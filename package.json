@@ -1,0 +1,49 @@
+{
+  "name": "ming-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic three-system birth-chart engine (Western natal, BaZi, Zi Wei Dou Shu) shipped as a self-contained, script-executing Skill for Codex / Qoder / WorkBuddy / Doubao.",
+  "license": "MIT",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "node tools/build-skill.ts",
+    "validate:skill": "node tools/validate-skill.ts",
+    "validate:reading": "node tools/validate-reading-examples.ts",
+    "validate:docs": "node tools/validate-current-docs.ts",
+    "validate:provenance": "node tools/validate-provenance.ts",
+    "smoke": "node tools/smoke-clean-dir.ts",
+    "forward:test": "node tools/forward-test.ts",
+    "example": "node tools/gen-example.ts",
+    "package": "node tools/package-skill.ts",
+    "package:hosts": "node tools/build-host-packages.ts",
+    "promote:release": "node tools/promote-release.ts",
+    "verify:zip-runtime": "node tools/verify-zip-runtime.ts",
+    "verify:published-release": "node tools/verify-published-release.ts",
+    "verify:hosts": "node tools/verify-host-packages.ts",
+    "verify:install": "node tools/verify-install-manifest.ts",
+    "check:doc-counts": "node tools/check-doc-counts.ts",
+    "scan:deps": "node tools/scan-deps.ts",
+    "scan:secrets": "node tools/scan-secrets.ts",
+    "scan:incident": "node tools/scan-incident.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint packages",
+    "verify:all": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run validate:provenance && pnpm run validate:skill && pnpm run validate:reading && pnpm run validate:docs && pnpm run smoke && pnpm run forward:test && pnpm run package:hosts && pnpm run verify:hosts && pnpm run verify:install && pnpm run check:doc-counts && pnpm run scan:deps && pnpm run scan:secrets && pnpm run scan:incident"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "esbuild": "^0.28.1",
+    "eslint": "^9.0.0",
+    "prettier": "^3.9.6",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.10"
+  }
+}

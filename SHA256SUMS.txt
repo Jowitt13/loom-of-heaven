@@ -1,0 +1,3 @@
+0eea2c5252f36fa3938b677e881762b685b9a23e0b73766777c11c8d28e921a3  ming-engine-qoder.zip
+369848d8cc4c565d7f2552d0c206f275515bbf2d94b957e5958e4dff21fda0fc  ming-engine-workbuddy.zip
+a7ed1c43a4e39155391abdccc5eb4bc753279979089585241997bae163ecb36b  ming-engine-doubao.zip

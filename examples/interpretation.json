@@ -1,0 +1,907 @@
+{
+  "interpretation": {
+    "disclaimers": [
+      "传统命理分析（八字/紫微/占星），仅供传统文化、娱乐与自我反思；文中的吉凶倾向、趋势与年份窗口属于命理条件评估，非统计学、非科学预测。",
+      "只据本文 facts 作答（引用其 reason 与 evidence 的 ref/ruleId/出处），不编造星位/宫位/干支/星曜或规则结论；反绝对化——命由经营、非注定。",
+      "不得对医疗、法律、投资、生死等重大事项给出确定性断言；健康提示仅为五行/宫位结构描述、非医疗建议。",
+      "基于脱敏命盘离线计算（不含姓名与人生事件）；不为“提升准确度”索取或臆断个人隐私。"
+    ],
+    "engineVersion": "0.1.1",
+    "facts": [
+      {
+        "claim": "四柱：年:庚午(七杀)  月:己卯(正财)  日:甲戌(日主(日元))  时:戊辰(偏财)",
+        "evidence": [
+          {
+            "kind": "bazi",
+            "note": "年:庚午(七杀)  月:己卯(正财)  日:甲戌(日主(日元))  时:戊辰(偏财)",
+            "ref": "bazi.pillars.*.(stem|branch|tenGodDisplay)"
+          }
+        ],
+        "topic": "character"
+      },
+      {
+        "claim": "八字日主为甲木（阳），甲木日主：日主偏强（得令得地得势偏多，克泄耗之物可为用）",
+        "evidence": [
+          {
+            "kind": "bazi",
+            "note": "甲 木 阳",
+            "ref": "bazi.dayMaster"
+          },
+          {
+            "kind": "bazi-rule",
+            "note": "甲木日主：日主偏强（得令得地得势偏多，克泄耗之物可为用）",
+            "ref": "bazi-rule/strength"
+          }
+        ],
+        "reason": "身强、印比偏轻、财官偏重、财星(土)有根",
+        "topic": "character"
+      },
+      {
+        "caveat": "缺某五行不等于凶；需结合喜忌判定其轻重。",
+        "claim": "五行缺失：五行俱全",
+        "evidence": [
+          {
+            "kind": "bazi",
+            "note": "俱全",
+            "ref": "bazi.pillars.*.(stemElement|hiddenStems)"
+          }
+        ],
+        "topic": "character"
+      },
+      {
+        "claim": "西方占星太阳位于Pisces 19.2°",
+        "evidence": [
+          {
+            "kind": "western",
+            "note": "Pisces 19.16°",
+            "ref": "western.planets[Sun].sign"
+          }
+        ],
+        "topic": "character"
+      },
+      {
+        "claim": "紫微命宫（丁亥）主星：武曲、破军",
+        "evidence": [
+          {
+            "kind": "ziwei",
+            "note": "武曲、破军",
+            "ref": "ziwei.palaces[命宫].majorStars"
+          }
+        ],
+        "topic": "character"
+      },
+      {
+        "claim": "扶抑：日主偏强，宜泄宜耗宜克——喜「火(食伤)、土(财)、金(官杀)」为用",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "扶抑：日主偏强，宜泄宜耗宜克——喜「火(食伤)、土(财)、金(官杀)」为用",
+            "ref": "bazi-rule/useful-god"
+          }
+        ],
+        "reason": "身强、印比偏轻、财官偏重，木旺需要出口：以火泄秀、土耗身、金制身为宜；财星(土)有根，行财官更能落地；然金(官杀)虽为喜用，逢金旺之运则由用转病、压力随增，非多多益善。",
+        "topic": "general"
+      },
+      {
+        "caveat": "官杀仅示事业/责任倾向的结构，非职业预言。",
+        "claim": "事业相关十神（官杀）：七杀；格局：阳刃格（月支卯为甲日主帝旺(刃)之地，劫财当令）",
+        "evidence": [
+          {
+            "kind": "bazi",
+            "note": "七杀",
+            "ref": "bazi.pillars.*.tenGod"
+          },
+          {
+            "kind": "bazi-rule",
+            "note": "格局：阳刃格（月支卯为甲日主帝旺(刃)之地，劫财当令）",
+            "ref": "bazi-rule/pattern"
+          }
+        ],
+        "topic": "career"
+      },
+      {
+        "caveat": "需确切出生时间方有宫位。",
+        "claim": "西方中天（MC）位于Capricorn",
+        "evidence": [
+          {
+            "kind": "western",
+            "note": "Capricorn",
+            "ref": "western.angles.mc.sign"
+          }
+        ],
+        "topic": "career"
+      },
+      {
+        "claim": "紫微官禄宫（己卯）：紫微、贪狼、地劫",
+        "evidence": [
+          {
+            "kind": "ziwei",
+            "note": "紫微、贪狼、地劫",
+            "ref": "ziwei.palaces[官禄宫]"
+          }
+        ],
+        "topic": "career"
+      },
+      {
+        "claim": "财运相关十神（财星）：正财、偏财",
+        "evidence": [
+          {
+            "kind": "bazi",
+            "note": "正财、偏财",
+            "ref": "bazi.pillars.*.tenGod"
+          }
+        ],
+        "topic": "wealth"
+      },
+      {
+        "claim": "紫微财帛宫（癸未）：廉贞、七杀、天钺、地空、铃星、陀罗",
+        "evidence": [
+          {
+            "kind": "ziwei",
+            "note": "廉贞、七杀、天钺、地空、铃星、陀罗",
+            "ref": "ziwei.palaces[财帛宫]"
+          }
+        ],
+        "topic": "wealth"
+      },
+      {
+        "claim": "西方金星位于Aquarius（第10宫）",
+        "evidence": [
+          {
+            "kind": "western",
+            "note": "Aquarius house 10",
+            "ref": "western.planets[Venus]"
+          }
+        ],
+        "topic": "wealth"
+      },
+      {
+        "caveat": "配偶星之有无/强弱仅示感情结构，非婚姻成败预言。",
+        "claim": "配偶星（正财）见于命局",
+        "evidence": [
+          {
+            "kind": "bazi",
+            "note": "七杀、正财、偏财",
+            "ref": "bazi.pillars.*.tenGod"
+          },
+          {
+            "kind": "time",
+            "note": "male",
+            "ref": "input.ruleGender"
+          }
+        ],
+        "topic": "marriage"
+      },
+      {
+        "claim": "西方下降点（第七宫头）位于Libra",
+        "evidence": [
+          {
+            "kind": "western",
+            "note": "Libra",
+            "ref": "western.angles.descendant.sign"
+          }
+        ],
+        "topic": "marriage"
+      },
+      {
+        "claim": "紫微夫妻宫（乙酉）：右弼、擎羊",
+        "evidence": [
+          {
+            "kind": "ziwei",
+            "note": "右弼、擎羊",
+            "ref": "ziwei.palaces[夫妻宫]"
+          }
+        ],
+        "topic": "marriage"
+      },
+      {
+        "caveat": "七宫主星示关系相处方式的倾向，非精确断人。",
+        "claim": "西方第七宫主星（下降天秤之主金星）位于水瓶第10宫",
+        "evidence": [
+          {
+            "kind": "western",
+            "note": "Aquarius house 10",
+            "ref": "western.7thRuler[Venus]"
+          }
+        ],
+        "topic": "marriage"
+      },
+      {
+        "caveat": "相位为能量互动倾向，非事件断言。",
+        "claim": "西方关系相位（月/金/火/土与七宫主）：金星合火星（第10宫）（差5.8°）、火星合土星（第10宫）（差5.9°）",
+        "evidence": [
+          {
+            "kind": "western",
+            "note": "金星合火星（第10宫）（差5.8°）、火星合土星（第10宫）（差5.9°）",
+            "ref": "western.aspects"
+          }
+        ],
+        "topic": "marriage"
+      },
+      {
+        "claim": "学业相关十神（印星）：未透干",
+        "evidence": [
+          {
+            "kind": "bazi",
+            "note": "无",
+            "ref": "bazi.pillars.*.tenGod"
+          }
+        ],
+        "topic": "studies"
+      },
+      {
+        "claim": "紫微文昌/文曲落于：疾厄、子女",
+        "evidence": [
+          {
+            "kind": "ziwei",
+            "note": "天梁、文昌",
+            "ref": "ziwei.palaces[疾厄]"
+          },
+          {
+            "kind": "ziwei",
+            "note": "文曲、禄存、天马",
+            "ref": "ziwei.palaces[子女]"
+          }
+        ],
+        "topic": "studies"
+      },
+      {
+        "claim": "西方水星位于Pisces（第11宫）",
+        "evidence": [
+          {
+            "kind": "western",
+            "note": "Pisces house 11",
+            "ref": "western.planets[Mercury]"
+          }
+        ],
+        "topic": "studies"
+      },
+      {
+        "claim": "五行分布（四柱干支本气计数）：金×1 火×1 土×4 木×2",
+        "evidence": [
+          {
+            "kind": "bazi",
+            "note": "金×1 火×1 土×4 木×2",
+            "ref": "bazi.pillars.*.(stemElement|hiddenStems)"
+          }
+        ],
+        "topic": "health"
+      },
+      {
+        "claim": "紫微疾厄宫（壬午）：天梁、文昌",
+        "evidence": [
+          {
+            "kind": "ziwei",
+            "note": "天梁、文昌",
+            "ref": "ziwei.palaces[疾厄宫]"
+          }
+        ],
+        "topic": "health"
+      },
+      {
+        "caveat": "如有健康问题请咨询专业医师。",
+        "claim": "健康提示仅为五行/宫位的一般结构描述，不构成任何医疗建议或诊断。",
+        "confidence": "low",
+        "evidence": [
+          {
+            "kind": "time",
+            "note": "not medical advice",
+            "ref": "engine.disclaimer"
+          }
+        ],
+        "topic": "health"
+      },
+      {
+        "claim": "年支午与月支卯相破（破损、消耗）",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "年支午与月支卯相破（破损、消耗）",
+            "ref": "bazi-rule/relations/xiang-po"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "年支午与月支卯相破（破损、消耗）",
+        "topic": "general"
+      },
+      {
+        "claim": "月支卯与日支戌六合（相吸相合）",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "月支卯与日支戌六合（相吸相合）",
+            "ref": "bazi-rule/relations/liu-he"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "月支卯与日支戌六合（相吸相合）",
+        "topic": "general"
+      },
+      {
+        "claim": "月支卯与时支辰相害（暗损、龃龉）",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "月支卯与时支辰相害（暗损、龃龉）",
+            "ref": "bazi-rule/relations/liu-hai"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "月支卯与时支辰相害（暗损、龃龉）",
+        "topic": "general"
+      },
+      {
+        "claim": "日支戌与时支辰六冲（动荡、变动）",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "日支戌与时支辰六冲（动荡、变动）",
+            "ref": "bazi-rule/relations/liu-chong"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "日支戌与时支辰六冲（动荡、变动）",
+        "topic": "general"
+      },
+      {
+        "claim": "午戌半合火（合而不全）",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "午戌半合火（合而不全）",
+            "ref": "bazi-rule/relations/san-he-half"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "午戌半合火（合而不全）",
+        "topic": "general"
+      },
+      {
+        "claim": "日主甲与月干己(正财)相合（甲己化土之象，然合而不化，贴身）——日主合正财，主财与日主关系紧密",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "日主甲与月干己(正财)相合（甲己化土之象，然合而不化，贴身）——日主合正财，主财与日主关系紧密",
+            "ref": "bazi-rule/relations/tian-gan-he-day"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "日主甲与月干己(正财)相合（甲己化土之象，然合而不化，贴身）——日主合正财，主财与日主关系紧密",
+        "topic": "general"
+      },
+      {
+        "claim": "羊刃：见于月支（刚烈、易冲动破耗，宜制化）",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "羊刃：见于月支（刚烈、易冲动破耗，宜制化）",
+            "ref": "bazi-rule/shensha/yangren"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "羊刃：见于月支（刚烈、易冲动破耗，宜制化）",
+        "topic": "general"
+      },
+      {
+        "claim": "桃花(咸池)：见于月支（人缘、情感、异性缘）",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "桃花(咸池)：见于月支（人缘、情感、异性缘）",
+            "ref": "bazi-rule/shensha/taohua"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "桃花(咸池)：见于月支（人缘、情感、异性缘）",
+        "topic": "general"
+      },
+      {
+        "claim": "华盖：见于日支（孤高、玄学艺术）",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "华盖：见于日支（孤高、玄学艺术）",
+            "ref": "bazi-rule/shensha/huagai"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "华盖：见于日支（孤高、玄学艺术）",
+        "topic": "general"
+      },
+      {
+        "claim": "1998年起(9-18岁) 行庚辰运，偏吉",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "1998年起(9-18岁) 行庚辰运，偏吉",
+            "ref": "bazi-rule/fortune/dayun/0"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "庚辰大运：天干庚(金/官杀)、地支辰(土/财)；本命喜食伤/财/官杀（泄耗克），故此运偏吉。",
+        "topic": "general"
+      },
+      {
+        "claim": "2008年起(19-28岁) 行辛巳运，偏吉",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2008年起(19-28岁) 行辛巳运，偏吉",
+            "ref": "bazi-rule/fortune/dayun/1"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "辛巳大运：天干辛(金/官杀)、地支巳(火/食伤)；本命喜食伤/财/官杀（泄耗克），故此运偏吉。",
+        "topic": "general"
+      },
+      {
+        "claim": "2018年起(29-38岁) 行壬午运，偏中性",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2018年起(29-38岁) 行壬午运，偏中性",
+            "ref": "bazi-rule/fortune/dayun/2"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "壬午大运：天干壬(水/印)、地支午(火/食伤)；本命喜食伤/财/官杀（泄耗克），故此运偏中性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2028年起(39-48岁) 行癸未运，偏中性",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2028年起(39-48岁) 行癸未运，偏中性",
+            "ref": "bazi-rule/fortune/dayun/3"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "癸未大运：天干癸(水/印)、地支未(土/财)；本命喜食伤/财/官杀（泄耗克），故此运偏中性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2038年起(49-58岁) 行甲申运，偏中性",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2038年起(49-58岁) 行甲申运，偏中性",
+            "ref": "bazi-rule/fortune/dayun/4"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "甲申大运：天干甲(木/比劫)、地支申(金/官杀)；本命喜食伤/财/官杀（泄耗克），故此运偏中性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2048年起(59-68岁) 行乙酉运，偏中性",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2048年起(59-68岁) 行乙酉运，偏中性",
+            "ref": "bazi-rule/fortune/dayun/5"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "乙酉大运：天干乙(木/比劫)、地支酉(金/官杀)；本命喜食伤/财/官杀（泄耗克），故此运偏中性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2058年起(69-78岁) 行丙戌运，偏吉",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2058年起(69-78岁) 行丙戌运，偏吉",
+            "ref": "bazi-rule/fortune/dayun/6"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "丙戌大运：天干丙(火/食伤)、地支戌(土/财)；本命喜食伤/财/官杀（泄耗克），故此运偏吉。",
+        "topic": "general"
+      },
+      {
+        "claim": "2068年起(79-88岁) 行丁亥运，偏中性",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2068年起(79-88岁) 行丁亥运，偏中性",
+            "ref": "bazi-rule/fortune/dayun/7"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "丁亥大运：天干丁(火/食伤)、地支亥(水/印)；本命喜食伤/财/官杀（泄耗克），故此运偏中性。",
+        "topic": "general"
+      },
+      {
+        "claim": "1998年起(9-18岁) 庚辰大运冲日支戌",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "1998年起(9-18岁) 庚辰大运冲日支戌",
+            "ref": "bazi-rule/fortune/dayun-clash/0/日支"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "大运地支辰与本命日支戌相冲（六冲（动荡、变动））：主位置/环境/方向易变动，为变动/转折之机，非吉凶定论。",
+        "topic": "general"
+      },
+      {
+        "claim": "2048年起(59-68岁) 乙酉大运冲月支卯",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2048年起(59-68岁) 乙酉大运冲月支卯",
+            "ref": "bazi-rule/fortune/dayun-clash/5/月支"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "大运地支酉与本命月支卯相冲（六冲（动荡、变动））：主位置/环境/方向易变动，为变动/转折之机，非吉凶定论。",
+        "topic": "general"
+      },
+      {
+        "claim": "2058年起(69-78岁) 丙戌大运合月支卯",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2058年起(69-78岁) 丙戌大运合月支卯",
+            "ref": "bazi-rule/fortune/dayun-clash/6/月支"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "大运地支戌与本命月支卯相合（六合（相吸相合））：主相对稳定或有牵合，为变动/转折之机，非吉凶定论。",
+        "topic": "general"
+      },
+      {
+        "claim": "庚辰大运内变动应期：2000(庚辰)冲日支戌；2006(丙戌)冲大运辰",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "庚辰大运内变动应期：2000(庚辰)冲日支戌；2006(丙戌)冲大运辰",
+            "ref": "bazi-rule/fortune/liunian-chong/0"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "流年地支冲本命日支或冲大运支，多主环境/职位/居所/方向之变动（变动非必凶，宜主动求变、防波动）。",
+        "topic": "general"
+      },
+      {
+        "claim": "辛巳大运内变动应期：2012(壬辰)冲日支戌",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "辛巳大运内变动应期：2012(壬辰)冲日支戌",
+            "ref": "bazi-rule/fortune/liunian-chong/1"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "流年地支冲本命日支或冲大运支，多主环境/职位/居所/方向之变动（变动非必凶，宜主动求变、防波动）。",
+        "topic": "general"
+      },
+      {
+        "claim": "壬午大运内变动应期：2020(庚子)冲大运午；2024(甲辰)冲日支戌",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "壬午大运内变动应期：2020(庚子)冲大运午；2024(甲辰)冲日支戌",
+            "ref": "bazi-rule/fortune/liunian-chong/2"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "流年地支冲本命日支或冲大运支，多主环境/职位/居所/方向之变动（变动非必凶，宜主动求变、防波动）。",
+        "topic": "general"
+      },
+      {
+        "claim": "癸未大运内变动应期：2033(癸丑)冲大运未；2036(丙辰)冲日支戌",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "癸未大运内变动应期：2033(癸丑)冲大运未；2036(丙辰)冲日支戌",
+            "ref": "bazi-rule/fortune/liunian-chong/3"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "流年地支冲本命日支或冲大运支，多主环境/职位/居所/方向之变动（变动非必凶，宜主动求变、防波动）。",
+        "topic": "general"
+      },
+      {
+        "claim": "甲申大运内变动应期：2046(丙寅)冲大运申",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "甲申大运内变动应期：2046(丙寅)冲大运申",
+            "ref": "bazi-rule/fortune/liunian-chong/4"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "流年地支冲本命日支或冲大运支，多主环境/职位/居所/方向之变动（变动非必凶，宜主动求变、防波动）。",
+        "topic": "general"
+      },
+      {
+        "claim": "乙酉大运内变动应期：2048(戊辰)冲日支戌",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "乙酉大运内变动应期：2048(戊辰)冲日支戌",
+            "ref": "bazi-rule/fortune/liunian-chong/5"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "流年地支冲本命日支或冲大运支，多主环境/职位/居所/方向之变动（变动非必凶，宜主动求变、防波动）。",
+        "topic": "general"
+      },
+      {
+        "claim": "丙戌大运内变动应期：2060(庚辰)冲日支戌、冲大运戌",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "丙戌大运内变动应期：2060(庚辰)冲日支戌、冲大运戌",
+            "ref": "bazi-rule/fortune/liunian-chong/6"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "流年地支冲本命日支或冲大运支，多主环境/职位/居所/方向之变动（变动非必凶，宜主动求变、防波动）。",
+        "topic": "general"
+      },
+      {
+        "claim": "丁亥大运内变动应期：2072(壬辰)冲日支戌；2073(癸巳)冲大运亥",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "丁亥大运内变动应期：2072(壬辰)冲日支戌；2073(癸巳)冲大运亥",
+            "ref": "bazi-rule/fortune/liunian-chong/7"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "流年地支冲本命日支或冲大运支，多主环境/职位/居所/方向之变动（变动非必凶，宜主动求变、防波动）。",
+        "topic": "general"
+      },
+      {
+        "claim": "2026(丙午)：天干丙食神、地支午伤官；地支破月支卯；主题：表达/才艺/子女",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2026(丙午)：天干丙食神、地支午伤官；地支破月支卯；主题：表达/才艺/子女",
+            "ref": "bazi-rule/fortune/liunian/2026"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "2026(丙午)：天干丙食神、地支午伤官；地支破月支卯；主题：表达/才艺/子女。吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2027(丁未)：天干丁伤官、地支未正财；地支合年支午(化土)、破日支戌、合大运午；主题：表达/才艺/子女、财运/投资",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2027(丁未)：天干丁伤官、地支未正财；地支合年支午(化土)、破日支戌、合大运午；主题：表达/才艺/子女、财运/投资",
+            "ref": "bazi-rule/fortune/liunian/2027"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "2027(丁未)：天干丁伤官、地支未正财；地支合年支午(化土)、破日支戌、合大运午；主题：表达/才艺/子女、财运/投资。吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2028(戊申)：天干戊偏财、地支申七杀；主题：财运/投资、事业/责任",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2028(戊申)：天干戊偏财、地支申七杀；主题：财运/投资、事业/责任",
+            "ref": "bazi-rule/fortune/liunian/2028"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "2028(戊申)：天干戊偏财、地支申七杀；主题：财运/投资、事业/责任。吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2029(己酉)：天干己正财、地支酉正官；地支冲月支卯、害日支戌、合时支辰(化金)；主题：财运/投资、事业/责任",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2029(己酉)：天干己正财、地支酉正官；地支冲月支卯、害日支戌、合时支辰(化金)；主题：财运/投资、事业/责任",
+            "ref": "bazi-rule/fortune/liunian/2029"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "2029(己酉)：天干己正财、地支酉正官；地支冲月支卯、害日支戌、合时支辰(化金)；主题：财运/投资、事业/责任。逢冲主变动/转折；吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2030(庚戌)：天干庚七杀、地支戌偏财；地支合月支卯(化火)、冲时支辰、破大运未；主题：事业/责任、财运/投资",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2030(庚戌)：天干庚七杀、地支戌偏财；地支合月支卯(化火)、冲时支辰、破大运未；主题：事业/责任、财运/投资",
+            "ref": "bazi-rule/fortune/liunian/2030"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "2030(庚戌)：天干庚七杀、地支戌偏财；地支合月支卯(化火)、冲时支辰、破大运未；主题：事业/责任、财运/投资。逢冲主变动/转折；吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2031(辛亥)：天干辛正官、地支亥偏印；主题：事业/责任、学业/文书/贵人",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2031(辛亥)：天干辛正官、地支亥偏印；主题：事业/责任、学业/文书/贵人",
+            "ref": "bazi-rule/fortune/liunian/2031"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "2031(辛亥)：天干辛正官、地支亥偏印；主题：事业/责任、学业/文书/贵人。吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2032(壬子)：天干壬偏印、地支子正印；地支冲年支午、害大运未；主题：学业/文书/贵人、健康/防耗",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2032(壬子)：天干壬偏印、地支子正印；地支冲年支午、害大运未；主题：学业/文书/贵人、健康/防耗",
+            "ref": "bazi-rule/fortune/liunian/2032"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "2032(壬子)：天干壬偏印、地支子正印；地支冲年支午、害大运未；主题：学业/文书/贵人、健康/防耗。逢冲主变动/转折；吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2033(癸丑)：天干癸正印、地支丑正财；地支害年支午、破时支辰、冲大运未；主题：学业/文书/贵人、财运/投资",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2033(癸丑)：天干癸正印、地支丑正财；地支害年支午、破时支辰、冲大运未；主题：学业/文书/贵人、财运/投资",
+            "ref": "bazi-rule/fortune/liunian/2033"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "2033(癸丑)：天干癸正印、地支丑正财；地支害年支午、破时支辰、冲大运未；主题：学业/文书/贵人、财运/投资。逢冲主变动/转折；吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2034(甲寅)：天干甲比肩、地支寅比肩；主题：人际/竞合/理财谨慎",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2034(甲寅)：天干甲比肩、地支寅比肩；主题：人际/竞合/理财谨慎",
+            "ref": "bazi-rule/fortune/liunian/2034"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "2034(甲寅)：天干甲比肩、地支寅比肩；主题：人际/竞合/理财谨慎。吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2035(乙卯)：天干乙劫财、地支卯劫财；地支破年支午、合日支戌(化火)、害时支辰；主题：人际/竞合/理财谨慎、感情/婚",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2035(乙卯)：天干乙劫财、地支卯劫财；地支破年支午、合日支戌(化火)、害时支辰；主题：人际/竞合/理财谨慎、感情/婚",
+            "ref": "bazi-rule/fortune/liunian/2035"
+          }
+        ],
+        "polarity": "凶",
+        "reason": "2035(乙卯)：天干乙劫财、地支卯劫财；地支破年支午、合日支戌(化火)、害时支辰；主题：人际/竞合/理财谨慎、感情/婚。吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2036(丙辰)：天干丙食神、地支辰偏财；地支害月支卯、冲日支戌；主题：表达/才艺/子女、财运/投资、感情/婚",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2036(丙辰)：天干丙食神、地支辰偏财；地支害月支卯、冲日支戌；主题：表达/才艺/子女、财运/投资、感情/婚",
+            "ref": "bazi-rule/fortune/liunian/2036"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "2036(丙辰)：天干丙食神、地支辰偏财；地支害月支卯、冲日支戌；主题：表达/才艺/子女、财运/投资、感情/婚。逢冲主变动/转折；吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "claim": "2037(丁巳)：天干丁伤官、地支巳食神；主题：表达/才艺/子女",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "2037(丁巳)：天干丁伤官、地支巳食神；主题：表达/才艺/子女",
+            "ref": "bazi-rule/fortune/liunian/2037"
+          }
+        ],
+        "polarity": "吉",
+        "reason": "2037(丁巳)：天干丁伤官、地支巳食神；主题：表达/才艺/子女。吉凶须结合当年天干十神、合冲与官杀强弱综合，非整年单一定性。",
+        "topic": "general"
+      },
+      {
+        "caveat": "行业为参考方向，非唯一；需结合兴趣与现实。",
+        "claim": "适合行业方向(按喜用五行)：火(能源/电子/餐饮/传媒/照明/文创/教育培训)；土(地产/建筑/农业/仓储/陶瓷/中介/管理)；金(金融/机械/IT硬件/五金/珠宝/汽车/法务)",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "适合行业方向(按喜用五行)：火(能源/电子/餐饮/传媒/照明/文创/教育培训)；土(地产/建筑/农业/仓储/陶瓷/中介/管理)；金(金融/机械/IT硬件/五金/珠宝/汽车/法务)",
+            "ref": "bazi-rule/industry/wu-xing"
+          }
+        ],
+        "reason": "以喜用神五行取行业大类：火、土、金相关领域较相合；还需结合食伤(专业输出/技能)、官杀(体制/管理)与现实兴趣，属参考方向而非唯一答案。",
+        "topic": "career"
+      },
+      {
+        "caveat": "应期是机会窗口，非“几岁必婚”；能否成婚需双方与现实配合。",
+        "claim": "婚姻/正缘应期(参考，2026起十二年)：2026(丙午) 午午自刑/伏吟(年支)→变动/反复；2027(丁未) 配偶星临→推进机会；2028(戊申) 配偶星临→推进机会；2029(己酉) 配偶星临、害日支→推进机会但易反复/需调整；2030(庚戌) 配偶星临、伏吟日支→推进机会但易反复/需调整；2032(壬子) 刑月支→变动/反复；2033(癸丑) 配偶星临、害年支、刑日支→推进机会但易反复/需调整；2035(乙卯) 合夫妻宫(日支)、伏吟月支、害时支、桃花动→推进机会但易反复/需调整；2036(丙辰) 配偶星临、冲夫妻宫、害月支、辰辰自刑/伏吟(时支)→推进机会但易反复/需调整",
+        "evidence": [
+          {
+            "kind": "bazi-rule",
+            "note": "婚姻/正缘应期(参考，2026起十二年)：2026(丙午) 午午自刑/伏吟(年支)→变动/反复；2027(丁未) 配偶星临→推进机会；2028(戊申) 配偶星临→推进机会；2029(己酉) 配偶星临、害日支→推进机会但易反复/需调整；2030(庚戌) 配偶星临、伏吟日支→推进机会但易反复/需调整；2032(壬子) 刑月支→变动/反复；2033(癸丑) 配偶星临、害年支、刑日支→推进机会但易反复/需调整；2035(乙卯) 合夫妻宫(日支)、伏吟月支、害时支、桃花动→推进机会但易反复/需调整；2036(丙辰) 配偶星临、冲夫妻宫、害月支、辰辰自刑/伏吟(时支)→推进机会但易反复/需调整",
+            "ref": "bazi-rule/marriage-timing"
+          }
+        ],
+        "polarity": "中性",
+        "reason": "以配偶星(男取财)临岁、流年合夫妻宫(日支)为推进机会信号；逢冲/自刑/伏吟/相害之年主变动、反复、需调整(非吉亦非必分)；桃花年为异性缘/机会的弱信号、不等于婚期；应期是机会窗口而非\"必婚之年\"，能否成婚仍取决于双方意愿与现实条件。",
+        "topic": "marriage"
+      },
+      {
+        "caveat": "体貌/性格为倾向性参考，非精确断人；不据此对号入座或排除。",
+        "claim": "配偶画像(倾向参考)：配偶星五行为土→稳重务实、敦厚可靠、恋家；夫妻宫(日支)为戌；紫微夫妻宫主星：右弼、擎羊；西方下降点在Libra；金星在Aquarius；七宫主金星在水瓶",
+        "evidence": [
+          {
+            "kind": "bazi",
+            "note": "土",
+            "ref": "bazi.spouseStar"
+          }
+        ],
+        "topic": "marriage"
+      }
+    ],
+    "followupOffers": [
+      "事业：适合什么工作、什么时候更容易起势",
+      "感情：相处模式、对象倾向和关键年份",
+      "财运：主要赚钱方式、收入阶段和存钱难点",
+      "学业：学习优势、适合的提升方法",
+      "流年：今年最值得把握和最需要注意什么"
+    ],
+    "requestId": "req_4fe25a52908a996b",
+    "rulesets": [
+      {
+        "id": "western-tropical-placidus",
+        "version": "0.1.0"
+      },
+      {
+        "id": "bazi-standard",
+        "version": "0.1.0"
+      },
+      {
+        "id": "iztro-default",
+        "version": "0.1.0"
+      }
+    ],
+    "schemaVersion": "0.1.0",
+    "subject": {
+      "calendar": "gregorian",
+      "timeAccuracy": "exact",
+      "timezone": "Asia/Shanghai"
+    }
+  },
+  "ok": true,
+  "warnings": [
+    {
+      "code": "SOLAR_TIME_APPROXIMATE",
+      "detail": {
+        "method": "noaa-eot@0.1.0"
+      },
+      "message": "Apparent solar time uses the noaa-eot@0.1.0 equation-of-time approximation (~tenths of a minute).",
+      "severity": "info",
+      "system": "time"
+    },
+    {
+      "code": "SOLAR_TIME_APPROXIMATE",
+      "message": "Lunar nodes use the true (osculating) node — self-computed, approximate (~arc-minutes).",
+      "severity": "info",
+      "system": "western"
+    },
+    {
+      "code": "SOLAR_TIME_APPROXIMATE",
+      "message": "Asteroids (Chiron/Ceres/Pallas/Juno/Vesta) use Keplerian osculating elements: approximate (sub-degree; Chiron coarser), not part of the ≤1′ gate.",
+      "severity": "info",
+      "system": "western"
+    }
+  ]
+}

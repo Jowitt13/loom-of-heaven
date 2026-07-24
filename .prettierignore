@@ -1,0 +1,12 @@
+node_modules/
+skills/calculate-birth-charts/scripts/dist/
+skills/calculate-birth-charts/sbom.cdx.json
+coverage/
+.tmp/
+.qoder/
+pnpm-lock.yaml
+QODER_HANDOFF.md
+
+# Generated artifacts (kept byte-identical to their generators)
+dist/
+examples/

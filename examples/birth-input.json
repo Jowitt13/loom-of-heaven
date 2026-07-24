@@ -1,0 +1,40 @@
+{
+  "calendar": "gregorian",
+  "localDate": "1990-03-10",
+  "localTime": "08:15:00",
+  "location": {
+    "displayName": "Fictional example location (not a real person)",
+    "latitude": 30.59,
+    "longitude": 114.27,
+    "source": "user"
+  },
+  "ruleGender": "male",
+  "schemaVersion": "0.1.0",
+  "settings": {
+    "bazi": {
+      "dayBoundary": "zi-hour",
+      "earlyLateZi": "late",
+      "rulesetId": "bazi-standard@0.1.0",
+      "solarTimeMode": "civil"
+    },
+    "systems": [
+      "western",
+      "bazi",
+      "ziwei"
+    ],
+    "western": {
+      "asteroids": true,
+      "ayanamsha": "lahiri",
+      "houseSystem": "placidus",
+      "nodes": "true",
+      "rulesetId": "western-tropical-placidus@0.1.0",
+      "zodiac": "tropical"
+    },
+    "ziwei": {
+      "rulesetId": "iztro-default@0.1.0",
+      "useApparentSolarTime": false
+    }
+  },
+  "timeAccuracy": "exact",
+  "timezone": "Asia/Shanghai"
+}

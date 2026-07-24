@@ -1,0 +1,17 @@
+{
+  "name": "@ming/ziwei",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Zi Wei Dou Shu (紫微斗数) provider adapter over iztro. Hides iztro types behind the project contracts.",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ming/contracts": "workspace:*",
+    "iztro": "^2.5.8"
+  }
+}

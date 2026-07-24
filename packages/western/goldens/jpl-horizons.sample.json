@@ -1,0 +1,16 @@
+{
+  "source": "JPL Horizons",
+  "status": "TODO-not-populated",
+  "generatedFrom": "https://ssd.jpl.nasa.gov/horizons/ (record the exact API/app query when filled)",
+  "frame": "geocentric apparent, ecliptic-of-date, true equinox",
+  "note": "Do NOT fabricate values. eclipticLongitudeDeg stays null until copied from a real, reproducible JPL Horizons response. See README.md.",
+  "rows": [
+    {
+      "body": "Sun",
+      "queryEpochUTC": "2000-01-01T12:00:00Z",
+      "jdTT": null,
+      "observer": "geocenter (500@399)",
+      "eclipticLongitudeDeg": null
+    }
+  ]
+}
