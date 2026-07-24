@@ -74,7 +74,10 @@ const RULES: DocRule[] = [
     file: 'INSTALL.md',
     mustNot: [
       { re: NO_NODE, msg: '“不需要 Node”错误声明' },
-      { re: QODER_CLI, msg: 'Qoder 安装出现 CLI/Skills CLI/方式一(命令行)/skills 安装' },
+      {
+        re: QODER_CLI,
+        msg: 'Qoder 安装出现 CLI/Skills CLI/方式一(命令行)/skills 安装',
+      },
     ],
     must: [
       { re: RUN_NODE, msg: '缺 运行 Node ≥ 22' },
@@ -88,8 +91,14 @@ const RULES: DocRule[] = [
     file: 'docs/INSTALL_BY_PLATFORM.md',
     mustNot: [
       { re: NO_NODE, msg: '“不需要 Node”错误声明' },
-      { re: /豆包[^。\n]{0,10}(仅解读|reading-lite|解读辅助)/, msg: '豆包仍标 reading-lite' },
-      { re: QODER_CLI, msg: 'Qoder 平台文档出现 CLI/Skills CLI/方式一(命令行)/skills 安装' },
+      {
+        re: /豆包[^。\n]{0,10}(仅解读|reading-lite|解读辅助)/,
+        msg: '豆包仍标 reading-lite',
+      },
+      {
+        re: QODER_CLI,
+        msg: 'Qoder 平台文档出现 CLI/Skills CLI/方式一(命令行)/skills 安装',
+      },
     ],
     must: [{ re: RUN_NODE, msg: '缺 运行 Node ≥ 22' }],
   },
@@ -137,7 +146,10 @@ const RULES: DocRule[] = [
     file: 'AGENTS.md',
     must: [
       { re: /render/, msg: '缺 render 说明' },
-      { re: /disabled|禁用|exit\s*3|退出码\s*3/, msg: 'render 未标 disabled/exit 3' },
+      {
+        re: /disabled|禁用|exit\s*3|退出码\s*3/,
+        msg: 'render 未标 disabled/exit 3',
+      },
     ],
   },
   {
@@ -174,7 +186,12 @@ const RULES: DocRule[] = [
   },
   {
     file: 'docs/installers/qoder.md',
-    mustNot: [{ re: QODER_CLI, msg: 'Qoder 安装器出现 CLI/Skills CLI/方式一(命令行)/skills 安装' }],
+    mustNot: [
+      {
+        re: QODER_CLI,
+        msg: 'Qoder 安装器出现 CLI/Skills CLI/方式一(命令行)/skills 安装',
+      },
+    ],
     must: [
       { re: /~\/\.qoder\/skills/, msg: '缺 Agent 写入 ~/.qoder/skills' },
       { re: /仅替换|只替换/, msg: '缺 仅替换目标目录' },
@@ -198,6 +215,13 @@ const RULES: DocRule[] = [
 /** D2: a "current release" mention in a user doc (captures the version tag). */
 const CURRENT_RELEASE_RE =
   /(?:安装包来自|指向)[^\n]{0,40}?GitHub Release\s*`?(v\d+\.\d+\.\d+)`?|最后更新[:：]\s*`?(v\d+\.\d+\.\d+)`?/g;
+const PUBLICATION_ENTRY_DOCS = [
+  'README.md',
+  'INSTALL.md',
+  'docs/INSTALL_BY_PLATFORM.md',
+  'docs/HOST_COMPATIBILITY.md',
+];
+const DELETED_RELEASE_DOWNLOAD = /\/releases\/download\/v0\.1\.3\//;
 /** D3: an incomplete "chart now" prompt that omits the full input contract. */
 const BAD_CHART_PROMPT = /出生在[^，。\n]{1,8}的盘/;
 
@@ -247,24 +271,24 @@ function main(): void {
     }
   }
 
-  // D2: user-facing "current release" version must match the STABLE tag from the root manifest.
+  // D2: user-facing publication claims must match the root manifest state. A withdrawn release is
+  // not allowed to survive as an install link or be described as the current release.
   const rootManifest = read('install-manifest.json');
-  let stableTag: string | undefined;
+  let publication: { status?: unknown; releaseTag?: unknown; releaseVersion?: unknown } | undefined;
   try {
-    stableTag = rootManifest
-      ? (JSON.parse(rootManifest) as { releaseTag?: string }).releaseTag
+    publication = rootManifest
+      ? (JSON.parse(rootManifest) as {
+          status?: unknown;
+          releaseTag?: unknown;
+          releaseVersion?: unknown;
+        })
       : undefined;
   } catch {
-    stableTag = undefined;
+    publication = undefined;
   }
-  add('根 install-manifest.json releaseTag 可读', typeof stableTag === 'string', String(stableTag));
-  if (typeof stableTag === 'string') {
-    for (const f of [
-      'README.md',
-      'INSTALL.md',
-      'docs/INSTALL_BY_PLATFORM.md',
-      'docs/HOST_COMPATIBILITY.md',
-    ]) {
+  add('root install-manifest.json publication state is readable', publication !== undefined);
+  if (publication?.status === 'published' && typeof publication.releaseTag === 'string') {
+    for (const f of PUBLICATION_ENTRY_DOCS) {
       const text = read(f);
       if (text === null) continue;
       const tags: string[] = [];
@@ -272,8 +296,29 @@ function main(): void {
         const t = mm[1] ?? mm[2];
         if (t) tags.push(t);
       }
-      const wrong = [...new Set(tags)].filter((t) => t !== stableTag);
-      add(`${f}: 当前发布标注 == 稳定 ${stableTag}`, wrong.length === 0, wrong.join(','));
+      const wrong = [...new Set(tags)].filter((t) => t !== publication.releaseTag);
+      add(
+        `${f}: current release label matches ${publication.releaseTag}`,
+        wrong.length === 0,
+        wrong.join(','),
+      );
+    }
+  } else {
+    add(
+      'root manifest is an explicit no-public-ZIP state',
+      publication?.status === 'unpublished' &&
+        publication.releaseTag === null &&
+        publication.releaseVersion === null,
+    );
+    for (const f of PUBLICATION_ENTRY_DOCS) {
+      const text = read(f);
+      if (text === null) continue;
+      add(`${f}: states that host ZIPs are not published`, text.includes('尚未发布'));
+      add(`${f}: has no deleted release download URL`, !DELETED_RELEASE_DOWNLOAD.test(text));
+      add(
+        `${f}: does not advertise v0.1.3 as current`,
+        !/GitHub Release\s*`?v0\.1\.3`?/.test(text),
+      );
     }
   }
 

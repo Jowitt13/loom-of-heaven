@@ -1,72 +1,72 @@
-# 隐私事故处置记录（示例数据中的 PII）
+# 隐私事件处置记录（不含任何个人信息）
 
-> 本记录**不包含任何被泄露的具体值**（日期 / 时间 / 地点 / 坐标一律不复述）。仅描述范围、动作与状态。
+> 本记录不复述、恢复或收集事故中的任何姓名、出生日期、精确时间、地点或坐标。它只记录处置边界、可验证状态和仍需外部平台完成的工作。
 
-## 概述
+## 事件边界
 
-在示例 / 演示输入中，误写入了一名真实个人的出生信息（出生日期、精确出生时间、出生地点与坐标）。该信息随源码与多个发布物进入了公开仓库 `Jowitt13/ming-engine`。本次为**隐私事故处置**，非普通 hotfix：不以“再发一个新版本”掩盖旧内容，而是先止血、再撤下、再清理源码与历史。
+曾有真实个人出生信息被错误用作公开示例输入，并进入源码历史和已撤下的分发物。这不是普通版本更新：重新发布新包不能覆盖旧对象、缓存或已下载副本，因此先停止公开分发，再处理当前仓库与可达历史。
 
-## 影响范围（值不复述）
+## 已完成的仓库侧处置
 
-- 公开 `main` 分支的多个文件（示例输入字段）。
-- `v0.1.3` 的 Qoder / WorkBuddy / 豆包公开 ZIP 内 `calculate-birth-charts/INSTALL.md`。
-- 受影响的源码 tag：`v0.1.0-rc.1`、`v0.1.0`、`v0.1.1`、`v0.1.2`、`v0.1.3`。
+1. 仓库保持 **private**；没有新的 Release、tag 或公开安装链接。
+2. 已删除受影响的 GitHub Releases、资产和远端 tag。
+3. 当前源码只保留明确标注为 synthetic / 虚构 / 非真实人物的示例和测试夹具；排盘算法、facts、schema、ruleset、引擎数值与依赖锁未被这次处置修改。
+4. 以已脱敏的工作树建立新的单根提交并替换 `main`。新克隆只含这一条可达提交；旧事故历史不再由仓库分支、tag 或 Release 引用。
+5. 增加长期门禁：
+   - `scan:incident` 从 gitignored 的受控本地 token 文件读取禁用字段；不会输出字段值。
+   - `pnpm run verify:all` 在本地把 `scan:incident` 接在 `verify:cloud` 后面；缺 token 必须 fail-closed。
+   - `pnpm run scan:incident:history` 只用于受控环境的全部当前可达历史检查。
+   - `incident-guard` 要求 shipped 示例和固定测试夹具标注为合成数据。
+6. 根安装清单当前明确处于 `unpublished`：Qoder、WorkBuddy 和豆包没有可下载的 ZIP、URL 或 SHA-256；安装器必须停止，而不是把 404 当作安装成功。
 
-## 已采取动作
+## 如实的验证边界
 
-1. **止血 — 私有化**：仓库可见性改为 `private`（已复核 `visibility=PRIVATE`）。
-2. **撤下公开分发物**：删除上述 5 个 GitHub Release 及其全部资产，并删除对应远端 tag（已复核 Release 列表为空、远端无 `v0.1.*` tag）。
-3. **清理当前源码 / 构建源**：将泄露字段全部替换为**明确标注 `synthetic` / 虚构 / 非真实人物**的合成示例；同步修正受影响测试的期望值；重建候选包。
-4. **新增永久隐私门禁** `scan:incident`（接入 `verify:all`）：禁用字段从 gitignored 本地 token 文件读取（明文不入库、不提交、不上传），扫描范围 = tracked 文本 + 候选/发布 ZIP 解压内容 + `releases/` 构建目录 +（`--history`）全部可达 Git blob；缺 token 文件即 **fail-closed**；输出仅路径 + 命中数，**绝不回显泄露值**。另加 `incident-guard` 测试，强制示例数据声明 synthetic/fictional。
-5. **清理 Git 历史**：以 `git-filter-repo --replace-text` 将泄露字段在所有可达 refs / 历史 / 受影响提交中替换为 `***REDACTED-PII***`；重写后**全历史扫描 0 命中**；已 `--force` 推送清理后的 `main`（default 分支未受保护）。
-6. **未改排盘算法 / facts / schema / 引擎数值**：`engine.mjs` 的 `sha256` 保持 `d7a89b08…` 不变；改动仅限示例字符串、文档、测试期望与门禁工具。
+| 检查                          | 当前可如实声明的结论                                            |
+| ----------------------------- | --------------------------------------------------------------- |
+| 新克隆可达历史                | 仅新的单根 `main`；旧历史不再由远端 refs 可达                   |
+| Release / tag                 | 均为 0                                                          |
+| 当前安装入口                  | 无公开宿主 ZIP；候选构建仅供本地离线验证                        |
+| `pnpm run verify:cloud`       | 不含事故 token 的 CI 门禁；应在本地和 GitHub Actions 通过       |
+| `pnpm run verify:all`         | 只有受控 token 文件存在时才可能通过；缺失时必须非零 fail-closed |
+| `scan:incident` / `--history` | 不在没有受控 token 的环境中伪造“0 命中”结论                     |
 
-## 验证结果（均为零命中）
+## 仍无法靠仓库技术手段保证删除的内容
 
-| 检查                                   | 结果                         |
-| -------------------------------------- | ---------------------------- |
-| 源码（tracked 文本）                   | 0 命中                       |
-| 全 Git 历史（所有可达 blob）           | 0 命中                       |
-| 候选 / 发布 ZIP + `releases/` 构建目录 | 0 命中                       |
-| `pnpm run verify:all`                  | EXIT 0（含 `scan:incident`） |
-| 引擎 `engine.mjs` sha256               | 未变（`d7a89b08…`）          |
+- 已下载的 clone、离线备份、第三方镜像或任何曾经取得内容的人；
+- GitHub 的旧不可达对象在平台垃圾回收前可能仍可通过直接 SHA 请求；
+- CDN、缓存、搜索索引和此前 Release 资产的存储副本；
+- 与旧提交关联的 GitHub Actions 历史日志。
 
-## 残留风险（必须知悉）
+这些项目需要 GitHub Support 和相关外部平台处理。仓库操作只能切断 GitHub 仓库当前可达历史，不能宣称互联网范围内已经彻底删除。
 
-- **无法保证**已被他人 clone / fork / 下载，或被搜索引擎、GitHub 页面缓存的副本自动消失。
-- GitHub 在垃圾回收前，仍可能通过旧 commit SHA 访问到已被取消引用的历史对象；已删除的 Release 资产、CDN 缓存可能短期内仍可达。
-- 官方仓库的 default 分支、公开 Release、tag 已先行彻底止血，但上述外部副本需通过 GitHub Support 申请与时间共同处理。
+## 重新公开前的条件
 
-## 后续
+1. GitHub Support 已收到敏感数据移除请求，并给出可执行的处置/确认；
+2. 再次核对仓库为 private 期间的 `main`、branches、tags、Releases、forks、Pages、artifacts 和 packages；
+3. 在受控环境运行 `pnpm run verify:all` 与 `pnpm run scan:incident:history`；
+4. 确认根安装清单仍不把未发布 ZIP 说成已发布；
+5. 先公开源码/Codex 入口，三种桌面端 ZIP 另行以全新未使用 tag 发布、重新下载校验后再 promote。
 
-- 仓库保持 `private`；**未经新的明确授权，不重新公开、不重新发布**。
-- 向 GitHub Support 提交敏感数据移除申请（模板见下）。
-- 视需要由负责人通知受影响个人（本记录不含其信息）。
-- 本地存在一份重写前的历史备份（`.tmp/`，gitignored、从未上传）；验证与 Support 流程完成后可删除。
+## GitHub Support 工单草稿（不填入 PII）
 
-## GitHub Support 敏感数据移除申请（英文模板 — 提交前不要填入任何明文 PII）
-
-> Subject: Sensitive data (PII) removal — private repo Jowitt13/ming-engine
+> Subject: Sensitive data removal and purge of unreachable objects — private repository `Jowitt13/ming-engine`
 >
-> Repository: `Jowitt13/ming-engine` (now **private**).
+> Repository: `Jowitt13/ming-engine` (currently private).
 >
-> Personal data (an individual's birth date, exact birth time, birthplace and coordinates) was
-> accidentally committed as example/demo input and had reached the public default branch, historical
-> commits, source tags (`v0.1.0-rc.1` … `v0.1.3`), and the release ZIP assets of those tags.
+> An individual's birth data was accidentally committed as example/demo input and reached the public default branch, historical source tags, and Release ZIP assets. We are deliberately not including the values in this request.
 >
-> Remediation already performed by us:
+> Repository-side remediation completed:
 >
-> - Repository set to private.
-> - Deleted the 5 affected Releases and their tags.
-> - Rewrote Git history with git-filter-repo to redact the values from all reachable objects and
->   force-pushed the cleaned `main`; a full-history scan now reports zero occurrences.
+> - Set the repository to private.
+> - Deleted affected Releases, assets and tags.
+> - Replaced the default branch with a single sanitized root commit; a fresh clone has one reachable commit and no release/tag refs.
+> - Added fail-closed local incident scanning and synthetic-example guards.
 >
-> Requests to GitHub Support:
+> Please:
 >
-> 1. Purge cached/stale views of the now-unreachable commit objects (old commit SHAs) so the redacted
->    data is not retrievable via direct-SHA URLs before garbage collection.
-> 2. Confirm removal of the deleted Release assets from CDN/storage caches.
-> 3. Advise on removing any forks that may have copied the affected commits/assets.
+> 1. Purge or expedite garbage collection for old unreachable commit objects and stale cached views.
+> 2. Confirm deletion/retention handling for deleted Release assets and CDN/storage caches.
+> 3. Advise on Actions logs tied to old commits and any search-index/cache removal steps.
+> 4. Confirm whether any forks retain the affected objects (our repository-side check found none).
 >
-> The specific leaked values are available privately on request; we are not including them here to
-> avoid re-exposing the data.
+> We can provide the specific values through an approved private support channel if required; we will not place them in repository files, tickets, logs or attachments.

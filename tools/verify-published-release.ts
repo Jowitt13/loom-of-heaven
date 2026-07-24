@@ -4,7 +4,7 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node
 import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SKILL_NAME, STABLE_RELEASE_TAG } from './lib/host-config.ts';
+import { PUBLISHED_RELEASE_TAG, SKILL_NAME } from './lib/host-config.ts';
 import {
   assertSingleTopDir,
   extractZip,
@@ -19,7 +19,7 @@ import {
  *   INTEGRITY   — each zip's SHA-256 matches the release SHA256SUMS.txt; every zip has a
  *                 single top-level `calculate-birth-charts/` dir with no double-nesting; the
  *                 engine.mjs is identical across all zips (and, when the tag is the current
- *                 STABLE release, matches the committed root install-manifest.json engineSha256).
+ *                 published release, matches the committed root install-manifest.json engineSha256).
  *   REPRODUCIBLE — every shipped text file already equals its LF-normalized form. If a file
  *                 (e.g. LICENSE) still carries CRLF, that is reported as a KNOWN LINE-ENDING
  *                 LEGACY and the run does NOT claim reproducibility (v0.1.1 predates the LF fix).
@@ -102,8 +102,8 @@ function main(): void {
       detail: `${engineHashes.size} distinct`,
     });
 
-    // When verifying the CURRENT stable tag, cross-check engine hash against the root manifest.
-    if (tag === STABLE_RELEASE_TAG) {
+    // When verifying the currently published tag, cross-check its engine hash against the root manifest.
+    if (PUBLISHED_RELEASE_TAG !== null && tag === PUBLISHED_RELEASE_TAG) {
       const rootManifest = join(root, 'install-manifest.json');
       if (existsSync(rootManifest)) {
         const m = JSON.parse(readFileSync(rootManifest, 'utf8')) as {

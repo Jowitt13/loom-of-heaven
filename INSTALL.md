@@ -14,7 +14,7 @@
 
 1. 发这一句话；
 2. 如果 AI 请求一次系统权限（例如允许运行本地脚本或允许导入技能），点“允许”；
-3. 等 AI 回复“已安装，可直接使用”。
+3. 等 AI 如实回复结果：已安装，或“该平台安装包尚未发布”。
 
 你**无需**懂终端命令、文件路径、解压 zip，也**无需** pnpm、Git 或源码构建。运行需要本机 Node.js ≥ 22（宿主通常已具备；若提示找不到 node 请先装）。
 
@@ -24,24 +24,25 @@
 
 1. **识别当前宿主**：判断你运行在 Codex、Qoder / Qoder CN、WorkBuddy（桌面端 / OpenClaw）还是豆包电脑版。若无法确定，走下方“平台未知”规则。
 2. **读取清单**：抓取 `https://raw.githubusercontent.com/Jowitt13/ming-engine/main/install-manifest.json`。
-3. **选择平台包**：在 `platforms[]` 中选 `host` 等于当前宿主的项；读取它的 `capability`、`downloadType`、`downloadUrl`、`sha256`、`installer`、`needsUserAuth`、`engineSelfCheck`、`userDemoPrompt`。
-4. **校验来源与完整性**：
+3. **选择平台并先检查可用性**：在 `platforms[]` 中选 `host` 等于当前宿主的项；先读取 `published`、`capability`、`downloadType` 与 `installer`。在确认 `published` 为 `true` 前，**不得**读取、猜测或使用 `downloadUrl`、`sha256`。
+4. **未发布时立即停止**：若所选平台 `published` 不是 `true`，明确告诉用户“该平台安装包尚未发布”，不要下载、不要校验、不要运行安装器、不要用本地旧包或缓存冒充最新版。Codex 的 `repo` 来源仅在仓库已公开且可访问时可继续；仓库未公开时同样停止并说明尚不可公开安装。
+5. **仅对已发布平台校验来源与完整性**：
    - 下载地址必须以 `https://github.com/Jowitt13/ming-engine` 或 `https://raw.githubusercontent.com/Jowitt13/ming-engine` 开头，**不得**从任何第三方 URL 下载；
-   - release 资产地址必须指向不可变版本 tag（形如 `/releases/download/v0.1.3/…`），**不得**使用 `latest/download`；
+   - release 资产地址必须指向不可变版本 tag（形如 `/releases/download/<tag>/…`），**不得**使用 `latest/download`；
    - 下载后计算 SHA-256，必须与该平台的 `sha256`（并可对照 `SHA256SUMS.txt`）**完全一致**。
-5. **按宿主原生方式安装**：严格遵循对应的安装器指令文件（见 `installer` 字段，即 `docs/installers/<host>.md`）。不要把复杂步骤、终端命令或路径抛给用户。
-6. **最小权限**：仅在确有需要时，向用户申请**一次**最小权限（如允许运行本地 `node`、允许导入技能）；不要反复索权，也不要索取无关权限。
-7. **刷新技能**：安装后刷新 / 重载宿主的 Skill 列表，确认技能可见。
-8. **自检**：full 版跑 `engineSelfCheck`（`node scripts/ming-chart.mjs verify`，返回 `ok:true`，无需出生资料、不猜坐标）；如需演示可用 `userDemoPrompt`（已含完整时区/经纬度）。reading-lite 版确认可接收 facts 并生成解读。
-9. **一句话反馈**：告诉用户四件事——是否安装成功；装的是**完整排盘版**还是 **reading-lite（解读辅助版）**；如何调用；如何卸载。
+6. **按宿主原生方式安装**：严格遵循对应的安装器指令文件（见 `installer` 字段，即 `docs/installers/<host>.md`）。不要把复杂步骤、终端命令或路径抛给用户。
+7. **最小权限**：仅在确有需要时，向用户申请**一次**最小权限（如允许运行本地 `node`、允许导入技能）；不要反复索权，也不要索取无关权限。
+8. **刷新技能**：安装后刷新 / 重载宿主的 Skill 列表，确认技能可见。
+9. **自检**：full 版跑 `engineSelfCheck`（`node scripts/ming-chart.mjs verify`，返回 `ok:true`，无需出生资料、不猜坐标）；如需演示可用 `userDemoPrompt`（已含完整时区/经纬度）。reading-lite 版确认可接收 facts 并生成解读。
+10. **一句话反馈**：告诉用户四件事——是否安装成功；装的是**完整排盘版**还是 **reading-lite（解读辅助版）**；如何调用；如何卸载。
 
-用户可见流程最多为：发一句安装请求 → 至多确认一次权限 → AI 回复“已安装，可直接使用”。
+用户可见流程最多为：发一句安装请求 →（仅在已发布且确有需要时）至多确认一次权限 → AI 如实回复“已安装，可直接使用”或“安装包尚未发布”。
 
 ---
 
 ## 安装规则（硬约束，任何一条不满足都不能继续）
 
-- **未发布 / 404**：当 `status` 为 `unpublished`、该平台 `published` 为 `false`，或下载返回 404 时，必须明确告诉用户“安装包尚未发布”，并给出替代方案（Codex 可直接用仓库；其余平台等待发布）。**不得伪装安装成功，不得下载 404 占位。**
+- **未发布 / 404**：当所选平台 `published` 不是 `true`，或已发布资产下载返回 404 时，必须明确告诉用户“安装包尚未发布”。当前根清单的 `status: "unpublished"` 表示没有公开 ZIP；Codex 仅可在仓库已公开时直接使用仓库，其余平台等待发布。**不得伪装安装成功，不得下载 404 占位。**
 - **SHA-256 不一致**：立即**拒绝安装**，提示用户重新下载或核对来源，绝不安装未通过校验的文件。
 - **平台未知**：如实说明“暂不支持在该宿主自动安装”，引导用户查看 `docs/INSTALL_BY_PLATFORM.md` 手动安装，**不强行安装**。
 - **安装失败**：只给用户**一步修复动作**（一句话，例如“请先安装 Node.js ≥ 22 再重试”），不要倒出长篇教程。
@@ -52,12 +53,12 @@
 
 ## 平台分流一览
 
-| 平台             | 能力级别 | 包 / 来源                   | 安装器指令                     |
-| ---------------- | -------- | --------------------------- | ------------------------------ |
-| Codex            | 完整排盘 | 仓库（AGENTS.md）           | `docs/installers/codex.md`     |
-| Qoder / Qoder CN | 完整排盘 | `ming-engine-qoder.zip`     | `docs/installers/qoder.md`     |
-| WorkBuddy        | 完整排盘 | `ming-engine-workbuddy.zip` | `docs/installers/workbuddy.md` |
-| 豆包电脑版       | 完整排盘 | `ming-engine-doubao.zip`    | `docs/installers/doubao.md`    |
+| 平台             | 能力级别 | 包 / 来源          | 安装器指令                     |
+| ---------------- | -------- | ------------------ | ------------------------------ |
+| Codex            | 完整排盘 | 仓库（公开后可用） | `docs/installers/codex.md`     |
+| Qoder / Qoder CN | 完整排盘 | ZIP（当前未发布）  | `docs/installers/qoder.md`     |
+| WorkBuddy        | 完整排盘 | ZIP（当前未发布）  | `docs/installers/workbuddy.md` |
+| 豆包电脑版       | 完整排盘 | ZIP（当前未发布）  | `docs/installers/doubao.md`    |
 
 > 四个宿主均为完整版，使用同一份预构建引擎 `scripts/dist/engine.mjs`，排盘输出一致（真机已验证）。
 > `reading-lite`（无引擎、需外部 facts）作为未来“不能运行脚本”宿主的降级模式保留（见 `docs/HOST_COMPATIBILITY.md`）。
@@ -72,11 +73,11 @@
 
 ---
 
-## 当前发布状态
+## 当前分发状态
 
-`install-manifest.json` 的 `status` 为 `published`，指向 GitHub Release `v0.1.3`（跨平台可复现打包；引擎 0.1.1，排盘数学与 `v0.1.0` 一致）。三个 zip 已上传并经 SHA-256 校验，可从 `releases/download/v0.1.3/` 下载：
+根清单当前为 `status: "unpublished"`：没有公开的 GitHub Release ZIP、发布 tag 或 SHA-256 清单。Qoder / WorkBuddy / 豆包电脑版的安装器必须在可用性检查处停止，不能引用历史下载地址或要求用户手动寻找旧包。
 
-- **Codex**：直接克隆 / 下载仓库使用（不依赖 Release）；
-- **Qoder / WorkBuddy / 豆包电脑版**：完整排盘包，**真机安装 + 触发 + 引擎执行已验证**。
+- **Codex**：仅在仓库重新公开后，可直接克隆 / 下载仓库使用（不依赖 Release）。
+- **Qoder / WorkBuddy / 豆包电脑版**：完整排盘兼容性与真机验证记录仍有效，但当前没有可下载的安装包；等待一次新的、独立验证的正式发布。
 
-> 发布使用不可变版本 tag（当前 `v0.1.3`）与独立 zip，不复用 `latest` 或先前的预发布 tag（如 `v0.1.0-rc.1`）。已发布的 `v0.1.0`/`v0.1.1`/`v0.1.2` 保持不变（不重打、不覆盖）。
+> 未来发布必须使用新的不可变 tag 与独立 ZIP；创建 Release、上传资产并完成重下 SHA-256 校验后，才可把清单切换为 `published`。不得使用 `latest/download`，不得复用已撤下的历史发布地址。

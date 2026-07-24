@@ -18,7 +18,7 @@ import {
   REPO_URL,
   SKILL_NAME,
   SKILL_NAME_LITE,
-  STABLE_RELEASE_TAG,
+  PUBLISHED_RELEASE_TAG,
   type HostConfig,
 } from './lib/host-config.ts';
 
@@ -26,8 +26,8 @@ import {
  * Build every host release bundle (the CANDIDATE build) from the ONE canonical Skill
  * ("一个核心，多个发布包"). Output goes ONLY to releases/<CANDIDATE_DIR>/ (gitignored):
  * the per-host zips + a candidate install-manifest.json + SHA256SUMS.txt. This tool NEVER
- * writes the committed root install-manifest.json / SHA256SUMS.txt — those reflect the live
- * STABLE release and are updated only by the explicit promote-release.ts step.
+ * writes the committed root install-manifest.json / SHA256SUMS.txt — those reflect only an
+ * explicitly published Release and are updated only by the explicit promote-release.ts step.
  *
  * Currently all four hosts (codex/qoder/workbuddy/doubao) are `full`: each stages a clean
  * copy of the canonical `skills/calculate-birth-charts` + INSTALL.md + BUILD_MANIFEST.json.
@@ -398,7 +398,7 @@ function main(): void {
   }
   // CANDIDATE build only: everything under releases/<CANDIDATE_DIR>/ (gitignored).
   // NEVER rewrite the committed root install-manifest.json / SHA256SUMS.txt (frozen at
-  // the live STABLE release); promotion is a separate explicit step (promote-release.ts).
+  // the committed root manifest); promotion is a separate explicit step (promote-release.ts).
   const candidateDir = join(releasesDir, CANDIDATE_DIR);
   rmSync(candidateDir, { recursive: true, force: true });
   mkdirSync(candidateDir, { recursive: true });
@@ -484,7 +484,7 @@ function main(): void {
   process.stdout.write(
     `\nCandidate packages -> releases/${CANDIDATE_DIR}/{${HOSTS.map((h) => h.id).join(',')}}/  (published:false)\n` +
       `Candidate manifest  -> releases/${CANDIDATE_DIR}/install-manifest.json + SHA256SUMS.txt\n` +
-      `Root stable manifest left UNTOUCHED (live stable release ${STABLE_RELEASE_TAG}; promote-release updates it).\n`,
+      `Root manifest left UNTOUCHED (${PUBLISHED_RELEASE_TAG ?? 'no published Release'}; promote-release updates it).\n`,
   );
 }
 

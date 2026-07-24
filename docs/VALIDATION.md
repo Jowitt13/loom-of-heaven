@@ -5,51 +5,63 @@ source-traceable — not that divination predicts anything (handoff §9).
 
 ## Gate (enforced now)
 
-The enforced gate is `pnpm run verify:all`, which runs, in order:
-`format:check → lint → typecheck → test → build → validate:skill → smoke → forward:test → check:doc-counts → scan:deps → scan:secrets → scan:incident`. CI runs exactly
-this command and nothing else (`.github/workflows/verify.yml`), so it is the single enforcement entry
-point and the rows below are 1:1 with what actually runs.
+There are two explicit gates:
 
-| Stage           | Command (in `verify:all`)   | What it proves                                                                    |
-| --------------- | --------------------------- | --------------------------------------------------------------------------------- |
-| Format          | `pnpm run format:check`     | Prettier `--check`; formatting consistent repo-wide, no writes.                   |
-| Lint            | `pnpm run lint`             | ESLint import boundaries: offline compute core; no reverse dep on interpret.      |
-| Typecheck       | `pnpm run typecheck`        | `tsc` strict over all packages, tools and tests (static gate beside lint).        |
-| Unit/property   | `pnpm run test`             | Vitest across contracts, time-location, orchestrator (incl. integration).         |
-| Build           | `pnpm run build`            | esbuild bundle + CycloneDX SBOM produced.                                         |
-| Skill validate  | `pnpm run validate:skill`   | Structure, frontmatter, portability, offline (no-network), CSP/no-script.         |
-| Clean-dir smoke | `pnpm run smoke`            | Offline run from an isolated copy + cross-env determinism.                        |
-| Forward test    | `pnpm run forward:test`     | Clean-dir, zero-install, offline SKILL workflow for 5 realistic requests.         |
-| Doc counts      | `pnpm run check:doc-counts` | Re-runs the suite; fails if a doc's `N tests / M files` drifts from the run.      |
-| Dep vuln scan   | `pnpm run scan:deps`        | `pnpm audit --prod` over shipped deps; fails on an advisory (offline: skip+warn). |
-| Secret scan     | `pnpm run scan:secrets`     | Dependency-free scan of tracked files; fails on a leaked credential.              |
+- `pnpm run verify:cloud` is the GitHub Actions gate. It runs every reproducible, non-sensitive
+  check through `scan:secrets`; CI runs exactly this command.
+- `pnpm run verify:all` is the controlled local gate: `verify:cloud` followed by
+  `scan:incident`. The precise incident-token file is ignored and must never enter CI. If it is
+  absent, the command fails closed instead of reporting a clean result.
 
-`pnpm run format:check` (Prettier) runs first in `verify:all`, so CI fails on any unformatted
+Before a release or a visibility change, run `pnpm run verify:all` and
+`pnpm run scan:incident:history` in a controlled environment.
+
+| Stage            | Command (in `verify:cloud`)                       | What it proves                                                                    |
+| ---------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Format           | `pnpm run format:check`                           | Prettier `--check`; formatting consistent repo-wide, no writes.                   |
+| Lint             | `pnpm run lint`                                   | ESLint import boundaries: offline compute core; no reverse dep on interpret.      |
+| Typecheck        | `pnpm run typecheck`                              | `tsc` strict over all packages, tools and tests (static gate beside lint).        |
+| Unit/property    | `pnpm run test`                                   | Vitest across contracts, time-location, orchestrator (incl. integration).         |
+| Build            | `pnpm run build`                                  | esbuild bundle + CycloneDX SBOM produced.                                         |
+| Provenance       | `pnpm run validate:provenance`                    | Built engine and live source retain the declared provenance boundary.             |
+| Skill validate   | `pnpm run validate:skill`                         | Structure, frontmatter, portability, offline (no-network), CSP/no-script.         |
+| Reading validate | `pnpm run validate:reading`                       | Static contract for reading examples and output structure; no LLM call.           |
+| Docs validate    | `pnpm run validate:docs`                          | Current capability, runtime, publication-state and install-doc consistency.       |
+| Clean-dir smoke  | `pnpm run smoke`                                  | Offline run from an isolated copy + cross-env determinism.                        |
+| Forward test     | `pnpm run forward:test`                           | Clean-dir, zero-install, offline SKILL workflow for 5 realistic requests.         |
+| Host packages    | `pnpm run package:hosts && pnpm run verify:hosts` | Candidate ZIP structure and runtime behavior remain reproducible.                 |
+| Install state    | `pnpm run verify:install`                         | Root no-release/published state and candidate boundary are honest and consistent. |
+| Doc counts       | `pnpm run check:doc-counts`                       | Re-runs the suite; fails if a doc's `N tests / M files` drifts from the run.      |
+| Dep vuln scan    | `pnpm run scan:deps`                              | `pnpm audit --prod` over shipped deps; fails on an advisory (offline: skip+warn). |
+| Secret scan      | `pnpm run scan:secrets`                           | Dependency-free scan of tracked files; fails on a leaked credential.              |
+| Incident scan    | local `pnpm run verify:all`                       | Exact incident tokens; fail-closed if the controlled token file is unavailable.   |
+
+`pnpm run format:check` (Prettier) runs first in `verify:cloud`, so CI fails on any unformatted
 file; run `pnpm run format` to auto-fix before pushing.
 
 ## Deferred to Phase 6 (declared, not yet enforced)
 
 These items appear in the QODER_HANDOFF §9.1 long-term minimum bar but have no runnable
-enforcement yet; they are intentionally excluded from `verify:all` and CI until implemented
+enforcement yet; they are intentionally excluded from `verify:cloud` and CI until implemented
 (also tracked in STATUS). No not-yet-ready scanner is wired into the gate.
 
 - Broader ESLint ruleset (style / type-aware rules) — only the import-boundary gate
-  (`eslint.config.js`, in `verify:all`) is enforced today; `typecheck` remains the other static gate.
+  (`eslint.config.js`, in `verify:cloud`) is enforced today; `typecheck` remains the other static gate.
 - Dependency **license** scan — the dependency **vulnerability** scan (`scan:deps`, `pnpm audit --prod`)
-  and the **secret** scan (`scan:secrets`) are now enforced in `verify:all`; a license-policy gate is
+  and the **secret** scan (`scan:secrets`) are now enforced in `verify:cloud`; a license-policy gate is
   still deferred.
 - SPDX-format SBOM — a CycloneDX `sbom.cdx.json` is produced today by `build`.
 - Dedicated / expanded HTML-injection suite beyond the template CSP, no-`<script>`, and
   no-network checks already run by `validate:skill`.
 
-## Current results (2026-07-21)
+## Current results (2026-07-24)
 
-These numbers come from one real `pnpm run verify:all` run — the single source of truth shared with
-the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not hand-edit them to
-resolve a disagreement; re-run the gate and copy the actual counts. `pnpm run check:doc-counts`
+The test count below comes from one real `pnpm run test` run — the single source of truth shared with
+the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not hand-edit it to
+resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **260 tests / 22 files — all passing**. The Western provider
+- Typecheck: clean. Tests: **261 tests / 22 files — all passing**. The Western provider
   (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 wrapper-consistency ≤1′ gate (vs
   astronomy-engine's own output; an independent JPL Horizons golden is TODO); the sidereal zodiac (Lahiri), true node
   and asteroids have a dedicated **approximate** regression (continuity / sign-plausibility, not the
@@ -72,7 +84,8 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   smoke: **10/10**. Clean-dir forward test: **41/41** — 8 realistic requests (incl. a horoscope, an
   interpret and a multi-person 合婚 synastry) across the CLI, and that `render` is disabled (exit 3,
   no report file). Format:
-  clean. `pnpm run verify:all`: green end to end.
+  clean. `pnpm run verify:cloud` is the CI gate. `pnpm run verify:all` is only green in a controlled
+  environment with the private incident-token file; without it, the expected result is fail-closed.
 
 ## Boundary fixtures (36; ≥30 required for Phase 1)
 

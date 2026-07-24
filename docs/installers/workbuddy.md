@@ -4,13 +4,14 @@
 
 ## AI 执行步骤（优先使用 WorkBuddy 原生导入）
 
-1. 从清单取 `ming-engine-workbuddy.zip` 的 `downloadUrl` 与 `sha256`；下载并校验 SHA-256。
-2. 优先调用 WorkBuddy 自身的“添加技能 / 导入技能”能力，直接导入该 zip（OpenClaw 技能格式：`SKILL.md` + `scripts/` 位于压缩包根目录）。
-3. 若对话 Agent 无法直接调起导入界面：**不要输出十几步手动说明**，只给用户一个最小动作，例如：
+1. 先读取所选平台的 `published`。若它不是 `true`：明确回复“WorkBuddy 安装包尚未发布”，**立即停止**；不得读取、猜测或请求 `downloadUrl` / `sha256`，不得下载、导入或用旧包冒充最新版。
+2. 只有 `published: true` 时，才从清单取当前 WorkBuddy ZIP 的 `downloadUrl` 与 `sha256`；下载并校验 SHA-256。
+3. 优先调用 WorkBuddy 自身的“添加技能 / 导入技能”能力，直接导入该 zip（OpenClaw 技能格式：`SKILL.md` + `scripts/` 位于压缩包根目录）。
+4. 若对话 Agent 无法直接调起导入界面：**不要输出十几步手动说明**，只给用户一个最小动作，例如：
    > 请点击此处确认导入 ming-engine-workbuddy.zip
    > 用户确认后，继续自动完成剩余步骤（启用技能 + 自检）。
-4. 启用技能，刷新 Skills 列表。
-5. 自检：用下方一句话触发一次，返回三盘即成功。
+5. 启用技能，刷新 Skills 列表。
+6. 自检：用下方一句话触发一次，返回三盘即成功。
 
 ## 权限（最小化）
 
@@ -31,5 +32,5 @@
 
 ## 更新 / 卸载
 
-- 更新：说“帮我更新 Ming Engine”。AI 读线上 `install-manifest.json` 取目标版本 → 下载不可变 tag 资产并校验 SHA-256 → 校验单层 → 解压临时目录 → 若可写技能目录则运行 `node <临时目录>/calculate-birth-charts/scripts/ming-chart.mjs migrate --host workbuddy --source <临时目录>/calculate-birth-charts` 原子替换 `~/.workbuddy/skills/calculate-birth-charts`（清理 legacy RC 双层、失败自动回滚）；若必须经「Skills 管理」界面，则先只删旧 Ming Engine 再导入新版、不碰其它技能。升级后只保留一个可触发 `calculate-birth-charts`。随后运行 `version` 复核并回报 before→after。下载失败 / SHA 不一致 / Release 不存在即明确失败并停止。
+- 更新：先读线上 `install-manifest.json`。若 WorkBuddy `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；不得使用本地旧包或缓存称作最新版。只有已发布时才下载不可变 tag 资产、校验 SHA-256、校验单层、解压临时目录；若可写技能目录则运行 `node <临时目录>/calculate-birth-charts/scripts/ming-chart.mjs migrate --host workbuddy --source <临时目录>/calculate-birth-charts` 原子替换 `~/.workbuddy/skills/calculate-birth-charts`（清理 legacy RC 双层、失败自动回滚）；若必须经「Skills 管理」界面，则先只删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 `calculate-birth-charts`。随后运行 `version` 复核并回报 before→after。下载失败 / SHA 不一致 / Release 不存在即明确失败并停止。
 - 卸载：说“帮我卸载 Ming Engine”，或在「Skills 管理」中删除该技能。

@@ -15,7 +15,7 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A522-brightgreen.svg" alt="Node >= 22" />
   <img src="https://img.shields.io/badge/offline-100%25-success.svg" alt="100% offline" />
   <img src="https://img.shields.io/badge/deterministic-byte--identical-8A2BE2.svg" alt="Deterministic" />
-  <img src="https://img.shields.io/badge/tests-259%20passing-success.svg" alt="259 tests passing" />
+  <img src="https://img.shields.io/badge/tests-261%20passing-success.svg" alt="261 tests passing" />
   <img src="https://img.shields.io/badge/LLM-never%20computes-critical.svg" alt="LLM never computes" />
 </p>
 
@@ -38,18 +38,20 @@ Qoder / Claude Code / Codex 里直接调用的 **Skill**。
 
 ---
 
-## ⚡ 一键安装 / One-line install
+## ⚡ 安装入口 / Install entry
 
 对你的 AI（Qoder / WorkBuddy / 豆包电脑版 / Codex）说一句：
 
 > 帮我安装这个技能：https://raw.githubusercontent.com/Jowitt13/ming-engine/main/INSTALL.md
 
-宿主 AI 会自动识别平台、按 [`install-manifest.json`](install-manifest.json) 下载并校验（SHA-256 + 不可变版本 tag）、以原生方式安装并自检，再一句话告诉你结果。无需终端、路径、解压或 pnpm。
+宿主 AI 会先识别平台并读取 [`install-manifest.json`](install-manifest.json) 的 `published` 状态；**只有所选平台已发布时**，才会读取下载地址、校验 SHA-256 并安装。它不会猜测、拼接或尝试不存在的下载链接。
 
-- 完整排盘（四平台一致，真机已验证）：Codex / Qoder / WorkBuddy / 豆包电脑版，使用同一份预构建引擎。
+- 仓库重新公开后，Codex 可直接使用仓库中的完整排盘 Skill。
+- Qoder、WorkBuddy 与豆包电脑版当前**没有公开 ZIP 安装包**；安装入口会明确提示“安装包尚未发布”并停止，不会下载 404 文件或伪称安装成功。
+- 四个平台的完整排盘能力与真机兼容性记录仍见下方文档；可下载性以清单的 `published` 字段为准。
 - 详见 [`INSTALL.md`](INSTALL.md) 与 [`docs/INSTALL_BY_PLATFORM.md`](docs/INSTALL_BY_PLATFORM.md)；能力矩阵见 [`docs/HOST_COMPATIBILITY.md`](docs/HOST_COMPATIBILITY.md)。
 
-> 注：安装包来自 GitHub Release `v0.1.3`（引擎 0.1.1，排盘数学与 `v0.1.0` 一致），一句话安装会按不可变 tag 自动核对 SHA-256。
+> 当前没有可供下载的 GitHub Release ZIP、发布 tag 或对应 SHA-256 清单。未来只有在真实 Release 创建、资产上传并完成重下校验后，清单才会切换为可安装状态。
 
 ---
 
@@ -130,8 +132,9 @@ node scripts/ming-chart.mjs interpret --input-file birth-input.json --output-fil
 
 ### 🟣 Qoder
 
-`SKILL.md` 是 Qoder 原生格式。将 `skills/calculate-birth-charts/` 文件夹导入 Qoder 的技能库并启用即可。
-之后直接说：**“帮我排一下 1990 年 3 月 10 日早上 8 点 15，出生在武汉的盘”**。
+Qoder 的公开 ZIP 当前尚未发布。普通用户应使用上方安装入口查看可用性；当清单中的 Qoder `published` 不是 `true` 时，Agent 必须停止，不应让用户从源码树拼装或导入旧包。
+
+正式 ZIP 发布后，Qoder 会按清单下载、校验并导入完整排盘 Skill。
 
 ### 🟠 Claude Code
 
@@ -189,14 +192,16 @@ pnpm monorepo（`packages/*`）构建出 Skill 的引擎 bundle。
 
 ```bash
 pnpm install          # 仅开发需要
-pnpm run verify:all   # 全部强制门禁（见 docs/VALIDATION.md）
+pnpm run verify:cloud # GitHub Actions 使用的非敏感门禁
+pnpm run verify:all   # 受控本地全量门禁；没有私密 token 文件时按设计 fail-closed
 pnpm run build        # 重建 scripts/dist/engine.mjs + sbom.cdx.json（改动后请提交产物）
 pnpm run package      # 生成 dist/*.zip + .sha256（自校验完整性）
 ```
 
-`verify:all` 依次运行：`format:check → lint → typecheck → test → build → validate:skill →
-validate:reading → validate:docs → smoke → forward:test → package:hosts → verify:hosts →
-verify:install → check:doc-counts → scan:deps → scan:secrets → scan:incident`（其中 build 后还有 validate:provenance）。当前 **260 tests / 22 files 全绿**。
+`verify:cloud` 依次运行：`format:check → lint → typecheck → test → build → validate:provenance →
+validate:skill → validate:reading → validate:docs → smoke → forward:test → package:hosts →
+verify:hosts → verify:install → check:doc-counts → scan:deps → scan:secrets`。`verify:all` 只在其后追加
+`scan:incident`，该扫描的私密 token 文件绝不进入 CI；缺失时必须 fail-closed。最近一次本地验证的测试阶段为 **261 tests / 22 files**。
 
 深入阅读：[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/VALIDATION.md`](docs/VALIDATION.md) ·
 [`docs/LICENSE_AUDIT.md`](docs/LICENSE_AUDIT.md) · [`docs/PRIVACY.md`](docs/PRIVACY.md) ·

@@ -4,16 +4,15 @@
  * derives each host bundle from it plus the metadata declared here. No host has a
  * hand-maintained SKILL.md — that would drift.
  *
- * Version model: STABLE_* describes the live published release (v0.1.2, engine 0.1.1 — the
- * chart math is byte-identical to 0.1.0; only the Western provenance label was corrected) and
- * is what the committed root manifest reflects. CANDIDATE_* describes the NEXT unpublished build
- * produced by `package:hosts` (v0.1.3, same 0.1.1 engine). STABLE and CANDIDATE tags MUST
- * differ; `verify:install` fails hard if they collide.
+ * Version model: PUBLISHED_* describes the live Release reflected by the committed root manifest.
+ * It is currently `null`: all prior public assets were withdrawn and no replacement ZIP has been
+ * published. CANDIDATE_* describes the NEXT unpublished build produced by `package:hosts`.
+ * When a published tag exists, it MUST differ from the candidate tag; `verify:install` fails hard
+ * if they collide.
  *
- * Candidate vs stable boundary: `package:hosts` only ever writes the CANDIDATE build under
+ * Candidate vs published boundary: `package:hosts` only ever writes the CANDIDATE build under
  * `releases/<CANDIDATE_DIR>/` with `published:false`. It NEVER rewrites the committed root
- * `install-manifest.json` / `SHA256SUMS.txt`, which stay frozen at the live STABLE release
- * (STABLE_RELEASE_TAG). The root stable manifest is updated only by the explicit
+ * `install-manifest.json` / `SHA256SUMS.txt`. The root manifest is updated only by the explicit
  * `promote-release.ts` step, after a real Release is created + assets uploaded + re-verified.
  */
 
@@ -64,14 +63,16 @@ export const SKILL_NAME_LITE = 'calculate-birth-charts-doubao-lite';
 
 export const REPO_URL = 'https://github.com/Jowitt13/ming-engine';
 
-// --- STABLE: the live published release; the committed root manifest reflects this. ---
-/** Engine semver shipped by the live STABLE release (v0.1.3 ships engine 0.1.1; math byte-identical to 0.1.0). */
-export const STABLE_ENGINE_VERSION = '0.1.1';
-/** The live/published release the committed root manifest reflects (updated only by promote-release). */
-export const STABLE_RELEASE_TAG = 'v0.1.3';
+// --- ROOT / PUBLISHED: no public ZIP is currently available. ---
+/** Engine semver in the committed, audited source root. */
+export const ROOT_ENGINE_VERSION = '0.1.1';
+/** The published Release currently reflected by the root manifest; null means no public ZIP. */
+export const PUBLISHED_RELEASE_VERSION: string | null = null;
+/** Immutable tag for the published Release; null until a new Release is created and verified. */
+export const PUBLISHED_RELEASE_TAG: string | null = null;
 
-// --- CANDIDATE: the next unpublished build produced by package:hosts. MUST differ from STABLE. ---
-/** Engine semver of the candidate: same 0.1.1 engine as the live stable (no engine change pending). */
+// --- CANDIDATE: the next unpublished build produced by package:hosts. ---
+/** Engine semver of the candidate: same audited engine as the source root (no engine change pending). */
 export const CANDIDATE_ENGINE_VERSION = '0.1.1';
 /** Install-package release version of the candidate (next packaging release over the 0.1.1 engine). */
 export const CANDIDATE_RELEASE_VERSION = '0.1.4';
@@ -81,18 +82,18 @@ export const CANDIDATE_RELEASE_TAG = `v${CANDIDATE_RELEASE_VERSION}`;
 export const CANDIDATE_DIR = CANDIDATE_RELEASE_TAG;
 
 /**
- * Invariant: the candidate release tag MUST differ from the live stable release tag, so a
- * candidate build can never be mistaken for (or overwrite) the published stable release.
+ * Invariant: when a published tag exists, the candidate release tag MUST differ from it, so a
+ * candidate build can never be mistaken for (or overwrite) a published release.
  * Pure + parameterized so it is unit-testable with a negative (equal) case.
  */
 export function assertDistinctReleaseTags(
   candidateTag: string = CANDIDATE_RELEASE_TAG,
-  stableTag: string = STABLE_RELEASE_TAG,
+  publishedTag: string | null = PUBLISHED_RELEASE_TAG,
 ): { ok: boolean; error?: string } {
-  if (candidateTag === stableTag) {
+  if (publishedTag !== null && candidateTag === publishedTag) {
     return {
       ok: false,
-      error: `candidate tag "${candidateTag}" must differ from stable tag "${stableTag}"`,
+      error: `candidate tag "${candidateTag}" must differ from published tag "${publishedTag}"`,
     };
   }
   return { ok: true };

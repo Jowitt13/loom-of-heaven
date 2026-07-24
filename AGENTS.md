@@ -48,13 +48,17 @@ This is a pnpm monorepo (`packages/*`) that builds the Skill's bundle.
 
 ```bash
 pnpm install          # dev only
-pnpm run verify:all   # the full enforced gate (see docs/VALIDATION.md)
+pnpm run verify:cloud # CI-safe gate (no private incident tokens)
+pnpm run verify:all   # controlled local full gate; scan:incident fails closed without its token file
 pnpm run build        # rebuild scripts/dist/engine.mjs + sbom.cdx.json (commit the result)
 ```
 
-`verify:all` runs, in order: `format:check → lint → typecheck → test → build → validate:skill →
-smoke → forward:test → check:doc-counts → scan:deps → scan:secrets`. Keep it green; if you change
-the test count, update `docs/STATUS.md` and `docs/VALIDATION.md` from a real run (never by hand).
+`verify:cloud` runs the reproducible, non-sensitive stages: `format:check → lint → typecheck → test
+→ build → validate:provenance → validate:skill → validate:reading → validate:docs → smoke →
+forward:test → package:hosts → verify:hosts → verify:install → check:doc-counts → scan:deps →
+scan:secrets`. `verify:all` then adds `scan:incident`; its precise token file is ignored, must never
+enter CI, and its absence is intentionally fail-closed. If you change the test count, update
+`docs/STATUS.md` and `docs/VALIDATION.md` from a real run (never by hand).
 
 ## Scope & disclaimer
 

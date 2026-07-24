@@ -40,4 +40,39 @@ describe('incident guard: example data declared synthetic (no real PII)', () => 
     const missing = files.filter((f) => !SYNTHETIC.test(readFileSync(join(root, f), 'utf8')));
     expect(missing, `missing synthetic marker: ${missing.join(', ')}`).toEqual([]);
   });
+
+  it('keeps the cloud gate free of private incident-token injection', () => {
+    const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const cloud = pkg.scripts?.['verify:cloud'] ?? '';
+    const full = pkg.scripts?.['verify:all'] ?? '';
+    const requiredCloudStages = [
+      'format:check',
+      'lint',
+      'typecheck',
+      'test',
+      'build',
+      'validate:provenance',
+      'validate:skill',
+      'validate:reading',
+      'validate:docs',
+      'smoke',
+      'forward:test',
+      'package:hosts',
+      'verify:hosts',
+      'verify:install',
+      'check:doc-counts',
+      'scan:deps',
+      'scan:secrets',
+    ];
+
+    for (const stage of requiredCloudStages) expect(cloud).toContain(`pnpm run ${stage}`);
+    expect(cloud).not.toContain('scan:incident');
+    expect(full).toBe('pnpm run verify:cloud && pnpm run scan:incident');
+
+    const workflow = readFileSync(join(root, '.github/workflows/verify.yml'), 'utf8');
+    expect(workflow).toContain('run: pnpm run verify:cloud');
+    expect(workflow).not.toMatch(/INCIDENT_TOKENS|incident-tokens\.txt/);
+  });
 });

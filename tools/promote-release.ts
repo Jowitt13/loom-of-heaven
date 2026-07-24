@@ -18,7 +18,9 @@ import {
  * PUBLISHED state: `status:"published"`, every release-asset `published:true`, and a published
  * statusNote. The candidate per-asset sha256 (already re-verified against the live download)
  * is carried over unchanged, so the root manifest points at exactly the uploaded assets. The
- * candidate SHA256SUMS.txt is copied verbatim.
+ * candidate SHA256SUMS.txt is copied verbatim. In the same reviewed change, update
+ * PUBLISHED_RELEASE_VERSION / PUBLISHED_RELEASE_TAG in host-config.ts before re-running the
+ * install verifier; this repository intentionally starts in a no-published-release state.
  *
  * Promoting WITHOUT `--confirm-published` refuses to run, so an unpublished candidate can
  * never be silently passed off as the live stable manifest.

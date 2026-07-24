@@ -29,12 +29,12 @@ function rewriteLineEndings(dir: string, eol: '\n' | '\r\n'): void {
   }
 }
 
-describe('release version model: stable vs candidate tags', () => {
-  it('accepts the current distinct stable/candidate tags', () => {
+describe('release version model: published vs candidate tags', () => {
+  it('accepts the current no-published-release baseline', () => {
     expect(assertDistinctReleaseTags().ok).toBe(true);
   });
 
-  it('rejects identical stable and candidate tags (negative)', () => {
+  it('rejects identical published and candidate tags (negative)', () => {
     const res = assertDistinctReleaseTags('v0.1.1', 'v0.1.1');
     expect(res.ok).toBe(false);
     expect(res.error).toMatch(/must differ/);

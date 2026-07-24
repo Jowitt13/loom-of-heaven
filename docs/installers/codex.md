@@ -6,7 +6,7 @@
 
 1. Codex 直接使用仓库，**不依赖 GitHub Release 资产**。
    - 若用户本地已有仓库目录，直接在 Codex 中打开该项目；
-   - 否则引导用户克隆或下载：`https://github.com/Jowitt13/ming-engine`。
+   - 仅在仓库已重新公开时，才引导用户克隆或下载：`https://github.com/Jowitt13/ming-engine`；仓库仍为 private 时，明确说明当前没有公开安装路径并停止。
 2. Codex 自动读取仓库根目录的 `AGENTS.md` 与 `skills/calculate-birth-charts/`。
 3. 引擎使用预构建的 `scripts/dist/engine.mjs`，无需安装依赖。
 4. 自检：用下方一句话触发一次，返回三盘（西方 / 八字 / 紫微）即成功。
@@ -30,4 +30,4 @@
 
 ## 与其他平台差异
 
-- Codex 走仓库（不依赖 Release）；Qoder / WorkBuddy 走 zip 完整版；豆包为 reading-lite（不能自行排盘）。
+- Codex 走仓库（不依赖 Release，且仅在仓库公开后可用）；Qoder / WorkBuddy / 豆包均是完整排盘包的目标宿主，但它们当前没有公开 ZIP，必须等待清单标记为 `published: true` 后再安装。

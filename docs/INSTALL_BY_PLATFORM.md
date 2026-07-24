@@ -1,6 +1,6 @@
 # Ming Engine 安装指南（按平台）
 
-> 最后更新：v0.1.3（四平台完整版，真机验证通过；历史 v0.1.0/v0.1.1/v0.1.2 见发布记录）
+> 当前分发状态：没有公开的宿主 ZIP。四个平台的完整排盘能力与真机验证记录不等于当前已有可下载安装包；以 `install-manifest.json` 的 `published` 字段为准。
 >
 > 本文档帮你用最简单的方式完成安装。不需要编程知识，不需要安装 pnpm 或克隆代码仓库。
 
@@ -12,17 +12,16 @@
 
 > 帮我安装这个技能：https://raw.githubusercontent.com/Jowitt13/ming-engine/main/INSTALL.md
 
-AI 会自动识别你所在的平台，选择正确的包、下载、校验 SHA-256、安装、启用并自检，然后用一句话告诉你结果。你最多只需要确认一次系统权限。
+AI 会自动识别你所在的平台，并先检查该平台是否已发布。只有 `published: true` 时才会下载、校验 SHA-256、安装、启用并自检；否则会明确告诉你“安装包尚未发布”并停止。你最多只需要确认一次系统权限。
 
-| 平台       | 用户需要做什么               | 最终能力 |
-| ---------- | ---------------------------- | -------- |
-| Qoder      | 发一句话，必要时确认一次权限 | 完整排盘 |
-| WorkBuddy  | 发一句话，必要时确认导入     | 完整排盘 |
-| 豆包电脑版 | 发一句话，必要时确认导入     | 完整排盘 |
-| Codex      | 发一句话，必要时确认一次权限 | 完整排盘 |
+| 平台       | 用户需要做什么                | 最终能力             |
+| ---------- | ----------------------------- | -------------------- |
+| Qoder      | 当前 ZIP 未发布，等待正式发布 | 完整排盘（包发布后） |
+| WorkBuddy  | 当前 ZIP 未发布，等待正式发布 | 完整排盘（包发布后） |
+| 豆包电脑版 | 当前 ZIP 未发布，等待正式发布 | 完整排盘（包发布后） |
+| Codex      | 仓库重新公开后可用            | 完整排盘             |
 
-> 四个平台都是完整排盘版（西方占星 + 八字 + 紫微），使用同一份引擎，结果一致；均已真机验证。
-> 安装包来自 GitHub Release `v0.1.3`（引擎 0.1.1，排盘数学与 `v0.1.0` 一致），下载时会自动核对 SHA-256。
+> 四个平台的完整排盘能力使用同一份引擎，结果一致；兼容性均已真机验证。当前 Qoder / WorkBuddy / 豆包电脑版没有公开 ZIP，不能把兼容性记录说成“现在可安装”。
 
 ---
 
@@ -37,7 +36,7 @@ AI 会自动识别你所在的平台，选择正确的包、下载、校验 SHA-
 
 > 四个平台功能一致，都能计算八字、紫微、西方占星并给出解读。最省事的方式仍是上面那句“一句话安装”。
 
-> 候选说明：v0.1.3 已发布为当前稳定版。下一候选版本 v0.1.4 尚未发布，`releases/download/v0.1.4/` 暂不可访问；候选真机测试只用本地生成的 candidate ZIP，公开“一句话安装”的验证需等其正式发布、GitHub 重下验收并 promote 之后再进行。
+> 当前没有公开 ZIP 或发布 tag。候选真机测试只使用本地生成的 candidate ZIP，不能作为公开“一句话安装”的来源；必须等新的正式 Release 创建、GitHub 重下验收并更新清单后才可安装。
 
 ---
 
@@ -45,7 +44,7 @@ AI 会自动识别你所在的平台，选择正确的包、下载、校验 SHA-
 
 ### 30 秒安装
 
-1. 访问 [ming-engine GitHub](https://github.com/Jowitt13/ming-engine)，下载 ZIP（绿色 "Code" 按钮 → Download ZIP）
+1. 在仓库重新公开后，访问 [ming-engine GitHub](https://github.com/Jowitt13/ming-engine)，下载 ZIP（绿色 "Code" 按钮 → Download ZIP）
 2. 解压到任意文件夹
 3. 在 Codex 中打开该项目文件夹，直接对话即可
 
@@ -70,13 +69,17 @@ AI 会自动识别你所在的平台，选择正确的包、下载、校验 SHA-
 
 ## Qoder / Qoder CN
 
-### 30 秒安装（推荐：一句话，由 Qoder Agent 代装）
+### 当前状态
+
+Qoder 的公开 ZIP 当前尚未发布。把顶部安装入口发给 Qoder 后，Agent 必须先看到 `published: false` 并明确停止；不要下载、不要请求旧链接、不要用本地缓存冒充最新版。
+
+### 正式发布后的安装流程（推荐：一句话，由 Qoder Agent 代装）
 
 把顶部那句“帮我安装这个技能：<INSTALL.md 链接>”发给 Qoder：Qoder 内置 Agent 会**代为**下载 `ming-engine-qoder.zip`、按清单校验 SHA-256、校验 zip 单层目录、解压到临时目录，然后**仅替换**你的用户技能目录 `~/.qoder/skills/calculate-birth-charts/`（不动其它技能，失败不覆盖旧版），再刷新或提示你重启 Qoder / 新开对话一次，并自检。你无需自己下载、解压或使用任何命令行工具。
 
-#### 手动备用方案（仅当 Qoder 不允许 Agent 写入技能目录时）
+#### 手动备用方案（仅在正式发布且 Qoder 不允许 Agent 写入技能目录时）
 
-1. 从 Release 下载 `ming-engine-qoder.zip`，核对 SHA-256。
+1. 从当前清单指定的正式 Release 下载 Qoder ZIP，核对 SHA-256。
 2. 解压得到单层 `calculate-birth-charts/` 文件夹。
 3. 把该文件夹放入 Qoder 的用户技能目录 `~/.qoder/skills/`，重启 Qoder 或新开一个对话。
 
@@ -93,7 +96,7 @@ AI 会自动识别你所在的平台，选择正确的包、下载、校验 SHA-
 ### 检查版本 / 更新 / 卸载
 
 - 检查版本：说“检查 Ming Engine 版本”，AI 运行 `node scripts/ming-chart.mjs version` 读取本地 `BUILD_MANIFEST.json`，回报真实已装版本，不等于“线上最新”。
-- 更新：说“帮我更新 Ming Engine”。AI 读线上 `install-manifest.json` → 下载不可变 tag 资产 + 校验 SHA-256 → 解压后用 `migrate --host qoder` 原子替换 `~/.qoder/skills/calculate-birth-charts`（清理 legacy RC 双层、失败回滚，不碰其它技能）→ 回报 before→after。全程 Agent 文件操作，无需命令行工具。
+- 更新：先读线上 `install-manifest.json`。若 Qoder `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；只有已发布时才下载不可变 tag 资产、校验 SHA-256 并用 `migrate --host qoder` 原子替换 `~/.qoder/skills/calculate-birth-charts`（清理 legacy RC 双层、失败回滚，不碰其它技能）→ 回报 before→after。全程 Agent 文件操作，无需命令行工具。
 - 卸载：在技能管理中删除 `calculate-birth-charts`，或删除技能文件夹。
 
 ### 已知限制
@@ -104,9 +107,13 @@ AI 会自动识别你所在的平台，选择正确的包、下载、校验 SHA-
 
 ## 腾讯 WorkBuddy
 
-### 30 秒安装
+### 当前状态
 
-1. 从 Release 下载 `ming-engine-workbuddy.zip`
+WorkBuddy 的公开 ZIP 当前尚未发布。安装入口应在 `published: false` 处停止，不读取 URL/hash、不下载也不要求导入。
+
+### 正式发布后的安装流程
+
+1. 从当前清单指定的正式 Release 下载 WorkBuddy ZIP
 2. 打开 WorkBuddy 桌面端 →「个人中心」→「Claw 设置」→「Skills 管理」
 3. 点「+ 新建技能 / 导入」→「本地上传」→ 选中该 zip → 确认导入
 
@@ -121,7 +128,7 @@ AI 会自动识别你所在的平台，选择正确的包、下载、校验 SHA-
 ### 检查版本 / 更新 / 卸载
 
 - 检查版本：说“检查 Ming Engine 版本”，AI 运行 `node scripts/ming-chart.mjs version` 读取本地 `BUILD_MANIFEST.json`，回报真实已装版本，不等于“线上最新”。
-- 更新：说“帮我更新 Ming Engine”。AI 读线上 `install-manifest.json` → 下载不可变 tag 资产 + 校验 SHA-256 → 解压后用 `migrate --host workbuddy` 原子替换 `~/.workbuddy/skills/calculate-birth-charts`（清理 legacy RC 双层、失败回滚），或经「Skills 管理」先删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 `calculate-birth-charts` → 回报 before→after。
+- 更新：先读线上 `install-manifest.json`。若 WorkBuddy `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；只有已发布时才下载不可变 tag 资产、校验 SHA-256 并用 `migrate --host workbuddy` 原子替换 `~/.workbuddy/skills/calculate-birth-charts`（清理 legacy RC 双层、失败回滚），或经「Skills 管理」先删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 `calculate-birth-charts` → 回报 before→after。
 - 卸载：在「Skills 管理」中删除该技能。
 
 ### 已知限制
@@ -132,9 +139,13 @@ AI 会自动识别你所在的平台，选择正确的包、下载、校验 SHA-
 
 ## 豆包电脑版
 
-### 30 秒安装
+### 当前状态
 
-1. 从 Release 下载 `ming-engine-doubao.zip`
+豆包电脑版的公开 ZIP 当前尚未发布。安装入口应在 `published: false` 处停止，不读取 URL/hash、不下载也不要求导入。
+
+### 正式发布后的安装流程
+
+1. 从当前清单指定的正式 Release 下载豆包 ZIP
 2. 在豆包电脑版中导入该技能（文件夹或 zip）
 3. 启用技能
 
@@ -148,7 +159,7 @@ AI 会自动识别你所在的平台，选择正确的包、下载、校验 SHA-
 
 ### 更新 / 卸载
 
-- 更新：重新导入最新版 zip 覆盖。
+- 更新：先读线上 `install-manifest.json`。若豆包 `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；只有已发布时才重新导入当前清单指定的 ZIP 覆盖。
 - 卸载：在豆包技能管理中删除该技能。
 
 ### 已知限制

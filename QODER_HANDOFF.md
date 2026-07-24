@@ -399,8 +399,9 @@ LLM 的强制护栏：
 
 CI 最低门槛（长期目标）分两档，避免“声明的门禁”与“实际强制的门禁”脱节：
 
-- **当前阶段已强制**：由 `pnpm run verify:all` 提供，并经 `.github/workflows/verify.yml` 在 push/PR 上自动运行（该工作流仅运行 verify:all，不做其它）。覆盖 typecheck、unit、property、integration（orchestrator 全盘用例 + 干净目录 smoke）、build（含 CycloneDX SBOM）、Skill 结构校验、干净目录离线 smoke，以及 `validate:skill` 内置的 HTML/CSP/无脚本/无网络检查。
-- **Phase 6 延后**（尚无可运行的强制入口，见 `docs/VALIDATION.md` 与 `docs/STATUS.md`）：format 门禁化（`format:check` 现可运行但未纳入 verify:all）、lint（ESLint）、独立的依赖许可证/漏洞扫描、secret scan、SPDX 格式 SBOM，以及超出模板 CSP 检查的专项 HTML/XSS 安全测试。这些扫描在落地前不写入强制门禁。
+- **当前阶段已强制**：`.github/workflows/verify.yml` 在 push/PR 上运行 `pnpm run verify:cloud`；它覆盖 format、lint、typecheck、unit/property/integration、build、host candidate 包、安装清单、依赖漏洞与通用 secret 扫描。CI 不接触事故专用 token。
+- **受控本地全量门禁**：`pnpm run verify:all` = `verify:cloud` + `scan:incident`。后者的 token 文件是 gitignored 私密输入，缺失必须 fail-closed，绝不能以 CI secret、日志或仓库文件的形式补齐。发布或改变仓库可见性前还须运行 `pnpm run scan:incident:history`。
+- **仍延后**：依赖许可证策略、SPDX 格式 SBOM，以及超出模板 CSP 检查的专项 HTML/XSS 安全测试；它们在有可运行门禁前不得写成已强制。
 
 触发测试既要覆盖“排星盘/八字/紫微”，也要验证“销售星盘图、数据星盘图”等非出生命盘语境不会误触发。关键计算包不得用“降低覆盖率阈值”掩盖缺测。
 

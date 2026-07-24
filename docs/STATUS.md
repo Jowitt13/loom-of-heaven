@@ -175,9 +175,9 @@ project home; move/copy the tree if a different repo root is desired.
   `@ming/synastry` 包与 `synastry` 命令（1-5 人、八字/紫微/占星三系、>2 人需 analyzePair）；SKILL
   多人工作流（先确认关系与分析哪两人）；反绝对化——不作“注定/必分”。W5 “synastry 不做”假设作废。
 
-## Commands & results (2026-07-22)
+## Commands & results (2026-07-24)
 
-The counts below are the output of one real `pnpm run verify:all` run — the single source of truth
+The counts below are the output of one real `pnpm run test` run — the single source of truth
 shared with [VALIDATION.md](./VALIDATION.md) ("Current results"). `pnpm run check:doc-counts` fails
 if either doc's `N tests / M files` count drifts from an actual run, so update both from the run,
 never by hand.
@@ -185,21 +185,22 @@ never by hand.
 | Command                        | Result                                                                                                                                                   |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm run typecheck`           | clean (tsc strict over packages, tools, tests)                                                                                                           |
-| `pnpm run test`                | 260 tests / 22 files — all passing (all systems + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + 版本迁移/回滚/目标白名单 + PII 隐私护栏 green) |
+| `pnpm run test`                | 261 tests / 22 files — all passing (all systems + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + 版本迁移/回滚/目标白名单 + PII 隐私护栏 green) |
 | `pnpm run build`               | `engine.mjs` ≈ 2.6 MiB + `sbom.cdx.json` (6 runtime deps)                                                                                                |
 | `pnpm run validate:skill`      | 34 / 34 (incl. scripts/ no-stray-files guard)                                                                                                            |
 | `pnpm run validate:reading`    | 53 / 53 (topic example libraries + output-spec structure + 无术语区 firewall; offline, no LLM)                                                           |
 | `pnpm run validate:docs`       | passes (docs consistency: 4 full hosts, render disabled, no wrong-ephemeris attribution, dev Node 24 / run Node 22; self-tests)                          |
 | `pnpm run validate:provenance` | passes (no wrong-ephemeris attribution in live source / examples / built engine; VSOP87+NOVAS; self-tests)                                               |
 | `pnpm run verify:hosts`        | real candidate ZIPs: single top dir, no double-nest, doctor/verify/calculate byte-identical to canonical                                                 |
-| `pnpm run verify:install`      | stable root = v0.1.3 published (release live), per-zip sha256 matches; candidate build unpublished/reproducible                                          |
+| `pnpm run verify:install`      | root explicitly has no public host ZIP (no stale URL/hash); candidate build remains unpublished/reproducible                                             |
 | `pnpm run smoke`               | 10 / 10 (offline; source CLI vs isolated Skill byte-identical)                                                                                           |
 | `pnpm run forward:test`        | 41 / 41 (offline; 8 realistic requests incl. horoscope + interpret + synastry)                                                                           |
 | `pnpm run example`             | regenerates `examples/` (de-identified artifacts; needs build)                                                                                           |
 | `pnpm run package`             | `dist/` stage + self-verified `.zip` + `.sha256` (14 files; needs build)                                                                                 |
 | `pnpm run check:doc-counts`    | passes — both docs match the real run                                                                                                                    |
 | `pnpm run format:check`        | clean                                                                                                                                                    |
-| `pnpm run verify:all`          | green end to end                                                                                                                                         |
+| `pnpm run verify:cloud`        | CI-safe, non-sensitive gate; must pass in GitHub Actions                                                                                                 |
+| `pnpm run verify:all`          | controlled local gate; `scan:incident` fails closed when its private token file is unavailable                                                           |
 
 Vertical slice proven: `birth-input.json → normalize → ChartBundle → structured JSON` (render paused),
 runnable from a clean copy outside the repo, offline, deterministic.
@@ -211,7 +212,7 @@ runnable from a clean copy outside the repo, offline, deterministic.
 - Richer interpretation (调候, more 格局 branches, Western dignities/aspects readings) → future
   ruleset versions; the current layer is the deterministic substrate for the host LLM.
 - Dependency **vulnerability** scan (`scan:deps`, `pnpm audit --prod`) and **secret** scan
-  (`scan:secrets`) are now wired into `verify:all`. A dependency **license** scan, SPDX SBOM and a
+  (`scan:secrets`) are now wired into `verify:cloud` (and therefore `verify:all`). A dependency **license** scan, SPDX SBOM and a
   broader lint ruleset are still deferred (the ESLint import-boundary gate is already enforced).
 - Live WorkBuddy upload/enable/trigger acceptance → the remaining Phase 4 step (real device;
   checklist in `docs/WORKBUDDY.md`).
@@ -240,4 +241,4 @@ upload/enable/trigger acceptance on a real device (checklist in `docs/WORKBUDDY.
 Phase 4 item that cannot run from the dev workspace); (2) optional Phase 5 (MCP/Web/API layer or a
 separate `interpret-birth-charts` Skill); (3) remaining Phase 6 hardening (dependency license scan,
 SPDX SBOM, reproducible release; the dependency vulnerability scan, secret scan and ESLint
-import-boundary gate are already wired into `verify:all`).
+import-boundary gate are already wired into `verify:cloud`).

@@ -4,8 +4,8 @@
 
 ## AI 执行步骤（Qoder 内置 Agent 全程代为文件安装；普通用户只发一句安装链接，不敲任何命令、不需任何命令行工具）
 
-1. 判断当前是 Qoder 还是 Qoder CN（二者安装方式一致）。
-2. 从清单取 `ming-engine-qoder.zip` 的 `downloadUrl` 与 `sha256`；下载并校验 SHA-256（不一致立即中止，不写入）。
+1. 判断当前是 Qoder 还是 Qoder CN（二者安装方式一致），并先读取所选平台的 `published`。若它不是 `true`：明确回复“Qoder 安装包尚未发布”，**立即停止**；不得读取、猜测或请求 `downloadUrl` / `sha256`，不得下载、导入或用旧包冒充最新版。
+2. 只有 `published: true` 时，才从清单取当前 Qoder ZIP 的 `downloadUrl` 与 `sha256`；下载并校验 SHA-256（不一致立即中止，不写入）。
 3. 校验 zip 只有一层顶层目录 `calculate-birth-charts/`（防双层目录 / Zip Slip；异常即中止）。
 4. 解压到临时目录，再**仅替换**用户技能目录 `~/.qoder/skills/calculate-birth-charts/`：
    - 只替换该目标目录；**不删除也不触碰** `~/.qoder/skills` 下的其它技能；
@@ -37,5 +37,5 @@
 
 ## 更新 / 卸载
 
-- 更新：说“帮我更新 Ming Engine”。AI 读线上 `install-manifest.json` 取目标版本 → 下载不可变 tag 资产并校验 SHA-256 → 校验单层 → 解压临时目录 → 运行 `node <临时目录>/calculate-birth-charts/scripts/ming-chart.mjs migrate --host qoder --source <临时目录>/calculate-birth-charts` 仅替换 `~/.qoder/skills/calculate-birth-charts`（清理 legacy RC 双层、失败自动回滚，不碰其它技能）→ 运行 `version` 复核并回报 before→after。下载失败 / SHA 不一致 / Release 不存在即明确失败并停止，不因本地旧包说“已是最新”。全程 Agent 文件操作，无需任何命令行工具。
+- 更新：先读线上 `install-manifest.json`。若 Qoder `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；不得使用本地旧包或缓存称作最新版。只有已发布时才下载不可变 tag 资产、校验 SHA-256、校验单层、解压临时目录并运行 `node <临时目录>/calculate-birth-charts/scripts/ming-chart.mjs migrate --host qoder --source <临时目录>/calculate-birth-charts` 仅替换 `~/.qoder/skills/calculate-birth-charts`（清理 legacy RC 双层、失败自动回滚，不碰其它技能）→ 运行 `version` 复核并回报 before→after。全程 Agent 文件操作，无需任何命令行工具。
 - 卸载：说“帮我卸载 Ming Engine”，或在技能管理中删除 `calculate-birth-charts`。

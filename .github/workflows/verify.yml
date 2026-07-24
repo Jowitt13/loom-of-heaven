@@ -2,10 +2,14 @@ name: verify
 
 # Enforcement entry point for the declared gate.
 #
-# Node 24 job runs the full `pnpm run verify:all`:
+# Node 24 job runs the non-sensitive cloud gate `pnpm run verify:cloud`:
 #   format:check -> lint -> typecheck -> test -> build -> validate:skill -> validate:reading ->
 #   validate:docs -> smoke -> forward:test -> package:hosts -> verify:hosts -> verify:install ->
 #   check:doc-counts -> scan:deps -> scan:secrets
+#
+# The full local gate is `pnpm run verify:all = verify:cloud + scan:incident`.  Its precise
+# incident tokens intentionally live only in a controlled local file and must never be copied to
+# GitHub Actions.  Missing tokens fail closed locally; CI therefore does not claim to run it.
 #
 # Node 22 job proves the RUNTIME floor: it builds the candidate host packages and runs
 # doctor/verify/calculate/interpret from a REAL extracted zip via `verify:zip-runtime`. It does
@@ -13,7 +17,7 @@ name: verify
 # bundle, which must run on Node >= 22 (the declared runtime floor for installed Skills).
 #
 # `lint` is the ESLint import-boundary gate. Supply-chain hardening (scan:deps / scan:secrets)
-# runs inside verify:all. A dependency LICENSE scan and an SPDX-format SBOM remain intentionally
+# runs inside verify:cloud. A dependency LICENSE scan and an SPDX-format SBOM remain intentionally
 # NOT wired in — see docs/VALIDATION.md and docs/STATUS.md.
 
 on:
@@ -48,8 +52,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run declared gate (verify:all)
-        run: pnpm run verify:all
+      - name: Run cloud gate (verify:cloud)
+        run: pnpm run verify:cloud
 
   runtime-node22:
     # The installed Skill's declared runtime floor is Node >= 22. This job runs the shipped
