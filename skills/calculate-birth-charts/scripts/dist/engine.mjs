@@ -40540,6 +40540,95 @@ var AnswerPlan = external_exports.strictObject({
   followupOffers: external_exports.array(external_exports.string())
 });
 
+// packages/contracts/src/validate-answer.ts
+var READING_DRAFT_CONTRACT_VERSION = "reading-draft/v1";
+var VALIDATION_RESULT_CONTRACT_VERSION = "validation-result/v1";
+var ReadingParagraph = external_exports.strictObject({
+  text: external_exports.string().min(1),
+  /** Fact IDs from the AnswerPlan that ground this paragraph. */
+  sourceFactIds: external_exports.array(external_exports.string())
+});
+var ReadingSection = external_exports.strictObject({
+  id: external_exports.string().min(1),
+  heading: external_exports.string(),
+  paragraphs: external_exports.array(ReadingParagraph).min(1)
+});
+var ReadingDraft = external_exports.strictObject({
+  contractVersion: external_exports.literal(READING_DRAFT_CONTRACT_VERSION),
+  topic: InterpretationTopic,
+  sections: external_exports.array(ReadingSection).min(1),
+  /** Which requiredCaveats (from AnswerPlan) the host claims to have expressed. */
+  caveatsExpressed: external_exports.array(external_exports.string()),
+  /** Which requiredWarningCodes the host claims to have disclosed. */
+  warningsDisclosed: external_exports.array(external_exports.string())
+});
+var ViolationCode = external_exports.enum([
+  // Fact-boundary violations
+  "MISSING_SOURCE_FACTS",
+  // paragraph has empty sourceFactIds
+  "UNKNOWN_FACT_ID",
+  // sourceFactId not in allowedFactIds
+  "CROSS_TOPIC",
+  // draft topic differs from plan topic
+  "UNSUPPORTED_TOPIC",
+  // plan says not-supported but draft has content
+  // Safety violations (high-risk expressions)
+  "HIGH_RISK_MEDICAL",
+  // medical diagnosis or treatment advice
+  "HIGH_RISK_LEGAL",
+  // legal conclusions or advice
+  "HIGH_RISK_INVESTMENT",
+  // investment buy/sell recommendations
+  "HIGH_RISK_LIFE_DEATH",
+  // life-and-death verdicts
+  "HIGH_RISK_DETERMINISTIC_FATE",
+  // deterministic fate / destiny claims
+  "HIGH_RISK_RELATIONSHIP_MANIPULATION",
+  // manipulative relationship advice
+  // Caveat/warning violations
+  "MISSING_REQUIRED_CAVEAT",
+  // a requiredCaveat not expressed
+  "MISSING_REQUIRED_WARNING",
+  // a requiredWarningCode not disclosed
+  "MISSING_DISCLAIMER",
+  // answerPlan disclaimers not communicated
+  // Guardrail violations
+  "GUARDRAIL_VIOLATED"
+  // a guardrail from the plan was violated
+]);
+var ViolationSeverity = external_exports.enum(["error", "warning"]);
+var AnswerViolation = external_exports.strictObject({
+  code: ViolationCode,
+  severity: ViolationSeverity,
+  /** Which section (by id) the violation was found in, if applicable. */
+  sectionId: external_exports.string().optional(),
+  /** Which paragraph index within the section, if applicable. */
+  paragraphIndex: external_exports.number().int().min(0).optional(),
+  /** Human-readable description of what went wrong. */
+  detail: external_exports.string().min(1),
+  /** Actionable remediation guidance. */
+  remediation: external_exports.string().min(1)
+});
+var AnswerValidationResult = external_exports.strictObject({
+  contractVersion: external_exports.literal(VALIDATION_RESULT_CONTRACT_VERSION),
+  ok: external_exports.boolean(),
+  violations: external_exports.array(AnswerViolation)
+});
+var ValidateAnswerInput = external_exports.strictObject({
+  answerPlan: external_exports.object({
+    allowedFactIds: external_exports.array(external_exports.string()),
+    requiredCaveats: external_exports.array(external_exports.string()),
+    requiredWarningCodes: external_exports.array(external_exports.string()),
+    guardrails: external_exports.array(AnswerGuardrail),
+    answerability: external_exports.enum(["grounded", "limited", "not-supported"]),
+    request: external_exports.object({
+      topic: InterpretationTopic
+    }),
+    disclaimers: external_exports.array(external_exports.string())
+  }),
+  readingDraft: ReadingDraft
+});
+
 // packages/contracts/src/synastry.ts
 var SynastryRelation = external_exports.enum([
   "couple",
@@ -53441,6 +53530,198 @@ function buildAnswerPlan(publicResult, requestInput) {
   });
 }
 
+// packages/interpret/src/validate-answer.ts
+var MEDICAL_PATTERNS = [
+  /(?:确诊|诊断|患有|得了|治疗|服药|用药|手术|处方|化疗|放疗|抗生素|止痛药)/,
+  /(?:建议(?:去|到|看|找|就)(?:医|诊|院|科))/,
+  /(?:你(?:有|得了?|患了?|是)(?:抑郁|焦虑|癌|肿瘤|糖尿|心脏))/,
+  /(?:停药|减药|加药|换药)/,
+  /(?:需要做(?:检查|化验|CT|MRI|B超|手术))/
+];
+var LEGAL_PATTERNS = [
+  /(?:构成(?:犯罪|违法|侵权|违约|欺诈))/,
+  /(?:应当(?:起诉|报警|追诉|提起诉讼))/,
+  /(?:建议(?:起诉|报警|找律师|聘请律师|打官司))/,
+  /(?:(?:合法|违法|犯法|犯罪|有权|无权)(?:的|地)?(?:行为|做法))/,
+  /(?:法律(?:责任|后果|风险)|承担(?:刑事|民事|法律)责任)/
+];
+var INVESTMENT_PATTERNS = [
+  /(?:(?:建议|应该|必须|赶紧)(?:买入|卖出|抛售|加仓|减仓|清仓|抄底|做多|做空|止损))/,
+  /(?:(?:买入|卖出|抛售|加仓|减仓|清仓|抄底|做多|做空)(?:股票|基金|期货|外汇|数字货币|比特币|黄金|房产))/,
+  /(?:保证(?:赚|翻倍|回本|不亏|盈利|收益))/,
+  /(?:年化(?:收益|回报)(?:率)?(?:至少|不低于|可达|超过)\d)/,
+  /(?:稳赚不赔|包赚|绝对赚)/
+];
+var LIFE_DEATH_PATTERNS = [
+  /(?:必死|会死|活不过|活不了|命不久|寿命(?:只有|不超过|到))/,
+  /(?:天煞孤星|克夫|克妻|克父|克母|克子)/,
+  /(?:注定(?:短命|早亡|夭折|孤独终老|断子绝孙))/,
+  /(?:(?:今年|明年|后年|\d{4}年)(?:会|必)(?:出事|遭难|有灾|有难))/
+];
+var FATE_PATTERNS = [
+  /(?:注定|命中注定|天生(?:就|注定|必须|只能|不能)|命里?(?:注定|该|就是))/,
+  /(?:(?:你的)?命(?:就是|注定|该)|这(?:是|就是)你的(?:命|宿命|命运))/,
+  /(?:(?:绝对|一定|肯定|必然|必定)(?:会|能|不会|不能|是|不是)(?:成功|失败|发财|破产|离婚|结婚))/,
+  /(?:铁定|板上钉钉|毫无疑问(?:会|地)|无可改变)/,
+  /(?:不可能(?:成功|翻身|改变|幸福|脱贫))/
+];
+var MANIPULATION_PATTERNS = [
+  /(?:(?:要|应该|必须)(?:控制|操控|掌控|拿捏|驯服|驾驭)(?:对方|他|她|伴侣|配偶))/,
+  /(?:(?:冷暴力|PUA|情感操控|精神控制|gaslighting)(?:一下|对方|他|她)?)/,
+  /(?:让(?:对方|他|她)(?:吃醋|嫉妒|不安|害怕|恐惧|离不开你))/,
+  /(?:故意(?:冷落|疏远|忽视|无视|不回|消失|断联))/,
+  /(?:(?:威胁|胁迫)(?:分手|离婚|断绝关系))/
+];
+var HIGH_RISK_GROUPS = [
+  {
+    code: "HIGH_RISK_MEDICAL",
+    patterns: MEDICAL_PATTERNS,
+    detail: "\u6587\u672C\u5305\u542B\u533B\u7597\u8BCA\u65AD\u6216\u6CBB\u7597\u5EFA\u8BAE\u3002",
+    remediation: '\u5220\u9664\u6240\u6709\u533B\u7597\u8BCA\u65AD/\u6CBB\u7597\u5185\u5BB9\u3002\u5982\u6D89\u53CA\u5065\u5EB7\u4E3B\u9898\uFF0C\u53EA\u80FD\u8BF4"\u5EFA\u8BAE\u54A8\u8BE2\u4E13\u4E1A\u533B\u751F"\uFF0C\u4E0D\u53EF\u7ED9\u5177\u4F53\u8BCA\u65AD\u6216\u7528\u836F\u5EFA\u8BAE\u3002'
+  },
+  {
+    code: "HIGH_RISK_LEGAL",
+    patterns: LEGAL_PATTERNS,
+    detail: "\u6587\u672C\u5305\u542B\u6CD5\u5F8B\u7ED3\u8BBA\u6216\u6CD5\u5F8B\u5EFA\u8BAE\u3002",
+    remediation: '\u5220\u9664\u6CD5\u5F8B\u7ED3\u8BBA\u3002\u5982\u6D89\u53CA\u6CD5\u5F8B\u76F8\u5173\u4E3B\u9898\uFF0C\u53EA\u80FD\u8BF4"\u5EFA\u8BAE\u54A8\u8BE2\u4E13\u4E1A\u5F8B\u5E08"\uFF0C\u4E0D\u53EF\u7ED9\u51FA\u5177\u4F53\u6CD5\u5F8B\u5224\u65AD\u3002'
+  },
+  {
+    code: "HIGH_RISK_INVESTMENT",
+    patterns: INVESTMENT_PATTERNS,
+    detail: "\u6587\u672C\u5305\u542B\u6295\u8D44\u4E70\u5356\u5EFA\u8BAE\u6216\u6536\u76CA\u4FDD\u8BC1\u3002",
+    remediation: '\u5220\u9664\u6295\u8D44\u64CD\u4F5C\u5EFA\u8BAE\u548C\u6536\u76CA\u4FDD\u8BC1\u3002\u7406\u8D22\u76F8\u5173\u53EA\u80FD\u7ED9\u65B9\u5411\u6027\u53C2\u8003\uFF08\u5982"\u53EF\u8003\u8651\u7A33\u5065\u578B\u7406\u8D22"\uFF09\uFF0C\u4E0D\u53EF\u7ED9\u5177\u4F53\u4E70\u5356\u6307\u4EE4\u6216\u6536\u76CA\u627F\u8BFA\u3002'
+  },
+  {
+    code: "HIGH_RISK_LIFE_DEATH",
+    patterns: LIFE_DEATH_PATTERNS,
+    detail: "\u6587\u672C\u5305\u542B\u751F\u6B7B\u65AD\u8BED\u6216\u707E\u7978\u9884\u8A00\u3002",
+    remediation: "\u5220\u9664\u6240\u6709\u751F\u6B7B\u3001\u707E\u7978\u9884\u8A00\u3002\u547D\u7406\u53EA\u63D0\u4F9B\u8D8B\u52BF\u53C2\u8003\uFF0C\u4E0D\u53EF\u5BF9\u5BFF\u547D\u3001\u707E\u7978\u505A\u786E\u5B9A\u6027\u65AD\u8A00\u3002"
+  },
+  {
+    code: "HIGH_RISK_DETERMINISTIC_FATE",
+    patterns: FATE_PATTERNS,
+    detail: "\u6587\u672C\u5305\u542B\u786E\u5B9A\u6027\u547D\u8FD0\u65AD\u8A00\uFF08\u6CE8\u5B9A/\u5929\u751F/\u5FC5\u7136/\u4E0D\u53EF\u80FD\u6539\u53D8\uFF09\u3002",
+    remediation: '\u5C06\u786E\u5B9A\u6027\u65AD\u8A00\u6539\u4E3A\u8D8B\u52BF\u53C2\u8003\uFF1A"\u76D8\u9762\u663E\u793A\u2026\u7684\u503E\u5411""\u5728\u8FD9\u4E00\u65B9\u9762\u53EF\u80FD\u9700\u8981\u66F4\u591A\u52AA\u529B"\u3002\u547D\u7406\u662F\u53C2\u8003\uFF0C\u4E0D\u662F\u5BBF\u547D\u5224\u51B3\u3002'
+  },
+  {
+    code: "HIGH_RISK_RELATIONSHIP_MANIPULATION",
+    patterns: MANIPULATION_PATTERNS,
+    detail: "\u6587\u672C\u5305\u542B\u5173\u7CFB\u64CD\u63A7\u5EFA\u8BAE\u3002",
+    remediation: "\u5220\u9664\u6240\u6709\u64CD\u63A7\u6027\u5EFA\u8BAE\u3002\u5173\u7CFB\u5EFA\u8BAE\u53EA\u80FD\u57FA\u4E8E\u76F8\u4E92\u5C0A\u91CD\u3001\u771F\u8BDA\u6C9F\u901A\u7684\u524D\u63D0\uFF0C\u4E0D\u53EF\u6559\u5506\u63A7\u5236\u6216\u7CBE\u795E\u64CD\u63A7\u3002"
+  }
+];
+var EXEMPT_SECTION_IDS = /* @__PURE__ */ new Set(["disclaimer", "uncertainty", "technical-evidence"]);
+function validateAnswer(input) {
+  const { answerPlan, readingDraft } = input;
+  const violations = [];
+  const allowedIds = new Set(answerPlan.allowedFactIds);
+  if (readingDraft.topic !== answerPlan.request.topic) {
+    violations.push({
+      code: "CROSS_TOPIC",
+      severity: "error",
+      detail: `\u8349\u7A3F\u4E3B\u9898 "${readingDraft.topic}" \u4E0E AnswerPlan \u4E3B\u9898 "${answerPlan.request.topic}" \u4E0D\u4E00\u81F4\u3002`,
+      remediation: "\u786E\u4FDD ReadingDraft \u7684 topic \u4E0E AnswerPlan.request.topic \u5B8C\u5168\u4E00\u81F4\u3002"
+    });
+  }
+  if (answerPlan.answerability === "not-supported") {
+    const hasContent = readingDraft.sections.some(
+      (s) => s.paragraphs.some((p) => p.text.trim().length > 0 && !EXEMPT_SECTION_IDS.has(s.id))
+    );
+    if (hasContent) {
+      violations.push({
+        code: "UNSUPPORTED_TOPIC",
+        severity: "error",
+        detail: "AnswerPlan \u6807\u8BB0\u4E3A not-supported\uFF0C\u4F46\u8349\u7A3F\u4ECD\u5305\u542B\u5B9E\u8D28\u5185\u5BB9\u3002",
+        remediation: "\u5F53 answerability \u4E3A not-supported \u65F6\uFF0C\u53EA\u80FD\u8BF4\u660E\u5F15\u64CE\u65E0\u6CD5\u63D0\u4F9B\u8BE5\u4E3B\u9898\u7684\u4E8B\u5B9E\uFF0C\u5E76\u5EFA\u8BAE\u6362\u4E00\u4E2A\u4E3B\u9898\u3002"
+      });
+    }
+  }
+  for (const section of readingDraft.sections) {
+    if (EXEMPT_SECTION_IDS.has(section.id)) continue;
+    for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
+      const para = section.paragraphs[pIdx];
+      if (para.sourceFactIds.length === 0) {
+        violations.push({
+          code: "MISSING_SOURCE_FACTS",
+          severity: "error",
+          sectionId: section.id,
+          paragraphIndex: pIdx,
+          detail: `\u6BB5\u843D\u7F3A\u5C11 sourceFactIds\uFF1A\u5185\u5BB9\u65E0\u4E8B\u5B9E\u4F9D\u636E\u3002"${para.text.slice(0, 40)}\u2026"`,
+          remediation: "\u6BCF\u4E2A\u975E\u514D\u8D23\u6BB5\u843D\u5FC5\u987B\u5F15\u7528\u81F3\u5C11\u4E00\u4E2A allowedFactIds \u4E2D\u7684 fact ID \u4F5C\u4E3A\u4F9D\u636E\u3002\u65E0\u6CD5\u5F15\u7528\u65F6\u5E94\u5220\u9664\u8BE5\u6BB5\u843D\u3002"
+        });
+      }
+      for (const factId of para.sourceFactIds) {
+        if (!allowedIds.has(factId)) {
+          violations.push({
+            code: "UNKNOWN_FACT_ID",
+            severity: "error",
+            sectionId: section.id,
+            paragraphIndex: pIdx,
+            detail: `\u5F15\u7528\u4E86\u4E0D\u5728 allowedFactIds \u4E2D\u7684 fact ID: "${factId}"\u3002`,
+            remediation: "\u53EA\u80FD\u5F15\u7528 answerPlan.allowedFactIds \u4E2D\u5217\u51FA\u7684 ID\u3002\u5220\u9664\u6216\u66FF\u6362\u65E0\u6548\u5F15\u7528\u3002"
+          });
+        }
+      }
+      for (const group of HIGH_RISK_GROUPS) {
+        for (const pattern of group.patterns) {
+          if (pattern.test(para.text)) {
+            violations.push({
+              code: group.code,
+              severity: "error",
+              sectionId: section.id,
+              paragraphIndex: pIdx,
+              detail: group.detail + ` \u5339\u914D\u5185\u5BB9\uFF1A"${para.text.slice(0, 60)}\u2026"`,
+              remediation: group.remediation
+            });
+            break;
+          }
+        }
+      }
+    }
+  }
+  const expressedCaveats = new Set(readingDraft.caveatsExpressed);
+  for (const caveat of answerPlan.requiredCaveats) {
+    if (!expressedCaveats.has(caveat)) {
+      violations.push({
+        code: "MISSING_REQUIRED_CAVEAT",
+        severity: "error",
+        detail: `\u672A\u8868\u8FBE\u5FC5\u8981\u7684 caveat\uFF1A"${caveat.slice(0, 80)}"\u3002`,
+        remediation: "\u5728\u8349\u7A3F\u7684 uncertainty \u6216 disclaimer \u90E8\u5206\u660E\u786E\u8868\u8FBE\u6B64 caveat\uFF0C\u5E76\u52A0\u5165 caveatsExpressed\u3002"
+      });
+    }
+  }
+  const disclosedWarnings = new Set(readingDraft.warningsDisclosed);
+  for (const code of answerPlan.requiredWarningCodes) {
+    if (!disclosedWarnings.has(code)) {
+      violations.push({
+        code: "MISSING_REQUIRED_WARNING",
+        severity: "error",
+        detail: `\u672A\u62AB\u9732\u5FC5\u8981\u7684 warning: "${code}"\u3002`,
+        remediation: "\u5728\u8349\u7A3F\u4E2D\u660E\u786E\u8BF4\u660E\u6B64 warning \u7684 impact/nextStep\uFF0C\u5E76\u52A0\u5165 warningsDisclosed\u3002"
+      });
+    }
+  }
+  if (answerPlan.disclaimers.length > 0) {
+    const hasDisclaimerSection = readingDraft.sections.some(
+      (s) => s.id === "disclaimer" || s.heading.includes("\u58F0\u660E") || s.heading.includes("\u514D\u8D23")
+    );
+    if (!hasDisclaimerSection) {
+      violations.push({
+        code: "MISSING_DISCLAIMER",
+        severity: "warning",
+        detail: "AnswerPlan \u5305\u542B disclaimers \u4F46\u8349\u7A3F\u7F3A\u5C11\u514D\u8D23\u58F0\u660E\u6BB5\u843D\u3002",
+        remediation: '\u6DFB\u52A0\u4E00\u4E2A id \u4E3A "disclaimer" \u7684 section\uFF0C\u5305\u542B AnswerPlan \u4E2D\u7684 disclaimers \u5185\u5BB9\u3002'
+      });
+    }
+  }
+  const ok = !violations.some((v) => v.severity === "error");
+  return {
+    contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+    ok,
+    violations
+  };
+}
+
 // packages/interpret/src/reading-lint.ts
 var STEP_PATTERNS = [
   { name: "30\u79D2\u770B\u61C2", re: /30\s*秒看懂/ },
@@ -54887,6 +55168,7 @@ export {
   JARGON_STRONG,
   READING_TERMS,
   SCHEMA_VERSION,
+  ValidateAnswerInput,
   calculate,
   canonicalJson,
   canonicalJsonPretty,
@@ -54909,5 +55191,6 @@ export {
   runSynastry,
   timeIndexFromHour,
   toEngineError,
+  validateAnswer,
   verify
 };

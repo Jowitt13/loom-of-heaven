@@ -4,4 +4,5 @@
  */
 export * from './build.ts';
 export * from './answer-plan.ts';
+export * from './validate-answer.ts';
 export * from './reading-lint.ts';

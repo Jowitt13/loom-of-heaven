@@ -61,7 +61,7 @@ the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not h
 resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **271 tests / 23 files — all passing**. The Western provider
+- Typecheck: clean. Tests: **290 tests / 24 files — all passing**. The Western provider
   (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 wrapper-consistency ≤1′ gate (vs
   astronomy-engine's own output; an independent JPL Horizons golden is TODO); the sidereal zodiac (Lahiri), true node
   and asteroids have a dedicated **approximate** regression (continuity / sign-plausibility, not the

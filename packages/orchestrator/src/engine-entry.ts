@@ -23,6 +23,15 @@ export type {
   ReadingChannel,
 } from '@ming/interpret';
 
+// Fact-boundary and safety validator for host-produced answer drafts (P0).
+export { validateAnswer } from '@ming/interpret';
+
+// Validator types come from the contracts layer.
+export type {
+  AnswerValidationResult,
+  AnswerViolation as AnswerValidationViolation,
+} from '@ming/contracts';
+
 export { runSynastry } from './synastry.ts';
 export type { SynastryRunOptions } from './synastry.ts';
 
@@ -47,6 +56,7 @@ export type { VerifyReport, VerifyCheck } from './verify.ts';
 export {
   parseBirthInput,
   parseSynastryInput,
+  ValidateAnswerInput,
   EngineError,
   toEngineError,
   ERROR_CODES,
@@ -62,4 +72,5 @@ export type {
   NormalizedBirthData,
   SynastryInput,
   SynastryResult,
+  ValidateAnswerInput as ValidateAnswerInputType,
 } from '@ming/contracts';
