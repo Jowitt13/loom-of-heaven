@@ -2,11 +2,11 @@
   "skill": "calculate-birth-charts",
   "product": "ming-engine",
   "engineVersion": "0.1.1",
-  "releaseVersion": null,
-  "releaseTag": null,
+  "releaseVersion": "0.1.4",
+  "releaseTag": "v0.1.4",
   "repo": "https://github.com/Jowitt13/ming-engine",
-  "status": "unpublished",
-  "statusNote": "当前没有已发布的宿主 ZIP。Qoder、WorkBuddy 与豆包必须停止安装或更新流程，不能使用历史下载链接；待新的不可变 Release 创建、资产上传并完成下载校验后，才会更新此清单。",
+  "status": "published",
+  "statusNote": "GitHub Release v0.1.4 已发布。release-asset ZIP 必须从 downloadUrl 下载，并核对 SHA-256 与本清单及 SHA256SUMS.txt 一致。",
   "canonicalEngine": {
     "version": "0.1.1",
     "engineSha256": "d7a89b080d50d0d545f74ca3ea7e3da3020cb3fadaea316dca93bfd0bf8f23ad"
@@ -47,7 +47,9 @@
       "realDeviceVerified": true,
       "releaseAsset": "ming-engine-qoder.zip",
       "downloadType": "release-asset",
-      "published": false
+      "downloadUrl": "https://github.com/Jowitt13/ming-engine/releases/download/v0.1.4/ming-engine-qoder.zip",
+      "sha256": "517e9b34ee35996c12175662bff56b89e4da25b2a126721799909a1448029f4b",
+      "published": true
     },
     {
       "host": "workbuddy",
@@ -65,7 +67,9 @@
       "realDeviceVerified": true,
       "releaseAsset": "ming-engine-workbuddy.zip",
       "downloadType": "release-asset",
-      "published": false
+      "downloadUrl": "https://github.com/Jowitt13/ming-engine/releases/download/v0.1.4/ming-engine-workbuddy.zip",
+      "sha256": "d0065cbe1963e7c14daf255bc6e1116869073172d6b16ea2bca5cdd317bee596",
+      "published": true
     },
     {
       "host": "doubao",
@@ -83,7 +87,9 @@
       "realDeviceVerified": true,
       "releaseAsset": "ming-engine-doubao.zip",
       "downloadType": "release-asset",
-      "published": false
+      "downloadUrl": "https://github.com/Jowitt13/ming-engine/releases/download/v0.1.4/ming-engine-doubao.zip",
+      "sha256": "40f4f91f4ce67e1fe0d7e8d36c2d8bf63096cc4fc4a0f88a2a17971f1e3cd281",
+      "published": true
     }
   ]
 }

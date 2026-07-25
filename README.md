@@ -47,18 +47,18 @@
 
 ### 当前可用性 / Availability
 
-| 宿主       | 当前状态                       | 最简开始方式                                             |
-| ---------- | ------------------------------ | -------------------------------------------------------- |
-| Codex      | 可从公开仓库使用完整排盘 Skill | 克隆或下载本仓库后打开项目；不依赖 GitHub Release        |
-| Qoder      | 公开 ZIP 安装包尚未发布        | 发送上方安装链接；Agent 会如实提示“安装包尚未发布”并停止 |
-| WorkBuddy  | 公开 ZIP 安装包尚未发布        | 发送上方安装链接；不会尝试下载不存在的文件               |
-| 豆包电脑版 | 公开 ZIP 安装包尚未发布        | 发送上方安装链接；不会要求你使用 CLI 或旧缓存            |
+| 宿主       | 当前状态                       | 最简开始方式                                       |
+| ---------- | ------------------------------ | -------------------------------------------------- |
+| Codex      | 可从公开仓库使用完整排盘 Skill | 克隆或下载本仓库后打开项目；不依赖 GitHub Release  |
+| Qoder      | 已发布 GitHub Release `v0.1.4` | 发送上方安装链接；Agent 下载、校验后安装           |
+| WorkBuddy  | 已发布 GitHub Release `v0.1.4` | 发送上方安装链接；Agent 下载、校验后按宿主流程导入 |
+| 豆包电脑版 | 已发布 GitHub Release `v0.1.4` | 发送上方安装链接；Agent 下载、校验后按宿主流程导入 |
 
 四个平台的完整排盘能力与真机兼容性记录仍见下方文档；可下载性始终以清单的 `published` 字段为准。
 
 - 详见 [`INSTALL.md`](INSTALL.md) 与 [`docs/INSTALL_BY_PLATFORM.md`](docs/INSTALL_BY_PLATFORM.md)；能力矩阵见 [`docs/HOST_COMPATIBILITY.md`](docs/HOST_COMPATIBILITY.md)。
 
-> 当前没有可供下载的 GitHub Release ZIP、发布 tag 或对应 SHA-256 清单。未来只有在真实 Release 创建、资产上传并完成重下校验后，清单才会切换为可安装状态。
+> 安装包来自 GitHub Release `v0.1.4`：已提供 Qoder、WorkBuddy 与豆包电脑版 ZIP。下载地址与 SHA-256 以 [`install-manifest.json`](install-manifest.json) 和 [`SHA256SUMS.txt`](SHA256SUMS.txt) 为准。
 
 ---
 
@@ -141,9 +141,7 @@ node scripts/ming-chart.mjs interpret --input-file birth-input.json --output-fil
 
 ### 🟣 Qoder
 
-Qoder 的公开 ZIP 当前尚未发布。普通用户应使用上方安装入口查看可用性；当清单中的 Qoder `published` 不是 `true` 时，Agent 必须停止，不应让用户从源码树拼装或导入旧包。
-
-正式 ZIP 发布后，Qoder 会按清单下载、校验并导入完整排盘 Skill。
+Qoder 的完整 ZIP 已发布在 GitHub Release `v0.1.4`。普通用户仍只需使用上方安装入口；Agent 会读取清单、下载不可变资产、校验 SHA-256 后安装，不需要 CLI。
 
 ### 🟠 Claude Code
 

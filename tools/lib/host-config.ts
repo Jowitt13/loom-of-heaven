@@ -5,8 +5,8 @@
  * hand-maintained SKILL.md — that would drift.
  *
  * Version model: PUBLISHED_* describes the live Release reflected by the committed root manifest.
- * It is currently `null`: all prior public assets were withdrawn and no replacement ZIP has been
- * published. CANDIDATE_* describes the NEXT unpublished build produced by `package:hosts`.
+ * It is currently `v0.1.4`. CANDIDATE_* describes the NEXT unpublished build produced by
+ * `package:hosts`.
  * When a published tag exists, it MUST differ from the candidate tag; `verify:install` fails hard
  * if they collide.
  *
@@ -63,19 +63,19 @@ export const SKILL_NAME_LITE = 'calculate-birth-charts-doubao-lite';
 
 export const REPO_URL = 'https://github.com/Jowitt13/ming-engine';
 
-// --- ROOT / PUBLISHED: no public ZIP is currently available. ---
+// --- ROOT / PUBLISHED: live public-release metadata. ---
 /** Engine semver in the committed, audited source root. */
 export const ROOT_ENGINE_VERSION = '0.1.1';
-/** The published Release currently reflected by the root manifest; null means no public ZIP. */
-export const PUBLISHED_RELEASE_VERSION: string | null = null;
-/** Immutable tag for the published Release; null until a new Release is created and verified. */
-export const PUBLISHED_RELEASE_TAG: string | null = null;
+/** The published Release currently reflected by the root manifest. */
+export const PUBLISHED_RELEASE_VERSION: string | null = '0.1.4';
+/** Immutable tag for the published Release. */
+export const PUBLISHED_RELEASE_TAG: string | null = 'v0.1.4';
 
 // --- CANDIDATE: the next unpublished build produced by package:hosts. ---
 /** Engine semver of the candidate: same audited engine as the source root (no engine change pending). */
 export const CANDIDATE_ENGINE_VERSION = '0.1.1';
 /** Install-package release version of the candidate (next packaging release over the 0.1.1 engine). */
-export const CANDIDATE_RELEASE_VERSION = '0.1.4';
+export const CANDIDATE_RELEASE_VERSION = '0.1.5';
 /** Immutable tag the CANDIDATE build targets (never `latest/download`). */
 export const CANDIDATE_RELEASE_TAG = `v${CANDIDATE_RELEASE_VERSION}`;
 /** Sub-directory under `releases/` for the candidate build (gitignored). */

@@ -42,7 +42,7 @@
 
 ## 安装规则（硬约束，任何一条不满足都不能继续）
 
-- **未发布 / 404**：当所选平台 `published` 不是 `true`，或已发布资产下载返回 404 时，必须明确告诉用户“安装包尚未发布”。当前根清单的 `status: "unpublished"` 表示没有公开 ZIP；Codex 仅可在仓库已公开时直接使用仓库，其余平台等待发布。**不得伪装安装成功，不得下载 404 占位。**
+- **未发布 / 404**：当所选平台 `published` 不是 `true`，或已发布资产下载返回 404 时，必须明确告诉用户“安装包尚未发布”。根清单是唯一可用性来源；已发布资产也必须以清单中的不可变 tag 与 SHA-256 为准。**不得伪装安装成功，不得下载 404 占位。**
 - **SHA-256 不一致**：立即**拒绝安装**，提示用户重新下载或核对来源，绝不安装未通过校验的文件。
 - **平台未知**：如实说明“暂不支持在该宿主自动安装”，引导用户查看 `docs/INSTALL_BY_PLATFORM.md` 手动安装，**不强行安装**。
 - **安装失败**：只给用户**一步修复动作**（一句话，例如“请先安装 Node.js ≥ 22 再重试”），不要倒出长篇教程。
@@ -53,12 +53,12 @@
 
 ## 平台分流一览
 
-| 平台             | 能力级别 | 包 / 来源          | 安装器指令                     |
-| ---------------- | -------- | ------------------ | ------------------------------ |
-| Codex            | 完整排盘 | 仓库（公开后可用） | `docs/installers/codex.md`     |
-| Qoder / Qoder CN | 完整排盘 | ZIP（当前未发布）  | `docs/installers/qoder.md`     |
-| WorkBuddy        | 完整排盘 | ZIP（当前未发布）  | `docs/installers/workbuddy.md` |
-| 豆包电脑版       | 完整排盘 | ZIP（当前未发布）  | `docs/installers/doubao.md`    |
+| 平台             | 能力级别 | 包 / 来源                   | 安装器指令                     |
+| ---------------- | -------- | --------------------------- | ------------------------------ |
+| Codex            | 完整排盘 | 仓库（已公开）              | `docs/installers/codex.md`     |
+| Qoder / Qoder CN | 完整排盘 | GitHub Release `v0.1.4` ZIP | `docs/installers/qoder.md`     |
+| WorkBuddy        | 完整排盘 | GitHub Release `v0.1.4` ZIP | `docs/installers/workbuddy.md` |
+| 豆包电脑版       | 完整排盘 | GitHub Release `v0.1.4` ZIP | `docs/installers/doubao.md`    |
 
 > 四个宿主均为完整版，使用同一份预构建引擎 `scripts/dist/engine.mjs`，排盘输出一致（真机已验证）。
 > `reading-lite`（无引擎、需外部 facts）作为未来“不能运行脚本”宿主的降级模式保留（见 `docs/HOST_COMPATIBILITY.md`）。
@@ -75,9 +75,9 @@
 
 ## 当前分发状态
 
-根清单当前为 `status: "unpublished"`：没有公开的 GitHub Release ZIP、发布 tag 或 SHA-256 清单。Qoder / WorkBuddy / 豆包电脑版的安装器必须在可用性检查处停止，不能引用历史下载地址或要求用户手动寻找旧包。
+根清单当前为 `status: "published"`：安装包来自 GitHub Release `v0.1.4`，已提供 Qoder / WorkBuddy / 豆包电脑版的 ZIP、不可变下载地址与 SHA-256。安装器必须先检查所选平台的 `published`，再下载和校验；不能引用历史下载地址或要求用户手动寻找旧包。
 
-- **Codex**：仅在仓库重新公开后，可直接克隆 / 下载仓库使用（不依赖 Release）。
-- **Qoder / WorkBuddy / 豆包电脑版**：完整排盘兼容性与真机验证记录仍有效，但当前没有可下载的安装包；等待一次新的、独立验证的正式发布。
+- **Codex**：可直接克隆 / 下载公开仓库使用（不依赖 Release）。
+- **Qoder / WorkBuddy / 豆包电脑版**：完整排盘包已按当前清单发布；更新时仍必须下载清单指定的不可变资产并校验 SHA-256。
 
-> 未来发布必须使用新的不可变 tag 与独立 ZIP；创建 Release、上传资产并完成重下 SHA-256 校验后，才可把清单切换为 `published`。不得使用 `latest/download`，不得复用已撤下的历史发布地址。
+> 后续发布必须使用新的不可变 tag 与独立 ZIP；创建 Release、上传资产并完成重下 SHA-256 校验后，才可更新清单。不得使用 `latest/download`，不得复用已撤下的历史发布地址。
