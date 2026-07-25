@@ -1,0 +1,13 @@
+# UI metadata for Codex-ecosystem hosts. Kept intentionally minimal: only name
+# and description, mirroring SKILL.md. Do NOT add speculative fields — confirm any
+# additional keys against the target host's official agents manifest spec first
+# (handoff §7.1). This file carries UI text only; it never changes calculation.
+name: calculate-birth-charts
+description: >-
+  Deterministically calculate Western natal charts, Four Pillars/BaZi (四柱八字) and
+  Zi Wei Dou Shu (紫微斗数) from birth date, local time, IANA timezone, coordinates,
+  calendar and versioned rule profiles, and on request narrate a sourced reading with
+  吉凶/喜用神/大运流年 facts，并支持 1-5 人合婚/关系分析。Use for 排盘、本命盘、占星、四柱八字、紫微斗数、真太阳时、恒星黄道、
+  吉凶/事业/感情/财运/学业解读、合婚/正缘/结婚时机/适合行业/流派对比. All math is done by the bundled deterministic CLI;
+  the model never computes charts. Not for sales/analytics "star charts" or ungrounded
+  predictive advice.

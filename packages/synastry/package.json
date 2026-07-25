@@ -1,0 +1,17 @@
+{
+  "name": "@ming/synastry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Multi-person relationship (合婚 / synastry) rules over two computed ChartBundles: BaZi (生肖/日柱/日干五合/五行喜用互补/配偶星/共振应期), Zi Wei (命宫/夫妻宫互涉/四化互涉) and Western (cross-aspects). Pure, deterministic, sourced; emits structural compatibility findings, never a fated verdict.",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ming/bazi-rules": "workspace:*",
+    "@ming/contracts": "workspace:*"
+  }
+}

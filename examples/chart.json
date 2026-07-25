@@ -1,0 +1,1318 @@
+{
+  "bundle": {
+    "bazi": {
+      "dayBoundaryApplied": "zi-hour/late (tyme4ts default)",
+      "dayMaster": {
+        "element": "木",
+        "stem": "甲",
+        "yinYang": "阳"
+      },
+      "luckCycle": {
+        "forward": true,
+        "majorCycles": [
+          {
+            "branch": "辰",
+            "endAge": 18,
+            "index": 0,
+            "naYin": "白蜡金",
+            "startAge": 9,
+            "startYear": 1998,
+            "stem": "庚"
+          },
+          {
+            "branch": "巳",
+            "endAge": 28,
+            "index": 1,
+            "naYin": "白蜡金",
+            "startAge": 19,
+            "startYear": 2008,
+            "stem": "辛"
+          },
+          {
+            "branch": "午",
+            "endAge": 38,
+            "index": 2,
+            "naYin": "杨柳木",
+            "startAge": 29,
+            "startYear": 2018,
+            "stem": "壬"
+          },
+          {
+            "branch": "未",
+            "endAge": 48,
+            "index": 3,
+            "naYin": "杨柳木",
+            "startAge": 39,
+            "startYear": 2028,
+            "stem": "癸"
+          },
+          {
+            "branch": "申",
+            "endAge": 58,
+            "index": 4,
+            "naYin": "泉中水",
+            "startAge": 49,
+            "startYear": 2038,
+            "stem": "甲"
+          },
+          {
+            "branch": "酉",
+            "endAge": 68,
+            "index": 5,
+            "naYin": "泉中水",
+            "startAge": 59,
+            "startYear": 2048,
+            "stem": "乙"
+          },
+          {
+            "branch": "戌",
+            "endAge": 78,
+            "index": 6,
+            "naYin": "屋上土",
+            "startAge": 69,
+            "startYear": 2058,
+            "stem": "丙"
+          },
+          {
+            "branch": "亥",
+            "endAge": 88,
+            "index": 7,
+            "naYin": "屋上土",
+            "startAge": 79,
+            "startYear": 2068,
+            "stem": "丁"
+          }
+        ],
+        "startAfter": {
+          "days": 4,
+          "months": 8,
+          "years": 8
+        },
+        "startSolarDate": "1990-03-10"
+      },
+      "pillars": {
+        "day": {
+          "branch": "戌",
+          "branchElement": "土",
+          "hiddenStems": [
+            {
+              "element": "土",
+              "primary": true,
+              "stem": "戊",
+              "tenGod": "偏财"
+            },
+            {
+              "element": "金",
+              "primary": false,
+              "stem": "辛",
+              "tenGod": "正官"
+            },
+            {
+              "element": "火",
+              "primary": false,
+              "stem": "丁",
+              "tenGod": "伤官"
+            }
+          ],
+          "naYin": "山头火",
+          "stem": "甲",
+          "stemElement": "木",
+          "stemYinYang": "阳",
+          "tenGod": null,
+          "tenGodDisplay": "日主(日元)"
+        },
+        "hour": {
+          "branch": "辰",
+          "branchElement": "土",
+          "hiddenStems": [
+            {
+              "element": "土",
+              "primary": true,
+              "stem": "戊",
+              "tenGod": "偏财"
+            },
+            {
+              "element": "木",
+              "primary": false,
+              "stem": "乙",
+              "tenGod": "劫财"
+            },
+            {
+              "element": "水",
+              "primary": false,
+              "stem": "癸",
+              "tenGod": "正印"
+            }
+          ],
+          "naYin": "大林木",
+          "stem": "戊",
+          "stemElement": "土",
+          "stemYinYang": "阳",
+          "tenGod": "偏财",
+          "tenGodDisplay": "偏财"
+        },
+        "month": {
+          "branch": "卯",
+          "branchElement": "木",
+          "hiddenStems": [
+            {
+              "element": "木",
+              "primary": true,
+              "stem": "乙",
+              "tenGod": "劫财"
+            }
+          ],
+          "naYin": "城头土",
+          "stem": "己",
+          "stemElement": "土",
+          "stemYinYang": "阴",
+          "tenGod": "正财",
+          "tenGodDisplay": "正财"
+        },
+        "year": {
+          "branch": "午",
+          "branchElement": "火",
+          "hiddenStems": [
+            {
+              "element": "火",
+              "primary": true,
+              "stem": "丁",
+              "tenGod": "伤官"
+            },
+            {
+              "element": "土",
+              "primary": false,
+              "stem": "己",
+              "tenGod": "正财"
+            }
+          ],
+          "naYin": "路旁土",
+          "stem": "庚",
+          "stemElement": "金",
+          "stemYinYang": "阳",
+          "tenGod": "七杀",
+          "tenGodDisplay": "七杀",
+          "zodiac": "马"
+        }
+      },
+      "provider": {
+        "id": "tyme4ts",
+        "license": "MIT",
+        "version": "1.5.2"
+      },
+      "rulesetId": "bazi-standard@0.1.0",
+      "solarTimeApplied": "civil"
+    },
+    "calculatedAt": "2026-01-01T00:00:00.000Z",
+    "engineVersion": "0.1.1",
+    "normalizedTime": {
+      "ambiguityResolution": "unambiguous",
+      "apparentSolarTime": "1990-03-10T07:40:59",
+      "localCivil": "1990-03-10T08:15:00+08:00",
+      "meanSolarTime": "1990-03-10T07:52:05",
+      "timezone": "Asia/Shanghai",
+      "timezoneDataVersion": "2026c",
+      "utcInstant": "1990-03-10T00:15:00Z"
+    },
+    "originalInput": {
+      "calendar": "gregorian",
+      "localDate": "1990-03-10",
+      "localTime": "08:15:00",
+      "location": {
+        "displayName": "Fictional example location (not a real person)",
+        "latitude": 30.59,
+        "longitude": 114.27,
+        "source": "user"
+      },
+      "ruleGender": "male",
+      "schemaVersion": "0.1.0",
+      "settings": {
+        "bazi": {
+          "dayBoundary": "zi-hour",
+          "earlyLateZi": "late",
+          "rulesetId": "bazi-standard@0.1.0",
+          "solarTimeMode": "civil"
+        },
+        "systems": [
+          "western",
+          "bazi",
+          "ziwei"
+        ],
+        "western": {
+          "asteroids": true,
+          "ayanamsha": "lahiri",
+          "houseSystem": "placidus",
+          "nodes": "true",
+          "rulesetId": "western-tropical-placidus@0.1.0",
+          "zodiac": "tropical"
+        },
+        "ziwei": {
+          "rulesetId": "iztro-default@0.1.0",
+          "useApparentSolarTime": false
+        }
+      },
+      "timeAccuracy": "exact",
+      "timezone": "Asia/Shanghai"
+    },
+    "provenance": {
+      "engine": {
+        "name": "ming-engine",
+        "schemaVersion": "0.1.0",
+        "version": "0.1.1"
+      },
+      "providers": [
+        {
+          "id": "astronomy-engine",
+          "license": "MIT",
+          "version": "2.1.19"
+        },
+        {
+          "id": "tyme4ts",
+          "license": "MIT",
+          "version": "1.5.2"
+        },
+        {
+          "id": "iztro",
+          "license": "MIT",
+          "version": "2.5.8"
+        }
+      ],
+      "rulesets": [
+        {
+          "id": "western-tropical-placidus",
+          "version": "0.1.0"
+        },
+        {
+          "id": "bazi-standard",
+          "version": "0.1.0"
+        },
+        {
+          "id": "iztro-default",
+          "version": "0.1.0"
+        }
+      ],
+      "tzdb": {
+        "source": "moment-timezone",
+        "version": "2026c"
+      }
+    },
+    "requestId": "req_4fe25a52908a996b",
+    "schemaVersion": "0.1.0",
+    "warnings": [
+      {
+        "code": "SOLAR_TIME_APPROXIMATE",
+        "detail": {
+          "method": "noaa-eot@0.1.0"
+        },
+        "message": "Apparent solar time uses the noaa-eot@0.1.0 equation-of-time approximation (~tenths of a minute).",
+        "severity": "info",
+        "system": "time"
+      },
+      {
+        "code": "SOLAR_TIME_APPROXIMATE",
+        "message": "Lunar nodes use the true (osculating) node — self-computed, approximate (~arc-minutes).",
+        "severity": "info",
+        "system": "western"
+      },
+      {
+        "code": "SOLAR_TIME_APPROXIMATE",
+        "message": "Asteroids (Chiron/Ceres/Pallas/Juno/Vesta) use Keplerian osculating elements: approximate (sub-degree; Chiron coarser), not part of the ≤1′ gate.",
+        "severity": "info",
+        "system": "western"
+      }
+    ],
+    "western": {
+      "angles": {
+        "ascendant": {
+          "longitudeDeg": 22.299679,
+          "sign": "Aries"
+        },
+        "descendant": {
+          "longitudeDeg": 202.299679,
+          "sign": "Libra"
+        },
+        "ic": {
+          "longitudeDeg": 104.220745,
+          "sign": "Cancer"
+        },
+        "mc": {
+          "longitudeDeg": 284.220745,
+          "sign": "Capricorn"
+        }
+      },
+      "aspects": [
+        {
+          "applying": true,
+          "bodyA": "Sun",
+          "bodyB": "Saturn",
+          "orbDeg": 3.74,
+          "type": "sextile"
+        },
+        {
+          "applying": false,
+          "bodyA": "Sun",
+          "bodyB": "Pluto",
+          "orbDeg": 1.48,
+          "type": "trine"
+        },
+        {
+          "applying": false,
+          "bodyA": "Moon",
+          "bodyB": "Jupiter",
+          "orbDeg": 1.28,
+          "type": "sextile"
+        },
+        {
+          "applying": true,
+          "bodyA": "Moon",
+          "bodyB": "Uranus",
+          "orbDeg": 6.7,
+          "type": "trine"
+        },
+        {
+          "applying": false,
+          "bodyA": "Mercury",
+          "bodyB": "Uranus",
+          "orbDeg": 1.94,
+          "type": "sextile"
+        },
+        {
+          "applying": true,
+          "bodyA": "Mercury",
+          "bodyB": "Neptune",
+          "orbDeg": 3.18,
+          "type": "sextile"
+        },
+        {
+          "applying": true,
+          "bodyA": "Mercury",
+          "bodyB": "Pluto",
+          "orbDeg": 6.68,
+          "type": "trine"
+        },
+        {
+          "applying": false,
+          "bodyA": "Venus",
+          "bodyB": "Mars",
+          "orbDeg": 5.84,
+          "type": "conjunction"
+        },
+        {
+          "applying": false,
+          "bodyA": "Mars",
+          "bodyB": "Saturn",
+          "orbDeg": 5.88,
+          "type": "conjunction"
+        },
+        {
+          "applying": true,
+          "bodyA": "Jupiter",
+          "bodyB": "Uranus",
+          "orbDeg": 7.97,
+          "type": "opposition"
+        },
+        {
+          "applying": true,
+          "bodyA": "Uranus",
+          "bodyB": "Neptune",
+          "orbDeg": 5.12,
+          "type": "conjunction"
+        },
+        {
+          "applying": true,
+          "bodyA": "Neptune",
+          "bodyB": "Pluto",
+          "orbDeg": 3.5,
+          "type": "sextile"
+        }
+      ],
+      "ayanamsha": null,
+      "ayanamshaDegrees": null,
+      "houseSystem": "placidus",
+      "houses": [
+        {
+          "cuspLongitudeDeg": 22.299679,
+          "index": 1,
+          "sign": "Aries"
+        },
+        {
+          "cuspLongitudeDeg": 55.684608,
+          "index": 2,
+          "sign": "Taurus"
+        },
+        {
+          "cuspLongitudeDeg": 81.105205,
+          "index": 3,
+          "sign": "Gemini"
+        },
+        {
+          "cuspLongitudeDeg": 104.220745,
+          "index": 4,
+          "sign": "Cancer"
+        },
+        {
+          "cuspLongitudeDeg": 129.330423,
+          "index": 5,
+          "sign": "Leo"
+        },
+        {
+          "cuspLongitudeDeg": 161.026783,
+          "index": 6,
+          "sign": "Virgo"
+        },
+        {
+          "cuspLongitudeDeg": 202.299679,
+          "index": 7,
+          "sign": "Libra"
+        },
+        {
+          "cuspLongitudeDeg": 235.684608,
+          "index": 8,
+          "sign": "Scorpio"
+        },
+        {
+          "cuspLongitudeDeg": 261.105205,
+          "index": 9,
+          "sign": "Sagittarius"
+        },
+        {
+          "cuspLongitudeDeg": 284.220745,
+          "index": 10,
+          "sign": "Capricorn"
+        },
+        {
+          "cuspLongitudeDeg": 309.330423,
+          "index": 11,
+          "sign": "Aquarius"
+        },
+        {
+          "cuspLongitudeDeg": 341.026783,
+          "index": 12,
+          "sign": "Pisces"
+        }
+      ],
+      "nodes": "true",
+      "planets": [
+        {
+          "body": "Sun",
+          "house": 12,
+          "latitudeDeg": -0.000009,
+          "longitudeDeg": 349.164346,
+          "precision": "high",
+          "retrograde": false,
+          "sign": "Pisces",
+          "signDeg": 19.164346,
+          "source": "astronomy-engine/VSOP87+NOVAS",
+          "speedDegPerDay": 0.99891
+        },
+        {
+          "body": "Moon",
+          "house": 5,
+          "latitudeDeg": -1.445358,
+          "longitudeDeg": 152.374472,
+          "precision": "high",
+          "retrograde": false,
+          "sign": "Virgo",
+          "signDeg": 2.374472,
+          "source": "astronomy-engine/VSOP87+NOVAS",
+          "speedDegPerDay": 12.737978
+        },
+        {
+          "body": "Mercury",
+          "dignity": "detriment",
+          "house": 11,
+          "latitudeDeg": -2.090861,
+          "longitudeDeg": 341.009222,
+          "precision": "high",
+          "retrograde": false,
+          "sign": "Pisces",
+          "signDeg": 11.009222,
+          "source": "astronomy-engine/VSOP87+NOVAS",
+          "speedDegPerDay": 1.80768
+        },
+        {
+          "body": "Venus",
+          "house": 10,
+          "latitudeDeg": 3.910957,
+          "longitudeDeg": 304.622679,
+          "precision": "high",
+          "retrograde": false,
+          "sign": "Aquarius",
+          "signDeg": 4.622679,
+          "source": "astronomy-engine/VSOP87+NOVAS",
+          "speedDegPerDay": 0.786003
+        },
+        {
+          "body": "Mars",
+          "dignity": "exaltation",
+          "house": 10,
+          "latitudeDeg": -0.880033,
+          "longitudeDeg": 298.779411,
+          "precision": "high",
+          "retrograde": false,
+          "sign": "Capricorn",
+          "signDeg": 28.779411,
+          "source": "astronomy-engine/VSOP87+NOVAS",
+          "speedDegPerDay": 0.738925
+        },
+        {
+          "body": "Jupiter",
+          "dignity": "exaltation",
+          "house": 3,
+          "latitudeDeg": 0.03882,
+          "longitudeDeg": 91.096398,
+          "precision": "high",
+          "retrograde": false,
+          "sign": "Cancer",
+          "signDeg": 1.096398,
+          "source": "astronomy-engine/VSOP87+NOVAS",
+          "speedDegPerDay": 0.043088
+        },
+        {
+          "body": "Saturn",
+          "dignity": "domicile",
+          "house": 10,
+          "latitudeDeg": 0.223368,
+          "longitudeDeg": 292.901912,
+          "precision": "high",
+          "retrograde": false,
+          "sign": "Capricorn",
+          "signDeg": 22.901912,
+          "source": "astronomy-engine/VSOP87+NOVAS",
+          "speedDegPerDay": 0.082203
+        },
+        {
+          "body": "Uranus",
+          "house": 9,
+          "latitudeDeg": -0.290227,
+          "longitudeDeg": 279.069959,
+          "precision": "high",
+          "retrograde": false,
+          "sign": "Capricorn",
+          "signDeg": 9.069959,
+          "source": "astronomy-engine/VSOP87+NOVAS",
+          "speedDegPerDay": 0.029193
+        },
+        {
+          "body": "Neptune",
+          "house": 9,
+          "latitudeDeg": 0.853308,
+          "longitudeDeg": 284.190108,
+          "precision": "high",
+          "retrograde": false,
+          "sign": "Capricorn",
+          "signDeg": 14.190108,
+          "source": "astronomy-engine/VSOP87+NOVAS",
+          "speedDegPerDay": 0.02009
+        },
+        {
+          "body": "Pluto",
+          "dignity": "domicile",
+          "house": 7,
+          "latitudeDeg": 15.795642,
+          "longitudeDeg": 227.685175,
+          "precision": "high",
+          "retrograde": true,
+          "sign": "Scorpio",
+          "signDeg": 17.685175,
+          "source": "astronomy-engine/VSOP87+NOVAS",
+          "speedDegPerDay": -0.010774
+        },
+        {
+          "body": "NorthNode",
+          "house": 11,
+          "latitudeDeg": 0,
+          "longitudeDeg": 316.27069,
+          "precision": "approximate",
+          "retrograde": true,
+          "sign": "Aquarius",
+          "signDeg": 16.27069,
+          "source": "osculating-node",
+          "speedDegPerDay": -0.033549
+        },
+        {
+          "body": "SouthNode",
+          "house": 5,
+          "latitudeDeg": 0,
+          "longitudeDeg": 136.27069,
+          "precision": "approximate",
+          "retrograde": true,
+          "sign": "Leo",
+          "signDeg": 16.27069,
+          "source": "osculating-node",
+          "speedDegPerDay": -0.033549
+        },
+        {
+          "body": "Chiron",
+          "house": 2,
+          "latitudeDeg": -5.60138,
+          "longitudeDeg": 78.435012,
+          "precision": "approximate",
+          "retrograde": false,
+          "sign": "Gemini",
+          "signDeg": 18.435012,
+          "source": "osculating-elements",
+          "speedDegPerDay": 0.019059
+        },
+        {
+          "body": "Ceres",
+          "house": 8,
+          "latitudeDeg": 6.707815,
+          "longitudeDeg": 248.719785,
+          "precision": "approximate",
+          "retrograde": false,
+          "sign": "Sagittarius",
+          "signDeg": 8.719785,
+          "source": "osculating-elements",
+          "speedDegPerDay": 0.161711
+        },
+        {
+          "body": "Pallas",
+          "house": 5,
+          "latitudeDeg": -24.863766,
+          "longitudeDeg": 135.304568,
+          "precision": "approximate",
+          "retrograde": true,
+          "sign": "Leo",
+          "signDeg": 15.304568,
+          "source": "osculating-elements",
+          "speedDegPerDay": -0.157053
+        },
+        {
+          "body": "Juno",
+          "house": 11,
+          "latitudeDeg": 3.077652,
+          "longitudeDeg": 336.118998,
+          "precision": "approximate",
+          "retrograde": false,
+          "sign": "Pisces",
+          "signDeg": 6.118998,
+          "source": "osculating-elements",
+          "speedDegPerDay": 0.468805
+        },
+        {
+          "body": "Vesta",
+          "house": 1,
+          "latitudeDeg": -4.506494,
+          "longitudeDeg": 36.765776,
+          "precision": "approximate",
+          "retrograde": false,
+          "sign": "Taurus",
+          "signDeg": 6.765776,
+          "source": "osculating-elements",
+          "speedDegPerDay": 0.395843
+        }
+      ],
+      "provider": {
+        "id": "astronomy-engine",
+        "license": "MIT",
+        "version": "2.1.19"
+      },
+      "rulesetId": "western-tropical-placidus@0.1.0",
+      "zodiac": "tropical"
+    },
+    "ziwei": {
+      "body": "火星",
+      "bodyPalaceBranch": "未",
+      "fiveElementsClass": "土五局",
+      "gender": "男",
+      "lunarDate": "一九九〇年二月十四",
+      "palaces": [
+        {
+          "adjectiveStars": [
+            {
+              "name": "天姚",
+              "type": "flower"
+            },
+            {
+              "name": "天厨",
+              "type": "adjective"
+            },
+            {
+              "name": "蜚廉",
+              "type": "adjective"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "寅",
+            "endAge": 44,
+            "heavenlyStem": "戊",
+            "startAge": 35
+          },
+          "earthlyBranch": "寅",
+          "heavenlyStem": "戊",
+          "index": 0,
+          "isBodyPalace": false,
+          "isSoulPalace": false,
+          "majorStars": [
+            {
+              "brightness": "得",
+              "name": "天机",
+              "type": "major"
+            },
+            {
+              "brightness": "旺",
+              "mutagen": "科",
+              "name": "太阴",
+              "type": "major"
+            }
+          ],
+          "minorStars": [],
+          "name": "田宅",
+          "surroundPalaces": {
+            "career": "疾厄",
+            "opposite": "子女",
+            "wealth": "兄弟"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "天喜",
+              "type": "flower"
+            },
+            {
+              "name": "咸池",
+              "type": "flower"
+            },
+            {
+              "name": "天德",
+              "type": "adjective"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "卯",
+            "endAge": 54,
+            "heavenlyStem": "己",
+            "startAge": 45
+          },
+          "earthlyBranch": "卯",
+          "heavenlyStem": "己",
+          "index": 1,
+          "isBodyPalace": false,
+          "isSoulPalace": false,
+          "majorStars": [
+            {
+              "brightness": "旺",
+              "name": "紫微",
+              "type": "major"
+            },
+            {
+              "brightness": "利",
+              "name": "贪狼",
+              "type": "major"
+            }
+          ],
+          "minorStars": [
+            {
+              "name": "地劫",
+              "type": "tough"
+            }
+          ],
+          "name": "官禄",
+          "surroundPalaces": {
+            "career": "财帛",
+            "opposite": "夫妻",
+            "wealth": "命宫"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "凤阁",
+              "type": "adjective"
+            },
+            {
+              "name": "寡宿",
+              "type": "adjective"
+            },
+            {
+              "name": "天伤",
+              "type": "adjective"
+            },
+            {
+              "name": "年解",
+              "type": "helper"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "辰",
+            "endAge": 64,
+            "heavenlyStem": "庚",
+            "startAge": 55
+          },
+          "earthlyBranch": "辰",
+          "heavenlyStem": "庚",
+          "index": 2,
+          "isBodyPalace": false,
+          "isSoulPalace": false,
+          "majorStars": [
+            {
+              "brightness": "陷",
+              "name": "巨门",
+              "type": "major"
+            }
+          ],
+          "minorStars": [],
+          "name": "仆役",
+          "surroundPalaces": {
+            "career": "子女",
+            "opposite": "兄弟",
+            "wealth": "父母"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "天才",
+              "type": "adjective"
+            },
+            {
+              "name": "天月",
+              "type": "adjective"
+            },
+            {
+              "name": "破碎",
+              "type": "adjective"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "巳",
+            "endAge": 74,
+            "heavenlyStem": "辛",
+            "startAge": 65
+          },
+          "earthlyBranch": "巳",
+          "heavenlyStem": "辛",
+          "index": 3,
+          "isBodyPalace": false,
+          "isSoulPalace": false,
+          "majorStars": [
+            {
+              "brightness": "得",
+              "name": "天相",
+              "type": "major"
+            }
+          ],
+          "minorStars": [
+            {
+              "name": "左辅",
+              "type": "soft"
+            },
+            {
+              "brightness": "得",
+              "name": "火星",
+              "type": "tough"
+            }
+          ],
+          "name": "迁移",
+          "surroundPalaces": {
+            "career": "夫妻",
+            "opposite": "命宫",
+            "wealth": "福德"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "三台",
+              "type": "adjective"
+            },
+            {
+              "name": "恩光",
+              "type": "adjective"
+            },
+            {
+              "name": "封诰",
+              "type": "adjective"
+            },
+            {
+              "name": "天福",
+              "type": "adjective"
+            },
+            {
+              "name": "截路",
+              "type": "adjective"
+            },
+            {
+              "name": "天使",
+              "type": "adjective"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "午",
+            "endAge": 84,
+            "heavenlyStem": "壬",
+            "startAge": 75
+          },
+          "earthlyBranch": "午",
+          "heavenlyStem": "壬",
+          "index": 4,
+          "isBodyPalace": false,
+          "isSoulPalace": false,
+          "majorStars": [
+            {
+              "brightness": "庙",
+              "name": "天梁",
+              "type": "major"
+            }
+          ],
+          "minorStars": [
+            {
+              "brightness": "陷",
+              "name": "文昌",
+              "type": "soft"
+            }
+          ],
+          "name": "疾厄",
+          "surroundPalaces": {
+            "career": "兄弟",
+            "opposite": "父母",
+            "wealth": "田宅"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "天空",
+              "type": "adjective"
+            },
+            {
+              "name": "空亡",
+              "type": "adjective"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "未",
+            "endAge": 94,
+            "heavenlyStem": "癸",
+            "startAge": 85
+          },
+          "earthlyBranch": "未",
+          "heavenlyStem": "癸",
+          "index": 5,
+          "isBodyPalace": true,
+          "isSoulPalace": false,
+          "majorStars": [
+            {
+              "brightness": "利",
+              "name": "廉贞",
+              "type": "major"
+            },
+            {
+              "brightness": "庙",
+              "name": "七杀",
+              "type": "major"
+            }
+          ],
+          "minorStars": [
+            {
+              "name": "天钺",
+              "type": "soft"
+            },
+            {
+              "name": "地空",
+              "type": "tough"
+            },
+            {
+              "brightness": "利",
+              "name": "铃星",
+              "type": "tough"
+            },
+            {
+              "brightness": "庙",
+              "name": "陀罗",
+              "type": "tough"
+            }
+          ],
+          "name": "财帛",
+          "surroundPalaces": {
+            "career": "命宫",
+            "opposite": "福德",
+            "wealth": "官禄"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "解神",
+              "type": "helper"
+            },
+            {
+              "name": "八座",
+              "type": "adjective"
+            },
+            {
+              "name": "天贵",
+              "type": "adjective"
+            },
+            {
+              "name": "天巫",
+              "type": "adjective"
+            },
+            {
+              "name": "孤辰",
+              "type": "adjective"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "申",
+            "endAge": 104,
+            "heavenlyStem": "甲",
+            "startAge": 95
+          },
+          "earthlyBranch": "申",
+          "heavenlyStem": "甲",
+          "index": 6,
+          "isBodyPalace": false,
+          "isSoulPalace": false,
+          "majorStars": [],
+          "minorStars": [
+            {
+              "brightness": "得",
+              "name": "文曲",
+              "type": "soft"
+            },
+            {
+              "name": "禄存",
+              "type": "lucun"
+            },
+            {
+              "name": "天马",
+              "type": "tianma"
+            }
+          ],
+          "name": "子女",
+          "surroundPalaces": {
+            "career": "父母",
+            "opposite": "田宅",
+            "wealth": "仆役"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "红鸾",
+              "type": "flower"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "酉",
+            "endAge": 114,
+            "heavenlyStem": "乙",
+            "startAge": 105
+          },
+          "earthlyBranch": "酉",
+          "heavenlyStem": "乙",
+          "index": 7,
+          "isBodyPalace": false,
+          "isSoulPalace": false,
+          "majorStars": [],
+          "minorStars": [
+            {
+              "name": "右弼",
+              "type": "soft"
+            },
+            {
+              "brightness": "陷",
+              "name": "擎羊",
+              "type": "tough"
+            }
+          ],
+          "name": "夫妻",
+          "surroundPalaces": {
+            "career": "福德",
+            "opposite": "官禄",
+            "wealth": "迁移"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "龙池",
+              "type": "adjective"
+            },
+            {
+              "name": "台辅",
+              "type": "adjective"
+            },
+            {
+              "name": "华盖",
+              "type": "adjective"
+            },
+            {
+              "name": "旬空",
+              "type": "adjective"
+            },
+            {
+              "name": "天刑",
+              "type": "adjective"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "戌",
+            "endAge": 124,
+            "heavenlyStem": "丙",
+            "startAge": 115
+          },
+          "earthlyBranch": "戌",
+          "heavenlyStem": "丙",
+          "index": 8,
+          "isBodyPalace": false,
+          "isSoulPalace": false,
+          "majorStars": [
+            {
+              "brightness": "平",
+              "mutagen": "忌",
+              "name": "天同",
+              "type": "major"
+            }
+          ],
+          "minorStars": [],
+          "name": "兄弟",
+          "surroundPalaces": {
+            "career": "田宅",
+            "opposite": "仆役",
+            "wealth": "疾厄"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "天官",
+              "type": "adjective"
+            },
+            {
+              "name": "月德",
+              "type": "adjective"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "亥",
+            "endAge": 14,
+            "heavenlyStem": "丁",
+            "startAge": 5
+          },
+          "earthlyBranch": "亥",
+          "heavenlyStem": "丁",
+          "index": 9,
+          "isBodyPalace": false,
+          "isSoulPalace": true,
+          "majorStars": [
+            {
+              "brightness": "平",
+              "mutagen": "权",
+              "name": "武曲",
+              "type": "major"
+            },
+            {
+              "brightness": "平",
+              "name": "破军",
+              "type": "major"
+            }
+          ],
+          "minorStars": [],
+          "name": "命宫",
+          "surroundPalaces": {
+            "career": "官禄",
+            "opposite": "迁移",
+            "wealth": "财帛"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "阴煞",
+              "type": "adjective"
+            },
+            {
+              "name": "天哭",
+              "type": "adjective"
+            },
+            {
+              "name": "天虚",
+              "type": "adjective"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "子",
+            "endAge": 24,
+            "heavenlyStem": "戊",
+            "startAge": 15
+          },
+          "earthlyBranch": "子",
+          "heavenlyStem": "戊",
+          "index": 10,
+          "isBodyPalace": false,
+          "isSoulPalace": false,
+          "majorStars": [
+            {
+              "brightness": "陷",
+              "mutagen": "禄",
+              "name": "太阳",
+              "type": "major"
+            }
+          ],
+          "minorStars": [],
+          "name": "父母",
+          "surroundPalaces": {
+            "career": "仆役",
+            "opposite": "疾厄",
+            "wealth": "子女"
+          }
+        },
+        {
+          "adjectiveStars": [
+            {
+              "name": "天寿",
+              "type": "adjective"
+            }
+          ],
+          "decadal": {
+            "earthlyBranch": "丑",
+            "endAge": 34,
+            "heavenlyStem": "己",
+            "startAge": 25
+          },
+          "earthlyBranch": "丑",
+          "heavenlyStem": "己",
+          "index": 11,
+          "isBodyPalace": false,
+          "isSoulPalace": false,
+          "majorStars": [
+            {
+              "brightness": "庙",
+              "name": "天府",
+              "type": "major"
+            }
+          ],
+          "minorStars": [
+            {
+              "name": "天魁",
+              "type": "soft"
+            }
+          ],
+          "name": "福德",
+          "surroundPalaces": {
+            "career": "迁移",
+            "opposite": "财帛",
+            "wealth": "夫妻"
+          }
+        }
+      ],
+      "provider": {
+        "id": "iztro",
+        "license": "MIT",
+        "version": "2.5.8"
+      },
+      "rulesetId": "iztro-default@0.1.0",
+      "sign": "双鱼座",
+      "soul": "巨门",
+      "soulPalaceBranch": "亥",
+      "timeIndex": 4,
+      "useApparentSolarTime": false,
+      "zodiac": "马"
+    }
+  },
+  "ok": true
+}

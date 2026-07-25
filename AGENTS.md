@@ -1,0 +1,66 @@
+# AGENTS.md — ming-engine
+
+Guidance for coding agents (OpenAI Codex, and any host that reads `AGENTS.md`) working in this
+repository. The user-facing capability is the **`calculate-birth-charts`** Skill under
+[`skills/calculate-birth-charts/`](skills/calculate-birth-charts/).
+
+## What this project is
+
+A **deterministic** three-system birth-chart engine — Western natal astrology, Four Pillars / BaZi
+(四柱八字), and Zi Wei Dou Shu (紫微斗数) — packaged as a portable, offline Skill. All astronomy,
+calendar, ganzhi, star-placement and time math is done by a bundled deterministic CLI. **The model
+never computes a chart itself.**
+
+## Golden rules (do not break)
+
+- **Never** compute or guess planet positions, houses, aspects, solar terms, 干支, 十神, 起运,
+  星曜 or 四化 yourself. If the CLI does not return a value, say so — never backfill.
+- **Offline only.** No network calls, AI model-provider SDKs, or prompt modules in the calculation
+  core (enforced by `pnpm run lint`).
+- **No fabricated verdicts.** Interpretation is source-cited; relay every warning honestly.
+- **De-identified.** Never write a real name, birth time, or location into logs, fixtures, or git.
+
+## How to run the Skill (the only supported entry point)
+
+The single stable CLI is `skills/calculate-birth-charts/scripts/ming-chart.mjs`. Pass arguments as
+an array and JSON via files — never build a shell string from user text.
+
+```bash
+cd skills/calculate-birth-charts
+node scripts/ming-chart.mjs doctor
+node scripts/ming-chart.mjs normalize  --input-file birth-input.json --output-file normalized.json
+node scripts/ming-chart.mjs calculate  --input-file birth-input.json --systems all --output-file chart.json
+node scripts/ming-chart.mjs compare    --input-file birth-input.json --profiles default,apparent-solar --output-file comparison.json
+node scripts/ming-chart.mjs horoscope  --input-file birth-input.json --at 2026-05-20T14:00 --output-file horoscope.json
+node scripts/ming-chart.mjs interpret  --input-file birth-input.json --at 2026-05-20T14:00 --output-file interpretation.json
+# render is disabled (temporary): returns a stable notice + exit 3 — use calculate/interpret JSON instead.
+node scripts/ming-chart.mjs verify
+```
+
+Requires a Node runtime (>=22). The published Skill folder is self-contained: it ships
+`scripts/dist/engine.mjs`, needs no `npm install`, and runs offline. Full workflow and input rules
+live in [`skills/calculate-birth-charts/SKILL.md`](skills/calculate-birth-charts/SKILL.md) and
+`skills/calculate-birth-charts/references/`.
+
+## Working on the engine (development)
+
+This is a pnpm monorepo (`packages/*`) that builds the Skill's bundle.
+
+```bash
+pnpm install          # dev only
+pnpm run verify:cloud # CI-safe gate (no private incident tokens)
+pnpm run verify:all   # controlled local full gate; scan:incident fails closed without its token file
+pnpm run build        # rebuild scripts/dist/engine.mjs + sbom.cdx.json (commit the result)
+```
+
+`verify:cloud` runs the reproducible, non-sensitive stages: `format:check → lint → typecheck → test
+→ build → validate:provenance → validate:skill → validate:reading → validate:docs → smoke →
+forward:test → package:hosts → verify:hosts → verify:install → check:doc-counts → scan:deps →
+scan:secrets`. `verify:all` then adds `scan:incident`; its precise token file is ignored, must never
+enter CI, and its absence is intentionally fail-closed. If you change the test count, update
+`docs/STATUS.md` and `docs/VALIDATION.md` from a real run (never by hand).
+
+## Scope & disclaimer
+
+For traditional-culture, entertainment and self-reflection use. Not scientifically validated
+prediction. Never give deterministic medical, legal, financial, or life-and-death advice.

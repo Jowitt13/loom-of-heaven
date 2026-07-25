@@ -1,0 +1,20 @@
+{
+  "name": "ming-engine",
+  "owner": {
+    "name": "Jowitt13",
+    "url": "https://github.com/Jowitt13"
+  },
+  "metadata": {
+    "description": "Deterministic three-system birth-chart Skill: Western natal, BaZi (四柱八字) and Zi Wei Dou Shu (紫微斗数).",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "calculate-birth-charts",
+      "source": "./",
+      "description": "Calculate Western natal charts, BaZi and Zi Wei Dou Shu offline and deterministically, then on request narrate a sourced reading (吉凶/喜用神/大运流年) and 1-5 person 合婚/relationship synastry. The bundled CLI does all math — the model never computes charts.",
+      "category": "productivity",
+      "strict": false
+    }
+  ]
+}

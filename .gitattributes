@@ -1,0 +1,6 @@
+# Normalize line endings to LF on commit so the repo is byte-consistent across
+# platforms (the engine's determinism claims depend on stable text).
+* text=auto eol=lf
+
+# Binary assets — never normalized or diffed as text.
+*.png binary

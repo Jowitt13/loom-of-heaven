@@ -1,0 +1,98 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "name": "calculate-birth-charts",
+      "version": "0.1.0"
+    },
+    "tools": [
+      {
+        "name": "ming-build-skill",
+        "version": "0.1.0"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "zod",
+      "version": "4.4.3",
+      "purl": "pkg:npm/zod@4.4.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "moment-timezone",
+      "version": "0.6.3",
+      "purl": "pkg:npm/moment-timezone@0.6.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "moment",
+      "version": "2.30.1",
+      "purl": "pkg:npm/moment@2.30.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "tyme4ts",
+      "version": "1.5.2",
+      "purl": "pkg:npm/tyme4ts@1.5.2",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "iztro",
+      "version": "2.5.8",
+      "purl": "pkg:npm/iztro@2.5.8",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "astronomy-engine",
+      "version": "2.1.19",
+      "purl": "pkg:npm/astronomy-engine@2.1.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    }
+  ]
+}

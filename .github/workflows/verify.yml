@@ -1,0 +1,82 @@
+name: verify
+
+# Enforcement entry point for the declared gate.
+#
+# Node 24 job runs the non-sensitive cloud gate `pnpm run verify:cloud`:
+#   format:check -> lint -> typecheck -> test -> build -> validate:skill -> validate:reading ->
+#   validate:docs -> smoke -> forward:test -> package:hosts -> verify:hosts -> verify:install ->
+#   check:doc-counts -> scan:deps -> scan:secrets
+#
+# The full local gate is `pnpm run verify:all = verify:cloud + scan:incident`.  Its precise
+# incident tokens intentionally live only in a controlled local file and must never be copied to
+# GitHub Actions.  Missing tokens fail closed locally; CI therefore does not claim to run it.
+#
+# Node 22 job proves the RUNTIME floor: it builds the candidate host packages and runs
+# doctor/verify/calculate/interpret from a REAL extracted zip via `verify:zip-runtime`. It does
+# NOT run the monorepo build (dev tooling needs Node 24); it only exercises the shipped engine
+# bundle, which must run on Node >= 22 (the declared runtime floor for installed Skills).
+#
+# `lint` is the ESLint import-boundary gate. Supply-chain hardening (scan:deps / scan:secrets)
+# runs inside verify:cloud. A dependency LICENSE scan and an SPDX-format SBOM remain intentionally
+# NOT wired in — see docs/VALIDATION.md and docs/STATUS.md.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        # Version is read from the root package.json `packageManager` field.
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js (dev toolchain)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run cloud gate (verify:cloud)
+        run: pnpm run verify:cloud
+
+  runtime-node22:
+    # The installed Skill's declared runtime floor is Node >= 22. This job runs the shipped
+    # engine bundle from a REAL extracted candidate zip on Node 22 — no monorepo build.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js 22 (runtime floor)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies (engines not strict; dev deps target Node 24)
+        run: pnpm install --frozen-lockfile --config.engine-strict=false
+
+      - name: Build candidate host packages (uses committed engine.mjs; no engine rebuild)
+        run: node --experimental-strip-types tools/build-host-packages.ts
+
+      - name: Runtime smoke of a real extracted zip (doctor/verify/calculate/interpret)
+        run: node --experimental-strip-types tools/verify-zip-runtime.ts

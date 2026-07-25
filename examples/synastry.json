@@ -1,0 +1,351 @@
+{
+  "ok": true,
+  "synastry": {
+    "disclaimers": [
+      "以下为传统合婚/关系分析（八字/紫微/占星），仅供传统文化、娱乐与自我反思；契合与否是相处经营的结果，非命定，非科学预测。",
+      "只能从本文提供的 findings 作答：每条结论引用其 code/reason/出处；不得臆断双方隐私或编造星曜、干支、宫位。",
+      "不下\"注定在一起 / 必分手 / 必成\"等绝对化断语；张力多的组合可通过沟通与磨合改善，吉多亦需现实经营。",
+      "合婚仅为参考，重大关系决定请结合现实相处、双方意愿与专业咨询，勿以命理替代沟通。"
+    ],
+    "engineVersion": "0.1.1",
+    "findings": [
+      {
+        "claim": "综合信号：吉/合 14 项、张力/冲 13 项、中性 0 项",
+        "code": "overall/tally",
+        "polarity": "吉",
+        "reason": "按八字/紫微/占星三系合婚信号的吉凶计数所得的粗略倾向；契合与否是相处经营的结果而非命定，张力多的组合亦可通过沟通与磨合改善，不作\"注定在一起/必分手\"的断言。",
+        "source": {
+          "chapter": "合婚汇总",
+          "text": "综合"
+        },
+        "system": "overall"
+      },
+      {
+        "claim": "双方日支(夫妻宫)戌与寅相半合（半合火局（合而有情））",
+        "code": "bazi/spouse-palace",
+        "polarity": "吉",
+        "reason": "日支为夫妻宫：相半合者夫妻相处和顺、默契较好。",
+        "source": {
+          "chapter": "论男女婚姻",
+          "text": "三命通会"
+        },
+        "system": "bazi"
+      },
+      {
+        "claim": "五行喜用互补：甲方日主木正是乙方喜用",
+        "code": "bazi/element-complement",
+        "polarity": "吉",
+        "reason": "一方日主之五行恰为另一方喜用，主相互补益、在一起时状态更顺（双向互补更佳）。",
+        "source": {
+          "chapter": "喜忌",
+          "text": "滴天髓"
+        },
+        "system": "bazi"
+      },
+      {
+        "claim": "大运/流年共振·同吉之年(2026起十二年)：2026(丙午)、2027(丁未)、2036(丙辰)、2037(丁巳)",
+        "code": "bazi/resonance-ji",
+        "polarity": "吉",
+        "reason": "这些流年对双方各自命局都偏喜用(生扶或泄耗得宜)，是两人状态同时较顺、宜共同推进(定情/成婚/合作)的参考窗口；应期是机会而非必然。",
+        "source": {
+          "chapter": "喜忌",
+          "text": "滴天髓"
+        },
+        "system": "bazi"
+      },
+      {
+        "claim": "甲方夫妻宫↔乙方命宫：酉 与 卯 相冲（六冲（动荡、变动））",
+        "code": "ziwei/甲方夫妻宫↔乙方命宫",
+        "polarity": "凶",
+        "reason": "宫位地支相冲，主该层面易有张力、需协调。",
+        "source": {
+          "chapter": "合婚/宫位互涉",
+          "text": "紫微斗数"
+        },
+        "system": "ziwei"
+      },
+      {
+        "claim": "双方命宫：亥 与 卯 相半合（半合木局（合而有情））",
+        "code": "ziwei/双方命宫",
+        "polarity": "吉",
+        "reason": "宫位地支相半合，主该层面契合、易共识。",
+        "source": {
+          "chapter": "合婚/宫位互涉",
+          "text": "紫微斗数"
+        },
+        "system": "ziwei"
+      },
+      {
+        "claim": "双方迁移宫：巳 与 酉 相半合（半合金局（合而有情））",
+        "code": "ziwei/双方迁移宫",
+        "polarity": "吉",
+        "reason": "宫位地支相半合，主该层面契合、易共识。",
+        "source": {
+          "chapter": "合婚/宫位互涉",
+          "text": "紫微斗数"
+        },
+        "system": "ziwei"
+      },
+      {
+        "claim": "星曜呼应：甲方命宫与乙方夫妻宫共见 月德",
+        "code": "ziwei/star-resonance",
+        "polarity": "吉",
+        "reason": "一方命宫主星现于另一方夫妻宫，主对方视其为\"良配\"般的存在，缘分感较强。",
+        "source": {
+          "chapter": "合婚/宫位互涉",
+          "text": "紫微斗数"
+        },
+        "system": "ziwei"
+      },
+      {
+        "claim": "四化互涉：甲方生年天同化忌落入乙方命宫",
+        "code": "ziwei/mutagen/忌/命宫",
+        "polarity": "凶",
+        "reason": "甲方的生年化忌落在乙方的命宫，主甲方易牵动乙方此宫的执著与纠葛，宜留意付出/消耗的平衡（牵绊深非等于不合）。",
+        "source": {
+          "chapter": "合婚/四化互涉",
+          "text": "紫微斗数"
+        },
+        "system": "ziwei"
+      },
+      {
+        "claim": "四化互涉：乙方生年武曲化忌落入甲方命宫",
+        "code": "ziwei/mutagen/忌/命宫",
+        "polarity": "凶",
+        "reason": "乙方的生年化忌落在甲方的命宫，主乙方易牵动甲方此宫的执著与纠葛，宜留意付出/消耗的平衡（牵绊深非等于不合）。",
+        "source": {
+          "chapter": "合婚/四化互涉",
+          "text": "紫微斗数"
+        },
+        "system": "ziwei"
+      },
+      {
+        "claim": "甲方Moon 与 乙方Sun 成刑相(square)（差 2.1°）",
+        "code": "western/Moon-Sun/刑相(square)",
+        "polarity": "凶",
+        "reason": "张力相位，主此处易有摩擦或推拉，需要磨合，非注定不合。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Moon 与 乙方Moon 成六分相(sextile)（差 2.2°）",
+        "code": "western/Moon-Moon/六分相(sextile)",
+        "polarity": "吉",
+        "reason": "和谐相位，主此两股能量之间容易顺畅、彼此欣赏。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Moon 与 乙方Mercury 成刑相(square)（差 3.1°）",
+        "code": "western/Moon-Mercury/刑相(square)",
+        "polarity": "凶",
+        "reason": "张力相位，主此处易有摩擦或推拉，需要磨合，非注定不合。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Moon 与 乙方上升(ASC) 成刑相(square)（差 4.5°）",
+        "code": "western/Moon-上升(ASC)/刑相(square)",
+        "polarity": "凶",
+        "reason": "张力相位，主此处易有摩擦或推拉，需要磨合，非注定不合。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Moon 与 乙方下降(DSC) 成刑相(square)（差 4.5°）",
+        "code": "western/Moon-下降(DSC)/刑相(square)",
+        "polarity": "凶",
+        "reason": "张力相位，主此处易有摩擦或推拉，需要磨合，非注定不合。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Mercury 与 乙方Moon 成拱相(trine)（差 6.5°）",
+        "code": "western/Mercury-Moon/拱相(trine)",
+        "polarity": "吉",
+        "reason": "和谐相位，主此两股能量之间容易顺畅、彼此欣赏。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Mercury 与 乙方Venus 成六分相(sextile)（差 0.4°）",
+        "code": "western/Mercury-Venus/六分相(sextile)",
+        "polarity": "吉",
+        "reason": "和谐相位，主此两股能量之间容易顺畅、彼此欣赏。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Venus 与 乙方Moon 成刑相(square)（差 0.1°）",
+        "code": "western/Venus-Moon/刑相(square)",
+        "polarity": "凶",
+        "reason": "张力相位，主此处易有摩擦或推拉，需要磨合，非注定不合。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Venus 与 乙方Mars 成冲相(opposition)（差 7.3°）",
+        "code": "western/Venus-Mars/冲相(opposition)",
+        "polarity": "凶",
+        "reason": "张力相位，主此处易有摩擦或推拉，需要磨合，非注定不合。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Venus 与 乙方上升(ASC) 成拱相(trine)（差 6.8°）",
+        "code": "western/Venus-上升(ASC)/拱相(trine)",
+        "polarity": "吉",
+        "reason": "和谐相位，主此两股能量之间容易顺畅、彼此欣赏。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Mars 与 乙方Sun 成六分相(sextile)（差 1.5°）",
+        "code": "western/Mars-Sun/六分相(sextile)",
+        "polarity": "吉",
+        "reason": "和谐相位，主此两股能量之间容易顺畅、彼此欣赏。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Mars 与 乙方Moon 成刑相(square)（差 5.8°）",
+        "code": "western/Mars-Moon/刑相(square)",
+        "polarity": "凶",
+        "reason": "张力相位，主此处易有摩擦或推拉，需要磨合，非注定不合。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Mars 与 乙方Mercury 成六分相(sextile)（差 0.5°）",
+        "code": "western/Mars-Mercury/六分相(sextile)",
+        "polarity": "吉",
+        "reason": "和谐相位，主此两股能量之间容易顺畅、彼此欣赏。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Mars 与 乙方Mars 成冲相(opposition)（差 1.4°）",
+        "code": "western/Mars-Mars/冲相(opposition)",
+        "polarity": "凶",
+        "reason": "张力相位，主此处易有摩擦或推拉，需要磨合，非注定不合。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Mars 与 乙方上升(ASC) 成拱相(trine)（差 0.9°）",
+        "code": "western/Mars-上升(ASC)/拱相(trine)",
+        "polarity": "吉",
+        "reason": "和谐相位，主此两股能量之间容易顺畅、彼此欣赏。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方Mars 与 乙方下降(DSC) 成六分相(sextile)（差 0.9°）",
+        "code": "western/Mars-下降(DSC)/六分相(sextile)",
+        "polarity": "吉",
+        "reason": "和谐相位，主此两股能量之间容易顺畅、彼此欣赏。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方上升(ASC) 与 乙方Mars 成刑相(square)（差 5.0°）",
+        "code": "western/上升(ASC)-Mars/刑相(square)",
+        "polarity": "凶",
+        "reason": "张力相位，主此处易有摩擦或推拉，需要磨合，非注定不合。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      },
+      {
+        "claim": "甲方下降(DSC) 与 乙方Mars 成刑相(square)（差 5.0°）",
+        "code": "western/下降(DSC)-Mars/刑相(square)",
+        "polarity": "凶",
+        "reason": "张力相位，主此处易有摩擦或推拉，需要磨合，非注定不合。",
+        "source": {
+          "chapter": "synastry cross-aspects",
+          "text": "astronomy-engine/VSOP87+NOVAS"
+        },
+        "system": "western"
+      }
+    ],
+    "followupOffers": [
+      "两人相处的关键磨合点与建议",
+      "感情推进/结婚的有利流年（需各自的婚姻应期）",
+      "财务/事业上的合作契合度",
+      "与其他人的对比（如上传了多位）"
+    ],
+    "pair": {
+      "a": "甲",
+      "b": "乙",
+      "relation": "spouse"
+    },
+    "people": [
+      {
+        "calendar": "gregorian",
+        "label": "甲",
+        "relation": "spouse",
+        "timeAccuracy": "exact",
+        "timezone": "Asia/Shanghai"
+      },
+      {
+        "calendar": "gregorian",
+        "label": "乙",
+        "relation": "spouse",
+        "timeAccuracy": "exact",
+        "timezone": "Asia/Shanghai"
+      }
+    ],
+    "requestId": "req_syn_e3045c7484e4f036",
+    "schemaVersion": "0.1.0"
+  }
+}
