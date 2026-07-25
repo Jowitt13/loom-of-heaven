@@ -14,6 +14,7 @@
  *   node scripts/ming-chart.mjs compare    --input-file in.json --profiles a,b [--output-file out.json]
  *   node scripts/ming-chart.mjs horoscope  --input-file in.json --at YYYY-MM-DD[THH:mm:ss] [--output-file out.json]
  *   node scripts/ming-chart.mjs interpret  --input-file in.json [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file interpretation.json]
+ *   node scripts/ming-chart.mjs answer-plan --input-file in.json --topic <topic> [--lens overview|strengths|risks|timing|advice|explain] [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file answer-plan.json]
  *   node scripts/ming-chart.mjs synastry  --input-file people.json [--now <iso|ms>] [--output-file synastry.json]  (1-5 people; set analyzePair when >2)
  *   node scripts/ming-chart.mjs lint-reading --input-file draft-reading.md [--channel topic|full] [--simple] [--output-file reading-lint.json]
  *   node scripts/ming-chart.mjs render     [DISABLED] visualization reports are temporarily off; use calculate/interpret JSON (exit 3)
@@ -36,6 +37,16 @@ import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const PKG_NAME = 'calculate-birth-charts';
+const ANSWER_TOPICS = new Set([
+  'character',
+  'career',
+  'wealth',
+  'marriage',
+  'studies',
+  'health',
+  'general',
+]);
+const ANSWER_LENSES = new Set(['overview', 'strengths', 'risks', 'timing', 'advice', 'explain']);
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_FIXTURE = resolve(scriptDir, 'fixtures', 'smoke.json');
@@ -71,6 +82,17 @@ function writeOutput(args, content, defaultToStdout = true) {
     writeFileSync(abs, content.endsWith('\n') ? content : `${content}\n`, 'utf8');
     process.stderr.write(`wrote ${abs}\n`);
   } else if (defaultToStdout) {
+    process.stdout.write(`${content}\n`);
+  }
+}
+
+/** Public output must never log the caller-controlled destination path. */
+function writePublicOutput(args, content) {
+  if (typeof args['output-file'] === 'string') {
+    const abs = resolve(process.cwd(), args['output-file']);
+    writeFileSync(abs, content.endsWith('\n') ? content : `${content}\n`, 'utf8');
+    process.stderr.write('wrote public answer plan\n');
+  } else {
     process.stdout.write(`${content}\n`);
   }
 }
@@ -126,6 +148,7 @@ async function main() {
     runNormalize,
     runHoroscope,
     runInterpret,
+    runAnswerPlan,
     runSynastry,
     timeIndexFromHour,
     calculate,
@@ -213,6 +236,32 @@ async function main() {
         writeOutput(args, canonicalJsonPretty({ ok: true, interpretation, warnings }));
         return;
       }
+      case 'answer-plan': {
+        rejectPublicAnswerArgs(args, EngineError);
+        const raw = readPublicJsonOrThrow(requireArg(args, 'input-file'), EngineError);
+        const input = parsePublicInputOrThrow(parseBirthInput, EngineError, raw);
+        const topic = parseAnswerTopic(args.topic, EngineError);
+        const lens = parseAnswerLens(args.lens, EngineError);
+        let at;
+        if (typeof args.at === 'string') {
+          const parsedAt = parseAtValue(args.at);
+          if (!parsedAt) {
+            throw new EngineError(
+              'INPUT_VALIDATION_FAILED',
+              'The answer-plan target time must use the documented format.',
+            );
+          }
+          at = { solarDate: parsedAt.solarDate, timeIndex: timeIndexFromHour(parsedAt.hour) };
+        }
+        const { publicResult, answerPlan } = runAnswerPlan(input, {
+          topic,
+          lens,
+          now: parseNow(typeof args.now === 'string' ? args.now : undefined),
+          at,
+        });
+        writePublicOutput(args, canonicalJsonPretty({ ok: true, publicResult, answerPlan }));
+        return;
+      }
       case 'synastry': {
         const raw = readJsonFile(requireArg(args, 'input-file'));
         let parsed;
@@ -272,17 +321,110 @@ async function main() {
       }
       default: {
         process.stderr.write(
-          'Usage: ming-chart <doctor|normalize|calculate|compare|horoscope|interpret|synastry|lint-reading|verify|version|migrate> [options]\n',
+          'Usage: ming-chart <doctor|normalize|calculate|compare|horoscope|interpret|answer-plan|synastry|lint-reading|verify|version|migrate> [options]\n',
         );
         process.exit(2);
       }
     }
   } catch (err) {
     const engineError = toEngineError(err);
+    if (command === 'answer-plan') {
+      process.stdout.write(`${canonicalJsonPretty(publicErrorEnvelope(engineError))}\n`);
+      process.stderr.write(`answer-plan failed [${engineError.code}]\n`);
+      process.exit(engineError.exitCode);
+      return;
+    }
     process.stdout.write(`${canonicalJsonPretty(engineError.toEnvelope())}\n`);
     process.stderr.write(`error [${engineError.code}]: ${engineError.message}\n`);
     process.exit(engineError.exitCode);
   }
+}
+
+function readPublicJsonOrThrow(file, EngineError) {
+  try {
+    return readJsonFile(file);
+  } catch {
+    throw new EngineError(
+      'INPUT_VALIDATION_FAILED',
+      'The answer-plan input file could not be read as JSON.',
+    );
+  }
+}
+
+function parsePublicInputOrThrow(parseBirthInput, EngineError, raw) {
+  try {
+    return parseBirthInput(raw);
+  } catch {
+    throw new EngineError(
+      'INPUT_VALIDATION_FAILED',
+      'The answer-plan input does not meet the birth-input contract.',
+    );
+  }
+}
+
+function parseAnswerTopic(value, EngineError) {
+  if (value === undefined) {
+    throw new EngineError('INPUT_VALIDATION_FAILED', 'The answer-plan topic is required.');
+  }
+  if (typeof value !== 'string') {
+    throw new EngineError('INPUT_VALIDATION_FAILED', 'The answer-plan topic requires a value.');
+  }
+  const topic = value;
+  if (!ANSWER_TOPICS.has(topic)) {
+    throw new EngineError('INPUT_VALIDATION_FAILED', 'The answer-plan topic is not supported.');
+  }
+  return topic;
+}
+
+function parseAnswerLens(value, EngineError) {
+  if (value === undefined) return 'overview';
+  if (typeof value !== 'string') {
+    throw new EngineError('INPUT_VALIDATION_FAILED', 'The answer-plan lens requires a value.');
+  }
+  const lens = value;
+  if (!ANSWER_LENSES.has(lens)) {
+    throw new EngineError('INPUT_VALIDATION_FAILED', 'The answer-plan lens is not supported.');
+  }
+  return lens;
+}
+
+function rejectPublicAnswerArgs(args, EngineError) {
+  const allowed = new Set(['input-file', 'topic', 'lens', 'at', 'now', 'output-file']);
+  if (args._.length > 0 || Object.keys(args).some((key) => key !== '_' && !allowed.has(key))) {
+    throw new EngineError(
+      'INPUT_VALIDATION_FAILED',
+      'answer-plan accepts only documented, bounded options and no free-form question text.',
+    );
+  }
+  for (const key of allowed) {
+    if (args[key] === true) {
+      throw new EngineError('INPUT_VALIDATION_FAILED', 'An answer-plan option requires a value.');
+    }
+  }
+}
+
+function publicErrorEnvelope(engineError) {
+  const messageByCode = {
+    INPUT_VALIDATION_FAILED:
+      'The answer request could not be used. Check the documented input fields.',
+    AMBIGUOUS_LOCAL_TIME: 'The local time needs an explicit earlier/later DST choice.',
+    NONEXISTENT_LOCAL_TIME: 'The supplied local time did not occur in that timezone.',
+    DATE_OUT_OF_RANGE: 'The supplied date is outside the engine-supported range.',
+    MISSING_COORDINATES: 'Coordinates are required for this calculation.',
+    UNKNOWN_TIMEZONE: 'The supplied timezone is not available in the bundled timezone database.',
+    HOUSE_SYSTEM_UNAVAILABLE: 'The requested house calculation is unavailable for this input.',
+    PROVIDER_FAILED: 'A calculation provider could not complete the request.',
+    RULESET_UNSUPPORTED: 'The requested ruleset is not supported.',
+    LUNAR_CONVERSION_UNAVAILABLE: 'The supplied lunar-calendar input could not be converted.',
+    INTERNAL_ERROR: 'The answer plan could not be prepared.',
+  };
+  return {
+    ok: false,
+    error: {
+      code: engineError.code,
+      message: messageByCode[engineError.code] ?? 'The answer plan could not be prepared.',
+    },
+  };
 }
 
 function requireArg(args, name) {

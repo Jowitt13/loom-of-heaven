@@ -30,6 +30,7 @@ const REQUIRED_FILES = [
   'scripts/fixtures/smoke.json',
   'references/input-contract.md',
   'references/output-contract.md',
+  'references/answer-contract.md',
   'references/rulesets.md',
   'references/sources-and-limitations.md',
   'references/privacy.md',

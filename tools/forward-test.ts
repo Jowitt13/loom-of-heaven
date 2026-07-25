@@ -439,6 +439,45 @@ try {
       !hSyn.stdout.includes('Fictional test location') &&
       ((hSyn2.disclaimers ?? []) as unknown[]).length > 0,
   );
+
+  // --- Request I: ordinary question uses only the public answer-plan contract. --
+  const iAnswer = runNode(tempSkill, [
+    'scripts/ming-chart.mjs',
+    'answer-plan',
+    '--input-file',
+    aInput,
+    '--topic',
+    'career',
+    '--lens',
+    'advice',
+    '--now',
+    FIXED_NOW,
+  ]);
+  const iJson = parseJson(iAnswer.stdout);
+  const iResult = iJson?.publicResult as Json | undefined;
+  const iPlan = iJson?.answerPlan as Json | undefined;
+  const iSelected = (iPlan?.selectedFacts ?? []) as Array<{ id: string; topic: string }>;
+  const iAllowed = (iPlan?.allowedFactIds ?? []) as string[];
+  const privateFields = [
+    'originalInput',
+    'requestId',
+    'normalizedTime',
+    'calculatedAt',
+    'timezone',
+    '"note"',
+    'Fictional test location',
+  ];
+  record('I: answer-plan runs in clean dir (exit 0)', iAnswer.code === 0 && iJson?.ok === true);
+  record(
+    'I: answer-plan has no direct birth input or raw evidence fields',
+    iResult !== undefined && privateFields.every((field) => !iAnswer.stdout.includes(field)),
+  );
+  record(
+    'I: answer-plan scopes facts to career and makes every one citable',
+    iSelected.length > 0 &&
+      iSelected.every((fact) => fact.topic === 'career') &&
+      JSON.stringify(iAllowed) === JSON.stringify(iSelected.map((fact) => fact.id)),
+  );
 } finally {
   rmSync(tempBase, { recursive: true, force: true });
 }

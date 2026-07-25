@@ -54,18 +54,22 @@ To keep results consistent across models, the **calculation** workflow is mandat
    calendar/leap month, rule gender and ruleset. Explicitly flag when the time is approximate,
    near a day/hour/solar-term boundary, or when historical DST makes the local time ambiguous.
 2. Build `birth-input.json` (see `references/input-contract.md`).
-3. Run `doctor`, then `normalize`, then **always run BOTH** `calculate --systems all` **and**
-   `interpret` — even if the user only wants a chart, and even if they named a single system.
-   `calculate` returns the raw three-system chart; `interpret` runs the sourced BaZi rules
-   (旺衰强弱 / 格局 / 喜用神 / 神煞 / 刑冲合害 / 大运·流年吉凶) and the cross-system facts. These
-   interpretation items are **not** in `chart.json` — they only come from `interpret`.
+3. Run `doctor`, then `normalize`. For a **full technical chart**, run BOTH `calculate --systems all`
+   and `interpret`. For an **ordinary question**, run `answer-plan --topic <bounded-topic>` instead:
+   it always computes all three systems internally, then returns only a de-identified `publicResult`
+   and a topic-scoped `answerPlan`. Do not create or attach raw chart artifacts for an ordinary
+   question. `calculate` returns the private three-system chart; `interpret` runs the sourced BaZi
+   rules (旺衰强弱 / 格局 / 喜用神 / 神煞 / 刑冲合害 / 大运·流年吉凶) and cross-system facts.
 4. **Choose one output channel — never front-load the three raw charts into a topic report:**
    - **Channel A — 排盘 / 原始数据 / 完整命盘 / 技术报告:** full three-system charts (step 5) + the full BaZi interpretation (step 6) + all warnings/provenance.
-   - **Channel B — a single topic (事业/感情/财运/学业/流年):** the body shows **only the facts relevant to that topic**; put their 命理 terms under a “专业依据” section; the rest of the full chart/interpretation stays in `chart.json` / `interpretation.json` / an optional appendix. There is **no** requirement to display all three raw charts or the full 八字 fact set in a topic report.
+   - **Channel B — a single topic (事业/感情/财运/学业/流年):** use only `answerPlan.selectedFacts` and its
+     `allowedFactIds`; do not read or attach `chart.json` / `interpretation.json`. The body shows
+     **only the facts relevant to that topic**, with terms under a “专业依据” section. There is no
+     requirement to display all three raw charts or the full 八字 fact set in a topic report.
    - Per-topic loading: 事业 → `references/reading-style.md` + `references/examples-career.md`; 感情 → `+ references/examples-love.md`; 财运 → `+ references/examples-wealth.md`; 学业/流年 → `reading-style.md`（不加载无关案例文件）。
    - **Channel B 是强制三阶段写作——第 1-5 部分与追问是无命理术语区：**
-     1. 选事实（内部）：从 `interpretation.json` 挑当前主题相关 facts，保留原始 claim/reason/evidence，此层可含全部术语，**不直接给用户**。
-     2. 通俗中间层（内部写作计划）：把每条事实转成 plainResult / behavior / scenario / upside / risk / action + sourceRefs（对应 evidence.ref 或 ruleId）；**不改 schema、不写回 interpretation.json**。
+     1. 选事实（内部）：只使用 `answerPlan.selectedFacts`，并保留 `id` / `reason` / `evidence.ref` / `caveat`；**不直接给用户**。
+     2. 通俗中间层（内部写作计划）：把每条事实转成 plainResult / behavior / scenario / upside / risk / action + sourceRefs（对应 `id` 与 evidence.ref）；**不改 schema、不写回输出文件**。
      3. 成文：第 1-5 部分与结尾追问**只用**通俗中间层；原始 claim/reason、干支、十神、星曜、宫位名**只允许进第 6 部分“专业依据”**。禁止把 claim 轻改后塞进核心结论；禁止括号夹带（不写“技能容易变现（食伤生财）”，写“技能和作品更容易形成收入”，依据放第 6 部分）。“甲戌大运/戊申流年”等干支移入第 6 部分，正文只留年份数字。
    - **术语防火墙 + 真实检查（lint-reading）:** 成文后，删去第 6 部分“专业依据”再检查剩余正文；只要仍出现命理术语（见 `reading-style.md` 开头清单）或顾问黑话，就必须重写。用随 Skill 发布的确定性检查器验证草稿：
      `node scripts/ming-chart.mjs lint-reading --input-file draft.md --channel topic [--simple]`
@@ -86,12 +90,15 @@ To keep results consistent across models, the **calculation** workflow is mandat
 6. **Sourced BaZi interpretation from `interpretation.json`** — 旺衰强弱, 格局, 喜用神 (+`reason`),
    神煞, 刑冲合害, and the 大运·流年 吉凶倾向 (each fact's `polarity`+`reason`+`source`). These ARE
    engine-produced (via `interpret`); **never** say this version “does not output” them or hand-compute a
-   substitute. **Channel A shows the full set; Channel B shows only the facts relevant to the asked topic**
-   (their terms go under “专业依据”). Only if `interpret` genuinely returns no fact for an item may you say it is absent.
-7. Relay **every** `warnings` entry and the `provenance` versions plainly (**both channels**). Never present an
-   omitted or approximate result as if it were exact.
-8. For a deeper/topic reading (吉凶/运势/事业/感情/财运/学业/流年), narrate from the same `interpretation.json`
-   following the **7-step order** in `references/reading-style.md`; 排盘校对与免责整篇只出现一次。
+   substitute. **Channel A shows the full set; Channel B uses only `answerPlan.selectedFacts`**
+   (their terms go under “专业依据”). Only if the answer plan has no eligible fact may you say it is absent.
+7. Relay every `warnings` entry for Channel A. For Channel B, relay every code in
+   `answerPlan.requiredWarningCodes` using the matching public warning `impact` / `nextStep` — never
+   copy a private warning message or detail. Never present an omitted or approximate result as if it
+   were exact.
+8. For a deeper/topic reading (吉凶/运势/事业/感情/财运/学业/流年), narrate only from the
+   `answerPlan` following the **7-step order** in `references/reading-style.md`; cite each
+   selected fact id internally, honor `guardrails`, and keep 排盘校对与免责整篇只出现一次。
 9. **Close with a single one-line follow-up entry** (not a long menu), e.g. “还想看：事业 / 感情 / 财运 / 学业 / 流年？”.
 
 ## Multi-person 合婚 / relationship analysis (`synastry`)
@@ -120,6 +127,7 @@ node scripts/ming-chart.mjs calculate --input-file birth-input.json --systems al
 node scripts/ming-chart.mjs compare   --input-file birth-input.json --profiles default,apparent-solar --output-file comparison.json
 node scripts/ming-chart.mjs horoscope --input-file birth-input.json --at 2026-05-20T14:00 --output-file horoscope.json
 node scripts/ming-chart.mjs interpret --input-file birth-input.json --at 2026-05-20T14:00 --output-file interpretation.json
+node scripts/ming-chart.mjs answer-plan --input-file birth-input.json --topic career --lens advice --output-file answer-plan.json
 node scripts/ming-chart.mjs synastry --input-file people.json --output-file synastry.json
 node scripts/ming-chart.mjs verify
 node scripts/ming-chart.mjs version
@@ -140,6 +148,12 @@ node scripts/ming-chart.mjs migrate --host qoder|workbuddy --source <extracted-n
 - `interpret` produces `interpretation.json`: topic-organized, evidence-grounded facts (with
   `polarity` 吉/凶/中性 and `reason` chains) plus `disclaimers` and `followupOffers`. `--at`
   additionally folds in the current Zi Wei 流年.
+- `answer-plan` is the ordinary-question entry point. It accepts only a bounded `--topic`
+  (`character|career|wealth|marriage|studies|health|general`) and `--lens`
+  (`overview|strengths|risks|timing|advice|explain`), never free-form question text. It computes
+  all three systems internally and returns `publicResult` plus `answerPlan`; see
+  `references/answer-contract.md`. Use `general` only for an explicitly requested complete
+  overview, never as the fallback for an unclear question.
 - **`render` is temporarily disabled.** HTML/SVG reports could not be produced reliably across
   host models, so the command now prints a stable JSON notice and exits with code 3. Present the
   structured `calculate` / `interpret` JSON instead. (The renderer stays dormant for a future
@@ -147,11 +161,12 @@ node scripts/ming-chart.mjs migrate --host qoder|workbuddy --source <extracted-n
 - On success the CLI prints `{ "ok": true, ... }`; on failure it prints
   `{ "ok": false, "error": { "code": ... } }` and exits non-zero.
 
-## Natural-language interpretation (the `interpret` step)
+## Natural-language interpretation (the `answer-plan` step)
 
-When the user wants a reading, run `interpret` and narrate ONLY from the `interpretation.json`
-it returns. That file is the de-identified, evidence-grounded substrate — never the raw birth
-data and never your own invention. Follow the fixed **7-step order** in
+When the user wants an ordinary reading, run `answer-plan` and narrate ONLY from its
+`answerPlan.selectedFacts`. The plan is the de-identified, evidence-grounded substrate — never
+raw birth data and never your own invention. It contains no free-form question text; map the
+question to a bounded topic/lens first, or ask a clarification question. Follow the fixed **7-step order** in
 `references/reading-style.md`:
 
 1. **30秒看懂:** 先给核心结论块（【核心结论】/【最大优势】/【最大风险】/【关键时间】/【现实建议】）。
@@ -168,7 +183,7 @@ data and never your own invention. Follow the fixed **7-step order** in
 
 Guardrails:
 
-- Narrate **only** from the `facts` provided; if a topic has no fact, say so — do not backfill
+- Narrate **only** from `answerPlan.selectedFacts`; if a topic has no fact, say so — do not backfill
   positions, stems, stars, houses, or verdicts.
 - 吉凶/运势 verdicts are permitted as traditional-metaphysical judgements, but honor every item
   in `disclaimers`: this is traditional-culture / entertainment / self-reflection material, **非科学预测**.
@@ -203,11 +218,16 @@ calculated.
 
 ## Result handling
 
-- `chart.json` is the source of truth; attach it (and `interpretation.json` when a reading was
-  requested) as workspace artifacts. There is no HTML/SVG report in this version.
+- For an ordinary question, `answer-plan.json` is the only default artifact. It omits direct birth
+  input, deterministic request ids, normalized timestamps, timezone, raw warning details and raw
+  evidence notes. It is a de-identified answer context, **not anonymous public data**: obtain the
+  user's consent before any caller sends derived facts to a remote model or service.
+- Generate or attach `chart.json` / `interpretation.json` only when the user explicitly asks for
+  a full technical chart or raw JSON. Keep those private artifacts and temporary input files out
+  of ordinary-topic workspaces; remove them after the task unless the user asks to retain them.
 - If the birth time is unknown, do not claim an ascendant, houses, hour pillar or Zi Wei hour.
-- Always surface `warnings` (approximate time, DST resolution, near-boundary, solar-time or
-  sidereal/asteroid approximation) and the `provenance` versions.
+- For full technical output, surface all raw `warnings` and `provenance` versions. For an ordinary
+  answer, surface only the generic impact of `answerPlan.requiredWarningCodes`.
 
 ## Scope and disclaimer
 

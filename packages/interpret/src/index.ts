@@ -3,4 +3,5 @@
  * Offline, deterministic, de-identified, evidence-grounded; never prose or prediction.
  */
 export * from './build.ts';
+export * from './answer-plan.ts';
 export * from './reading-lint.ts';

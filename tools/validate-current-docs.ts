@@ -127,6 +127,16 @@ const RULES: DocRule[] = [
     must: [
       { re: /Channel B/, msg: '缺 Channel B 区分' },
       { re: /VSOP87|NOVAS/, msg: '缺 VSOP87/NOVAS' },
+      { re: /answer-plan/, msg: '缺 ordinary-question answer-plan 入口' },
+    ],
+  },
+  {
+    file: `${SKILL}/references/answer-contract.md`,
+    must: [
+      { re: /answer-plan/, msg: '缺 answer-plan 命令说明' },
+      { re: /free-form user question|自由文本问题/, msg: '缺自由文本问题隔离说明' },
+      { re: /originalInput/, msg: '缺私有字段排除说明' },
+      { re: /consent|同意/, msg: '缺远程传输同意说明' },
     ],
   },
   {
