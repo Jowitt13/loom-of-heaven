@@ -40194,6 +40194,64 @@ var BaziInterpretation = external_exports.object({
   findings: external_exports.array(BaziRuleFinding)
 });
 
+// packages/contracts/src/western-interpretation.ts
+var WesternRuleSource = external_exports.object({
+  /** Classical work, e.g. 'Ptolemy, Tetrabiblos' or 'Lilly, Christian Astrology'. */
+  text: external_exports.string(),
+  /** Section / chapter the rule derives from. */
+  chapter: external_exports.string()
+});
+var WesternRuleTopic = external_exports.enum([
+  "planet-sign",
+  "planet-house",
+  "angle",
+  "aspect",
+  "dignity"
+]);
+var WesternRuleFinding = external_exports.object({
+  /** Stable rule id within the ruleset (e.g. 'planet-sign/sun-aries'). */
+  ruleId: external_exports.string(),
+  topic: WesternRuleTopic,
+  /** Whether the rule's precondition matched this chart. */
+  matched: external_exports.boolean(),
+  /** The deterministic, sourced claim about meaning. */
+  claim: external_exports.string(),
+  source: WesternRuleSource,
+  /** Supporting reasoning derived from the chart's structured facts. */
+  reason: external_exports.string().optional()
+});
+var WesternInterpretation = external_exports.object({
+  rulesetId: external_exports.string(),
+  provider: ProviderRef,
+  findings: external_exports.array(WesternRuleFinding)
+});
+
+// packages/contracts/src/ziwei-interpretation.ts
+var ZiweiRuleSource = external_exports.object({
+  /** Classical work, e.g. '紫微斗数全书' or '太微赋'. */
+  text: external_exports.string(),
+  /** Section / chapter the rule derives from. */
+  chapter: external_exports.string()
+});
+var ZiweiRuleTopic = external_exports.enum(["main-star", "palace-star", "sihua", "brightness"]);
+var ZiweiRuleFinding = external_exports.object({
+  /** Stable rule id within the ruleset (e.g. 'main-star/ziwei'). */
+  ruleId: external_exports.string(),
+  topic: ZiweiRuleTopic,
+  /** Whether the rule's precondition matched this chart. */
+  matched: external_exports.boolean(),
+  /** The deterministic, sourced claim about meaning. */
+  claim: external_exports.string(),
+  source: ZiweiRuleSource,
+  /** Supporting reasoning derived from the chart's structured facts. */
+  reason: external_exports.string().optional()
+});
+var ZiweiInterpretation = external_exports.object({
+  rulesetId: external_exports.string(),
+  provider: ProviderRef,
+  findings: external_exports.array(ZiweiRuleFinding)
+});
+
 // packages/contracts/src/ziwei.ts
 var ZiweiStar = external_exports.object({
   name: external_exports.string(),
@@ -40403,6 +40461,8 @@ var EvidenceKind = external_exports.enum([
   "ziwei",
   "ziwei-horoscope",
   "bazi-rule",
+  "western-rule",
+  "ziwei-rule",
   "time"
 ]);
 var InterpretationEvidence = external_exports.object({
@@ -52806,6 +52866,455 @@ function interpretBazi(bazi, opts = {}) {
   return { rulesetId: BAZI_RULES_RULESET_ID, provider: PROVIDER4, findings };
 }
 
+// packages/western-rules/src/planet-sign.ts
+var SRC = { text: "Ptolemy, Tetrabiblos", chapter: "Book I\u2013III, planetary natures" };
+var PLANET_SIGN_MEANINGS = {
+  Sun: {
+    Aries: "\u884C\u52A8\u529B\u5F3A\u3001\u5F00\u62D3\u610F\u613F\u660E\u663E",
+    Taurus: "\u91CD\u89C6\u7A33\u5B9A\u4E0E\u5B9E\u8D28\u6210\u679C",
+    Gemini: "\u601D\u7EF4\u6D3B\u8DC3\u3001\u9002\u5E94\u529B\u5F3A",
+    Cancer: "\u60C5\u611F\u9A71\u52A8\u3001\u91CD\u89C6\u5F52\u5C5E",
+    Leo: "\u8868\u8FBE\u6B32\u5F3A\u3001\u8FFD\u6C42\u88AB\u770B\u89C1",
+    Virgo: "\u6CE8\u91CD\u7EC6\u8282\u4E0E\u5B9E\u7528",
+    Libra: "\u8FFD\u6C42\u5E73\u8861\u4E0E\u5408\u4F5C",
+    Scorpio: "\u6DF1\u5EA6\u63A2\u7D22\u3001\u610F\u5FD7\u96C6\u4E2D",
+    Sagittarius: "\u8FFD\u6C42\u610F\u4E49\u4E0E\u66F4\u5927\u89C6\u91CE",
+    Capricorn: "\u76EE\u6807\u5BFC\u5411\u3001\u6CE8\u91CD\u7ED3\u6784",
+    Aquarius: "\u72EC\u7ACB\u601D\u8003\u3001\u5173\u6CE8\u96C6\u4F53",
+    Pisces: "\u76F4\u89C9\u654F\u9510\u3001\u5BCC\u540C\u7406\u5FC3"
+  },
+  Moon: {
+    Aries: "\u60C5\u7EEA\u53CD\u5E94\u5FEB\u3001\u9700\u8981\u72EC\u7ACB\u7A7A\u95F4",
+    Taurus: "\u60C5\u7EEA\u7A33\u5B9A\u3001\u9700\u8981\u5B89\u5168\u611F",
+    Gemini: "\u60C5\u7EEA\u591A\u53D8\u3001\u9700\u8981\u4EA4\u6D41\u523A\u6FC0",
+    Cancer: "\u60C5\u611F\u4E30\u5BCC\u3001\u9700\u8981\u5BB6\u5EAD\u5F52\u5C5E",
+    Leo: "\u9700\u8981\u88AB\u6B23\u8D4F\u3001\u60C5\u611F\u8868\u8FBE\u5916\u653E",
+    Virgo: "\u60C5\u7EEA\u5185\u655B\u3001\u9700\u8981\u79E9\u5E8F\u611F",
+    Libra: "\u9700\u8981\u548C\u8C10\u73AF\u5883\u3001\u56DE\u907F\u51B2\u7A81",
+    Scorpio: "\u60C5\u611F\u6DF1\u6C89\u3001\u9700\u8981\u6DF1\u5EA6\u8FDE\u63A5",
+    Sagittarius: "\u60C5\u7EEA\u4E50\u89C2\u3001\u9700\u8981\u81EA\u7531\u7A7A\u95F4",
+    Capricorn: "\u60C5\u7EEA\u514B\u5236\u3001\u9700\u8981\u6210\u5C31\u611F",
+    Aquarius: "\u60C5\u611F\u72EC\u7ACB\u3001\u9700\u8981\u7406\u5FF5\u8BA4\u540C",
+    Pisces: "\u60C5\u7EEA\u6613\u611F\u3001\u9700\u8981\u7CBE\u795E\u5BC4\u6258"
+  },
+  Mercury: {
+    Aries: "\u601D\u8003\u76F4\u63A5\u679C\u65AD",
+    Taurus: "\u601D\u8003\u52A1\u5B9E\u7F13\u6162",
+    Gemini: "\u601D\u7EF4\u7075\u6D3B\u5584\u53D8",
+    Cancer: "\u601D\u8003\u5E26\u60C5\u611F\u8272\u5F69",
+    Leo: "\u8868\u8FBE\u6709\u611F\u67D3\u529B",
+    Virgo: "\u5206\u6790\u7CBE\u7EC6\u6709\u6761\u7406",
+    Libra: "\u5584\u4E8E\u6743\u8861\u591A\u65B9",
+    Scorpio: "\u601D\u7EF4\u6DF1\u5165\u7A7F\u900F",
+    Sagittarius: "\u601D\u8DEF\u5F00\u9614\u8DF3\u8DC3",
+    Capricorn: "\u601D\u8003\u6709\u7ED3\u6784\u6709\u76EE\u6807",
+    Aquarius: "\u601D\u7EF4\u521B\u65B0\u975E\u4E3B\u6D41",
+    Pisces: "\u601D\u8003\u76F4\u89C9\u5316\u8DF3\u8DC3"
+  },
+  Venus: {
+    Aries: "\u611F\u60C5\u4E3B\u52A8\u51B2\u52A8",
+    Taurus: "\u611F\u60C5\u7A33\u5B9A\u5FE0\u8BDA",
+    Gemini: "\u793E\u4EA4\u7075\u6D3B\u591A\u5143",
+    Cancer: "\u60C5\u611F\u4ED8\u51FA\u6709\u4FDD\u62A4\u6027",
+    Leo: "\u559C\u6B22\u70ED\u70C8\u6D6A\u6F2B",
+    Virgo: "\u5728\u5173\u7CFB\u4E2D\u6CE8\u91CD\u5B9E\u9645",
+    Libra: "\u5929\u7136\u8FFD\u6C42\u548C\u8C10\u7F8E\u611F",
+    Scorpio: "\u611F\u60C5\u6DF1\u6C89\u6392\u4ED6",
+    Sagittarius: "\u611F\u60C5\u9700\u8981\u81EA\u7531\u7A7A\u95F4",
+    Capricorn: "\u611F\u60C5\u52A1\u5B9E\u6709\u8D23\u4EFB\u5FC3",
+    Aquarius: "\u60C5\u611F\u72EC\u7ACB\u4E0D\u62D8\u4F20\u7EDF",
+    Pisces: "\u611F\u60C5\u6D6A\u6F2B\u7406\u60F3\u5316"
+  },
+  Mars: {
+    Aries: "\u884C\u52A8\u529B\u5F3A\u76F4\u63A5",
+    Taurus: "\u505A\u4E8B\u6301\u4E45\u6709\u8010\u529B",
+    Gemini: "\u7CBE\u529B\u5206\u6563\u7075\u6D3B",
+    Cancer: "\u88AB\u52A8\u5F0F\u53D1\u529B\u3001\u53D7\u60C5\u611F\u9A71\u52A8",
+    Leo: "\u6709\u8868\u73B0\u6B32\u3001\u5927\u65B9\u6295\u5165",
+    Virgo: "\u7CBE\u529B\u7528\u4E8E\u7EC6\u8282\u5B8C\u5584",
+    Libra: "\u884C\u52A8\u524D\u9700\u8981\u6743\u8861",
+    Scorpio: "\u610F\u5FD7\u529B\u96C6\u4E2D\u6301\u4E45",
+    Sagittarius: "\u7CBE\u529B\u5145\u6C9B\u76EE\u6807\u8FDC\u5927",
+    Capricorn: "\u884C\u52A8\u6709\u8BA1\u5212\u6709\u7EAA\u5F8B",
+    Aquarius: "\u505A\u4E8B\u4E0D\u6309\u5E38\u89C4",
+    Pisces: "\u884C\u52A8\u529B\u53D7\u76F4\u89C9\u548C\u60C5\u7EEA\u5F71\u54CD"
+  }
+};
+function planetSignFindings(chart) {
+  const out = [];
+  for (const planet of chart.planets) {
+    const meanings = PLANET_SIGN_MEANINGS[planet.body];
+    if (!meanings) continue;
+    const claim = meanings[planet.sign];
+    if (!claim) continue;
+    out.push({
+      ruleId: `planet-sign/${planet.body.toLowerCase()}-${planet.sign.toLowerCase()}`,
+      topic: "planet-sign",
+      matched: true,
+      claim: `${planet.body}\u5728${planet.sign}\uFF1A${claim}`,
+      source: SRC,
+      reason: `${planet.body}\u843D\u5165${planet.sign}\uFF0C\u8BE5\u661F\u4F53\u7684\u80FD\u91CF\u4EE5\u6B64\u661F\u5EA7\u7684\u65B9\u5F0F\u8868\u8FBE`
+    });
+  }
+  return out;
+}
+
+// packages/western-rules/src/planet-house.ts
+var SRC2 = { text: "Lilly, Christian Astrology", chapter: "Houses and their significations" };
+var HOUSE_MEANINGS = {
+  1: "\u4E0E\u4E2A\u4EBA\u8EAB\u4EFD\u548C\u81EA\u6211\u8868\u8FBE\u76F4\u63A5\u76F8\u5173",
+  4: "\u4E0E\u5BB6\u5EAD\u3001\u6839\u57FA\u548C\u5185\u5728\u5B89\u5168\u611F\u76F8\u5173",
+  7: "\u4E0E\u4E00\u5BF9\u4E00\u5173\u7CFB\u548C\u5408\u4F5C\u76F8\u5173",
+  10: "\u4E0E\u4E8B\u4E1A\u3001\u793E\u4F1A\u5730\u4F4D\u548C\u516C\u4F17\u5F62\u8C61\u76F8\u5173"
+};
+function planetHouseFindings(chart) {
+  const out = [];
+  for (const planet of chart.planets) {
+    if (planet.body !== "Sun" && planet.body !== "Moon") continue;
+    if (planet.house === null) continue;
+    const meaning = HOUSE_MEANINGS[planet.house];
+    if (!meaning) continue;
+    out.push({
+      ruleId: `planet-house/${planet.body.toLowerCase()}-h${planet.house}`,
+      topic: "planet-house",
+      matched: true,
+      claim: `${planet.body}\u5728\u7B2C${planet.house}\u5BAB\uFF1A\u6838\u5FC3\u80FD\u91CF${meaning}`,
+      source: SRC2,
+      reason: `${planet.body}\u843D\u5165\u7B2C${planet.house}\u5BAB\uFF08\u89D2\u5BAB\uFF09\uFF0C\u8BE5\u5BAB\u4F4D\u4E3B\u9898\u88AB\u5F3A\u5316`
+    });
+  }
+  return out;
+}
+
+// packages/western-rules/src/angles.ts
+var SRC3 = { text: "Ptolemy, Tetrabiblos", chapter: "Book III, angles and their nature" };
+var ASC_MEANINGS = {
+  Aries: "\u5916\u5728\u5F62\u8C61\u4E3B\u52A8\u679C\u6562",
+  Taurus: "\u7ED9\u4EBA\u6C89\u7A33\u52A1\u5B9E\u7684\u5370\u8C61",
+  Gemini: "\u5916\u5728\u7075\u6D3B\u591A\u9762\u5584\u6C9F\u901A",
+  Cancer: "\u5916\u5728\u6E29\u548C\u6709\u4FDD\u62A4\u8272\u5F69",
+  Leo: "\u5916\u5728\u81EA\u4FE1\u6709\u611F\u67D3\u529B",
+  Virgo: "\u5916\u5728\u8C28\u614E\u7CBE\u7EC6",
+  Libra: "\u5916\u5728\u4F18\u96C5\u91CD\u793E\u4EA4",
+  Scorpio: "\u5916\u5728\u6DF1\u6C89\u6709\u7A7F\u900F\u529B",
+  Sagittarius: "\u5916\u5728\u5F00\u6717\u6709\u8FDC\u89C1",
+  Capricorn: "\u5916\u5728\u7A33\u91CD\u6709\u8D23\u4EFB\u611F",
+  Aquarius: "\u5916\u5728\u72EC\u7279\u4E0D\u8D70\u5BFB\u5E38\u8DEF",
+  Pisces: "\u5916\u5728\u67D4\u548C\u6709\u827A\u672F\u6C14\u8D28"
+};
+var MC_MEANINGS = {
+  Aries: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u5F00\u62D3\u548C\u9886\u5BFC",
+  Taurus: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u7A33\u5B9A\u79EF\u7D2F\u4E0E\u91D1\u878D",
+  Gemini: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u6C9F\u901A\u548C\u4FE1\u606F",
+  Cancer: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u7167\u987E\u548C\u670D\u52A1",
+  Leo: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u521B\u610F\u548C\u8868\u6F14",
+  Virgo: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u5206\u6790\u548C\u6539\u5584",
+  Libra: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u534F\u8C03\u548C\u7F8E\u5B66",
+  Scorpio: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u8C03\u7814\u548C\u8F6C\u5316",
+  Sagittarius: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u6559\u80B2\u548C\u62D3\u5C55",
+  Capricorn: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u7BA1\u7406\u548C\u5EFA\u6784",
+  Aquarius: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u521B\u65B0\u548C\u6280\u672F",
+  Pisces: "\u4E8B\u4E1A\u65B9\u5411\u504F\u5411\u827A\u672F\u548C\u7597\u6108"
+};
+function angleFindings(chart) {
+  const out = [];
+  if (!chart.angles) return out;
+  const ascSign = chart.angles.ascendant.sign;
+  const ascMeaning = ASC_MEANINGS[ascSign];
+  if (ascMeaning) {
+    out.push({
+      ruleId: `angle/asc-${ascSign.toLowerCase()}`,
+      topic: "angle",
+      matched: true,
+      claim: `\u4E0A\u5347${ascSign}\uFF1A${ascMeaning}`,
+      source: SRC3,
+      reason: `\u4E0A\u5347\u70B9\u843D\u5165${ascSign}\uFF0C\u51B3\u5B9A\u5916\u5728\u8868\u73B0\u4E0E\u4ED6\u4EBA\u7B2C\u4E00\u5370\u8C61`
+    });
+  }
+  const mcSign = chart.angles.mc.sign;
+  const mcMeaning = MC_MEANINGS[mcSign];
+  if (mcMeaning) {
+    out.push({
+      ruleId: `angle/mc-${mcSign.toLowerCase()}`,
+      topic: "angle",
+      matched: true,
+      claim: `MC\u5728${mcSign}\uFF1A${mcMeaning}`,
+      source: SRC3,
+      reason: `\u5929\u9876(MC)\u843D\u5165${mcSign}\uFF0C\u663E\u793A\u793E\u4F1A\u89D2\u8272\u4E0E\u4E8B\u4E1A\u65B9\u5411\u7684\u57FA\u8C03`
+    });
+  }
+  return out;
+}
+
+// packages/western-rules/src/aspects.ts
+var SRC4 = { text: "Ptolemy, Tetrabiblos", chapter: "Book I, aspects and their effects" };
+var ASPECT_MEANINGS = {
+  conjunction: "\u80FD\u91CF\u878D\u5408\u3001\u4E3B\u9898\u53E0\u52A0\u5F3A\u5316",
+  opposition: "\u5185\u5728\u5F20\u529B\u3001\u9700\u8981\u6574\u5408\u5BF9\u7ACB\u9762",
+  square: "\u6210\u957F\u538B\u529B\u3001\u9700\u8981\u7A81\u7834\u4F46\u6709\u963B\u529B",
+  trine: "\u80FD\u91CF\u548C\u8C10\u6D41\u52A8\u3001\u5929\u7136\u4F18\u52BF",
+  sextile: "\u6709\u53D1\u5C55\u673A\u4F1A\u3001\u9700\u8981\u4E3B\u52A8\u628A\u63E1"
+};
+function aspectFindings(chart) {
+  const out = [];
+  const luminaries = /* @__PURE__ */ new Set(["Sun", "Moon"]);
+  for (const asp of chart.aspects) {
+    if (!luminaries.has(asp.bodyA) && !luminaries.has(asp.bodyB)) continue;
+    const meaning = ASPECT_MEANINGS[asp.type];
+    if (!meaning) continue;
+    out.push({
+      ruleId: `aspect/${asp.bodyA.toLowerCase()}-${asp.type}-${asp.bodyB.toLowerCase()}`,
+      topic: "aspect",
+      matched: true,
+      claim: `${asp.bodyA}\u4E0E${asp.bodyB}${asp.type}\uFF1A${meaning}`,
+      source: SRC4,
+      reason: `${asp.bodyA}\u548C${asp.bodyB}\u5F62\u6210${asp.type}\u76F8\u4F4D\uFF08\u5BB9\u8BB8\u5EA6${asp.orbDeg.toFixed(1)}\xB0\uFF09\uFF0C\u4E24\u8005\u4E3B\u9898\u4EA7\u751F\u4E92\u52A8`
+    });
+  }
+  return out;
+}
+
+// packages/western-rules/src/dignity.ts
+var SRC5 = { text: "Ptolemy, Tetrabiblos", chapter: "Book I, essential dignities" };
+var DIGNITY_MEANINGS = {
+  domicile: "\u5728\u672C\u5EA7\uFF0C\u80FD\u91CF\u5145\u5206\u8868\u8FBE",
+  exaltation: "\u5728\u65FA\u5EA7\uFF0C\u80FD\u91CF\u63D0\u5347",
+  detriment: "\u5728\u5F31\u52BF\u5EA7\uFF0C\u80FD\u91CF\u8868\u8FBE\u53D7\u9650\uFF0C\u9700\u540E\u5929\u52AA\u529B",
+  fall: "\u5728\u843D\u9677\u5EA7\uFF0C\u80FD\u91CF\u53D1\u6325\u56F0\u96BE\uFF0C\u9700\u523B\u610F\u7ECF\u8425"
+};
+function dignityFindings(chart) {
+  const out = [];
+  for (const planet of chart.planets) {
+    if (!planet.dignity) continue;
+    const meaning = DIGNITY_MEANINGS[planet.dignity];
+    if (!meaning) continue;
+    out.push({
+      ruleId: `dignity/${planet.body.toLowerCase()}-${planet.dignity}`,
+      topic: "dignity",
+      matched: true,
+      claim: `${planet.body}\u5904\u4E8E${planet.dignity}\u72B6\u6001\uFF1A${meaning}`,
+      source: SRC5,
+      reason: `${planet.body}\u5728${planet.sign}\u4E3A${planet.dignity}\uFF0C\u53E4\u5178\u5360\u661F\u8BA4\u4E3A\u6B64\u4F4D\u7F6E${meaning}`
+    });
+  }
+  return out;
+}
+
+// packages/western-rules/src/interpret.ts
+var WESTERN_RULES_VERSION = "0.1.0";
+var WESTERN_RULES_RULESET_ID = `western-rules@${WESTERN_RULES_VERSION}`;
+var PROVIDER5 = {
+  id: "western-rules",
+  version: WESTERN_RULES_VERSION,
+  license: "MIT"
+};
+function interpretWestern(chart) {
+  return {
+    rulesetId: WESTERN_RULES_RULESET_ID,
+    provider: PROVIDER5,
+    findings: [
+      ...planetSignFindings(chart),
+      ...planetHouseFindings(chart),
+      ...angleFindings(chart),
+      ...aspectFindings(chart),
+      ...dignityFindings(chart)
+    ]
+  };
+}
+
+// packages/ziwei-rules/src/main-star.ts
+var SRC6 = { text: "\u7D2B\u5FAE\u6597\u6570\u5168\u4E66", chapter: "\u8BF8\u661F\u8BBA" };
+var STAR_MEANINGS = {
+  \u7D2B\u5FAE: "\u9886\u5BFC\u529B\u4E0E\u5C0A\u8D35\uFF0C\u5584\u4E8E\u7EDF\u7B79\u5168\u5C40",
+  \u5929\u673A: "\u667A\u6167\u7075\u6D3B\uFF0C\u5584\u4E8E\u7B56\u5212\u548C\u5E94\u53D8",
+  \u592A\u9633: "\u5149\u660E\u6B63\u5927\uFF0C\u4E3B\u52A8\u4ED8\u51FA\u4E0D\u6C42\u56DE\u62A5",
+  \u6B66\u66F2: "\u521A\u6BC5\u679C\u51B3\uFF0C\u5584\u4E8E\u7406\u8D22\u4E0E\u6267\u884C",
+  \u5929\u540C: "\u6E29\u548C\u77E5\u8DB3\uFF0C\u8FFD\u6C42\u751F\u6D3B\u54C1\u8D28",
+  \u5EC9\u8D1E: "\u591A\u624D\u591A\u827A\uFF0C\u60C5\u611F\u4E30\u5BCC\u4F46\u590D\u6742",
+  \u5929\u5E9C: "\u7A33\u91CD\u4FDD\u5B88\uFF0C\u5584\u4E8E\u5B88\u6210\u4E0E\u7BA1\u7406",
+  \u592A\u9634: "\u7EC6\u817B\u5185\u655B\uFF0C\u5584\u4E8E\u8BA1\u5212\u4E0E\u6536\u85CF",
+  \u8D2A\u72FC: "\u591A\u6B32\u591A\u624D\uFF0C\u793E\u4EA4\u80FD\u529B\u5F3A",
+  \u5DE8\u95E8: "\u53E3\u624D\u4E0E\u5206\u6790\u529B\u5F3A\uFF0C\u5584\u4E8E\u63A2\u7A76",
+  \u5929\u76F8: "\u6E29\u6587\u5C14\u96C5\uFF0C\u5584\u4E8E\u534F\u8C03\u4E0E\u8F85\u52A9",
+  \u5929\u6881: "\u6B63\u76F4\u6E05\u9AD8\uFF0C\u5584\u4E8E\u5E87\u62A4\u4E0E\u6559\u5316",
+  \u4E03\u6740: "\u9B44\u529B\u521A\u5F3A\uFF0C\u72EC\u7ACB\u5F00\u521B",
+  \u7834\u519B: "\u53D8\u52A8\u6027\u5F3A\uFF0C\u6562\u4E8E\u7834\u65E7\u7ACB\u65B0"
+};
+function mainStarFindings(chart) {
+  const out = [];
+  const soulPalace = chart.palaces.find((p) => p.isSoulPalace);
+  if (!soulPalace) return out;
+  for (const star2 of soulPalace.majorStars) {
+    const meaning = STAR_MEANINGS[star2.name];
+    if (!meaning) continue;
+    out.push({
+      ruleId: `main-star/${star2.name}`,
+      topic: "main-star",
+      matched: true,
+      claim: `\u547D\u5BAB\u4E3B\u661F${star2.name}\uFF1A${meaning}`,
+      source: SRC6,
+      reason: `${star2.name}\u5750\u5B88\u547D\u5BAB\uFF0C\u5176\u661F\u6027\u4E3A\u672C\u4EBA\u6838\u5FC3\u6027\u683C\u5E95\u8272`
+    });
+  }
+  return out;
+}
+
+// packages/ziwei-rules/src/palace-star.ts
+var SRC7 = { text: "\u592A\u5FAE\u8D4B", chapter: "\u5341\u4E8C\u5BAB\u8BBA" };
+function findPalace(chart, name) {
+  const strip = (s) => s.replace(/宫$/, "");
+  return chart.palaces.find((p) => strip(p.name) === strip(name));
+}
+function majorStarNames(palace) {
+  return palace.majorStars.map((s) => s.name).join("\u3001") || "\u65E0\u6B63\u66DC";
+}
+var CAREER_STAR_HINTS = {
+  \u7D2B\u5FAE: "\u9002\u5408\u7BA1\u7406\u3001\u7EDF\u7B79\u5168\u5C40\u7684\u5DE5\u4F5C",
+  \u6B66\u66F2: "\u9002\u5408\u91D1\u878D\u3001\u6267\u884C\u529B\u5F3A\u7684\u5C97\u4F4D",
+  \u592A\u9633: "\u9002\u5408\u516C\u5F00\u9762\u5BF9\u5927\u4F17\u7684\u804C\u4E1A",
+  \u5929\u673A: "\u9002\u5408\u7B56\u5212\u3001\u6280\u672F\u3001\u7075\u6D3B\u53D8\u901A\u7684\u5DE5\u4F5C",
+  \u5929\u5E9C: "\u9002\u5408\u7A33\u5B9A\u5B88\u6210\u3001\u884C\u653F\u7BA1\u7406",
+  \u5EC9\u8D1E: "\u9002\u5408\u9700\u8981\u591A\u9762\u80FD\u529B\u548C\u4EBA\u9645\u7684\u5DE5\u4F5C",
+  \u5929\u76F8: "\u9002\u5408\u8F85\u52A9\u534F\u8C03\u3001\u6587\u804C\u884C\u653F",
+  \u4E03\u6740: "\u9002\u5408\u72EC\u7ACB\u5F00\u521B\u3001\u9AD8\u538B\u73AF\u5883",
+  \u7834\u519B: "\u9002\u5408\u53D8\u9769\u521B\u65B0\u3001\u4E0D\u5B89\u4E8E\u73B0\u72B6\u7684\u9886\u57DF",
+  \u8D2A\u72FC: "\u9002\u5408\u793E\u4EA4\u3001\u9500\u552E\u3001\u827A\u672F\u5A31\u4E50",
+  \u5DE8\u95E8: "\u9002\u5408\u53E3\u624D\u3001\u7814\u7A76\u3001\u5206\u6790\u7C7B\u5DE5\u4F5C",
+  \u592A\u9634: "\u9002\u5408\u5E55\u540E\u7B56\u5212\u3001\u8D22\u52A1\u3001\u6587\u827A",
+  \u5929\u6881: "\u9002\u5408\u6559\u80B2\u3001\u516C\u804C\u3001\u670D\u52A1\u4FDD\u969C",
+  \u5929\u540C: "\u9002\u5408\u670D\u52A1\u3001\u4F11\u95F2\u3001\u4F4E\u538B\u73AF\u5883"
+};
+var WEALTH_STAR_HINTS = {
+  \u6B66\u66F2: "\u7406\u8D22\u80FD\u529B\u5F3A\uFF0C\u5584\u4E8E\u79EF\u7D2F",
+  \u592A\u9634: "\u5584\u4E8E\u7CBE\u6253\u7EC6\u7B97\u3001\u7EC6\u6C34\u957F\u6D41",
+  \u5929\u5E9C: "\u8D22\u52A1\u4FDD\u5B88\u7A33\u5065\uFF0C\u4E0D\u559C\u5192\u9669",
+  \u8D2A\u72FC: "\u7406\u8D22\u5927\u80C6\u7075\u6D3B\uFF0C\u53EF\u80FD\u591A\u6E20\u9053",
+  \u7D2B\u5FAE: "\u82B1\u94B1\u6709\u683C\u5C40\uFF0C\u4E0D\u62D8\u5C0F\u8282",
+  \u7834\u519B: "\u8D22\u6765\u8D22\u53BB\u6CE2\u52A8\u5927\uFF0C\u9700\u6709\u79EF\u84C4\u610F\u8BC6",
+  \u4E03\u6740: "\u8D5A\u94B1\u80FD\u529B\u5F3A\u4F46\u82B1\u9500\u4E5F\u5927",
+  \u5EC9\u8D1E: "\u8D22\u52A1\u6765\u6E90\u591A\u5143\u590D\u6742"
+};
+function palaceStarFindings(chart) {
+  const out = [];
+  const soul = chart.palaces.find((p) => p.isSoulPalace);
+  if (soul && soul.majorStars.length > 0) {
+    out.push({
+      ruleId: `palace-star/soul-${majorStarNames(soul)}`,
+      topic: "palace-star",
+      matched: true,
+      claim: `\u547D\u5BAB\u4E3B\u661F\u7EC4\u5408\uFF1A${majorStarNames(soul)}\u2014\u2014\u51B3\u5B9A\u672C\u4EBA\u6838\u5FC3\u6027\u683C\u5E95\u8272`,
+      source: SRC7,
+      reason: `\u547D\u5BAB\u4E3B\u661F\u4E3A${majorStarNames(soul)}\uFF0C\u4E09\u65B9\u56DB\u6B63\u661F\u66DC\u5171\u540C\u5F71\u54CD\u6027\u683C\u5168\u8C8C`
+    });
+  }
+  const career = findPalace(chart, "\u5B98\u7984\u5BAB");
+  if (career && career.majorStars.length > 0) {
+    const hint = career.majorStars.map((s) => CAREER_STAR_HINTS[s.name]).filter(Boolean).join("\uFF1B");
+    out.push({
+      ruleId: `palace-star/career-${majorStarNames(career)}`,
+      topic: "palace-star",
+      matched: true,
+      claim: `\u5B98\u7984\u5BAB\u4E3B\u661F${majorStarNames(career)}\uFF1A${hint || "\u4E8B\u4E1A\u65B9\u5411\u9700\u7ED3\u5408\u4E09\u65B9\u56DB\u6B63\u7EFC\u5408\u5224\u65AD"}`,
+      source: SRC7,
+      reason: `\u5B98\u7984\u5BAB\u4E3B\u661F\u51B3\u5B9A\u4E8B\u4E1A\u65B9\u5411\u4E0E\u9002\u5408\u7684\u5DE5\u4F5C\u73AF\u5883`
+    });
+  }
+  const wealth = findPalace(chart, "\u8D22\u5E1B\u5BAB");
+  if (wealth && wealth.majorStars.length > 0) {
+    const hint = wealth.majorStars.map((s) => WEALTH_STAR_HINTS[s.name]).filter(Boolean).join("\uFF1B");
+    out.push({
+      ruleId: `palace-star/wealth-${majorStarNames(wealth)}`,
+      topic: "palace-star",
+      matched: true,
+      claim: `\u8D22\u5E1B\u5BAB\u4E3B\u661F${majorStarNames(wealth)}\uFF1A${hint || "\u7406\u8D22\u98CE\u683C\u9700\u7ED3\u5408\u4E09\u65B9\u56DB\u6B63\u7EFC\u5408\u5224\u65AD"}`,
+      source: SRC7,
+      reason: `\u8D22\u5E1B\u5BAB\u4E3B\u661F\u51B3\u5B9A\u7406\u8D22\u98CE\u683C\u4E0E\u8FDB\u8D22\u65B9\u5F0F`
+    });
+  }
+  return out;
+}
+
+// packages/ziwei-rules/src/sihua.ts
+var SRC8 = { text: "\u7D2B\u5FAE\u6597\u6570\u5168\u4E66", chapter: "\u56DB\u5316\u603B\u8BBA" };
+var SIHUA_MEANINGS = {
+  \u7984: "\u673A\u4F1A\u589E\u52A0\u3001\u8D44\u6E90\u6D41\u5165\u3001\u6709\u5229\u53D1\u5C55",
+  \u6743: "\u638C\u63A7\u529B\u589E\u5F3A\u3001\u7ADE\u4E89\u610F\u613F\u3001\u4E3B\u52A8\u6027\u9AD8",
+  \u79D1: "\u540D\u58F0\u63D0\u5347\u3001\u8D35\u4EBA\u5E2E\u52A9\u3001\u6587\u96C5\u6709\u5E8F",
+  \u5FCC: "\u7EA0\u7ED3\u56F0\u6270\u3001\u9700\u8981\u9762\u5BF9\u3001\u4E0D\u53EF\u56DE\u907F\u7684\u529F\u8BFE"
+};
+function sihuaFindings(chart) {
+  const out = [];
+  for (const palace of chart.palaces) {
+    const allStars = [...palace.majorStars, ...palace.minorStars];
+    for (const star2 of allStars) {
+      if (!star2.mutagen) continue;
+      const meaning = SIHUA_MEANINGS[star2.mutagen];
+      if (!meaning) continue;
+      out.push({
+        ruleId: `sihua/${star2.name}-\u5316${star2.mutagen}-${palace.name}`,
+        topic: "sihua",
+        matched: true,
+        claim: `${star2.name}\u5316${star2.mutagen}\u5728${palace.name}\uFF1A\u8BE5\u5BAB\u4F4D\u4E3B\u9898${meaning}`,
+        source: SRC8,
+        reason: `${star2.name}\u5316${star2.mutagen}\u843D\u5165${palace.name}\uFF0C\u56DB\u5316\u80FD\u91CF\u4F5C\u7528\u4E8E\u8BE5\u5BAB\u4F4D\u6240\u7BA1\u9886\u57DF`
+      });
+    }
+  }
+  return out;
+}
+
+// packages/ziwei-rules/src/brightness.ts
+var SRC9 = { text: "\u9AA8\u9AD3\u8D4B", chapter: "\u661F\u8FB0\u5E99\u65FA\u8BBA" };
+var BRIGHTNESS_EFFECT = {
+  \u5E99: "\u80FD\u91CF\u5145\u5206\u53D1\u6325\uFF0C\u4F18\u52BF\u660E\u663E",
+  \u65FA: "\u80FD\u91CF\u65FA\u76DB\uFF0C\u8868\u73B0\u7A81\u51FA",
+  \u5F97: "\u80FD\u91CF\u8F83\u597D\uFF0C\u6B63\u5E38\u53D1\u6325",
+  \u5229: "\u80FD\u91CF\u5C1A\u53EF\uFF0C\u7565\u6709\u52A9\u529B",
+  \u5E73: "\u80FD\u91CF\u4E2D\u6027\uFF0C\u65E0\u660E\u663E\u589E\u51CF",
+  \u4E0D: "\u80FD\u91CF\u53D7\u9650\uFF0C\u9700\u540E\u5929\u52AA\u529B\u5F25\u8865",
+  \u9677: "\u80FD\u91CF\u53D1\u6325\u56F0\u96BE\uFF0C\u8BE5\u661F\u7279\u8D28\u4E0D\u6613\u5C55\u73B0"
+};
+function brightnessFindings(chart) {
+  const out = [];
+  const soulPalace = chart.palaces.find((p) => p.isSoulPalace);
+  if (!soulPalace) return out;
+  for (const star2 of soulPalace.majorStars) {
+    if (!star2.brightness) continue;
+    const effect = BRIGHTNESS_EFFECT[star2.brightness];
+    if (!effect) continue;
+    out.push({
+      ruleId: `brightness/${star2.name}-${star2.brightness}`,
+      topic: "brightness",
+      matched: true,
+      claim: `\u547D\u5BAB${star2.name}\u4EAE\u5EA6"${star2.brightness}"\uFF1A${effect}`,
+      source: SRC9,
+      reason: `${star2.name}\u5728\u547D\u5BAB\u4EAE\u5EA6\u4E3A"${star2.brightness}"\uFF0C\u5F71\u54CD\u8BE5\u661F\u7279\u8D28\u7684\u53D1\u6325\u7A0B\u5EA6`
+    });
+  }
+  return out;
+}
+
+// packages/ziwei-rules/src/interpret.ts
+var ZIWEI_RULES_VERSION = "0.1.0";
+var ZIWEI_RULES_RULESET_ID = `ziwei-rules@${ZIWEI_RULES_VERSION}`;
+var PROVIDER6 = {
+  id: "ziwei-rules",
+  version: ZIWEI_RULES_VERSION,
+  license: "MIT"
+};
+function interpretZiwei(chart) {
+  return {
+    rulesetId: ZIWEI_RULES_RULESET_ID,
+    provider: PROVIDER6,
+    findings: [
+      ...mainStarFindings(chart),
+      ...palaceStarFindings(chart),
+      ...sihuaFindings(chart),
+      ...brightnessFindings(chart)
+    ]
+  };
+}
+
 // packages/interpret/src/build.ts
 var DISCLAIMERS = [
   "\u4F20\u7EDF\u547D\u7406\u5206\u6790\uFF08\u516B\u5B57/\u7D2B\u5FAE/\u5360\u661F\uFF09\uFF0C\u4EC5\u4F9B\u4F20\u7EDF\u6587\u5316\u3001\u5A31\u4E50\u4E0E\u81EA\u6211\u53CD\u601D\uFF1B\u6587\u4E2D\u7684\u5409\u51F6\u503E\u5411\u3001\u8D8B\u52BF\u4E0E\u5E74\u4EFD\u7A97\u53E3\u5C5E\u4E8E\u547D\u7406\u6761\u4EF6\u8BC4\u4F30\uFF0C\u975E\u7EDF\u8BA1\u5B66\u3001\u975E\u79D1\u5B66\u9884\u6D4B\u3002",
@@ -53292,9 +53801,39 @@ function followupFacts(bundle, focusYear) {
   }
   return out;
 }
+function westernRuleFacts(rules) {
+  if (!rules) return [];
+  const out = [];
+  for (const f of rules.findings) {
+    const topic = f.topic === "angle" && f.ruleId.startsWith("angle/mc") ? "career" : "character";
+    out.push(
+      fact(topic, f.claim, [ev("western-rule", `western-rule/${f.ruleId}`, f.claim)], {
+        reason: f.reason
+      })
+    );
+  }
+  return out;
+}
+function ziweiRuleFacts(rules) {
+  if (!rules) return [];
+  const out = [];
+  for (const f of rules.findings) {
+    let topic = "character";
+    if (f.ruleId.startsWith("palace-star/career")) topic = "career";
+    else if (f.ruleId.startsWith("palace-star/wealth")) topic = "wealth";
+    out.push(
+      fact(topic, f.claim, [ev("ziwei-rule", `ziwei-rule/${f.ruleId}`, f.claim)], {
+        reason: f.reason
+      })
+    );
+  }
+  return out;
+}
 function buildInterpretationFacts(bundle, options = {}) {
   const focusYear = options.horoscope ? new Date(options.horoscope.targetSolarDate).getUTCFullYear() : new Date(bundle.calculatedAt).getUTCFullYear();
   const baziRules = bundle.bazi ? interpretBazi(bundle.bazi, { focusYear }) : null;
+  const westernRules = bundle.western ? interpretWestern(bundle.western) : null;
+  const ziweiRules = bundle.ziwei ? interpretZiwei(bundle.ziwei) : null;
   const facts = [
     ...characterFacts(bundle, baziRules),
     ...usefulGodFacts(baziRules),
@@ -53304,6 +53843,8 @@ function buildInterpretationFacts(bundle, options = {}) {
     ...studiesFacts(bundle),
     ...healthFacts(bundle),
     ...fortuneFacts(baziRules),
+    ...westernRuleFacts(westernRules),
+    ...ziweiRuleFacts(ziweiRules),
     ...followupFacts(bundle, focusYear)
   ];
   if (options.horoscope) {
@@ -53327,7 +53868,11 @@ function buildInterpretationFacts(bundle, options = {}) {
       calendar: bundle.originalInput.calendar
     },
     facts,
-    rulesets: bundle.provenance.rulesets,
+    rulesets: [
+      ...bundle.provenance.rulesets,
+      ...westernRules ? [{ id: westernRules.rulesetId, version: westernRules.provider.version }] : [],
+      ...ziweiRules ? [{ id: ziweiRules.rulesetId, version: ziweiRules.provider.version }] : []
+    ],
     disclaimers: DISCLAIMERS,
     followupOffers: FOLLOWUP_OFFERS
   };
@@ -54415,14 +54960,14 @@ function baziSynastryFindings(a, b, focusYear) {
 
 // packages/synastry/src/ziwei-synastry.ts
 function palaceBranch(z2, name) {
-  return findPalace(z2, name)?.earthlyBranch;
+  return findPalace2(z2, name)?.earthlyBranch;
 }
 function palaceStars(z2, name) {
-  const p = findPalace(z2, name);
+  const p = findPalace2(z2, name);
   if (!p) return [];
   return [...p.majorStars, ...p.minorStars, ...p.adjectiveStars].map((s) => s.name);
 }
-function findPalace(z2, name) {
+function findPalace2(z2, name) {
   const strip = (s) => s.replace(/宫$/, "");
   const target = strip(name);
   return z2.palaces.find((p) => strip(p.name) === target);

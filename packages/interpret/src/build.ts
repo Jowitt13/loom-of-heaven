@@ -6,6 +6,8 @@ import {
   elementsByRelation,
   type Element,
 } from '@ming/bazi-rules';
+import { interpretWestern } from '@ming/western-rules';
+import { interpretZiwei as interpretZiweiRules } from '@ming/ziwei-rules';
 import type {
   BaziInterpretation,
   ChartBundle,
@@ -15,8 +17,10 @@ import type {
   InterpretationFacts,
   InterpretationTopic,
   WesternChartResult,
+  WesternInterpretation,
   ZiweiChartResult,
   ZiweiHoroscopeResult,
+  ZiweiInterpretation,
 } from '@ming/contracts';
 
 /**
@@ -595,6 +599,41 @@ function followupFacts(bundle: ChartBundle, focusYear: number): InterpretationFa
   return out;
 }
 
+/** Western rule-based facts: semantic meanings from the western-rules package. */
+function westernRuleFacts(rules: WesternInterpretation | null): InterpretationFact[] {
+  if (!rules) return [];
+  const out: InterpretationFact[] = [];
+  for (const f of rules.findings) {
+    // Map rule topics to interpretation topics
+    const topic: InterpretationTopic =
+      f.topic === 'angle' && f.ruleId.startsWith('angle/mc') ? 'career' : 'character';
+    out.push(
+      fact(topic, f.claim, [ev('western-rule', `western-rule/${f.ruleId}`, f.claim)], {
+        reason: f.reason,
+      }),
+    );
+  }
+  return out;
+}
+
+/** Ziwei rule-based facts: semantic meanings from the ziwei-rules package. */
+function ziweiRuleFacts(rules: ZiweiInterpretation | null): InterpretationFact[] {
+  if (!rules) return [];
+  const out: InterpretationFact[] = [];
+  for (const f of rules.findings) {
+    // Map rule topics to interpretation topics
+    let topic: InterpretationTopic = 'character';
+    if (f.ruleId.startsWith('palace-star/career')) topic = 'career';
+    else if (f.ruleId.startsWith('palace-star/wealth')) topic = 'wealth';
+    out.push(
+      fact(topic, f.claim, [ev('ziwei-rule', `ziwei-rule/${f.ruleId}`, f.claim)], {
+        reason: f.reason,
+      }),
+    );
+  }
+  return out;
+}
+
 /** Build the topic-organized, evidence-grounded interpretation facts for a chart. */
 export function buildInterpretationFacts(
   bundle: ChartBundle,
@@ -606,6 +645,8 @@ export function buildInterpretationFacts(
     ? new Date(options.horoscope.targetSolarDate).getUTCFullYear()
     : new Date(bundle.calculatedAt).getUTCFullYear();
   const baziRules = bundle.bazi ? interpretBazi(bundle.bazi, { focusYear }) : null;
+  const westernRules = bundle.western ? interpretWestern(bundle.western) : null;
+  const ziweiRules = bundle.ziwei ? interpretZiweiRules(bundle.ziwei) : null;
   const facts: InterpretationFact[] = [
     ...characterFacts(bundle, baziRules),
     ...usefulGodFacts(baziRules),
@@ -615,6 +656,8 @@ export function buildInterpretationFacts(
     ...studiesFacts(bundle),
     ...healthFacts(bundle),
     ...fortuneFacts(baziRules),
+    ...westernRuleFacts(westernRules),
+    ...ziweiRuleFacts(ziweiRules),
     ...followupFacts(bundle, focusYear),
   ];
 
@@ -641,7 +684,13 @@ export function buildInterpretationFacts(
       calendar: bundle.originalInput.calendar,
     },
     facts,
-    rulesets: bundle.provenance.rulesets,
+    rulesets: [
+      ...bundle.provenance.rulesets,
+      ...(westernRules
+        ? [{ id: westernRules.rulesetId, version: westernRules.provider.version }]
+        : []),
+      ...(ziweiRules ? [{ id: ziweiRules.rulesetId, version: ziweiRules.provider.version }] : []),
+    ],
     disclaimers: DISCLAIMERS,
     followupOffers: FOLLOWUP_OFFERS,
   };

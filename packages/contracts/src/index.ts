@@ -11,6 +11,8 @@ export * from './birth-input.ts';
 export * from './normalized.ts';
 export * from './bazi.ts';
 export * from './bazi-interpretation.ts';
+export * from './western-interpretation.ts';
+export * from './ziwei-interpretation.ts';
 export * from './ziwei.ts';
 export * from './western.ts';
 export * from './interpretation.ts';

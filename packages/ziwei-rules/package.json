@@ -1,0 +1,16 @@
+{
+  "name": "@ming/ziwei-rules",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Zi Wei Dou Shu interpretation rules (main-star meanings, palace-star combinations, sihua effects, brightness modifiers) — deterministic, versioned, source-cited to public-domain classics (紫微斗数全书, 太微赋, 骨髓赋). Reads a ZiweiChartResult; never recomputes the chart.",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ming/contracts": "workspace:*"
+  }
+}

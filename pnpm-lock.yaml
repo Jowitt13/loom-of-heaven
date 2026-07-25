@@ -63,6 +63,12 @@ importers:
       '@ming/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@ming/western-rules':
+        specifier: workspace:*
+        version: link:../western-rules
+      '@ming/ziwei-rules':
+        specifier: workspace:*
+        version: link:../ziwei-rules
 
   packages/orchestrator:
     dependencies:
@@ -94,6 +100,12 @@ importers:
       '@ming/test-fixtures':
         specifier: workspace:*
         version: link:../test-fixtures
+      '@ming/western-rules':
+        specifier: workspace:*
+        version: link:../western-rules
+      '@ming/ziwei-rules':
+        specifier: workspace:*
+        version: link:../ziwei-rules
 
   packages/synastry:
     dependencies:
@@ -135,6 +147,12 @@ importers:
         specifier: ^2.1.19
         version: 2.1.19
 
+  packages/western-rules:
+    dependencies:
+      '@ming/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+
   packages/ziwei:
     dependencies:
       '@ming/contracts':
@@ -143,6 +161,12 @@ importers:
       iztro:
         specifier: ^2.5.8
         version: 2.5.8
+
+  packages/ziwei-rules:
+    dependencies:
+      '@ming/contracts':
+        specifier: workspace:*
+        version: link:../contracts
 
 packages:
 

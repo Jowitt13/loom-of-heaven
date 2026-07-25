@@ -29,6 +29,8 @@ export const EvidenceKind = z.enum([
   'ziwei',
   'ziwei-horoscope',
   'bazi-rule',
+  'western-rule',
+  'ziwei-rule',
   'time',
 ]);
 export type EvidenceKind = z.infer<typeof EvidenceKind>;

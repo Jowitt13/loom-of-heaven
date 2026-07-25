@@ -22,6 +22,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@ming/test-fixtures": "workspace:*"
+    "@ming/test-fixtures": "workspace:*",
+    "@ming/western-rules": "workspace:*",
+    "@ming/ziwei-rules": "workspace:*"
   }
 }
