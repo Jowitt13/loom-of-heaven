@@ -60,6 +60,8 @@ scan:secrets`. `verify:all` then adds `scan:incident`; its precise token file is
 enter CI, and its absence is intentionally fail-closed. If you change the test count, update
 `docs/STATUS.md` and `docs/VALIDATION.md` from a real run (never by hand).
 
+Release acceptance criteria live in [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md).
+
 ## Scope & disclaimer
 
 For traditional-culture, entertainment and self-reflection use. Not scientifically validated
