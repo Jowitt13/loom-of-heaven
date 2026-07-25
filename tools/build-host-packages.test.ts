@@ -30,7 +30,7 @@ function rewriteLineEndings(dir: string, eol: '\n' | '\r\n'): void {
 }
 
 describe('release version model: published vs candidate tags', () => {
-  it('accepts the current no-published-release baseline', () => {
+  it('accepts distinct published and candidate release tags', () => {
     expect(assertDistinctReleaseTags().ok).toBe(true);
   });
 

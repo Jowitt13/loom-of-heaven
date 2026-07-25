@@ -16,25 +16,25 @@ There are two explicit gates:
 Before a release or a visibility change, run `pnpm run verify:all` and
 `pnpm run scan:incident:history` in a controlled environment.
 
-| Stage            | Command (in `verify:cloud`)                       | What it proves                                                                    |
-| ---------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Format           | `pnpm run format:check`                           | Prettier `--check`; formatting consistent repo-wide, no writes.                   |
-| Lint             | `pnpm run lint`                                   | ESLint import boundaries: offline compute core; no reverse dep on interpret.      |
-| Typecheck        | `pnpm run typecheck`                              | `tsc` strict over all packages, tools and tests (static gate beside lint).        |
-| Unit/property    | `pnpm run test`                                   | Vitest across contracts, time-location, orchestrator (incl. integration).         |
-| Build            | `pnpm run build`                                  | esbuild bundle + CycloneDX SBOM produced.                                         |
-| Provenance       | `pnpm run validate:provenance`                    | Built engine and live source retain the declared provenance boundary.             |
-| Skill validate   | `pnpm run validate:skill`                         | Structure, frontmatter, portability, offline (no-network), CSP/no-script.         |
-| Reading validate | `pnpm run validate:reading`                       | Static contract for reading examples and output structure; no LLM call.           |
-| Docs validate    | `pnpm run validate:docs`                          | Current capability, runtime, publication-state and install-doc consistency.       |
-| Clean-dir smoke  | `pnpm run smoke`                                  | Offline run from an isolated copy + cross-env determinism.                        |
-| Forward test     | `pnpm run forward:test`                           | Clean-dir, zero-install, offline SKILL workflow for 5 realistic requests.         |
-| Host packages    | `pnpm run package:hosts && pnpm run verify:hosts` | Candidate ZIP structure and runtime behavior remain reproducible.                 |
-| Install state    | `pnpm run verify:install`                         | Root no-release/published state and candidate boundary are honest and consistent. |
-| Doc counts       | `pnpm run check:doc-counts`                       | Re-runs the suite; fails if a doc's `N tests / M files` drifts from the run.      |
-| Dep vuln scan    | `pnpm run scan:deps`                              | `pnpm audit --prod` over shipped deps; fails on an advisory (offline: skip+warn). |
-| Secret scan      | `pnpm run scan:secrets`                           | Dependency-free scan of tracked files; fails on a leaked credential.              |
-| Incident scan    | local `pnpm run verify:all`                       | Exact incident tokens; fail-closed if the controlled token file is unavailable.   |
+| Stage            | Command (in `verify:cloud`)                       | What it proves                                                                                         |
+| ---------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Format           | `pnpm run format:check`                           | Prettier `--check`; formatting consistent repo-wide, no writes.                                        |
+| Lint             | `pnpm run lint`                                   | ESLint import boundaries: offline compute core; no reverse dep on interpret.                           |
+| Typecheck        | `pnpm run typecheck`                              | `tsc` strict over all packages, tools and tests (static gate beside lint).                             |
+| Unit/property    | `pnpm run test`                                   | Vitest across contracts, time-location, orchestrator (incl. integration).                              |
+| Build            | `pnpm run build`                                  | esbuild bundle + CycloneDX SBOM produced.                                                              |
+| Provenance       | `pnpm run validate:provenance`                    | Built engine and live source retain the declared provenance boundary.                                  |
+| Skill validate   | `pnpm run validate:skill`                         | Structure, frontmatter, portability, offline (no-network), CSP/no-script.                              |
+| Reading validate | `pnpm run validate:reading`                       | Static contract for reading examples and output structure; no LLM call.                                |
+| Docs validate    | `pnpm run validate:docs`                          | Current capability, runtime, publication-state and install-doc consistency.                            |
+| Clean-dir smoke  | `pnpm run smoke`                                  | Offline run from an isolated copy + cross-env determinism.                                             |
+| Forward test     | `pnpm run forward:test`                           | Clean-dir, zero-install, offline SKILL workflow for 5 realistic requests.                              |
+| Host packages    | `pnpm run package:hosts && pnpm run verify:hosts` | Candidate ZIP structure and runtime behavior remain reproducible.                                      |
+| Install state    | `pnpm run verify:install`                         | Root published state, immutable Release URL/SHA-256, and candidate boundary are honest and consistent. |
+| Doc counts       | `pnpm run check:doc-counts`                       | Re-runs the suite; fails if a doc's `N tests / M files` drifts from the run.                           |
+| Dep vuln scan    | `pnpm run scan:deps`                              | `pnpm audit --prod` over shipped deps; fails on an advisory (offline: skip+warn).                      |
+| Secret scan      | `pnpm run scan:secrets`                           | Dependency-free scan of tracked files; fails on a leaked credential.                                   |
+| Incident scan    | local `pnpm run verify:all`                       | Exact incident tokens; fail-closed if the controlled token file is unavailable.                        |
 
 `pnpm run format:check` (Prettier) runs first in `verify:cloud`, so CI fails on any unformatted
 file; run `pnpm run format` to auto-fix before pushing.

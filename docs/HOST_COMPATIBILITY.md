@@ -1,6 +1,6 @@
 # 宿主兼容性审计
 
-> 当前分发状态：无公开宿主 ZIP；四宿主的完整排盘能力与真机验证记录见下文。可下载性以 `install-manifest.json` 的 `published` 字段为准。
+> 当前分发状态：安装包来自 GitHub Release `v0.1.4`；Qoder、WorkBuddy 与豆包电脑版已有公开 ZIP。可下载性以 `install-manifest.json` 的 `published` 字段及 SHA-256 为准。
 >
 > 本文档记录 Ming Engine（`calculate-birth-charts`）在四个目标宿主平台上的能力与验证状态。
 
@@ -20,16 +20,16 @@
 
 ## 能力矩阵总览
 
-| 能力维度                | Codex          | Qoder / Qoder CN                             | 腾讯 WorkBuddy          | 豆包电脑版     |
-| ----------------------- | -------------- | -------------------------------------------- | ----------------------- | -------------- |
-| 支持本地 Skill          | 是             | 是                                           | 是                      | 是             |
-| 导入格式                | 仓库 / 文件夹  | Agent 代装（下载→校验→写入 ~/.qoder/skills） | zip 上传（技能管理）    | 文件夹 / zip   |
-| 可执行脚本              | 是（Node.js）  | 是（Node.js）                                | 是（OpenClaw 独立进程） | 是（真机确认） |
-| Node.js 运行环境        | ≥ 22           | ≥ 22                                         | ≥ 22                    | ≥ 22           |
-| 能力级别                | full           | full                                         | full                    | full           |
-| 真机验证                | L3             | L3                                           | L3                      | L3             |
-| 当前分发来源            | 仓库（公开后） | ZIP 未发布                                   | ZIP 未发布              | ZIP 未发布     |
-| Windows 中文 / 空格路径 | 是             | 是                                           | 是                      | 是             |
+| 能力维度                | Codex          | Qoder / Qoder CN                             | 腾讯 WorkBuddy              | 豆包电脑版                  |
+| ----------------------- | -------------- | -------------------------------------------- | --------------------------- | --------------------------- |
+| 支持本地 Skill          | 是             | 是                                           | 是                          | 是                          |
+| 导入格式                | 仓库 / 文件夹  | Agent 代装（下载→校验→写入 ~/.qoder/skills） | zip 上传（技能管理）        | 文件夹 / zip                |
+| 可执行脚本              | 是（Node.js）  | 是（Node.js）                                | 是（OpenClaw 独立进程）     | 是（真机确认）              |
+| Node.js 运行环境        | ≥ 22           | ≥ 22                                         | ≥ 22                        | ≥ 22                        |
+| 能力级别                | full           | full                                         | full                        | full                        |
+| 真机验证                | L3             | L3                                           | L3                          | L3                          |
+| 当前分发来源            | 仓库（已公开） | GitHub Release `v0.1.4` ZIP                  | GitHub Release `v0.1.4` ZIP | GitHub Release `v0.1.4` ZIP |
+| Windows 中文 / 空格路径 | 是             | 是                                           | 是                          | 是                          |
 
 ---
 
@@ -41,18 +41,18 @@
 
 宿主 AI 按 `INSTALL.md` 协议识别平台、读 `install-manifest.json`，先判断所选平台的 `published`。只有已发布平台才会按**不可变版本 tag**下载并校验 SHA-256；未发布时必须停止并如实说明。
 
-| 宿主      | 当前安装来源       | 能力级别 | 来源类型      |
-| --------- | ------------------ | -------- | ------------- |
-| Codex     | 仓库（重新公开后） | full     | repo          |
-| Qoder     | ZIP 尚未发布       | full     | release-asset |
-| WorkBuddy | ZIP 尚未发布       | full     | release-asset |
-| 豆包      | ZIP 尚未发布       | full     | release-asset |
+| 宿主      | 当前安装来源                | 能力级别 | 来源类型      |
+| --------- | --------------------------- | -------- | ------------- |
+| Codex     | 仓库（已公开）              | full     | repo          |
+| Qoder     | GitHub Release `v0.1.4` ZIP | full     | release-asset |
+| WorkBuddy | GitHub Release `v0.1.4` ZIP | full     | release-asset |
+| 豆包      | GitHub Release `v0.1.4` ZIP | full     | release-asset |
 
-- 根清单当前为 `status: "unpublished"`，没有公开 ZIP、发布 tag 或 SHA-256 清单。安装器必须先检查所选平台的 `published`；为 `false` 时不读取 URL/hash、不下载、不安装。
+- 根清单当前为 `status: "published"`：安装包来自 GitHub Release `v0.1.4`，包含不可变下载地址与 SHA-256。安装器必须先检查所选平台的 `published`；为 `false` 时不读取 URL/hash、不下载、不安装。
 - 静态门禁 `pnpm run verify:install`（L1）；真机安装/触发为 L2/L3。
 - 版本检查：宿主 Agent 运行 `node scripts/ming-chart.mjs version` 读本地 `BUILD_MANIFEST.json` 回报真实已装版本（区分 legacy / 双层目录），不靠猜、不等于线上最新。
-- 更新迁移：只有线上清单将所选平台标记为已发布时，Agent 才可下载不可变 tag 资产、校验 SHA-256 并用 `migrate` 原子替换旧包。当前没有更新源，不能把本地旧包或缓存称作最新版。
-- 候选边界：候选构建只供本地验证，且始终 `published:false`；它不是公开安装源。未来发布须创建新的不可变 tag、上传 ZIP、重下验收后再更新根清单。
+- 更新迁移：只有线上清单将所选平台标记为已发布时，Agent 才可下载不可变 tag 资产、校验 SHA-256 并用 `migrate` 原子替换旧包。当前更新源是 v0.1.4，不能把本地旧包或缓存称作最新版。
+- 候选边界：下一候选构建只供本地验证，且始终 `published:false`；它不是公开安装源。未来发布须创建新的不可变 tag、上传 ZIP、重下验收后再更新根清单。
 
 ---
 
@@ -60,7 +60,7 @@
 
 ### 1. Codex（及任何读取 AGENTS.md 的宿主）
 
-- 能力：**full**。真机 **L3**。仓库重新公开后，宿主可克隆 / 下载仓库并读取 `AGENTS.md` 与 `skills/calculate-birth-charts/`，引擎用预构建 `scripts/dist/engine.mjs`。
+- 能力：**full**。真机 **L3**。仓库已公开，宿主可克隆 / 下载仓库并读取 `AGENTS.md` 与 `skills/calculate-birth-charts/`，引擎用预构建 `scripts/dist/engine.mjs`。
 
 ### 2. Qoder / Qoder CN
 

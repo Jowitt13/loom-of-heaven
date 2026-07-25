@@ -296,12 +296,14 @@ function main(): void {
         const t = mm[1] ?? mm[2];
         if (t) tags.push(t);
       }
-      const wrong = [...new Set(tags)].filter((t) => t !== publication.releaseTag);
+      const releaseTags = [...new Set(tags)];
+      const wrong = releaseTags.filter((t) => t !== publication.releaseTag);
       add(
-        `${f}: current release label matches ${publication.releaseTag}`,
-        wrong.length === 0,
-        wrong.join(','),
+        `${f}: states current release ${publication.releaseTag}`,
+        releaseTags.includes(publication.releaseTag),
+        releaseTags.join(','),
       );
+      add(`${f}: has no conflicting current release label`, wrong.length === 0, wrong.join(','));
     }
   } else {
     add(

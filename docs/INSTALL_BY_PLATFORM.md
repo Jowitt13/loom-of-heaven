@@ -1,6 +1,6 @@
 # Ming Engine 安装指南（按平台）
 
-> 当前分发状态：没有公开的宿主 ZIP。四个平台的完整排盘能力与真机验证记录不等于当前已有可下载安装包；以 `install-manifest.json` 的 `published` 字段为准。
+> 当前分发状态：安装包来自 GitHub Release `v0.1.4`。Qoder、WorkBuddy 与豆包电脑版已有公开 ZIP；以 `install-manifest.json` 的 `published` 字段及 SHA-256 为准。
 >
 > 本文档帮你用最简单的方式完成安装。不需要编程知识，不需要安装 pnpm 或克隆代码仓库。
 
@@ -14,14 +14,14 @@
 
 AI 会自动识别你所在的平台，并先检查该平台是否已发布。只有 `published: true` 时才会下载、校验 SHA-256、安装、启用并自检；否则会明确告诉你“安装包尚未发布”并停止。你最多只需要确认一次系统权限。
 
-| 平台       | 用户需要做什么                | 最终能力             |
-| ---------- | ----------------------------- | -------------------- |
-| Qoder      | 当前 ZIP 未发布，等待正式发布 | 完整排盘（包发布后） |
-| WorkBuddy  | 当前 ZIP 未发布，等待正式发布 | 完整排盘（包发布后） |
-| 豆包电脑版 | 当前 ZIP 未发布，等待正式发布 | 完整排盘（包发布后） |
-| Codex      | 仓库重新公开后可用            | 完整排盘             |
+| 平台       | 用户需要做什么                          | 最终能力 |
+| ---------- | --------------------------------------- | -------- |
+| Qoder      | 发一句安装链接；Agent 下载并校验 v0.1.4 | 完整排盘 |
+| WorkBuddy  | 发一句安装链接；Agent 下载并校验 v0.1.4 | 完整排盘 |
+| 豆包电脑版 | 发一句安装链接；Agent 下载并校验 v0.1.4 | 完整排盘 |
+| Codex      | 公开仓库可用                            | 完整排盘 |
 
-> 四个平台的完整排盘能力使用同一份引擎，结果一致；兼容性均已真机验证。当前 Qoder / WorkBuddy / 豆包电脑版没有公开 ZIP，不能把兼容性记录说成“现在可安装”。
+> 四个平台的完整排盘能力使用同一份引擎，结果一致；可下载性始终以 `install-manifest.json` 的 `published` 字段与 SHA-256 为准。
 
 ---
 
@@ -36,7 +36,7 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 > 四个平台功能一致，都能计算八字、紫微、西方占星并给出解读。最省事的方式仍是上面那句“一句话安装”。
 
-> 当前没有公开 ZIP 或发布 tag。候选真机测试只使用本地生成的 candidate ZIP，不能作为公开“一句话安装”的来源；必须等新的正式 Release 创建、GitHub 重下验收并更新清单后才可安装。
+> 当前公开安装源是 GitHub Release `v0.1.4`。候选 ZIP 仍只用于本地验证，不能作为公开“一句话安装”的来源；后续版本必须创建新的不可变 Release、完成重下验收后再更新清单。
 
 ---
 
@@ -44,7 +44,7 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 30 秒安装
 
-1. 在仓库重新公开后，访问 [ming-engine GitHub](https://github.com/Jowitt13/ming-engine)，下载 ZIP（绿色 "Code" 按钮 → Download ZIP）
+1. 访问 [ming-engine GitHub](https://github.com/Jowitt13/ming-engine)，下载 ZIP（绿色 "Code" 按钮 → Download ZIP）
 2. 解压到任意文件夹
 3. 在 Codex 中打开该项目文件夹，直接对话即可
 
@@ -71,9 +71,9 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 当前状态
 
-Qoder 的公开 ZIP 当前尚未发布。把顶部安装入口发给 Qoder 后，Agent 必须先看到 `published: false` 并明确停止；不要下载、不要请求旧链接、不要用本地缓存冒充最新版。
+安装包来自 GitHub Release `v0.1.4`。把顶部安装入口发给 Qoder 后，Agent 会先读取清单，确认 Qoder `published: true` 后下载不可变资产并校验 SHA-256；不要请求旧链接，也不要用本地缓存冒充最新版。
 
-### 正式发布后的安装流程（推荐：一句话，由 Qoder Agent 代装）
+### 安装流程（推荐：一句话，由 Qoder Agent 代装）
 
 把顶部那句“帮我安装这个技能：<INSTALL.md 链接>”发给 Qoder：Qoder 内置 Agent 会**代为**下载 `ming-engine-qoder.zip`、按清单校验 SHA-256、校验 zip 单层目录、解压到临时目录，然后**仅替换**你的用户技能目录 `~/.qoder/skills/calculate-birth-charts/`（不动其它技能，失败不覆盖旧版），再刷新或提示你重启 Qoder / 新开对话一次，并自检。你无需自己下载、解压或使用任何命令行工具。
 
@@ -109,9 +109,9 @@ Qoder 的公开 ZIP 当前尚未发布。把顶部安装入口发给 Qoder 后�
 
 ### 当前状态
 
-WorkBuddy 的公开 ZIP 当前尚未发布。安装入口应在 `published: false` 处停止，不读取 URL/hash、不下载也不要求导入。
+安装包来自 GitHub Release `v0.1.4`。安装入口会先读取清单，确认 WorkBuddy `published: true` 后才读取 URL/hash、下载并按宿主流程导入。
 
-### 正式发布后的安装流程
+### 安装流程
 
 1. 从当前清单指定的正式 Release 下载 WorkBuddy ZIP
 2. 打开 WorkBuddy 桌面端 →「个人中心」→「Claw 设置」→「Skills 管理」
@@ -141,9 +141,9 @@ WorkBuddy 的公开 ZIP 当前尚未发布。安装入口应在 `published: fals
 
 ### 当前状态
 
-豆包电脑版的公开 ZIP 当前尚未发布。安装入口应在 `published: false` 处停止，不读取 URL/hash、不下载也不要求导入。
+安装包来自 GitHub Release `v0.1.4`。安装入口会先读取清单，确认豆包 `published: true` 后才读取 URL/hash、下载并按宿主流程导入。
 
-### 正式发布后的安装流程
+### 安装流程
 
 1. 从当前清单指定的正式 Release 下载豆包 ZIP
 2. 在豆包电脑版中导入该技能（文件夹或 zip）
