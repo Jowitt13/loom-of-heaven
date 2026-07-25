@@ -40448,6 +40448,98 @@ var InterpretationFacts = external_exports.object({
   followupOffers: external_exports.array(external_exports.string())
 });
 
+// packages/contracts/src/answer-plan.ts
+var PUBLIC_RESULT_CONTRACT_VERSION = "public-result/v1";
+var ANSWER_PLAN_CONTRACT_VERSION = "answer-plan/v1";
+var PublicWarning = EngineWarning.pick({
+  code: true,
+  severity: true,
+  system: true
+}).extend({
+  impact: external_exports.string().min(1),
+  nextStep: external_exports.string().min(1)
+}).strict();
+var PublicEvidence = InterpretationEvidence.pick({
+  kind: true,
+  ref: true
+}).strict();
+var PublicFact = InterpretationFact.pick({
+  topic: true,
+  claim: true,
+  confidence: true,
+  caveat: true,
+  polarity: true,
+  reason: true
+}).extend({
+  id: external_exports.string().regex(/^fact-\d+$/, "fact ids must use the fact-<number> form"),
+  evidence: external_exports.array(PublicEvidence).min(1)
+}).strict();
+var PublicSystemStatus = external_exports.strictObject({
+  system: ChartSystem,
+  status: external_exports.enum(["computed", "unavailable"])
+});
+var PublicResult = external_exports.strictObject({
+  contractVersion: external_exports.literal(PUBLIC_RESULT_CONTRACT_VERSION),
+  engineVersion: external_exports.string(),
+  sourceSchemaVersion: external_exports.string(),
+  systems: external_exports.array(PublicSystemStatus).length(3),
+  inputReliability: external_exports.strictObject({
+    timeAccuracy: TimeAccuracy,
+    birthTimeKnown: external_exports.boolean()
+  }),
+  warnings: external_exports.array(PublicWarning),
+  facts: external_exports.array(PublicFact),
+  rulesets: external_exports.array(RulesetRef),
+  disclaimers: external_exports.array(external_exports.string()),
+  followupOffers: external_exports.array(external_exports.string())
+});
+var AnswerLens = external_exports.enum(["overview", "strengths", "risks", "timing", "advice", "explain"]);
+var Answerability = external_exports.enum(["grounded", "limited", "not-supported"]);
+var AnswerSection = external_exports.enum([
+  "summary",
+  "plain-language-explanation",
+  "uncertainty",
+  "practical-options",
+  "technical-evidence",
+  "disclaimer"
+]);
+var AnswerGuardrail = external_exports.enum([
+  "traditional-culture-only",
+  "evidence-only",
+  "no-deterministic-fate",
+  "no-medical-advice",
+  "no-legal-advice",
+  "no-investment-advice",
+  "no-life-and-death-advice",
+  "no-unsupported-comparison"
+]);
+var AnswerRequest = external_exports.strictObject({
+  topic: InterpretationTopic,
+  lens: AnswerLens.default("overview")
+});
+var AnswerPlan = external_exports.strictObject({
+  contractVersion: external_exports.literal(ANSWER_PLAN_CONTRACT_VERSION),
+  engineVersion: external_exports.string(),
+  sourceSchemaVersion: external_exports.string(),
+  request: AnswerRequest,
+  answerability: Answerability,
+  selectedFacts: external_exports.array(PublicFact),
+  allowedFactIds: external_exports.array(external_exports.string()),
+  requiredCaveats: external_exports.array(external_exports.string()),
+  requiredWarningCodes: external_exports.array(PublicWarning.shape.code),
+  guardrails: external_exports.array(AnswerGuardrail).min(1),
+  responseRequirements: external_exports.strictObject({
+    contentOrder: external_exports.array(AnswerSection).min(1),
+    citeSelectedFactIds: external_exports.array(external_exports.string()),
+    onlyUseSelectedFacts: external_exports.literal(true),
+    explainInPlainLanguage: external_exports.literal(true),
+    discloseRequiredWarnings: external_exports.literal(true)
+  }),
+  noEvidenceReason: external_exports.enum(["NO_TOPIC_FACTS", "TIME_REQUIRED", "INPUT_REQUIRED"]).optional(),
+  disclaimers: external_exports.array(external_exports.string()),
+  followupOffers: external_exports.array(external_exports.string())
+});
+
 // packages/contracts/src/synastry.ts
 var SynastryRelation = external_exports.enum([
   "couple",
@@ -53152,6 +53244,203 @@ function buildInterpretationFacts(bundle, options = {}) {
   };
 }
 
+// packages/interpret/src/answer-plan.ts
+var SYSTEMS = ["western", "bazi", "ziwei"];
+var ANSWER_GUARDRAILS = [
+  "traditional-culture-only",
+  "evidence-only",
+  "no-deterministic-fate",
+  "no-medical-advice",
+  "no-legal-advice",
+  "no-investment-advice",
+  "no-life-and-death-advice",
+  "no-unsupported-comparison"
+];
+var PUBLIC_WARNING_COPY = {
+  TIME_ACCURACY_APPROXIMATE: {
+    impact: "\u51FA\u751F\u65F6\u95F4\u4E3A\u7EA6\u4F30\uFF0C\u6D89\u53CA\u65F6\u523B\u7684\u7ED3\u679C\u53EF\u80FD\u53D8\u5316\u3002",
+    nextStep: "\u5982\u6709\u6761\u4EF6\uFF0C\u53EF\u8865\u5145\u66F4\u7CBE\u786E\u7684\u51FA\u751F\u65F6\u95F4\u540E\u518D\u6B21\u8BA1\u7B97\u3002"
+  },
+  TIME_UNKNOWN: {
+    impact: "\u51FA\u751F\u65F6\u95F4\u672A\u77E5\uFF0C\u4F9D\u8D56\u65F6\u523B\u7684\u7ED3\u679C\u5DF2\u53D7\u9650\u6216\u7701\u7565\u3002",
+    nextStep: "\u5982\u80FD\u786E\u8BA4\u51FA\u751F\u65F6\u95F4\uFF0C\u53EF\u91CD\u65B0\u8BA1\u7B97\u5B8C\u6574\u7684\u65F6\u523B\u76F8\u5173\u90E8\u5206\u3002"
+  },
+  DST_AMBIGUOUS_RESOLVED: {
+    impact: "\u5F53\u5730\u65F6\u95F4\u5B58\u5728\u5386\u53F2\u590F\u4EE4\u65F6\u6B67\u4E49\uFF0C\u7ED3\u679C\u4F9D\u8D56\u5DF2\u9009\u62E9\u7684\u5904\u7406\u65B9\u5F0F\u3002",
+    nextStep: "\u5982\u80FD\u786E\u8BA4\u5F53\u65F6\u91C7\u7528\u7684\u65F6\u95F4\uFF0C\u53EF\u6838\u5BF9\u8BE5\u9009\u62E9\u3002"
+  },
+  SOLAR_TIME_APPROXIMATE: {
+    impact: "\u771F\u592A\u9633\u65F6\u4F7F\u7528\u4E86\u8FD1\u4F3C\u65B9\u6CD5\uFF0C\u8FB9\u754C\u9644\u8FD1\u7684\u7ED3\u679C\u53EF\u80FD\u8F83\u654F\u611F\u3002",
+    nextStep: "\u8BF7\u628A\u5B83\u89C6\u4E3A\u4F20\u7EDF\u6587\u5316\u5206\u6790\u4E2D\u7684\u4E0D\u786E\u5B9A\u6027\u8BF4\u660E\u3002"
+  },
+  SYSTEM_NOT_YET_IMPLEMENTED: {
+    impact: "\u6709\u4E00\u4E2A\u6240\u9700\u4F53\u7CFB\u5F53\u524D\u65E0\u6CD5\u8BA1\u7B97\uFF0C\u7ED3\u8BBA\u8303\u56F4\u5DF2\u53D7\u9650\u3002",
+    nextStep: "\u53EF\u67E5\u770B\u5DF2\u5B8C\u6210\u4F53\u7CFB\u7684\u4F9D\u636E\uFF0C\u6216\u7B49\u5F85\u8BE5\u4F53\u7CFB\u53EF\u7528\u540E\u91CD\u65B0\u8BA1\u7B97\u3002"
+  },
+  NEAR_BOUNDARY: {
+    impact: "\u8F93\u5165\u63A5\u8FD1\u89C4\u5219\u8FB9\u754C\uFF0C\u90E8\u5206\u7ED3\u679C\u5BF9\u91C7\u7528\u7684\u8FB9\u754C\u89C4\u5219\u654F\u611F\u3002",
+    nextStep: "\u5EFA\u8BAE\u6838\u5BF9\u51FA\u751F\u65F6\u95F4\uFF0C\u5E76\u4EE5\u4E0D\u540C\u89C4\u5219\u7684\u5DEE\u5F02\u4F5C\u4E3A\u53C2\u8003\u3002"
+  },
+  HIGH_LATITUDE_HOUSE_RISK: {
+    impact: "\u9AD8\u7EAC\u5EA6\u6761\u4EF6\u53EF\u80FD\u4F7F\u90E8\u5206\u5BAB\u4F4D\u8BA1\u7B97\u4E0D\u7A33\u5B9A\u3002",
+    nextStep: "\u8BF7\u8C28\u614E\u89E3\u8BFB\u5BAB\u4F4D\u76F8\u5173\u7ED3\u8BBA\uFF0C\u5E76\u5728\u9700\u8981\u65F6\u6BD4\u8F83\u4E0D\u540C\u5BAB\u5236\u3002"
+  },
+  LUNAR_CONVERTED: {
+    impact: "\u519C\u5386\u8F93\u5165\u5DF2\u6309\u6240\u9009\u89C4\u5219\u8F6C\u6362\u540E\u8BA1\u7B97\u3002",
+    nextStep: "\u5982\u53D1\u73B0\u5386\u6CD5\u4FE1\u606F\u6709\u8BEF\uFF0C\u8BF7\u66F4\u6B63\u540E\u91CD\u65B0\u8BA1\u7B97\u3002"
+  },
+  BAZI_GENDER_REQUIRED: {
+    impact: "\u7F3A\u5C11\u89C4\u5219\u6240\u9700\u4FE1\u606F\uFF0C\u90E8\u5206\u516B\u5B57\u5468\u671F\u5185\u5BB9\u672A\u8BA1\u7B97\u3002",
+    nextStep: "\u8865\u5145\u6240\u9700\u89C4\u5219\u4FE1\u606F\u540E\u53EF\u91CD\u65B0\u8BA1\u7B97\u8BE5\u90E8\u5206\u3002"
+  },
+  ZIWEI_INPUT_REQUIRED: {
+    impact: "\u7F3A\u5C11\u7D2B\u5FAE\u6240\u9700\u4FE1\u606F\uFF0C\u7D2B\u5FAE\u90E8\u5206\u672A\u8BA1\u7B97\u3002",
+    nextStep: "\u8865\u5145\u6240\u9700\u4FE1\u606F\u540E\u53EF\u91CD\u65B0\u8BA1\u7B97\u7D2B\u5FAE\u90E8\u5206\u3002"
+  },
+  RULESET_VARIANT_DEFAULTED: {
+    impact: "\u8BF7\u6C42\u7684\u89C4\u5219\u53D8\u4F53\u4E0D\u53EF\u7528\uFF0C\u5DF2\u91C7\u7528\u6587\u6863\u8BF4\u660E\u7684\u9ED8\u8BA4\u89C4\u5219\u3002",
+    nextStep: "\u8BF7\u7ED3\u5408\u89C4\u5219\u8BF4\u660E\u7406\u89E3\u8BE5\u5DEE\u5F02\uFF0C\u907F\u514D\u628A\u5B83\u89C6\u4E3A\u552F\u4E00\u7B54\u6848\u3002"
+  }
+};
+function sanitizePublicText(text) {
+  return text.replace(
+    /\b\d{4}-\d{2}-\d{2}(?:[T\s]\d{2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:?\d{2})?)?\b/g,
+    "\u8BE5\u76EE\u6807\u65E5\u671F"
+  ).replace(/\b\d{4}年\d{1,2}月\d{1,2}日\b/g, "\u8BE5\u76EE\u6807\u65E5\u671F").replace(/\b(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?\b/g, "\u8BE5\u76EE\u6807\u65F6\u523B");
+}
+function toPublicWarnings(warnings) {
+  const seen = /* @__PURE__ */ new Set();
+  const publicWarnings = [];
+  for (const warning of warnings) {
+    const key = `${warning.code}:${warning.severity}:${warning.system}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    publicWarnings.push({
+      code: warning.code,
+      severity: warning.severity,
+      system: warning.system,
+      ...PUBLIC_WARNING_COPY[warning.code]
+    });
+  }
+  return publicWarnings;
+}
+function toPublicFacts(interpretation) {
+  return interpretation.facts.map((fact2, index) => ({
+    id: `fact-${index + 1}`,
+    topic: fact2.topic,
+    claim: sanitizePublicText(fact2.claim),
+    evidence: fact2.evidence.map((evidence) => ({
+      kind: evidence.kind,
+      ref: sanitizePublicText(evidence.ref)
+    })),
+    ...fact2.confidence === void 0 ? {} : { confidence: fact2.confidence },
+    ...fact2.caveat === void 0 ? {} : { caveat: sanitizePublicText(fact2.caveat) },
+    ...fact2.polarity === void 0 ? {} : { polarity: fact2.polarity },
+    ...fact2.reason === void 0 ? {} : { reason: sanitizePublicText(fact2.reason) }
+  }));
+}
+function systemStatuses(bundle) {
+  return SYSTEMS.map((system) => ({
+    system,
+    status: bundle[system] === void 0 ? "unavailable" : "computed"
+  }));
+}
+function dedupeStrings(values) {
+  return [
+    ...new Set(values.filter((value) => value !== void 0 && value !== ""))
+  ];
+}
+function buildPublicResult(bundle, interpretation, warnings = bundle.warnings) {
+  return PublicResult.parse({
+    contractVersion: PUBLIC_RESULT_CONTRACT_VERSION,
+    engineVersion: bundle.engineVersion,
+    sourceSchemaVersion: bundle.schemaVersion,
+    systems: systemStatuses(bundle),
+    inputReliability: {
+      timeAccuracy: bundle.originalInput.timeAccuracy,
+      birthTimeKnown: bundle.originalInput.timeAccuracy !== "unknown"
+    },
+    warnings: toPublicWarnings(warnings),
+    facts: toPublicFacts(interpretation),
+    rulesets: interpretation.rulesets,
+    disclaimers: interpretation.disclaimers.map(sanitizePublicText),
+    followupOffers: interpretation.followupOffers.map(sanitizePublicText)
+  });
+}
+function selectFacts(facts, topic) {
+  if (topic === "general") return facts;
+  return facts.filter((fact2) => fact2.topic === topic);
+}
+var LIMITING_WARNING_CODES = /* @__PURE__ */ new Set([
+  "TIME_ACCURACY_APPROXIMATE",
+  "TIME_UNKNOWN",
+  "DST_AMBIGUOUS_RESOLVED",
+  "SOLAR_TIME_APPROXIMATE",
+  "SYSTEM_NOT_YET_IMPLEMENTED",
+  "NEAR_BOUNDARY",
+  "HIGH_LATITUDE_HOUSE_RISK",
+  "BAZI_GENDER_REQUIRED",
+  "ZIWEI_INPUT_REQUIRED",
+  "RULESET_VARIANT_DEFAULTED"
+]);
+function contentOrder(lens) {
+  if (lens === "explain") {
+    return ["summary", "technical-evidence", "uncertainty", "disclaimer"];
+  }
+  if (lens === "timing") {
+    return [
+      "summary",
+      "plain-language-explanation",
+      "uncertainty",
+      "practical-options",
+      "technical-evidence",
+      "disclaimer"
+    ];
+  }
+  return [
+    "summary",
+    "plain-language-explanation",
+    "practical-options",
+    "uncertainty",
+    "technical-evidence",
+    "disclaimer"
+  ];
+}
+function buildAnswerPlan(publicResult, requestInput) {
+  const request = AnswerRequest.parse(requestInput);
+  const selectedFacts = selectFacts(publicResult.facts, request.topic);
+  const hasUnavailableSystem = publicResult.systems.some(
+    (system) => system.status === "unavailable"
+  );
+  const hasLimitation = hasUnavailableSystem || publicResult.inputReliability.timeAccuracy !== "exact" || publicResult.warnings.some(
+    (warning) => warning.severity === "warning" || LIMITING_WARNING_CODES.has(warning.code)
+  );
+  const answerability = selectedFacts.length === 0 ? "not-supported" : hasLimitation ? "limited" : "grounded";
+  const noEvidenceReason = selectedFacts.length === 0 ? publicResult.inputReliability.birthTimeKnown ? "NO_TOPIC_FACTS" : "TIME_REQUIRED" : void 0;
+  return AnswerPlan.parse({
+    contractVersion: ANSWER_PLAN_CONTRACT_VERSION,
+    engineVersion: publicResult.engineVersion,
+    sourceSchemaVersion: publicResult.sourceSchemaVersion,
+    request,
+    answerability,
+    selectedFacts,
+    allowedFactIds: selectedFacts.map((fact2) => fact2.id),
+    requiredCaveats: dedupeStrings(selectedFacts.map((fact2) => fact2.caveat)),
+    requiredWarningCodes: publicResult.warnings.map((warning) => warning.code),
+    guardrails: ANSWER_GUARDRAILS,
+    responseRequirements: {
+      contentOrder: contentOrder(request.lens),
+      citeSelectedFactIds: selectedFacts.map((fact2) => fact2.id),
+      onlyUseSelectedFacts: true,
+      explainInPlainLanguage: true,
+      discloseRequiredWarnings: true
+    },
+    ...noEvidenceReason === void 0 ? {} : { noEvidenceReason },
+    disclaimers: publicResult.disclaimers,
+    followupOffers: publicResult.followupOffers
+  });
+}
+
 // packages/interpret/src/reading-lint.ts
 var STEP_PATTERNS = [
   { name: "30\u79D2\u770B\u61C2", re: /30\s*秒看懂/ },
@@ -53662,11 +53951,50 @@ function bigramSimilarity(a, b) {
 }
 
 // packages/orchestrator/src/interpret.ts
-function runInterpret(input, options = {}) {
+function dedupeWarnings(warnings) {
+  const seen = /* @__PURE__ */ new Set();
+  return warnings.filter((warning) => {
+    const key = `${warning.code}:${warning.severity}:${warning.system}:${warning.message}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+function runInterpretation(input, options) {
   const bundle = calculate(input, { now: options.now });
-  const horoscope = options.at ? runHoroscope(input, options.at).horoscope : null;
-  const interpretation = buildInterpretationFacts(bundle, { horoscope });
-  return { interpretation, warnings: bundle.warnings };
+  const horoscopeRun = options.at ? runHoroscope(input, options.at) : null;
+  const interpretation = buildInterpretationFacts(bundle, {
+    horoscope: horoscopeRun?.horoscope ?? null
+  });
+  return {
+    bundle,
+    interpretation,
+    warnings: dedupeWarnings([...bundle.warnings, ...horoscopeRun?.warnings ?? []])
+  };
+}
+function runInterpret(input, options = {}) {
+  const run = runInterpretation(input, options);
+  return { interpretation: run.interpretation, warnings: run.warnings };
+}
+function runAnswerPlan(input, options) {
+  const allSystemsInput = {
+    ...input,
+    settings: {
+      ...input.settings,
+      systems: ["western", "bazi", "ziwei"]
+    }
+  };
+  const run = runInterpretation(allSystemsInput, options);
+  const fullPublicResult = buildPublicResult(run.bundle, run.interpretation, run.warnings);
+  const answerPlan = buildAnswerPlan(fullPublicResult, {
+    topic: options.topic,
+    lens: options.lens
+  });
+  const publicResult = {
+    ...fullPublicResult,
+    facts: answerPlan.selectedFacts
+  };
+  return { publicResult, answerPlan };
 }
 
 // packages/synastry/src/bazi-synastry.ts
@@ -54574,6 +54902,7 @@ export {
   renderHoroscopeSvg,
   renderReport,
   renderSvgReport,
+  runAnswerPlan,
   runHoroscope,
   runInterpret,
   runNormalize,

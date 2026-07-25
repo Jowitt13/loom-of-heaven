@@ -83,6 +83,54 @@ function main(): void {
       ok: interp.code === 0 && /"ok":\s*true/.test(interp.stdout),
       detail: `exit ${interp.code}`,
     });
+
+    const answerPlan = run(pkgRoot, [
+      'scripts/ming-chart.mjs',
+      'answer-plan',
+      '--input-file',
+      fixture,
+      '--topic',
+      'career',
+      '--lens',
+      'advice',
+      '--now',
+      FIXED_NOW,
+    ]);
+    const privateFields = [
+      'originalInput',
+      'requestId',
+      'normalizedTime',
+      'calculatedAt',
+      'timezone',
+      '"note"',
+    ];
+    results.push({
+      name: 'answer-plan ok:true and share-safe shape',
+      ok:
+        answerPlan.code === 0 &&
+        /"ok":\s*true/.test(answerPlan.stdout) &&
+        privateFields.every((field) => !answerPlan.stdout.includes(field)),
+      detail: `exit ${answerPlan.code}`,
+    });
+
+    const targetDate = '2026-05-20';
+    const dynamicAnswerPlan = run(pkgRoot, [
+      'scripts/ming-chart.mjs',
+      'answer-plan',
+      '--input-file',
+      fixture,
+      '--topic',
+      'general',
+      '--at',
+      targetDate,
+      '--now',
+      FIXED_NOW,
+    ]);
+    results.push({
+      name: 'answer-plan omits exact dynamic target dates',
+      ok: dynamicAnswerPlan.code === 0 && !dynamicAnswerPlan.stdout.includes(targetDate),
+      detail: `exit ${dynamicAnswerPlan.code}`,
+    });
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

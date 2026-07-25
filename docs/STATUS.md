@@ -185,7 +185,7 @@ never by hand.
 | Command                        | Result                                                                                                                                                   |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm run typecheck`           | clean (tsc strict over packages, tools, tests)                                                                                                           |
-| `pnpm run test`                | 261 tests / 22 files — all passing (all systems + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + 版本迁移/回滚/目标白名单 + PII 隐私护栏 green) |
+| `pnpm run test`                | 271 tests / 23 files — all passing (all systems + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + 版本迁移/回滚/目标白名单 + PII 隐私护栏 green) |
 | `pnpm run build`               | `engine.mjs` ≈ 2.6 MiB + `sbom.cdx.json` (6 runtime deps)                                                                                                |
 | `pnpm run validate:skill`      | 34 / 34 (incl. scripts/ no-stray-files guard)                                                                                                            |
 | `pnpm run validate:reading`    | 53 / 53 (topic example libraries + output-spec structure + 无术语区 firewall; offline, no LLM)                                                           |

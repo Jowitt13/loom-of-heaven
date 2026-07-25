@@ -11,8 +11,8 @@ export type { DoctorReport, RuntimeInfo } from './doctor.ts';
 export { calculate, runNormalize, runHoroscope, computeRequestId } from './calculate.ts';
 export type { CalculateOptions, NormalizeResult, HoroscopeOptions } from './calculate.ts';
 
-export { runInterpret } from './interpret.ts';
-export type { InterpretOptions } from './interpret.ts';
+export { runAnswerPlan, runInterpret } from './interpret.ts';
+export type { AnswerPlanOptions, InterpretOptions } from './interpret.ts';
 
 // Output-layer term firewall for produced Channel B reports (ADR 0011). Pure text util.
 export { lintReading, READING_TERMS, JARGON_STRONG, JARGON_SOFT } from '@ming/interpret';

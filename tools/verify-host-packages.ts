@@ -41,7 +41,15 @@ function runNode(cwd: string, args: string[]): { code: number; stdout: string } 
 
 const REF_RE = /(?:scripts|references|assets)\/[A-Za-z0-9._\-/]+/g;
 const ABS_PATH_RE = /(?:[A-Za-z]:\\Users\\|\/Users\/|\/home\/)/;
-const KNOWN_COMMANDS = ['doctor', 'normalize', 'calculate', 'interpret', 'synastry', 'verify'];
+const KNOWN_COMMANDS = [
+  'doctor',
+  'normalize',
+  'calculate',
+  'interpret',
+  'answer-plan',
+  'synastry',
+  'verify',
+];
 
 function selfTest(): void {
   const pkg = 'calculate-birth-charts';
@@ -247,6 +255,38 @@ function main(): void {
       add(
         `[${h.id}] 解压后 facts 与 canonical byte-identical`,
         fromPkg.stdout.length > 0 && fromPkg.stdout === fromSrc.stdout,
+      );
+
+      const answerArgs = [
+        'scripts/ming-chart.mjs',
+        'answer-plan',
+        '--input-file',
+        'scripts/fixtures/smoke.json',
+        '--topic',
+        'career',
+        '--lens',
+        'advice',
+        '--now',
+        FIXED_NOW,
+      ];
+      const answerFromPkg = runNode(pkgRoot, answerArgs);
+      const answerFromSrc = runNode(srcSkill, answerArgs);
+      const privateFields = [
+        'originalInput',
+        'requestId',
+        'normalizedTime',
+        'calculatedAt',
+        'timezone',
+        '"note"',
+      ];
+      add(
+        `[${h.id}] 解压后 answer-plan 与 canonical byte-identical`,
+        answerFromPkg.stdout.length > 0 && answerFromPkg.stdout === answerFromSrc.stdout,
+      );
+      add(
+        `[${h.id}] 解压后 answer-plan 是脱敏输出`,
+        answerFromPkg.code === 0 &&
+          privateFields.every((field) => !answerFromPkg.stdout.includes(field)),
       );
 
       // Round 13.1: the deterministic `version` command reads the packaged BUILD_MANIFEST and
