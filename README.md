@@ -23,8 +23,7 @@
 
 ## 🔮 这是什么？ / What is this?
 
-**ming-engine** 把三大命理体系装进一个 **完全离线、字节级确定** 的引擎，并打包成一个可在
-Qoder / Claude Code / Codex 里直接调用的 **Skill**。
+**ming-engine** 把三大命理体系装进一个 **完全离线、字节级确定** 的引擎，并打包成一个供支持本地脚本执行的 AI 宿主调用的 **Skill**。
 
 > 🧠 **大模型只负责收集输入、复述确认、转达结果——它从不亲自算命。**
 > 所有行星位置、宫位、相位、干支、十神、星曜、四化都由内置的确定性 CLI 计算，可回归、可复现、有来源。
@@ -46,9 +45,17 @@ Qoder / Claude Code / Codex 里直接调用的 **Skill**。
 
 宿主 AI 会先识别平台并读取 [`install-manifest.json`](install-manifest.json) 的 `published` 状态；**只有所选平台已发布时**，才会读取下载地址、校验 SHA-256 并安装。它不会猜测、拼接或尝试不存在的下载链接。
 
-- 仓库重新公开后，Codex 可直接使用仓库中的完整排盘 Skill。
-- Qoder、WorkBuddy 与豆包电脑版当前**没有公开 ZIP 安装包**；安装入口会明确提示“安装包尚未发布”并停止，不会下载 404 文件或伪称安装成功。
-- 四个平台的完整排盘能力与真机兼容性记录仍见下方文档；可下载性以清单的 `published` 字段为准。
+### 当前可用性 / Availability
+
+| 宿主       | 当前状态                       | 最简开始方式                                             |
+| ---------- | ------------------------------ | -------------------------------------------------------- |
+| Codex      | 可从公开仓库使用完整排盘 Skill | 克隆或下载本仓库后打开项目；不依赖 GitHub Release        |
+| Qoder      | 公开 ZIP 安装包尚未发布        | 发送上方安装链接；Agent 会如实提示“安装包尚未发布”并停止 |
+| WorkBuddy  | 公开 ZIP 安装包尚未发布        | 发送上方安装链接；不会尝试下载不存在的文件               |
+| 豆包电脑版 | 公开 ZIP 安装包尚未发布        | 发送上方安装链接；不会要求你使用 CLI 或旧缓存            |
+
+四个平台的完整排盘能力与真机兼容性记录仍见下方文档；可下载性始终以清单的 `published` 字段为准。
+
 - 详见 [`INSTALL.md`](INSTALL.md) 与 [`docs/INSTALL_BY_PLATFORM.md`](docs/INSTALL_BY_PLATFORM.md)；能力矩阵见 [`docs/HOST_COMPATIBILITY.md`](docs/HOST_COMPATIBILITY.md)。
 
 > 当前没有可供下载的 GitHub Release ZIP、发布 tag 或对应 SHA-256 清单。未来只有在真实 Release 创建、资产上传并完成重下校验后，清单才会切换为可安装状态。
@@ -109,6 +116,8 @@ node scripts/ming-chart.mjs interpret --input-file birth-input.json --output-fil
 
 <details>
 <summary>📥 <b>birth-input.json 示例</b>（点击展开）</summary>
+
+> **合成示例：** 下列人物、日期、时间与地点仅用于测试和演示，不对应真实个人。
 
 ```json
 {
