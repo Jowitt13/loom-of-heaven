@@ -15,5 +15,6 @@ export * from './ziwei.ts';
 export * from './western.ts';
 export * from './interpretation.ts';
 export * from './answer-plan.ts';
+export * from './validate-answer.ts';
 export * from './synastry.ts';
 export * from './chart-bundle.ts';

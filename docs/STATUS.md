@@ -182,25 +182,25 @@ shared with [VALIDATION.md](./VALIDATION.md) ("Current results"). `pnpm run chec
 if either doc's `N tests / M files` count drifts from an actual run, so update both from the run,
 never by hand.
 
-| Command                        | Result                                                                                                                                                   |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm run typecheck`           | clean (tsc strict over packages, tools, tests)                                                                                                           |
-| `pnpm run test`                | 271 tests / 23 files — all passing (all systems + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + 版本迁移/回滚/目标白名单 + PII 隐私护栏 green) |
-| `pnpm run build`               | `engine.mjs` ≈ 2.6 MiB + `sbom.cdx.json` (6 runtime deps)                                                                                                |
-| `pnpm run validate:skill`      | 34 / 34 (incl. scripts/ no-stray-files guard)                                                                                                            |
-| `pnpm run validate:reading`    | 53 / 53 (topic example libraries + output-spec structure + 无术语区 firewall; offline, no LLM)                                                           |
-| `pnpm run validate:docs`       | passes (docs consistency: 4 full hosts, render disabled, no wrong-ephemeris attribution, dev Node 24 / run Node 22; self-tests)                          |
-| `pnpm run validate:provenance` | passes (no wrong-ephemeris attribution in live source / examples / built engine; VSOP87+NOVAS; self-tests)                                               |
-| `pnpm run verify:hosts`        | real candidate ZIPs: single top dir, no double-nest, doctor/verify/calculate byte-identical to canonical                                                 |
-| `pnpm run verify:install`      | root publishes GitHub Release v0.1.4 with immutable URL/SHA-256; next candidate build remains unpublished/reproducible                                   |
-| `pnpm run smoke`               | 10 / 10 (offline; source CLI vs isolated Skill byte-identical)                                                                                           |
-| `pnpm run forward:test`        | 41 / 41 (offline; 8 realistic requests incl. horoscope + interpret + synastry)                                                                           |
-| `pnpm run example`             | regenerates `examples/` (de-identified artifacts; needs build)                                                                                           |
-| `pnpm run package`             | `dist/` stage + self-verified `.zip` + `.sha256` (14 files; needs build)                                                                                 |
-| `pnpm run check:doc-counts`    | passes — both docs match the real run                                                                                                                    |
-| `pnpm run format:check`        | clean                                                                                                                                                    |
-| `pnpm run verify:cloud`        | CI-safe, non-sensitive gate; must pass in GitHub Actions                                                                                                 |
-| `pnpm run verify:all`          | controlled local gate; `scan:incident` fails closed when its private token file is unavailable                                                           |
+| Command                        | Result                                                                                                                                                                                    |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm run typecheck`           | clean (tsc strict over packages, tools, tests)                                                                                                                                            |
+| `pnpm run test`                | 290 tests / 24 files — all passing (all systems + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + validate-answer 事实边界与安全 + 版本迁移/回滚/目标白名单 + PII 隐私护栏 green) |
+| `pnpm run build`               | `engine.mjs` ≈ 2.6 MiB + `sbom.cdx.json` (6 runtime deps)                                                                                                                                 |
+| `pnpm run validate:skill`      | 35 / 35 (incl. scripts/ no-stray-files guard)                                                                                                                                             |
+| `pnpm run validate:reading`    | 53 / 53 (topic example libraries + output-spec structure + 无术语区 firewall; offline, no LLM)                                                                                            |
+| `pnpm run validate:docs`       | passes (docs consistency: 4 full hosts, render disabled, no wrong-ephemeris attribution, dev Node 24 / run Node 22; self-tests)                                                           |
+| `pnpm run validate:provenance` | passes (no wrong-ephemeris attribution in live source / examples / built engine; VSOP87+NOVAS; self-tests)                                                                                |
+| `pnpm run verify:hosts`        | real candidate ZIPs: single top dir, no double-nest, doctor/verify/calculate byte-identical to canonical                                                                                  |
+| `pnpm run verify:install`      | root publishes GitHub Release v0.1.4 with immutable URL/SHA-256; next candidate build remains unpublished/reproducible                                                                    |
+| `pnpm run smoke`               | 10 / 10 (offline; source CLI vs isolated Skill byte-identical)                                                                                                                            |
+| `pnpm run forward:test`        | 41 / 41 (offline; 8 realistic requests incl. horoscope + interpret + synastry)                                                                                                            |
+| `pnpm run example`             | regenerates `examples/` (de-identified artifacts; needs build)                                                                                                                            |
+| `pnpm run package`             | `dist/` stage + self-verified `.zip` + `.sha256` (14 files; needs build)                                                                                                                  |
+| `pnpm run check:doc-counts`    | passes — both docs match the real run                                                                                                                                                     |
+| `pnpm run format:check`        | clean                                                                                                                                                                                     |
+| `pnpm run verify:cloud`        | CI-safe, non-sensitive gate; must pass in GitHub Actions                                                                                                                                  |
+| `pnpm run verify:all`          | controlled local gate; `scan:incident` fails closed when its private token file is unavailable                                                                                            |
 
 Vertical slice proven: `birth-input.json → normalize → ChartBundle → structured JSON` (render paused),
 runnable from a clean copy outside the repo, offline, deterministic.

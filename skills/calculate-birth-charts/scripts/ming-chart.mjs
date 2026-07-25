@@ -17,6 +17,7 @@
  *   node scripts/ming-chart.mjs answer-plan --input-file in.json --topic <topic> [--lens overview|strengths|risks|timing|advice|explain] [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file answer-plan.json]
  *   node scripts/ming-chart.mjs synastry  --input-file people.json [--now <iso|ms>] [--output-file synastry.json]  (1-5 people; set analyzePair when >2)
  *   node scripts/ming-chart.mjs lint-reading --input-file draft-reading.md [--channel topic|full] [--simple] [--output-file reading-lint.json]
+ *   node scripts/ming-chart.mjs validate-answer --input-file validate-input.json [--output-file validation-result.json]
  *   node scripts/ming-chart.mjs render     [DISABLED] visualization reports are temporarily off; use calculate/interpret JSON (exit 3)
  *   node scripts/ming-chart.mjs verify     [--fixture fixtures/smoke.json]
  *   node scripts/ming-chart.mjs version    (reads the sibling BUILD_MANIFEST.json of THIS installed package)
@@ -150,6 +151,8 @@ async function main() {
     runInterpret,
     runAnswerPlan,
     runSynastry,
+    validateAnswer,
+    ValidateAnswerInput,
     timeIndexFromHour,
     calculate,
     compareProfiles,
@@ -287,6 +290,36 @@ async function main() {
         const result = lintReading(text, { channel, simple: args.simple === true });
         writeOutput(args, canonicalJsonPretty(result));
         if (!result.ok) process.exit(1);
+        return;
+      }
+      case 'validate-answer': {
+        // Fact-boundary and safety validator (P0): checks a structured ReadingDraft
+        // against an AnswerPlan. Reads a JSON file containing { answerPlan, readingDraft }.
+        const inputPath = resolve(process.cwd(), requireArg(args, 'input-file'));
+        let rawInput;
+        try {
+          rawInput = JSON.parse(readFileSync(inputPath, 'utf8'));
+        } catch (err) {
+          throw new EngineError(
+            'INPUT_VALIDATION_FAILED',
+            `Cannot parse input file: ${err && err.message ? err.message : String(err)}`,
+          );
+        }
+        let validatedInput;
+        try {
+          validatedInput = ValidateAnswerInput.parse(rawInput);
+        } catch (err) {
+          throw new EngineError(
+            'INPUT_VALIDATION_FAILED',
+            'Input does not match ValidateAnswerInput schema.',
+            {
+              issues: err && err.issues ? err.issues : String(err),
+            },
+          );
+        }
+        const validationResult = validateAnswer(validatedInput);
+        writeOutput(args, canonicalJsonPretty(validationResult));
+        if (!validationResult.ok) process.exit(1);
         return;
       }
       case 'render': {
