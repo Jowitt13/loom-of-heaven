@@ -133,6 +133,23 @@ describe('cross-system interpretation facts (handoff §8 layer 2)', () => {
     expect(canonicalJson(interpret())).toBe(canonicalJson(interpret()));
   });
 
+  it('facts from all three rule systems carry -rule kind evidence (back-link guarantee)', () => {
+    const interp = interpret();
+    const ruleKinds = new Set(interp.facts.flatMap((f) => f.evidence.map((e) => e.kind)));
+    // All three rule systems must appear in evidence
+    expect(ruleKinds.has('bazi-rule')).toBe(true);
+    expect(ruleKinds.has('western-rule')).toBe(true);
+    expect(ruleKinds.has('ziwei-rule')).toBe(true);
+    // Every fact with a -rule evidence must have a non-empty ref
+    for (const f of interp.facts) {
+      for (const e of f.evidence) {
+        if (e.kind.endsWith('-rule')) {
+          expect(e.ref.length, `empty ref in ${e.kind}`).toBeGreaterThan(0);
+        }
+      }
+    }
+  });
+
   it('includes the Zi Wei 流年 when a target date is given', () => {
     const interp = runInterpret(parseBirthInput(base), {
       now: FIXED,

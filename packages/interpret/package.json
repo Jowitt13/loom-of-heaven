@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@ming/bazi-rules": "workspace:*",
+    "@ming/western-rules": "workspace:*",
+    "@ming/ziwei-rules": "workspace:*",
     "@ming/contracts": "workspace:*"
   }
 }
