@@ -1,0 +1,27 @@
+{
+  "description": "Independent golden longitudes for the ten natal bodies, fetched once from the NASA/JPL Horizons On-Line Ephemeris System. These are TECHNICAL epochs (synthetic instants reused from the precision-regression suite), NOT anyone's birth data.",
+  "source": {
+    "name": "NASA/JPL Horizons On-Line Ephemeris System (Solar System Dynamics Group)",
+    "api": "https://ssd.jpl.nasa.gov/api/horizons.api",
+    "query": "EPHEM_TYPE=OBSERVER, CENTER='500@399' (geocentric), QUANTITIES='31', CSV_FORMAT=YES, EXTRA_PREC=YES, TLIST=<epochsUtc>",
+    "quantity": "ObsEcLon — observer-centered IAU76/80 ecliptic-of-date apparent longitude (light-time, gravitational deflection of light, and stellar aberration applied), degrees",
+    "fetchedOn": "2026-07-26",
+    "timeScaleNote": "Horizons time tags are UTC from 1962 on; the 1955 epoch is UT1 (≈UTC within 0.9 s). The sub-arcsecond difference is far inside the tolerance."
+  },
+  "frameMatch": "Same frame as the provider's Ecliptic(GeoVector(body, date, true)): geocentric, apparent (aberration applied), true ecliptic and equinox of date.",
+  "toleranceArcmin": 1.0,
+  "measuredWorstArcmin": 0.1996,
+  "epochsUtc": ["1955-04-18T22:10:00Z", "2000-01-01T12:00:00Z", "2024-10-03T06:30:00Z"],
+  "longitudesDeg": {
+    "Sun": [28.0953236, 280.3689092, 190.5425225],
+    "Moon": [339.3877599, 223.323786, 195.7969323],
+    "Mercury": [23.3357288, 271.8892699, 192.3914973],
+    "Venus": [353.1580492, 241.5657794, 222.3682485],
+    "Mars": [65.3714648, 327.9632921, 106.0308246],
+    "Jupiter": [111.5639351, 25.2530685, 81.2771784],
+    "Saturn": [229.3535876, 40.3956366, 344.2100673],
+    "Uranus": [113.7294077, 314.809168, 56.8500978],
+    "Neptune": [206.8431674, 303.1930007, 358.1789738],
+    "Pluto": [144.3758705, 251.4547644, 299.6601638]
+  }
+}

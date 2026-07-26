@@ -61,9 +61,11 @@ the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not h
 resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **301 tests / 26 files — all passing**. The Western provider
-  (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 wrapper-consistency ≤1′ gate (vs
-  astronomy-engine's own output; an independent JPL Horizons golden is TODO); the sidereal zodiac (Lahiri), true node
+- Typecheck: clean. Tests: **312 tests / 27 files — all passing**. The Western provider
+  (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 ≤1′ gate two ways: wrapper-consistency
+  (vs astronomy-engine's own output) plus an **independent JPL Horizons golden** (10 bodies × 3
+  technical epochs fetched from the NASA/JPL Horizons service, query recorded in
+  `packages/western/goldens/jpl-horizons.json`; worst deviation 0.20′); the sidereal zodiac (Lahiri), true node
   and asteroids have a dedicated **approximate** regression (continuity / sign-plausibility, not the
   ≤1′ gate); angles/houses are validated against the MC=RAMC and eastern-horizon oracles, the Zi Wei
   dynamic chart (运限盘) is regression-anchored, the sourced BaZi interpretation rules (incl.
@@ -106,10 +108,12 @@ canonical-JSON order independence; deterministic hashing; calculate determinism.
 - Each fixture: source URL/citation, collection date, ruleset, expected result, tolerance, and
   why it is trustworthy.
 - Western: at least one set cross-checked against JPL/Swiss; main-body positions within ≤1
-  arc-minute; discrete classifications (sign/house changes) must match exactly.
+  arc-minute; discrete classifications (sign/house changes) must match exactly. (Planetary
+  longitudes: met via the JPL Horizons golden; an independent house table is still open.)
 - BaZi/Zi Wei: sourced references, NOT another wrapper of the same core library.
 - Snapshots guard against regressions only; they never become ground truth.
-- Minimum targets: time/location 30 (met: 36), Western 20, BaZi 40, Zi Wei 20.
+- Minimum targets: time/location 30 (met: 36), Western 20 (met: 30 — JPL Horizons golden
+  longitudes), BaZi 40, Zi Wei 20.
 
 ## Must-test boundaries (tracked to Phase 2)
 

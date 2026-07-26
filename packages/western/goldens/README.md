@@ -1,42 +1,29 @@
-# Western independent golden fixtures (JPL Horizons) — TODO
+# Western independent golden fixtures (JPL Horizons)
 
-This directory is the designated home for an **independent** ephemeris cross-check of the
-Western provider against authoritative [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/)
-geocentric positions.
+This directory holds the **independent** ephemeris cross-check of the Western provider
+against authoritative [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) geocentric
+positions.
 
 ## Status
 
-**Not yet populated.** The current `precision-regression.test.ts` proves only
-_wrapper-consistency_: that our thin wrapper reproduces `astronomy-engine`'s own output to
-≤1 arc-minute (plus Sun cardinal-point anchors that are true by definition). It does **not**
-independently verify absolute accuracy against JPL. `astronomy-engine` itself follows the
-VSOP87 + NOVAS route and its upstream validates against JPL Horizons.
+**Populated** (`jpl-horizons.json`, fetched 2026-07-26): apparent geocentric
+ecliptic-of-date longitudes (Horizons quantity 31, `ObsEcLon`) for all ten natal bodies at
+three technical epochs (1955/2000/2024 — synthetic instants, not anyone's birth data). The
+fixture records the exact API query, frame provenance and capture date so anyone can
+reproduce it. Measured worst deviation at capture time: 0.20 arc-minutes (Neptune); all ten
+bodies pass the same ≤1 arc-minute gate as ADR 0003.
 
-Do **not** fabricate values here. Add rows only when copied from a real, reproducible JPL
-Horizons query (record the exact query so anyone can reproduce it).
+`packages/western/test/western-jpl-golden.test.ts` loads this fixture offline and asserts
+`planetPlacement(body, ms)` matches every golden longitude within `toleranceArcmin` — so the
+Western gate is no longer wrapper-consistency only (`precision-regression.test.ts` keeps
+that layer, plus the Sun cardinal-point anchors).
 
-## Fixture format (`jpl-horizons.sample.json`)
+Do **not** fabricate values here. When adding rows or epochs, copy them from a real,
+reproducible JPL Horizons query and record the exact query in the fixture's `source` block.
 
-```jsonc
-{
-  "source": "JPL Horizons",
-  "generatedFrom": "https://ssd.jpl.nasa.gov/horizons/ (record the exact API/app query)",
-  "frame": "geocentric apparent, ecliptic-of-date, true equinox",
-  "rows": [
-    {
-      "body": "Sun", // NATAL_BODIES member
-      "queryEpochUTC": "2000-01-01T12:00:00Z",
-      "jdTT": 0, // Terrestrial Time Julian Date used in the query
-      "observer": "geocenter (500@399)",
-      "eclipticLongitudeDeg": null, // TODO: fill from a real Horizons response
-      "note": "TODO: paste the Horizons query + response reference",
-    },
-  ],
-}
-```
+## Not covered (still open)
 
-## When populated
-
-Add a `western-jpl-golden.test.ts` that loads this fixture and asserts
-`planetPlacement(body, ms)` matches `eclipticLongitudeDeg` within the documented tolerance,
-turning the Western gate from wrapper-consistency into an independent accuracy check.
+- An independent golden **house table** (e.g. a Swiss Ephemeris reference chart) for the
+  in-house angles/houses — tracked in `docs/STATUS.md` Open risks.
+- The sidereal zodiac, true node and asteroids remain `precision: approximate` with their
+  own continuity regression; they are intentionally outside this ≤1′ golden.

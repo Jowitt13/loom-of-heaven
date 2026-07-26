@@ -10,7 +10,10 @@ import { NATAL_BODIES, planetPlacement } from '../src/ephemeris.ts';
  * 0.2.1 was evaluated and REJECTED at this gate: it deviated by up to ~17′ for
  * Mercury and ~37′ for Pluto against the same astronomy-engine cross-check.)
  *
- * Two layers of assurance:
+ * Two layers of assurance here (a third, INDEPENDENT layer lives in
+ * `western-jpl-golden.test.ts`: JPL Horizons golden longitudes from
+ * `../goldens/jpl-horizons.json`, an ephemeris pipeline sharing no code with
+ * astronomy-engine):
  *  1. Self-consistency: our ephemeris wrapper reproduces the astronomy-engine reference
  *     longitude to ≤1 arc-minute for ALL ten bodies (incl. Mercury and Pluto),
  *     guarding against wrapper bugs or an inaccurate provider swap.
