@@ -30,4 +30,4 @@
 
 ## 与其他平台差异
 
-- Codex 走仓库（不依赖 Release，且在仓库公开时可用）；Qoder / WorkBuddy / 豆包均是完整排盘包的目标宿主，安装包来自 GitHub Release `v0.1.4`，仍必须按清单校验 SHA-256 后再安装。
+- Codex 走仓库（不依赖 Release，且在仓库公开时可用）；Qoder / WorkBuddy / 豆包均是完整排盘包的目标宿主，安装包来自 GitHub Release `v0.1.6`，仍必须按清单校验 SHA-256 后再安装。

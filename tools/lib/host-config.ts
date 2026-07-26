@@ -67,15 +67,15 @@ export const REPO_URL = 'https://github.com/Jowitt13/ming-engine';
 /** Engine semver in the committed, audited source root. */
 export const ROOT_ENGINE_VERSION = '0.1.1';
 /** The published Release currently reflected by the root manifest. */
-export const PUBLISHED_RELEASE_VERSION: string | null = '0.1.5';
+export const PUBLISHED_RELEASE_VERSION: string | null = '0.1.6';
 /** Immutable tag for the published Release. */
-export const PUBLISHED_RELEASE_TAG: string | null = 'v0.1.5';
+export const PUBLISHED_RELEASE_TAG: string | null = 'v0.1.6';
 
 // --- CANDIDATE: the next unpublished build produced by package:hosts. ---
 /** Engine semver of the candidate: same audited engine as the source root (no engine change pending). */
 export const CANDIDATE_ENGINE_VERSION = '0.1.1';
 /** Install-package release version of the candidate (next packaging release over the 0.1.1 engine). */
-export const CANDIDATE_RELEASE_VERSION = '0.1.6';
+export const CANDIDATE_RELEASE_VERSION = '0.1.7';
 /** Immutable tag the CANDIDATE build targets (never `latest/download`). */
 export const CANDIDATE_RELEASE_TAG = `v${CANDIDATE_RELEASE_VERSION}`;
 /** Sub-directory under `releases/` for the candidate build (gitignored). */

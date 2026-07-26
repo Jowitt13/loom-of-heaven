@@ -50,15 +50,15 @@
 | 宿主       | 当前状态                       | 最简开始方式                                       |
 | ---------- | ------------------------------ | -------------------------------------------------- |
 | Codex      | 可从公开仓库使用完整排盘 Skill | 克隆或下载本仓库后打开项目；不依赖 GitHub Release  |
-| Qoder      | 已发布 GitHub Release `v0.1.5` | 发送上方安装链接；Agent 下载、校验后安装           |
-| WorkBuddy  | 已发布 GitHub Release `v0.1.5` | 发送上方安装链接；Agent 下载、校验后按宿主流程导入 |
-| 豆包电脑版 | 已发布 GitHub Release `v0.1.5` | 发送上方安装链接；Agent 下载、校验后按宿主流程导入 |
+| Qoder      | 已发布 GitHub Release `v0.1.6` | 发送上方安装链接；Agent 下载、校验后安装           |
+| WorkBuddy  | 已发布 GitHub Release `v0.1.6` | 发送上方安装链接；Agent 下载、校验后按宿主流程导入 |
+| 豆包电脑版 | 已发布 GitHub Release `v0.1.6` | 发送上方安装链接；Agent 下载、校验后按宿主流程导入 |
 
 四个平台的完整排盘能力与真机兼容性记录仍见下方文档；可下载性始终以清单的 `published` 字段为准。
 
 - 详见 [`INSTALL.md`](INSTALL.md) 与 [`docs/INSTALL_BY_PLATFORM.md`](docs/INSTALL_BY_PLATFORM.md)；能力矩阵见 [`docs/HOST_COMPATIBILITY.md`](docs/HOST_COMPATIBILITY.md)。
 
-> 安装包来自 GitHub Release `v0.1.5`：已提供 Qoder、WorkBuddy 与豆包电脑版 ZIP。下载地址与 SHA-256 以 [`install-manifest.json`](install-manifest.json) 和 [`SHA256SUMS.txt`](SHA256SUMS.txt) 为准。
+> 安装包来自 GitHub Release `v0.1.6`：已提供 Qoder、WorkBuddy 与豆包电脑版 ZIP。下载地址与 SHA-256 以 [`install-manifest.json`](install-manifest.json) 和 [`SHA256SUMS.txt`](SHA256SUMS.txt) 为准。
 
 ---
 
@@ -141,7 +141,7 @@ node scripts/ming-chart.mjs interpret --input-file birth-input.json --output-fil
 
 ### 🟣 Qoder
 
-Qoder 的完整 ZIP 已发布在 GitHub Release `v0.1.5`。普通用户仍只需使用上方安装入口；Agent 会读取清单、下载不可变资产、校验 SHA-256 后安装，不需要 CLI。
+Qoder 的完整 ZIP 已发布在 GitHub Release `v0.1.6`。普通用户仍只需使用上方安装入口；Agent 会读取清单、下载不可变资产、校验 SHA-256 后安装，不需要 CLI。
 
 ### 🟠 Claude Code
 
