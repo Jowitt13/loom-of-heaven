@@ -54,7 +54,7 @@ enforcement yet; they are intentionally excluded from `verify:cloud` and CI unti
 - Dedicated / expanded HTML-injection suite beyond the template CSP, no-`<script>`, and
   no-network checks already run by `validate:skill`.
 
-## Current results (2026-07-24)
+## Current results (2026-07-26)
 
 The test count below comes from one real `pnpm run test` run — the single source of truth shared with
 the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not hand-edit it to
@@ -69,7 +69,7 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   dynamic chart (运限盘) is regression-anchored, the sourced BaZi interpretation rules (incl.
   刑冲合害/神煞/大运吉凶 `polarity`) are covered, and the cross-system interpretation-facts layer is
   checked for topic coverage, grounded evidence, `followupOffers`, de-identification and honest
-  caveats. Skill validate: **34/34** (incl. the scripts/ no-stray-files guard). Reading-example
+  caveats. Skill validate: **35/35** (incl. the scripts/ no-stray-files guard). Reading-example
   static validate: **53/53** (topic example libraries + output-spec structure + the Channel B
   无术语区 term firewall; offline, no LLM — it proves the spec/sample structure, **not** that a host
   model follows the style 100% of the time). Docs-consistency `validate:docs` passes (four full hosts /
