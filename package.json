@@ -30,13 +30,14 @@
     "verify:install": "node tools/verify-install-manifest.ts",
     "check:doc-counts": "node tools/check-doc-counts.ts",
     "scan:deps": "node tools/scan-deps.ts",
+    "scan:licenses": "node tools/scan-licenses.ts",
     "scan:secrets": "node tools/scan-secrets.ts",
     "scan:incident": "node tools/scan-incident.ts",
     "scan:incident:history": "node tools/scan-incident.ts --history",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint packages",
-    "verify:cloud": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run validate:provenance && pnpm run validate:skill && pnpm run validate:reading && pnpm run validate:docs && pnpm run smoke && pnpm run forward:test && pnpm run package:hosts && pnpm run verify:hosts && pnpm run verify:install && pnpm run check:doc-counts && pnpm run scan:deps && pnpm run scan:secrets",
+    "verify:cloud": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run validate:provenance && pnpm run validate:skill && pnpm run validate:reading && pnpm run validate:docs && pnpm run smoke && pnpm run forward:test && pnpm run package:hosts && pnpm run verify:hosts && pnpm run verify:install && pnpm run check:doc-counts && pnpm run scan:deps && pnpm run scan:licenses && pnpm run scan:secrets",
     "verify:all": "pnpm run verify:cloud && pnpm run scan:incident"
   },
   "devDependencies": {

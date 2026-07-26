@@ -50,8 +50,9 @@ const releasesDir = join(root, 'releases');
 /** Files/dirs excluded from EVERY host package to keep zips byte-reproducible. */
 function isExcluded(src: string): boolean {
   if (/[\\/]\.tmp([\\/]|$)/.test(src)) return true;
-  // sbom.cdx.json carries a build timestamp -> excluding it keeps the zip deterministic.
-  if (/[\\/]sbom\.cdx\.json$/.test(src)) return true;
+  // Both committed SBOMs (CycloneDX + SPDX) stay out of the host zips, matching the
+  // long-standing sbom.cdx.json exclusion that keeps the zip contents deterministic.
+  if (/[\\/]sbom\.(cdx|spdx)\.json$/.test(src)) return true;
   return false;
 }
 

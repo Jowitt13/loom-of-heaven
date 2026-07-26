@@ -33,6 +33,7 @@ Before a release or a visibility change, run `pnpm run verify:all` and
 | Install state    | `pnpm run verify:install`                         | Root published state, immutable Release URL/SHA-256, and candidate boundary are honest and consistent. |
 | Doc counts       | `pnpm run check:doc-counts`                       | Re-runs the suite; fails if a doc's `N tests / M files` drifts from the run.                           |
 | Dep vuln scan    | `pnpm run scan:deps`                              | `pnpm audit --prod` over shipped deps; fails on an advisory (offline: skip+warn).                      |
+| License scan     | `pnpm run scan:licenses`                          | Offline `pnpm licenses` policy gate (LICENSE_AUDIT allowlist) + SBOM license cross-check; fail-closed. |
 | Secret scan      | `pnpm run scan:secrets`                           | Dependency-free scan of tracked files; fails on a leaked credential.                                   |
 | Incident scan    | local `pnpm run verify:all`                       | Exact incident tokens; fail-closed if the controlled token file is unavailable.                        |
 
@@ -47,10 +48,6 @@ enforcement yet; they are intentionally excluded from `verify:cloud` and CI unti
 
 - Broader ESLint ruleset (style / type-aware rules) — only the import-boundary gate
   (`eslint.config.js`, in `verify:cloud`) is enforced today; `typecheck` remains the other static gate.
-- Dependency **license** scan — the dependency **vulnerability** scan (`scan:deps`, `pnpm audit --prod`)
-  and the **secret** scan (`scan:secrets`) are now enforced in `verify:cloud`; a license-policy gate is
-  still deferred.
-- SPDX-format SBOM — a CycloneDX `sbom.cdx.json` is produced today by `build`.
 - Dedicated / expanded HTML-injection suite beyond the template CSP, no-`<script>`, and
   no-network checks already run by `validate:skill`.
 
@@ -71,7 +68,7 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   dynamic chart (运限盘) is regression-anchored, the sourced BaZi interpretation rules (incl.
   刑冲合害/神煞/大运吉凶 `polarity`) are covered, and the cross-system interpretation-facts layer is
   checked for topic coverage, grounded evidence, `followupOffers`, de-identification and honest
-  caveats. Skill validate: **35/35** (incl. the scripts/ no-stray-files guard). Reading-example
+  caveats. Skill validate: **37/37** (incl. the scripts/ no-stray-files guard and both SBOM checks). Reading-example
   static validate: **53/53** (topic example libraries + output-spec structure + the Channel B
   无术语区 term firewall; offline, no LLM — it proves the spec/sample structure, **not** that a host
   model follows the style 100% of the time). Docs-consistency `validate:docs` passes (four full hosts /
@@ -82,7 +79,9 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   命理/黑话 terms in sections 1-5 — still a static text gate, not a guarantee of host-model wording. Round 9 (ADR 0012) added an 空话 (vagueness) check: abstract judgements in sections 1-5 must carry a concrete
   action/scene/observable/result nearby, and three REAL reports (male, 1990-06-15 14:20, 示例城市; 事业/感情/
   财运, saved unpolished to `docs/round9-acceptance/`) lint to 0 error (test #8 reads them). The detector is a
-  nearby-concreteness heuristic, not a meaning judge. Clean-dir offline
+  nearby-concreteness heuristic, not a meaning judge. The dependency **license** gate (`scan:licenses`) enforces the
+  LICENSE_AUDIT allowlist offline and cross-checks the committed SBOM license claims; `build` emits both a CycloneDX
+  and an SPDX 2.3 SBOM (byte-stable, committed). Clean-dir offline
   smoke: **10/10**. Clean-dir forward test: **41/41** — 8 realistic requests (incl. a horoscope, an
   interpret and a multi-person 合婚 synastry) across the CLI, and that `render` is disabled (exit 3,
   no report file). Format:

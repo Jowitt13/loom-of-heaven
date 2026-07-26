@@ -6,9 +6,10 @@ import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'no
 
 /**
  * Bundle the deterministic engine into the Skill as a single self-contained ESM
- * file (scripts/dist/engine.mjs) and emit a CycloneDX SBOM. The bundle inlines
- * zod + moment-timezone (including its packed TZDB), so the published Skill has
- * no dependency on the repo's packages/ or on `npm install` (handoff §3.1, §12).
+ * file (scripts/dist/engine.mjs) and emit a CycloneDX SBOM plus an SPDX 2.3 SBOM.
+ * The bundle inlines zod + moment-timezone (including its packed TZDB), so the
+ * published Skill has no dependency on the repo's packages/ or on `npm install`
+ * (handoff §3.1, §12).
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -103,6 +104,67 @@ async function main(): Promise<void> {
   console.log(
     `sbom.cdx.json written (zod ${zod.version}, moment-timezone ${momentTz.version}, moment ${moment.version}, tyme4ts ${tyme.version}, iztro ${iztro.version}, astronomy-engine ${astroEngine.version})`,
   );
+
+  // --- SPDX 2.3 SBOM from the SAME component data (Phase 6: second standard format) ---
+  // SPDX requires creationInfo.created; a wall-clock value would break the v0.1.2
+  // byte-reproducibility of committed build artifacts, so this is a FIXED deterministic
+  // build timestamp (not the real build instant — the pinned versions are the record).
+  const SPDX_FIXED_CREATED = '2026-01-01T00:00:00Z';
+  const spdxPackages = components.map((c) => ({
+    name: c.name,
+    SPDXID: `SPDXRef-Package-${c.name.replace(/[^A-Za-z0-9.-]/g, '-')}`,
+    versionInfo: c.version,
+    downloadLocation: 'NOASSERTION',
+    filesAnalyzed: false,
+    licenseConcluded: c.licenses[0]!.license.id,
+    licenseDeclared: c.licenses[0]!.license.id,
+    externalRefs: [
+      {
+        referenceCategory: 'PACKAGE-MANAGER',
+        referenceType: 'purl',
+        referenceLocator: c.purl,
+      },
+    ],
+  }));
+  const spdx = {
+    spdxVersion: 'SPDX-2.3',
+    dataLicense: 'CC0-1.0',
+    SPDXID: 'SPDXRef-DOCUMENT',
+    name: 'calculate-birth-charts-0.1.0',
+    documentNamespace: 'https://github.com/Jowitt13/ming-engine/spdx/calculate-birth-charts-0.1.0',
+    creationInfo: {
+      created: SPDX_FIXED_CREATED,
+      creators: ['Tool: ming-build-skill-0.1.0'],
+      comment:
+        'Deterministic committed artifact: created is a fixed build timestamp, not the real build instant.',
+    },
+    packages: [
+      {
+        name: 'calculate-birth-charts',
+        SPDXID: 'SPDXRef-Package-calculate-birth-charts',
+        versionInfo: '0.1.0',
+        downloadLocation: 'NOASSERTION',
+        filesAnalyzed: false,
+        licenseConcluded: 'MIT',
+        licenseDeclared: 'MIT',
+      },
+      ...spdxPackages,
+    ],
+    relationships: [
+      {
+        spdxElementId: 'SPDXRef-DOCUMENT',
+        relationshipType: 'DESCRIBES',
+        relatedSpdxElement: 'SPDXRef-Package-calculate-birth-charts',
+      },
+      ...spdxPackages.map((p) => ({
+        spdxElementId: 'SPDXRef-Package-calculate-birth-charts',
+        relationshipType: 'DEPENDS_ON',
+        relatedSpdxElement: p.SPDXID,
+      })),
+    ],
+  };
+  writeFileSync(join(skillDir, 'sbom.spdx.json'), `${JSON.stringify(spdx, null, 2)}\n`, 'utf8');
+  console.log(`sbom.spdx.json written (SPDX 2.3, ${spdxPackages.length} dependency packages)`);
 
   const outputs = Object.keys(result.metafile.outputs);
   console.log(`build outputs: ${outputs.join(', ')}`);

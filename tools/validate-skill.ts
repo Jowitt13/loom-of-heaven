@@ -38,6 +38,7 @@ const REQUIRED_FILES = [
   'LICENSE',
   'THIRD_PARTY_NOTICES.md',
   'sbom.cdx.json',
+  'sbom.spdx.json',
 ];
 
 for (const rel of REQUIRED_FILES) {
@@ -130,6 +131,26 @@ if (existsSync(sbomPath)) {
     add('sbom lists components', Array.isArray(sbom.components) && sbom.components.length > 0);
   } catch (err) {
     add('sbom is valid JSON', false, String(err));
+  }
+}
+
+// --- SPDX SBOM lists packages (second standard format, Phase 6) ---
+const spdxPath = join(skillDir, 'sbom.spdx.json');
+if (existsSync(spdxPath)) {
+  try {
+    const spdx = JSON.parse(readFileSync(spdxPath, 'utf8')) as {
+      spdxVersion?: string;
+      packages?: unknown[];
+    };
+    add(
+      'spdx sbom is SPDX-2.x and lists packages',
+      typeof spdx.spdxVersion === 'string' &&
+        spdx.spdxVersion.startsWith('SPDX-2') &&
+        Array.isArray(spdx.packages) &&
+        spdx.packages.length > 1,
+    );
+  } catch (err) {
+    add('spdx sbom is valid JSON', false, String(err));
   }
 }
 

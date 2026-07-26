@@ -1,0 +1,158 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "calculate-birth-charts-0.1.0",
+  "documentNamespace": "https://github.com/Jowitt13/ming-engine/spdx/calculate-birth-charts-0.1.0",
+  "creationInfo": {
+    "created": "2026-01-01T00:00:00Z",
+    "creators": [
+      "Tool: ming-build-skill-0.1.0"
+    ],
+    "comment": "Deterministic committed artifact: created is a fixed build timestamp, not the real build instant."
+  },
+  "packages": [
+    {
+      "name": "calculate-birth-charts",
+      "SPDXID": "SPDXRef-Package-calculate-birth-charts",
+      "versionInfo": "0.1.0",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT"
+    },
+    {
+      "name": "zod",
+      "SPDXID": "SPDXRef-Package-zod",
+      "versionInfo": "4.4.3",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/zod@4.4.3"
+        }
+      ]
+    },
+    {
+      "name": "moment-timezone",
+      "SPDXID": "SPDXRef-Package-moment-timezone",
+      "versionInfo": "0.6.3",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/moment-timezone@0.6.3"
+        }
+      ]
+    },
+    {
+      "name": "moment",
+      "SPDXID": "SPDXRef-Package-moment",
+      "versionInfo": "2.30.1",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/moment@2.30.1"
+        }
+      ]
+    },
+    {
+      "name": "tyme4ts",
+      "SPDXID": "SPDXRef-Package-tyme4ts",
+      "versionInfo": "1.5.2",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/tyme4ts@1.5.2"
+        }
+      ]
+    },
+    {
+      "name": "iztro",
+      "SPDXID": "SPDXRef-Package-iztro",
+      "versionInfo": "2.5.8",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/iztro@2.5.8"
+        }
+      ]
+    },
+    {
+      "name": "astronomy-engine",
+      "SPDXID": "SPDXRef-Package-astronomy-engine",
+      "versionInfo": "2.1.19",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/astronomy-engine@2.1.19"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-Package-calculate-birth-charts"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-zod"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-moment-timezone"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-moment"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-tyme4ts"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-iztro"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-astronomy-engine"
+    }
+  ]
+}
