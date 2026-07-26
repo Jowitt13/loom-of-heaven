@@ -23,8 +23,9 @@ export type {
   ReadingChannel,
 } from '@ming/interpret';
 
-// Fact-boundary and safety validator for host-produced answer drafts (P0).
-export { validateAnswer } from '@ming/interpret';
+// Fact-boundary and safety validator for host-produced answer drafts (P0),
+// plus the bounded parsing facade shared by the CLI and host integrations.
+export { validateAnswer, parseValidateAnswerInputBounded } from '@ming/interpret';
 
 // Validator types come from the contracts layer.
 export type {
@@ -53,10 +54,40 @@ export { verify } from './verify.ts';
 export type { VerifyReport, VerifyCheck } from './verify.ts';
 
 // Contract helpers the CLI needs — re-exported so the CLI imports one bundle only.
+// The validate-answer MAX_* limits and version constants are part of the public
+// runtime surface documented in references/answer-contract.md.
 export {
   parseBirthInput,
   parseSynastryInput,
   ValidateAnswerInput,
+  MAX_VALIDATE_ANSWER_INPUT_BYTES,
+  MAX_OBJECT_KEYS,
+  MAX_OBJECT_KEY_CHARS,
+  MAX_PARAGRAPH_TEXT_CHARS,
+  MAX_SECTIONS,
+  MAX_PARAGRAPHS_PER_SECTION,
+  MAX_SOURCE_FACT_IDS_PER_PARAGRAPH,
+  MAX_CONSTRAINT_REFS_PER_PARAGRAPH,
+  MAX_TOTAL_SOURCE_FACT_IDS,
+  MAX_FACT_ID_CHARS,
+  MAX_CAVEATS_EXPRESSED,
+  MAX_CAVEAT_ENTRY_CHARS,
+  MAX_WARNINGS_DISCLOSED,
+  MAX_WARNING_ENTRY_CHARS,
+  MAX_SECTION_ID_CHARS,
+  MAX_HEADING_CHARS,
+  MAX_TOTAL_TEXT_CHARS,
+  MAX_ALLOWED_FACT_IDS,
+  MAX_REQUIRED_CAVEATS,
+  MAX_REQUIRED_WARNING_CODES,
+  MAX_PLAN_DISCLAIMERS,
+  MAX_DISCLAIMER_ENTRY_CHARS,
+  MAX_PLAN_GUARDRAILS,
+  MAX_NOT_SUPPORTED_TEXT_CHARS,
+  MAX_VIOLATIONS,
+  READING_DRAFT_CONTRACT_VERSION,
+  READING_DRAFT_LEGACY_V1,
+  VALIDATION_RESULT_CONTRACT_VERSION,
   EngineError,
   toEngineError,
   ERROR_CODES,

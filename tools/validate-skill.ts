@@ -91,6 +91,31 @@ if (existsSync(cliPath)) {
   add('CLI does not import child_process', !/child_process|node:child_process/.test(cli));
 }
 
+// --- Ordinary-question gate workflow is documented (validate-answer + lint-reading) ---
+if (existsSync(skillMdPath)) {
+  const skillMd = readFileSync(skillMdPath, 'utf8');
+  add(
+    'SKILL.md documents the validate-answer + lint-reading gate order',
+    skillMd.includes('validate-answer') &&
+      skillMd.includes('lint-reading') &&
+      skillMd.includes('reading-draft/v2'),
+  );
+}
+const answerContractPath = join(skillDir, 'references', 'answer-contract.md');
+if (existsSync(answerContractPath)) {
+  const answerContract = readFileSync(answerContractPath, 'utf8');
+  add(
+    'answer-contract.md documents reading-draft/v2 and validation-result/v2',
+    answerContract.includes('reading-draft/v2') && answerContract.includes('validation-result/v2'),
+  );
+  add(
+    'answer-contract.md documents structured locators and truncation handling',
+    answerContract.includes('sectionIndex') &&
+      answerContract.includes('violationsTruncated') &&
+      answerContract.includes('constraintRefs'),
+  );
+}
+
 // --- Engine bundle is offline: no network API usage ---
 const enginePath = join(skillDir, 'scripts', 'dist', 'engine.mjs');
 if (existsSync(enginePath)) {

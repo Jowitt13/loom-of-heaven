@@ -71,6 +71,7 @@ To keep results consistent across models, the **calculation** workflow is mandat
      1. 选事实（内部）：只使用 `answerPlan.selectedFacts`，并保留 `id` / `reason` / `evidence.ref` / `caveat`；**不直接给用户**。
      2. 通俗中间层（内部写作计划）：把每条事实转成 plainResult / behavior / scenario / upside / risk / action + sourceRefs（对应 `id` 与 evidence.ref）；**不改 schema、不写回输出文件**。
      3. 成文：第 1-5 部分与结尾追问**只用**通俗中间层；原始 claim/reason、干支、十神、星曜、宫位名**只允许进第 6 部分“专业依据”**。禁止把 claim 轻改后塞进核心结论；禁止括号夹带（不写“技能容易变现（食伤生财）”，写“技能和作品更容易形成收入”，依据放第 6 部分）。“甲戌大运/戊申流年”等干支移入第 6 部分，正文只留年份数字。
+   - **结构与措辞门禁（validate-answer，先于成文）:** 把通俗中间层整理成 `reading-draft/v2` JSON（每段带 `sourceFactIds`；免责/caveat/warning 段落用 `constraintRefs` 引用 AnswerPlan 约束，每一条 disclaimer 都要被引用；legacy `reading-draft/v1` 已在运行时被拒绝），与 `answerPlan` 一起送检：`node scripts/ming-chart.mjs validate-answer --input-file validate-input.json`（输入/输出结构、退出码与限制见 `references/answer-contract.md`）。普通问题的完整门禁顺序：**answer-plan → 写 reading-draft/v2 → validate-answer → 用完全相同的可见文本成文 Markdown → lint-reading → 两个门禁都 ok 才展示；任何重写都必须重新跑两个门禁**。
    - **术语防火墙 + 真实检查（lint-reading）:** 成文后，删去第 6 部分“专业依据”再检查剩余正文；只要仍出现命理术语（见 `reading-style.md` 开头清单）或顾问黑话，就必须重写。用随 Skill 发布的确定性检查器验证草稿：
      `node scripts/ming-chart.mjs lint-reading --input-file draft.md --channel topic [--simple]`
      它输出 `{ ok, violations:[{section,term,category,severity,line,replacementHint}] }`。工作流：①先把报告写入临时草稿 → ②跑 lint-reading → ③按 violations 重写（最多 2 次）→ ④通过（ok:true）才展示 → ⑤仍不过则改用更短更通俗的版本（可加 `--simple`），**绝不把未通过草稿发给用户**。检查器只指出问题，由你重写（不要机械删词，以免病句）。
@@ -129,6 +130,8 @@ node scripts/ming-chart.mjs horoscope --input-file birth-input.json --at 2026-05
 node scripts/ming-chart.mjs interpret --input-file birth-input.json --at 2026-05-20T14:00 --output-file interpretation.json
 node scripts/ming-chart.mjs answer-plan --input-file birth-input.json --topic career --lens advice --output-file answer-plan.json
 node scripts/ming-chart.mjs synastry --input-file people.json --output-file synastry.json
+node scripts/ming-chart.mjs validate-answer --input-file validate-input.json --output-file validation-result.json
+node scripts/ming-chart.mjs lint-reading --input-file draft.md --channel topic
 node scripts/ming-chart.mjs verify
 node scripts/ming-chart.mjs version
 node scripts/ming-chart.mjs migrate --host qoder|workbuddy --source <extracted-new-package-dir>
