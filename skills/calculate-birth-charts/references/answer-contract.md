@@ -135,6 +135,12 @@ The input file is one JSON object: `{ "answerPlan": { … }, "readingDraft": { �
   paragraphs cite no facts, and all headings + paragraph texts share one
   `MAX_NOT_SUPPORTED_TEXT_CHARS` budget. Any `sourceFactIds` value that IS provided is
   always checked against `allowedFactIds`, in every mode.
+- **Plain-text contract:** `heading` and `text` fields are PLAIN TEXT. HTML tags, HTML
+  comments, HTML named/numeric entities (e.g. `&amp;`, `&#27880;`, `&#x6CE8;`), and
+  Markdown link/image syntax (`[](...)`, `![](...)`) are FORBIDDEN. The validator rejects
+  them with `CONTAINS_MARKUP` (error). Hosts must escape these fields themselves before
+  rendering as Markdown or HTML; the validator scans the plain text as-is without any
+  decode step, so there is no divergence between scanned text and host-rendered text.
 - `caveatsExpressed` / `warningsDisclosed` must stay consistent with the `constraintRefs`:
   a required caveat/warning that is declared but never referenced (or vice versa) is a
   `CONSTRAINT_ATTESTATION_MISMATCH` error.
@@ -171,14 +177,13 @@ conclusively failed, fix the reported violations, and re-run — never display i
   errors map to the stable `ERROR_EXIT_CODES` table in the engine contracts.
 - The CLI stat-checks the input file BEFORE reading it and rejects files larger than
   `MAX_VALIDATE_ANSWER_INPUT_BYTES` (2 MiB); the parsed object then passes a bounded
-  preflight (object key counts/lengths, all array and text caps) before full schema
-  validation, and parser diagnostics are STATIC — caller keys, paths and values are never
-  echoed. The same bounded entry runs inside the public `validateAnswer(input)` API, so
-  callers never need (and cannot be trusted) to pre-validate.
-- Scanning normalizes to the host-rendered form for every host alike: numeric character
-  references (`&#…;`, `&#x…;`, one `&amp;`-encoded layer) are decoded, default-ignorable
-  code points (e.g. U+034F) stripped, and case folded, before the rules run on every
-  heading and paragraph through one shared pipeline.
+  preflight (object key counts/lengths, own-field checks, guardrail/topic length caps,
+  whitelist projection to Zod) before full schema validation, and all diagnostics are
+  STATIC — caller keys, paths, values, error messages are never echoed. The same bounded
+  entry runs inside the public `validateAnswer(input)` API (which wraps all property
+  access in a try/catch so Proxy traps and getter exceptions are also caught safely).
+- Scanning strips `\p{Default_Ignorable_Code_Point}` and case-folds the plain text — no
+  entity/NCR decode step is needed since the input is plain text by contract.
 - Runtime surface: the engine bundle exports `validateAnswer`,
   `parseValidateAnswerInputBounded`, `READING_DRAFT_CONTRACT_VERSION`,
   `VALIDATION_RESULT_CONTRACT_VERSION`, `READING_DRAFT_LEGACY_V1` and the documented
@@ -186,5 +191,5 @@ conclusively failed, fix the reported violations, and re-run — never display i
 - Honest scope: this is a deterministic structure-and-wording gate. It cannot prove a
   paragraph's meaning follows from its cited facts, cannot prove a referenced caveat is
   truly expressed by the surrounding prose, and its pattern scan cannot recognize every
-  semantic paraphrase or encoding beyond the decoded layers above. It complements — never
-  replaces — `lint-reading` and the host writing rules.
+  semantic paraphrase. It complements — never replaces — `lint-reading` and the host
+  writing rules.

@@ -19,10 +19,12 @@
  *    fact-free" only, not that the text semantically explains the limitation.
  * 3. High-risk expression rules run over ALL visible text (every heading and
  *    paragraph). Canonical fixed safety-disclaimer templates, anchored at a
- *    clause start, are masked before scanning; everything else is scanned as-is.
- *    Scanning normalizes to the HOST-RENDERED form: numeric character
- *    references are decoded, default-ignorable code points stripped, and case
- *    folded, so encoding variants cannot diverge from what the user sees.
+ *    clause start with an explicitly whitelisted prefix, are masked before
+ *    scanning; everything else is scanned as-is. Scanning strips
+ *    default-ignorable code points and case-folds; heading/text fields are
+ *    defined as PLAIN TEXT (no HTML, no entities, no Markdown link/image syntax)
+ *    so there is no decode/render divergence — any markup is rejected with
+ *    CONTAINS_MARKUP before the rule scan runs.
  * 4. Required caveats/warnings via structured `constraintRefs`, with
  *    `caveatsExpressed`/`warningsDisclosed` required to stay consistent; every
  *    plan disclaimer must be covered by a reference, item by item.
@@ -78,10 +80,8 @@ import {
 // Deliberately NOT merged with reading-lint's style word lists: this normalizer only
 // serves the high-risk scan below.
 
-/** Zero-width / invisible / default-ignorable code points used to split keywords
- * (incl. U+034F COMBINING GRAPHEME JOINER, U+061C, Hangul fillers). */
-const INVISIBLE_CHARS_RE =
-  /[\u00AD\u034F\u061C\u115F\u1160\u180E\u200B-\u200F\u202A-\u202E\u2060\u2066-\u2069\u3164\uFE00-\uFE0F\uFEFF\uFFA0]/g;
+/** Default-ignorable code points (Unicode property) used to split keywords. */
+const INVISIBLE_CHARS_RE = /\p{Default_Ignorable_Code_Point}/gu;
 
 /** CJK unified ideograph ranges used to detect artificial splitting of Chinese words. */
 const CJK_RANGE = '\u3400-\u9FFF\uF900-\uFAFF';
@@ -97,41 +97,23 @@ const CJK_SEPARATOR_RE = new RegExp(
 );
 
 /**
- * HTML/Markdown numeric character references (&#27880; / &#x6CE8;) render back
- * to real characters in the host's final output, so the scan must see the
- * rendered form. Invalid / surrogate code points decode to a space.
- */
-const NUMERIC_CHAR_REF_RE = /&#(?:[xX]([0-9a-fA-F]{1,6})|(\d{1,7}));/g;
-
-function decodeCharRefsOnce(text: string): string {
-  return text
-    .replace(/&amp;/gi, '&')
-    .replace(NUMERIC_CHAR_REF_RE, (_m, hex?: string, dec?: string) => {
-      const cp = hex !== undefined ? parseInt(hex, 16) : parseInt(dec!, 10);
-      if (!Number.isFinite(cp) || cp > 0x10ffff || (cp >= 0xd800 && cp <= 0xdfff)) return ' ';
-      return String.fromCodePoint(cp);
-    });
-}
-
-/**
- * Normalize text to the HOST-RENDERED form for safety scanning:
- * 1. Decode numeric character references twice (covers `&#…;`, `&#x…;` and the
- *    `&amp;#…;` double-encoded layer) — the same decode semantics apply to
- *    every host, so the scanned text matches the finally visible text.
- * 2. Unicode NFKC (folds full-width/compatibility forms, e.g. ＰＵＡ → PUA).
- * 3. Strip zero-width / default-ignorable code points (incl. U+034F).
- * 4. Normalize line endings to `\n` and collapse HORIZONTAL whitespace runs to a
+ * Normalize PLAIN TEXT for safety scanning:
+ * 1. Strip default-ignorable code points (Unicode property, covers U+034F,
+ *    variation selectors, tag characters, etc.).
+ * 2. Unicode NFKC (folds full-width/compatibility forms).
+ * 3. Normalize line endings to `\n` and collapse HORIZONTAL whitespace runs to a
  *    single space — newlines are PRESERVED as clause boundaries so the
- *    disclaimer mask can never cross a line break (`toScanText` folds them
- *    after masking so line-split keywords still cannot evade the scan).
- * 5. Remove separator runs wedged between two CJK characters (artificial splitting).
- * 6. Case-fold to lower case so English variants (PUA/Pua/pua) cannot evade.
+ *    disclaimer mask can never cross a line break.
+ * 4. Remove separator runs wedged between two CJK characters (artificial splitting).
+ * 5. Case-fold to lower case so English variants cannot evade.
  * The normalized text is used ONLY for scanning and never appears in any output.
+ * NOTE: heading/text are defined as plain text — HTML entities and Markdown
+ * syntax are rejected BEFORE this function runs (CONTAINS_MARKUP), so no
+ * decode step is needed here.
  */
 export function normalizeSafetyText(text: string): string {
-  let t = decodeCharRefsOnce(decodeCharRefsOnce(text));
+  let t = text.replace(INVISIBLE_CHARS_RE, '');
   t = t.normalize('NFKC');
-  t = t.replace(INVISIBLE_CHARS_RE, '');
   t = t.replace(/\r\n?|[\u0085\u2028\u2029]/g, '\n');
   t = t.replace(/[^\S\n]+/g, ' ');
   t = t.replace(CJK_SEPARATOR_RE, '');
@@ -207,11 +189,11 @@ const DISCLAIMER_PHRASE_ALT = `(?:${[...DISCLAIMER_OBJECT_PHRASES]
   .join('|')})`;
 
 const SAFETY_DISCLAIMER_RE = new RegExp(
-  // Anchor: the template must sit at a clause start, after at most 6 prefix
-  // characters (e.g. 本报告/本内容) that contain no negation character — a
-  // double-negation prefix (并非不构成…) therefore never masks, and a template
-  // substring inside a larger clause is not treated as a canonical disclaimer.
-  `(?<=(?:^|[${CLAUSE_END_CLASS}])[^${CLAUSE_END_CLASS}不非没无]{0,6})` +
+  // Anchor: the template must sit at a clause start, after ONLY an explicitly
+  // whitelisted neutral prefix (e.g. 本报告/本内容) or nothing. Any other
+  // prefix (e.g. 我确认/研究表明/权威指出) means the clause is NOT a
+  // canonical disclaimer and is scanned as-is.
+  `(?<=(?:^|[${CLAUSE_END_CLASS}])(?:本报告|本内容|本解读|本分析|本命盘解读|))` +
     `(?:${DISCLAIMER_NEGATION_VERBS.join('|')})` +
     `${DISCLAIMER_PHRASE_ALT}(?:[或及和]${DISCLAIMER_PHRASE_ALT})*` +
     `(?=[${CLAUSE_END_CLASS}]|$)`,
@@ -375,6 +357,13 @@ const HIGH_RISK_GROUPS: RuleGroup[] = [
 // (The former reading-draft/v1 section-id fact exemption is intentionally gone:
 // runtime acceptance of caller-selected v1 would re-enable it from input data.)
 
+// --- Plain-text contract: heading/text must not contain markup syntax ---
+// Any HTML tags, HTML comments, HTML named/numeric entities, or Markdown
+// link/image syntax violates the plain-text contract and is rejected with
+// CONTAINS_MARKUP before the rule scan runs.
+const MARKUP_RE =
+  /&(?:#[xX]?[0-9a-fA-F]+;?|[a-zA-Z]\w{0,30};)|<\/?[a-zA-Z][\s\S]*?>|<!--[\s\S]*?-->|!\[.*?\]\(.*?\)|\[.*?\]\(.*?\)/;
+
 /**
  * Scan normalized+masked text and return the id of the first matching rule in a
  * group, or null. Rules use stable named ids — never array positions.
@@ -432,47 +421,68 @@ export function validateAnswer(input: unknown): AnswerValidationResult {
     violationsTruncated: false,
   });
 
-  // -1. Contract-version gate (cheap peek before the full parse so version
-  // problems get a dedicated diagnostic; legacy v1 is rejected by design).
-  const rawDraft =
-    typeof input === 'object' && input !== null
-      ? (input as { readingDraft?: unknown }).readingDraft
-      : undefined;
-  const draftVersion =
-    typeof rawDraft === 'object' && rawDraft !== null
-      ? (rawDraft as { contractVersion?: unknown }).contractVersion
-      : undefined;
-  if (draftVersion !== READING_DRAFT_CONTRACT_VERSION) {
-    return reject(
-      'UNSUPPORTED_CONTRACT_VERSION',
-      'ReadingDraft 的 contractVersion 不是受支持的 reading-draft/v2。',
-      '使用 reading-draft/v2。legacy reading-draft/v1 已在运行时被拒绝（v0.2.0 破坏性变化）；迁移方法见 references/answer-contract.md（为约束表达段落添加 constraintRefs 并更换版本串）。',
-    );
-  }
-
-  // 0a. Bounded parse + full runtime schema — the caller is never trusted to
-  // have validated anything. Resource-limit breaches keep their limit-constant
-  // diagnostic; every other parse failure collapses to one static diagnostic.
-  let parsed: ValidateAnswerInput;
+  // Entire entry is wrapped so Proxy traps, getters and any other throws from
+  // accessing unknown input properties yield a stable static result.
   try {
-    parsed = parseValidateAnswerInputBounded(input);
-  } catch (err) {
-    if (err instanceof BoundedParseError && err.limitKey !== undefined) {
-      return {
-        contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
-        ok: false,
-        violations: [resourceViolation(err.limitKey)],
-        violationsTruncated: false,
-      };
+    // -1. Contract-version gate (cheap peek before the full parse so version
+    // problems get a dedicated diagnostic; legacy v1 is rejected by design).
+    const rawDraft =
+      typeof input === 'object' && input !== null
+        ? (input as { readingDraft?: unknown }).readingDraft
+        : undefined;
+    const draftVersion =
+      typeof rawDraft === 'object' && rawDraft !== null
+        ? (rawDraft as { contractVersion?: unknown }).contractVersion
+        : undefined;
+    if (draftVersion !== READING_DRAFT_CONTRACT_VERSION) {
+      return reject(
+        'UNSUPPORTED_CONTRACT_VERSION',
+        'ReadingDraft 的 contractVersion 不是受支持的 reading-draft/v2。',
+        '使用 reading-draft/v2。legacy reading-draft/v1 已在运行时被拒绝（v0.2.0 破坏性变化）；迁移方法见 references/answer-contract.md（为约束表达段落添加 constraintRefs 并更换版本串）。',
+      );
     }
-    return reject(
-      'MALFORMED_INPUT',
-      '输入未通过有界预检或运行时 schema 校验，未执行内容校验。',
-      '按 references/answer-contract.md 的 ValidateAnswerInput 结构提供 { answerPlan, readingDraft }，并遵守导出的 MAX_* 上限。',
-    );
-  }
 
-  return runValidateAnswer(parsed);
+    // 0a. Bounded parse + full runtime schema — the caller is never trusted to
+    // have validated anything. Resource-limit breaches keep their limit-constant
+    // diagnostic; every other parse failure collapses to one static diagnostic.
+    let parsed: ValidateAnswerInput;
+    try {
+      parsed = parseValidateAnswerInputBounded(input);
+    } catch (err) {
+      if (err instanceof BoundedParseError && err.limitKey !== undefined) {
+        return {
+          contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+          ok: false,
+          violations: [resourceViolation(err.limitKey)],
+          violationsTruncated: false,
+        };
+      }
+      return reject(
+        'MALFORMED_INPUT',
+        '输入未通过有界预检或运行时 schema 校验，未执行内容校验。',
+        '按 references/answer-contract.md 的 ValidateAnswerInput 结构提供 { answerPlan, readingDraft }，并遵守导出的 MAX_* 上限。',
+      );
+    }
+
+    return runValidateAnswer(parsed);
+  } catch {
+    // Proxy traps, getter throws, or any other unexpected exception from
+    // accessing unknown input properties — return stable static result.
+    return {
+      contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+      ok: false,
+      violations: [
+        {
+          code: 'MALFORMED_INPUT',
+          severity: 'error',
+          detail: '输入未通过有界预检或运行时 schema 校验，未执行内容校验。',
+          remediation:
+            '按 references/answer-contract.md 的 ValidateAnswerInput 结构提供 { answerPlan, readingDraft }，并遵守导出的 MAX_* 上限。',
+        },
+      ],
+      violationsTruncated: false,
+    };
+  }
 }
 
 /** Map a (schema-validated) constraint kind to its plan array length. */
@@ -566,6 +576,21 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
   for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
     const section = readingDraft.sections[sIdx]!;
 
+    // 3.0 Plain-text contract: reject markup in heading.
+    if (MARKUP_RE.test(section.heading)) {
+      push({
+        code: 'CONTAINS_MARKUP',
+        severity: 'error',
+        sectionIndex: sIdx,
+        field: 'heading',
+        patternKey: 'markup.detected',
+        detail:
+          'heading 含有 HTML 标签、HTML 实体、HTML 注释或 Markdown 链接/图片语法，违反纯文本契约。',
+        remediation:
+          'heading/text 字段必须为纯文本；宿主负责在渲染时 escape 并自行添加 Markdown 格式。',
+      });
+    }
+
     // 4a. Heading scan (headings are visible text too).
     if (section.heading.length > 0) {
       const headingScanText = toScanText(section.heading);
@@ -587,6 +612,22 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
 
     for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
       const para = section.paragraphs[pIdx]!;
+
+      // 3.0 Plain-text contract: reject markup in paragraph text.
+      if (MARKUP_RE.test(para.text)) {
+        push({
+          code: 'CONTAINS_MARKUP',
+          severity: 'error',
+          sectionIndex: sIdx,
+          field: 'paragraph',
+          paragraphIndex: pIdx,
+          patternKey: 'markup.detected',
+          detail:
+            'paragraph text 含有 HTML 标签、HTML 实体、HTML 注释或 Markdown 链接/图片语法，违反纯文本契约。',
+          remediation:
+            'heading/text 字段必须为纯文本；宿主负责在渲染时 escape 并自行添加 Markdown 格式。',
+        });
+      }
 
       // 3c. Constraint references: every ref must resolve to a real plan entry.
       const refs = para.constraintRefs ?? [];
@@ -785,13 +826,16 @@ function boundedReject(limitKey?: string): never {
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null;
+  if (typeof v !== 'object' || v === null) return false;
+  const proto = Object.getPrototypeOf(v);
+  return proto === Object.prototype || proto === null;
 }
 
 /**
  * Cap an object's own-key count and key-name lengths BEFORE any deeper work —
  * a flood of unknown keys must not reach Zod, whose strict-object errors would
- * otherwise enumerate (echo) every unrecognized key name.
+ * otherwise enumerate (echo) every unrecognized key name. Only accepts
+ * Object.prototype or null-prototype plain objects (rejects Proxy/exotic).
  */
 function requireBoundedObject(v: unknown): Record<string, unknown> {
   if (!isPlainObject(v)) boundedReject();
@@ -801,6 +845,12 @@ function requireBoundedObject(v: unknown): Record<string, unknown> {
     if (key.length > MAX_OBJECT_KEY_CHARS) boundedReject('MAX_OBJECT_KEY_CHARS');
   }
   return v;
+}
+
+/** Verify a field is an own data property (not inherited/getter). */
+function requireOwnField(obj: Record<string, unknown>, field: string): void {
+  const desc = Object.getOwnPropertyDescriptor(obj, field);
+  if (!desc || 'get' in desc) boundedReject();
 }
 
 function requireArrayWithin(v: unknown, max: number, limitKey: string): unknown[] {
@@ -830,8 +880,15 @@ function requireStringEntriesWithin(entries: unknown[], maxChars: number, limitK
  */
 export function parseValidateAnswerInputBounded(raw: unknown): ValidateAnswerInput {
   const root = requireBoundedObject(raw);
+  requireOwnField(root, 'answerPlan');
+  requireOwnField(root, 'readingDraft');
   const plan = requireBoundedObject(root.answerPlan);
   const draft = requireBoundedObject(root.readingDraft);
+
+  // Plan-side: request must be a bounded own-property object with topic.
+  requireOwnField(plan, 'request');
+  const planRequest = requireBoundedObject(plan.request);
+  if (typeof planRequest.topic !== 'string' || planRequest.topic.length > 50) boundedReject();
 
   requireStringEntriesWithin(
     requireArrayWithin(plan.allowedFactIds, MAX_ALLOWED_FACT_IDS, 'MAX_ALLOWED_FACT_IDS'),
@@ -852,13 +909,22 @@ export function parseValidateAnswerInputBounded(raw: unknown): ValidateAnswerInp
     MAX_WARNING_ENTRY_CHARS,
     'MAX_WARNING_ENTRY_CHARS',
   );
-  requireArrayWithin(plan.guardrails, MAX_PLAN_GUARDRAILS, 'MAX_PLAN_GUARDRAILS');
+  // guardrails: each entry must be a short string.
+  const guardrails = requireArrayWithin(
+    plan.guardrails,
+    MAX_PLAN_GUARDRAILS,
+    'MAX_PLAN_GUARDRAILS',
+  );
+  for (const g of guardrails) {
+    if (typeof g !== 'string' || g.length > 64) boundedReject();
+  }
   requireStringEntriesWithin(
     requireArrayWithin(plan.disclaimers, MAX_PLAN_DISCLAIMERS, 'MAX_PLAN_DISCLAIMERS'),
     MAX_DISCLAIMER_ENTRY_CHARS,
     'MAX_DISCLAIMER_ENTRY_CHARS',
   );
 
+  requireOwnField(draft, 'sections');
   const sections = requireArrayWithin(draft.sections, MAX_SECTIONS, 'MAX_SECTIONS');
   requireStringEntriesWithin(
     requireArrayWithin(draft.caveatsExpressed, MAX_CAVEATS_EXPRESSED, 'MAX_CAVEATS_EXPRESSED'),
@@ -910,8 +976,29 @@ export function parseValidateAnswerInputBounded(raw: unknown): ValidateAnswerInp
     }
   }
 
+  // Whitelist projection: build a clean shallow copy so that unknown deep
+  // getters/Proxies in the original `raw` never reach Zod's internal traversal.
+  const projected = {
+    answerPlan: {
+      allowedFactIds: plan.allowedFactIds,
+      requiredCaveats: plan.requiredCaveats,
+      requiredWarningCodes: plan.requiredWarningCodes,
+      guardrails: plan.guardrails,
+      answerability: plan.answerability,
+      request: { topic: planRequest.topic },
+      disclaimers: plan.disclaimers,
+    },
+    readingDraft: {
+      contractVersion: draft.contractVersion,
+      topic: draft.topic,
+      sections: draft.sections,
+      caveatsExpressed: draft.caveatsExpressed,
+      warningsDisclosed: draft.warningsDisclosed,
+    },
+  };
+
   try {
-    return ValidateAnswerInputSchema.parse(raw);
+    return ValidateAnswerInputSchema.parse(projected);
   } catch {
     // Collapse ZodError (which may embed caller key names/paths) into the
     // single static bounded-reject diagnostic.

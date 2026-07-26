@@ -40724,6 +40724,9 @@ var ViolationCode = external_exports.enum([
   // Input-shape violations (public entry rejects unparseable raw input)
   "MALFORMED_INPUT",
   // input failed the bounded parse / runtime schema validation
+  // Plain-text contract violations (heading/text must be plain text, no markup)
+  "CONTAINS_MARKUP",
+  // heading or paragraph text contains HTML/entity/Markdown syntax
   // Guardrail violations
   // Reserved: not currently emitted. Mapping answerPlan.guardrails to checks without
   // changing the public AnswerPlan contract is a follow-up design item; we do not
@@ -54177,24 +54180,15 @@ function buildAnswerPlan(publicResult, requestInput) {
 }
 
 // packages/interpret/src/validate-answer.ts
-var INVISIBLE_CHARS_RE = /[\u00AD\u034F\u061C\u115F\u1160\u180E\u200B-\u200F\u202A-\u202E\u2060\u2066-\u2069\u3164\uFE00-\uFE0F\uFEFF\uFFA0]/g;
+var INVISIBLE_CHARS_RE = new RegExp("\\p{Default_Ignorable_Code_Point}", "gu");
 var CJK_RANGE = "\u3400-\u9FFF\uF900-\uFAFF";
 var CJK_SEPARATOR_RE = new RegExp(
   `(?<=[${CJK_RANGE}])[ \\-_.*+~/\\u00B7\\u2010-\\u2015\\u2022\\u30FB\\u3001]+(?=[${CJK_RANGE}])`,
   "g"
 );
-var NUMERIC_CHAR_REF_RE = /&#(?:[xX]([0-9a-fA-F]{1,6})|(\d{1,7}));/g;
-function decodeCharRefsOnce(text) {
-  return text.replace(/&amp;/gi, "&").replace(NUMERIC_CHAR_REF_RE, (_m, hex3, dec) => {
-    const cp = hex3 !== void 0 ? parseInt(hex3, 16) : parseInt(dec, 10);
-    if (!Number.isFinite(cp) || cp > 1114111 || cp >= 55296 && cp <= 57343) return " ";
-    return String.fromCodePoint(cp);
-  });
-}
 function normalizeSafetyText(text) {
-  let t = decodeCharRefsOnce(decodeCharRefsOnce(text));
+  let t = text.replace(INVISIBLE_CHARS_RE, "");
   t = t.normalize("NFKC");
-  t = t.replace(INVISIBLE_CHARS_RE, "");
   t = t.replace(/\r\n?|[\u0085\u2028\u2029]/g, "\n");
   t = t.replace(/[^\S\n]+/g, " ");
   t = t.replace(CJK_SEPARATOR_RE, "");
@@ -54249,11 +54243,11 @@ var DISCLAIMER_OBJECT_PHRASES = [
 ];
 var DISCLAIMER_PHRASE_ALT = `(?:${[...DISCLAIMER_OBJECT_PHRASES].sort((a, b) => b.length - a.length).join("|")})`;
 var SAFETY_DISCLAIMER_RE = new RegExp(
-  // Anchor: the template must sit at a clause start, after at most 6 prefix
-  // characters (e.g. 本报告/本内容) that contain no negation character — a
-  // double-negation prefix (并非不构成…) therefore never masks, and a template
-  // substring inside a larger clause is not treated as a canonical disclaimer.
-  `(?<=(?:^|[${CLAUSE_END_CLASS}])[^${CLAUSE_END_CLASS}\u4E0D\u975E\u6CA1\u65E0]{0,6})(?:${DISCLAIMER_NEGATION_VERBS.join("|")})${DISCLAIMER_PHRASE_ALT}(?:[\u6216\u53CA\u548C]${DISCLAIMER_PHRASE_ALT})*(?=[${CLAUSE_END_CLASS}]|$)`,
+  // Anchor: the template must sit at a clause start, after ONLY an explicitly
+  // whitelisted neutral prefix (e.g. 本报告/本内容) or nothing. Any other
+  // prefix (e.g. 我确认/研究表明/权威指出) means the clause is NOT a
+  // canonical disclaimer and is scanned as-is.
+  `(?<=(?:^|[${CLAUSE_END_CLASS}])(?:\u672C\u62A5\u544A|\u672C\u5185\u5BB9|\u672C\u89E3\u8BFB|\u672C\u5206\u6790|\u672C\u547D\u76D8\u89E3\u8BFB|))(?:${DISCLAIMER_NEGATION_VERBS.join("|")})${DISCLAIMER_PHRASE_ALT}(?:[\u6216\u53CA\u548C]${DISCLAIMER_PHRASE_ALT})*(?=[${CLAUSE_END_CLASS}]|$)`,
   "g"
 );
 function maskSafetyDisclaimers(normText) {
@@ -54377,6 +54371,7 @@ var HIGH_RISK_GROUPS = [
     remediation: "\u5220\u9664\u6240\u6709\u64CD\u63A7\u6027\u5EFA\u8BAE\u3002\u5173\u7CFB\u5EFA\u8BAE\u53EA\u80FD\u57FA\u4E8E\u76F8\u4E92\u5C0A\u91CD\u3001\u771F\u8BDA\u6C9F\u901A\u7684\u524D\u63D0\uFF0C\u4E0D\u53EF\u6559\u5506\u63A7\u5236\u6216\u7CBE\u795E\u64CD\u63A7\u3002"
   }
 ];
+var MARKUP_RE = /&(?:#[xX]?[0-9a-fA-F]+;?|[a-zA-Z]\w{0,30};)|<\/?[a-zA-Z][\s\S]*?>|<!--[\s\S]*?-->|!\[.*?\]\(.*?\)|\[.*?\]\(.*?\)/;
 function findGroupHit(scanText, rules) {
   for (const rule of rules) {
     if (rule.re.test(scanText)) return rule.id;
@@ -54405,34 +54400,50 @@ function validateAnswer(input) {
     violations: [{ code, severity: "error", detail, remediation }],
     violationsTruncated: false
   });
-  const rawDraft = typeof input === "object" && input !== null ? input.readingDraft : void 0;
-  const draftVersion = typeof rawDraft === "object" && rawDraft !== null ? rawDraft.contractVersion : void 0;
-  if (draftVersion !== READING_DRAFT_CONTRACT_VERSION) {
-    return reject(
-      "UNSUPPORTED_CONTRACT_VERSION",
-      "ReadingDraft \u7684 contractVersion \u4E0D\u662F\u53D7\u652F\u6301\u7684 reading-draft/v2\u3002",
-      "\u4F7F\u7528 reading-draft/v2\u3002legacy reading-draft/v1 \u5DF2\u5728\u8FD0\u884C\u65F6\u88AB\u62D2\u7EDD\uFF08v0.2.0 \u7834\u574F\u6027\u53D8\u5316\uFF09\uFF1B\u8FC1\u79FB\u65B9\u6CD5\u89C1 references/answer-contract.md\uFF08\u4E3A\u7EA6\u675F\u8868\u8FBE\u6BB5\u843D\u6DFB\u52A0 constraintRefs \u5E76\u66F4\u6362\u7248\u672C\u4E32\uFF09\u3002"
-    );
-  }
-  let parsed;
   try {
-    parsed = parseValidateAnswerInputBounded(input);
-  } catch (err) {
-    if (err instanceof BoundedParseError && err.limitKey !== void 0) {
-      return {
-        contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
-        ok: false,
-        violations: [resourceViolation(err.limitKey)],
-        violationsTruncated: false
-      };
+    const rawDraft = typeof input === "object" && input !== null ? input.readingDraft : void 0;
+    const draftVersion = typeof rawDraft === "object" && rawDraft !== null ? rawDraft.contractVersion : void 0;
+    if (draftVersion !== READING_DRAFT_CONTRACT_VERSION) {
+      return reject(
+        "UNSUPPORTED_CONTRACT_VERSION",
+        "ReadingDraft \u7684 contractVersion \u4E0D\u662F\u53D7\u652F\u6301\u7684 reading-draft/v2\u3002",
+        "\u4F7F\u7528 reading-draft/v2\u3002legacy reading-draft/v1 \u5DF2\u5728\u8FD0\u884C\u65F6\u88AB\u62D2\u7EDD\uFF08v0.2.0 \u7834\u574F\u6027\u53D8\u5316\uFF09\uFF1B\u8FC1\u79FB\u65B9\u6CD5\u89C1 references/answer-contract.md\uFF08\u4E3A\u7EA6\u675F\u8868\u8FBE\u6BB5\u843D\u6DFB\u52A0 constraintRefs \u5E76\u66F4\u6362\u7248\u672C\u4E32\uFF09\u3002"
+      );
     }
-    return reject(
-      "MALFORMED_INPUT",
-      "\u8F93\u5165\u672A\u901A\u8FC7\u6709\u754C\u9884\u68C0\u6216\u8FD0\u884C\u65F6 schema \u6821\u9A8C\uFF0C\u672A\u6267\u884C\u5185\u5BB9\u6821\u9A8C\u3002",
-      "\u6309 references/answer-contract.md \u7684 ValidateAnswerInput \u7ED3\u6784\u63D0\u4F9B { answerPlan, readingDraft }\uFF0C\u5E76\u9075\u5B88\u5BFC\u51FA\u7684 MAX_* \u4E0A\u9650\u3002"
-    );
+    let parsed;
+    try {
+      parsed = parseValidateAnswerInputBounded(input);
+    } catch (err) {
+      if (err instanceof BoundedParseError && err.limitKey !== void 0) {
+        return {
+          contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+          ok: false,
+          violations: [resourceViolation(err.limitKey)],
+          violationsTruncated: false
+        };
+      }
+      return reject(
+        "MALFORMED_INPUT",
+        "\u8F93\u5165\u672A\u901A\u8FC7\u6709\u754C\u9884\u68C0\u6216\u8FD0\u884C\u65F6 schema \u6821\u9A8C\uFF0C\u672A\u6267\u884C\u5185\u5BB9\u6821\u9A8C\u3002",
+        "\u6309 references/answer-contract.md \u7684 ValidateAnswerInput \u7ED3\u6784\u63D0\u4F9B { answerPlan, readingDraft }\uFF0C\u5E76\u9075\u5B88\u5BFC\u51FA\u7684 MAX_* \u4E0A\u9650\u3002"
+      );
+    }
+    return runValidateAnswer(parsed);
+  } catch {
+    return {
+      contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+      ok: false,
+      violations: [
+        {
+          code: "MALFORMED_INPUT",
+          severity: "error",
+          detail: "\u8F93\u5165\u672A\u901A\u8FC7\u6709\u754C\u9884\u68C0\u6216\u8FD0\u884C\u65F6 schema \u6821\u9A8C\uFF0C\u672A\u6267\u884C\u5185\u5BB9\u6821\u9A8C\u3002",
+          remediation: "\u6309 references/answer-contract.md \u7684 ValidateAnswerInput \u7ED3\u6784\u63D0\u4F9B { answerPlan, readingDraft }\uFF0C\u5E76\u9075\u5B88\u5BFC\u51FA\u7684 MAX_* \u4E0A\u9650\u3002"
+        }
+      ],
+      violationsTruncated: false
+    };
   }
-  return runValidateAnswer(parsed);
 }
 function constraintTargetLength(plan, kind) {
   switch (kind) {
@@ -54498,6 +54509,17 @@ function runValidateAnswer(input) {
   const referencedWarnings = /* @__PURE__ */ new Set();
   for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
     const section = readingDraft.sections[sIdx];
+    if (MARKUP_RE.test(section.heading)) {
+      push({
+        code: "CONTAINS_MARKUP",
+        severity: "error",
+        sectionIndex: sIdx,
+        field: "heading",
+        patternKey: "markup.detected",
+        detail: "heading \u542B\u6709 HTML \u6807\u7B7E\u3001HTML \u5B9E\u4F53\u3001HTML \u6CE8\u91CA\u6216 Markdown \u94FE\u63A5/\u56FE\u7247\u8BED\u6CD5\uFF0C\u8FDD\u53CD\u7EAF\u6587\u672C\u5951\u7EA6\u3002",
+        remediation: "heading/text \u5B57\u6BB5\u5FC5\u987B\u4E3A\u7EAF\u6587\u672C\uFF1B\u5BBF\u4E3B\u8D1F\u8D23\u5728\u6E32\u67D3\u65F6 escape \u5E76\u81EA\u884C\u6DFB\u52A0 Markdown \u683C\u5F0F\u3002"
+      });
+    }
     if (section.heading.length > 0) {
       const headingScanText = toScanText(section.heading);
       for (const group of HIGH_RISK_GROUPS) {
@@ -54517,6 +54539,18 @@ function runValidateAnswer(input) {
     }
     for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
       const para = section.paragraphs[pIdx];
+      if (MARKUP_RE.test(para.text)) {
+        push({
+          code: "CONTAINS_MARKUP",
+          severity: "error",
+          sectionIndex: sIdx,
+          field: "paragraph",
+          paragraphIndex: pIdx,
+          patternKey: "markup.detected",
+          detail: "paragraph text \u542B\u6709 HTML \u6807\u7B7E\u3001HTML \u5B9E\u4F53\u3001HTML \u6CE8\u91CA\u6216 Markdown \u94FE\u63A5/\u56FE\u7247\u8BED\u6CD5\uFF0C\u8FDD\u53CD\u7EAF\u6587\u672C\u5951\u7EA6\u3002",
+          remediation: "heading/text \u5B57\u6BB5\u5FC5\u987B\u4E3A\u7EAF\u6587\u672C\uFF1B\u5BBF\u4E3B\u8D1F\u8D23\u5728\u6E32\u67D3\u65F6 escape \u5E76\u81EA\u884C\u6DFB\u52A0 Markdown \u683C\u5F0F\u3002"
+        });
+      }
       const refs = para.constraintRefs ?? [];
       let refsValid = refs.length > 0;
       for (let rIdx = 0; rIdx < refs.length; rIdx++) {
@@ -54668,7 +54702,9 @@ function boundedReject(limitKey) {
   throw new BoundedParseError(limitKey);
 }
 function isPlainObject2(v) {
-  return typeof v === "object" && v !== null;
+  if (typeof v !== "object" || v === null) return false;
+  const proto = Object.getPrototypeOf(v);
+  return proto === Object.prototype || proto === null;
 }
 function requireBoundedObject(v) {
   if (!isPlainObject2(v)) boundedReject();
@@ -54678,6 +54714,10 @@ function requireBoundedObject(v) {
     if (key.length > MAX_OBJECT_KEY_CHARS) boundedReject("MAX_OBJECT_KEY_CHARS");
   }
   return v;
+}
+function requireOwnField(obj, field) {
+  const desc = Object.getOwnPropertyDescriptor(obj, field);
+  if (!desc || "get" in desc) boundedReject();
 }
 function requireArrayWithin(v, max, limitKey) {
   if (!Array.isArray(v)) boundedReject();
@@ -54692,8 +54732,13 @@ function requireStringEntriesWithin(entries, maxChars, limitKey) {
 }
 function parseValidateAnswerInputBounded(raw) {
   const root = requireBoundedObject(raw);
+  requireOwnField(root, "answerPlan");
+  requireOwnField(root, "readingDraft");
   const plan = requireBoundedObject(root.answerPlan);
   const draft = requireBoundedObject(root.readingDraft);
+  requireOwnField(plan, "request");
+  const planRequest = requireBoundedObject(plan.request);
+  if (typeof planRequest.topic !== "string" || planRequest.topic.length > 50) boundedReject();
   requireStringEntriesWithin(
     requireArrayWithin(plan.allowedFactIds, MAX_ALLOWED_FACT_IDS, "MAX_ALLOWED_FACT_IDS"),
     MAX_FACT_ID_CHARS,
@@ -54713,12 +54758,20 @@ function parseValidateAnswerInputBounded(raw) {
     MAX_WARNING_ENTRY_CHARS,
     "MAX_WARNING_ENTRY_CHARS"
   );
-  requireArrayWithin(plan.guardrails, MAX_PLAN_GUARDRAILS, "MAX_PLAN_GUARDRAILS");
+  const guardrails = requireArrayWithin(
+    plan.guardrails,
+    MAX_PLAN_GUARDRAILS,
+    "MAX_PLAN_GUARDRAILS"
+  );
+  for (const g of guardrails) {
+    if (typeof g !== "string" || g.length > 64) boundedReject();
+  }
   requireStringEntriesWithin(
     requireArrayWithin(plan.disclaimers, MAX_PLAN_DISCLAIMERS, "MAX_PLAN_DISCLAIMERS"),
     MAX_DISCLAIMER_ENTRY_CHARS,
     "MAX_DISCLAIMER_ENTRY_CHARS"
   );
+  requireOwnField(draft, "sections");
   const sections = requireArrayWithin(draft.sections, MAX_SECTIONS, "MAX_SECTIONS");
   requireStringEntriesWithin(
     requireArrayWithin(draft.caveatsExpressed, MAX_CAVEATS_EXPRESSED, "MAX_CAVEATS_EXPRESSED"),
@@ -54768,8 +54821,26 @@ function parseValidateAnswerInputBounded(raw) {
       }
     }
   }
+  const projected = {
+    answerPlan: {
+      allowedFactIds: plan.allowedFactIds,
+      requiredCaveats: plan.requiredCaveats,
+      requiredWarningCodes: plan.requiredWarningCodes,
+      guardrails: plan.guardrails,
+      answerability: plan.answerability,
+      request: { topic: planRequest.topic },
+      disclaimers: plan.disclaimers
+    },
+    readingDraft: {
+      contractVersion: draft.contractVersion,
+      topic: draft.topic,
+      sections: draft.sections,
+      caveatsExpressed: draft.caveatsExpressed,
+      warningsDisclosed: draft.warningsDisclosed
+    }
+  };
   try {
-    return ValidateAnswerInput.parse(raw);
+    return ValidateAnswerInput.parse(projected);
   } catch {
     boundedReject();
   }

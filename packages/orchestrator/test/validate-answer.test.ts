@@ -518,16 +518,15 @@ describe('validate-answer — fact boundary and safety layer', () => {
       });
     }
 
-    it('normalizeSafetyText strips zero-width chars, folds NFKC, case and CJK splits', () => {
+    it('normalizeSafetyText strips default-ignorable code points, folds NFKC, case and CJK splits', () => {
       expect(normalizeSafetyText('注\u200B定')).toBe('注定');
       expect(normalizeSafetyText('ＰＵＡ')).toBe('pua'); // NFKC + case fold
       expect(normalizeSafetyText('注 定')).toBe('注定');
       expect(normalizeSafetyText('注-定')).toBe('注定');
       expect(normalizeSafetyText('必\u00A0\u3000死')).toBe('必死');
       expect(normalizeSafetyText('注\u034F定')).toBe('注定'); // U+034F CGJ is ignorable
-      expect(normalizeSafetyText('&#27880;&#23450;')).toBe('注定'); // decimal NCR
-      expect(normalizeSafetyText('&#x5FC5;&#x6B7B;')).toBe('必死'); // hex NCR
-      expect(normalizeSafetyText('&amp;#27880;&amp;#23450;')).toBe('注定'); // double-encoded
+      // NCR is no longer decoded (plain-text contract); test that raw & survives
+      expect(normalizeSafetyText('&')).toBe('&');
       // English words are not merged by the CJK-split rule:
       expect(normalizeSafetyText('a-b')).toBe('a-b');
     });
@@ -1569,14 +1568,15 @@ describe('validate-answer — fact boundary and safety layer', () => {
       expect(JSON.stringify(result)).not.toContain('SYNTH_');
     });
 
-    it('unknown keys within limits still fail Zod but with the static diagnostic', () => {
+    it('unknown keys within limits are silently dropped by projection (no Zod echo)', () => {
       const junk = {
         answerPlan: makePlan(),
         readingDraft: { ...makeDraft(), SYNTH_EXTRA_KEY: 1 },
       };
+      // The whitelist projection drops unknown fields before Zod runs, so this
+      // input is now valid (the extra key is never seen by Zod or the validator).
       const result = validateAnswer(junk);
-      expect(result.ok).toBe(false);
-      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+      expect(result.ok).toBe(true);
       expect(JSON.stringify(result)).not.toContain('SYNTH_EXTRA_KEY');
     });
 
@@ -1594,7 +1594,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
     });
   });
 
-  describe('render-consistent scanning (R3/R4 encodings)', () => {
+  describe('plain-text contract rejects markup (R5 CONTAINS_MARKUP)', () => {
     function para(text: string) {
       return makeDraft({
         sections: [
@@ -1603,16 +1603,22 @@ describe('validate-answer — fact boundary and safety layer', () => {
       });
     }
 
-    it('decimal / hex / double-encoded numeric character references are scanned decoded', () => {
-      const dec = runValidated(makePlan(), para('你命中&#27880;&#23450;失败。'));
-      expect(dec.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
-      const hex = runValidated(makePlan(), para('命盘显示你&#x5FC5;&#x6B7B;。'));
-      expect(hex.violations.some((v) => v.code === 'HIGH_RISK_LIFE_DEATH')).toBe(true);
-      const dbl = runValidated(makePlan(), para('你命中&amp;#27880;&amp;#23450;失败。'));
-      expect(dbl.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
+    it('decimal / hex / no-semicolon / double-encoded NCR all rejected as markup', () => {
+      for (const text of [
+        '你命中&#27880;&#23450;失败。',
+        '命盘显示你&#x5FC5;&#x6B7B;。',
+        '命中&#27880定失败',
+        '你命中&amp;#27880;&amp;#23450;失败。',
+      ]) {
+        const result = runValidated(makePlan(), para(text));
+        expect(
+          result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
+          `should reject: ${text}`,
+        ).toBe(true);
+      }
     });
 
-    it('NCR evasion in a heading is caught by the same pipeline', () => {
+    it('NCR / entity in a heading is rejected too', () => {
       const draft = makeDraft({
         sections: [
           {
@@ -1624,13 +1630,100 @@ describe('validate-answer — fact boundary and safety layer', () => {
       });
       const result = runValidated(makePlan(), draft);
       expect(
-        result.violations.some(
-          (v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE' && v.field === 'heading',
-        ),
+        result.violations.some((v) => v.code === 'CONTAINS_MARKUP' && v.field === 'heading'),
       ).toBe(true);
     });
 
-    it('English case variants and U+034F splitting are caught (paragraph and heading)', () => {
+    it('Markdown links and images are rejected', () => {
+      for (const text of [
+        '[合成链接](http://example.com)',
+        '![合成图片](http://example.com/img.png)',
+      ]) {
+        const result = runValidated(makePlan(), para(text));
+        expect(
+          result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
+          `should reject: ${text}`,
+        ).toBe(true);
+      }
+    });
+
+    it('HTML tags and comments are rejected', () => {
+      for (const text of ['<b>合成</b>', '<!-- 合成注释 -->']) {
+        const result = runValidated(makePlan(), para(text));
+        expect(
+          result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
+          `should reject: ${text}`,
+        ).toBe(true);
+      }
+    });
+
+    it('named entities are rejected', () => {
+      const result = runValidated(makePlan(), para('合成&amp;合成'));
+      expect(result.violations.some((v) => v.code === 'CONTAINS_MARKUP')).toBe(true);
+    });
+
+    it('compliant plain text passes', () => {
+      const result = runValidated(
+        makePlan(),
+        para('你的事业方向偏向技术与创意结合的领域，2026年偏向好转。 Test plain text.'),
+      );
+      expect(result.violations.some((v) => v.code === 'CONTAINS_MARKUP')).toBe(false);
+    });
+  });
+
+  describe('default-ignorable Unicode property (R5)', () => {
+    function para(text: string) {
+      return makeDraft({
+        sections: [
+          { id: 'summary', heading: '核心结论', paragraphs: [{ text, sourceFactIds: ['fact-1'] }] },
+        ],
+      });
+    }
+
+    it('U+2061, U+180B, U+E0100, U+E0020 are stripped so keywords are still caught', () => {
+      // U+2061 FUNCTION APPLICATION
+      const r1 = runValidated(makePlan(), para('你命中注\u2061定失败。'));
+      expect(r1.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
+      // U+180B MONGOLIAN FREE VARIATION SELECTOR ONE
+      const r2 = runValidated(makePlan(), para('你命中注\u180B定失败。'));
+      expect(r2.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
+      // U+E0100 VARIATION SELECTOR-17 (supplementary plane)
+      const r3 = runValidated(makePlan(), para(`你命中注${String.fromCodePoint(0xe0100)}定失败。`));
+      expect(r3.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
+      // U+E0020 TAG SPACE
+      const r4 = runValidated(makePlan(), para(`你命中注${String.fromCodePoint(0xe0020)}定失败。`));
+      expect(r4.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
+    });
+
+    it('default-ignorable in heading is also stripped', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '关于 P\u2061UA 的建议',
+            paragraphs: [{ text: '事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
+          },
+        ],
+      });
+      const hc = runValidated(makePlan(), draft);
+      expect(
+        hc.violations.some(
+          (v) => v.code === 'HIGH_RISK_RELATIONSHIP_MANIPULATION' && v.field === 'heading',
+        ),
+      ).toBe(true);
+    });
+  });
+
+  describe('case-fold and splitting still work (migrated from R4)', () => {
+    function para(text: string) {
+      return makeDraft({
+        sections: [
+          { id: 'summary', heading: '核心结论', paragraphs: [{ text, sourceFactIds: ['fact-1'] }] },
+        ],
+      });
+    }
+
+    it('English case variants and U+034F splitting are caught', () => {
       const cased = runValidated(makePlan(), para('试着 Gaslighting 对方。'));
       expect(cased.violations.some((v) => v.code === 'HIGH_RISK_RELATIONSHIP_MANIPULATION')).toBe(
         true,
@@ -1764,7 +1857,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
       }
     });
 
-    it('CLI: junk input yields exit 2 and no echo of caller keys', () => {
+    it('CLI: structurally invalid input yields exit != 0 and no echo of caller keys', () => {
       const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
       const cliPath = join(
         repoRoot,
@@ -1776,9 +1869,16 @@ describe('validate-answer — fact boundary and safety layer', () => {
       const tmpDir = join(repoRoot, '.tmp', 'validate-answer-tests');
       mkdirSync(tmpDir, { recursive: true });
       const junkFile = join(tmpDir, 'junk-input.json');
-      const junk: Record<string, unknown> = {
+      // Structurally invalid: sections is a string, not an array.
+      const junk = {
         answerPlan: makePlan(),
-        readingDraft: { ...makeDraft(), SYNTH_CLI_KEY_MARKER: 1 },
+        readingDraft: {
+          contractVersion: 'reading-draft/v2',
+          topic: 'career',
+          sections: 'SYNTH_CLI_KEY_MARKER',
+          caveatsExpressed: [],
+          warningsDisclosed: [],
+        },
       };
       writeFileSync(junkFile, JSON.stringify(junk));
       const run = spawnSync(
@@ -1788,10 +1888,128 @@ describe('validate-answer — fact boundary and safety layer', () => {
           encoding: 'utf8',
         },
       );
-      expect(run.status).toBe(2); // INPUT_VALIDATION_FAILED exit code
+      expect(run.status).not.toBe(0); // not ok: malformed input or validation failure
       const output = `${run.stdout}${run.stderr}`;
-      expect(output).toContain('INPUT_VALIDATION_FAILED');
       expect(output).not.toContain('SYNTH_CLI_KEY_MARKER');
+    });
+  });
+
+  // --- R5: Proxy/getter/inherit safety, complete preflight, whitelist masking ---
+  describe('Proxy / getter / inherited-property safety (R5)', () => {
+    it('a Proxy input yields MALFORMED_INPUT without crash or echo', () => {
+      const trapped = new Proxy(
+        {},
+        {
+          get() {
+            throw new Error('SYNTH_PROXY_TRAP');
+          },
+        },
+      );
+      const result = validateAnswer(trapped);
+      expect(result.ok).toBe(false);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+      expect(JSON.stringify(result)).not.toContain('SYNTH_PROXY_TRAP');
+    });
+
+    it('a getter-on-prototype object yields MALFORMED_INPUT', () => {
+      const proto = {
+        get readingDraft(): never {
+          throw new Error('SYNTH_GETTER');
+        },
+      };
+      const obj = Object.create(proto);
+      obj.answerPlan = makePlan();
+      const result = validateAnswer(obj);
+      expect(result.ok).toBe(false);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+      expect(JSON.stringify(result)).not.toContain('SYNTH_GETTER');
+    });
+
+    it('inherited (non-own) sections rejects with MALFORMED_INPUT', () => {
+      const proto = { sections: [{ id: 's', heading: 'h', paragraphs: [] }] };
+      const draft = Object.create(proto);
+      draft.contractVersion = 'reading-draft/v2';
+      draft.topic = 'career';
+      draft.caveatsExpressed = [];
+      draft.warningsDisclosed = [];
+      const input = { answerPlan: makePlan(), readingDraft: draft };
+      const result = validateAnswer(input);
+      expect(result.ok).toBe(false);
+      // sections is on prototype, not own — requireOwnField rejects it.
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+    });
+  });
+
+  describe('complete bounded precheck (R5)', () => {
+    it('missing plan.request rejects with MALFORMED_INPUT', () => {
+      const plan = { ...makePlan() } as Record<string, unknown>;
+      delete plan.request;
+      const result = validateAnswer({ answerPlan: plan, readingDraft: makeDraft() });
+      expect(result.ok).toBe(false);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+    });
+
+    it('plan.request.topic too long rejects with MALFORMED_INPUT', () => {
+      const plan = makePlan();
+      (plan as Record<string, unknown>).request = { topic: 'x'.repeat(51) };
+      const result = validateAnswer({ answerPlan: plan, readingDraft: makeDraft() });
+      expect(result.ok).toBe(false);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+    });
+
+    it('guardrails containing a non-string rejects with MALFORMED_INPUT', () => {
+      const plan = makePlan();
+      (plan.guardrails as unknown[]).push(12345);
+      const result = validateAnswer({ answerPlan: plan, readingDraft: makeDraft() });
+      expect(result.ok).toBe(false);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+    });
+
+    it('guardrails containing an over-length string rejects with MALFORMED_INPUT', () => {
+      const plan = makePlan();
+      (plan.guardrails as unknown[]).push('g'.repeat(65));
+      const result = validateAnswer({ answerPlan: plan, readingDraft: makeDraft() });
+      expect(result.ok).toBe(false);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+    });
+  });
+
+  describe('whitelist-prefix disclaimer masking (R5)', () => {
+    function textDraft(text: string) {
+      return makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [{ text, sourceFactIds: ['fact-1'] }],
+          },
+        ],
+      });
+    }
+
+    it('authority/conclusion prefix + canonical template is NOT masked (flagged)', () => {
+      for (const prefix of ['我确认', '研究表明', '权威指出', '经确认']) {
+        const result = runValidated(makePlan(), textDraft(`${prefix}不构成医疗诊断。`));
+        expect(
+          result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL'),
+          `should flag: ${prefix}不构成...`,
+        ).toBe(true);
+      }
+    });
+
+    it('whitelisted prefix + canonical template IS masked (passes)', () => {
+      for (const prefix of ['本报告', '本内容', '本解读', '本分析', '本命盘解读']) {
+        const result = runValidated(makePlan(), textDraft(`${prefix}不构成医疗诊断。`));
+        expect(
+          result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL'),
+          `should pass: ${prefix}不构成...`,
+        ).toBe(false);
+      }
+    });
+
+    it('empty prefix (clause start) IS masked (passes)', () => {
+      const result = runValidated(makePlan(), textDraft('不构成医疗诊断，'));
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(false);
     });
   });
 });

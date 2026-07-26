@@ -307,11 +307,8 @@ async function main() {
         let inputStat;
         try {
           inputStat = statSync(inputPath);
-        } catch (err) {
-          throw new EngineError(
-            'INPUT_VALIDATION_FAILED',
-            `Cannot stat input file: ${err && err.message ? err.message : String(err)}`,
-          );
+        } catch {
+          throw new EngineError('INPUT_VALIDATION_FAILED', 'Cannot read or parse the input file.');
         }
         if (inputStat.size > MAX_VALIDATE_ANSWER_INPUT_BYTES) {
           throw new EngineError(
@@ -322,11 +319,8 @@ async function main() {
         let rawInput;
         try {
           rawInput = JSON.parse(readFileSync(inputPath, 'utf8'));
-        } catch (err) {
-          throw new EngineError(
-            'INPUT_VALIDATION_FAILED',
-            `Cannot parse input file: ${err && err.message ? err.message : String(err)}`,
-          );
+        } catch {
+          throw new EngineError('INPUT_VALIDATION_FAILED', 'Cannot read or parse the input file.');
         }
         let validatedInput;
         try {

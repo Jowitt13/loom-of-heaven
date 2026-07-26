@@ -229,6 +229,9 @@ export const ViolationCode = z.enum([
   // Input-shape violations (public entry rejects unparseable raw input)
   'MALFORMED_INPUT', // input failed the bounded parse / runtime schema validation
 
+  // Plain-text contract violations (heading/text must be plain text, no markup)
+  'CONTAINS_MARKUP', // heading or paragraph text contains HTML/entity/Markdown syntax
+
   // Guardrail violations
   // Reserved: not currently emitted. Mapping answerPlan.guardrails to checks without
   // changing the public AnswerPlan contract is a follow-up design item; we do not
