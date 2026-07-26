@@ -135,12 +135,12 @@ The input file is one JSON object: `{ "answerPlan": { … }, "readingDraft": { �
   paragraphs cite no facts, and all headings + paragraph texts share one
   `MAX_NOT_SUPPORTED_TEXT_CHARS` budget. Any `sourceFactIds` value that IS provided is
   always checked against `allowedFactIds`, in every mode.
-- **Plain-text contract:** `heading` and `text` fields are PLAIN TEXT. HTML tags, HTML
-  comments, HTML named/numeric entities (e.g. `&amp;`, `&#27880;`, `&#x6CE8;`), and
-  Markdown link/image syntax (`[](...)`, `![](...)`) are FORBIDDEN. The validator rejects
-  them with `CONTAINS_MARKUP` (error). Hosts must escape these fields themselves before
-  rendering as Markdown or HTML; the validator scans the plain text as-is without any
-  decode step, so there is no divergence between scanned text and host-rendered text.
+- **Plain-text contract:** `heading` and `text` fields are PLAIN TEXT. The validator
+  bans a fixed set of ASCII structural characters that can form Markdown/HTML across
+  hosts: `& < > [ ] ` + "`* _ ~ \\ | #". Any single occurrence triggers`CONTAINS_MARKUP` (error). Full-width equivalents (，。【】（）＞＆～ etc.) are
+  allowed. Hosts must escape these fields before rendering as Markdown or HTML; the
+  validator scans the plain text as-is without any decode step, so there is no
+  divergence between scanned text and host-rendered text.
 - `caveatsExpressed` / `warningsDisclosed` must stay consistent with the `constraintRefs`:
   a required caveat/warning that is declared but never referenced (or vice versa) is a
   `CONSTRAINT_ATTESTATION_MISMATCH` error.

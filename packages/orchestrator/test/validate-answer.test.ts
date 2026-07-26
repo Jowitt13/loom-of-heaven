@@ -1603,41 +1603,14 @@ describe('validate-answer — fact boundary and safety layer', () => {
       });
     }
 
-    it('decimal / hex / no-semicolon / double-encoded NCR all rejected as markup', () => {
+    it('HTML entities (with and without semicolon, named and numeric) are rejected', () => {
       for (const text of [
-        '你命中&#27880;&#23450;失败。',
-        '命盘显示你&#x5FC5;&#x6B7B;。',
-        '命中&#27880定失败',
-        '你命中&amp;#27880;&amp;#23450;失败。',
-      ]) {
-        const result = runValidated(makePlan(), para(text));
-        expect(
-          result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
-          `should reject: ${text}`,
-        ).toBe(true);
-      }
-    });
-
-    it('NCR / entity in a heading is rejected too', () => {
-      const draft = makeDraft({
-        sections: [
-          {
-            id: 'summary',
-            heading: '你命中&#27880;&#23450;失败的原因',
-            paragraphs: [{ text: '事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
-          },
-        ],
-      });
-      const result = runValidated(makePlan(), draft);
-      expect(
-        result.violations.some((v) => v.code === 'CONTAINS_MARKUP' && v.field === 'heading'),
-      ).toBe(true);
-    });
-
-    it('Markdown links and images are rejected', () => {
-      for (const text of [
-        '[合成链接](http://example.com)',
-        '![合成图片](http://example.com/img.png)',
+        '合成&amp;合成',
+        '含&#27880;实体。',
+        '含&#x6CE8;实体。',
+        '含&#27880实体',
+        '含&amp;#27880;嵌套。',
+        '含&nbsp空格',
       ]) {
         const result = runValidated(makePlan(), para(text));
         expect(
@@ -1657,9 +1630,75 @@ describe('validate-answer — fact boundary and safety layer', () => {
       }
     });
 
-    it('named entities are rejected', () => {
-      const result = runValidated(makePlan(), para('合成&amp;合成'));
+    it('inline Markdown links and images are rejected', () => {
+      for (const text of [
+        '[合成链接](http://example.com)',
+        '![合成图片](http://example.com/img.png)',
+      ]) {
+        const result = runValidated(makePlan(), para(text));
+        expect(
+          result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
+          `should reject: ${text}`,
+        ).toBe(true);
+      }
+    });
+
+    it('reference-style Markdown links/images are rejected (R5-fix regression)', () => {
+      for (const text of ['[合成][ref-id]', '![合成图片][img-id]']) {
+        const result = runValidated(makePlan(), para(text));
+        expect(
+          result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
+          `should reject ref-link: ${text}`,
+        ).toBe(true);
+      }
+    });
+
+    it('code spans (backticks) are rejected (R5-fix regression)', () => {
+      const result = runValidated(makePlan(), para('你命中`注定`失败。'));
       expect(result.violations.some((v) => v.code === 'CONTAINS_MARKUP')).toBe(true);
+    });
+
+    it('emphasis, strikethrough, escape, table, heading chars are rejected', () => {
+      for (const text of [
+        '*合成加粗*',
+        '__合成斜体__',
+        '~~合成删除~~',
+        '\\转义',
+        '| 合成表格 |',
+        '# 合成标题',
+      ]) {
+        const result = runValidated(makePlan(), para(text));
+        expect(
+          result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
+          `should reject: ${text}`,
+        ).toBe(true);
+      }
+    });
+
+    it('heading field is also checked', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '含&nbsp;的标题',
+            paragraphs: [{ text: '纯文本。', sourceFactIds: ['fact-1'] }],
+          },
+        ],
+      });
+      const result = runValidated(makePlan(), draft);
+      expect(
+        result.violations.some((v) => v.code === 'CONTAINS_MARKUP' && v.field === 'heading'),
+      ).toBe(true);
+    });
+
+    it('full-width equivalents do NOT trigger (Chinese punctuation is allowed)', () => {
+      const result = runValidated(
+        makePlan(),
+        para(
+          '你的事业方向偏向技术与创意结合的领域，2026年偏向好转。【核心结论】（参考）＞趋势 Test＆plain～',
+        ),
+      );
+      expect(result.violations.some((v) => v.code === 'CONTAINS_MARKUP')).toBe(false);
     });
 
     it('compliant plain text passes', () => {

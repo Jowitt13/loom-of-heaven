@@ -54371,7 +54371,7 @@ var HIGH_RISK_GROUPS = [
     remediation: "\u5220\u9664\u6240\u6709\u64CD\u63A7\u6027\u5EFA\u8BAE\u3002\u5173\u7CFB\u5EFA\u8BAE\u53EA\u80FD\u57FA\u4E8E\u76F8\u4E92\u5C0A\u91CD\u3001\u771F\u8BDA\u6C9F\u901A\u7684\u524D\u63D0\uFF0C\u4E0D\u53EF\u6559\u5506\u63A7\u5236\u6216\u7CBE\u795E\u64CD\u63A7\u3002"
   }
 ];
-var MARKUP_RE = /&(?:#[xX]?[0-9a-fA-F]+;?|[a-zA-Z]\w{0,30};)|<\/?[a-zA-Z][\s\S]*?>|<!--[\s\S]*?-->|!\[.*?\]\(.*?\)|\[.*?\]\(.*?\)/;
+var MARKUP_STRUCTURAL_CHARS_RE = /[&<>\[\]`*_~\\|#]/;
 function findGroupHit(scanText, rules) {
   for (const rule of rules) {
     if (rule.re.test(scanText)) return rule.id;
@@ -54509,7 +54509,7 @@ function runValidateAnswer(input) {
   const referencedWarnings = /* @__PURE__ */ new Set();
   for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
     const section = readingDraft.sections[sIdx];
-    if (MARKUP_RE.test(section.heading)) {
+    if (MARKUP_STRUCTURAL_CHARS_RE.test(section.heading)) {
       push({
         code: "CONTAINS_MARKUP",
         severity: "error",
@@ -54539,7 +54539,7 @@ function runValidateAnswer(input) {
     }
     for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
       const para = section.paragraphs[pIdx];
-      if (MARKUP_RE.test(para.text)) {
+      if (MARKUP_STRUCTURAL_CHARS_RE.test(para.text)) {
         push({
           code: "CONTAINS_MARKUP",
           severity: "error",

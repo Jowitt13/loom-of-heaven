@@ -358,11 +358,13 @@ const HIGH_RISK_GROUPS: RuleGroup[] = [
 // runtime acceptance of caller-selected v1 would re-enable it from input data.)
 
 // --- Plain-text contract: heading/text must not contain markup syntax ---
-// Any HTML tags, HTML comments, HTML named/numeric entities, or Markdown
-// link/image syntax violates the plain-text contract and is rejected with
-// CONTAINS_MARKUP before the rule scan runs.
-const MARKUP_RE =
-  /&(?:#[xX]?[0-9a-fA-F]+;?|[a-zA-Z]\w{0,30};)|<\/?[a-zA-Z][\s\S]*?>|<!--[\s\S]*?-->|!\[.*?\]\(.*?\)|\[.*?\]\(.*?\)/;
+// Rather than pattern-matching specific Markdown/HTML forms (which inevitably
+// misses edge cases), we ban the fixed set of ASCII characters that can form
+// cross-host Markdown/HTML structures. Any single occurrence triggers
+// CONTAINS_MARKUP. Full-width equivalents (，。【】（）＞ etc.) are allowed —
+// visual structure comes from the sections/paragraphs schema, not inline
+// formatting.
+const MARKUP_STRUCTURAL_CHARS_RE = /[&<>\[\]`*_~\\|#]/;
 
 /**
  * Scan normalized+masked text and return the id of the first matching rule in a
@@ -577,7 +579,7 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
     const section = readingDraft.sections[sIdx]!;
 
     // 3.0 Plain-text contract: reject markup in heading.
-    if (MARKUP_RE.test(section.heading)) {
+    if (MARKUP_STRUCTURAL_CHARS_RE.test(section.heading)) {
       push({
         code: 'CONTAINS_MARKUP',
         severity: 'error',
@@ -614,7 +616,7 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
       const para = section.paragraphs[pIdx]!;
 
       // 3.0 Plain-text contract: reject markup in paragraph text.
-      if (MARKUP_RE.test(para.text)) {
+      if (MARKUP_STRUCTURAL_CHARS_RE.test(para.text)) {
         push({
           code: 'CONTAINS_MARKUP',
           severity: 'error',
