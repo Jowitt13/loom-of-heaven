@@ -2,11 +2,11 @@
   "skill": "calculate-birth-charts",
   "product": "ming-engine",
   "engineVersion": "0.1.1",
-  "releaseVersion": "0.1.5",
-  "releaseTag": "v0.1.5",
+  "releaseVersion": "0.1.6",
+  "releaseTag": "v0.1.6",
   "repo": "https://github.com/Jowitt13/ming-engine",
   "status": "published",
-  "statusNote": "GitHub Release v0.1.5 已发布。release-asset ZIP 必须从 downloadUrl 下载，并核对 SHA-256 与本清单及 SHA256SUMS.txt 一致。",
+  "statusNote": "GitHub Release v0.1.6 已发布。release-asset ZIP 必须从 downloadUrl 下载，并核对 SHA-256 与本清单及 SHA256SUMS.txt 一致。",
   "canonicalEngine": {
     "version": "0.1.1",
     "engineSha256": "bb12f64e5593b72ac033fb108beb05dcd5f8204b12d73c247c226795bdd6ef35"
@@ -47,8 +47,8 @@
       "realDeviceVerified": true,
       "releaseAsset": "ming-engine-qoder.zip",
       "downloadType": "release-asset",
-      "downloadUrl": "https://github.com/Jowitt13/ming-engine/releases/download/v0.1.5/ming-engine-qoder.zip",
-      "sha256": "d835b3e0a343e32b7a6e9f3067fcd49824bf4f01beec188c8e83c3316f9269ed",
+      "downloadUrl": "https://github.com/Jowitt13/ming-engine/releases/download/v0.1.6/ming-engine-qoder.zip",
+      "sha256": "dc3149a8353534efb057bdd3850b2abbd1904c24860be010a968a875a8f8936b",
       "published": true
     },
     {
@@ -67,8 +67,8 @@
       "realDeviceVerified": true,
       "releaseAsset": "ming-engine-workbuddy.zip",
       "downloadType": "release-asset",
-      "downloadUrl": "https://github.com/Jowitt13/ming-engine/releases/download/v0.1.5/ming-engine-workbuddy.zip",
-      "sha256": "89047e8c1c9da0352d478511e91ac59cdc967763f1b9641bfc0692605d716615",
+      "downloadUrl": "https://github.com/Jowitt13/ming-engine/releases/download/v0.1.6/ming-engine-workbuddy.zip",
+      "sha256": "07c84ad056a08ba3c74efbd0ce30855f77d37f4567b0df0301506c3d0cd48ed8",
       "published": true
     },
     {
@@ -87,8 +87,8 @@
       "realDeviceVerified": true,
       "releaseAsset": "ming-engine-doubao.zip",
       "downloadType": "release-asset",
-      "downloadUrl": "https://github.com/Jowitt13/ming-engine/releases/download/v0.1.5/ming-engine-doubao.zip",
-      "sha256": "d34923a7467e1ca013477c8aebac5ca2f79a64c990746d5ab57c3dcd9f353aed",
+      "downloadUrl": "https://github.com/Jowitt13/ming-engine/releases/download/v0.1.6/ming-engine-doubao.zip",
+      "sha256": "eabfda68616bed95dc3b54d6d212d80e68c4994ade23f5b8052e8a2f0eb21012",
       "published": true
     }
   ]
