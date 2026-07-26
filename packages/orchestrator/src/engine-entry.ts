@@ -23,8 +23,9 @@ export type {
   ReadingChannel,
 } from '@ming/interpret';
 
-// Fact-boundary and safety validator for host-produced answer drafts (P0).
-export { validateAnswer } from '@ming/interpret';
+// Fact-boundary and safety validator for host-produced answer drafts (P0),
+// plus the bounded parsing facade shared by the CLI and host integrations.
+export { validateAnswer, parseValidateAnswerInputBounded } from '@ming/interpret';
 
 // Validator types come from the contracts layer.
 export type {
@@ -57,6 +58,7 @@ export {
   parseBirthInput,
   parseSynastryInput,
   ValidateAnswerInput,
+  MAX_VALIDATE_ANSWER_INPUT_BYTES,
   EngineError,
   toEngineError,
   ERROR_CODES,

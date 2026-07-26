@@ -58,7 +58,7 @@ the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not h
 resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **345 tests / 27 files — all passing**. The Western provider
+- Typecheck: clean. Tests: **364 tests / 27 files — all passing**. The Western provider
   (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 ≤1′ gate two ways: wrapper-consistency
   (vs astronomy-engine's own output) plus an **independent JPL Horizons golden** (10 bodies × 3
   technical epochs fetched from the NASA/JPL Horizons service, query recorded in
@@ -68,7 +68,7 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   dynamic chart (运限盘) is regression-anchored, the sourced BaZi interpretation rules (incl.
   刑冲合害/神煞/大运吉凶 `polarity`) are covered, and the cross-system interpretation-facts layer is
   checked for topic coverage, grounded evidence, `followupOffers`, de-identification and honest
-  caveats. Skill validate: **37/37** (incl. the scripts/ no-stray-files guard and both SBOM checks). Reading-example
+  caveats. Skill validate: **40/40** (incl. the scripts/ no-stray-files guard, both SBOM checks and the validate-answer/lint-reading gate-workflow doc checks). Reading-example
   static validate: **53/53** (topic example libraries + output-spec structure + the Channel B
   无术语区 term firewall; offline, no LLM — it proves the spec/sample structure, **not** that a host
   model follows the style 100% of the time). Docs-consistency `validate:docs` passes (four full hosts /
@@ -80,20 +80,26 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   action/scene/observable/result nearby, and three REAL reports (male, 1990-06-15 14:20, 示例城市; 事业/感情/
   财运, saved unpolished to `docs/round9-acceptance/`) lint to 0 error (test #8 reads them). The detector is a
   nearby-concreteness heuristic, not a meaning judge. The `validate-answer` gate is a **deterministic
-  structure-and-wording gate** over a host's ReadingDraft (`reading-draft/v2`, with `reading-draft/v1`
-  accepted as a compatible strict-subset input; results are emitted as `validation-result/v2`):
-  fact-citation presence (paragraphs outside the minimal disclaimer/uncertainty exemption must cite
-  `allowedFactIds`), a normalized high-risk expression scan (NFKC + zero-width stripping + CJK-split
-  condensing) that covers **every heading and paragraph of every section** with recognized fixed
-  safety-disclaimer clauses masked structurally before scanning, caveat/warning **self-attestation**
-  set checks, and protective resource limits on both the draft and the plan envelope; violations
-  carry only structured locators (sectionIndex / field / paragraphIndex / patternKey rule ids /
+  structure-and-wording gate** over a host's ReadingDraft (`reading-draft/v2`; legacy `reading-draft/v1`
+  is conditionally accepted under the v2 safety limits — oversized legacy v1 input is intentionally
+  rejected; results are emitted as `validation-result/v2`, a breaking change vs v1): fact-citation
+  presence with fact exemption granted ONLY through structured `constraintRefs` into real AnswerPlan
+  constraints (v1 keeps its legacy disclaimer/uncertainty section-id exemption), a normalized
+  high-risk expression scan (NFKC + zero-width stripping + CJK-split condensing) that covers **every
+  heading and paragraph of every section** with canonical fixed safety-disclaimer templates masked
+  clause-bounded before scanning (newlines are clause boundaries), caveat/warning checks that require
+  `caveatsExpressed`/`warningsDisclosed` to stay **consistent** with the constraint references, and
+  protective resource limits on both the draft and the plan envelope enforced via a bounded parsing
+  facade plus a CLI input-file byte cap (`MAX_VALIDATE_ANSWER_INPUT_BYTES`); violations carry only
+  structured locators (sectionIndex / field / paragraphIndex / stable patternKey rule ids /
   itemIndex), never draft text or caller-provided section ids, and are capped at `MAX_VIOLATIONS`.
   It **cannot** prove that a paragraph's meaning actually follows from its cited facts, cannot verify
-  that a claimed caveat is truly expressed in the body text, and its regex scan and disclaimer mask
-  are bounded heuristics that cannot recognize every semantic paraphrase; the resource limits bound
-  the **validation stage only** — they do not bound the memory a caller spends reading or
-  JSON-parsing an input file before validation (the CLI has no separate input-byte limit). It is a
+  that a referenced caveat is truly expressed by the surrounding prose (the not-supported budget only
+  verifies "short and fact-free", not that the text semantically explains the limitation), and its
+  regex scan and canonical disclaimer mask are bounded heuristics that cannot recognize every
+  semantic paraphrase; the resource limits bound the **validation stage only** — the CLI additionally
+  caps the input file size before reading, but the bare Zod schema by itself is not fail-fast against
+  an arbitrarily large in-memory object (use the bounded facade). It is a
   necessary wording gate, not a semantic-correctness proof. The dependency **license** gate (`scan:licenses`) enforces the
   LICENSE_AUDIT allowlist offline and cross-checks the committed SBOM license claims; `build` emits both a CycloneDX
   and an SPDX 2.3 SBOM (byte-stable, committed). Clean-dir offline

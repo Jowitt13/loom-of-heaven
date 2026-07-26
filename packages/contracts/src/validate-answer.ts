@@ -20,9 +20,12 @@ import { AnswerGuardrail } from './answer-plan.ts';
  * CANNOT recognize every semantic paraphrase. This gate is necessary, not sufficient.
  *
  * Contract versioning:
- * - `reading-draft/v2` tightens v1 with protective input limits (below). v1 drafts
- *   are accepted for compatibility: a v1 draft that stays within the v2 limits
- *   validates unchanged; oversized v1 drafts are now rejected (that IS the fix).
+ * - `reading-draft/v2` tightens v1 with protective input limits (below) and
+ *   structured plan-constraint references. Legacy `reading-draft/v1` is
+ *   CONDITIONALLY accepted under the v2 safety limits; oversized legacy v1 input
+ *   is intentionally rejected. v1 keeps its legacy section-id based fact
+ *   exemption (disclaimer/uncertainty only); v2 grants fact exemption ONLY to
+ *   paragraphs that reference real AnswerPlan constraints via `constraintRefs`.
  * - `validation-result/v2` replaces v1: violations locate by `sectionIndex`
  *   (never the caller-provided section id), add `field`, `patternKey`, `itemIndex`,
  *   and the result adds `violationsTruncated`. v1 result consumers must migrate:
@@ -38,10 +41,16 @@ export const VALIDATION_RESULT_CONTRACT_VERSION = 'validation-result/v2';
 // Rationale: the validator runs bounded regex scans over every heading and
 // paragraph; these caps keep worst-case VALIDATION-STAGE cost linear and small,
 // and reject absurd inputs before scanning. They do NOT bound what a caller
-// spends reading or JSON-parsing a file before validation (the CLI has no
-// separate input-byte limit today). A real reading is a handful of sections
-// with a few short paragraphs each — the limits below are an order of
-// magnitude above legitimate use.
+// spends reading or JSON-parsing a file before validation. The bare Zod schemas
+// below EXPRESS the contract but are not themselves fail-fast against an
+// arbitrarily large in-memory object; use `parseValidateAnswerInputBounded`
+// (from @ming/interpret) for bounded parsing, and the CLI additionally enforces
+// MAX_VALIDATE_ANSWER_INPUT_BYTES on the input file before reading it. A real
+// reading is a handful of sections with a few short paragraphs each — the
+// limits below are an order of magnitude above legitimate use.
+
+/** Max input-file size in bytes for the CLI `validate-answer` command (stat before read). */
+export const MAX_VALIDATE_ANSWER_INPUT_BYTES = 2_097_152;
 
 /** Max characters in a single paragraph text (regex scan cost per paragraph stays bounded). */
 export const MAX_PARAGRAPH_TEXT_CHARS = 5_000;
@@ -51,6 +60,8 @@ export const MAX_SECTIONS = 40;
 export const MAX_PARAGRAPHS_PER_SECTION = 50;
 /** Max fact IDs cited by a single paragraph (plans expose far fewer facts than this). */
 export const MAX_SOURCE_FACT_IDS_PER_PARAGRAPH = 50;
+/** Max plan-constraint references on a single paragraph (a paragraph expresses a few). */
+export const MAX_CONSTRAINT_REFS_PER_PARAGRAPH = 10;
 /** Max fact IDs cited across the whole draft (bounds set-lookup and violation volume). */
 export const MAX_TOTAL_SOURCE_FACT_IDS = 1_000;
 /** Max characters in a single fact ID (engine fact IDs are short slugs). */
@@ -101,11 +112,34 @@ export const MAX_VIOLATIONS = 200;
  */
 export const MAX_NOT_SUPPORTED_TEXT_CHARS = 500;
 
+/** Which AnswerPlan constraint array a paragraph reference points into. */
+export const PlanConstraintKind = z.enum(['disclaimer', 'caveat', 'warning']);
+export type PlanConstraintKind = z.infer<typeof PlanConstraintKind>;
+
+/**
+ * Structured reference from a draft paragraph to a REAL AnswerPlan constraint:
+ * kind selects the plan array (disclaimer → answerPlan.disclaimers, caveat →
+ * requiredCaveats, warning → requiredWarningCodes) and index locates the entry.
+ * Only paragraphs whose references all resolve are fact-exempt in v2 — a free
+ * section id never grants exemption.
+ */
+export const PlanConstraintRef = z.strictObject({
+  kind: PlanConstraintKind,
+  index: z.number().int().min(0),
+});
+export type PlanConstraintRef = z.infer<typeof PlanConstraintRef>;
+
 /** A single paragraph within a reading section. */
 export const ReadingParagraph = z.strictObject({
   text: z.string().min(1).max(MAX_PARAGRAPH_TEXT_CHARS),
   /** Fact IDs from the AnswerPlan that ground this paragraph. */
   sourceFactIds: z.array(z.string().max(MAX_FACT_ID_CHARS)).max(MAX_SOURCE_FACT_IDS_PER_PARAGRAPH),
+  /**
+   * Present when this paragraph expresses AnswerPlan constraints (disclaimers /
+   * caveats / warnings) instead of new factual claims; such paragraphs are
+   * fact-exempt only when every reference resolves to a real plan entry.
+   */
+  constraintRefs: z.array(PlanConstraintRef).max(MAX_CONSTRAINT_REFS_PER_PARAGRAPH).optional(),
 });
 export type ReadingParagraph = z.infer<typeof ReadingParagraph>;
 
@@ -179,6 +213,13 @@ export const ViolationCode = z.enum([
   'MISSING_REQUIRED_CAVEAT', // a requiredCaveat not expressed
   'MISSING_REQUIRED_WARNING', // a requiredWarningCode not disclosed
   'MISSING_DISCLAIMER', // answerPlan disclaimers not communicated
+
+  // Constraint-reference violations (v2)
+  'INVALID_CONSTRAINT_REF', // a constraintRef does not resolve to a real plan entry
+  'CONSTRAINT_ATTESTATION_MISMATCH', // caveatsExpressed/warningsDisclosed disagree with constraintRefs
+
+  // Contract-version violations
+  'UNSUPPORTED_CONTRACT_VERSION', // readingDraft.contractVersion is not an accepted version
 
   // Guardrail violations
   // Reserved: not currently emitted. Mapping answerPlan.guardrails to checks without

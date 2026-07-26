@@ -18,6 +18,9 @@
  *   node scripts/ming-chart.mjs synastry  --input-file people.json [--now <iso|ms>] [--output-file synastry.json]  (1-5 people; set analyzePair when >2)
  *   node scripts/ming-chart.mjs lint-reading --input-file draft-reading.md [--channel topic|full] [--simple] [--output-file reading-lint.json]
  *   node scripts/ming-chart.mjs validate-answer --input-file validate-input.json [--output-file validation-result.json]
+ *       (input file is size-capped; ordinary-question gate order: answer-plan → host writes a
+ *        reading-draft/v2 JSON → validate-answer → render the SAME visible text as Markdown →
+ *        lint-reading → show the answer only when BOTH gates pass; re-run BOTH after any rewrite)
  *   node scripts/ming-chart.mjs render     [DISABLED] visualization reports are temporarily off; use calculate/interpret JSON (exit 3)
  *   node scripts/ming-chart.mjs verify     [--fixture fixtures/smoke.json]
  *   node scripts/ming-chart.mjs version    (reads the sibling BUILD_MANIFEST.json of THIS installed package)
@@ -31,6 +34,7 @@ import {
   realpathSync,
   renameSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
@@ -152,7 +156,8 @@ async function main() {
     runAnswerPlan,
     runSynastry,
     validateAnswer,
-    ValidateAnswerInput,
+    parseValidateAnswerInputBounded,
+    MAX_VALIDATE_ANSWER_INPUT_BYTES,
     timeIndexFromHour,
     calculate,
     compareProfiles,
@@ -295,7 +300,25 @@ async function main() {
       case 'validate-answer': {
         // Fact-boundary and safety validator (P0): checks a structured ReadingDraft
         // against an AnswerPlan. Reads a JSON file containing { answerPlan, readingDraft }.
+        // The file is size-capped BEFORE reading (stat, then read/parse), and the
+        // parsed object goes through the bounded preflight facade before full
+        // schema validation — both reject oversized input with INPUT_VALIDATION_FAILED.
         const inputPath = resolve(process.cwd(), requireArg(args, 'input-file'));
+        let inputStat;
+        try {
+          inputStat = statSync(inputPath);
+        } catch (err) {
+          throw new EngineError(
+            'INPUT_VALIDATION_FAILED',
+            `Cannot stat input file: ${err && err.message ? err.message : String(err)}`,
+          );
+        }
+        if (inputStat.size > MAX_VALIDATE_ANSWER_INPUT_BYTES) {
+          throw new EngineError(
+            'INPUT_VALIDATION_FAILED',
+            `Input file exceeds MAX_VALIDATE_ANSWER_INPUT_BYTES (${MAX_VALIDATE_ANSWER_INPUT_BYTES} bytes); file not read.`,
+          );
+        }
         let rawInput;
         try {
           rawInput = JSON.parse(readFileSync(inputPath, 'utf8'));
@@ -307,11 +330,11 @@ async function main() {
         }
         let validatedInput;
         try {
-          validatedInput = ValidateAnswerInput.parse(rawInput);
+          validatedInput = parseValidateAnswerInputBounded(rawInput);
         } catch (err) {
           throw new EngineError(
             'INPUT_VALIDATION_FAILED',
-            'Input does not match ValidateAnswerInput schema.',
+            'Input does not match ValidateAnswerInput schema (or failed the bounded preflight).',
             {
               issues: err && err.issues ? err.issues : String(err),
             },

@@ -1,6 +1,15 @@
 // Synthetic test data — fictional only; not a real person or event.
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { maskSafetyDisclaimers, normalizeSafetyText, validateAnswer } from '@ming/interpret';
+import {
+  maskSafetyDisclaimers,
+  normalizeSafetyText,
+  parseValidateAnswerInputBounded,
+  validateAnswer,
+} from '@ming/interpret';
 import {
   MAX_ALLOWED_FACT_IDS,
   MAX_CAVEATS_EXPRESSED,
@@ -10,6 +19,7 @@ import {
   MAX_SECTIONS,
   MAX_SOURCE_FACT_IDS_PER_PARAGRAPH,
   MAX_TOTAL_SOURCE_FACT_IDS,
+  MAX_VALIDATE_ANSWER_INPUT_BYTES,
   MAX_VIOLATIONS,
   ValidateAnswerInput as ValidateAnswerInputSchema,
 } from '@ming/contracts';
@@ -40,7 +50,8 @@ function makePlan(
   };
 }
 
-/** Minimal valid ReadingDraft stub. */
+/** Minimal valid ReadingDraft stub (v2: the disclaimer paragraph expresses the
+ * plan disclaimer + required caveat/warning via structured constraintRefs). */
 function makeDraft(
   overrides: Partial<ValidateAnswerInput['readingDraft']> = {},
 ): ValidateAnswerInput['readingDraft'] {
@@ -56,13 +67,32 @@ function makeDraft(
       {
         id: 'disclaimer',
         heading: '信息可靠性与声明',
-        paragraphs: [{ text: '本报告仅供传统文化参考，不构成专业建议。', sourceFactIds: [] }],
+        paragraphs: [
+          {
+            text: '本报告仅供传统文化参考，不构成专业建议。',
+            sourceFactIds: [],
+            constraintRefs: [
+              { kind: 'disclaimer', index: 0 },
+              { kind: 'caveat', index: 0 },
+              { kind: 'warning', index: 0 },
+            ],
+          },
+        ],
       },
     ],
     caveatsExpressed: ['出生时间为约估，涉及时刻的结果可能变化。'],
     warningsDisclosed: ['TIME_ACCURACY_APPROXIMATE'],
     ...overrides,
   };
+}
+
+/** Parse through the public schema first, then validate — the full input path. */
+function runValidated(
+  plan: ValidateAnswerInput['answerPlan'],
+  draft: ValidateAnswerInput['readingDraft'],
+) {
+  const input = ValidateAnswerInputSchema.parse({ answerPlan: plan, readingDraft: draft });
+  return validateAnswer(input);
 }
 
 describe('validate-answer — fact boundary and safety layer', () => {
@@ -233,10 +263,10 @@ describe('validate-answer — fact boundary and safety layer', () => {
       );
     });
 
-    it('does NOT flag negation-guarded disclaimer wording in exempt sections', () => {
-      // The disclaimer section may reference medical/legal topics generically,
-      // as long as the risky term sits in an explicit disclaimer negation
-      // (不构成… / 请咨询专业…). The section is still safety-scanned.
+    it('does NOT flag canonical disclaimer templates in constraint-expressing paragraphs', () => {
+      // The disclaimer paragraph may reference medical topics inside a canonical
+      // safety-disclaimer template; the paragraph is still safety-scanned, and is
+      // fact-exempt only through its structured constraintRefs.
       const draft = makeDraft({
         sections: [
           {
@@ -251,6 +281,11 @@ describe('validate-answer — fact boundary and safety layer', () => {
               {
                 text: '本报告不构成医疗诊断或治疗建议。如有健康问题请咨询专业医生。',
                 sourceFactIds: [],
+                constraintRefs: [
+                  { kind: 'disclaimer', index: 0 },
+                  { kind: 'caveat', index: 0 },
+                  { kind: 'warning', index: 0 },
+                ],
               },
             ],
           },
@@ -263,15 +298,63 @@ describe('validate-answer — fact boundary and safety layer', () => {
 
   // --- CAVEAT AND WARNING VIOLATIONS ---
   describe('caveat and warning violations', () => {
-    it('MISSING_REQUIRED_CAVEAT: fails when a required caveat is not expressed', () => {
-      const draft = makeDraft({ caveatsExpressed: [] }); // missing the required caveat
+    it('MISSING_REQUIRED_CAVEAT: fails when a required caveat is neither declared nor referenced', () => {
+      const draft = makeDraft({
+        caveatsExpressed: [], // not declared
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [{ text: '你的事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
+          },
+          {
+            id: 'disclaimer',
+            heading: '信息可靠性与声明',
+            paragraphs: [
+              {
+                text: '本报告仅供传统文化参考。',
+                sourceFactIds: [],
+                // no caveat ref either → the caveat is fully missing
+                constraintRefs: [
+                  { kind: 'disclaimer', index: 0 },
+                  { kind: 'warning', index: 0 },
+                ],
+              },
+            ],
+          },
+        ],
+      });
       const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
       expect(result.ok).toBe(false);
       expect(result.violations.some((v) => v.code === 'MISSING_REQUIRED_CAVEAT')).toBe(true);
     });
 
-    it('MISSING_REQUIRED_WARNING: fails when a required warning is not disclosed', () => {
-      const draft = makeDraft({ warningsDisclosed: [] }); // missing TIME_ACCURACY_APPROXIMATE
+    it('MISSING_REQUIRED_WARNING: fails when a required warning is neither declared nor referenced', () => {
+      const draft = makeDraft({
+        warningsDisclosed: [], // not declared
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [{ text: '你的事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
+          },
+          {
+            id: 'disclaimer',
+            heading: '信息可靠性与声明',
+            paragraphs: [
+              {
+                text: '本报告仅供传统文化参考。',
+                sourceFactIds: [],
+                // no warning ref either → the warning is fully missing
+                constraintRefs: [
+                  { kind: 'disclaimer', index: 0 },
+                  { kind: 'caveat', index: 0 },
+                ],
+              },
+            ],
+          },
+        ],
+      });
       const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
       expect(result.ok).toBe(false);
       expect(result.violations.some((v) => v.code === 'MISSING_REQUIRED_WARNING')).toBe(true);
@@ -371,7 +454,17 @@ describe('validate-answer — fact boundary and safety layer', () => {
           {
             id: 'disclaimer',
             heading: '免责声明',
-            paragraphs: [{ text: '你命中注定会离婚，无可改变。', sourceFactIds: [] }],
+            paragraphs: [
+              {
+                text: '你命中注定会离婚，无可改变。',
+                sourceFactIds: [],
+                constraintRefs: [
+                  { kind: 'disclaimer', index: 0 },
+                  { kind: 'caveat', index: 0 },
+                  { kind: 'warning', index: 0 },
+                ],
+              },
+            ],
           },
         ],
       });
@@ -381,7 +474,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
       expect(fate).toBeDefined();
       expect(fate!.sectionIndex).toBe(0);
       expect(fate!.field).toBe('paragraph');
-      // Fact-citation exemption still applies to disclaimer sections:
+      // Constraint-based fact exemption still applies — but never exempts the scan:
       expect(result.violations.some((v) => v.code === 'MISSING_SOURCE_FACTS')).toBe(false);
     });
 
@@ -483,9 +576,10 @@ describe('validate-answer — fact boundary and safety layer', () => {
       );
     });
 
-    it('does not misfire on recognized fixed safety-disclaimer clauses', () => {
-      // These clauses fit the narrow structural mask (negation verb + category
-      // term + object noun inside one clause) and are masked before scanning.
+    it('does not misfire on canonical safety-disclaimer templates', () => {
+      // These clauses match the canonical templates (negation verb + enumerated
+      // object phrase, clause-bounded) and are masked before scanning; the
+      // paragraphs are fact-exempt via structured constraintRefs.
       const draft = makeDraft({
         sections: [
           {
@@ -497,13 +591,27 @@ describe('validate-answer — fact boundary and safety layer', () => {
             id: 'disclaimer',
             heading: '免责声明',
             paragraphs: [
-              { text: '本报告不构成医疗诊断或治疗建议。', sourceFactIds: [] },
-              { text: '本报告不提供投资操作指令，不构成买入股票的依据。', sourceFactIds: [] },
+              {
+                text: '本报告不构成医疗诊断或治疗建议。',
+                sourceFactIds: [],
+                constraintRefs: [
+                  { kind: 'disclaimer', index: 0 },
+                  { kind: 'caveat', index: 0 },
+                ],
+              },
+              {
+                text: '本解读不提供用药建议，也不构成投资操作指令。',
+                sourceFactIds: [],
+                constraintRefs: [
+                  { kind: 'disclaimer', index: 0 },
+                  { kind: 'warning', index: 0 },
+                ],
+              },
             ],
           },
         ],
       });
-      const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
+      const result = runValidated(makePlan(), draft);
       expect(result.ok).toBe(true);
       expect(result.violations).toHaveLength(0);
     });
@@ -573,7 +681,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
     });
   });
 
-  describe('disclaimer masking is narrow and structural', () => {
+  describe('disclaimer masking is canonical and clause-bounded', () => {
     /** Wrap a single synthetic text into a minimal draft. */
     function textDraft(text: string): ValidateAnswerInput['readingDraft'] {
       return makeDraft({
@@ -587,7 +695,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
       });
     }
 
-    it('maskSafetyDisclaimers masks only the disclaimer clause, not neighbours', () => {
+    it('maskSafetyDisclaimers masks only the canonical clause, not neighbours', () => {
       const masked = maskSafetyDisclaimers(
         normalizeSafetyText('本报告不构成医疗建议，你应该立即停药。'),
       );
@@ -595,44 +703,68 @@ describe('validate-answer — fact boundary and safety layer', () => {
       expect(masked).toContain('停药'); // the second clause stays scannable
     });
 
+    it('newlines are clause boundaries: the mask never crosses a line break', () => {
+      const masked = maskSafetyDisclaimers(
+        normalizeSafetyText('本报告不构成医疗建议\n你应该停药。'),
+      );
+      expect(masked).not.toContain('医疗建议');
+      expect(masked).toContain('停药');
+      const result = runValidated(makePlan(), textDraft('本报告不构成医疗建议\n你应该停药。'));
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
+    });
+
+    it('a line-split risky word is still caught by the scan after masking', () => {
+      const result = runValidated(makePlan(), textDraft('命盘显示你必\n死。'));
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_LIFE_DEATH')).toBe(true);
+    });
+
     it('cross-clause negation does not exempt the next clause', () => {
-      const result = validateAnswer({
-        answerPlan: makePlan(),
-        readingDraft: textDraft('本报告不构成医疗建议，你应该立即停药。'),
-      });
+      const result = runValidated(makePlan(), textDraft('本报告不构成医疗建议，你应该立即停药。'));
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
+    });
+
+    it('a short adversative inside the old 12-char window is no longer swallowed', () => {
+      // Under the removed wide-span mask this whole span could be eaten;
+      // canonical templates reject it and the second action is scanned.
+      const result = runValidated(makePlan(), textDraft('本报告不构成医疗但你应该服药的建议。'));
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
+    });
+
+    it('a second action in the same clause is not swallowed', () => {
+      const result = runValidated(makePlan(), textDraft('本报告不构成医疗建议并建议你服药。'));
       expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
     });
 
     it('referral prompts are not a generic exemption marker', () => {
-      const result = validateAnswer({
-        answerPlan: makePlan(),
-        readingDraft: textDraft('请咨询专业人士，你命中注定不可能成功。'),
-      });
+      const result = runValidated(makePlan(), textDraft('请咨询专业人士，你命中注定不可能成功。'));
       expect(result.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
     });
 
     it('double negation is not masked', () => {
-      const result = validateAnswer({
-        answerPlan: makePlan(),
-        readingDraft: textDraft('不是不建议买入股票，其实可以买入股票。'),
-      });
+      const result = runValidated(makePlan(), textDraft('不是不建议买入股票，其实可以买入股票。'));
       expect(result.violations.some((v) => v.code === 'HIGH_RISK_INVESTMENT')).toBe(true);
     });
 
-    it('a masked disclaimer never hides an unrelated hit in the same paragraph', () => {
-      const result = validateAnswer({
-        answerPlan: makePlan(),
-        readingDraft: textDraft('本报告不构成医疗诊断，但命盘显示你必死。'),
-      });
+    it('a canonical template never hides an adjacent independent hit', () => {
+      const result = runValidated(
+        makePlan(),
+        textDraft('本报告不构成医疗诊断或治疗建议。你必死。'),
+      );
       expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(false);
       expect(result.violations.some((v) => v.code === 'HIGH_RISK_LIFE_DEATH')).toBe(true);
     });
 
-    it('a run-on clause that does not fit the disclaimer shape is scanned as-is', () => {
-      const result = validateAnswer({
-        answerPlan: makePlan(),
-        readingDraft: textDraft('本内容不构成医疗建议你需要做手术。'),
-      });
+    it('a masked disclaimer never hides an unrelated hit in the same paragraph', () => {
+      const result = runValidated(
+        makePlan(),
+        textDraft('本报告不构成医疗诊断，但命盘显示你必死。'),
+      );
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(false);
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_LIFE_DEATH')).toBe(true);
+    });
+
+    it('a run-on clause that does not fit a canonical template is scanned as-is', () => {
+      const result = runValidated(makePlan(), textDraft('本内容不构成医疗建议你需要做手术。'));
       expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
     });
   });
@@ -714,7 +846,17 @@ describe('validate-answer — fact boundary and safety layer', () => {
           {
             id: 'disclaimer',
             heading: '信息可靠性与声明',
-            paragraphs: [{ text: '引擎无法提供该主题的事实，建议换一个主题。', sourceFactIds: [] }],
+            paragraphs: [
+              {
+                text: '引擎无法提供该主题的事实，建议换一个主题。',
+                sourceFactIds: [],
+                constraintRefs: [
+                  { kind: 'disclaimer', index: 0 },
+                  { kind: 'caveat', index: 0 },
+                  { kind: 'warning', index: 0 },
+                ],
+              },
+            ],
           },
         ],
       });
@@ -737,6 +879,67 @@ describe('validate-answer — fact boundary and safety layer', () => {
         result.violations.some((v) => v.code === 'MISSING_SOURCE_FACTS' && v.sectionIndex === 0),
       ).toBe(true);
     });
+
+    it('not-supported: headings count against the same visible-text budget', () => {
+      // heading-heavy: 3 headings x 180 chars = 540 > budget, paragraphs tiny.
+      const plan = makePlan({
+        answerability: 'not-supported',
+        allowedFactIds: [],
+        requiredCaveats: [],
+        requiredWarningCodes: [],
+        disclaimers: [],
+      });
+      const draft = makeDraft({
+        caveatsExpressed: [],
+        warningsDisclosed: [],
+        sections: Array.from({ length: 3 }, (_, i) => ({
+          id: `s-${i}`,
+          heading: '安'.repeat(180),
+          paragraphs: [{ text: '说明。', sourceFactIds: [] }],
+        })),
+      });
+      const result = runValidated(plan, draft);
+      expect(result.violations.some((v) => v.code === 'UNSUPPORTED_TOPIC')).toBe(true);
+    });
+
+    it('not-supported: heading + paragraph exactly at the budget passes; one more char fails', () => {
+      const plan = makePlan({
+        answerability: 'not-supported',
+        allowedFactIds: [],
+        requiredCaveats: [],
+        requiredWarningCodes: [],
+        disclaimers: [],
+      });
+      const atLimit = makeDraft({
+        caveatsExpressed: [],
+        warningsDisclosed: [],
+        sections: [
+          {
+            id: 'note',
+            heading: '安'.repeat(100),
+            paragraphs: [
+              { text: '安'.repeat(MAX_NOT_SUPPORTED_TEXT_CHARS - 100), sourceFactIds: [] },
+            ],
+          },
+        ],
+      });
+      expect(runValidated(plan, atLimit).ok).toBe(true);
+      const overLimit = makeDraft({
+        caveatsExpressed: [],
+        warningsDisclosed: [],
+        sections: [
+          {
+            id: 'note',
+            heading: '安'.repeat(100),
+            paragraphs: [
+              { text: '安'.repeat(MAX_NOT_SUPPORTED_TEXT_CHARS - 99), sourceFactIds: [] },
+            ],
+          },
+        ],
+      });
+      const result = runValidated(plan, overLimit);
+      expect(result.violations.some((v) => v.code === 'UNSUPPORTED_TOPIC')).toBe(true);
+    });
   });
 
   describe('contract versioning', () => {
@@ -757,6 +960,208 @@ describe('validate-answer — fact boundary and safety layer', () => {
         readingDraft: { ...makeDraft(), contractVersion: 'reading-draft/v0' },
       };
       expect(ValidateAnswerInputSchema.safeParse(badInput).success).toBe(false);
+    });
+
+    it('the direct API rejects unknown versions instead of returning a v2 success', () => {
+      const forged = {
+        answerPlan: makePlan(),
+        readingDraft: { ...makeDraft(), contractVersion: 'reading-draft/v99' },
+      } as unknown as ValidateAnswerInput;
+      const result = validateAnswer(forged);
+      expect(result.ok).toBe(false);
+      expect(result.violations).toHaveLength(1);
+      expect(result.violations[0]!.code).toBe('UNSUPPORTED_CONTRACT_VERSION');
+    });
+
+    it('legacy v1 keeps the section-id fact exemption (conditional compatibility)', () => {
+      const v1Draft = makeDraft({
+        contractVersion: 'reading-draft/v1',
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [{ text: '你的事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
+          },
+          {
+            id: 'disclaimer',
+            heading: '信息可靠性与声明',
+            // v1: no constraintRefs, id-based exemption still applies
+            paragraphs: [{ text: '本报告仅供传统文化参考。', sourceFactIds: [] }],
+          },
+        ],
+      });
+      const result = runValidated(makePlan(), v1Draft);
+      expect(result.ok).toBe(true);
+    });
+  });
+
+  describe('structured constraint references (v2 fact exemption)', () => {
+    it('a masquerading section id no longer grants fact exemption', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'disclaimer', // free id — no refs → no exemption in v2
+            heading: '声明',
+            paragraphs: [{ text: '无依据的内容。', sourceFactIds: [] }],
+          },
+        ],
+      });
+      const result = runValidated(makePlan(), draft);
+      expect(result.ok).toBe(false);
+      expect(result.violations.some((v) => v.code === 'MISSING_SOURCE_FACTS')).toBe(true);
+    });
+
+    it('an out-of-range constraint index is rejected', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'disclaimer',
+            heading: '声明',
+            paragraphs: [
+              {
+                text: '本报告仅供传统文化参考。',
+                sourceFactIds: [],
+                constraintRefs: [{ kind: 'caveat', index: 5 }], // only 1 caveat exists
+              },
+            ],
+          },
+        ],
+      });
+      const result = runValidated(makePlan(), draft);
+      expect(result.ok).toBe(false);
+      const invalid = result.violations.find((v) => v.code === 'INVALID_CONSTRAINT_REF');
+      expect(invalid).toBeDefined();
+      expect(invalid!.itemIndex).toBe(0);
+      expect(invalid!.patternKey).toBe('caveat');
+      // an invalid ref also voids the fact exemption:
+      expect(result.violations.some((v) => v.code === 'MISSING_SOURCE_FACTS')).toBe(true);
+    });
+
+    it('a ref whose kind points at an empty plan array is rejected', () => {
+      const plan = makePlan({ disclaimers: [] });
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [
+              {
+                text: '本报告仅供传统文化参考。',
+                sourceFactIds: [],
+                constraintRefs: [{ kind: 'disclaimer', index: 0 }], // wrong kind: no disclaimers
+              },
+            ],
+          },
+        ],
+      });
+      const result = runValidated(plan, draft);
+      expect(
+        result.violations.some(
+          (v) => v.code === 'INVALID_CONSTRAINT_REF' && v.patternKey === 'disclaimer',
+        ),
+      ).toBe(true);
+    });
+
+    it('declared-but-not-referenced caveats are a mismatch, not silent success', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [{ text: '你的事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
+          },
+        ],
+        // caveatsExpressed/warningsDisclosed keep defaults → declared but never referenced
+      });
+      const result = runValidated(makePlan(), draft);
+      expect(result.ok).toBe(false);
+      expect(
+        result.violations.some(
+          (v) => v.code === 'CONSTRAINT_ATTESTATION_MISMATCH' && v.patternKey === 'caveat',
+        ),
+      ).toBe(true);
+      expect(
+        result.violations.some(
+          (v) => v.code === 'CONSTRAINT_ATTESTATION_MISMATCH' && v.patternKey === 'warning',
+        ),
+      ).toBe(true);
+    });
+
+    it('referenced-but-not-declared caveats are a mismatch too', () => {
+      const draft = makeDraft({ caveatsExpressed: [] }); // default draft references caveat 0
+      const result = runValidated(makePlan(), draft);
+      expect(result.ok).toBe(false);
+      expect(
+        result.violations.some(
+          (v) => v.code === 'CONSTRAINT_ATTESTATION_MISMATCH' && v.patternKey === 'caveat',
+        ),
+      ).toBe(true);
+    });
+
+    it('legit disclaimer/caveat/warning references validate cleanly', () => {
+      // The default draft expresses all three constraint kinds via refs.
+      const result = runValidated(makePlan(), makeDraft());
+      expect(result.ok).toBe(true);
+      expect(result.violations).toHaveLength(0);
+    });
+  });
+
+  describe('bounded input entry (facade + CLI byte cap)', () => {
+    const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+    const cliPath = join(repoRoot, 'skills', 'calculate-birth-charts', 'scripts', 'ming-chart.mjs');
+    const tmpDir = join(repoRoot, '.tmp', 'validate-answer-tests');
+
+    it('parseValidateAnswerInputBounded rejects a huge top-level array before Zod', () => {
+      const huge = {
+        answerPlan: makePlan(),
+        readingDraft: {
+          ...makeDraft(),
+          sections: Array.from({ length: MAX_SECTIONS + 1 }, () => ({
+            id: 's',
+            heading: '',
+            paragraphs: [{ text: '安', sourceFactIds: [] }],
+          })),
+        },
+      };
+      expect(() => parseValidateAnswerInputBounded(huge)).toThrow(/bounded preflight/);
+    });
+
+    it('parseValidateAnswerInputBounded accepts a valid input and returns the parsed value', () => {
+      const input = parseValidateAnswerInputBounded({
+        answerPlan: makePlan(),
+        readingDraft: makeDraft(),
+      });
+      expect(input.readingDraft.topic).toBe('career');
+      expect(validateAnswer(input).ok).toBe(true);
+    });
+
+    it('CLI: an input file above MAX_VALIDATE_ANSWER_INPUT_BYTES is rejected before reading', () => {
+      mkdirSync(tmpDir, { recursive: true });
+      const bigFile = join(tmpDir, 'oversized-input.json');
+      // Synthetic filler only — the CLI must reject on stat() size alone.
+      writeFileSync(bigFile, Buffer.alloc(MAX_VALIDATE_ANSWER_INPUT_BYTES + 1, 0x20));
+      const run = spawnSync(
+        process.execPath,
+        [cliPath, 'validate-answer', '--input-file', bigFile],
+        { encoding: 'utf8' },
+      );
+      expect(run.status).not.toBe(0);
+      expect(`${run.stdout}${run.stderr}`).toContain('INPUT_VALIDATION_FAILED');
+      expect(`${run.stdout}${run.stderr}`).toContain('MAX_VALIDATE_ANSWER_INPUT_BYTES');
+    });
+
+    it('CLI: a valid v2 input passes end-to-end through the bounded facade', () => {
+      mkdirSync(tmpDir, { recursive: true });
+      const okFile = join(tmpDir, 'valid-input.json');
+      writeFileSync(okFile, JSON.stringify({ answerPlan: makePlan(), readingDraft: makeDraft() }));
+      const run = spawnSync(
+        process.execPath,
+        [cliPath, 'validate-answer', '--input-file', okFile],
+        { encoding: 'utf8' },
+      );
+      expect(run.status).toBe(0);
+      expect(run.stdout).toContain('"ok": true');
+      expect(run.stdout).toContain('validation-result/v2');
     });
   });
 
@@ -870,7 +1275,17 @@ describe('validate-answer — fact boundary and safety layer', () => {
           {
             id: 'disclaimer',
             heading: '信息可靠性与声明',
-            paragraphs: [{ text: '本报告仅供传统文化参考。', sourceFactIds: [] }],
+            paragraphs: [
+              {
+                text: '本报告仅供传统文化参考。',
+                sourceFactIds: [],
+                constraintRefs: [
+                  { kind: 'disclaimer', index: 0 },
+                  { kind: 'caveat', index: 0 },
+                  { kind: 'warning', index: 0 },
+                ],
+              },
+            ],
           },
         ],
       });

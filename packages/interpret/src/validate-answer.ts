@@ -2,27 +2,33 @@
  * validate-answer — deterministic, offline fact-boundary and safety validator (P0).
  *
  * A DETERMINISTIC STRUCTURE-AND-WORDING GATE over a host-produced ReadingDraft:
- * 1. Every paragraph outside the minimal fact-exempt sections (disclaimer,
- *    uncertainty) must declare sourceFactIds that exist in allowedFactIds.
- *    (Citation presence is structural — it does NOT prove the paragraph's meaning
- *    is actually derived from those facts.)
+ * 1. Fact boundary: in v2, a paragraph is fact-exempt ONLY when its
+ *    `constraintRefs` all resolve to real AnswerPlan constraints (disclaimers /
+ *    requiredCaveats / requiredWarningCodes); a free section id never grants
+ *    exemption. Legacy v1 drafts keep the old disclaimer/uncertainty section-id
+ *    exemption as conditional compatibility. Every other paragraph must declare
+ *    sourceFactIds that exist in allowedFactIds. (Citation presence is
+ *    structural — it does NOT prove the paragraph's meaning is derived from
+ *    those facts.)
  * 2. The draft does not cross topic boundaries; `not-supported` plans reject any
- *    fact-citing or more-than-brief content regardless of section ids.
+ *    fact-citing draft, and budget ALL visible text (headings + paragraphs)
+ *    regardless of section ids. This verifies "short and fact-free" only — it
+ *    cannot prove the text semantically just explains the limitation.
  * 3. High-risk expression rules (medical, legal, investment, fate, life-death,
  *    manipulation) run over ALL visible text — every heading and every paragraph
- *    of every section. Recognized fixed safety-disclaimer clauses are masked
+ *    of every section. Canonical fixed safety-disclaimer templates are masked
  *    before scanning; everything else is scanned as-is.
- * 4. All required caveats and warnings from the AnswerPlan are claimed as expressed
- *    (self-attestation set check, not a semantic proof of in-body expression).
- * 5. Protective resource limits reject oversized inputs before any regex scanning
- *    and cap the number of reported violations. These limits bound the cost of the
- *    VALIDATION stage only — they do not bound what a caller spends reading or
- *    JSON-parsing an input file before validation.
+ * 4. Required caveats/warnings: structured `constraintRefs` are the primary
+ *    evidence in v2; `caveatsExpressed`/`warningsDisclosed` must stay consistent
+ *    with them (still not a semantic proof of in-body expression).
+ * 5. Protective resource limits reject oversized inputs before any regex
+ *    scanning and cap reported violations. These bound the VALIDATION stage
+ *    only; use `parseValidateAnswerInputBounded` + the CLI file-byte cap for
+ *    bounded parsing before validation.
  *
- * Honest scope: the rule scan (with normalization and disclaimer masking) is a
- * heuristic wording gate; it cannot recognize every semantic paraphrase or
- * evasion, and the disclaimer mask is a bounded structural heuristic, not
- * language understanding. This is the SAFETY layer; lint-reading remains the
+ * Honest scope: the rule scan (with normalization and canonical-template
+ * masking) is a heuristic wording gate; it cannot recognize every semantic
+ * paraphrase or evasion. This is the SAFETY layer; lint-reading remains the
  * LANGUAGE QUALITY layer — the two keep separate word lists on purpose.
  */
 
@@ -36,6 +42,7 @@ import {
   MAX_ALLOWED_FACT_IDS,
   MAX_CAVEAT_ENTRY_CHARS,
   MAX_CAVEATS_EXPRESSED,
+  MAX_CONSTRAINT_REFS_PER_PARAGRAPH,
   MAX_DISCLAIMER_ENTRY_CHARS,
   MAX_FACT_ID_CHARS,
   MAX_HEADING_CHARS,
@@ -54,7 +61,9 @@ import {
   MAX_VIOLATIONS,
   MAX_WARNING_ENTRY_CHARS,
   MAX_WARNINGS_DISCLOSED,
+  READING_DRAFT_COMPAT_VERSIONS,
   VALIDATION_RESULT_CONTRACT_VERSION,
+  ValidateAnswerInput as ValidateAnswerInputSchema,
 } from '@ming/contracts';
 
 // --- Safety-text normalization (single shared entry point for the safety scan) ---
@@ -82,51 +91,100 @@ const CJK_SEPARATOR_RE = new RegExp(
  * Normalize text for safety scanning:
  * 1. Unicode NFKC (folds full-width/compatibility forms, e.g. ＰＵＡ → PUA).
  * 2. Strip zero-width and invisible formatting characters.
- * 3. Collapse all whitespace runs (incl. NBSP, U+3000) to a single space.
+ * 3. Normalize line endings to `\n` and collapse HORIZONTAL whitespace runs to a
+ *    single space — newlines are PRESERVED as clause boundaries so the
+ *    disclaimer mask can never cross a line break (`toScanText` folds them
+ *    after masking so line-split keywords still cannot evade the scan).
  * 4. Remove separator runs wedged between two CJK characters (artificial splitting).
  * The normalized text is used ONLY for scanning and never appears in any output.
  */
 export function normalizeSafetyText(text: string): string {
   let t = text.normalize('NFKC');
   t = t.replace(INVISIBLE_CHARS_RE, '');
-  t = t.replace(/\s+/g, ' ');
+  t = t.replace(/\r\n?|[\u0085\u2028\u2029]/g, '\n');
+  t = t.replace(/[^\S\n]+/g, ' ');
   t = t.replace(CJK_SEPARATOR_RE, '');
   return t;
 }
 
-// --- Fixed safety-disclaimer masking (replaces the former negation-window guard) ---
-// A recognized disclaimer clause is masked out (replaced by spaces) BEFORE the
-// high-risk scan; all remaining text is scanned normally. The mask is deliberately
-// narrow and structural — all four conditions must hold inside ONE clause
-// (no clause punctuation may intervene):
-//   1. an explicit disclaimer negation verb (不构成/不提供/不能替代/…),
-//   2. a safety-category term within the next 4 characters,
-//   3. at most 12 further characters,
-//   4. a disclaimer object noun (建议/意见/依据/…) immediately before the clause end.
-// Anything that does not fit this shape — cross-clause negation, "请咨询专业人士"
-// style referral prompts, double negation, run-on clauses — is NOT masked and is
-// scanned as-is (the failure direction is to flag, not to exempt). Residual risk:
-// a rule keyword hidden inside a clause that structurally looks exactly like a
-// disclaimer can escape; the mask is a bounded heuristic, not semantics.
+// --- Canonical safety-disclaimer masking (fixed templates only) ---
+// A span is masked (replaced by spaces) BEFORE the high-risk scan ONLY when it
+// matches a canonical safe-disclaimer template: an explicit disclaimer negation
+// verb IMMEDIATELY followed by one of the enumerated disclaimer object phrases
+// (optionally chained with 或/及/和 + another enumerated phrase), ending exactly
+// at a clause boundary. There is no free character span — adversative words,
+// second predicates, and following lines can never enter the mask, and newlines
+// count as clause boundaries. The caller-supplied answerPlan.disclaimers are
+// deliberately NOT used as a mask whitelist. Anything that does not match a
+// template is scanned as-is (the failure direction is to flag, not to exempt).
+// Residual risk: text that IS one of these fixed phrases escapes the scan; the
+// phrases are curated to be safe-by-construction disclaimer objects.
 
-const CLAUSE_END_CLASS = '，。；：！？,.;:!?';
-const DISCLAIMER_NEGATION_VERBS =
-  '不构成|不提供|不作为|不应视为|不能替代|不能作为|并非|不涉及|不包含|不给出|不做出';
-const DISCLAIMER_CATEGORY_TERMS =
-  '医疗|医学|诊断|治疗|用药|法律|诉讼|投资|理财|证券|操作指令|买入|卖出|买卖|生死|寿命|命运';
-const DISCLAIMER_OBJECT_NOUNS = '建议|意见|结论|判断|指令|依据|断言|诊断|方案|承诺|保证';
+const CLAUSE_END_CLASS = '\\n，。；：！？,.;:!?';
+
+const DISCLAIMER_NEGATION_VERBS = [
+  '不构成',
+  '不提供',
+  '不作为',
+  '不应视为',
+  '不能替代',
+  '不能作为',
+  '并非',
+  '不涉及',
+  '不包含',
+  '不给出',
+  '不做出',
+] as const;
+
+/** Closed, curated list of disclaimer object phrases (safe by construction). */
+const DISCLAIMER_OBJECT_PHRASES = [
+  '医疗诊断',
+  '医学诊断',
+  '医疗建议',
+  '医学建议',
+  '医疗意见',
+  '诊断建议',
+  '诊断结论',
+  '治疗建议',
+  '治疗方案',
+  '用药建议',
+  '诊断',
+  '法律意见',
+  '法律建议',
+  '法律结论',
+  '法律判断',
+  '诉讼建议',
+  '投资建议',
+  '投资意见',
+  '投资操作指令',
+  '操作指令',
+  '理财建议',
+  '买卖建议',
+  '收益承诺',
+  '收益保证',
+  '生死判断',
+  '生死断言',
+  '寿命判断',
+  '命运断言',
+  '命运判断',
+  '专业建议',
+  '专业意见',
+] as const;
+
+const DISCLAIMER_PHRASE_ALT = `(?:${[...DISCLAIMER_OBJECT_PHRASES]
+  .sort((a, b) => b.length - a.length)
+  .join('|')})`;
 
 const SAFETY_DISCLAIMER_RE = new RegExp(
-  `(?:${DISCLAIMER_NEGATION_VERBS})` +
-    `(?=[^${CLAUSE_END_CLASS}]{0,4}(?:${DISCLAIMER_CATEGORY_TERMS}))` +
-    `[^${CLAUSE_END_CLASS}]{0,12}(?:${DISCLAIMER_OBJECT_NOUNS})` +
+  `(?:${DISCLAIMER_NEGATION_VERBS.join('|')})` +
+    `${DISCLAIMER_PHRASE_ALT}(?:[或及和]${DISCLAIMER_PHRASE_ALT})*` +
     `(?=[${CLAUSE_END_CLASS}]|$)`,
   'g',
 );
 
 /**
- * Mask recognized fixed safety-disclaimer clauses with spaces (length-preserving,
- * so masking can never join surrounding text into a new match). Everything left
+ * Mask canonical safety-disclaimer templates with spaces (length-preserving, so
+ * masking can never join surrounding text into a new match). Everything left
  * after masking is scanned normally.
  */
 export function maskSafetyDisclaimers(normText: string): string {
@@ -278,12 +336,11 @@ const HIGH_RISK_GROUPS: RuleGroup[] = [
   },
 ];
 
-// --- Fact-exempt section IDs (MINIMAL set) ---
-// Only disclaimer and uncertainty sections may omit fact citations: they express
-// plan-provided caveats/disclaimers, not new factual claims. technical-evidence
-// presents evidence and therefore MUST cite facts. No section id ever exempts the
-// high-risk safety scan.
-const FACT_EXEMPT_SECTION_IDS = new Set(['disclaimer', 'uncertainty']);
+// --- Legacy fact-exempt section IDs (reading-draft/v1 ONLY) ---
+// v1 conditional compatibility: only disclaimer and uncertainty sections may omit
+// fact citations. In v2 this id-based exemption is GONE — fact exemption requires
+// valid `constraintRefs`. No section id ever exempts the high-risk safety scan.
+const LEGACY_FACT_EXEMPT_SECTION_IDS = new Set(['disclaimer', 'uncertainty']);
 
 /**
  * Scan normalized+masked text and return the id of the first matching rule in a
@@ -296,9 +353,15 @@ function findGroupHit(scanText: string, rules: HighRiskRule[]): string | null {
   return null;
 }
 
-/** Prepare a text field for scanning: normalize, then mask fixed disclaimers. */
+/**
+ * Prepare a text field for scanning: normalize (newlines preserved), mask
+ * canonical disclaimer templates (a mask can never cross a line), THEN fold
+ * newlines to spaces and re-condense CJK splits so line-split keywords cannot
+ * evade the scan either.
+ */
 function toScanText(text: string): string {
-  return maskSafetyDisclaimers(normalizeSafetyText(text));
+  const masked = maskSafetyDisclaimers(normalizeSafetyText(text));
+  return masked.replace(/\n+/g, ' ').replace(CJK_SEPARATOR_RE, '');
 }
 
 const RESOURCE_LIMIT_DETAIL = '输入超出资源保护上限，未执行内容校验。';
@@ -408,6 +471,9 @@ function checkResourceLimits(input: ValidateAnswerInput): AnswerViolation | null
       if (para.sourceFactIds.some((id) => id.length > MAX_FACT_ID_CHARS)) {
         return resourceViolation('MAX_FACT_ID_CHARS', sIdx, pIdx);
       }
+      if ((para.constraintRefs?.length ?? 0) > MAX_CONSTRAINT_REFS_PER_PARAGRAPH) {
+        return resourceViolation('MAX_CONSTRAINT_REFS_PER_PARAGRAPH', sIdx, pIdx);
+      }
       totalChars += para.text.length;
       if (totalChars > MAX_TOTAL_TEXT_CHARS) {
         return resourceViolation('MAX_TOTAL_TEXT_CHARS', sIdx, pIdx);
@@ -431,6 +497,28 @@ function checkResourceLimits(input: ValidateAnswerInput): AnswerViolation | null
  */
 export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
   const { answerPlan, readingDraft } = input;
+
+  // -1. Contract-version gate: unknown draft versions are rejected outright —
+  // this public entry never returns a successful v2 result for an arbitrary
+  // version smuggled past the TypeScript types.
+  const draftVersion = (readingDraft as { contractVersion?: unknown }).contractVersion;
+  if (!(READING_DRAFT_COMPAT_VERSIONS as readonly unknown[]).includes(draftVersion)) {
+    return {
+      contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+      ok: false,
+      violations: [
+        {
+          code: 'UNSUPPORTED_CONTRACT_VERSION',
+          severity: 'error',
+          detail: 'ReadingDraft 的 contractVersion 不在受支持的版本列表内。',
+          remediation:
+            '使用 reading-draft/v2；legacy reading-draft/v1 仅在满足 v2 安全上限时有条件接受。',
+        },
+      ],
+      violationsTruncated: false,
+    };
+  }
+  const isLegacyV1 = draftVersion === 'reading-draft/v1';
 
   // 0. Resource boundary: reject oversized inputs before any scanning.
   const limitViolation = checkResourceLimits(input);
@@ -467,11 +555,15 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
 
   // 2. Answerability gate: not-supported allows only a brief, fact-free
   // explanation. Section ids are deliberately ignored here — content cannot be
-  // smuggled past this gate by choosing a particular id.
+  // smuggled past this gate by choosing a particular id. ALL visible text
+  // (headings + paragraphs) counts against one shared budget. This verifies
+  // "short and fact-free" only; it cannot prove the text semantically just
+  // explains the limitation.
   if (answerPlan.answerability === 'not-supported') {
     let contentChars = 0;
     let citesFacts = false;
     for (const section of readingDraft.sections) {
+      contentChars += section.heading.trim().length;
       for (const para of section.paragraphs) {
         contentChars += para.text.trim().length;
         if (para.sourceFactIds.length > 0) citesFacts = true;
@@ -481,18 +573,30 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
       push({
         code: 'UNSUPPORTED_TOPIC',
         severity: 'error',
-        detail: 'AnswerPlan 标记为 not-supported，但草稿引用了 fact 或包含超出简短说明的内容。',
+        detail:
+          'AnswerPlan 标记为 not-supported，但草稿引用了 fact，或全部可见文本（标题+段落）超出简短说明的预算。',
         remediation:
-          '当 answerability 为 not-supported 时，只能用不引用任何 fact 的简短说明（总量不超过 MAX_NOT_SUPPORTED_TEXT_CHARS）解释引擎无法提供该主题的事实，并建议换一个主题。',
+          '当 answerability 为 not-supported 时，只能用不引用任何 fact 的简短说明（所有标题与段落合计不超过 MAX_NOT_SUPPORTED_TEXT_CHARS）解释引擎无法提供该主题的事实，并建议换一个主题。',
       });
     }
   }
 
-  // 3 + 4. Per-section checks. disclaimer/uncertainty skip ONLY the fact-citation
-  // checks (3a/3b); the high-risk scan (4) covers every heading and paragraph.
+  // 3 + 4. Per-section checks. Fact-citation exemption: v2 requires valid
+  // constraintRefs on the paragraph; legacy v1 keeps the disclaimer/uncertainty
+  // section-id exemption. The high-risk scan (4) covers every heading and
+  // paragraph regardless.
+  const referencedDisclaimers = new Set<number>();
+  const referencedCaveats = new Set<number>();
+  const referencedWarnings = new Set<number>();
+  const constraintTargetLength = (kind: 'disclaimer' | 'caveat' | 'warning'): number =>
+    kind === 'disclaimer'
+      ? answerPlan.disclaimers.length
+      : kind === 'caveat'
+        ? answerPlan.requiredCaveats.length
+        : answerPlan.requiredWarningCodes.length;
+
   for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
     const section = readingDraft.sections[sIdx]!;
-    const exemptFromFactChecks = FACT_EXEMPT_SECTION_IDS.has(section.id);
 
     // 4a. Heading scan (headings are visible text too).
     if (section.heading.length > 0) {
@@ -516,6 +620,42 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
     for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
       const para = section.paragraphs[pIdx]!;
 
+      // 3c. Constraint references: every ref must resolve to a real plan entry.
+      const refs = para.constraintRefs ?? [];
+      let refsValid = refs.length > 0;
+      for (let rIdx = 0; rIdx < refs.length; rIdx++) {
+        const ref = refs[rIdx]!;
+        if (ref.index >= constraintTargetLength(ref.kind)) {
+          refsValid = false;
+          push({
+            code: 'INVALID_CONSTRAINT_REF',
+            severity: 'error',
+            sectionIndex: sIdx,
+            field: 'paragraph',
+            paragraphIndex: pIdx,
+            itemIndex: rIdx,
+            patternKey: ref.kind,
+            detail:
+              '段落的 constraintRef 未指向真实存在的 AnswerPlan 约束（见 itemIndex 对应的 constraintRefs 下标与 patternKey 对应的 kind）。',
+            remediation:
+              '只能引用 answerPlan.disclaimers / requiredCaveats / requiredWarningCodes 中真实存在的下标。',
+          });
+        }
+      }
+      if (refsValid) {
+        for (const ref of refs) {
+          if (ref.kind === 'disclaimer') referencedDisclaimers.add(ref.index);
+          else if (ref.kind === 'caveat') referencedCaveats.add(ref.index);
+          else referencedWarnings.add(ref.index);
+        }
+      }
+
+      const exemptFromFactChecks =
+        // not-supported drafts must be fact-free; the UNSUPPORTED_TOPIC gate
+        // above governs them instead of the citation requirement.
+        answerPlan.answerability === 'not-supported' ||
+        (isLegacyV1 ? LEGACY_FACT_EXEMPT_SECTION_IDS.has(section.id) || refsValid : refsValid);
+
       if (!exemptFromFactChecks) {
         // 3a. Must have at least one sourceFactId
         if (para.sourceFactIds.length === 0) {
@@ -527,7 +667,7 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
             paragraphIndex: pIdx,
             detail: '段落未声明任何 sourceFactIds，内容缺少事实依据声明。',
             remediation:
-              '每个非免责段落必须引用至少一个 allowedFactIds 中的 fact ID 作为依据。无法引用时应删除该段落。',
+              '每个非约束表达段落必须引用至少一个 allowedFactIds 中的 fact ID；表达免责/caveat/warning 的段落必须通过 constraintRefs 引用真实存在的 AnswerPlan 约束。',
           });
         }
 
@@ -570,48 +710,107 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
     }
   }
 
-  // 5. Required caveats check (self-attestation set check; located by plan index)
+  // 5. Required caveats. v2: constraintRefs are the primary evidence and the
+  // caveatsExpressed self-attestation must agree with them — one truth source,
+  // no contradictions. v1: legacy set check only.
   const expressedCaveats = new Set(readingDraft.caveatsExpressed);
   for (let cIdx = 0; cIdx < answerPlan.requiredCaveats.length; cIdx++) {
-    if (!expressedCaveats.has(answerPlan.requiredCaveats[cIdx]!)) {
+    const declared = expressedCaveats.has(answerPlan.requiredCaveats[cIdx]!);
+    if (isLegacyV1) {
+      if (!declared) {
+        push({
+          code: 'MISSING_REQUIRED_CAVEAT',
+          severity: 'error',
+          itemIndex: cIdx,
+          detail:
+            '未声明表达必要的 caveat（见 itemIndex 对应的 answerPlan.requiredCaveats 下标）。',
+          remediation:
+            '在草稿的 uncertainty 或 disclaimer 部分明确表达此 caveat，并加入 caveatsExpressed。',
+        });
+      }
+      continue;
+    }
+    const referenced = referencedCaveats.has(cIdx);
+    if (!declared && !referenced) {
       push({
         code: 'MISSING_REQUIRED_CAVEAT',
         severity: 'error',
         itemIndex: cIdx,
         detail: '未声明表达必要的 caveat（见 itemIndex 对应的 answerPlan.requiredCaveats 下标）。',
         remediation:
-          '在草稿的 uncertainty 或 disclaimer 部分明确表达此 caveat，并加入 caveatsExpressed。',
+          '用一个段落表达此 caveat 并加 constraintRefs {kind:"caveat", index}，同时将原文加入 caveatsExpressed。',
+      });
+    } else if (declared !== referenced) {
+      push({
+        code: 'CONSTRAINT_ATTESTATION_MISMATCH',
+        severity: 'error',
+        itemIndex: cIdx,
+        patternKey: 'caveat',
+        detail:
+          'caveatsExpressed 与段落 constraintRefs 对同一 caveat 的声明不一致（见 itemIndex 对应的 answerPlan.requiredCaveats 下标）。',
+        remediation:
+          '两个来源必须一致：声明表达的每个 caveat 都要有对应的 constraintRef，反之亦然。',
       });
     }
   }
 
-  // 6. Required warnings check (self-attestation set check; located by plan index)
+  // 6. Required warnings. Same v2 consistency rule as caveats.
   const disclosedWarnings = new Set(readingDraft.warningsDisclosed);
   for (let wIdx = 0; wIdx < answerPlan.requiredWarningCodes.length; wIdx++) {
-    if (!disclosedWarnings.has(answerPlan.requiredWarningCodes[wIdx]!)) {
+    const declared = disclosedWarnings.has(answerPlan.requiredWarningCodes[wIdx]!);
+    if (isLegacyV1) {
+      if (!declared) {
+        push({
+          code: 'MISSING_REQUIRED_WARNING',
+          severity: 'error',
+          itemIndex: wIdx,
+          detail:
+            '未声明披露必要的 warning（见 itemIndex 对应的 answerPlan.requiredWarningCodes 下标）。',
+          remediation: '在草稿中明确说明此 warning 的 impact/nextStep，并加入 warningsDisclosed。',
+        });
+      }
+      continue;
+    }
+    const referenced = referencedWarnings.has(wIdx);
+    if (!declared && !referenced) {
       push({
         code: 'MISSING_REQUIRED_WARNING',
         severity: 'error',
         itemIndex: wIdx,
         detail:
           '未声明披露必要的 warning（见 itemIndex 对应的 answerPlan.requiredWarningCodes 下标）。',
-        remediation: '在草稿中明确说明此 warning 的 impact/nextStep，并加入 warningsDisclosed。',
+        remediation:
+          '用一个段落说明此 warning 的 impact/nextStep 并加 constraintRefs {kind:"warning", index}，同时将 code 加入 warningsDisclosed。',
+      });
+    } else if (declared !== referenced) {
+      push({
+        code: 'CONSTRAINT_ATTESTATION_MISMATCH',
+        severity: 'error',
+        itemIndex: wIdx,
+        patternKey: 'warning',
+        detail:
+          'warningsDisclosed 与段落 constraintRefs 对同一 warning 的声明不一致（见 itemIndex 对应的 answerPlan.requiredWarningCodes 下标）。',
+        remediation:
+          '两个来源必须一致：声明披露的每个 warning 都要有对应的 constraintRef，反之亦然。',
       });
     }
   }
 
-  // 7. Disclaimers check (at least one disclaimer section must exist when plan has disclaimers)
+  // 7. Disclaimers check. v2: at least one paragraph must reference a plan
+  // disclaimer via constraintRefs; v1 keeps the legacy id/heading heuristic.
   if (answerPlan.disclaimers.length > 0) {
-    const hasDisclaimerSection = readingDraft.sections.some(
-      (s) => s.id === 'disclaimer' || s.heading.includes('声明') || s.heading.includes('免责'),
-    );
-    if (!hasDisclaimerSection) {
+    const hasDisclaimer = isLegacyV1
+      ? readingDraft.sections.some(
+          (s) => s.id === 'disclaimer' || s.heading.includes('声明') || s.heading.includes('免责'),
+        )
+      : referencedDisclaimers.size > 0;
+    if (!hasDisclaimer) {
       push({
         code: 'MISSING_DISCLAIMER',
         severity: 'warning',
-        detail: 'AnswerPlan 包含 disclaimers 但草稿缺少免责声明段落。',
+        detail: 'AnswerPlan 包含 disclaimers 但草稿缺少对应的免责声明表达。',
         remediation:
-          '添加一个 id 为 "disclaimer" 的 section，包含 AnswerPlan 中的 disclaimers 内容。',
+          '用一个段落表达 AnswerPlan 的 disclaimers，并加 constraintRefs {kind:"disclaimer", index}（legacy v1：提供 id 为 "disclaimer" 的 section）。',
       });
     }
   }
@@ -623,4 +822,67 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
     violations,
     violationsTruncated,
   };
+}
+
+// --- Bounded parsing facade (shared by the CLI and the public JS API) ---
+
+const BOUNDED_PARSE_REJECT_MESSAGE =
+  'validate-answer input rejected by bounded preflight: missing required structure or a field exceeds the protective limits.';
+
+function boundedReject(): never {
+  // Static message only — never echoes any part of the rejected input.
+  throw new Error(BOUNDED_PARSE_REJECT_MESSAGE);
+}
+
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null;
+}
+
+function requireArrayWithin(v: unknown, max: number): unknown[] {
+  if (!Array.isArray(v) || v.length > max) boundedReject();
+  return v;
+}
+
+/**
+ * Bounded parsing facade for ValidateAnswerInput: a shallow preflight confirms
+ * every top-level and nested array length (O(1) length reads, bounded loops)
+ * and every paragraph text length BEFORE the full Zod parse runs, so an
+ * adversarially huge in-memory object is rejected at bounded cost. Callers that
+ * already hold parsed-but-untrusted JSON (the CLI, host integrations) should
+ * use this instead of the bare `ValidateAnswerInput.parse`, which expresses the
+ * contract but is not itself fail-fast against arbitrarily large objects.
+ * NOTE: this bounds the parse/validate stages only — reading a file and
+ * JSON.parse happen before it (the CLI adds MAX_VALIDATE_ANSWER_INPUT_BYTES).
+ */
+export function parseValidateAnswerInputBounded(raw: unknown): ValidateAnswerInput {
+  if (!isPlainObject(raw)) boundedReject();
+  const plan = raw.answerPlan;
+  const draft = raw.readingDraft;
+  if (!isPlainObject(plan) || !isPlainObject(draft)) boundedReject();
+
+  requireArrayWithin(plan.allowedFactIds, MAX_ALLOWED_FACT_IDS);
+  requireArrayWithin(plan.requiredCaveats, MAX_REQUIRED_CAVEATS);
+  requireArrayWithin(plan.requiredWarningCodes, MAX_REQUIRED_WARNING_CODES);
+  requireArrayWithin(plan.guardrails, MAX_PLAN_GUARDRAILS);
+  requireArrayWithin(plan.disclaimers, MAX_PLAN_DISCLAIMERS);
+
+  const sections = requireArrayWithin(draft.sections, MAX_SECTIONS);
+  requireArrayWithin(draft.caveatsExpressed, MAX_CAVEATS_EXPRESSED);
+  requireArrayWithin(draft.warningsDisclosed, MAX_WARNINGS_DISCLOSED);
+  for (const section of sections) {
+    if (!isPlainObject(section)) boundedReject();
+    const paragraphs = requireArrayWithin(section.paragraphs, MAX_PARAGRAPHS_PER_SECTION);
+    for (const para of paragraphs) {
+      if (!isPlainObject(para)) boundedReject();
+      if (typeof para.text !== 'string' || para.text.length > MAX_PARAGRAPH_TEXT_CHARS) {
+        boundedReject();
+      }
+      requireArrayWithin(para.sourceFactIds, MAX_SOURCE_FACT_IDS_PER_PARAGRAPH);
+      if (para.constraintRefs !== undefined) {
+        requireArrayWithin(para.constraintRefs, MAX_CONSTRAINT_REFS_PER_PARAGRAPH);
+      }
+    }
+  }
+
+  return ValidateAnswerInputSchema.parse(raw);
 }

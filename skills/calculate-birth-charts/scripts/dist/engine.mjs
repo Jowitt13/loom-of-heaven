@@ -40603,10 +40603,12 @@ var AnswerPlan = external_exports.strictObject({
 // packages/contracts/src/validate-answer.ts
 var READING_DRAFT_COMPAT_VERSIONS = ["reading-draft/v1", "reading-draft/v2"];
 var VALIDATION_RESULT_CONTRACT_VERSION = "validation-result/v2";
+var MAX_VALIDATE_ANSWER_INPUT_BYTES = 2097152;
 var MAX_PARAGRAPH_TEXT_CHARS = 5e3;
 var MAX_SECTIONS = 40;
 var MAX_PARAGRAPHS_PER_SECTION = 50;
 var MAX_SOURCE_FACT_IDS_PER_PARAGRAPH = 50;
+var MAX_CONSTRAINT_REFS_PER_PARAGRAPH = 10;
 var MAX_TOTAL_SOURCE_FACT_IDS = 1e3;
 var MAX_FACT_ID_CHARS = 200;
 var MAX_CAVEATS_EXPRESSED = 100;
@@ -40624,10 +40626,21 @@ var MAX_DISCLAIMER_ENTRY_CHARS = 500;
 var MAX_PLAN_GUARDRAILS = 50;
 var MAX_VIOLATIONS = 200;
 var MAX_NOT_SUPPORTED_TEXT_CHARS = 500;
+var PlanConstraintKind = external_exports.enum(["disclaimer", "caveat", "warning"]);
+var PlanConstraintRef = external_exports.strictObject({
+  kind: PlanConstraintKind,
+  index: external_exports.number().int().min(0)
+});
 var ReadingParagraph = external_exports.strictObject({
   text: external_exports.string().min(1).max(MAX_PARAGRAPH_TEXT_CHARS),
   /** Fact IDs from the AnswerPlan that ground this paragraph. */
-  sourceFactIds: external_exports.array(external_exports.string().max(MAX_FACT_ID_CHARS)).max(MAX_SOURCE_FACT_IDS_PER_PARAGRAPH)
+  sourceFactIds: external_exports.array(external_exports.string().max(MAX_FACT_ID_CHARS)).max(MAX_SOURCE_FACT_IDS_PER_PARAGRAPH),
+  /**
+   * Present when this paragraph expresses AnswerPlan constraints (disclaimers /
+   * caveats / warnings) instead of new factual claims; such paragraphs are
+   * fact-exempt only when every reference resolves to a real plan entry.
+   */
+  constraintRefs: external_exports.array(PlanConstraintRef).max(MAX_CONSTRAINT_REFS_PER_PARAGRAPH).optional()
 });
 var ReadingSection = external_exports.strictObject({
   id: external_exports.string().min(1).max(MAX_SECTION_ID_CHARS),
@@ -40697,6 +40710,14 @@ var ViolationCode = external_exports.enum([
   // a requiredWarningCode not disclosed
   "MISSING_DISCLAIMER",
   // answerPlan disclaimers not communicated
+  // Constraint-reference violations (v2)
+  "INVALID_CONSTRAINT_REF",
+  // a constraintRef does not resolve to a real plan entry
+  "CONSTRAINT_ATTESTATION_MISMATCH",
+  // caveatsExpressed/warningsDisclosed disagree with constraintRefs
+  // Contract-version violations
+  "UNSUPPORTED_CONTRACT_VERSION",
+  // readingDraft.contractVersion is not an accepted version
   // Guardrail violations
   // Reserved: not currently emitted. Mapping answerPlan.guardrails to checks without
   // changing the public AnswerPlan contract is a follow-up design item; we do not
@@ -54159,16 +54180,61 @@ var CJK_SEPARATOR_RE = new RegExp(
 function normalizeSafetyText(text) {
   let t = text.normalize("NFKC");
   t = t.replace(INVISIBLE_CHARS_RE, "");
-  t = t.replace(/\s+/g, " ");
+  t = t.replace(/\r\n?|[\u0085\u2028\u2029]/g, "\n");
+  t = t.replace(/[^\S\n]+/g, " ");
   t = t.replace(CJK_SEPARATOR_RE, "");
   return t;
 }
-var CLAUSE_END_CLASS = "\uFF0C\u3002\uFF1B\uFF1A\uFF01\uFF1F,.;:!?";
-var DISCLAIMER_NEGATION_VERBS = "\u4E0D\u6784\u6210|\u4E0D\u63D0\u4F9B|\u4E0D\u4F5C\u4E3A|\u4E0D\u5E94\u89C6\u4E3A|\u4E0D\u80FD\u66FF\u4EE3|\u4E0D\u80FD\u4F5C\u4E3A|\u5E76\u975E|\u4E0D\u6D89\u53CA|\u4E0D\u5305\u542B|\u4E0D\u7ED9\u51FA|\u4E0D\u505A\u51FA";
-var DISCLAIMER_CATEGORY_TERMS = "\u533B\u7597|\u533B\u5B66|\u8BCA\u65AD|\u6CBB\u7597|\u7528\u836F|\u6CD5\u5F8B|\u8BC9\u8BBC|\u6295\u8D44|\u7406\u8D22|\u8BC1\u5238|\u64CD\u4F5C\u6307\u4EE4|\u4E70\u5165|\u5356\u51FA|\u4E70\u5356|\u751F\u6B7B|\u5BFF\u547D|\u547D\u8FD0";
-var DISCLAIMER_OBJECT_NOUNS = "\u5EFA\u8BAE|\u610F\u89C1|\u7ED3\u8BBA|\u5224\u65AD|\u6307\u4EE4|\u4F9D\u636E|\u65AD\u8A00|\u8BCA\u65AD|\u65B9\u6848|\u627F\u8BFA|\u4FDD\u8BC1";
+var CLAUSE_END_CLASS = "\\n\uFF0C\u3002\uFF1B\uFF1A\uFF01\uFF1F,.;:!?";
+var DISCLAIMER_NEGATION_VERBS = [
+  "\u4E0D\u6784\u6210",
+  "\u4E0D\u63D0\u4F9B",
+  "\u4E0D\u4F5C\u4E3A",
+  "\u4E0D\u5E94\u89C6\u4E3A",
+  "\u4E0D\u80FD\u66FF\u4EE3",
+  "\u4E0D\u80FD\u4F5C\u4E3A",
+  "\u5E76\u975E",
+  "\u4E0D\u6D89\u53CA",
+  "\u4E0D\u5305\u542B",
+  "\u4E0D\u7ED9\u51FA",
+  "\u4E0D\u505A\u51FA"
+];
+var DISCLAIMER_OBJECT_PHRASES = [
+  "\u533B\u7597\u8BCA\u65AD",
+  "\u533B\u5B66\u8BCA\u65AD",
+  "\u533B\u7597\u5EFA\u8BAE",
+  "\u533B\u5B66\u5EFA\u8BAE",
+  "\u533B\u7597\u610F\u89C1",
+  "\u8BCA\u65AD\u5EFA\u8BAE",
+  "\u8BCA\u65AD\u7ED3\u8BBA",
+  "\u6CBB\u7597\u5EFA\u8BAE",
+  "\u6CBB\u7597\u65B9\u6848",
+  "\u7528\u836F\u5EFA\u8BAE",
+  "\u8BCA\u65AD",
+  "\u6CD5\u5F8B\u610F\u89C1",
+  "\u6CD5\u5F8B\u5EFA\u8BAE",
+  "\u6CD5\u5F8B\u7ED3\u8BBA",
+  "\u6CD5\u5F8B\u5224\u65AD",
+  "\u8BC9\u8BBC\u5EFA\u8BAE",
+  "\u6295\u8D44\u5EFA\u8BAE",
+  "\u6295\u8D44\u610F\u89C1",
+  "\u6295\u8D44\u64CD\u4F5C\u6307\u4EE4",
+  "\u64CD\u4F5C\u6307\u4EE4",
+  "\u7406\u8D22\u5EFA\u8BAE",
+  "\u4E70\u5356\u5EFA\u8BAE",
+  "\u6536\u76CA\u627F\u8BFA",
+  "\u6536\u76CA\u4FDD\u8BC1",
+  "\u751F\u6B7B\u5224\u65AD",
+  "\u751F\u6B7B\u65AD\u8A00",
+  "\u5BFF\u547D\u5224\u65AD",
+  "\u547D\u8FD0\u65AD\u8A00",
+  "\u547D\u8FD0\u5224\u65AD",
+  "\u4E13\u4E1A\u5EFA\u8BAE",
+  "\u4E13\u4E1A\u610F\u89C1"
+];
+var DISCLAIMER_PHRASE_ALT = `(?:${[...DISCLAIMER_OBJECT_PHRASES].sort((a, b) => b.length - a.length).join("|")})`;
 var SAFETY_DISCLAIMER_RE = new RegExp(
-  `(?:${DISCLAIMER_NEGATION_VERBS})(?=[^${CLAUSE_END_CLASS}]{0,4}(?:${DISCLAIMER_CATEGORY_TERMS}))[^${CLAUSE_END_CLASS}]{0,12}(?:${DISCLAIMER_OBJECT_NOUNS})(?=[${CLAUSE_END_CLASS}]|$)`,
+  `(?:${DISCLAIMER_NEGATION_VERBS.join("|")})${DISCLAIMER_PHRASE_ALT}(?:[\u6216\u53CA\u548C]${DISCLAIMER_PHRASE_ALT})*(?=[${CLAUSE_END_CLASS}]|$)`,
   "g"
 );
 function maskSafetyDisclaimers(normText) {
@@ -54292,7 +54358,7 @@ var HIGH_RISK_GROUPS = [
     remediation: "\u5220\u9664\u6240\u6709\u64CD\u63A7\u6027\u5EFA\u8BAE\u3002\u5173\u7CFB\u5EFA\u8BAE\u53EA\u80FD\u57FA\u4E8E\u76F8\u4E92\u5C0A\u91CD\u3001\u771F\u8BDA\u6C9F\u901A\u7684\u524D\u63D0\uFF0C\u4E0D\u53EF\u6559\u5506\u63A7\u5236\u6216\u7CBE\u795E\u64CD\u63A7\u3002"
   }
 ];
-var FACT_EXEMPT_SECTION_IDS = /* @__PURE__ */ new Set(["disclaimer", "uncertainty"]);
+var LEGACY_FACT_EXEMPT_SECTION_IDS = /* @__PURE__ */ new Set(["disclaimer", "uncertainty"]);
 function findGroupHit(scanText, rules) {
   for (const rule of rules) {
     if (rule.re.test(scanText)) return rule.id;
@@ -54300,7 +54366,8 @@ function findGroupHit(scanText, rules) {
   return null;
 }
 function toScanText(text) {
-  return maskSafetyDisclaimers(normalizeSafetyText(text));
+  const masked = maskSafetyDisclaimers(normalizeSafetyText(text));
+  return masked.replace(/\n+/g, " ").replace(CJK_SEPARATOR_RE, "");
 }
 var RESOURCE_LIMIT_DETAIL = "\u8F93\u5165\u8D85\u51FA\u8D44\u6E90\u4FDD\u62A4\u4E0A\u9650\uFF0C\u672A\u6267\u884C\u5185\u5BB9\u6821\u9A8C\u3002";
 var RESOURCE_LIMIT_REMEDIATION = "\u5C06\u8F93\u5165\u89C4\u6A21\u7F29\u51CF\u5230 @ming/contracts validate-answer \u5BFC\u51FA\u7684\u4E0A\u9650\u5E38\u91CF\u4EE5\u5185\uFF08\u89C1 patternKey \u5BF9\u5E94\u7684\u5E38\u91CF\u540D\uFF09\u3002";
@@ -54387,6 +54454,9 @@ function checkResourceLimits(input) {
       if (para.sourceFactIds.some((id) => id.length > MAX_FACT_ID_CHARS)) {
         return resourceViolation("MAX_FACT_ID_CHARS", sIdx, pIdx);
       }
+      if ((para.constraintRefs?.length ?? 0) > MAX_CONSTRAINT_REFS_PER_PARAGRAPH) {
+        return resourceViolation("MAX_CONSTRAINT_REFS_PER_PARAGRAPH", sIdx, pIdx);
+      }
       totalChars += para.text.length;
       if (totalChars > MAX_TOTAL_TEXT_CHARS) {
         return resourceViolation("MAX_TOTAL_TEXT_CHARS", sIdx, pIdx);
@@ -54401,6 +54471,23 @@ function checkResourceLimits(input) {
 }
 function validateAnswer(input) {
   const { answerPlan, readingDraft } = input;
+  const draftVersion = readingDraft.contractVersion;
+  if (!READING_DRAFT_COMPAT_VERSIONS.includes(draftVersion)) {
+    return {
+      contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+      ok: false,
+      violations: [
+        {
+          code: "UNSUPPORTED_CONTRACT_VERSION",
+          severity: "error",
+          detail: "ReadingDraft \u7684 contractVersion \u4E0D\u5728\u53D7\u652F\u6301\u7684\u7248\u672C\u5217\u8868\u5185\u3002",
+          remediation: "\u4F7F\u7528 reading-draft/v2\uFF1Blegacy reading-draft/v1 \u4EC5\u5728\u6EE1\u8DB3 v2 \u5B89\u5168\u4E0A\u9650\u65F6\u6709\u6761\u4EF6\u63A5\u53D7\u3002"
+        }
+      ],
+      violationsTruncated: false
+    };
+  }
+  const isLegacyV1 = draftVersion === "reading-draft/v1";
   const limitViolation = checkResourceLimits(input);
   if (limitViolation !== null) {
     return {
@@ -54432,6 +54519,7 @@ function validateAnswer(input) {
     let contentChars = 0;
     let citesFacts = false;
     for (const section of readingDraft.sections) {
+      contentChars += section.heading.trim().length;
       for (const para of section.paragraphs) {
         contentChars += para.text.trim().length;
         if (para.sourceFactIds.length > 0) citesFacts = true;
@@ -54441,14 +54529,17 @@ function validateAnswer(input) {
       push({
         code: "UNSUPPORTED_TOPIC",
         severity: "error",
-        detail: "AnswerPlan \u6807\u8BB0\u4E3A not-supported\uFF0C\u4F46\u8349\u7A3F\u5F15\u7528\u4E86 fact \u6216\u5305\u542B\u8D85\u51FA\u7B80\u77ED\u8BF4\u660E\u7684\u5185\u5BB9\u3002",
-        remediation: "\u5F53 answerability \u4E3A not-supported \u65F6\uFF0C\u53EA\u80FD\u7528\u4E0D\u5F15\u7528\u4EFB\u4F55 fact \u7684\u7B80\u77ED\u8BF4\u660E\uFF08\u603B\u91CF\u4E0D\u8D85\u8FC7 MAX_NOT_SUPPORTED_TEXT_CHARS\uFF09\u89E3\u91CA\u5F15\u64CE\u65E0\u6CD5\u63D0\u4F9B\u8BE5\u4E3B\u9898\u7684\u4E8B\u5B9E\uFF0C\u5E76\u5EFA\u8BAE\u6362\u4E00\u4E2A\u4E3B\u9898\u3002"
+        detail: "AnswerPlan \u6807\u8BB0\u4E3A not-supported\uFF0C\u4F46\u8349\u7A3F\u5F15\u7528\u4E86 fact\uFF0C\u6216\u5168\u90E8\u53EF\u89C1\u6587\u672C\uFF08\u6807\u9898+\u6BB5\u843D\uFF09\u8D85\u51FA\u7B80\u77ED\u8BF4\u660E\u7684\u9884\u7B97\u3002",
+        remediation: "\u5F53 answerability \u4E3A not-supported \u65F6\uFF0C\u53EA\u80FD\u7528\u4E0D\u5F15\u7528\u4EFB\u4F55 fact \u7684\u7B80\u77ED\u8BF4\u660E\uFF08\u6240\u6709\u6807\u9898\u4E0E\u6BB5\u843D\u5408\u8BA1\u4E0D\u8D85\u8FC7 MAX_NOT_SUPPORTED_TEXT_CHARS\uFF09\u89E3\u91CA\u5F15\u64CE\u65E0\u6CD5\u63D0\u4F9B\u8BE5\u4E3B\u9898\u7684\u4E8B\u5B9E\uFF0C\u5E76\u5EFA\u8BAE\u6362\u4E00\u4E2A\u4E3B\u9898\u3002"
       });
     }
   }
+  const referencedDisclaimers = /* @__PURE__ */ new Set();
+  const referencedCaveats = /* @__PURE__ */ new Set();
+  const referencedWarnings = /* @__PURE__ */ new Set();
+  const constraintTargetLength = (kind) => kind === "disclaimer" ? answerPlan.disclaimers.length : kind === "caveat" ? answerPlan.requiredCaveats.length : answerPlan.requiredWarningCodes.length;
   for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
     const section = readingDraft.sections[sIdx];
-    const exemptFromFactChecks = FACT_EXEMPT_SECTION_IDS.has(section.id);
     if (section.heading.length > 0) {
       const headingScanText = toScanText(section.heading);
       for (const group of HIGH_RISK_GROUPS) {
@@ -54468,6 +54559,37 @@ function validateAnswer(input) {
     }
     for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
       const para = section.paragraphs[pIdx];
+      const refs = para.constraintRefs ?? [];
+      let refsValid = refs.length > 0;
+      for (let rIdx = 0; rIdx < refs.length; rIdx++) {
+        const ref = refs[rIdx];
+        if (ref.index >= constraintTargetLength(ref.kind)) {
+          refsValid = false;
+          push({
+            code: "INVALID_CONSTRAINT_REF",
+            severity: "error",
+            sectionIndex: sIdx,
+            field: "paragraph",
+            paragraphIndex: pIdx,
+            itemIndex: rIdx,
+            patternKey: ref.kind,
+            detail: "\u6BB5\u843D\u7684 constraintRef \u672A\u6307\u5411\u771F\u5B9E\u5B58\u5728\u7684 AnswerPlan \u7EA6\u675F\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 constraintRefs \u4E0B\u6807\u4E0E patternKey \u5BF9\u5E94\u7684 kind\uFF09\u3002",
+            remediation: "\u53EA\u80FD\u5F15\u7528 answerPlan.disclaimers / requiredCaveats / requiredWarningCodes \u4E2D\u771F\u5B9E\u5B58\u5728\u7684\u4E0B\u6807\u3002"
+          });
+        }
+      }
+      if (refsValid) {
+        for (const ref of refs) {
+          if (ref.kind === "disclaimer") referencedDisclaimers.add(ref.index);
+          else if (ref.kind === "caveat") referencedCaveats.add(ref.index);
+          else referencedWarnings.add(ref.index);
+        }
+      }
+      const exemptFromFactChecks = (
+        // not-supported drafts must be fact-free; the UNSUPPORTED_TOPIC gate
+        // above governs them instead of the citation requirement.
+        answerPlan.answerability === "not-supported" || (isLegacyV1 ? LEGACY_FACT_EXEMPT_SECTION_IDS.has(section.id) || refsValid : refsValid)
+      );
       if (!exemptFromFactChecks) {
         if (para.sourceFactIds.length === 0) {
           push({
@@ -54477,7 +54599,7 @@ function validateAnswer(input) {
             field: "paragraph",
             paragraphIndex: pIdx,
             detail: "\u6BB5\u843D\u672A\u58F0\u660E\u4EFB\u4F55 sourceFactIds\uFF0C\u5185\u5BB9\u7F3A\u5C11\u4E8B\u5B9E\u4F9D\u636E\u58F0\u660E\u3002",
-            remediation: "\u6BCF\u4E2A\u975E\u514D\u8D23\u6BB5\u843D\u5FC5\u987B\u5F15\u7528\u81F3\u5C11\u4E00\u4E2A allowedFactIds \u4E2D\u7684 fact ID \u4F5C\u4E3A\u4F9D\u636E\u3002\u65E0\u6CD5\u5F15\u7528\u65F6\u5E94\u5220\u9664\u8BE5\u6BB5\u843D\u3002"
+            remediation: "\u6BCF\u4E2A\u975E\u7EA6\u675F\u8868\u8FBE\u6BB5\u843D\u5FC5\u987B\u5F15\u7528\u81F3\u5C11\u4E00\u4E2A allowedFactIds \u4E2D\u7684 fact ID\uFF1B\u8868\u8FBE\u514D\u8D23/caveat/warning \u7684\u6BB5\u843D\u5FC5\u987B\u901A\u8FC7 constraintRefs \u5F15\u7528\u771F\u5B9E\u5B58\u5728\u7684 AnswerPlan \u7EA6\u675F\u3002"
           });
         }
         for (let fIdx = 0; fIdx < para.sourceFactIds.length; fIdx++) {
@@ -54515,38 +54637,84 @@ function validateAnswer(input) {
   }
   const expressedCaveats = new Set(readingDraft.caveatsExpressed);
   for (let cIdx = 0; cIdx < answerPlan.requiredCaveats.length; cIdx++) {
-    if (!expressedCaveats.has(answerPlan.requiredCaveats[cIdx])) {
+    const declared = expressedCaveats.has(answerPlan.requiredCaveats[cIdx]);
+    if (isLegacyV1) {
+      if (!declared) {
+        push({
+          code: "MISSING_REQUIRED_CAVEAT",
+          severity: "error",
+          itemIndex: cIdx,
+          detail: "\u672A\u58F0\u660E\u8868\u8FBE\u5FC5\u8981\u7684 caveat\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredCaveats \u4E0B\u6807\uFF09\u3002",
+          remediation: "\u5728\u8349\u7A3F\u7684 uncertainty \u6216 disclaimer \u90E8\u5206\u660E\u786E\u8868\u8FBE\u6B64 caveat\uFF0C\u5E76\u52A0\u5165 caveatsExpressed\u3002"
+        });
+      }
+      continue;
+    }
+    const referenced = referencedCaveats.has(cIdx);
+    if (!declared && !referenced) {
       push({
         code: "MISSING_REQUIRED_CAVEAT",
         severity: "error",
         itemIndex: cIdx,
         detail: "\u672A\u58F0\u660E\u8868\u8FBE\u5FC5\u8981\u7684 caveat\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredCaveats \u4E0B\u6807\uFF09\u3002",
-        remediation: "\u5728\u8349\u7A3F\u7684 uncertainty \u6216 disclaimer \u90E8\u5206\u660E\u786E\u8868\u8FBE\u6B64 caveat\uFF0C\u5E76\u52A0\u5165 caveatsExpressed\u3002"
+        remediation: '\u7528\u4E00\u4E2A\u6BB5\u843D\u8868\u8FBE\u6B64 caveat \u5E76\u52A0 constraintRefs {kind:"caveat", index}\uFF0C\u540C\u65F6\u5C06\u539F\u6587\u52A0\u5165 caveatsExpressed\u3002'
+      });
+    } else if (declared !== referenced) {
+      push({
+        code: "CONSTRAINT_ATTESTATION_MISMATCH",
+        severity: "error",
+        itemIndex: cIdx,
+        patternKey: "caveat",
+        detail: "caveatsExpressed \u4E0E\u6BB5\u843D constraintRefs \u5BF9\u540C\u4E00 caveat \u7684\u58F0\u660E\u4E0D\u4E00\u81F4\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredCaveats \u4E0B\u6807\uFF09\u3002",
+        remediation: "\u4E24\u4E2A\u6765\u6E90\u5FC5\u987B\u4E00\u81F4\uFF1A\u58F0\u660E\u8868\u8FBE\u7684\u6BCF\u4E2A caveat \u90FD\u8981\u6709\u5BF9\u5E94\u7684 constraintRef\uFF0C\u53CD\u4E4B\u4EA6\u7136\u3002"
       });
     }
   }
   const disclosedWarnings = new Set(readingDraft.warningsDisclosed);
   for (let wIdx = 0; wIdx < answerPlan.requiredWarningCodes.length; wIdx++) {
-    if (!disclosedWarnings.has(answerPlan.requiredWarningCodes[wIdx])) {
+    const declared = disclosedWarnings.has(answerPlan.requiredWarningCodes[wIdx]);
+    if (isLegacyV1) {
+      if (!declared) {
+        push({
+          code: "MISSING_REQUIRED_WARNING",
+          severity: "error",
+          itemIndex: wIdx,
+          detail: "\u672A\u58F0\u660E\u62AB\u9732\u5FC5\u8981\u7684 warning\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredWarningCodes \u4E0B\u6807\uFF09\u3002",
+          remediation: "\u5728\u8349\u7A3F\u4E2D\u660E\u786E\u8BF4\u660E\u6B64 warning \u7684 impact/nextStep\uFF0C\u5E76\u52A0\u5165 warningsDisclosed\u3002"
+        });
+      }
+      continue;
+    }
+    const referenced = referencedWarnings.has(wIdx);
+    if (!declared && !referenced) {
       push({
         code: "MISSING_REQUIRED_WARNING",
         severity: "error",
         itemIndex: wIdx,
         detail: "\u672A\u58F0\u660E\u62AB\u9732\u5FC5\u8981\u7684 warning\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredWarningCodes \u4E0B\u6807\uFF09\u3002",
-        remediation: "\u5728\u8349\u7A3F\u4E2D\u660E\u786E\u8BF4\u660E\u6B64 warning \u7684 impact/nextStep\uFF0C\u5E76\u52A0\u5165 warningsDisclosed\u3002"
+        remediation: '\u7528\u4E00\u4E2A\u6BB5\u843D\u8BF4\u660E\u6B64 warning \u7684 impact/nextStep \u5E76\u52A0 constraintRefs {kind:"warning", index}\uFF0C\u540C\u65F6\u5C06 code \u52A0\u5165 warningsDisclosed\u3002'
+      });
+    } else if (declared !== referenced) {
+      push({
+        code: "CONSTRAINT_ATTESTATION_MISMATCH",
+        severity: "error",
+        itemIndex: wIdx,
+        patternKey: "warning",
+        detail: "warningsDisclosed \u4E0E\u6BB5\u843D constraintRefs \u5BF9\u540C\u4E00 warning \u7684\u58F0\u660E\u4E0D\u4E00\u81F4\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredWarningCodes \u4E0B\u6807\uFF09\u3002",
+        remediation: "\u4E24\u4E2A\u6765\u6E90\u5FC5\u987B\u4E00\u81F4\uFF1A\u58F0\u660E\u62AB\u9732\u7684\u6BCF\u4E2A warning \u90FD\u8981\u6709\u5BF9\u5E94\u7684 constraintRef\uFF0C\u53CD\u4E4B\u4EA6\u7136\u3002"
       });
     }
   }
   if (answerPlan.disclaimers.length > 0) {
-    const hasDisclaimerSection = readingDraft.sections.some(
+    const hasDisclaimer = isLegacyV1 ? readingDraft.sections.some(
       (s) => s.id === "disclaimer" || s.heading.includes("\u58F0\u660E") || s.heading.includes("\u514D\u8D23")
-    );
-    if (!hasDisclaimerSection) {
+    ) : referencedDisclaimers.size > 0;
+    if (!hasDisclaimer) {
       push({
         code: "MISSING_DISCLAIMER",
         severity: "warning",
-        detail: "AnswerPlan \u5305\u542B disclaimers \u4F46\u8349\u7A3F\u7F3A\u5C11\u514D\u8D23\u58F0\u660E\u6BB5\u843D\u3002",
-        remediation: '\u6DFB\u52A0\u4E00\u4E2A id \u4E3A "disclaimer" \u7684 section\uFF0C\u5305\u542B AnswerPlan \u4E2D\u7684 disclaimers \u5185\u5BB9\u3002'
+        detail: "AnswerPlan \u5305\u542B disclaimers \u4F46\u8349\u7A3F\u7F3A\u5C11\u5BF9\u5E94\u7684\u514D\u8D23\u58F0\u660E\u8868\u8FBE\u3002",
+        remediation: '\u7528\u4E00\u4E2A\u6BB5\u843D\u8868\u8FBE AnswerPlan \u7684 disclaimers\uFF0C\u5E76\u52A0 constraintRefs {kind:"disclaimer", index}\uFF08legacy v1\uFF1A\u63D0\u4F9B id \u4E3A "disclaimer" \u7684 section\uFF09\u3002'
       });
     }
   }
@@ -54557,6 +54725,46 @@ function validateAnswer(input) {
     violations,
     violationsTruncated
   };
+}
+var BOUNDED_PARSE_REJECT_MESSAGE = "validate-answer input rejected by bounded preflight: missing required structure or a field exceeds the protective limits.";
+function boundedReject() {
+  throw new Error(BOUNDED_PARSE_REJECT_MESSAGE);
+}
+function isPlainObject2(v) {
+  return typeof v === "object" && v !== null;
+}
+function requireArrayWithin(v, max) {
+  if (!Array.isArray(v) || v.length > max) boundedReject();
+  return v;
+}
+function parseValidateAnswerInputBounded(raw) {
+  if (!isPlainObject2(raw)) boundedReject();
+  const plan = raw.answerPlan;
+  const draft = raw.readingDraft;
+  if (!isPlainObject2(plan) || !isPlainObject2(draft)) boundedReject();
+  requireArrayWithin(plan.allowedFactIds, MAX_ALLOWED_FACT_IDS);
+  requireArrayWithin(plan.requiredCaveats, MAX_REQUIRED_CAVEATS);
+  requireArrayWithin(plan.requiredWarningCodes, MAX_REQUIRED_WARNING_CODES);
+  requireArrayWithin(plan.guardrails, MAX_PLAN_GUARDRAILS);
+  requireArrayWithin(plan.disclaimers, MAX_PLAN_DISCLAIMERS);
+  const sections = requireArrayWithin(draft.sections, MAX_SECTIONS);
+  requireArrayWithin(draft.caveatsExpressed, MAX_CAVEATS_EXPRESSED);
+  requireArrayWithin(draft.warningsDisclosed, MAX_WARNINGS_DISCLOSED);
+  for (const section of sections) {
+    if (!isPlainObject2(section)) boundedReject();
+    const paragraphs = requireArrayWithin(section.paragraphs, MAX_PARAGRAPHS_PER_SECTION);
+    for (const para of paragraphs) {
+      if (!isPlainObject2(para)) boundedReject();
+      if (typeof para.text !== "string" || para.text.length > MAX_PARAGRAPH_TEXT_CHARS) {
+        boundedReject();
+      }
+      requireArrayWithin(para.sourceFactIds, MAX_SOURCE_FACT_IDS_PER_PARAGRAPH);
+      if (para.constraintRefs !== void 0) {
+        requireArrayWithin(para.constraintRefs, MAX_CONSTRAINT_REFS_PER_PARAGRAPH);
+      }
+    }
+  }
+  return ValidateAnswerInput.parse(raw);
 }
 
 // packages/interpret/src/reading-lint.ts
@@ -56003,6 +56211,7 @@ export {
   EngineError,
   JARGON_SOFT,
   JARGON_STRONG,
+  MAX_VALIDATE_ANSWER_INPUT_BYTES,
   READING_TERMS,
   SCHEMA_VERSION,
   ValidateAnswerInput,
@@ -56017,6 +56226,7 @@ export {
   listCompareProfiles,
   parseBirthInput,
   parseSynastryInput,
+  parseValidateAnswerInputBounded,
   renderHoroscopeReport,
   renderHoroscopeSvg,
   renderReport,
