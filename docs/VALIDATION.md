@@ -58,7 +58,7 @@ the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not h
 resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **404 tests / 27 files â€?all passing**. The Western provider
+- Typecheck: clean. Tests: **437 tests / 27 files â€?all passing**. The Western provider
   (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 â‰?â€?gate two ways: wrapper-consistency
   (vs astronomy-engine's own output) plus an **independent JPL Horizons golden** (10 bodies Ã— 3
   technical epochs fetched from the NASA/JPL Horizons service, query recorded in

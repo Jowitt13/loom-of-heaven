@@ -1,10 +1,10 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CANDIDATE_DIR, hostById } from './lib/host-config.ts';
-import { extractZip } from './lib/zip.ts';
+import { extractZipFileSafe } from './lib/zip.ts';
 
 /**
  * Runtime smoke of a REAL extracted candidate ZIP: doctor / verify / calculate / interpret
@@ -40,8 +40,8 @@ function main(): void {
   const tmp = mkdtempSync(join(tmpdir(), 'ming-zip-runtime-'));
   const results: { name: string; ok: boolean; detail?: string }[] = [];
   try {
-    extractZip(readFileSync(zipPath), tmp);
-    const pkgRoot = join(tmp, h.packageName);
+    extractZipFileSafe(zipPath, join(tmp, 'payload'));
+    const pkgRoot = join(tmp, 'payload', h.packageName);
     const fixture = 'scripts/fixtures/smoke.json';
 
     const doctor = run(pkgRoot, ['scripts/ming-chart.mjs', 'doctor']);

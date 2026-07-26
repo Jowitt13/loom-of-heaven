@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node
 import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { extractZip } from './lib/zip.ts';
+import { extractZipFileSafe } from './lib/zip.ts';
 
 /**
  * Privacy incident scanner (permanent gate). Detects any occurrence of the incident's leaked PII
@@ -93,8 +93,14 @@ function scanZips(tokens: Buffer[]): Hit[] {
   for (const z of zips) {
     const tmp = mkdtempSync(join(tmpdir(), 'incident-zip-'));
     try {
-      extractZip(readFileSync(z), tmp);
-      walkText(tmp, relative(root, z).replace(/\\/g, '/'), tmp, tokens, out);
+      extractZipFileSafe(z, join(tmp, 'payload'));
+      walkText(
+        join(tmp, 'payload'),
+        relative(root, z).replace(/\\/g, '/'),
+        join(tmp, 'payload'),
+        tokens,
+        out,
+      );
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
