@@ -1,6 +1,7 @@
 node_modules/
 skills/calculate-birth-charts/scripts/dist/
 skills/calculate-birth-charts/sbom.cdx.json
+skills/calculate-birth-charts/sbom.spdx.json
 coverage/
 .tmp/
 .qoder/

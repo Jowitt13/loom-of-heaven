@@ -4,6 +4,9 @@
   package metadata.
 - Default route: **closed-source-friendly**. Only MIT/BSD/Apache/ISC permitted without explicit
   owner approval. No AGPL/GPL or unclear-provenance code in the default build.
+- **Enforced in the gate**: `pnpm run scan:licenses` (in `verify:cloud`) checks the whole
+  production dependency closure against this policy offline and cross-checks the committed SBOM
+  license claims; it fails closed.
 - This file is not legal advice; re-verify before any commercial release.
 
 ## Bundled into the published engine (`scripts/dist/engine.mjs`)
