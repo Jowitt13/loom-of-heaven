@@ -1,12 +1,16 @@
 // Synthetic test data — fictional only; not a real person or event.
 import { describe, expect, it } from 'vitest';
-import { normalizeSafetyText, validateAnswer } from '@ming/interpret';
+import { maskSafetyDisclaimers, normalizeSafetyText, validateAnswer } from '@ming/interpret';
 import {
+  MAX_ALLOWED_FACT_IDS,
   MAX_CAVEATS_EXPRESSED,
+  MAX_NOT_SUPPORTED_TEXT_CHARS,
   MAX_PARAGRAPH_TEXT_CHARS,
   MAX_PARAGRAPHS_PER_SECTION,
   MAX_SECTIONS,
   MAX_SOURCE_FACT_IDS_PER_PARAGRAPH,
+  MAX_TOTAL_SOURCE_FACT_IDS,
+  MAX_VIOLATIONS,
   ValidateAnswerInput as ValidateAnswerInputSchema,
 } from '@ming/contracts';
 import type { ValidateAnswerInput } from '@ming/contracts';
@@ -41,7 +45,7 @@ function makeDraft(
   overrides: Partial<ValidateAnswerInput['readingDraft']> = {},
 ): ValidateAnswerInput['readingDraft'] {
   return {
-    contractVersion: 'reading-draft/v1',
+    contractVersion: 'reading-draft/v2',
     topic: 'career',
     sections: [
       {
@@ -67,7 +71,8 @@ describe('validate-answer — fact boundary and safety layer', () => {
     const result = validateAnswer({ answerPlan: makePlan(), readingDraft: makeDraft() });
     expect(result.ok).toBe(true);
     expect(result.violations).toHaveLength(0);
-    expect(result.contractVersion).toBe('validation-result/v1');
+    expect(result.violationsTruncated).toBe(false);
+    expect(result.contractVersion).toBe('validation-result/v2');
   });
 
   // --- FACT BOUNDARY VIOLATIONS ---
@@ -374,8 +379,9 @@ describe('validate-answer — fact boundary and safety layer', () => {
       expect(result.ok).toBe(false);
       const fate = result.violations.find((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE');
       expect(fate).toBeDefined();
-      expect(fate!.sectionId).toBe('disclaimer');
-      // Fact-citation exemption still applies to exempt sections:
+      expect(fate!.sectionIndex).toBe(0);
+      expect(fate!.field).toBe('paragraph');
+      // Fact-citation exemption still applies to disclaimer sections:
       expect(result.violations.some((v) => v.code === 'MISSING_SOURCE_FACTS')).toBe(false);
     });
 
@@ -398,6 +404,10 @@ describe('validate-answer — fact boundary and safety layer', () => {
       expect(result.ok).toBe(false);
       expect(result.violations.some((v) => v.code === 'HIGH_RISK_LIFE_DEATH')).toBe(true);
       expect(result.violations.some((v) => v.code === 'HIGH_RISK_INVESTMENT')).toBe(true);
+      // technical-evidence is NOT fact-exempt: its unsourced paragraph is flagged too.
+      expect(
+        result.violations.some((v) => v.code === 'MISSING_SOURCE_FACTS' && v.sectionIndex === 1),
+      ).toBe(true);
     });
   });
 
@@ -473,7 +483,9 @@ describe('validate-answer — fact boundary and safety layer', () => {
       );
     });
 
-    it('does not obviously misfire on disclaimer-style negation contexts', () => {
+    it('does not misfire on recognized fixed safety-disclaimer clauses', () => {
+      // These clauses fit the narrow structural mask (negation verb + category
+      // term + object noun inside one clause) and are masked before scanning.
       const draft = makeDraft({
         sections: [
           {
@@ -498,8 +510,9 @@ describe('validate-answer — fact boundary and safety layer', () => {
   });
 
   describe('violation output contains no input fragments', () => {
-    it('never echoes draft text, fact IDs, or caveat text in the result', () => {
+    it('never echoes draft text, section ids, fact IDs, or caveat text in the result', () => {
       const TEXT_MARKER = 'SYNTH-DRAFT-MARKER-7f3a';
+      const SECTION_MARKER = 'SYNTH-SECTION-MARKER-1a2b';
       const FACT_MARKER = 'SYNTH-FACT-MARKER-9b2c';
       const CAVEAT_MARKER = 'SYNTH-CAVEAT-MARKER-5d1e';
       const WARNING_MARKER = 'SYNTH-WARNING-MARKER-3c4f';
@@ -512,7 +525,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
         warningsDisclosed: [],
         sections: [
           {
-            id: 'summary',
+            id: SECTION_MARKER,
             heading: '核心结论',
             paragraphs: [
               {
@@ -528,6 +541,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
       expect(result.ok).toBe(false);
       const serialized = JSON.stringify(result);
       expect(serialized).not.toContain(TEXT_MARKER);
+      expect(serialized).not.toContain(SECTION_MARKER);
       expect(serialized).not.toContain(FACT_MARKER);
       expect(serialized).not.toContain(CAVEAT_MARKER);
       expect(serialized).not.toContain(WARNING_MARKER);
@@ -548,12 +562,201 @@ describe('validate-answer — fact boundary and safety layer', () => {
       const unknown = result.violations.find((v) => v.code === 'UNKNOWN_FACT_ID');
       expect(unknown).toBeDefined();
       expect(unknown!.itemIndex).toBe(1); // sourceFactIds[1] is the bad one, not echoed
+      expect(unknown!.sectionIndex).toBe(0); // numeric locator, never the section id
       const fate = result.violations.find((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE');
       expect(fate).toBeDefined();
-      expect(fate!.patternKey).toMatch(/^fate\/\d+$/);
+      expect(fate!.patternKey).toBe('fate.predestined'); // stable named rule id
+      expect(fate!.patternKey).toMatch(/^[a-z-]+\.[a-z-]+$/); // never a bare array index
       const caveat = result.violations.find((v) => v.code === 'MISSING_REQUIRED_CAVEAT');
       expect(caveat).toBeDefined();
       expect(caveat!.itemIndex).toBe(0);
+    });
+  });
+
+  describe('disclaimer masking is narrow and structural', () => {
+    /** Wrap a single synthetic text into a minimal draft. */
+    function textDraft(text: string): ValidateAnswerInput['readingDraft'] {
+      return makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [{ text, sourceFactIds: ['fact-1'] }],
+          },
+        ],
+      });
+    }
+
+    it('maskSafetyDisclaimers masks only the disclaimer clause, not neighbours', () => {
+      const masked = maskSafetyDisclaimers(
+        normalizeSafetyText('本报告不构成医疗建议，你应该立即停药。'),
+      );
+      expect(masked).not.toContain('医疗建议');
+      expect(masked).toContain('停药'); // the second clause stays scannable
+    });
+
+    it('cross-clause negation does not exempt the next clause', () => {
+      const result = validateAnswer({
+        answerPlan: makePlan(),
+        readingDraft: textDraft('本报告不构成医疗建议，你应该立即停药。'),
+      });
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
+    });
+
+    it('referral prompts are not a generic exemption marker', () => {
+      const result = validateAnswer({
+        answerPlan: makePlan(),
+        readingDraft: textDraft('请咨询专业人士，你命中注定不可能成功。'),
+      });
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
+    });
+
+    it('double negation is not masked', () => {
+      const result = validateAnswer({
+        answerPlan: makePlan(),
+        readingDraft: textDraft('不是不建议买入股票，其实可以买入股票。'),
+      });
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_INVESTMENT')).toBe(true);
+    });
+
+    it('a masked disclaimer never hides an unrelated hit in the same paragraph', () => {
+      const result = validateAnswer({
+        answerPlan: makePlan(),
+        readingDraft: textDraft('本报告不构成医疗诊断，但命盘显示你必死。'),
+      });
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(false);
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_LIFE_DEATH')).toBe(true);
+    });
+
+    it('a run-on clause that does not fit the disclaimer shape is scanned as-is', () => {
+      const result = validateAnswer({
+        answerPlan: makePlan(),
+        readingDraft: textDraft('本内容不构成医疗建议你需要做手术。'),
+      });
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
+    });
+  });
+
+  describe('headings are scanned like paragraphs', () => {
+    it('rejects a heading-only adversarial draft and locates it with field=heading', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '你命中注定失败的原因',
+            paragraphs: [{ text: '事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
+          },
+        ],
+      });
+      const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
+      expect(result.ok).toBe(false);
+      const hit = result.violations.find((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE');
+      expect(hit).toBeDefined();
+      expect(hit!.field).toBe('heading');
+      expect(hit!.sectionIndex).toBe(0);
+      expect(hit!.paragraphIndex).toBeUndefined();
+    });
+
+    it('scans headings of fact-exempt sections too', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'disclaimer',
+            heading: '保证赚不亏的声明',
+            paragraphs: [{ text: '本报告仅供传统文化参考。', sourceFactIds: [] }],
+          },
+        ],
+      });
+      const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
+      expect(
+        result.violations.some((v) => v.code === 'HIGH_RISK_INVESTMENT' && v.field === 'heading'),
+      ).toBe(true);
+    });
+  });
+
+  describe('answerability boundaries', () => {
+    it('not-supported: content cannot hide under a disclaimer section id (fact-citing)', () => {
+      const plan = makePlan({ answerability: 'not-supported', allowedFactIds: [] });
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'disclaimer',
+            heading: '声明',
+            paragraphs: [{ text: '你的事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
+          },
+        ],
+      });
+      const result = validateAnswer({ answerPlan: plan, readingDraft: draft });
+      expect(result.violations.some((v) => v.code === 'UNSUPPORTED_TOPIC')).toBe(true);
+    });
+
+    it('not-supported: more-than-brief text is rejected regardless of section id', () => {
+      const plan = makePlan({ answerability: 'not-supported', allowedFactIds: [] });
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'disclaimer',
+            heading: '声明',
+            paragraphs: [
+              { text: '安'.repeat(MAX_NOT_SUPPORTED_TEXT_CHARS + 1), sourceFactIds: [] },
+            ],
+          },
+        ],
+      });
+      const result = validateAnswer({ answerPlan: plan, readingDraft: draft });
+      expect(result.violations.some((v) => v.code === 'UNSUPPORTED_TOPIC')).toBe(true);
+    });
+
+    it('not-supported: a brief fact-free explanation passes', () => {
+      const plan = makePlan({ answerability: 'not-supported', allowedFactIds: [] });
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'disclaimer',
+            heading: '信息可靠性与声明',
+            paragraphs: [{ text: '引擎无法提供该主题的事实，建议换一个主题。', sourceFactIds: [] }],
+          },
+        ],
+      });
+      const result = validateAnswer({ answerPlan: plan, readingDraft: draft });
+      expect(result.ok).toBe(true);
+    });
+
+    it('grounded: technical-evidence paragraphs must cite facts', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'technical-evidence',
+            heading: '技术依据',
+            paragraphs: [{ text: '日主得令，比劫为用。', sourceFactIds: [] }],
+          },
+        ],
+      });
+      const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
+      expect(
+        result.violations.some((v) => v.code === 'MISSING_SOURCE_FACTS' && v.sectionIndex === 0),
+      ).toBe(true);
+    });
+  });
+
+  describe('contract versioning', () => {
+    it('emits validation-result/v2 and accepts reading-draft/v1 as compatible input', () => {
+      const v1Input = {
+        answerPlan: makePlan(),
+        readingDraft: makeDraft({ contractVersion: 'reading-draft/v1' }),
+      };
+      expect(ValidateAnswerInputSchema.safeParse(v1Input).success).toBe(true);
+      const result = validateAnswer(v1Input);
+      expect(result.ok).toBe(true);
+      expect(result.contractVersion).toBe('validation-result/v2');
+    });
+
+    it('rejects unknown reading-draft versions at the schema', () => {
+      const badInput = {
+        answerPlan: makePlan(),
+        readingDraft: { ...makeDraft(), contractVersion: 'reading-draft/v0' },
+      };
+      expect(ValidateAnswerInputSchema.safeParse(badInput).success).toBe(false);
     });
   });
 
@@ -695,6 +898,77 @@ describe('validate-answer — fact boundary and safety layer', () => {
       };
       const parsed = ValidateAnswerInputSchema.safeParse(oversized);
       expect(parsed.success).toBe(false);
+    });
+
+    it('caps reported violations at MAX_VIOLATIONS and flags truncation', () => {
+      // 5 paragraphs x 50 unknown fact IDs would otherwise emit 250 violations.
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: Array.from({ length: 5 }, (_, p) => ({
+              text: '合成段落。',
+              sourceFactIds: Array.from({ length: 50 }, (_, i) => `bad-${p}-${i}`),
+            })),
+          },
+        ],
+      });
+      const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
+      expect(result.ok).toBe(false);
+      expect(result.violations).toHaveLength(MAX_VIOLATIONS);
+      expect(result.violationsTruncated).toBe(true);
+    });
+
+    it('rejects a draft whose total sourceFactIds exceed the whole-draft budget', () => {
+      // 21 paragraphs x 50 allowed IDs = 1050 > MAX_TOTAL_SOURCE_FACT_IDS,
+      // without breaching any per-paragraph cap.
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: Array.from({ length: 21 }, () => ({
+              text: '合成段落。',
+              sourceFactIds: Array.from({ length: 50 }, () => 'fact-1'),
+            })),
+          },
+        ],
+      });
+      const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
+      expect(result.violations).toHaveLength(1);
+      expect(result.violations[0]!.patternKey).toBe('MAX_TOTAL_SOURCE_FACT_IDS');
+      expect(50 * 21).toBeGreaterThan(MAX_TOTAL_SOURCE_FACT_IDS);
+    });
+
+    it('caps plan-side arrays on both the function path and the schema path', () => {
+      const oversizedPlan = makePlan({
+        allowedFactIds: Array.from({ length: MAX_ALLOWED_FACT_IDS + 1 }, (_, i) => `f-${i}`),
+      });
+      const result = validateAnswer({ answerPlan: oversizedPlan, readingDraft: makeDraft() });
+      expect(result.ok).toBe(false);
+      expect(result.violations).toHaveLength(1);
+      expect(result.violations[0]!.patternKey).toBe('MAX_ALLOWED_FACT_IDS');
+      const parsed = ValidateAnswerInputSchema.safeParse({
+        answerPlan: oversizedPlan,
+        readingDraft: makeDraft(),
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('returns a single violation immediately on a top-level count breach', () => {
+      // Early return: the oversized sections array is detected by its length and
+      // never traversed, so exactly one violation is reported.
+      const draft = makeDraft({
+        sections: Array.from({ length: MAX_SECTIONS + 1 }, (_, i) => ({
+          id: `s-${i}`,
+          heading: '合成',
+          paragraphs: [{ text: '你命中注定必死。', sourceFactIds: [] }],
+        })),
+      });
+      const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
+      expect(result.violations).toHaveLength(1);
+      expect(result.violations[0]!.patternKey).toBe('MAX_SECTIONS');
     });
   });
 });

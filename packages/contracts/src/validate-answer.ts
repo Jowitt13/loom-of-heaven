@@ -7,25 +7,41 @@ import { AnswerGuardrail } from './answer-plan.ts';
  *
  * This is deliberately separate from lint-reading (language quality).
  * It is a DETERMINISTIC STRUCTURE-AND-WORDING GATE over a host's ReadingDraft:
- * 1. Every non-exempt paragraph must declare sourceFactIds that exist in allowedFactIds.
+ * 1. Every paragraph outside the minimal fact-exempt sections must declare
+ *    sourceFactIds that exist in allowedFactIds.
  * 2. The draft must not cross topic boundaries.
  * 3. High-risk expression patterns (medical, legal, investment, fate, life-death,
- *    manipulation) are blocked in ALL sections, including exempt ones.
+ *    manipulation) are blocked in ALL visible text: every heading and every
+ *    paragraph of every section, with no section-id exemption.
  * 4. All required caveats and warnings must be claimed as expressed/disclosed.
  *
  * Honest scope: citation presence is a structural check — it CANNOT prove that a
  * paragraph's meaning actually follows from the cited facts, and the pattern scan
  * CANNOT recognize every semantic paraphrase. This gate is necessary, not sufficient.
+ *
+ * Contract versioning:
+ * - `reading-draft/v2` tightens v1 with protective input limits (below). v1 drafts
+ *   are accepted for compatibility: a v1 draft that stays within the v2 limits
+ *   validates unchanged; oversized v1 drafts are now rejected (that IS the fix).
+ * - `validation-result/v2` replaces v1: violations locate by `sectionIndex`
+ *   (never the caller-provided section id), add `field`, `patternKey`, `itemIndex`,
+ *   and the result adds `violationsTruncated`. v1 result consumers must migrate:
+ *   read `sectionIndex` instead of the removed `sectionId`.
  */
 
-export const READING_DRAFT_CONTRACT_VERSION = 'reading-draft/v1';
-export const VALIDATION_RESULT_CONTRACT_VERSION = 'validation-result/v1';
+export const READING_DRAFT_CONTRACT_VERSION = 'reading-draft/v2';
+/** Accepted input versions; v1 is a compatible (strict-subset) input format. */
+export const READING_DRAFT_COMPAT_VERSIONS = ['reading-draft/v1', 'reading-draft/v2'] as const;
+export const VALIDATION_RESULT_CONTRACT_VERSION = 'validation-result/v2';
 
-// --- Protective resource limits (anti-resource-exhaustion) ---
-// Rationale: the validator runs bounded regex scans over every paragraph; these caps
-// keep worst-case scan cost linear and small, and reject absurd drafts up front.
-// A real reading is a handful of sections with a few short paragraphs each — the
-// limits below are an order of magnitude above legitimate use.
+// --- Protective resource limits ---
+// Rationale: the validator runs bounded regex scans over every heading and
+// paragraph; these caps keep worst-case VALIDATION-STAGE cost linear and small,
+// and reject absurd inputs before scanning. They do NOT bound what a caller
+// spends reading or JSON-parsing a file before validation (the CLI has no
+// separate input-byte limit today). A real reading is a handful of sections
+// with a few short paragraphs each — the limits below are an order of
+// magnitude above legitimate use.
 
 /** Max characters in a single paragraph text (regex scan cost per paragraph stays bounded). */
 export const MAX_PARAGRAPH_TEXT_CHARS = 5_000;
@@ -35,6 +51,8 @@ export const MAX_SECTIONS = 40;
 export const MAX_PARAGRAPHS_PER_SECTION = 50;
 /** Max fact IDs cited by a single paragraph (plans expose far fewer facts than this). */
 export const MAX_SOURCE_FACT_IDS_PER_PARAGRAPH = 50;
+/** Max fact IDs cited across the whole draft (bounds set-lookup and violation volume). */
+export const MAX_TOTAL_SOURCE_FACT_IDS = 1_000;
 /** Max characters in a single fact ID (engine fact IDs are short slugs). */
 export const MAX_FACT_ID_CHARS = 200;
 /** Max entries in caveatsExpressed (plans require only a few caveats). */
@@ -51,6 +69,37 @@ export const MAX_SECTION_ID_CHARS = 100;
 export const MAX_HEADING_CHARS = 200;
 /** Max total characters across all paragraph texts + headings (whole-draft budget). */
 export const MAX_TOTAL_TEXT_CHARS = 200_000;
+
+// Plan-side limits (the validator also reads these arrays; cap them the same way).
+
+/** Max allowedFactIds in the plan envelope (real plans expose dozens of facts). */
+export const MAX_ALLOWED_FACT_IDS = 500;
+/** Max requiredCaveats in the plan envelope. */
+export const MAX_REQUIRED_CAVEATS = 100;
+/** Max requiredWarningCodes in the plan envelope. */
+export const MAX_REQUIRED_WARNING_CODES = 100;
+/** Max disclaimers in the plan envelope. */
+export const MAX_PLAN_DISCLAIMERS = 100;
+/** Max characters per plan disclaimer entry. */
+export const MAX_DISCLAIMER_ENTRY_CHARS = 500;
+/** Max guardrails in the plan envelope (the guardrail enum is tiny). */
+export const MAX_PLAN_GUARDRAILS = 50;
+
+// Output-side limit.
+
+/**
+ * Max violations reported in one result. Prevents a crafted draft (e.g. hundreds
+ * of unknown fact IDs) from amplifying the validator's own output; when hit,
+ * `violationsTruncated` is set and the result is already conclusively not-ok.
+ */
+export const MAX_VIOLATIONS = 200;
+
+/**
+ * When answerability is `not-supported`, the draft may only briefly explain the
+ * limitation — this caps the total paragraph text allowed in that mode, so
+ * substantive content cannot hide under any section id.
+ */
+export const MAX_NOT_SUPPORTED_TEXT_CHARS = 500;
 
 /** A single paragraph within a reading section. */
 export const ReadingParagraph = z.strictObject({
@@ -74,7 +123,7 @@ export type ReadingSection = z.infer<typeof ReadingSection>;
  */
 export const ReadingDraft = z
   .strictObject({
-    contractVersion: z.literal(READING_DRAFT_CONTRACT_VERSION),
+    contractVersion: z.enum(READING_DRAFT_COMPAT_VERSIONS),
     topic: InterpretationTopic,
     sections: z.array(ReadingSection).min(1).max(MAX_SECTIONS),
     /** Which requiredCaveats (from AnswerPlan) the host claims to have expressed. */
@@ -83,16 +132,27 @@ export const ReadingDraft = z
     warningsDisclosed: z.array(z.string().max(MAX_WARNING_ENTRY_CHARS)).max(MAX_WARNINGS_DISCLOSED),
   })
   .superRefine((draft, ctx) => {
-    let total = 0;
+    let totalText = 0;
+    let totalFactIds = 0;
     for (const section of draft.sections) {
-      total += section.heading.length;
-      for (const para of section.paragraphs) total += para.text.length;
+      totalText += section.heading.length;
+      for (const para of section.paragraphs) {
+        totalText += para.text.length;
+        totalFactIds += para.sourceFactIds.length;
+      }
     }
-    if (total > MAX_TOTAL_TEXT_CHARS) {
+    if (totalText > MAX_TOTAL_TEXT_CHARS) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['sections'],
         message: `Total draft text exceeds MAX_TOTAL_TEXT_CHARS (${MAX_TOTAL_TEXT_CHARS}).`,
+      });
+    }
+    if (totalFactIds > MAX_TOTAL_SOURCE_FACT_IDS) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['sections'],
+        message: `Total sourceFactIds exceed MAX_TOTAL_SOURCE_FACT_IDS (${MAX_TOTAL_SOURCE_FACT_IDS}).`,
       });
     }
   });
@@ -127,24 +187,34 @@ export const ViolationCode = z.enum([
   'GUARDRAIL_VIOLATED',
 
   // Resource-boundary violations
-  'RESOURCE_LIMIT_EXCEEDED', // draft exceeds a protective resource limit
+  'RESOURCE_LIMIT_EXCEEDED', // input exceeds a protective resource limit
 ]);
 export type ViolationCode = z.infer<typeof ViolationCode>;
 
 export const ViolationSeverity = z.enum(['error', 'warning']);
 export type ViolationSeverity = z.infer<typeof ViolationSeverity>;
 
+/** Which text field of the located section the violation was found in. */
+export const ViolationField = z.enum(['heading', 'paragraph']);
+export type ViolationField = z.infer<typeof ViolationField>;
+
 export const AnswerViolation = z.strictObject({
   code: ViolationCode,
   severity: ViolationSeverity,
-  /** Which section (by id) the violation was found in, if applicable. */
-  sectionId: z.string().optional(),
+  /**
+   * Zero-based index of the section in readingDraft.sections, if applicable.
+   * Deliberately an index — the caller-provided section id is never echoed
+   * (ids are unbounded caller text and may repeat).
+   */
+  sectionIndex: z.number().int().min(0).optional(),
+  /** Which text field of that section was hit, if applicable. */
+  field: ViolationField.optional(),
   /** Which paragraph index within the section, if applicable. */
   paragraphIndex: z.number().int().min(0).optional(),
   /**
-   * Structured category/pattern key (e.g. "medical/2" for a high-risk pattern hit,
-   * or a resource-limit constant name like "MAX_TOTAL_TEXT_CHARS").
-   * This — never raw draft text — is how a hit is identified.
+   * Stable rule/limit identifier (e.g. "medical.medication-change" for a
+   * high-risk rule hit, or a resource-limit constant name like
+   * "MAX_TOTAL_TEXT_CHARS"). Never raw input text, never a bare array index.
    */
   patternKey: z.string().optional(),
   /**
@@ -155,7 +225,7 @@ export const AnswerViolation = z.strictObject({
   itemIndex: z.number().int().min(0).optional(),
   /**
    * Human-readable description of what went wrong. Static wording only — MUST NOT
-   * embed draft text, caveat text, warning codes, or any other input fragments.
+   * embed draft text, section ids, caveat text, warning codes, or any other input.
    */
   detail: z.string().min(1),
   /** Actionable remediation guidance. */
@@ -166,25 +236,30 @@ export type AnswerViolation = z.infer<typeof AnswerViolation>;
 export const AnswerValidationResult = z.strictObject({
   contractVersion: z.literal(VALIDATION_RESULT_CONTRACT_VERSION),
   ok: z.boolean(),
-  violations: z.array(AnswerViolation),
+  violations: z.array(AnswerViolation).max(MAX_VIOLATIONS),
+  /** True when reporting stopped at MAX_VIOLATIONS (result is conclusively not-ok). */
+  violationsTruncated: z.boolean(),
 });
 export type AnswerValidationResult = z.infer<typeof AnswerValidationResult>;
 
 /**
  * The input envelope for validate-answer: an AnswerPlan + a ReadingDraft.
- * The validator checks the draft against the plan's constraints.
+ * The validator checks the draft against the plan's constraints. The plan-side
+ * arrays carry the same protective caps as the draft (the validator iterates them).
  */
 export const ValidateAnswerInput = z.strictObject({
   answerPlan: z.object({
-    allowedFactIds: z.array(z.string()),
-    requiredCaveats: z.array(z.string()),
-    requiredWarningCodes: z.array(z.string()),
-    guardrails: z.array(AnswerGuardrail),
+    allowedFactIds: z.array(z.string().max(MAX_FACT_ID_CHARS)).max(MAX_ALLOWED_FACT_IDS),
+    requiredCaveats: z.array(z.string().max(MAX_CAVEAT_ENTRY_CHARS)).max(MAX_REQUIRED_CAVEATS),
+    requiredWarningCodes: z
+      .array(z.string().max(MAX_WARNING_ENTRY_CHARS))
+      .max(MAX_REQUIRED_WARNING_CODES),
+    guardrails: z.array(AnswerGuardrail).max(MAX_PLAN_GUARDRAILS),
     answerability: z.enum(['grounded', 'limited', 'not-supported']),
     request: z.object({
       topic: InterpretationTopic,
     }),
-    disclaimers: z.array(z.string()),
+    disclaimers: z.array(z.string().max(MAX_DISCLAIMER_ENTRY_CHARS)).max(MAX_PLAN_DISCLAIMERS),
   }),
   readingDraft: ReadingDraft,
 });
