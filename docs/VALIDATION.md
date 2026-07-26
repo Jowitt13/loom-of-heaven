@@ -58,7 +58,7 @@ the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not h
 resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **312 tests / 27 files — all passing**. The Western provider
+- Typecheck: clean. Tests: **327 tests / 27 files — all passing**. The Western provider
   (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 ≤1′ gate two ways: wrapper-consistency
   (vs astronomy-engine's own output) plus an **independent JPL Horizons golden** (10 bodies × 3
   technical epochs fetched from the NASA/JPL Horizons service, query recorded in
@@ -79,7 +79,16 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   命理/黑话 terms in sections 1-5 — still a static text gate, not a guarantee of host-model wording. Round 9 (ADR 0012) added an 空话 (vagueness) check: abstract judgements in sections 1-5 must carry a concrete
   action/scene/observable/result nearby, and three REAL reports (male, 1990-06-15 14:20, 示例城市; 事业/感情/
   财运, saved unpolished to `docs/round9-acceptance/`) lint to 0 error (test #8 reads them). The detector is a
-  nearby-concreteness heuristic, not a meaning judge. The dependency **license** gate (`scan:licenses`) enforces the
+  nearby-concreteness heuristic, not a meaning judge. The `validate-answer` gate is a **deterministic
+  structure-and-wording gate** over a host's ReadingDraft: fact-citation presence (non-exempt
+  paragraphs must cite `allowedFactIds`), a normalized high-risk expression scan (NFKC + zero-width
+  stripping + CJK-split condensing, applied to **all** sections including disclaimer/uncertainty, with
+  a conservative closed-list negation guard), caveat/warning **self-attestation** set checks, and
+  protective resource limits; its violations carry only structured locators (sectionId /
+  paragraphIndex / patternKey / itemIndex), never fragments of the draft. It **cannot** prove that a
+  paragraph's meaning actually follows from its cited facts, cannot verify that a claimed caveat is
+  truly expressed in the body text, and its regex scan cannot recognize every semantic paraphrase —
+  it is a necessary wording gate, not a semantic-correctness proof. The dependency **license** gate (`scan:licenses`) enforces the
   LICENSE_AUDIT allowlist offline and cross-checks the committed SBOM license claims; `build` emits both a CycloneDX
   and an SPDX 2.3 SBOM (byte-stable, committed). Clean-dir offline
   smoke: **10/10**. Clean-dir forward test: **41/41** — 8 realistic requests (incl. a horoscope, an

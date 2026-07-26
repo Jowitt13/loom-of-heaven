@@ -40603,24 +40603,49 @@ var AnswerPlan = external_exports.strictObject({
 // packages/contracts/src/validate-answer.ts
 var READING_DRAFT_CONTRACT_VERSION = "reading-draft/v1";
 var VALIDATION_RESULT_CONTRACT_VERSION = "validation-result/v1";
+var MAX_PARAGRAPH_TEXT_CHARS = 5e3;
+var MAX_SECTIONS = 40;
+var MAX_PARAGRAPHS_PER_SECTION = 50;
+var MAX_SOURCE_FACT_IDS_PER_PARAGRAPH = 50;
+var MAX_FACT_ID_CHARS = 200;
+var MAX_CAVEATS_EXPRESSED = 100;
+var MAX_CAVEAT_ENTRY_CHARS = 500;
+var MAX_WARNINGS_DISCLOSED = 100;
+var MAX_WARNING_ENTRY_CHARS = 100;
+var MAX_SECTION_ID_CHARS = 100;
+var MAX_HEADING_CHARS = 200;
+var MAX_TOTAL_TEXT_CHARS = 2e5;
 var ReadingParagraph = external_exports.strictObject({
-  text: external_exports.string().min(1),
+  text: external_exports.string().min(1).max(MAX_PARAGRAPH_TEXT_CHARS),
   /** Fact IDs from the AnswerPlan that ground this paragraph. */
-  sourceFactIds: external_exports.array(external_exports.string())
+  sourceFactIds: external_exports.array(external_exports.string().max(MAX_FACT_ID_CHARS)).max(MAX_SOURCE_FACT_IDS_PER_PARAGRAPH)
 });
 var ReadingSection = external_exports.strictObject({
-  id: external_exports.string().min(1),
-  heading: external_exports.string(),
-  paragraphs: external_exports.array(ReadingParagraph).min(1)
+  id: external_exports.string().min(1).max(MAX_SECTION_ID_CHARS),
+  heading: external_exports.string().max(MAX_HEADING_CHARS),
+  paragraphs: external_exports.array(ReadingParagraph).min(1).max(MAX_PARAGRAPHS_PER_SECTION)
 });
 var ReadingDraft = external_exports.strictObject({
   contractVersion: external_exports.literal(READING_DRAFT_CONTRACT_VERSION),
   topic: InterpretationTopic,
-  sections: external_exports.array(ReadingSection).min(1),
+  sections: external_exports.array(ReadingSection).min(1).max(MAX_SECTIONS),
   /** Which requiredCaveats (from AnswerPlan) the host claims to have expressed. */
-  caveatsExpressed: external_exports.array(external_exports.string()),
+  caveatsExpressed: external_exports.array(external_exports.string().max(MAX_CAVEAT_ENTRY_CHARS)).max(MAX_CAVEATS_EXPRESSED),
   /** Which requiredWarningCodes the host claims to have disclosed. */
-  warningsDisclosed: external_exports.array(external_exports.string())
+  warningsDisclosed: external_exports.array(external_exports.string().max(MAX_WARNING_ENTRY_CHARS)).max(MAX_WARNINGS_DISCLOSED)
+}).superRefine((draft, ctx) => {
+  let total = 0;
+  for (const section of draft.sections) {
+    total += section.heading.length;
+    for (const para of section.paragraphs) total += para.text.length;
+  }
+  if (total > MAX_TOTAL_TEXT_CHARS) {
+    ctx.addIssue({
+      code: external_exports.ZodIssueCode.custom,
+      path: ["sections"],
+      message: `Total draft text exceeds MAX_TOTAL_TEXT_CHARS (${MAX_TOTAL_TEXT_CHARS}).`
+    });
+  }
 });
 var ViolationCode = external_exports.enum([
   // Fact-boundary violations
@@ -40653,8 +40678,13 @@ var ViolationCode = external_exports.enum([
   "MISSING_DISCLAIMER",
   // answerPlan disclaimers not communicated
   // Guardrail violations
-  "GUARDRAIL_VIOLATED"
-  // a guardrail from the plan was violated
+  // Reserved: not currently emitted. Mapping answerPlan.guardrails to checks without
+  // changing the public AnswerPlan contract is a follow-up design item; we do not
+  // fabricate a fake guardrail validation just to "use" this code.
+  "GUARDRAIL_VIOLATED",
+  // Resource-boundary violations
+  "RESOURCE_LIMIT_EXCEEDED"
+  // draft exceeds a protective resource limit
 ]);
 var ViolationSeverity = external_exports.enum(["error", "warning"]);
 var AnswerViolation = external_exports.strictObject({
@@ -40664,7 +40694,22 @@ var AnswerViolation = external_exports.strictObject({
   sectionId: external_exports.string().optional(),
   /** Which paragraph index within the section, if applicable. */
   paragraphIndex: external_exports.number().int().min(0).optional(),
-  /** Human-readable description of what went wrong. */
+  /**
+   * Structured category/pattern key (e.g. "medical/2" for a high-risk pattern hit,
+   * or a resource-limit constant name like "MAX_TOTAL_TEXT_CHARS").
+   * This — never raw draft text — is how a hit is identified.
+   */
+  patternKey: external_exports.string().optional(),
+  /**
+   * Index of the offending item in the relevant array, keyed by `code`:
+   * UNKNOWN_FACT_ID → paragraph.sourceFactIds; MISSING_REQUIRED_CAVEAT →
+   * answerPlan.requiredCaveats; MISSING_REQUIRED_WARNING → answerPlan.requiredWarningCodes.
+   */
+  itemIndex: external_exports.number().int().min(0).optional(),
+  /**
+   * Human-readable description of what went wrong. Static wording only — MUST NOT
+   * embed draft text, caveat text, warning codes, or any other input fragments.
+   */
   detail: external_exports.string().min(1),
   /** Actionable remediation guidance. */
   remediation: external_exports.string().min(1)
@@ -54076,6 +54121,36 @@ function buildAnswerPlan(publicResult, requestInput) {
 }
 
 // packages/interpret/src/validate-answer.ts
+var INVISIBLE_CHARS_RE = /[\u200B-\u200F\u2060\uFEFF\u00AD\u180E\u202A-\u202E\u2066-\u2069\uFE00-\uFE0F]/g;
+var CJK_RANGE = "\u3400-\u9FFF\uF900-\uFAFF";
+var CJK_SEPARATOR_RE = new RegExp(
+  `(?<=[${CJK_RANGE}])[ \\-_.*+~/\\u00B7\\u2010-\\u2015\\u2022\\u30FB\\u3001]+(?=[${CJK_RANGE}])`,
+  "g"
+);
+function normalizeSafetyText(text) {
+  let t = text.normalize("NFKC");
+  t = t.replace(INVISIBLE_CHARS_RE, "");
+  t = t.replace(/\s+/g, " ");
+  t = t.replace(CJK_SEPARATOR_RE, "");
+  return t;
+}
+var NEGATION_MARKERS = [
+  "\u4E0D\u6784\u6210",
+  "\u4E0D\u63D0\u4F9B",
+  "\u4E0D\u4F5C\u4E3A",
+  "\u4E0D\u5E94\u89C6\u4E3A",
+  "\u4E0D\u80FD\u66FF\u4EE3",
+  "\u4E0D\u80FD\u4F5C\u4E3A",
+  "\u5E76\u975E",
+  "\u4E0D\u6D89\u53CA",
+  "\u8BF7\u54A8\u8BE2\u4E13\u4E1A"
+];
+var NEGATION_WINDOW_CHARS = 12;
+function isNegatedMatch(normText, matchIndex) {
+  const start = Math.max(0, matchIndex - NEGATION_WINDOW_CHARS);
+  const window = normText.slice(start, matchIndex);
+  return NEGATION_MARKERS.some((marker) => window.includes(marker));
+}
 var MEDICAL_PATTERNS = [
   /(?:确诊|诊断|患有|得了|治疗|服药|用药|手术|处方|化疗|放疗|抗生素|止痛药)/,
   /(?:建议(?:去|到|看|找|就)(?:医|诊|院|科))/,
@@ -54120,51 +54195,136 @@ var MANIPULATION_PATTERNS = [
 var HIGH_RISK_GROUPS = [
   {
     code: "HIGH_RISK_MEDICAL",
+    key: "medical",
     patterns: MEDICAL_PATTERNS,
     detail: "\u6587\u672C\u5305\u542B\u533B\u7597\u8BCA\u65AD\u6216\u6CBB\u7597\u5EFA\u8BAE\u3002",
     remediation: '\u5220\u9664\u6240\u6709\u533B\u7597\u8BCA\u65AD/\u6CBB\u7597\u5185\u5BB9\u3002\u5982\u6D89\u53CA\u5065\u5EB7\u4E3B\u9898\uFF0C\u53EA\u80FD\u8BF4"\u5EFA\u8BAE\u54A8\u8BE2\u4E13\u4E1A\u533B\u751F"\uFF0C\u4E0D\u53EF\u7ED9\u5177\u4F53\u8BCA\u65AD\u6216\u7528\u836F\u5EFA\u8BAE\u3002'
   },
   {
     code: "HIGH_RISK_LEGAL",
+    key: "legal",
     patterns: LEGAL_PATTERNS,
     detail: "\u6587\u672C\u5305\u542B\u6CD5\u5F8B\u7ED3\u8BBA\u6216\u6CD5\u5F8B\u5EFA\u8BAE\u3002",
     remediation: '\u5220\u9664\u6CD5\u5F8B\u7ED3\u8BBA\u3002\u5982\u6D89\u53CA\u6CD5\u5F8B\u76F8\u5173\u4E3B\u9898\uFF0C\u53EA\u80FD\u8BF4"\u5EFA\u8BAE\u54A8\u8BE2\u4E13\u4E1A\u5F8B\u5E08"\uFF0C\u4E0D\u53EF\u7ED9\u51FA\u5177\u4F53\u6CD5\u5F8B\u5224\u65AD\u3002'
   },
   {
     code: "HIGH_RISK_INVESTMENT",
+    key: "investment",
     patterns: INVESTMENT_PATTERNS,
     detail: "\u6587\u672C\u5305\u542B\u6295\u8D44\u4E70\u5356\u5EFA\u8BAE\u6216\u6536\u76CA\u4FDD\u8BC1\u3002",
     remediation: '\u5220\u9664\u6295\u8D44\u64CD\u4F5C\u5EFA\u8BAE\u548C\u6536\u76CA\u4FDD\u8BC1\u3002\u7406\u8D22\u76F8\u5173\u53EA\u80FD\u7ED9\u65B9\u5411\u6027\u53C2\u8003\uFF08\u5982"\u53EF\u8003\u8651\u7A33\u5065\u578B\u7406\u8D22"\uFF09\uFF0C\u4E0D\u53EF\u7ED9\u5177\u4F53\u4E70\u5356\u6307\u4EE4\u6216\u6536\u76CA\u627F\u8BFA\u3002'
   },
   {
     code: "HIGH_RISK_LIFE_DEATH",
+    key: "life-death",
     patterns: LIFE_DEATH_PATTERNS,
     detail: "\u6587\u672C\u5305\u542B\u751F\u6B7B\u65AD\u8BED\u6216\u707E\u7978\u9884\u8A00\u3002",
     remediation: "\u5220\u9664\u6240\u6709\u751F\u6B7B\u3001\u707E\u7978\u9884\u8A00\u3002\u547D\u7406\u53EA\u63D0\u4F9B\u8D8B\u52BF\u53C2\u8003\uFF0C\u4E0D\u53EF\u5BF9\u5BFF\u547D\u3001\u707E\u7978\u505A\u786E\u5B9A\u6027\u65AD\u8A00\u3002"
   },
   {
     code: "HIGH_RISK_DETERMINISTIC_FATE",
+    key: "fate",
     patterns: FATE_PATTERNS,
     detail: "\u6587\u672C\u5305\u542B\u786E\u5B9A\u6027\u547D\u8FD0\u65AD\u8A00\uFF08\u6CE8\u5B9A/\u5929\u751F/\u5FC5\u7136/\u4E0D\u53EF\u80FD\u6539\u53D8\uFF09\u3002",
     remediation: '\u5C06\u786E\u5B9A\u6027\u65AD\u8A00\u6539\u4E3A\u8D8B\u52BF\u53C2\u8003\uFF1A"\u76D8\u9762\u663E\u793A\u2026\u7684\u503E\u5411""\u5728\u8FD9\u4E00\u65B9\u9762\u53EF\u80FD\u9700\u8981\u66F4\u591A\u52AA\u529B"\u3002\u547D\u7406\u662F\u53C2\u8003\uFF0C\u4E0D\u662F\u5BBF\u547D\u5224\u51B3\u3002'
   },
   {
     code: "HIGH_RISK_RELATIONSHIP_MANIPULATION",
+    key: "manipulation",
     patterns: MANIPULATION_PATTERNS,
     detail: "\u6587\u672C\u5305\u542B\u5173\u7CFB\u64CD\u63A7\u5EFA\u8BAE\u3002",
     remediation: "\u5220\u9664\u6240\u6709\u64CD\u63A7\u6027\u5EFA\u8BAE\u3002\u5173\u7CFB\u5EFA\u8BAE\u53EA\u80FD\u57FA\u4E8E\u76F8\u4E92\u5C0A\u91CD\u3001\u771F\u8BDA\u6C9F\u901A\u7684\u524D\u63D0\uFF0C\u4E0D\u53EF\u6559\u5506\u63A7\u5236\u6216\u7CBE\u795E\u64CD\u63A7\u3002"
   }
 ];
 var EXEMPT_SECTION_IDS = /* @__PURE__ */ new Set(["disclaimer", "uncertainty", "technical-evidence"]);
+var COMPILED_GROUPS = HIGH_RISK_GROUPS.map((group) => ({
+  group,
+  globalPatterns: group.patterns.map(
+    (p) => new RegExp(p.source, p.flags.includes("g") ? p.flags : `${p.flags}g`)
+  )
+}));
+function findHighRiskHit(normText, globalPatterns) {
+  for (let i = 0; i < globalPatterns.length; i++) {
+    const re = globalPatterns[i];
+    re.lastIndex = 0;
+    let match;
+    while ((match = re.exec(normText)) !== null) {
+      if (!isNegatedMatch(normText, match.index)) return i;
+      if (re.lastIndex === match.index) re.lastIndex++;
+    }
+  }
+  return null;
+}
+function checkResourceLimits(readingDraft) {
+  const violations = [];
+  const seen = /* @__PURE__ */ new Set();
+  const add = (limitKey, sectionId, paragraphIndex) => {
+    if (seen.has(limitKey)) return;
+    seen.add(limitKey);
+    violations.push({
+      code: "RESOURCE_LIMIT_EXCEEDED",
+      severity: "error",
+      ...sectionId !== void 0 ? { sectionId } : {},
+      ...paragraphIndex !== void 0 ? { paragraphIndex } : {},
+      patternKey: limitKey,
+      detail: "\u8349\u7A3F\u8D85\u51FA\u8D44\u6E90\u4FDD\u62A4\u4E0A\u9650\uFF0C\u672A\u6267\u884C\u5185\u5BB9\u6821\u9A8C\u3002",
+      remediation: "\u5C06\u8349\u7A3F\u89C4\u6A21\u7F29\u51CF\u5230 @ming/contracts validate-answer \u5BFC\u51FA\u7684\u4E0A\u9650\u5E38\u91CF\u4EE5\u5185\uFF08\u89C1 patternKey \u5BF9\u5E94\u7684\u5E38\u91CF\u540D\uFF09\u3002"
+    });
+  };
+  if (readingDraft.sections.length > MAX_SECTIONS) add("MAX_SECTIONS");
+  if (readingDraft.caveatsExpressed.length > MAX_CAVEATS_EXPRESSED) add("MAX_CAVEATS_EXPRESSED");
+  if (readingDraft.caveatsExpressed.some((c) => c.length > MAX_CAVEAT_ENTRY_CHARS)) {
+    add("MAX_CAVEAT_ENTRY_CHARS");
+  }
+  if (readingDraft.warningsDisclosed.length > MAX_WARNINGS_DISCLOSED) {
+    add("MAX_WARNINGS_DISCLOSED");
+  }
+  if (readingDraft.warningsDisclosed.some((w) => w.length > MAX_WARNING_ENTRY_CHARS)) {
+    add("MAX_WARNING_ENTRY_CHARS");
+  }
+  let totalChars = 0;
+  for (const section of readingDraft.sections) {
+    if (section.id.length > MAX_SECTION_ID_CHARS) add("MAX_SECTION_ID_CHARS");
+    const sectionId = section.id.length > MAX_SECTION_ID_CHARS ? void 0 : section.id;
+    if (section.heading.length > MAX_HEADING_CHARS) add("MAX_HEADING_CHARS", sectionId);
+    if (section.paragraphs.length > MAX_PARAGRAPHS_PER_SECTION) {
+      add("MAX_PARAGRAPHS_PER_SECTION", sectionId);
+    }
+    totalChars += section.heading.length;
+    for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
+      const para = section.paragraphs[pIdx];
+      totalChars += para.text.length;
+      if (para.text.length > MAX_PARAGRAPH_TEXT_CHARS) {
+        add("MAX_PARAGRAPH_TEXT_CHARS", sectionId, pIdx);
+      }
+      if (para.sourceFactIds.length > MAX_SOURCE_FACT_IDS_PER_PARAGRAPH) {
+        add("MAX_SOURCE_FACT_IDS_PER_PARAGRAPH", sectionId, pIdx);
+      }
+      if (para.sourceFactIds.some((id) => id.length > MAX_FACT_ID_CHARS)) {
+        add("MAX_FACT_ID_CHARS", sectionId, pIdx);
+      }
+    }
+  }
+  if (totalChars > MAX_TOTAL_TEXT_CHARS) add("MAX_TOTAL_TEXT_CHARS");
+  return violations;
+}
 function validateAnswer(input) {
   const { answerPlan, readingDraft } = input;
+  const limitViolations = checkResourceLimits(readingDraft);
+  if (limitViolations.length > 0) {
+    return {
+      contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+      ok: false,
+      violations: limitViolations
+    };
+  }
   const violations = [];
   const allowedIds = new Set(answerPlan.allowedFactIds);
   if (readingDraft.topic !== answerPlan.request.topic) {
     violations.push({
       code: "CROSS_TOPIC",
       severity: "error",
-      detail: `\u8349\u7A3F\u4E3B\u9898 "${readingDraft.topic}" \u4E0E AnswerPlan \u4E3B\u9898 "${answerPlan.request.topic}" \u4E0D\u4E00\u81F4\u3002`,
+      detail: "\u8349\u7A3F\u7684 topic \u4E0E AnswerPlan.request.topic \u4E0D\u4E00\u81F4\u3002",
       remediation: "\u786E\u4FDD ReadingDraft \u7684 topic \u4E0E AnswerPlan.request.topic \u5B8C\u5168\u4E00\u81F4\u3002"
     });
   }
@@ -54182,66 +54342,71 @@ function validateAnswer(input) {
     }
   }
   for (const section of readingDraft.sections) {
-    if (EXEMPT_SECTION_IDS.has(section.id)) continue;
+    const exemptFromFactChecks = EXEMPT_SECTION_IDS.has(section.id);
     for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
       const para = section.paragraphs[pIdx];
-      if (para.sourceFactIds.length === 0) {
-        violations.push({
-          code: "MISSING_SOURCE_FACTS",
-          severity: "error",
-          sectionId: section.id,
-          paragraphIndex: pIdx,
-          detail: `\u6BB5\u843D\u7F3A\u5C11 sourceFactIds\uFF1A\u5185\u5BB9\u65E0\u4E8B\u5B9E\u4F9D\u636E\u3002"${para.text.slice(0, 40)}\u2026"`,
-          remediation: "\u6BCF\u4E2A\u975E\u514D\u8D23\u6BB5\u843D\u5FC5\u987B\u5F15\u7528\u81F3\u5C11\u4E00\u4E2A allowedFactIds \u4E2D\u7684 fact ID \u4F5C\u4E3A\u4F9D\u636E\u3002\u65E0\u6CD5\u5F15\u7528\u65F6\u5E94\u5220\u9664\u8BE5\u6BB5\u843D\u3002"
-        });
-      }
-      for (const factId of para.sourceFactIds) {
-        if (!allowedIds.has(factId)) {
+      if (!exemptFromFactChecks) {
+        if (para.sourceFactIds.length === 0) {
           violations.push({
-            code: "UNKNOWN_FACT_ID",
+            code: "MISSING_SOURCE_FACTS",
             severity: "error",
             sectionId: section.id,
             paragraphIndex: pIdx,
-            detail: `\u5F15\u7528\u4E86\u4E0D\u5728 allowedFactIds \u4E2D\u7684 fact ID: "${factId}"\u3002`,
-            remediation: "\u53EA\u80FD\u5F15\u7528 answerPlan.allowedFactIds \u4E2D\u5217\u51FA\u7684 ID\u3002\u5220\u9664\u6216\u66FF\u6362\u65E0\u6548\u5F15\u7528\u3002"
+            detail: "\u6BB5\u843D\u672A\u58F0\u660E\u4EFB\u4F55 sourceFactIds\uFF0C\u5185\u5BB9\u7F3A\u5C11\u4E8B\u5B9E\u4F9D\u636E\u58F0\u660E\u3002",
+            remediation: "\u6BCF\u4E2A\u975E\u514D\u8D23\u6BB5\u843D\u5FC5\u987B\u5F15\u7528\u81F3\u5C11\u4E00\u4E2A allowedFactIds \u4E2D\u7684 fact ID \u4F5C\u4E3A\u4F9D\u636E\u3002\u65E0\u6CD5\u5F15\u7528\u65F6\u5E94\u5220\u9664\u8BE5\u6BB5\u843D\u3002"
           });
         }
-      }
-      for (const group of HIGH_RISK_GROUPS) {
-        for (const pattern of group.patterns) {
-          if (pattern.test(para.text)) {
+        for (let fIdx = 0; fIdx < para.sourceFactIds.length; fIdx++) {
+          if (!allowedIds.has(para.sourceFactIds[fIdx])) {
             violations.push({
-              code: group.code,
+              code: "UNKNOWN_FACT_ID",
               severity: "error",
               sectionId: section.id,
               paragraphIndex: pIdx,
-              detail: group.detail + ` \u5339\u914D\u5185\u5BB9\uFF1A"${para.text.slice(0, 60)}\u2026"`,
-              remediation: group.remediation
+              itemIndex: fIdx,
+              detail: "\u6BB5\u843D\u5F15\u7528\u4E86\u4E0D\u5728 allowedFactIds \u4E2D\u7684 fact ID\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 sourceFactIds \u4E0B\u6807\uFF09\u3002",
+              remediation: "\u53EA\u80FD\u5F15\u7528 answerPlan.allowedFactIds \u4E2D\u5217\u51FA\u7684 ID\u3002\u5220\u9664\u6216\u66FF\u6362\u65E0\u6548\u5F15\u7528\u3002"
             });
-            break;
           }
+        }
+      }
+      const normText = normalizeSafetyText(para.text);
+      for (const { group, globalPatterns } of COMPILED_GROUPS) {
+        const patternIndex = findHighRiskHit(normText, globalPatterns);
+        if (patternIndex !== null) {
+          violations.push({
+            code: group.code,
+            severity: "error",
+            sectionId: section.id,
+            paragraphIndex: pIdx,
+            patternKey: `${group.key}/${patternIndex}`,
+            detail: group.detail,
+            remediation: group.remediation
+          });
         }
       }
     }
   }
   const expressedCaveats = new Set(readingDraft.caveatsExpressed);
-  for (const caveat of answerPlan.requiredCaveats) {
-    if (!expressedCaveats.has(caveat)) {
+  for (let cIdx = 0; cIdx < answerPlan.requiredCaveats.length; cIdx++) {
+    if (!expressedCaveats.has(answerPlan.requiredCaveats[cIdx])) {
       violations.push({
         code: "MISSING_REQUIRED_CAVEAT",
         severity: "error",
-        detail: `\u672A\u8868\u8FBE\u5FC5\u8981\u7684 caveat\uFF1A"${caveat.slice(0, 80)}"\u3002`,
+        itemIndex: cIdx,
+        detail: "\u672A\u58F0\u660E\u8868\u8FBE\u5FC5\u8981\u7684 caveat\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredCaveats \u4E0B\u6807\uFF09\u3002",
         remediation: "\u5728\u8349\u7A3F\u7684 uncertainty \u6216 disclaimer \u90E8\u5206\u660E\u786E\u8868\u8FBE\u6B64 caveat\uFF0C\u5E76\u52A0\u5165 caveatsExpressed\u3002"
       });
     }
   }
   const disclosedWarnings = new Set(readingDraft.warningsDisclosed);
-  for (const code of answerPlan.requiredWarningCodes) {
-    if (!disclosedWarnings.has(code)) {
+  for (let wIdx = 0; wIdx < answerPlan.requiredWarningCodes.length; wIdx++) {
+    if (!disclosedWarnings.has(answerPlan.requiredWarningCodes[wIdx])) {
       violations.push({
         code: "MISSING_REQUIRED_WARNING",
         severity: "error",
-        detail: `\u672A\u62AB\u9732\u5FC5\u8981\u7684 warning: "${code}"\u3002`,
+        itemIndex: wIdx,
+        detail: "\u672A\u58F0\u660E\u62AB\u9732\u5FC5\u8981\u7684 warning\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredWarningCodes \u4E0B\u6807\uFF09\u3002",
         remediation: "\u5728\u8349\u7A3F\u4E2D\u660E\u786E\u8BF4\u660E\u6B64 warning \u7684 impact/nextStep\uFF0C\u5E76\u52A0\u5165 warningsDisclosed\u3002"
       });
     }
