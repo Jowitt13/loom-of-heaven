@@ -40601,9 +40601,12 @@ var AnswerPlan = external_exports.strictObject({
 });
 
 // packages/contracts/src/validate-answer.ts
-var READING_DRAFT_COMPAT_VERSIONS = ["reading-draft/v1", "reading-draft/v2"];
+var READING_DRAFT_CONTRACT_VERSION = "reading-draft/v2";
+var READING_DRAFT_LEGACY_V1 = "reading-draft/v1";
 var VALIDATION_RESULT_CONTRACT_VERSION = "validation-result/v2";
 var MAX_VALIDATE_ANSWER_INPUT_BYTES = 2097152;
+var MAX_OBJECT_KEYS = 32;
+var MAX_OBJECT_KEY_CHARS = 64;
 var MAX_PARAGRAPH_TEXT_CHARS = 5e3;
 var MAX_SECTIONS = 40;
 var MAX_PARAGRAPHS_PER_SECTION = 50;
@@ -40648,7 +40651,7 @@ var ReadingSection = external_exports.strictObject({
   paragraphs: external_exports.array(ReadingParagraph).min(1).max(MAX_PARAGRAPHS_PER_SECTION)
 });
 var ReadingDraft = external_exports.strictObject({
-  contractVersion: external_exports.enum(READING_DRAFT_COMPAT_VERSIONS),
+  contractVersion: external_exports.literal(READING_DRAFT_CONTRACT_VERSION),
   topic: InterpretationTopic,
   sections: external_exports.array(ReadingSection).min(1).max(MAX_SECTIONS),
   /** Which requiredCaveats (from AnswerPlan) the host claims to have expressed. */
@@ -40718,6 +40721,9 @@ var ViolationCode = external_exports.enum([
   // Contract-version violations
   "UNSUPPORTED_CONTRACT_VERSION",
   // readingDraft.contractVersion is not an accepted version
+  // Input-shape violations (public entry rejects unparseable raw input)
+  "MALFORMED_INPUT",
+  // input failed the bounded parse / runtime schema validation
   // Guardrail violations
   // Reserved: not currently emitted. Mapping answerPlan.guardrails to checks without
   // changing the public AnswerPlan contract is a follow-up design item; we do not
@@ -54171,19 +54177,28 @@ function buildAnswerPlan(publicResult, requestInput) {
 }
 
 // packages/interpret/src/validate-answer.ts
-var INVISIBLE_CHARS_RE = /[\u200B-\u200F\u2060\uFEFF\u00AD\u180E\u202A-\u202E\u2066-\u2069\uFE00-\uFE0F]/g;
+var INVISIBLE_CHARS_RE = /[\u00AD\u034F\u061C\u115F\u1160\u180E\u200B-\u200F\u202A-\u202E\u2060\u2066-\u2069\u3164\uFE00-\uFE0F\uFEFF\uFFA0]/g;
 var CJK_RANGE = "\u3400-\u9FFF\uF900-\uFAFF";
 var CJK_SEPARATOR_RE = new RegExp(
   `(?<=[${CJK_RANGE}])[ \\-_.*+~/\\u00B7\\u2010-\\u2015\\u2022\\u30FB\\u3001]+(?=[${CJK_RANGE}])`,
   "g"
 );
+var NUMERIC_CHAR_REF_RE = /&#(?:[xX]([0-9a-fA-F]{1,6})|(\d{1,7}));/g;
+function decodeCharRefsOnce(text) {
+  return text.replace(/&amp;/gi, "&").replace(NUMERIC_CHAR_REF_RE, (_m, hex3, dec) => {
+    const cp = hex3 !== void 0 ? parseInt(hex3, 16) : parseInt(dec, 10);
+    if (!Number.isFinite(cp) || cp > 1114111 || cp >= 55296 && cp <= 57343) return " ";
+    return String.fromCodePoint(cp);
+  });
+}
 function normalizeSafetyText(text) {
-  let t = text.normalize("NFKC");
+  let t = decodeCharRefsOnce(decodeCharRefsOnce(text));
+  t = t.normalize("NFKC");
   t = t.replace(INVISIBLE_CHARS_RE, "");
   t = t.replace(/\r\n?|[\u0085\u2028\u2029]/g, "\n");
   t = t.replace(/[^\S\n]+/g, " ");
   t = t.replace(CJK_SEPARATOR_RE, "");
-  return t;
+  return t.toLowerCase();
 }
 var CLAUSE_END_CLASS = "\\n\uFF0C\u3002\uFF1B\uFF1A\uFF01\uFF1F,.;:!?";
 var DISCLAIMER_NEGATION_VERBS = [
@@ -54234,7 +54249,11 @@ var DISCLAIMER_OBJECT_PHRASES = [
 ];
 var DISCLAIMER_PHRASE_ALT = `(?:${[...DISCLAIMER_OBJECT_PHRASES].sort((a, b) => b.length - a.length).join("|")})`;
 var SAFETY_DISCLAIMER_RE = new RegExp(
-  `(?:${DISCLAIMER_NEGATION_VERBS.join("|")})${DISCLAIMER_PHRASE_ALT}(?:[\u6216\u53CA\u548C]${DISCLAIMER_PHRASE_ALT})*(?=[${CLAUSE_END_CLASS}]|$)`,
+  // Anchor: the template must sit at a clause start, after at most 6 prefix
+  // characters (e.g. 本报告/本内容) that contain no negation character — a
+  // double-negation prefix (并非不构成…) therefore never masks, and a template
+  // substring inside a larger clause is not treated as a canonical disclaimer.
+  `(?<=(?:^|[${CLAUSE_END_CLASS}])[^${CLAUSE_END_CLASS}\u4E0D\u975E\u6CA1\u65E0]{0,6})(?:${DISCLAIMER_NEGATION_VERBS.join("|")})${DISCLAIMER_PHRASE_ALT}(?:[\u6216\u53CA\u548C]${DISCLAIMER_PHRASE_ALT})*(?=[${CLAUSE_END_CLASS}]|$)`,
   "g"
 );
 function maskSafetyDisclaimers(normText) {
@@ -54251,7 +54270,7 @@ var MEDICAL_RULES = [
     re: /(?:你(?:有|得了?|患了?|是)(?:抑郁|焦虑|癌|肿瘤|糖尿|心脏))/
   },
   { id: "medical.medication-change", re: /(?:停药|减药|加药|换药)/ },
-  { id: "medical.procedure-order", re: /(?:需要做(?:检查|化验|CT|MRI|B超|手术))/ }
+  { id: "medical.procedure-order", re: /(?:需要做(?:检查|化验|ct|mri|b超|手术))/ }
 ];
 var LEGAL_RULES = [
   { id: "legal.crime-conclusion", re: /(?:构成(?:犯罪|违法|侵权|违约|欺诈))/ },
@@ -54311,7 +54330,7 @@ var MANIPULATION_RULES = [
   },
   {
     id: "manipulation.coercive-tactics",
-    re: /(?:(?:冷暴力|PUA|情感操控|精神控制|gaslighting)(?:一下|对方|他|她)?)/
+    re: /(?:(?:冷暴力|pua|情感操控|精神控制|gaslighting)(?:一下|对方|他|她)?)/
   },
   {
     id: "manipulation.fear-inducing",
@@ -54358,7 +54377,6 @@ var HIGH_RISK_GROUPS = [
     remediation: "\u5220\u9664\u6240\u6709\u64CD\u63A7\u6027\u5EFA\u8BAE\u3002\u5173\u7CFB\u5EFA\u8BAE\u53EA\u80FD\u57FA\u4E8E\u76F8\u4E92\u5C0A\u91CD\u3001\u771F\u8BDA\u6C9F\u901A\u7684\u524D\u63D0\uFF0C\u4E0D\u53EF\u6559\u5506\u63A7\u5236\u6216\u7CBE\u795E\u64CD\u63A7\u3002"
   }
 ];
-var LEGACY_FACT_EXEMPT_SECTION_IDS = /* @__PURE__ */ new Set(["disclaimer", "uncertainty"]);
 function findGroupHit(scanText, rules) {
   for (const rule of rules) {
     if (rule.re.test(scanText)) return rule.id;
@@ -54371,132 +54389,73 @@ function toScanText(text) {
 }
 var RESOURCE_LIMIT_DETAIL = "\u8F93\u5165\u8D85\u51FA\u8D44\u6E90\u4FDD\u62A4\u4E0A\u9650\uFF0C\u672A\u6267\u884C\u5185\u5BB9\u6821\u9A8C\u3002";
 var RESOURCE_LIMIT_REMEDIATION = "\u5C06\u8F93\u5165\u89C4\u6A21\u7F29\u51CF\u5230 @ming/contracts validate-answer \u5BFC\u51FA\u7684\u4E0A\u9650\u5E38\u91CF\u4EE5\u5185\uFF08\u89C1 patternKey \u5BF9\u5E94\u7684\u5E38\u91CF\u540D\uFF09\u3002";
-function resourceViolation(limitKey, sectionIndex, paragraphIndex) {
+function resourceViolation(limitKey) {
   return {
     code: "RESOURCE_LIMIT_EXCEEDED",
     severity: "error",
-    ...sectionIndex !== void 0 ? { sectionIndex } : {},
-    ...paragraphIndex !== void 0 ? { paragraphIndex } : {},
     patternKey: limitKey,
     detail: RESOURCE_LIMIT_DETAIL,
     remediation: RESOURCE_LIMIT_REMEDIATION
   };
 }
-function checkResourceLimits(input) {
-  const { answerPlan, readingDraft } = input;
-  if (answerPlan.allowedFactIds.length > MAX_ALLOWED_FACT_IDS) {
-    return resourceViolation("MAX_ALLOWED_FACT_IDS");
-  }
-  if (answerPlan.requiredCaveats.length > MAX_REQUIRED_CAVEATS) {
-    return resourceViolation("MAX_REQUIRED_CAVEATS");
-  }
-  if (answerPlan.requiredWarningCodes.length > MAX_REQUIRED_WARNING_CODES) {
-    return resourceViolation("MAX_REQUIRED_WARNING_CODES");
-  }
-  if (answerPlan.disclaimers.length > MAX_PLAN_DISCLAIMERS) {
-    return resourceViolation("MAX_PLAN_DISCLAIMERS");
-  }
-  if (answerPlan.guardrails.length > MAX_PLAN_GUARDRAILS) {
-    return resourceViolation("MAX_PLAN_GUARDRAILS");
-  }
-  if (answerPlan.allowedFactIds.some((id) => id.length > MAX_FACT_ID_CHARS)) {
-    return resourceViolation("MAX_FACT_ID_CHARS");
-  }
-  if (answerPlan.requiredCaveats.some((c) => c.length > MAX_CAVEAT_ENTRY_CHARS)) {
-    return resourceViolation("MAX_CAVEAT_ENTRY_CHARS");
-  }
-  if (answerPlan.requiredWarningCodes.some((w) => w.length > MAX_WARNING_ENTRY_CHARS)) {
-    return resourceViolation("MAX_WARNING_ENTRY_CHARS");
-  }
-  if (answerPlan.disclaimers.some((d) => d.length > MAX_DISCLAIMER_ENTRY_CHARS)) {
-    return resourceViolation("MAX_DISCLAIMER_ENTRY_CHARS");
-  }
-  if (readingDraft.sections.length > MAX_SECTIONS) {
-    return resourceViolation("MAX_SECTIONS");
-  }
-  if (readingDraft.caveatsExpressed.length > MAX_CAVEATS_EXPRESSED) {
-    return resourceViolation("MAX_CAVEATS_EXPRESSED");
-  }
-  if (readingDraft.caveatsExpressed.some((c) => c.length > MAX_CAVEAT_ENTRY_CHARS)) {
-    return resourceViolation("MAX_CAVEAT_ENTRY_CHARS");
-  }
-  if (readingDraft.warningsDisclosed.length > MAX_WARNINGS_DISCLOSED) {
-    return resourceViolation("MAX_WARNINGS_DISCLOSED");
-  }
-  if (readingDraft.warningsDisclosed.some((w) => w.length > MAX_WARNING_ENTRY_CHARS)) {
-    return resourceViolation("MAX_WARNING_ENTRY_CHARS");
-  }
-  let totalChars = 0;
-  let totalFactIds = 0;
-  for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
-    const section = readingDraft.sections[sIdx];
-    if (section.id.length > MAX_SECTION_ID_CHARS) {
-      return resourceViolation("MAX_SECTION_ID_CHARS", sIdx);
-    }
-    if (section.heading.length > MAX_HEADING_CHARS) {
-      return resourceViolation("MAX_HEADING_CHARS", sIdx);
-    }
-    if (section.paragraphs.length > MAX_PARAGRAPHS_PER_SECTION) {
-      return resourceViolation("MAX_PARAGRAPHS_PER_SECTION", sIdx);
-    }
-    totalChars += section.heading.length;
-    if (totalChars > MAX_TOTAL_TEXT_CHARS) {
-      return resourceViolation("MAX_TOTAL_TEXT_CHARS", sIdx);
-    }
-    for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
-      const para = section.paragraphs[pIdx];
-      if (para.text.length > MAX_PARAGRAPH_TEXT_CHARS) {
-        return resourceViolation("MAX_PARAGRAPH_TEXT_CHARS", sIdx, pIdx);
-      }
-      if (para.sourceFactIds.length > MAX_SOURCE_FACT_IDS_PER_PARAGRAPH) {
-        return resourceViolation("MAX_SOURCE_FACT_IDS_PER_PARAGRAPH", sIdx, pIdx);
-      }
-      if (para.sourceFactIds.some((id) => id.length > MAX_FACT_ID_CHARS)) {
-        return resourceViolation("MAX_FACT_ID_CHARS", sIdx, pIdx);
-      }
-      if ((para.constraintRefs?.length ?? 0) > MAX_CONSTRAINT_REFS_PER_PARAGRAPH) {
-        return resourceViolation("MAX_CONSTRAINT_REFS_PER_PARAGRAPH", sIdx, pIdx);
-      }
-      totalChars += para.text.length;
-      if (totalChars > MAX_TOTAL_TEXT_CHARS) {
-        return resourceViolation("MAX_TOTAL_TEXT_CHARS", sIdx, pIdx);
-      }
-      totalFactIds += para.sourceFactIds.length;
-      if (totalFactIds > MAX_TOTAL_SOURCE_FACT_IDS) {
-        return resourceViolation("MAX_TOTAL_SOURCE_FACT_IDS", sIdx, pIdx);
-      }
-    }
-  }
-  return null;
-}
 function validateAnswer(input) {
+  const reject = (code, detail, remediation) => ({
+    contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+    ok: false,
+    violations: [{ code, severity: "error", detail, remediation }],
+    violationsTruncated: false
+  });
+  const rawDraft = typeof input === "object" && input !== null ? input.readingDraft : void 0;
+  const draftVersion = typeof rawDraft === "object" && rawDraft !== null ? rawDraft.contractVersion : void 0;
+  if (draftVersion !== READING_DRAFT_CONTRACT_VERSION) {
+    return reject(
+      "UNSUPPORTED_CONTRACT_VERSION",
+      "ReadingDraft \u7684 contractVersion \u4E0D\u662F\u53D7\u652F\u6301\u7684 reading-draft/v2\u3002",
+      "\u4F7F\u7528 reading-draft/v2\u3002legacy reading-draft/v1 \u5DF2\u5728\u8FD0\u884C\u65F6\u88AB\u62D2\u7EDD\uFF08v0.2.0 \u7834\u574F\u6027\u53D8\u5316\uFF09\uFF1B\u8FC1\u79FB\u65B9\u6CD5\u89C1 references/answer-contract.md\uFF08\u4E3A\u7EA6\u675F\u8868\u8FBE\u6BB5\u843D\u6DFB\u52A0 constraintRefs \u5E76\u66F4\u6362\u7248\u672C\u4E32\uFF09\u3002"
+    );
+  }
+  let parsed;
+  try {
+    parsed = parseValidateAnswerInputBounded(input);
+  } catch (err) {
+    if (err instanceof BoundedParseError && err.limitKey !== void 0) {
+      return {
+        contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+        ok: false,
+        violations: [resourceViolation(err.limitKey)],
+        violationsTruncated: false
+      };
+    }
+    return reject(
+      "MALFORMED_INPUT",
+      "\u8F93\u5165\u672A\u901A\u8FC7\u6709\u754C\u9884\u68C0\u6216\u8FD0\u884C\u65F6 schema \u6821\u9A8C\uFF0C\u672A\u6267\u884C\u5185\u5BB9\u6821\u9A8C\u3002",
+      "\u6309 references/answer-contract.md \u7684 ValidateAnswerInput \u7ED3\u6784\u63D0\u4F9B { answerPlan, readingDraft }\uFF0C\u5E76\u9075\u5B88\u5BFC\u51FA\u7684 MAX_* \u4E0A\u9650\u3002"
+    );
+  }
+  return runValidateAnswer(parsed);
+}
+function constraintTargetLength(plan, kind) {
+  switch (kind) {
+    case "disclaimer":
+      return plan.disclaimers.length;
+    case "caveat":
+      return plan.requiredCaveats.length;
+    case "warning":
+      return plan.requiredWarningCodes.length;
+  }
+}
+function constraintKindKey(kind) {
+  switch (kind) {
+    case "disclaimer":
+      return "disclaimer";
+    case "caveat":
+      return "caveat";
+    case "warning":
+      return "warning";
+  }
+}
+function runValidateAnswer(input) {
   const { answerPlan, readingDraft } = input;
-  const draftVersion = readingDraft.contractVersion;
-  if (!READING_DRAFT_COMPAT_VERSIONS.includes(draftVersion)) {
-    return {
-      contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
-      ok: false,
-      violations: [
-        {
-          code: "UNSUPPORTED_CONTRACT_VERSION",
-          severity: "error",
-          detail: "ReadingDraft \u7684 contractVersion \u4E0D\u5728\u53D7\u652F\u6301\u7684\u7248\u672C\u5217\u8868\u5185\u3002",
-          remediation: "\u4F7F\u7528 reading-draft/v2\uFF1Blegacy reading-draft/v1 \u4EC5\u5728\u6EE1\u8DB3 v2 \u5B89\u5168\u4E0A\u9650\u65F6\u6709\u6761\u4EF6\u63A5\u53D7\u3002"
-        }
-      ],
-      violationsTruncated: false
-    };
-  }
-  const isLegacyV1 = draftVersion === "reading-draft/v1";
-  const limitViolation = checkResourceLimits(input);
-  if (limitViolation !== null) {
-    return {
-      contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
-      ok: false,
-      violations: [limitViolation],
-      violationsTruncated: false
-    };
-  }
   const violations = [];
   let violationsTruncated = false;
   const push = (v) => {
@@ -54537,7 +54496,6 @@ function validateAnswer(input) {
   const referencedDisclaimers = /* @__PURE__ */ new Set();
   const referencedCaveats = /* @__PURE__ */ new Set();
   const referencedWarnings = /* @__PURE__ */ new Set();
-  const constraintTargetLength = (kind) => kind === "disclaimer" ? answerPlan.disclaimers.length : kind === "caveat" ? answerPlan.requiredCaveats.length : answerPlan.requiredWarningCodes.length;
   for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
     const section = readingDraft.sections[sIdx];
     if (section.heading.length > 0) {
@@ -54563,7 +54521,7 @@ function validateAnswer(input) {
       let refsValid = refs.length > 0;
       for (let rIdx = 0; rIdx < refs.length; rIdx++) {
         const ref = refs[rIdx];
-        if (ref.index >= constraintTargetLength(ref.kind)) {
+        if (ref.index >= constraintTargetLength(answerPlan, ref.kind)) {
           refsValid = false;
           push({
             code: "INVALID_CONSTRAINT_REF",
@@ -54572,7 +54530,7 @@ function validateAnswer(input) {
             field: "paragraph",
             paragraphIndex: pIdx,
             itemIndex: rIdx,
-            patternKey: ref.kind,
+            patternKey: constraintKindKey(ref.kind),
             detail: "\u6BB5\u843D\u7684 constraintRef \u672A\u6307\u5411\u771F\u5B9E\u5B58\u5728\u7684 AnswerPlan \u7EA6\u675F\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 constraintRefs \u4E0B\u6807\u4E0E patternKey \u5BF9\u5E94\u7684 kind\uFF09\u3002",
             remediation: "\u53EA\u80FD\u5F15\u7528 answerPlan.disclaimers / requiredCaveats / requiredWarningCodes \u4E2D\u771F\u5B9E\u5B58\u5728\u7684\u4E0B\u6807\u3002"
           });
@@ -54585,36 +54543,34 @@ function validateAnswer(input) {
           else referencedWarnings.add(ref.index);
         }
       }
-      const exemptFromFactChecks = (
+      const exemptFromMissingFactCheck = (
         // not-supported drafts must be fact-free; the UNSUPPORTED_TOPIC gate
         // above governs them instead of the citation requirement.
-        answerPlan.answerability === "not-supported" || (isLegacyV1 ? LEGACY_FACT_EXEMPT_SECTION_IDS.has(section.id) || refsValid : refsValid)
+        answerPlan.answerability === "not-supported" || refsValid
       );
-      if (!exemptFromFactChecks) {
-        if (para.sourceFactIds.length === 0) {
+      if (!exemptFromMissingFactCheck && para.sourceFactIds.length === 0) {
+        push({
+          code: "MISSING_SOURCE_FACTS",
+          severity: "error",
+          sectionIndex: sIdx,
+          field: "paragraph",
+          paragraphIndex: pIdx,
+          detail: "\u6BB5\u843D\u672A\u58F0\u660E\u4EFB\u4F55 sourceFactIds\uFF0C\u5185\u5BB9\u7F3A\u5C11\u4E8B\u5B9E\u4F9D\u636E\u58F0\u660E\u3002",
+          remediation: "\u6BCF\u4E2A\u975E\u7EA6\u675F\u8868\u8FBE\u6BB5\u843D\u5FC5\u987B\u5F15\u7528\u81F3\u5C11\u4E00\u4E2A allowedFactIds \u4E2D\u7684 fact ID\uFF1B\u8868\u8FBE\u514D\u8D23/caveat/warning \u7684\u6BB5\u843D\u5FC5\u987B\u901A\u8FC7 constraintRefs \u5F15\u7528\u771F\u5B9E\u5B58\u5728\u7684 AnswerPlan \u7EA6\u675F\u3002"
+        });
+      }
+      for (let fIdx = 0; fIdx < para.sourceFactIds.length; fIdx++) {
+        if (!allowedIds.has(para.sourceFactIds[fIdx])) {
           push({
-            code: "MISSING_SOURCE_FACTS",
+            code: "UNKNOWN_FACT_ID",
             severity: "error",
             sectionIndex: sIdx,
             field: "paragraph",
             paragraphIndex: pIdx,
-            detail: "\u6BB5\u843D\u672A\u58F0\u660E\u4EFB\u4F55 sourceFactIds\uFF0C\u5185\u5BB9\u7F3A\u5C11\u4E8B\u5B9E\u4F9D\u636E\u58F0\u660E\u3002",
-            remediation: "\u6BCF\u4E2A\u975E\u7EA6\u675F\u8868\u8FBE\u6BB5\u843D\u5FC5\u987B\u5F15\u7528\u81F3\u5C11\u4E00\u4E2A allowedFactIds \u4E2D\u7684 fact ID\uFF1B\u8868\u8FBE\u514D\u8D23/caveat/warning \u7684\u6BB5\u843D\u5FC5\u987B\u901A\u8FC7 constraintRefs \u5F15\u7528\u771F\u5B9E\u5B58\u5728\u7684 AnswerPlan \u7EA6\u675F\u3002"
+            itemIndex: fIdx,
+            detail: "\u6BB5\u843D\u5F15\u7528\u4E86\u4E0D\u5728 allowedFactIds \u4E2D\u7684 fact ID\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 sourceFactIds \u4E0B\u6807\uFF09\u3002",
+            remediation: "\u53EA\u80FD\u5F15\u7528 answerPlan.allowedFactIds \u4E2D\u5217\u51FA\u7684 ID\u3002\u5220\u9664\u6216\u66FF\u6362\u65E0\u6548\u5F15\u7528\u3002"
           });
-        }
-        for (let fIdx = 0; fIdx < para.sourceFactIds.length; fIdx++) {
-          if (!allowedIds.has(para.sourceFactIds[fIdx])) {
-            push({
-              code: "UNKNOWN_FACT_ID",
-              severity: "error",
-              sectionIndex: sIdx,
-              field: "paragraph",
-              paragraphIndex: pIdx,
-              itemIndex: fIdx,
-              detail: "\u6BB5\u843D\u5F15\u7528\u4E86\u4E0D\u5728 allowedFactIds \u4E2D\u7684 fact ID\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 sourceFactIds \u4E0B\u6807\uFF09\u3002",
-              remediation: "\u53EA\u80FD\u5F15\u7528 answerPlan.allowedFactIds \u4E2D\u5217\u51FA\u7684 ID\u3002\u5220\u9664\u6216\u66FF\u6362\u65E0\u6548\u5F15\u7528\u3002"
-            });
-          }
         }
       }
       const paraScanText = toScanText(para.text);
@@ -54638,18 +54594,6 @@ function validateAnswer(input) {
   const expressedCaveats = new Set(readingDraft.caveatsExpressed);
   for (let cIdx = 0; cIdx < answerPlan.requiredCaveats.length; cIdx++) {
     const declared = expressedCaveats.has(answerPlan.requiredCaveats[cIdx]);
-    if (isLegacyV1) {
-      if (!declared) {
-        push({
-          code: "MISSING_REQUIRED_CAVEAT",
-          severity: "error",
-          itemIndex: cIdx,
-          detail: "\u672A\u58F0\u660E\u8868\u8FBE\u5FC5\u8981\u7684 caveat\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredCaveats \u4E0B\u6807\uFF09\u3002",
-          remediation: "\u5728\u8349\u7A3F\u7684 uncertainty \u6216 disclaimer \u90E8\u5206\u660E\u786E\u8868\u8FBE\u6B64 caveat\uFF0C\u5E76\u52A0\u5165 caveatsExpressed\u3002"
-        });
-      }
-      continue;
-    }
     const referenced = referencedCaveats.has(cIdx);
     if (!declared && !referenced) {
       push({
@@ -54673,18 +54617,6 @@ function validateAnswer(input) {
   const disclosedWarnings = new Set(readingDraft.warningsDisclosed);
   for (let wIdx = 0; wIdx < answerPlan.requiredWarningCodes.length; wIdx++) {
     const declared = disclosedWarnings.has(answerPlan.requiredWarningCodes[wIdx]);
-    if (isLegacyV1) {
-      if (!declared) {
-        push({
-          code: "MISSING_REQUIRED_WARNING",
-          severity: "error",
-          itemIndex: wIdx,
-          detail: "\u672A\u58F0\u660E\u62AB\u9732\u5FC5\u8981\u7684 warning\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredWarningCodes \u4E0B\u6807\uFF09\u3002",
-          remediation: "\u5728\u8349\u7A3F\u4E2D\u660E\u786E\u8BF4\u660E\u6B64 warning \u7684 impact/nextStep\uFF0C\u5E76\u52A0\u5165 warningsDisclosed\u3002"
-        });
-      }
-      continue;
-    }
     const referenced = referencedWarnings.has(wIdx);
     if (!declared && !referenced) {
       push({
@@ -54705,16 +54637,14 @@ function validateAnswer(input) {
       });
     }
   }
-  if (answerPlan.disclaimers.length > 0) {
-    const hasDisclaimer = isLegacyV1 ? readingDraft.sections.some(
-      (s) => s.id === "disclaimer" || s.heading.includes("\u58F0\u660E") || s.heading.includes("\u514D\u8D23")
-    ) : referencedDisclaimers.size > 0;
-    if (!hasDisclaimer) {
+  for (let dIdx = 0; dIdx < answerPlan.disclaimers.length; dIdx++) {
+    if (!referencedDisclaimers.has(dIdx)) {
       push({
         code: "MISSING_DISCLAIMER",
-        severity: "warning",
-        detail: "AnswerPlan \u5305\u542B disclaimers \u4F46\u8349\u7A3F\u7F3A\u5C11\u5BF9\u5E94\u7684\u514D\u8D23\u58F0\u660E\u8868\u8FBE\u3002",
-        remediation: '\u7528\u4E00\u4E2A\u6BB5\u843D\u8868\u8FBE AnswerPlan \u7684 disclaimers\uFF0C\u5E76\u52A0 constraintRefs {kind:"disclaimer", index}\uFF08legacy v1\uFF1A\u63D0\u4F9B id \u4E3A "disclaimer" \u7684 section\uFF09\u3002'
+        severity: "error",
+        itemIndex: dIdx,
+        detail: "AnswerPlan \u7684\u67D0\u6761 disclaimer \u672A\u88AB\u4EFB\u4F55\u6BB5\u843D\u7684 constraintRef \u8986\u76D6\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.disclaimers \u4E0B\u6807\uFF09\u3002",
+        remediation: '\u7528\u6BB5\u843D\u8868\u8FBE\u6BCF\u4E00\u6761 disclaimer\uFF0C\u5E76\u4E3A\u6BCF\u6761\u52A0 constraintRefs {kind:"disclaimer", index}\u3002'
       });
     }
   }
@@ -54727,44 +54657,122 @@ function validateAnswer(input) {
   };
 }
 var BOUNDED_PARSE_REJECT_MESSAGE = "validate-answer input rejected by bounded preflight: missing required structure or a field exceeds the protective limits.";
-function boundedReject() {
-  throw new Error(BOUNDED_PARSE_REJECT_MESSAGE);
+var BoundedParseError = class extends Error {
+  limitKey;
+  constructor(limitKey) {
+    super(BOUNDED_PARSE_REJECT_MESSAGE);
+    if (limitKey !== void 0) this.limitKey = limitKey;
+  }
+};
+function boundedReject(limitKey) {
+  throw new BoundedParseError(limitKey);
 }
 function isPlainObject2(v) {
   return typeof v === "object" && v !== null;
 }
-function requireArrayWithin(v, max) {
-  if (!Array.isArray(v) || v.length > max) boundedReject();
+function requireBoundedObject(v) {
+  if (!isPlainObject2(v)) boundedReject();
+  const keys = Object.keys(v);
+  if (keys.length > MAX_OBJECT_KEYS) boundedReject("MAX_OBJECT_KEYS");
+  for (const key of keys) {
+    if (key.length > MAX_OBJECT_KEY_CHARS) boundedReject("MAX_OBJECT_KEY_CHARS");
+  }
   return v;
 }
+function requireArrayWithin(v, max, limitKey) {
+  if (!Array.isArray(v)) boundedReject();
+  if (v.length > max) boundedReject(limitKey);
+  return v;
+}
+function requireStringEntriesWithin(entries, maxChars, limitKey) {
+  for (const entry of entries) {
+    if (typeof entry !== "string") boundedReject();
+    if (entry.length > maxChars) boundedReject(limitKey);
+  }
+}
 function parseValidateAnswerInputBounded(raw) {
-  if (!isPlainObject2(raw)) boundedReject();
-  const plan = raw.answerPlan;
-  const draft = raw.readingDraft;
-  if (!isPlainObject2(plan) || !isPlainObject2(draft)) boundedReject();
-  requireArrayWithin(plan.allowedFactIds, MAX_ALLOWED_FACT_IDS);
-  requireArrayWithin(plan.requiredCaveats, MAX_REQUIRED_CAVEATS);
-  requireArrayWithin(plan.requiredWarningCodes, MAX_REQUIRED_WARNING_CODES);
-  requireArrayWithin(plan.guardrails, MAX_PLAN_GUARDRAILS);
-  requireArrayWithin(plan.disclaimers, MAX_PLAN_DISCLAIMERS);
-  const sections = requireArrayWithin(draft.sections, MAX_SECTIONS);
-  requireArrayWithin(draft.caveatsExpressed, MAX_CAVEATS_EXPRESSED);
-  requireArrayWithin(draft.warningsDisclosed, MAX_WARNINGS_DISCLOSED);
-  for (const section of sections) {
-    if (!isPlainObject2(section)) boundedReject();
-    const paragraphs = requireArrayWithin(section.paragraphs, MAX_PARAGRAPHS_PER_SECTION);
-    for (const para of paragraphs) {
-      if (!isPlainObject2(para)) boundedReject();
-      if (typeof para.text !== "string" || para.text.length > MAX_PARAGRAPH_TEXT_CHARS) {
-        boundedReject();
-      }
-      requireArrayWithin(para.sourceFactIds, MAX_SOURCE_FACT_IDS_PER_PARAGRAPH);
+  const root = requireBoundedObject(raw);
+  const plan = requireBoundedObject(root.answerPlan);
+  const draft = requireBoundedObject(root.readingDraft);
+  requireStringEntriesWithin(
+    requireArrayWithin(plan.allowedFactIds, MAX_ALLOWED_FACT_IDS, "MAX_ALLOWED_FACT_IDS"),
+    MAX_FACT_ID_CHARS,
+    "MAX_FACT_ID_CHARS"
+  );
+  requireStringEntriesWithin(
+    requireArrayWithin(plan.requiredCaveats, MAX_REQUIRED_CAVEATS, "MAX_REQUIRED_CAVEATS"),
+    MAX_CAVEAT_ENTRY_CHARS,
+    "MAX_CAVEAT_ENTRY_CHARS"
+  );
+  requireStringEntriesWithin(
+    requireArrayWithin(
+      plan.requiredWarningCodes,
+      MAX_REQUIRED_WARNING_CODES,
+      "MAX_REQUIRED_WARNING_CODES"
+    ),
+    MAX_WARNING_ENTRY_CHARS,
+    "MAX_WARNING_ENTRY_CHARS"
+  );
+  requireArrayWithin(plan.guardrails, MAX_PLAN_GUARDRAILS, "MAX_PLAN_GUARDRAILS");
+  requireStringEntriesWithin(
+    requireArrayWithin(plan.disclaimers, MAX_PLAN_DISCLAIMERS, "MAX_PLAN_DISCLAIMERS"),
+    MAX_DISCLAIMER_ENTRY_CHARS,
+    "MAX_DISCLAIMER_ENTRY_CHARS"
+  );
+  const sections = requireArrayWithin(draft.sections, MAX_SECTIONS, "MAX_SECTIONS");
+  requireStringEntriesWithin(
+    requireArrayWithin(draft.caveatsExpressed, MAX_CAVEATS_EXPRESSED, "MAX_CAVEATS_EXPRESSED"),
+    MAX_CAVEAT_ENTRY_CHARS,
+    "MAX_CAVEAT_ENTRY_CHARS"
+  );
+  requireStringEntriesWithin(
+    requireArrayWithin(draft.warningsDisclosed, MAX_WARNINGS_DISCLOSED, "MAX_WARNINGS_DISCLOSED"),
+    MAX_WARNING_ENTRY_CHARS,
+    "MAX_WARNING_ENTRY_CHARS"
+  );
+  let totalChars = 0;
+  let totalFactIds = 0;
+  for (const rawSection of sections) {
+    const section = requireBoundedObject(rawSection);
+    if (typeof section.id !== "string" || typeof section.heading !== "string") boundedReject();
+    if (section.id.length > MAX_SECTION_ID_CHARS) boundedReject("MAX_SECTION_ID_CHARS");
+    if (section.heading.length > MAX_HEADING_CHARS) boundedReject("MAX_HEADING_CHARS");
+    totalChars += section.heading.length;
+    if (totalChars > MAX_TOTAL_TEXT_CHARS) boundedReject("MAX_TOTAL_TEXT_CHARS");
+    const paragraphs = requireArrayWithin(
+      section.paragraphs,
+      MAX_PARAGRAPHS_PER_SECTION,
+      "MAX_PARAGRAPHS_PER_SECTION"
+    );
+    for (const rawPara of paragraphs) {
+      const para = requireBoundedObject(rawPara);
+      if (typeof para.text !== "string") boundedReject();
+      if (para.text.length > MAX_PARAGRAPH_TEXT_CHARS) boundedReject("MAX_PARAGRAPH_TEXT_CHARS");
+      totalChars += para.text.length;
+      if (totalChars > MAX_TOTAL_TEXT_CHARS) boundedReject("MAX_TOTAL_TEXT_CHARS");
+      const factIds = requireArrayWithin(
+        para.sourceFactIds,
+        MAX_SOURCE_FACT_IDS_PER_PARAGRAPH,
+        "MAX_SOURCE_FACT_IDS_PER_PARAGRAPH"
+      );
+      requireStringEntriesWithin(factIds, MAX_FACT_ID_CHARS, "MAX_FACT_ID_CHARS");
+      totalFactIds += factIds.length;
+      if (totalFactIds > MAX_TOTAL_SOURCE_FACT_IDS) boundedReject("MAX_TOTAL_SOURCE_FACT_IDS");
       if (para.constraintRefs !== void 0) {
-        requireArrayWithin(para.constraintRefs, MAX_CONSTRAINT_REFS_PER_PARAGRAPH);
+        const refs = requireArrayWithin(
+          para.constraintRefs,
+          MAX_CONSTRAINT_REFS_PER_PARAGRAPH,
+          "MAX_CONSTRAINT_REFS_PER_PARAGRAPH"
+        );
+        for (const ref of refs) requireBoundedObject(ref);
       }
     }
   }
-  return ValidateAnswerInput.parse(raw);
+  try {
+    return ValidateAnswerInput.parse(raw);
+  } catch {
+    boundedReject();
+  }
 }
 
 // packages/interpret/src/reading-lint.ts
@@ -56211,9 +56219,36 @@ export {
   EngineError,
   JARGON_SOFT,
   JARGON_STRONG,
+  MAX_ALLOWED_FACT_IDS,
+  MAX_CAVEATS_EXPRESSED,
+  MAX_CAVEAT_ENTRY_CHARS,
+  MAX_CONSTRAINT_REFS_PER_PARAGRAPH,
+  MAX_DISCLAIMER_ENTRY_CHARS,
+  MAX_FACT_ID_CHARS,
+  MAX_HEADING_CHARS,
+  MAX_NOT_SUPPORTED_TEXT_CHARS,
+  MAX_OBJECT_KEYS,
+  MAX_OBJECT_KEY_CHARS,
+  MAX_PARAGRAPHS_PER_SECTION,
+  MAX_PARAGRAPH_TEXT_CHARS,
+  MAX_PLAN_DISCLAIMERS,
+  MAX_PLAN_GUARDRAILS,
+  MAX_REQUIRED_CAVEATS,
+  MAX_REQUIRED_WARNING_CODES,
+  MAX_SECTIONS,
+  MAX_SECTION_ID_CHARS,
+  MAX_SOURCE_FACT_IDS_PER_PARAGRAPH,
+  MAX_TOTAL_SOURCE_FACT_IDS,
+  MAX_TOTAL_TEXT_CHARS,
   MAX_VALIDATE_ANSWER_INPUT_BYTES,
+  MAX_VIOLATIONS,
+  MAX_WARNINGS_DISCLOSED,
+  MAX_WARNING_ENTRY_CHARS,
+  READING_DRAFT_CONTRACT_VERSION,
+  READING_DRAFT_LEGACY_V1,
   READING_TERMS,
   SCHEMA_VERSION,
+  VALIDATION_RESULT_CONTRACT_VERSION,
   ValidateAnswerInput,
   calculate,
   canonicalJson,

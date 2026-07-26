@@ -1,40 +1,46 @@
 /**
  * validate-answer — deterministic, offline fact-boundary and safety validator (P0).
  *
- * A DETERMINISTIC STRUCTURE-AND-WORDING GATE over a host-produced ReadingDraft:
- * 1. Fact boundary: in v2, a paragraph is fact-exempt ONLY when its
- *    `constraintRefs` all resolve to real AnswerPlan constraints (disclaimers /
- *    requiredCaveats / requiredWarningCodes); a free section id never grants
- *    exemption. Legacy v1 drafts keep the old disclaimer/uncertainty section-id
- *    exemption as conditional compatibility. Every other paragraph must declare
- *    sourceFactIds that exist in allowedFactIds. (Citation presence is
- *    structural — it does NOT prove the paragraph's meaning is derived from
- *    those facts.)
- * 2. The draft does not cross topic boundaries; `not-supported` plans reject any
- *    fact-citing draft, and budget ALL visible text (headings + paragraphs)
- *    regardless of section ids. This verifies "short and fact-free" only — it
- *    cannot prove the text semantically just explains the limitation.
- * 3. High-risk expression rules (medical, legal, investment, fate, life-death,
- *    manipulation) run over ALL visible text — every heading and every paragraph
- *    of every section. Canonical fixed safety-disclaimer templates are masked
- *    before scanning; everything else is scanned as-is.
- * 4. Required caveats/warnings: structured `constraintRefs` are the primary
- *    evidence in v2; `caveatsExpressed`/`warningsDisclosed` must stay consistent
- *    with them (still not a semantic proof of in-body expression).
- * 5. Protective resource limits reject oversized inputs before any regex
- *    scanning and cap reported violations. These bound the VALIDATION stage
- *    only; use `parseValidateAnswerInputBounded` + the CLI file-byte cap for
- *    bounded parsing before validation.
+ * A DETERMINISTIC STRUCTURE-AND-WORDING GATE over a host-produced ReadingDraft.
+ * The ONLY public entry is `validateAnswer(input: unknown)`: it never trusts the
+ * caller to have parsed anything — every call runs the bounded preflight and the
+ * full runtime schema first, and malformed / over-limit / wrong-version input is
+ * rejected with a stable result (never a crash, never an echo of caller data).
  *
- * Honest scope: the rule scan (with normalization and canonical-template
- * masking) is a heuristic wording gate; it cannot recognize every semantic
- * paraphrase or evasion. This is the SAFETY layer; lint-reading remains the
- * LANGUAGE QUALITY layer — the two keep separate word lists on purpose.
+ * Checks (after parsing):
+ * 1. Fact boundary: a paragraph may skip the "at least one fact" requirement
+ *    ONLY when its `constraintRefs` all resolve to real AnswerPlan constraints;
+ *    a free section id never grants exemption, and every provided sourceFactId
+ *    is ALWAYS checked against allowedFactIds regardless of exemption.
+ *    (Citation presence is structural — it does NOT prove the paragraph's
+ *    meaning is derived from those facts.)
+ * 2. Topic boundaries; `not-supported` plans reject any fact-citing draft and
+ *    budget ALL visible text (headings + paragraphs) — this verifies "short and
+ *    fact-free" only, not that the text semantically explains the limitation.
+ * 3. High-risk expression rules run over ALL visible text (every heading and
+ *    paragraph). Canonical fixed safety-disclaimer templates, anchored at a
+ *    clause start, are masked before scanning; everything else is scanned as-is.
+ *    Scanning normalizes to the HOST-RENDERED form: numeric character
+ *    references are decoded, default-ignorable code points stripped, and case
+ *    folded, so encoding variants cannot diverge from what the user sees.
+ * 4. Required caveats/warnings via structured `constraintRefs`, with
+ *    `caveatsExpressed`/`warningsDisclosed` required to stay consistent; every
+ *    plan disclaimer must be covered by a reference, item by item.
+ * 5. Protective resource limits reject oversized inputs before any regex
+ *    scanning and cap reported violations. These bound the parse+validation
+ *    stages only; the CLI adds a file-byte cap before reading.
+ *
+ * Legacy `reading-draft/v1` is REJECTED at runtime (v0.2.0 breaking change) —
+ * accepting caller-selected v1 would re-enable removed exemptions from input
+ * data alone. Honest scope: the rule scan is a heuristic wording gate; it
+ * cannot recognize every semantic paraphrase or evasion. This is the SAFETY
+ * layer; lint-reading remains the LANGUAGE QUALITY layer.
  */
 
 import type {
   AnswerValidationResult,
   AnswerViolation,
+  PlanConstraintKind,
   ValidateAnswerInput,
   ViolationCode,
 } from '@ming/contracts';
@@ -47,6 +53,8 @@ import {
   MAX_FACT_ID_CHARS,
   MAX_HEADING_CHARS,
   MAX_NOT_SUPPORTED_TEXT_CHARS,
+  MAX_OBJECT_KEY_CHARS,
+  MAX_OBJECT_KEYS,
   MAX_PARAGRAPH_TEXT_CHARS,
   MAX_PARAGRAPHS_PER_SECTION,
   MAX_PLAN_DISCLAIMERS,
@@ -61,7 +69,7 @@ import {
   MAX_VIOLATIONS,
   MAX_WARNING_ENTRY_CHARS,
   MAX_WARNINGS_DISCLOSED,
-  READING_DRAFT_COMPAT_VERSIONS,
+  READING_DRAFT_CONTRACT_VERSION,
   VALIDATION_RESULT_CONTRACT_VERSION,
   ValidateAnswerInput as ValidateAnswerInputSchema,
 } from '@ming/contracts';
@@ -70,9 +78,10 @@ import {
 // Deliberately NOT merged with reading-lint's style word lists: this normalizer only
 // serves the high-risk scan below.
 
-/** Zero-width / invisible formatting characters commonly used to split keywords. */
+/** Zero-width / invisible / default-ignorable code points used to split keywords
+ * (incl. U+034F COMBINING GRAPHEME JOINER, U+061C, Hangul fillers). */
 const INVISIBLE_CHARS_RE =
-  /[\u200B-\u200F\u2060\uFEFF\u00AD\u180E\u202A-\u202E\u2066-\u2069\uFE00-\uFE0F]/g;
+  /[\u00AD\u034F\u061C\u115F\u1160\u180E\u200B-\u200F\u202A-\u202E\u2060\u2066-\u2069\u3164\uFE00-\uFE0F\uFEFF\uFFA0]/g;
 
 /** CJK unified ideograph ranges used to detect artificial splitting of Chinese words. */
 const CJK_RANGE = '\u3400-\u9FFF\uF900-\uFAFF';
@@ -88,23 +97,45 @@ const CJK_SEPARATOR_RE = new RegExp(
 );
 
 /**
- * Normalize text for safety scanning:
- * 1. Unicode NFKC (folds full-width/compatibility forms, e.g. ＰＵＡ → PUA).
- * 2. Strip zero-width and invisible formatting characters.
- * 3. Normalize line endings to `\n` and collapse HORIZONTAL whitespace runs to a
+ * HTML/Markdown numeric character references (&#27880; / &#x6CE8;) render back
+ * to real characters in the host's final output, so the scan must see the
+ * rendered form. Invalid / surrogate code points decode to a space.
+ */
+const NUMERIC_CHAR_REF_RE = /&#(?:[xX]([0-9a-fA-F]{1,6})|(\d{1,7}));/g;
+
+function decodeCharRefsOnce(text: string): string {
+  return text
+    .replace(/&amp;/gi, '&')
+    .replace(NUMERIC_CHAR_REF_RE, (_m, hex?: string, dec?: string) => {
+      const cp = hex !== undefined ? parseInt(hex, 16) : parseInt(dec!, 10);
+      if (!Number.isFinite(cp) || cp > 0x10ffff || (cp >= 0xd800 && cp <= 0xdfff)) return ' ';
+      return String.fromCodePoint(cp);
+    });
+}
+
+/**
+ * Normalize text to the HOST-RENDERED form for safety scanning:
+ * 1. Decode numeric character references twice (covers `&#…;`, `&#x…;` and the
+ *    `&amp;#…;` double-encoded layer) — the same decode semantics apply to
+ *    every host, so the scanned text matches the finally visible text.
+ * 2. Unicode NFKC (folds full-width/compatibility forms, e.g. ＰＵＡ → PUA).
+ * 3. Strip zero-width / default-ignorable code points (incl. U+034F).
+ * 4. Normalize line endings to `\n` and collapse HORIZONTAL whitespace runs to a
  *    single space — newlines are PRESERVED as clause boundaries so the
  *    disclaimer mask can never cross a line break (`toScanText` folds them
  *    after masking so line-split keywords still cannot evade the scan).
- * 4. Remove separator runs wedged between two CJK characters (artificial splitting).
+ * 5. Remove separator runs wedged between two CJK characters (artificial splitting).
+ * 6. Case-fold to lower case so English variants (PUA/Pua/pua) cannot evade.
  * The normalized text is used ONLY for scanning and never appears in any output.
  */
 export function normalizeSafetyText(text: string): string {
-  let t = text.normalize('NFKC');
+  let t = decodeCharRefsOnce(decodeCharRefsOnce(text));
+  t = t.normalize('NFKC');
   t = t.replace(INVISIBLE_CHARS_RE, '');
   t = t.replace(/\r\n?|[\u0085\u2028\u2029]/g, '\n');
   t = t.replace(/[^\S\n]+/g, ' ');
   t = t.replace(CJK_SEPARATOR_RE, '');
-  return t;
+  return t.toLowerCase();
 }
 
 // --- Canonical safety-disclaimer masking (fixed templates only) ---
@@ -176,7 +207,12 @@ const DISCLAIMER_PHRASE_ALT = `(?:${[...DISCLAIMER_OBJECT_PHRASES]
   .join('|')})`;
 
 const SAFETY_DISCLAIMER_RE = new RegExp(
-  `(?:${DISCLAIMER_NEGATION_VERBS.join('|')})` +
+  // Anchor: the template must sit at a clause start, after at most 6 prefix
+  // characters (e.g. 本报告/本内容) that contain no negation character — a
+  // double-negation prefix (并非不构成…) therefore never masks, and a template
+  // substring inside a larger clause is not treated as a canonical disclaimer.
+  `(?<=(?:^|[${CLAUSE_END_CLASS}])[^${CLAUSE_END_CLASS}不非没无]{0,6})` +
+    `(?:${DISCLAIMER_NEGATION_VERBS.join('|')})` +
     `${DISCLAIMER_PHRASE_ALT}(?:[或及和]${DISCLAIMER_PHRASE_ALT})*` +
     `(?=[${CLAUSE_END_CLASS}]|$)`,
   'g',
@@ -210,7 +246,7 @@ const MEDICAL_RULES: HighRiskRule[] = [
     re: /(?:你(?:有|得了?|患了?|是)(?:抑郁|焦虑|癌|肿瘤|糖尿|心脏))/,
   },
   { id: 'medical.medication-change', re: /(?:停药|减药|加药|换药)/ },
-  { id: 'medical.procedure-order', re: /(?:需要做(?:检查|化验|CT|MRI|B超|手术))/ },
+  { id: 'medical.procedure-order', re: /(?:需要做(?:检查|化验|ct|mri|b超|手术))/ },
 ];
 
 const LEGAL_RULES: HighRiskRule[] = [
@@ -275,7 +311,7 @@ const MANIPULATION_RULES: HighRiskRule[] = [
   },
   {
     id: 'manipulation.coercive-tactics',
-    re: /(?:(?:冷暴力|PUA|情感操控|精神控制|gaslighting)(?:一下|对方|他|她)?)/,
+    re: /(?:(?:冷暴力|pua|情感操控|精神控制|gaslighting)(?:一下|对方|他|她)?)/,
   },
   {
     id: 'manipulation.fear-inducing',
@@ -336,11 +372,8 @@ const HIGH_RISK_GROUPS: RuleGroup[] = [
   },
 ];
 
-// --- Legacy fact-exempt section IDs (reading-draft/v1 ONLY) ---
-// v1 conditional compatibility: only disclaimer and uncertainty sections may omit
-// fact citations. In v2 this id-based exemption is GONE — fact exemption requires
-// valid `constraintRefs`. No section id ever exempts the high-risk safety scan.
-const LEGACY_FACT_EXEMPT_SECTION_IDS = new Set(['disclaimer', 'uncertainty']);
+// (The former reading-draft/v1 section-id fact exemption is intentionally gone:
+// runtime acceptance of caller-selected v1 would re-enable it from input data.)
 
 /**
  * Scan normalized+masked text and return the id of the first matching rule in a
@@ -368,16 +401,11 @@ const RESOURCE_LIMIT_DETAIL = '输入超出资源保护上限，未执行内容�
 const RESOURCE_LIMIT_REMEDIATION =
   '将输入规模缩减到 @ming/contracts validate-answer 导出的上限常量以内（见 patternKey 对应的常量名）。';
 
-function resourceViolation(
-  limitKey: string,
-  sectionIndex?: number,
-  paragraphIndex?: number,
-): AnswerViolation {
+/** limitKey is always one of OUR limit-constant names — never caller text. */
+function resourceViolation(limitKey: string): AnswerViolation {
   return {
     code: 'RESOURCE_LIMIT_EXCEEDED',
     severity: 'error',
-    ...(sectionIndex !== undefined ? { sectionIndex } : {}),
-    ...(paragraphIndex !== undefined ? { paragraphIndex } : {}),
     patternKey: limitKey,
     detail: RESOURCE_LIMIT_DETAIL,
     remediation: RESOURCE_LIMIT_REMEDIATION,
@@ -385,151 +413,98 @@ function resourceViolation(
 }
 
 /**
- * Protective resource-limit checks over BOTH sides of the input, run BEFORE any
- * regex scanning. Returns the FIRST violated limit immediately: every array's
- * count is checked (an O(1) length read) before that array is iterated, so an
- * over-cap array is never traversed. Cost is therefore bounded by the caps
- * themselves. This bounds the validation stage only — reading/parsing the input
- * happens before this function and is not covered by these limits.
+ * Validate a ReadingDraft against an AnswerPlan. THE public safety entry:
+ * accepts unknown/raw input, never trusts a prior parse, and never throws —
+ * malformed or wrong-version input yields a stable not-ok result. Violations
+ * carry only structured locators (sectionIndex, field, paragraphIndex,
+ * patternKey from closed sets, itemIndex) and static wording — never fragments
+ * of the draft, the plan, or any caller-provided string.
  */
-function checkResourceLimits(input: ValidateAnswerInput): AnswerViolation | null {
-  const { answerPlan, readingDraft } = input;
+export function validateAnswer(input: unknown): AnswerValidationResult {
+  const reject = (
+    code: 'UNSUPPORTED_CONTRACT_VERSION' | 'MALFORMED_INPUT',
+    detail: string,
+    remediation: string,
+  ): AnswerValidationResult => ({
+    contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+    ok: false,
+    violations: [{ code, severity: 'error', detail, remediation }],
+    violationsTruncated: false,
+  });
 
-  // Plan-side counts first (never iterate an over-cap array).
-  if (answerPlan.allowedFactIds.length > MAX_ALLOWED_FACT_IDS) {
-    return resourceViolation('MAX_ALLOWED_FACT_IDS');
-  }
-  if (answerPlan.requiredCaveats.length > MAX_REQUIRED_CAVEATS) {
-    return resourceViolation('MAX_REQUIRED_CAVEATS');
-  }
-  if (answerPlan.requiredWarningCodes.length > MAX_REQUIRED_WARNING_CODES) {
-    return resourceViolation('MAX_REQUIRED_WARNING_CODES');
-  }
-  if (answerPlan.disclaimers.length > MAX_PLAN_DISCLAIMERS) {
-    return resourceViolation('MAX_PLAN_DISCLAIMERS');
-  }
-  if (answerPlan.guardrails.length > MAX_PLAN_GUARDRAILS) {
-    return resourceViolation('MAX_PLAN_GUARDRAILS');
-  }
-  // Plan-side entry lengths (arrays are within caps now).
-  if (answerPlan.allowedFactIds.some((id) => id.length > MAX_FACT_ID_CHARS)) {
-    return resourceViolation('MAX_FACT_ID_CHARS');
-  }
-  if (answerPlan.requiredCaveats.some((c) => c.length > MAX_CAVEAT_ENTRY_CHARS)) {
-    return resourceViolation('MAX_CAVEAT_ENTRY_CHARS');
-  }
-  if (answerPlan.requiredWarningCodes.some((w) => w.length > MAX_WARNING_ENTRY_CHARS)) {
-    return resourceViolation('MAX_WARNING_ENTRY_CHARS');
-  }
-  if (answerPlan.disclaimers.some((d) => d.length > MAX_DISCLAIMER_ENTRY_CHARS)) {
-    return resourceViolation('MAX_DISCLAIMER_ENTRY_CHARS');
+  // -1. Contract-version gate (cheap peek before the full parse so version
+  // problems get a dedicated diagnostic; legacy v1 is rejected by design).
+  const rawDraft =
+    typeof input === 'object' && input !== null
+      ? (input as { readingDraft?: unknown }).readingDraft
+      : undefined;
+  const draftVersion =
+    typeof rawDraft === 'object' && rawDraft !== null
+      ? (rawDraft as { contractVersion?: unknown }).contractVersion
+      : undefined;
+  if (draftVersion !== READING_DRAFT_CONTRACT_VERSION) {
+    return reject(
+      'UNSUPPORTED_CONTRACT_VERSION',
+      'ReadingDraft 的 contractVersion 不是受支持的 reading-draft/v2。',
+      '使用 reading-draft/v2。legacy reading-draft/v1 已在运行时被拒绝（v0.2.0 破坏性变化）；迁移方法见 references/answer-contract.md（为约束表达段落添加 constraintRefs 并更换版本串）。',
+    );
   }
 
-  // Draft-side counts.
-  if (readingDraft.sections.length > MAX_SECTIONS) {
-    return resourceViolation('MAX_SECTIONS');
-  }
-  if (readingDraft.caveatsExpressed.length > MAX_CAVEATS_EXPRESSED) {
-    return resourceViolation('MAX_CAVEATS_EXPRESSED');
-  }
-  if (readingDraft.caveatsExpressed.some((c) => c.length > MAX_CAVEAT_ENTRY_CHARS)) {
-    return resourceViolation('MAX_CAVEAT_ENTRY_CHARS');
-  }
-  if (readingDraft.warningsDisclosed.length > MAX_WARNINGS_DISCLOSED) {
-    return resourceViolation('MAX_WARNINGS_DISCLOSED');
-  }
-  if (readingDraft.warningsDisclosed.some((w) => w.length > MAX_WARNING_ENTRY_CHARS)) {
-    return resourceViolation('MAX_WARNING_ENTRY_CHARS');
+  // 0a. Bounded parse + full runtime schema — the caller is never trusted to
+  // have validated anything. Resource-limit breaches keep their limit-constant
+  // diagnostic; every other parse failure collapses to one static diagnostic.
+  let parsed: ValidateAnswerInput;
+  try {
+    parsed = parseValidateAnswerInputBounded(input);
+  } catch (err) {
+    if (err instanceof BoundedParseError && err.limitKey !== undefined) {
+      return {
+        contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
+        ok: false,
+        violations: [resourceViolation(err.limitKey)],
+        violationsTruncated: false,
+      };
+    }
+    return reject(
+      'MALFORMED_INPUT',
+      '输入未通过有界预检或运行时 schema 校验，未执行内容校验。',
+      '按 references/answer-contract.md 的 ValidateAnswerInput 结构提供 { answerPlan, readingDraft }，并遵守导出的 MAX_* 上限。',
+    );
   }
 
-  // Draft-side structure (sections count is within cap here).
-  let totalChars = 0;
-  let totalFactIds = 0;
-  for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
-    const section = readingDraft.sections[sIdx]!;
-    if (section.id.length > MAX_SECTION_ID_CHARS) {
-      return resourceViolation('MAX_SECTION_ID_CHARS', sIdx);
-    }
-    if (section.heading.length > MAX_HEADING_CHARS) {
-      return resourceViolation('MAX_HEADING_CHARS', sIdx);
-    }
-    if (section.paragraphs.length > MAX_PARAGRAPHS_PER_SECTION) {
-      return resourceViolation('MAX_PARAGRAPHS_PER_SECTION', sIdx);
-    }
-    totalChars += section.heading.length;
-    if (totalChars > MAX_TOTAL_TEXT_CHARS) {
-      return resourceViolation('MAX_TOTAL_TEXT_CHARS', sIdx);
-    }
-    for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
-      const para = section.paragraphs[pIdx]!;
-      if (para.text.length > MAX_PARAGRAPH_TEXT_CHARS) {
-        return resourceViolation('MAX_PARAGRAPH_TEXT_CHARS', sIdx, pIdx);
-      }
-      if (para.sourceFactIds.length > MAX_SOURCE_FACT_IDS_PER_PARAGRAPH) {
-        return resourceViolation('MAX_SOURCE_FACT_IDS_PER_PARAGRAPH', sIdx, pIdx);
-      }
-      if (para.sourceFactIds.some((id) => id.length > MAX_FACT_ID_CHARS)) {
-        return resourceViolation('MAX_FACT_ID_CHARS', sIdx, pIdx);
-      }
-      if ((para.constraintRefs?.length ?? 0) > MAX_CONSTRAINT_REFS_PER_PARAGRAPH) {
-        return resourceViolation('MAX_CONSTRAINT_REFS_PER_PARAGRAPH', sIdx, pIdx);
-      }
-      totalChars += para.text.length;
-      if (totalChars > MAX_TOTAL_TEXT_CHARS) {
-        return resourceViolation('MAX_TOTAL_TEXT_CHARS', sIdx, pIdx);
-      }
-      totalFactIds += para.sourceFactIds.length;
-      if (totalFactIds > MAX_TOTAL_SOURCE_FACT_IDS) {
-        return resourceViolation('MAX_TOTAL_SOURCE_FACT_IDS', sIdx, pIdx);
-      }
-    }
-  }
-  return null;
+  return runValidateAnswer(parsed);
 }
 
-/**
- * Validate a ReadingDraft against an AnswerPlan.
- * Returns a deterministic, structured result with all violations (capped at
- * MAX_VIOLATIONS; `violationsTruncated` reports the cap being hit).
- * Violations carry only structured locators (sectionIndex, field, paragraphIndex,
- * patternKey, itemIndex) and static wording — never fragments of the draft, the
- * plan, or caller-provided section ids.
- */
-export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
+/** Map a (schema-validated) constraint kind to its plan array length. */
+function constraintTargetLength(
+  plan: ValidateAnswerInput['answerPlan'],
+  kind: PlanConstraintKind,
+): number {
+  switch (kind) {
+    case 'disclaimer':
+      return plan.disclaimers.length;
+    case 'caveat':
+      return plan.requiredCaveats.length;
+    case 'warning':
+      return plan.requiredWarningCodes.length;
+  }
+}
+
+/** patternKey values for constraint kinds — a closed set, never caller text. */
+function constraintKindKey(kind: PlanConstraintKind): 'disclaimer' | 'caveat' | 'warning' {
+  switch (kind) {
+    case 'disclaimer':
+      return 'disclaimer';
+    case 'caveat':
+      return 'caveat';
+    case 'warning':
+      return 'warning';
+  }
+}
+
+/** Internal: validate an ALREADY schema-parsed input. Not a public entry. */
+function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
   const { answerPlan, readingDraft } = input;
-
-  // -1. Contract-version gate: unknown draft versions are rejected outright —
-  // this public entry never returns a successful v2 result for an arbitrary
-  // version smuggled past the TypeScript types.
-  const draftVersion = (readingDraft as { contractVersion?: unknown }).contractVersion;
-  if (!(READING_DRAFT_COMPAT_VERSIONS as readonly unknown[]).includes(draftVersion)) {
-    return {
-      contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
-      ok: false,
-      violations: [
-        {
-          code: 'UNSUPPORTED_CONTRACT_VERSION',
-          severity: 'error',
-          detail: 'ReadingDraft 的 contractVersion 不在受支持的版本列表内。',
-          remediation:
-            '使用 reading-draft/v2；legacy reading-draft/v1 仅在满足 v2 安全上限时有条件接受。',
-        },
-      ],
-      violationsTruncated: false,
-    };
-  }
-  const isLegacyV1 = draftVersion === 'reading-draft/v1';
-
-  // 0. Resource boundary: reject oversized inputs before any scanning.
-  const limitViolation = checkResourceLimits(input);
-  if (limitViolation !== null) {
-    return {
-      contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
-      ok: false,
-      violations: [limitViolation],
-      violationsTruncated: false,
-    };
-  }
 
   const violations: AnswerViolation[] = [];
   let violationsTruncated = false;
@@ -581,19 +556,12 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
     }
   }
 
-  // 3 + 4. Per-section checks. Fact-citation exemption: v2 requires valid
-  // constraintRefs on the paragraph; legacy v1 keeps the disclaimer/uncertainty
-  // section-id exemption. The high-risk scan (4) covers every heading and
-  // paragraph regardless.
+  // 3 + 4. Per-section checks. Fact-count exemption requires valid
+  // constraintRefs on the paragraph — nothing else. The high-risk scan (4)
+  // covers every heading and paragraph regardless.
   const referencedDisclaimers = new Set<number>();
   const referencedCaveats = new Set<number>();
   const referencedWarnings = new Set<number>();
-  const constraintTargetLength = (kind: 'disclaimer' | 'caveat' | 'warning'): number =>
-    kind === 'disclaimer'
-      ? answerPlan.disclaimers.length
-      : kind === 'caveat'
-        ? answerPlan.requiredCaveats.length
-        : answerPlan.requiredWarningCodes.length;
 
   for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
     const section = readingDraft.sections[sIdx]!;
@@ -625,7 +593,7 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
       let refsValid = refs.length > 0;
       for (let rIdx = 0; rIdx < refs.length; rIdx++) {
         const ref = refs[rIdx]!;
-        if (ref.index >= constraintTargetLength(ref.kind)) {
+        if (ref.index >= constraintTargetLength(answerPlan, ref.kind)) {
           refsValid = false;
           push({
             code: 'INVALID_CONSTRAINT_REF',
@@ -634,7 +602,7 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
             field: 'paragraph',
             paragraphIndex: pIdx,
             itemIndex: rIdx,
-            patternKey: ref.kind,
+            patternKey: constraintKindKey(ref.kind),
             detail:
               '段落的 constraintRef 未指向真实存在的 AnswerPlan 约束（见 itemIndex 对应的 constraintRefs 下标与 patternKey 对应的 kind）。',
             remediation:
@@ -650,42 +618,40 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
         }
       }
 
-      const exemptFromFactChecks =
+      const exemptFromMissingFactCheck =
         // not-supported drafts must be fact-free; the UNSUPPORTED_TOPIC gate
         // above governs them instead of the citation requirement.
-        answerPlan.answerability === 'not-supported' ||
-        (isLegacyV1 ? LEGACY_FACT_EXEMPT_SECTION_IDS.has(section.id) || refsValid : refsValid);
+        answerPlan.answerability === 'not-supported' || refsValid;
 
-      if (!exemptFromFactChecks) {
-        // 3a. Must have at least one sourceFactId
-        if (para.sourceFactIds.length === 0) {
+      // 3a. Must have at least one sourceFactId (unless constraint-exempt).
+      if (!exemptFromMissingFactCheck && para.sourceFactIds.length === 0) {
+        push({
+          code: 'MISSING_SOURCE_FACTS',
+          severity: 'error',
+          sectionIndex: sIdx,
+          field: 'paragraph',
+          paragraphIndex: pIdx,
+          detail: '段落未声明任何 sourceFactIds，内容缺少事实依据声明。',
+          remediation:
+            '每个非约束表达段落必须引用至少一个 allowedFactIds 中的 fact ID；表达免责/caveat/warning 的段落必须通过 constraintRefs 引用真实存在的 AnswerPlan 约束。',
+        });
+      }
+
+      // 3b. Every provided factId is ALWAYS checked against allowedFactIds —
+      // constraint exemption and not-supported mode never skip this.
+      for (let fIdx = 0; fIdx < para.sourceFactIds.length; fIdx++) {
+        if (!allowedIds.has(para.sourceFactIds[fIdx]!)) {
           push({
-            code: 'MISSING_SOURCE_FACTS',
+            code: 'UNKNOWN_FACT_ID',
             severity: 'error',
             sectionIndex: sIdx,
             field: 'paragraph',
             paragraphIndex: pIdx,
-            detail: '段落未声明任何 sourceFactIds，内容缺少事实依据声明。',
-            remediation:
-              '每个非约束表达段落必须引用至少一个 allowedFactIds 中的 fact ID；表达免责/caveat/warning 的段落必须通过 constraintRefs 引用真实存在的 AnswerPlan 约束。',
+            itemIndex: fIdx,
+            detail:
+              '段落引用了不在 allowedFactIds 中的 fact ID（见 itemIndex 对应的 sourceFactIds 下标）。',
+            remediation: '只能引用 answerPlan.allowedFactIds 中列出的 ID。删除或替换无效引用。',
           });
-        }
-
-        // 3b. Each cited factId must be in allowedFactIds (located by index, not echoed)
-        for (let fIdx = 0; fIdx < para.sourceFactIds.length; fIdx++) {
-          if (!allowedIds.has(para.sourceFactIds[fIdx]!)) {
-            push({
-              code: 'UNKNOWN_FACT_ID',
-              severity: 'error',
-              sectionIndex: sIdx,
-              field: 'paragraph',
-              paragraphIndex: pIdx,
-              itemIndex: fIdx,
-              detail:
-                '段落引用了不在 allowedFactIds 中的 fact ID（见 itemIndex 对应的 sourceFactIds 下标）。',
-              remediation: '只能引用 answerPlan.allowedFactIds 中列出的 ID。删除或替换无效引用。',
-            });
-          }
         }
       }
 
@@ -710,26 +676,12 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
     }
   }
 
-  // 5. Required caveats. v2: constraintRefs are the primary evidence and the
+  // 5. Required caveats: constraintRefs are the primary evidence and the
   // caveatsExpressed self-attestation must agree with them — one truth source,
-  // no contradictions. v1: legacy set check only.
+  // no contradictions.
   const expressedCaveats = new Set(readingDraft.caveatsExpressed);
   for (let cIdx = 0; cIdx < answerPlan.requiredCaveats.length; cIdx++) {
     const declared = expressedCaveats.has(answerPlan.requiredCaveats[cIdx]!);
-    if (isLegacyV1) {
-      if (!declared) {
-        push({
-          code: 'MISSING_REQUIRED_CAVEAT',
-          severity: 'error',
-          itemIndex: cIdx,
-          detail:
-            '未声明表达必要的 caveat（见 itemIndex 对应的 answerPlan.requiredCaveats 下标）。',
-          remediation:
-            '在草稿的 uncertainty 或 disclaimer 部分明确表达此 caveat，并加入 caveatsExpressed。',
-        });
-      }
-      continue;
-    }
     const referenced = referencedCaveats.has(cIdx);
     if (!declared && !referenced) {
       push({
@@ -754,23 +706,10 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
     }
   }
 
-  // 6. Required warnings. Same v2 consistency rule as caveats.
+  // 6. Required warnings. Same consistency rule as caveats.
   const disclosedWarnings = new Set(readingDraft.warningsDisclosed);
   for (let wIdx = 0; wIdx < answerPlan.requiredWarningCodes.length; wIdx++) {
     const declared = disclosedWarnings.has(answerPlan.requiredWarningCodes[wIdx]!);
-    if (isLegacyV1) {
-      if (!declared) {
-        push({
-          code: 'MISSING_REQUIRED_WARNING',
-          severity: 'error',
-          itemIndex: wIdx,
-          detail:
-            '未声明披露必要的 warning（见 itemIndex 对应的 answerPlan.requiredWarningCodes 下标）。',
-          remediation: '在草稿中明确说明此 warning 的 impact/nextStep，并加入 warningsDisclosed。',
-        });
-      }
-      continue;
-    }
     const referenced = referencedWarnings.has(wIdx);
     if (!declared && !referenced) {
       push({
@@ -796,21 +735,19 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
     }
   }
 
-  // 7. Disclaimers check. v2: at least one paragraph must reference a plan
-  // disclaimer via constraintRefs; v1 keeps the legacy id/heading heuristic.
-  if (answerPlan.disclaimers.length > 0) {
-    const hasDisclaimer = isLegacyV1
-      ? readingDraft.sections.some(
-          (s) => s.id === 'disclaimer' || s.heading.includes('声明') || s.heading.includes('免责'),
-        )
-      : referencedDisclaimers.size > 0;
-    if (!hasDisclaimer) {
+  // 7. Disclaimers: EVERY plan disclaimer must be covered by a constraintRef,
+  // item by item — "any one referenced" is not enough. This is an explicit,
+  // auditable v2 requirement (error severity), not an implicit ok:true policy.
+  for (let dIdx = 0; dIdx < answerPlan.disclaimers.length; dIdx++) {
+    if (!referencedDisclaimers.has(dIdx)) {
       push({
         code: 'MISSING_DISCLAIMER',
-        severity: 'warning',
-        detail: 'AnswerPlan 包含 disclaimers 但草稿缺少对应的免责声明表达。',
+        severity: 'error',
+        itemIndex: dIdx,
+        detail:
+          'AnswerPlan 的某条 disclaimer 未被任何段落的 constraintRef 覆盖（见 itemIndex 对应的 answerPlan.disclaimers 下标）。',
         remediation:
-          '用一个段落表达 AnswerPlan 的 disclaimers，并加 constraintRefs {kind:"disclaimer", index}（legacy v1：提供 id 为 "disclaimer" 的 section）。',
+          '用段落表达每一条 disclaimer，并为每条加 constraintRefs {kind:"disclaimer", index}。',
       });
     }
   }
@@ -824,65 +761,160 @@ export function validateAnswer(input: ValidateAnswerInput): AnswerValidationResu
   };
 }
 
-// --- Bounded parsing facade (shared by the CLI and the public JS API) ---
+// --- Bounded parsing facade (the ONLY road into runValidateAnswer) ---
 
 const BOUNDED_PARSE_REJECT_MESSAGE =
   'validate-answer input rejected by bounded preflight: missing required structure or a field exceeds the protective limits.';
 
-function boundedReject(): never {
+/**
+ * Raised by the bounded facade. `limitKey` — when present — is ALWAYS one of
+ * our own limit-constant names (never caller text), so the public entry can
+ * surface it as a RESOURCE_LIMIT_EXCEEDED patternKey.
+ */
+class BoundedParseError extends Error {
+  readonly limitKey?: string;
+  constructor(limitKey?: string) {
+    super(BOUNDED_PARSE_REJECT_MESSAGE);
+    if (limitKey !== undefined) this.limitKey = limitKey;
+  }
+}
+
+function boundedReject(limitKey?: string): never {
   // Static message only — never echoes any part of the rejected input.
-  throw new Error(BOUNDED_PARSE_REJECT_MESSAGE);
+  throw new BoundedParseError(limitKey);
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null;
 }
 
-function requireArrayWithin(v: unknown, max: number): unknown[] {
-  if (!Array.isArray(v) || v.length > max) boundedReject();
+/**
+ * Cap an object's own-key count and key-name lengths BEFORE any deeper work —
+ * a flood of unknown keys must not reach Zod, whose strict-object errors would
+ * otherwise enumerate (echo) every unrecognized key name.
+ */
+function requireBoundedObject(v: unknown): Record<string, unknown> {
+  if (!isPlainObject(v)) boundedReject();
+  const keys = Object.keys(v);
+  if (keys.length > MAX_OBJECT_KEYS) boundedReject('MAX_OBJECT_KEYS');
+  for (const key of keys) {
+    if (key.length > MAX_OBJECT_KEY_CHARS) boundedReject('MAX_OBJECT_KEY_CHARS');
+  }
   return v;
 }
 
+function requireArrayWithin(v: unknown, max: number, limitKey: string): unknown[] {
+  if (!Array.isArray(v)) boundedReject();
+  if (v.length > max) boundedReject(limitKey);
+  return v;
+}
+
+/** Array is already count-capped; verify each entry is a string within maxChars. */
+function requireStringEntriesWithin(entries: unknown[], maxChars: number, limitKey: string): void {
+  for (const entry of entries) {
+    if (typeof entry !== 'string') boundedReject();
+    if (entry.length > maxChars) boundedReject(limitKey);
+  }
+}
+
 /**
- * Bounded parsing facade for ValidateAnswerInput: a shallow preflight confirms
- * every top-level and nested array length (O(1) length reads, bounded loops)
- * and every paragraph text length BEFORE the full Zod parse runs, so an
- * adversarially huge in-memory object is rejected at bounded cost. Callers that
- * already hold parsed-but-untrusted JSON (the CLI, host integrations) should
- * use this instead of the bare `ValidateAnswerInput.parse`, which expresses the
- * contract but is not itself fail-fast against arbitrarily large objects.
- * NOTE: this bounds the parse/validate stages only — reading a file and
- * JSON.parse happen before it (the CLI adds MAX_VALIDATE_ANSWER_INPUT_BYTES).
+ * Bounded parsing facade for ValidateAnswerInput: a shallow preflight caps every
+ * object's own-key count and key lengths and confirms every array/text length
+ * and the whole-draft budgets (O(1) length reads, bounded loops) BEFORE the
+ * full Zod parse runs, so an adversarially huge in-memory object is rejected at
+ * bounded cost — over-cap arrays are never traversed. Any Zod failure is
+ * collapsed into ONE static error — issues, paths and unrecognized key names
+ * are never propagated (no input echo). NOTE: this bounds the parse/validate
+ * stages only — reading a file and JSON.parse happen before it (the CLI adds
+ * MAX_VALIDATE_ANSWER_INPUT_BYTES).
  */
 export function parseValidateAnswerInputBounded(raw: unknown): ValidateAnswerInput {
-  if (!isPlainObject(raw)) boundedReject();
-  const plan = raw.answerPlan;
-  const draft = raw.readingDraft;
-  if (!isPlainObject(plan) || !isPlainObject(draft)) boundedReject();
+  const root = requireBoundedObject(raw);
+  const plan = requireBoundedObject(root.answerPlan);
+  const draft = requireBoundedObject(root.readingDraft);
 
-  requireArrayWithin(plan.allowedFactIds, MAX_ALLOWED_FACT_IDS);
-  requireArrayWithin(plan.requiredCaveats, MAX_REQUIRED_CAVEATS);
-  requireArrayWithin(plan.requiredWarningCodes, MAX_REQUIRED_WARNING_CODES);
-  requireArrayWithin(plan.guardrails, MAX_PLAN_GUARDRAILS);
-  requireArrayWithin(plan.disclaimers, MAX_PLAN_DISCLAIMERS);
+  requireStringEntriesWithin(
+    requireArrayWithin(plan.allowedFactIds, MAX_ALLOWED_FACT_IDS, 'MAX_ALLOWED_FACT_IDS'),
+    MAX_FACT_ID_CHARS,
+    'MAX_FACT_ID_CHARS',
+  );
+  requireStringEntriesWithin(
+    requireArrayWithin(plan.requiredCaveats, MAX_REQUIRED_CAVEATS, 'MAX_REQUIRED_CAVEATS'),
+    MAX_CAVEAT_ENTRY_CHARS,
+    'MAX_CAVEAT_ENTRY_CHARS',
+  );
+  requireStringEntriesWithin(
+    requireArrayWithin(
+      plan.requiredWarningCodes,
+      MAX_REQUIRED_WARNING_CODES,
+      'MAX_REQUIRED_WARNING_CODES',
+    ),
+    MAX_WARNING_ENTRY_CHARS,
+    'MAX_WARNING_ENTRY_CHARS',
+  );
+  requireArrayWithin(plan.guardrails, MAX_PLAN_GUARDRAILS, 'MAX_PLAN_GUARDRAILS');
+  requireStringEntriesWithin(
+    requireArrayWithin(plan.disclaimers, MAX_PLAN_DISCLAIMERS, 'MAX_PLAN_DISCLAIMERS'),
+    MAX_DISCLAIMER_ENTRY_CHARS,
+    'MAX_DISCLAIMER_ENTRY_CHARS',
+  );
 
-  const sections = requireArrayWithin(draft.sections, MAX_SECTIONS);
-  requireArrayWithin(draft.caveatsExpressed, MAX_CAVEATS_EXPRESSED);
-  requireArrayWithin(draft.warningsDisclosed, MAX_WARNINGS_DISCLOSED);
-  for (const section of sections) {
-    if (!isPlainObject(section)) boundedReject();
-    const paragraphs = requireArrayWithin(section.paragraphs, MAX_PARAGRAPHS_PER_SECTION);
-    for (const para of paragraphs) {
-      if (!isPlainObject(para)) boundedReject();
-      if (typeof para.text !== 'string' || para.text.length > MAX_PARAGRAPH_TEXT_CHARS) {
-        boundedReject();
-      }
-      requireArrayWithin(para.sourceFactIds, MAX_SOURCE_FACT_IDS_PER_PARAGRAPH);
+  const sections = requireArrayWithin(draft.sections, MAX_SECTIONS, 'MAX_SECTIONS');
+  requireStringEntriesWithin(
+    requireArrayWithin(draft.caveatsExpressed, MAX_CAVEATS_EXPRESSED, 'MAX_CAVEATS_EXPRESSED'),
+    MAX_CAVEAT_ENTRY_CHARS,
+    'MAX_CAVEAT_ENTRY_CHARS',
+  );
+  requireStringEntriesWithin(
+    requireArrayWithin(draft.warningsDisclosed, MAX_WARNINGS_DISCLOSED, 'MAX_WARNINGS_DISCLOSED'),
+    MAX_WARNING_ENTRY_CHARS,
+    'MAX_WARNING_ENTRY_CHARS',
+  );
+
+  let totalChars = 0;
+  let totalFactIds = 0;
+  for (const rawSection of sections) {
+    const section = requireBoundedObject(rawSection);
+    if (typeof section.id !== 'string' || typeof section.heading !== 'string') boundedReject();
+    if (section.id.length > MAX_SECTION_ID_CHARS) boundedReject('MAX_SECTION_ID_CHARS');
+    if (section.heading.length > MAX_HEADING_CHARS) boundedReject('MAX_HEADING_CHARS');
+    totalChars += section.heading.length;
+    if (totalChars > MAX_TOTAL_TEXT_CHARS) boundedReject('MAX_TOTAL_TEXT_CHARS');
+    const paragraphs = requireArrayWithin(
+      section.paragraphs,
+      MAX_PARAGRAPHS_PER_SECTION,
+      'MAX_PARAGRAPHS_PER_SECTION',
+    );
+    for (const rawPara of paragraphs) {
+      const para = requireBoundedObject(rawPara);
+      if (typeof para.text !== 'string') boundedReject();
+      if (para.text.length > MAX_PARAGRAPH_TEXT_CHARS) boundedReject('MAX_PARAGRAPH_TEXT_CHARS');
+      totalChars += para.text.length;
+      if (totalChars > MAX_TOTAL_TEXT_CHARS) boundedReject('MAX_TOTAL_TEXT_CHARS');
+      const factIds = requireArrayWithin(
+        para.sourceFactIds,
+        MAX_SOURCE_FACT_IDS_PER_PARAGRAPH,
+        'MAX_SOURCE_FACT_IDS_PER_PARAGRAPH',
+      );
+      requireStringEntriesWithin(factIds, MAX_FACT_ID_CHARS, 'MAX_FACT_ID_CHARS');
+      totalFactIds += factIds.length;
+      if (totalFactIds > MAX_TOTAL_SOURCE_FACT_IDS) boundedReject('MAX_TOTAL_SOURCE_FACT_IDS');
       if (para.constraintRefs !== undefined) {
-        requireArrayWithin(para.constraintRefs, MAX_CONSTRAINT_REFS_PER_PARAGRAPH);
+        const refs = requireArrayWithin(
+          para.constraintRefs,
+          MAX_CONSTRAINT_REFS_PER_PARAGRAPH,
+          'MAX_CONSTRAINT_REFS_PER_PARAGRAPH',
+        );
+        for (const ref of refs) requireBoundedObject(ref);
       }
     }
   }
 
-  return ValidateAnswerInputSchema.parse(raw);
+  try {
+    return ValidateAnswerInputSchema.parse(raw);
+  } catch {
+    // Collapse ZodError (which may embed caller key names/paths) into the
+    // single static bounded-reject diagnostic.
+    boundedReject();
+  }
 }

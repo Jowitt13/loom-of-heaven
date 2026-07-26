@@ -360,7 +360,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
       expect(result.violations.some((v) => v.code === 'MISSING_REQUIRED_WARNING')).toBe(true);
     });
 
-    it('MISSING_DISCLAIMER: warns when plan has disclaimers but draft has no disclaimer section', () => {
+    it('MISSING_DISCLAIMER: errors per uncovered plan disclaimer', () => {
       const draft = makeDraft({
         sections: [
           {
@@ -368,15 +368,15 @@ describe('validate-answer — fact boundary and safety layer', () => {
             heading: '核心结论',
             paragraphs: [{ text: '你的事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
           },
-          // No disclaimer section
+          // No disclaimer-referencing paragraph
         ],
       });
       const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
-      // MISSING_DISCLAIMER is a warning, not an error — so ok may still be true
-      expect(result.violations.some((v) => v.code === 'MISSING_DISCLAIMER')).toBe(true);
-      expect(result.violations.find((v) => v.code === 'MISSING_DISCLAIMER')!.severity).toBe(
-        'warning',
-      );
+      expect(result.ok).toBe(false); // explicit v2 strictness: uncovered disclaimers are errors
+      const missing = result.violations.find((v) => v.code === 'MISSING_DISCLAIMER');
+      expect(missing).toBeDefined();
+      expect(missing!.severity).toBe('error');
+      expect(missing!.itemIndex).toBe(0);
     });
   });
 
@@ -518,12 +518,16 @@ describe('validate-answer — fact boundary and safety layer', () => {
       });
     }
 
-    it('normalizeSafetyText strips zero-width chars, folds NFKC and CJK splits', () => {
+    it('normalizeSafetyText strips zero-width chars, folds NFKC, case and CJK splits', () => {
       expect(normalizeSafetyText('注\u200B定')).toBe('注定');
-      expect(normalizeSafetyText('ＰＵＡ')).toBe('PUA');
+      expect(normalizeSafetyText('ＰＵＡ')).toBe('pua'); // NFKC + case fold
       expect(normalizeSafetyText('注 定')).toBe('注定');
       expect(normalizeSafetyText('注-定')).toBe('注定');
       expect(normalizeSafetyText('必\u00A0\u3000死')).toBe('必死');
+      expect(normalizeSafetyText('注\u034F定')).toBe('注定'); // U+034F CGJ is ignorable
+      expect(normalizeSafetyText('&#27880;&#23450;')).toBe('注定'); // decimal NCR
+      expect(normalizeSafetyText('&#x5FC5;&#x6B7B;')).toBe('必死'); // hex NCR
+      expect(normalizeSafetyText('&amp;#27880;&amp;#23450;')).toBe('注定'); // double-encoded
       // English words are not merged by the CJK-split rule:
       expect(normalizeSafetyText('a-b')).toBe('a-b');
     });
@@ -943,14 +947,16 @@ describe('validate-answer — fact boundary and safety layer', () => {
   });
 
   describe('contract versioning', () => {
-    it('emits validation-result/v2 and accepts reading-draft/v1 as compatible input', () => {
+    it('legacy reading-draft/v1 is rejected at runtime (schema AND public API)', () => {
       const v1Input = {
         answerPlan: makePlan(),
-        readingDraft: makeDraft({ contractVersion: 'reading-draft/v1' }),
+        readingDraft: { ...makeDraft(), contractVersion: 'reading-draft/v1' },
       };
-      expect(ValidateAnswerInputSchema.safeParse(v1Input).success).toBe(true);
+      expect(ValidateAnswerInputSchema.safeParse(v1Input).success).toBe(false);
       const result = validateAnswer(v1Input);
-      expect(result.ok).toBe(true);
+      expect(result.ok).toBe(false);
+      expect(result.violations).toHaveLength(1);
+      expect(result.violations[0]!.code).toBe('UNSUPPORTED_CONTRACT_VERSION');
       expect(result.contractVersion).toBe('validation-result/v2');
     });
 
@@ -966,16 +972,18 @@ describe('validate-answer — fact boundary and safety layer', () => {
       const forged = {
         answerPlan: makePlan(),
         readingDraft: { ...makeDraft(), contractVersion: 'reading-draft/v99' },
-      } as unknown as ValidateAnswerInput;
+      };
       const result = validateAnswer(forged);
       expect(result.ok).toBe(false);
       expect(result.violations).toHaveLength(1);
       expect(result.violations[0]!.code).toBe('UNSUPPORTED_CONTRACT_VERSION');
     });
 
-    it('legacy v1 keeps the section-id fact exemption (conditional compatibility)', () => {
-      const v1Draft = makeDraft({
-        contractVersion: 'reading-draft/v1',
+    it('a v1-style draft cannot recover the section-id fact exemption by any version value', () => {
+      // The former v1 escape hatch: unsourced content under id "disclaimer"
+      // without constraintRefs. With v1 rejected at runtime, the only way in is
+      // v2 — where the free section id grants nothing.
+      const draft = makeDraft({
         sections: [
           {
             id: 'summary',
@@ -985,13 +993,15 @@ describe('validate-answer — fact boundary and safety layer', () => {
           {
             id: 'disclaimer',
             heading: '信息可靠性与声明',
-            // v1: no constraintRefs, id-based exemption still applies
             paragraphs: [{ text: '本报告仅供传统文化参考。', sourceFactIds: [] }],
           },
         ],
       });
-      const result = runValidated(makePlan(), v1Draft);
-      expect(result.ok).toBe(true);
+      const result = runValidated(makePlan(), draft);
+      expect(result.ok).toBe(false);
+      expect(
+        result.violations.some((v) => v.code === 'MISSING_SOURCE_FACTS' && v.sectionIndex === 1),
+      ).toBe(true);
     });
   });
 
@@ -1384,6 +1394,404 @@ describe('validate-answer — fact boundary and safety layer', () => {
       const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
       expect(result.violations).toHaveLength(1);
       expect(result.violations[0]!.patternKey).toBe('MAX_SECTIONS');
+    });
+  });
+
+  // --- R4: unified public entry + bounded errors + render-consistent scanning ---
+  describe('public validateAnswer never trusts caller input (R1/R2)', () => {
+    it('raw junk input is rejected with a stable result, never a crash', () => {
+      const junk = {
+        answerPlan: makePlan(),
+        readingDraft: {
+          contractVersion: 'reading-draft/v2',
+          topic: 'career',
+          sections: 'SYNTH-NOT-AN-ARRAY',
+          caveatsExpressed: [],
+          warningsDisclosed: [],
+        },
+      };
+      const result = validateAnswer(junk);
+      expect(result.ok).toBe(false);
+      expect(result.violations).toHaveLength(1);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+      expect(JSON.stringify(result)).not.toContain('SYNTH-NOT-AN-ARRAY');
+    });
+
+    it('non-object and primitive inputs are rejected stably', () => {
+      for (const bad of [null, 42, 'SYNTH-STRING', [], undefined]) {
+        const result = validateAnswer(bad);
+        expect(result.ok).toBe(false);
+        expect(result.violations).toHaveLength(1);
+      }
+    });
+
+    it('a negative constraintRef index is rejected as malformed', () => {
+      const result = validateAnswer({
+        answerPlan: makePlan(),
+        readingDraft: makeDraft({
+          sections: [
+            {
+              id: 's',
+              heading: '声明',
+              paragraphs: [
+                {
+                  text: '合成声明。',
+                  sourceFactIds: [],
+                  constraintRefs: [{ kind: 'caveat', index: -1 as unknown as number }],
+                },
+              ],
+            },
+          ],
+        }),
+      });
+      expect(result.ok).toBe(false);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+    });
+
+    it('an unknown constraintRef kind is rejected and NEVER echoed in patternKey', () => {
+      const result = validateAnswer({
+        answerPlan: makePlan(),
+        readingDraft: {
+          ...makeDraft(),
+          sections: [
+            {
+              id: 's',
+              heading: '声明',
+              paragraphs: [
+                {
+                  text: '合成声明。',
+                  sourceFactIds: [],
+                  constraintRefs: [{ kind: 'SYNTH-KIND-MARKER', index: 0 }],
+                },
+              ],
+            },
+          ],
+        },
+      });
+      expect(result.ok).toBe(false);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+      expect(JSON.stringify(result)).not.toContain('SYNTH-KIND-MARKER');
+    });
+
+    it('every emitted patternKey comes from a fixed closed set', () => {
+      const draft = makeDraft({
+        caveatsExpressed: [],
+        warningsDisclosed: [],
+        sections: [
+          {
+            id: 'summary',
+            heading: '你命中注定失败的原因',
+            paragraphs: [
+              {
+                text: '你必死。',
+                sourceFactIds: ['fact-99'],
+                constraintRefs: [{ kind: 'caveat', index: 9 }],
+              },
+            ],
+          },
+        ],
+      });
+      const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
+      expect(result.ok).toBe(false);
+      const FIXED_KEY = /^(?:[a-z-]+\.[a-z-]+|MAX_[A-Z_]+|disclaimer|caveat|warning)$/;
+      for (const v of result.violations) {
+        if (v.patternKey !== undefined) expect(v.patternKey).toMatch(FIXED_KEY);
+      }
+    });
+
+    it('unknown fact ids are flagged even on constraint-exempt paragraphs (R2b)', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [
+              {
+                text: '合成声明段落。',
+                sourceFactIds: ['fact-99'], // unknown, provided alongside valid refs
+                constraintRefs: [
+                  { kind: 'disclaimer', index: 0 },
+                  { kind: 'caveat', index: 0 },
+                  { kind: 'warning', index: 0 },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      const result = runValidated(makePlan(), draft);
+      expect(result.ok).toBe(false);
+      expect(result.violations.some((v) => v.code === 'UNKNOWN_FACT_ID')).toBe(true);
+    });
+
+    it('unknown fact ids are flagged in not-supported mode too', () => {
+      const plan = makePlan({ answerability: 'not-supported', allowedFactIds: [] });
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'note',
+            heading: '说明',
+            paragraphs: [{ text: '简短说明。', sourceFactIds: ['fact-99'] }],
+          },
+        ],
+      });
+      const result = runValidated(plan, draft);
+      expect(result.violations.some((v) => v.code === 'UNKNOWN_FACT_ID')).toBe(true);
+      expect(result.violations.some((v) => v.code === 'UNSUPPORTED_TOPIC')).toBe(true);
+    });
+  });
+
+  describe('bounded parser errors carry no input echo (R7)', () => {
+    it('a flood of unknown keys is rejected with one static message', () => {
+      const junk: Record<string, unknown> = {
+        answerPlan: makePlan(),
+        readingDraft: makeDraft(),
+      };
+      for (let i = 0; i < 1000; i++) junk[`SYNTH_KEY_${i}`] = 1;
+      expect(() => parseValidateAnswerInputBounded(junk)).toThrowError(/bounded preflight/);
+      try {
+        parseValidateAnswerInputBounded(junk);
+      } catch (err) {
+        expect(String((err as Error).message)).not.toContain('SYNTH_KEY_');
+      }
+      const result = validateAnswer(junk);
+      expect(result.ok).toBe(false);
+      expect(JSON.stringify(result)).not.toContain('SYNTH_KEY_');
+    });
+
+    it('an over-long key name is rejected before Zod', () => {
+      const junk = {
+        answerPlan: makePlan(),
+        readingDraft: { ...makeDraft(), ['SYNTH_' + 'k'.repeat(80)]: 1 },
+      };
+      const result = validateAnswer(junk);
+      expect(result.ok).toBe(false);
+      expect(JSON.stringify(result)).not.toContain('SYNTH_');
+    });
+
+    it('unknown keys within limits still fail Zod but with the static diagnostic', () => {
+      const junk = {
+        answerPlan: makePlan(),
+        readingDraft: { ...makeDraft(), SYNTH_EXTRA_KEY: 1 },
+      };
+      const result = validateAnswer(junk);
+      expect(result.ok).toBe(false);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+      expect(JSON.stringify(result)).not.toContain('SYNTH_EXTRA_KEY');
+    });
+
+    it('illegal nesting (paragraphs not an array) is rejected stably', () => {
+      const junk = {
+        answerPlan: makePlan(),
+        readingDraft: {
+          ...makeDraft(),
+          sections: [{ id: 's', heading: 'h', paragraphs: 'SYNTH-NOT-ARRAY' }],
+        },
+      };
+      const result = validateAnswer(junk);
+      expect(result.ok).toBe(false);
+      expect(JSON.stringify(result)).not.toContain('SYNTH-NOT-ARRAY');
+    });
+  });
+
+  describe('render-consistent scanning (R3/R4 encodings)', () => {
+    function para(text: string) {
+      return makeDraft({
+        sections: [
+          { id: 'summary', heading: '核心结论', paragraphs: [{ text, sourceFactIds: ['fact-1'] }] },
+        ],
+      });
+    }
+
+    it('decimal / hex / double-encoded numeric character references are scanned decoded', () => {
+      const dec = runValidated(makePlan(), para('你命中&#27880;&#23450;失败。'));
+      expect(dec.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
+      const hex = runValidated(makePlan(), para('命盘显示你&#x5FC5;&#x6B7B;。'));
+      expect(hex.violations.some((v) => v.code === 'HIGH_RISK_LIFE_DEATH')).toBe(true);
+      const dbl = runValidated(makePlan(), para('你命中&amp;#27880;&amp;#23450;失败。'));
+      expect(dbl.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
+    });
+
+    it('NCR evasion in a heading is caught by the same pipeline', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '你命中&#27880;&#23450;失败的原因',
+            paragraphs: [{ text: '事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
+          },
+        ],
+      });
+      const result = runValidated(makePlan(), draft);
+      expect(
+        result.violations.some(
+          (v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE' && v.field === 'heading',
+        ),
+      ).toBe(true);
+    });
+
+    it('English case variants and U+034F splitting are caught (paragraph and heading)', () => {
+      const cased = runValidated(makePlan(), para('试着 Gaslighting 对方。'));
+      expect(cased.violations.some((v) => v.code === 'HIGH_RISK_RELATIONSHIP_MANIPULATION')).toBe(
+        true,
+      );
+      const cgj = runValidated(makePlan(), para('你命中注\u034F定失败。'));
+      expect(cgj.violations.some((v) => v.code === 'HIGH_RISK_DETERMINISTIC_FATE')).toBe(true);
+      const headingCase = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '关于 PUA 的建议',
+            paragraphs: [{ text: '事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
+          },
+        ],
+      });
+      const hc = runValidated(makePlan(), headingCase);
+      expect(
+        hc.violations.some(
+          (v) => v.code === 'HIGH_RISK_RELATIONSHIP_MANIPULATION' && v.field === 'heading',
+        ),
+      ).toBe(true);
+    });
+  });
+
+  describe('clause-anchored masking (R4 mask)', () => {
+    it('a double-negation prefix is never masked (scanned and flagged)', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [{ text: '并非不构成医疗诊断。', sourceFactIds: ['fact-1'] }],
+          },
+        ],
+      });
+      const result = runValidated(makePlan(), draft);
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
+    });
+
+    it('a canonical template with a short benign prefix still masks', () => {
+      const masked = maskSafetyDisclaimers(normalizeSafetyText('本报告不构成医疗诊断。'));
+      expect(masked).not.toContain('诊断');
+    });
+
+    it('cross-line splicing of a disclaimer is not masked and stays flagged', () => {
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [{ text: '本报告不构成医疗\n诊断。', sourceFactIds: ['fact-1'] }],
+          },
+        ],
+      });
+      const result = runValidated(makePlan(), draft);
+      expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
+    });
+  });
+
+  describe('per-item disclaimer coverage (R5)', () => {
+    it('with two plan disclaimers, referencing only one is an error for the other', () => {
+      const plan = makePlan({ disclaimers: ['合成声明一。', '合成声明二。'] });
+      const draft = makeDraft(); // default draft references disclaimer 0 only
+      const result = runValidated(plan, draft);
+      expect(result.ok).toBe(false);
+      const missing = result.violations.find((v) => v.code === 'MISSING_DISCLAIMER');
+      expect(missing).toBeDefined();
+      expect(missing!.severity).toBe('error');
+      expect(missing!.itemIndex).toBe(1);
+    });
+
+    it('referencing every plan disclaimer passes', () => {
+      const plan = makePlan({ disclaimers: ['合成声明一。', '合成声明二。'] });
+      const draft = makeDraft({
+        sections: [
+          {
+            id: 'summary',
+            heading: '核心结论',
+            paragraphs: [{ text: '你的事业方向偏向技术。', sourceFactIds: ['fact-1'] }],
+          },
+          {
+            id: 'disclaimer',
+            heading: '信息可靠性与声明',
+            paragraphs: [
+              {
+                text: '本报告仅供传统文化参考。',
+                sourceFactIds: [],
+                constraintRefs: [
+                  { kind: 'disclaimer', index: 0 },
+                  { kind: 'disclaimer', index: 1 },
+                  { kind: 'caveat', index: 0 },
+                  { kind: 'warning', index: 0 },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      const result = runValidated(plan, draft);
+      expect(result.ok).toBe(true);
+    });
+  });
+
+  describe('runtime bundle exports (docs-required surface)', () => {
+    it('the built engine exports the documented validate-answer surface', async () => {
+      const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+      const engineUrl = new URL(
+        `file:///${join(repoRoot, 'skills', 'calculate-birth-charts', 'scripts', 'dist', 'engine.mjs').replace(/\\/g, '/')}`,
+      );
+      const engine = (await import(engineUrl.href)) as Record<string, unknown>;
+      expect(typeof engine.validateAnswer).toBe('function');
+      expect(typeof engine.parseValidateAnswerInputBounded).toBe('function');
+      expect(engine.READING_DRAFT_CONTRACT_VERSION).toBe('reading-draft/v2');
+      expect(engine.READING_DRAFT_LEGACY_V1).toBe('reading-draft/v1');
+      expect(engine.VALIDATION_RESULT_CONTRACT_VERSION).toBe('validation-result/v2');
+      for (const name of [
+        'MAX_VALIDATE_ANSWER_INPUT_BYTES',
+        'MAX_OBJECT_KEYS',
+        'MAX_OBJECT_KEY_CHARS',
+        'MAX_PARAGRAPH_TEXT_CHARS',
+        'MAX_SECTIONS',
+        'MAX_PARAGRAPHS_PER_SECTION',
+        'MAX_SOURCE_FACT_IDS_PER_PARAGRAPH',
+        'MAX_CONSTRAINT_REFS_PER_PARAGRAPH',
+        'MAX_TOTAL_SOURCE_FACT_IDS',
+        'MAX_TOTAL_TEXT_CHARS',
+        'MAX_NOT_SUPPORTED_TEXT_CHARS',
+        'MAX_VIOLATIONS',
+      ]) {
+        expect(typeof engine[name]).toBe('number');
+      }
+    });
+
+    it('CLI: junk input yields exit 2 and no echo of caller keys', () => {
+      const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+      const cliPath = join(
+        repoRoot,
+        'skills',
+        'calculate-birth-charts',
+        'scripts',
+        'ming-chart.mjs',
+      );
+      const tmpDir = join(repoRoot, '.tmp', 'validate-answer-tests');
+      mkdirSync(tmpDir, { recursive: true });
+      const junkFile = join(tmpDir, 'junk-input.json');
+      const junk: Record<string, unknown> = {
+        answerPlan: makePlan(),
+        readingDraft: { ...makeDraft(), SYNTH_CLI_KEY_MARKER: 1 },
+      };
+      writeFileSync(junkFile, JSON.stringify(junk));
+      const run = spawnSync(
+        process.execPath,
+        [cliPath, 'validate-answer', '--input-file', junkFile],
+        {
+          encoding: 'utf8',
+        },
+      );
+      expect(run.status).toBe(2); // INPUT_VALIDATION_FAILED exit code
+      const output = `${run.stdout}${run.stderr}`;
+      expect(output).toContain('INPUT_VALIDATION_FAILED');
+      expect(output).not.toContain('SYNTH_CLI_KEY_MARKER');
     });
   });
 });

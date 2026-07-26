@@ -331,13 +331,12 @@ async function main() {
         let validatedInput;
         try {
           validatedInput = parseValidateAnswerInputBounded(rawInput);
-        } catch (err) {
+        } catch {
+          // Static message only: bounded-parse/schema failures never echo caller
+          // keys, paths or values (Zod issue lists are deliberately dropped).
           throw new EngineError(
             'INPUT_VALIDATION_FAILED',
-            'Input does not match ValidateAnswerInput schema (or failed the bounded preflight).',
-            {
-              issues: err && err.issues ? err.issues : String(err),
-            },
+            'Input does not match ValidateAnswerInput (bounded preflight or schema rejected it); see references/answer-contract.md.',
           );
         }
         const validationResult = validateAnswer(validatedInput);
@@ -377,7 +376,7 @@ async function main() {
       }
       default: {
         process.stderr.write(
-          'Usage: ming-chart <doctor|normalize|calculate|compare|horoscope|interpret|answer-plan|synastry|lint-reading|verify|version|migrate> [options]\n',
+          'Usage: ming-chart <doctor|normalize|calculate|compare|horoscope|interpret|answer-plan|synastry|lint-reading|validate-answer|verify|version|migrate> [options]\n',
         );
         process.exit(2);
       }

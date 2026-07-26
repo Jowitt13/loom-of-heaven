@@ -20,12 +20,12 @@ import { AnswerGuardrail } from './answer-plan.ts';
  * CANNOT recognize every semantic paraphrase. This gate is necessary, not sufficient.
  *
  * Contract versioning:
- * - `reading-draft/v2` tightens v1 with protective input limits (below) and
- *   structured plan-constraint references. Legacy `reading-draft/v1` is
- *   CONDITIONALLY accepted under the v2 safety limits; oversized legacy v1 input
- *   is intentionally rejected. v1 keeps its legacy section-id based fact
- *   exemption (disclaimer/uncertainty only); v2 grants fact exemption ONLY to
- *   paragraphs that reference real AnswerPlan constraints via `constraintRefs`.
+ * - `reading-draft/v2` is the ONLY runtime-accepted draft version. Legacy
+ *   `reading-draft/v1` is REJECTED at runtime (an intentional breaking change for
+ *   the next release, v0.2.0): accepting caller-selected v1 would let input data
+ *   re-enable the removed section-id fact exemption. Migration is a documented
+ *   path, not a runtime downgrade: add `constraintRefs` to constraint-expressing
+ *   paragraphs and switch the version string (see references/answer-contract.md).
  * - `validation-result/v2` replaces v1: violations locate by `sectionIndex`
  *   (never the caller-provided section id), add `field`, `patternKey`, `itemIndex`,
  *   and the result adds `violationsTruncated`. v1 result consumers must migrate:
@@ -33,8 +33,8 @@ import { AnswerGuardrail } from './answer-plan.ts';
  */
 
 export const READING_DRAFT_CONTRACT_VERSION = 'reading-draft/v2';
-/** Accepted input versions; v1 is a compatible (strict-subset) input format. */
-export const READING_DRAFT_COMPAT_VERSIONS = ['reading-draft/v1', 'reading-draft/v2'] as const;
+/** Legacy version string — rejected at runtime; kept only for docs/diagnostics. */
+export const READING_DRAFT_LEGACY_V1 = 'reading-draft/v1';
 export const VALIDATION_RESULT_CONTRACT_VERSION = 'validation-result/v2';
 
 // --- Protective resource limits ---
@@ -51,6 +51,11 @@ export const VALIDATION_RESULT_CONTRACT_VERSION = 'validation-result/v2';
 
 /** Max input-file size in bytes for the CLI `validate-answer` command (stat before read). */
 export const MAX_VALIDATE_ANSWER_INPUT_BYTES = 2_097_152;
+
+/** Max own keys on any object level of the input (known schemas use < 10 keys). */
+export const MAX_OBJECT_KEYS = 32;
+/** Max characters per object key (schema key names are short ASCII identifiers). */
+export const MAX_OBJECT_KEY_CHARS = 64;
 
 /** Max characters in a single paragraph text (regex scan cost per paragraph stays bounded). */
 export const MAX_PARAGRAPH_TEXT_CHARS = 5_000;
@@ -157,7 +162,7 @@ export type ReadingSection = z.infer<typeof ReadingSection>;
  */
 export const ReadingDraft = z
   .strictObject({
-    contractVersion: z.enum(READING_DRAFT_COMPAT_VERSIONS),
+    contractVersion: z.literal(READING_DRAFT_CONTRACT_VERSION),
     topic: InterpretationTopic,
     sections: z.array(ReadingSection).min(1).max(MAX_SECTIONS),
     /** Which requiredCaveats (from AnswerPlan) the host claims to have expressed. */
@@ -220,6 +225,9 @@ export const ViolationCode = z.enum([
 
   // Contract-version violations
   'UNSUPPORTED_CONTRACT_VERSION', // readingDraft.contractVersion is not an accepted version
+
+  // Input-shape violations (public entry rejects unparseable raw input)
+  'MALFORMED_INPUT', // input failed the bounded parse / runtime schema validation
 
   // Guardrail violations
   // Reserved: not currently emitted. Mapping answerPlan.guardrails to checks without
