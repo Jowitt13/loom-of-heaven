@@ -46,6 +46,10 @@ const QODER_CLI =
 const VERSION_CMD = /ming-chart\.mjs version/;
 const ONLINE_MANIFEST = /install-manifest\.json/;
 const MIGRATE = /\bmigrate\b/;
+/** Round 14: STATUS.md must not point at the retired pre-incident workspace. */
+const STARTMOON = /startmoon/i;
+/** Round 14: the release tag quoted in STATUS.md's verify:install row. */
+const STATUS_INSTALL_TAG = /verify:install[^\n]*?(v\d+\.\d+\.\d+)/;
 
 interface DocRule {
   file: string;
@@ -104,7 +108,10 @@ const RULES: DocRule[] = [
   },
   {
     file: 'docs/STATUS.md',
-    mustNot: [{ re: DE441, msg: 'DE441 错误声明' }],
+    mustNot: [
+      { re: DE441, msg: 'DE441 错误声明' },
+      { re: STARTMOON, msg: '仍指向已废弃 startmoon 旧工作区' },
+    ],
     must: [
       { re: /validate:docs/, msg: '缺 validate:docs 阶段' },
       { re: /VSOP87|NOVAS/, msg: '缺 VSOP87/NOVAS' },
@@ -260,6 +267,20 @@ function selfTest(): void {
   add('[self-test] version 命令检测命中', VERSION_CMD.test('node scripts/ming-chart.mjs version'));
   add('[self-test] version 不误报 verify', !VERSION_CMD.test('node scripts/ming-chart.mjs verify'));
   add('[self-test] migrate 协议检测命中', MIGRATE.test('migrate --host qoder --source tmp'));
+  add(
+    '[self-test] startmoon 旧工作区命中',
+    STARTMOON.test('built in `Qoder\\startmoon` (git here)'),
+  );
+  add(
+    '[self-test] verify:install 行 tag 提取命中',
+    STATUS_INSTALL_TAG.exec(
+      '| `pnpm run verify:install` | root publishes GitHub Release v0.1.4 with immutable URL |',
+    )?.[1] === 'v0.1.4',
+  );
+  add(
+    '[self-test] verify:install tag 不跨行误报',
+    !STATUS_INSTALL_TAG.test('| `pnpm run verify:install` | passes |\n| other | v0.1.4 |'),
+  );
 }
 
 function main(): void {
@@ -298,6 +319,16 @@ function main(): void {
   }
   add('root install-manifest.json publication state is readable', publication !== undefined);
   if (publication?.status === 'published' && typeof publication.releaseTag === 'string') {
+    // Round 14: STATUS.md's verify:install row must quote the CURRENT published tag.
+    const statusText = read('docs/STATUS.md');
+    if (statusText !== null) {
+      const quoted = STATUS_INSTALL_TAG.exec(statusText)?.[1];
+      add(
+        `docs/STATUS.md: verify:install row quotes current release ${publication.releaseTag}`,
+        quoted === publication.releaseTag,
+        quoted,
+      );
+    }
     for (const f of PUBLICATION_ENTRY_DOCS) {
       const text = read(f);
       if (text === null) continue;

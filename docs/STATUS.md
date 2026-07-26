@@ -1,13 +1,14 @@
 # STATUS
 
-> Updated: 2026-07-22 · Phase W5 (吉凶 facts + sidereal/true-node/asteroids + 解读风格，HTML/SVG 报告暂停) complete — **expansion roadmap W1–W5 done** · engine `0.1.0` / schema `0.1.0`
+> Updated: 2026-07-26 · Phase W5 (吉凶 facts + sidereal/true-node/asteroids + 解读风格，HTML/SVG 报告暂停) complete — **expansion roadmap W1–W5 done** · engine `0.1.0` / schema `0.1.0`
 
 ## Where the project lives
 
-Built in the writable workspace **`c:\Users\hangi\Documents\Qoder\startmoon`** (git initialized
-here). The handoff was read from `c:\Users\hangi\Documents\ming\QODER_HANDOFF.md` and copied into
-this workspace root for continuity. Tooling can only write inside the workspace, so this is the
-project home; move/copy the tree if a different repo root is desired.
+The public home is the sanitized repository `github.com/Jowitt13/ming-engine` (after a PII
+incident the public history was rewritten and republished; see
+[INCIDENT_PII_REMEDIATION.md](./INCIDENT_PII_REMEDIATION.md)). The original handoff document is
+kept at the repository root as `QODER_HANDOFF.md` for continuity. Pre-incident workspaces are
+retired and must never be pushed from or copied from.
 
 ## Done
 
@@ -86,8 +87,8 @@ project home; move/copy the tree if a different repo root is desired.
   safe to commit.
 - Privacy remediation + guard: removed stray real-looking birth data (`scripts/birth-input.json`,
   `scripts/chart.json`, `.tmp/`) from the Skill source, and added a `validate:skill` check that
-  `scripts/` holds only `ming-chart.mjs`, `fixtures/`, `dist/` (handoff §10). validate:skill is now
-  34/34.
+  `scripts/` holds only `ming-chart.mjs`, `fixtures/`, `dist/` (handoff §10); the enforced check
+  count lives in the "Commands & results" table below.
 - Remaining Phase 4 step: **live WorkBuddy upload/enable/trigger acceptance on a real device**
   (checklist in `docs/WORKBUDDY.md`); it cannot be exercised from the dev workspace.
 
@@ -175,7 +176,7 @@ project home; move/copy the tree if a different repo root is desired.
   `@ming/synastry` 包与 `synastry` 命令（1-5 人、八字/紫微/占星三系、>2 人需 analyzePair）；SKILL
   多人工作流（先确认关系与分析哪两人）；反绝对化——不作“注定/必分”。W5 “synastry 不做”假设作废。
 
-## Commands & results (2026-07-24)
+## Commands & results (2026-07-26)
 
 The counts below are the output of one real `pnpm run test` run — the single source of truth
 shared with [VALIDATION.md](./VALIDATION.md) ("Current results"). `pnpm run check:doc-counts` fails
@@ -186,13 +187,13 @@ never by hand.
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `pnpm run typecheck`           | clean (tsc strict over packages, tools, tests)                                                                                                                                                                                 |
 | `pnpm run test`                | 301 tests / 26 files — all passing (all systems + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + validate-answer 事实边界与安全 + western-rules/ziwei-rules 语义规则 + 版本迁移/回滚/目标白名单 + PII 隐私护栏 green) |
-| `pnpm run build`               | `engine.mjs` ≈ 2.6 MiB + `sbom.cdx.json` (6 runtime deps)                                                                                                                                                                      |
+| `pnpm run build`               | `engine.mjs` ≈ 2.8 MB + `sbom.cdx.json` (6 runtime deps)                                                                                                                                                                       |
 | `pnpm run validate:skill`      | 35 / 35 (incl. scripts/ no-stray-files guard)                                                                                                                                                                                  |
 | `pnpm run validate:reading`    | 53 / 53 (topic example libraries + output-spec structure + 无术语区 firewall; offline, no LLM)                                                                                                                                 |
 | `pnpm run validate:docs`       | passes (docs consistency: 4 full hosts, render disabled, no wrong-ephemeris attribution, dev Node 24 / run Node 22; self-tests)                                                                                                |
 | `pnpm run validate:provenance` | passes (no wrong-ephemeris attribution in live source / examples / built engine; VSOP87+NOVAS; self-tests)                                                                                                                     |
 | `pnpm run verify:hosts`        | real candidate ZIPs: single top dir, no double-nest, doctor/verify/calculate byte-identical to canonical                                                                                                                       |
-| `pnpm run verify:install`      | root publishes GitHub Release v0.1.4 with immutable URL/SHA-256; next candidate build remains unpublished/reproducible                                                                                                         |
+| `pnpm run verify:install`      | root publishes GitHub Release v0.1.5 with immutable URL/SHA-256; next candidate build remains unpublished/reproducible                                                                                                         |
 | `pnpm run smoke`               | 10 / 10 (offline; source CLI vs isolated Skill byte-identical)                                                                                                                                                                 |
 | `pnpm run forward:test`        | 41 / 41 (offline; 8 realistic requests incl. horoscope + interpret + synastry)                                                                                                                                                 |
 | `pnpm run example`             | regenerates `examples/` (de-identified artifacts; needs build)                                                                                                                                                                 |
