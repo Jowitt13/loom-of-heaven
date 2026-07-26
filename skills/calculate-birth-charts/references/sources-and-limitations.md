@@ -28,10 +28,11 @@
 ## Current limitations (stated honestly)
 
 - **Western natal charts are computed** by astronomy-engine (MIT, VSOP87 + NOVAS based). Our
-  `precision-regression` proves our wrapper stays consistent with astronomy-engine's own output;
-  it is **not** an independent JPL cross-check. astronomy-engine upstream claims ~±1′ accuracy
-  (tested against JPL Horizons); an independent JPL Horizons golden fixture in THIS repo is still
-  TODO (待补，不伪造数据). The candidate celestine 0.2.1 was evaluated and REJECTED at the ADR 0003
+  `precision-regression` proves our wrapper stays consistent with astronomy-engine's own output,
+  and an **independent JPL Horizons golden fixture** (10 bodies × 3 technical epochs, fetched from
+  the NASA/JPL Horizons service with the query recorded; worst deviation 0.20′) cross-checks
+  absolute accuracy in `packages/western/test/western-jpl-golden.test.ts` — both hold the ≤1′
+  gate. The candidate celestine 0.2.1 was evaluated and REJECTED at the ADR 0003
   ≤1′ gate (up to ~17′ Mercury / ~37′ Pluto). The regression lives in
   `packages/western/test/precision-regression.test.ts`. The **sidereal zodiac (Lahiri ayanamsha)**,
   the **true lunar node** and the **asteroids** (Chiron/Ceres/Pallas/Juno/Vesta) are also computed

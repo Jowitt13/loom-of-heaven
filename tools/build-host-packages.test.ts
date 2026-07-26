@@ -55,7 +55,9 @@ describe('normalizeZipEntryData', () => {
 });
 
 describe('cross-platform reproducible host packaging (real build path)', () => {
-  it('LF and CRLF Skill inputs yield byte-identical host ZIP SHA-256', () => {
+  // Builds 8 real ZIPs (4 hosts × 2 line-ending trees) — routinely ~4-5 s, right at the
+  // default 5 s timeout under a loaded full-suite run, so give it explicit headroom.
+  it('LF and CRLF Skill inputs yield byte-identical host ZIP SHA-256', { timeout: 30_000 }, () => {
     const work = mkdtempSync(join(tmpdir(), 'ming-crlf-'));
     try {
       const lfSrc = join(work, 'lf-src');

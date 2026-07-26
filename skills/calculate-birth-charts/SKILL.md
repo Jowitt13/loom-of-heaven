@@ -200,7 +200,8 @@ Notes:
 
 - Western ten planets (astronomy-engine, VSOP87 + NOVAS, `precision: high`) cover Sun–Pluto with houses
   (placidus/whole-sign/equal/koch/porphyry), ascendant/MC, aspects and retrogrades, and hold the
-  wrapper-consistency gate (≤1′ vs astronomy-engine's own output; an independent JPL Horizons golden is TODO).
+  ≤1′ gate two ways: wrapper-consistency vs astronomy-engine's own output, plus an independent
+  JPL Horizons golden cross-check (source-cited fixture; worst deviation 0.20′).
 - The **sidereal zodiac (Lahiri ayanamsha)**, the **true lunar node**, and the **asteroids**
   (Chiron/Ceres/Pallas/Juno/Vesta) are now computed. The true node and asteroids are
   self-computed from public-domain elements and are marked `precision: approximate` (角分级近似);

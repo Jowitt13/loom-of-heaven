@@ -6,9 +6,11 @@ import { fileURLToPath } from 'node:url';
  * Deterministic provenance-source gate (Round 12).
  *
  * Astronomy Engine follows the VSOP87 + NOVAS route (its upstream validates against JPL
- * Horizons); this repository has NO independent JPL Horizons golden fixture. So NO live
- * authored source, generated example, or the BUILT candidate engine may attribute the
- * ephemeris to "JPL DE441" / "DE441-grade" / "astronomy-engine/DE441".
+ * Horizons). This repository ALSO carries its own independent JPL Horizons golden fixture
+ * (packages/western/goldens/jpl-horizons.json + western-jpl-golden.test.ts) — but that is a
+ * test-time cross-check, NOT an engine attribution. So NO live authored source, generated
+ * example, or the BUILT candidate engine may attribute the ephemeris to "JPL DE441" /
+ * "DE441-grade" / "astronomy-engine/DE441".
  *
  * Scans authored source (packages, tools, skills SKILL/reference docs), generated examples,
  * and the built engine bundle. A line is allowed to mention DE441 ONLY if it is explicitly

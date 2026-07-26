@@ -159,7 +159,7 @@ retired and must never be pushed from or copied from.
   gained reason chains. `BaziRuleFinding`/`InterpretationFact` carry `polarity` (吉/凶/中性) +
   `reason`; `interpret` adds `followupOffers` (事业/感情/财运/学业/流年).
 - **Western completeness (MIT, self-computed):** sidereal zodiac (Lahiri ayanamsha), true lunar
-  node, and asteroids (Chiron/Ceres/Pallas/Juno/Vesta). The ten planets keep the ≤1′ wrapper-consistency gate (vs astronomy-engine; independent JPL Horizons golden TODO)
+  node, and asteroids (Chiron/Ceres/Pallas/Juno/Vesta). The ten planets keep the ≤1′ gate two ways — wrapper-consistency (vs astronomy-engine) plus an independent JPL Horizons golden (`packages/western/goldens/jpl-horizons.json`, worst 0.20′)
   (`precision: high`); the true node + asteroids are `precision: approximate` and excluded from it.
 - **Cross-model consistency:** SKILL.md mandates `calculate --systems all` (full COMPUTATION; how much
   is DISPLAYED follows the output channel — Channel A full three charts, Channel B topic-only) + a closing
@@ -183,25 +183,25 @@ shared with [VALIDATION.md](./VALIDATION.md) ("Current results"). `pnpm run chec
 if either doc's `N tests / M files` count drifts from an actual run, so update both from the run,
 never by hand.
 
-| Command                        | Result                                                                                                                                                                                                                         |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm run typecheck`           | clean (tsc strict over packages, tools, tests)                                                                                                                                                                                 |
-| `pnpm run test`                | 301 tests / 26 files — all passing (all systems + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + validate-answer 事实边界与安全 + western-rules/ziwei-rules 语义规则 + 版本迁移/回滚/目标白名单 + PII 隐私护栏 green) |
-| `pnpm run build`               | `engine.mjs` ≈ 2.8 MB + `sbom.cdx.json` (6 runtime deps)                                                                                                                                                                       |
-| `pnpm run validate:skill`      | 35 / 35 (incl. scripts/ no-stray-files guard)                                                                                                                                                                                  |
-| `pnpm run validate:reading`    | 53 / 53 (topic example libraries + output-spec structure + 无术语区 firewall; offline, no LLM)                                                                                                                                 |
-| `pnpm run validate:docs`       | passes (docs consistency: 4 full hosts, render disabled, no wrong-ephemeris attribution, dev Node 24 / run Node 22; self-tests)                                                                                                |
-| `pnpm run validate:provenance` | passes (no wrong-ephemeris attribution in live source / examples / built engine; VSOP87+NOVAS; self-tests)                                                                                                                     |
-| `pnpm run verify:hosts`        | real candidate ZIPs: single top dir, no double-nest, doctor/verify/calculate byte-identical to canonical                                                                                                                       |
-| `pnpm run verify:install`      | root publishes GitHub Release v0.1.5 with immutable URL/SHA-256; next candidate build remains unpublished/reproducible                                                                                                         |
-| `pnpm run smoke`               | 10 / 10 (offline; source CLI vs isolated Skill byte-identical)                                                                                                                                                                 |
-| `pnpm run forward:test`        | 41 / 41 (offline; 8 realistic requests incl. horoscope + interpret + synastry)                                                                                                                                                 |
-| `pnpm run example`             | regenerates `examples/` (de-identified artifacts; needs build)                                                                                                                                                                 |
-| `pnpm run package`             | `dist/` stage + self-verified `.zip` + `.sha256` (14 files; needs build)                                                                                                                                                       |
-| `pnpm run check:doc-counts`    | passes — both docs match the real run                                                                                                                                                                                          |
-| `pnpm run format:check`        | clean                                                                                                                                                                                                                          |
-| `pnpm run verify:cloud`        | CI-safe, non-sensitive gate; must pass in GitHub Actions                                                                                                                                                                       |
-| `pnpm run verify:all`          | controlled local gate; `scan:incident` fails closed when its private token file is unavailable                                                                                                                                 |
+| Command                        | Result                                                                                                                                                                                                                                                    |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm run typecheck`           | clean (tsc strict over packages, tools, tests)                                                                                                                                                                                                            |
+| `pnpm run test`                | 312 tests / 27 files — all passing (all systems + JPL Horizons 独立 golden + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + validate-answer 事实边界与安全 + western-rules/ziwei-rules 语义规则 + 版本迁移/回滚/目标白名单 + PII 隐私护栏 green) |
+| `pnpm run build`               | `engine.mjs` ≈ 2.8 MB + `sbom.cdx.json` (6 runtime deps)                                                                                                                                                                                                  |
+| `pnpm run validate:skill`      | 35 / 35 (incl. scripts/ no-stray-files guard)                                                                                                                                                                                                             |
+| `pnpm run validate:reading`    | 53 / 53 (topic example libraries + output-spec structure + 无术语区 firewall; offline, no LLM)                                                                                                                                                            |
+| `pnpm run validate:docs`       | passes (docs consistency: 4 full hosts, render disabled, no wrong-ephemeris attribution, dev Node 24 / run Node 22; self-tests)                                                                                                                           |
+| `pnpm run validate:provenance` | passes (no wrong-ephemeris attribution in live source / examples / built engine; VSOP87+NOVAS; self-tests)                                                                                                                                                |
+| `pnpm run verify:hosts`        | real candidate ZIPs: single top dir, no double-nest, doctor/verify/calculate byte-identical to canonical                                                                                                                                                  |
+| `pnpm run verify:install`      | root publishes GitHub Release v0.1.5 with immutable URL/SHA-256; next candidate build remains unpublished/reproducible                                                                                                                                    |
+| `pnpm run smoke`               | 10 / 10 (offline; source CLI vs isolated Skill byte-identical)                                                                                                                                                                                            |
+| `pnpm run forward:test`        | 41 / 41 (offline; 8 realistic requests incl. horoscope + interpret + synastry)                                                                                                                                                                            |
+| `pnpm run example`             | regenerates `examples/` (de-identified artifacts; needs build)                                                                                                                                                                                            |
+| `pnpm run package`             | `dist/` stage + self-verified `.zip` + `.sha256` (14 files; needs build)                                                                                                                                                                                  |
+| `pnpm run check:doc-counts`    | passes — both docs match the real run                                                                                                                                                                                                                     |
+| `pnpm run format:check`        | clean                                                                                                                                                                                                                                                     |
+| `pnpm run verify:cloud`        | CI-safe, non-sensitive gate; must pass in GitHub Actions                                                                                                                                                                                                  |
+| `pnpm run verify:all`          | controlled local gate; `scan:incident` fails closed when its private token file is unavailable                                                                                                                                                            |
 
 Vertical slice proven: `birth-input.json → normalize → ChartBundle → structured JSON` (render paused),
 runnable from a clean copy outside the repo, offline, deterministic.
@@ -222,7 +222,8 @@ runnable from a clean copy outside the repo, offline, deterministic.
 
 - Western angles/houses are derived in-house (not astronomy-engine); they are validated against
   the MC=RAMC and eastern-horizon oracles, but an independent golden house-table (e.g. a Swiss
-  Ephemeris reference chart) would further harden them.
+  Ephemeris reference chart) would further harden them. (Planetary longitudes now HAVE an
+  independent JPL Horizons golden; only the house layer still lacks one.)
 - LMT-era (early 1901+) offsets are whole-minute precision (moment-timezone limitation).
 - Equation of time is an approximation (~tenths of a minute); fine for display, not high-precision.
 - TypeScript pinned to 5.9 while registry `latest` is 7.0; revisit after TS 7 soaks.
