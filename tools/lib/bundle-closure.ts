@@ -137,32 +137,51 @@ export function extractLicense(pkg: RawPackageJson): string {
 }
 
 /**
- * Classify a metafile input path.
+ * Classify a metafile input path into one of four categories, or 'unknown'
+ * if the path cannot be safely attributed. The classifier uses
+ * PATH-SEGMENT precise matching, never a substring `includes()`, so a
+ * third-party package with its own `packages/` subdirectory (a very common
+ * pattern in monorepo-shipped packages) is not silently swept into the
+ * repo-internal category.
  *
- * The metafile paths esbuild emits are relative to the invocation cwd (in the
- * ming build, that is the repo root). We only care about three exclusion
- * categories plus everything else, which we treat as "third-party under
- * node_modules and must be resolvable to a package root".
+ * Order matters:
+ *   1. virtual (esbuild synthetic inputs like `<define:...>` and `<runtime>`)
+ *   2. nodeBuiltin (`node:` prefixed identifiers)
+ *   3. thirdParty (ANY path with `node_modules` as a real path segment) —
+ *      even when the path contains later segments named `packages`.
+ *   4. repoInternal (path whose FIRST segment is exactly `packages`) — the
+ *      workspace's own `packages/<workspace>/…` source files.
+ *   5. unknown — anything that does not match the above. Callers must treat
+ *      this as a hard error rather than a silent skip.
  */
 type Category =
-  { kind: 'virtual' } | { kind: 'nodeBuiltin' } | { kind: 'repoInternal' } | { kind: 'thirdParty' };
+  | { kind: 'virtual' }
+  | { kind: 'nodeBuiltin' }
+  | { kind: 'repoInternal' }
+  | { kind: 'thirdParty' }
+  | { kind: 'unknown' };
 
 function classifyInput(input: string): Category {
   // esbuild emits synthetic entries like `<define:X>` and `<runtime>`.
   if (input.startsWith('<') || input.includes('\x00')) return { kind: 'virtual' };
   if (input.startsWith('node:')) return { kind: 'nodeBuiltin' };
-  // Normalise to forward slashes for consistent classification on Windows.
-  const norm = input.split(sep).join('/');
-  if (norm.startsWith('packages/') || norm.includes('/packages/')) {
-    return { kind: 'repoInternal' };
-  }
-  if (norm.startsWith('node_modules/') || norm.includes('/node_modules/')) {
-    return { kind: 'thirdParty' };
-  }
-  // Anything else (a bare workspace-relative source that is neither packages/
-  // nor node_modules) is likely a repo-internal file too; treat as internal so
-  // we never silently label it "unknown third-party".
-  return { kind: 'repoInternal' };
+  // Normalise BOTH backslashes and the OS separator to `/` so segment
+  // matching works uniformly on Windows, POSIX and any mixed-separator input
+  // that a metafile might carry.
+  const norm = input.replace(/\\/g, '/');
+  const parts = norm.split('/').filter((p) => p.length > 0);
+
+  // PRIORITY: a path with `node_modules` as a real path SEGMENT is
+  // third-party — even if a later segment happens to be named `packages/`.
+  // Substring matching (`.includes('/packages/')`) would false-positive on
+  // `node_modules/foo/packages/runtime/index.js`.
+  if (parts.includes('node_modules')) return { kind: 'thirdParty' };
+
+  // repoInternal: only when the FIRST segment is exactly `packages`.
+  if (parts[0] === 'packages') return { kind: 'repoInternal' };
+
+  // Anything else cannot be safely attributed — fail-closed at the caller.
+  return { kind: 'unknown' };
 }
 
 /**
@@ -251,6 +270,14 @@ export function computeBundleClosure(
     if (c.kind === 'repoInternal') {
       ignored.repoInternal.push(raw);
       continue;
+    }
+    if (c.kind === 'unknown') {
+      // Fail-closed: any metafile input that is neither obviously virtual,
+      // a Node built-in, a repo `packages/*` source, nor located under a
+      // real `node_modules` path segment is refused. Silently sweeping such
+      // paths into repoInternal (the pre-fix behaviour) hid third-party
+      // inputs whose paths happened to include a `packages/` subdirectory.
+      throw new Error(`could not classify metafile input: ${raw}`);
     }
     // Third-party. Resolve to an absolute path relative to root, then walk up.
     const abs = isAbsolute(raw) ? raw : join(opts.root, raw);

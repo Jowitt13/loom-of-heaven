@@ -219,6 +219,92 @@ describe('bundle-closure: computeBundleClosure', () => {
       ),
     ).toThrow(/could not resolve package root/);
   });
+
+  // --- Regression: classifyInput priority bug (P1-fix) --------------------
+  // Pre-fix, classifyInput ran `repoInternal` before `thirdParty` and used a
+  // substring `.includes('/packages/')`, so any third-party package with its
+  // own `packages/` subdirectory got silently swept into `ignored.repoInternal`
+  // and the bundle closure lost the package. These tests lock in the fix.
+
+  it('16. classifyInput priority: node_modules/foo/packages/... resolves to foo (not repoInternal)', () => {
+    // Exact repro from the P1-fix report.
+    const dirSynth = nm('node_modules/synthetic-dep');
+    const map = new Map<string, unknown>([
+      [dirSynth, { name: 'synthetic-dep', version: '1.0.0', license: 'MIT' }],
+    ]);
+    const r = computeBundleClosure(
+      { inputs: { 'node_modules/synthetic-dep/packages/runtime/index.js': {} } },
+      { root: ROOT, readPackageJson: makeReader(map) },
+    );
+    expect(r.packages.map((p) => `${p.name}@${p.version}`)).toEqual(['synthetic-dep@1.0.0']);
+    // Must NOT be swept into repoInternal even though the path contains 'packages/'.
+    expect(r.ignored.repoInternal).toEqual([]);
+  });
+
+  it('17. classifyInput priority: scoped node_modules/@scope/pkg/packages/... resolves to @scope/pkg', () => {
+    const dirScopedInner = nm('node_modules/@scope/inner');
+    const map = new Map<string, unknown>([
+      [dirScopedInner, { name: '@scope/inner', version: '3.4.5', license: 'MIT' }],
+    ]);
+    const r = computeBundleClosure(
+      { inputs: { 'node_modules/@scope/inner/packages/runtime/index.js': {} } },
+      { root: ROOT, readPackageJson: makeReader(map) },
+    );
+    expect(r.packages[0]!.name).toBe('@scope/inner');
+    expect(r.packages[0]!.version).toBe('3.4.5');
+    expect(r.ignored.repoInternal).toEqual([]);
+  });
+
+  it('18. classifyInput priority: pnpm-nested pkg with internal packages/ subdir resolves to the pkg', () => {
+    const dirPnpmDeep = nm('node_modules/.pnpm/deep@1.2.3/node_modules/deep');
+    const map = new Map<string, unknown>([
+      [dirPnpmDeep, { name: 'deep', version: '1.2.3', license: 'MIT' }],
+    ]);
+    const r = computeBundleClosure(
+      {
+        inputs: {
+          'node_modules/.pnpm/deep@1.2.3/node_modules/deep/packages/runtime/index.js': {},
+        },
+      },
+      { root: ROOT, readPackageJson: makeReader(map) },
+    );
+    expect(r.packages.map((p) => `${p.name}@${p.version}`)).toEqual(['deep@1.2.3']);
+    expect(r.ignored.repoInternal).toEqual([]);
+  });
+
+  it('19. repo-internal packages/<workspace> still routes to ignored.repoInternal (no regression)', () => {
+    const r = run(['packages/orchestrator/src/x.ts']);
+    expect(r.packages).toEqual([]);
+    expect(r.ignored.repoInternal).toEqual(['packages/orchestrator/src/x.ts']);
+  });
+
+  it('20. unknown path (neither node_modules nor packages/) -> throw (fail-closed)', () => {
+    expect(() =>
+      computeBundleClosure(
+        { inputs: { 'somewhere/random/file.js': {} } },
+        { root: ROOT, readPackageJson },
+      ),
+    ).toThrow(/could not classify metafile input/);
+  });
+
+  it('21. Windows backslash path normalises so segment logic still runs', () => {
+    // A metafile that carries `\\`-separated paths (unusual but possible on
+    // Windows or in captured fixtures) must still be classified via segment
+    // matching, not fold to repoInternal via `\packages\`.
+    const map = new Map<string, unknown>([
+      [nm('node_modules/backslashy'), { name: 'backslashy', version: '0.0.9', license: 'MIT' }],
+    ]);
+    const r = computeBundleClosure(
+      {
+        inputs: {
+          [`node_modules\\backslashy\\packages\\runtime\\x.js`]: {},
+        },
+      },
+      { root: ROOT, readPackageJson: makeReader(map) },
+    );
+    expect(r.packages.map((p) => `${p.name}@${p.version}`)).toEqual(['backslashy@0.0.9']);
+    expect(r.ignored.repoInternal).toEqual([]);
+  });
 });
 
 describe('bundle-closure: real disk smoke via tmpdir', () => {
