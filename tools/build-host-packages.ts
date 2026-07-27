@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   buildZip,
@@ -47,12 +47,16 @@ const root = join(here, '..');
 const srcSkill = join(root, 'skills', 'calculate-birth-charts');
 const releasesDir = join(root, 'releases');
 
-/** Files/dirs excluded from EVERY host package to keep zips byte-reproducible. */
-function isExcluded(src: string): boolean {
-  if (/[\\/]\.tmp([\\/]|$)/.test(src)) return true;
+/** Files/dirs excluded from EVERY host package to keep zips byte-reproducible.
+ * Operates on paths RELATIVE to the Skill root (posix-style), so parent directory
+ * names (e.g. a workspace under a folder named '.tmp') never cause false exclusions.
+ */
+function isExcluded(relPath: string): boolean {
+  if (/(?:^|\/)\.\.?(?:\/|$)/.test(relPath)) return true; // safety: . or ..
+  if (/(?:^|\/)\.tmp(\/|$)/.test(relPath)) return true;
   // Both committed SBOMs (CycloneDX + SPDX) stay out of the host zips, matching the
   // long-standing sbom.cdx.json exclusion that keeps the zip contents deterministic.
-  if (/[\\/]sbom\.(cdx|spdx)\.json$/.test(src)) return true;
+  if (/(?:^|\/)sbom\.(cdx|spdx)\.json$/.test(relPath)) return true;
   return false;
 }
 
@@ -332,17 +336,21 @@ export function buildHostZips(srcSkillDir: string, stagingRoot: string): HostZip
     if (isLite) {
       // reading-lite (no current host): references/ only, NO scripts/agents/assets.
       const liteFilter = (src: string): boolean => {
-        if (isExcluded(src)) return false;
-        if (/[\\/]scripts([\\/]|$)/.test(src)) return false;
-        if (/[\\/]agents([\\/]|$)/.test(src)) return false;
-        if (/[\\/]assets([\\/]|$)/.test(src)) return false;
+        const rel = relative(srcSkillDir, src).split(sep).join('/');
+        if (isExcluded(rel)) return false;
+        if (/(?:^|\/)scripts(\/|$)/.test(rel)) return false;
+        if (/(?:^|\/)agents(\/|$)/.test(rel)) return false;
+        if (/(?:^|\/)assets(\/|$)/.test(rel)) return false;
         return true;
       };
       cpSync(srcSkillDir, stageSkill, { recursive: true, filter: liteFilter });
       writeFileSync(join(stageSkill, 'SKILL.md'), readingLiteSkillMd(), 'utf8');
     } else {
       // full: copy the entire canonical skill (exclude .tmp + volatile sbom).
-      cpSync(srcSkillDir, stageSkill, { recursive: true, filter: (src) => !isExcluded(src) });
+      cpSync(srcSkillDir, stageSkill, {
+        recursive: true,
+        filter: (src) => !isExcluded(relative(srcSkillDir, src).split(sep).join('/')),
+      });
     }
 
     writeFileSync(

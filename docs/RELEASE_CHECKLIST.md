@@ -19,6 +19,9 @@
       `pnpm run verify:hosts`（解包真实 ZIP：单一顶层目录、无双层嵌套、engine 与 canonical
       字节一致）→ `pnpm run verify:install`（候选/发布边界诚实一致）。需要在 Node 22 运行底座
       上冒烟时用 `pnpm run verify:zip-runtime -- --host <codex|qoder|workbuddy|doubao>`。
+- [ ] **A3.1 ZIP 配额测试通过**：`tools/lib/zip.test.ts` 中的 15 项合成安全测试全部
+      pass（含 ZIP bomb 元数据、超条目数、超单文件/总量、超压缩比、越界 offset、路径穿越、
+      Windows 路径、重复路径、CRC 不匹配无残留、解压失败清理）。
 - [ ] **A4 候选包与真机测试包一致**：真机实测的每个 ZIP 的 SHA-256 必须逐一等于
       `releases/<CANDIDATE_DIR>/SHA256SUMS.txt` 及同目录 `install-manifest.json` 中记录的值
       （Windows 用 `Get-FileHash -Algorithm SHA256`，macOS/Linux 用 `shasum -a 256`）。真机

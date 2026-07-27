@@ -81,3 +81,29 @@
 - **Qoder / WorkBuddy / 豆包电脑版**：完整排盘包已按当前清单发布；更新时仍必须下载清单指定的不可变资产并校验 SHA-256。
 
 > 后续发布必须使用新的不可变 tag 与独立 ZIP；创建 Release、上传资产并完成重下 SHA-256 校验后，才可更新清单。不得使用 `latest/download`，不得复用已撤下的历史发布地址。
+
+## ZIP 解压安全配额
+
+所有宿主 Agent 在解压安装包时必须执行以下配额检查（基于 inflate 前的 central directory 元数据）：
+
+| 配额                         | 值         | 作用                     |
+| ---------------------------- | ---------- | ------------------------ |
+| MAX_ZIP_FILE_BYTES           | 2,000,000  | 压缩 ZIP 文件大小上限    |
+| MAX_ZIP_ENTRIES              | 100        | 条目数上限               |
+| MAX_SINGLE_FILE_BYTES        | 8,000,000  | 单文件解压大小上限       |
+| MAX_TOTAL_UNCOMPRESSED_BYTES | 12,000,000 | 总解压大小上限           |
+| MAX_COMPRESSION_RATIO        | 20         | 单条目最大压缩比         |
+| ALLOWED_METHODS              | {0, 8}     | 仅允许 stored 和 deflate |
+
+任一违规必须**立即拒绝整个 ZIP**，不得“过滤后继续”。若宿主 Agent 无法执行某项检查，必须停止安装并报告失败，不得降级或绕过。
+
+此配额已在 `tools/lib/zip.ts` (`extractZipSafe`) 中实现并经过合成测试验证，保护的是仓库工具链的 ZIP 提取过程。桌面端 Agent 下载/解压的端到端执行边界作为后续设计项单独确认。
+
+extractZipSafe 安全属性：
+
+- 文件入口 `extractZipFileSafe`：先 stat 文件大小，超出 maxZipFileBytes 立即拒绝后才读取
+- 文件入口 `readZipFileSafe` / `extractZipFileSafe`：先 lstat 确认普通文件且大小 <= maxZipFileBytes 后才读取
+- inflate 前元数据预检（CD/local header 完整一致性、拒绝加密/data descriptor/multi-disk/ZIP64；本项目受支持的简化 ZIP 子集严格要求 CD 恰好结束于 EOCD，不允许任何间隙或重叠）
+- inflate 使用 maxOutputLength 按声明值封顶，防止伪造小 uncompSize + 真实大流超额分配
+- destDir 必须不存在（lstatSync 拒绝 symlink/junction/已有目录；父目录必须预存在）
+- 原子 staging：mkdtempSync 创建同父目录 sibling → 单次目录级 rename，失败无残留

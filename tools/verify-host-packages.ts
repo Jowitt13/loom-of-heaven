@@ -4,7 +4,13 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CANDIDATE_DIR, CANDIDATE_RELEASE_VERSION, HOSTS } from './lib/host-config.ts';
-import { assertSingleTopDir, buildZip, extractZip, listZipEntries } from './lib/zip.ts';
+import {
+  assertSingleTopDir,
+  buildZip,
+  extractZip,
+  listZipEntries,
+  readZipFileSafe,
+} from './lib/zip.ts';
 
 /**
  * Verify the CANDIDATE host release bundles by inspecting the REAL zip archives (not the
@@ -82,7 +88,7 @@ function main(): void {
     if (!existsSync(zipPath)) continue;
 
     // 1-4. Real ZIP structure: single top dir == packageName, packageName/SKILL.md, no double-nest.
-    const zipBuf = readFileSync(zipPath);
+    const zipBuf = readZipFileSafe(zipPath);
     const entries = listZipEntries(zipBuf);
     const struct = assertSingleTopDir(entries, h.packageName);
     add(`[${h.id}] ZIP 单一顶层目录且无双层`, struct.ok, struct.error);
@@ -109,8 +115,8 @@ function main(): void {
     // 5. Extract the REAL zip to a temp dir and work from the extracted path.
     const tmp = mkdtempSync(join(tmpdir(), `ming-verify-${h.id}-`));
     tmpRoots.push(tmp);
-    extractZip(zipBuf, tmp);
-    const pkgRoot = join(tmp, h.packageName);
+    extractZip(zipBuf, join(tmp, 'payload'));
+    const pkgRoot = join(tmp, 'payload', h.packageName);
     add(`[${h.id}] 解压后 ${h.packageName}/ 存在`, existsSync(pkgRoot));
 
     // SKILL.md + metadata from the EXTRACTED files.

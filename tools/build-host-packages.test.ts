@@ -1,4 +1,12 @@
-import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -97,6 +105,41 @@ describe('cross-platform reproducible host packaging (real build path)', () => {
       }
     } finally {
       rmSync(work, { recursive: true, force: true });
+    }
+  });
+
+  it('builds correctly when the workspace parent directory contains .tmp in its name', () => {
+    // Regression: isExcluded must not match .tmp in parent path, only in Skill-relative path.
+    const parentWithTmp = mkdtempSync(join(tmpdir(), '.tmp-parent-'));
+    const work = join(parentWithTmp, 'staging');
+    const fakeSkill = join(parentWithTmp, 'skill-src');
+    try {
+      // Create a minimal synthetic Skill under a '.tmp'-named parent
+      mkdirSync(join(fakeSkill, 'scripts', 'dist'), { recursive: true });
+      mkdirSync(join(fakeSkill, 'references'), { recursive: true });
+      writeFileSync(join(fakeSkill, 'SKILL.md'), '# Synthetic Skill\n');
+      writeFileSync(join(fakeSkill, 'LICENSE'), 'MIT\n');
+      writeFileSync(join(fakeSkill, 'scripts', 'dist', 'engine.mjs'), 'export const x = 1;\n');
+      writeFileSync(join(fakeSkill, 'scripts', 'ming-chart.mjs'), '#!/usr/bin/env node\n');
+      writeFileSync(join(fakeSkill, 'references', 'answer-contract.md'), '# contract\n');
+      mkdirSync(join(fakeSkill, 'agents'), { recursive: true });
+      writeFileSync(join(fakeSkill, 'agents', 'openai.yaml'), 'name: test\n');
+      mkdirSync(join(fakeSkill, 'assets'), { recursive: true });
+      writeFileSync(join(fakeSkill, 'assets', 'report-template.html'), '<html></html>');
+
+      const zips = buildHostZips(fakeSkill, work);
+      expect(zips.length).toBeGreaterThan(0);
+      for (const b of zips) {
+        const entries = listZipEntries(b.zip);
+        expect(entries.length).toBeGreaterThan(0);
+        expect(entries).toContain(`${b.host.packageName}/SKILL.md`);
+        // Full hosts should have the engine
+        if (b.host.capability !== 'reading-lite') {
+          expect(entries).toContain(`${b.host.packageName}/scripts/dist/engine.mjs`);
+        }
+      }
+    } finally {
+      rmSync(parentWithTmp, { recursive: true, force: true });
     }
   });
 });

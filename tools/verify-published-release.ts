@@ -11,6 +11,7 @@ import {
   isTextEntry,
   listZipEntries,
   normalizeZipEntryData,
+  readZipFileSafe,
 } from './lib/zip.ts';
 
 /**
@@ -67,7 +68,7 @@ function main(): void {
     const enginePathInZip = `${SKILL_NAME}/scripts/dist/engine.mjs`;
 
     for (const zipName of zips.sort()) {
-      const buf = readFileSync(join(tmp, zipName));
+      const buf = readZipFileSafe(join(tmp, zipName));
       const sha = createHash('sha256').update(buf).digest('hex');
       integrity.push({
         name: `${zipName} SHA-256 == SHA256SUMS.txt`,
