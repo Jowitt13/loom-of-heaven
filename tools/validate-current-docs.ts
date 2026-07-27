@@ -460,10 +460,12 @@ export function runChecks(readDoc: DocReader = defaultReadDoc): {
       /scan:deps[\s\S]*scan:licenses[\s\S]*scan:secrets/.test(readmeMd),
     );
     // Static test counts drift the moment the suite grows; the real count lives
-    // on GitHub Actions `verify` + docs/VALIDATION.md, not in README.
+    // on GitHub Actions `verify` + docs/VALIDATION.md, not in README. Match both
+    // bold Markdown form (`**471 tests / 29 files**`) and plain text form
+    // (`471 tests / 29 files`) so neither can slip past the guard.
     add(
       'README.md: no stale static "N tests / M files" claim',
-      !/\*\*\d+\s*tests\s*\/\s*\d+\s*files\*\*/.test(readmeMd),
+      !/\d+\s*tests\s*\/\s*\d+\s*files/i.test(readmeMd),
     );
     add(
       'README.md: no static "tests-N passing" shield badge',

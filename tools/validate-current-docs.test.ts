@@ -327,7 +327,20 @@ describe('validate-current-docs: injected reader', () => {
   it('13. README contains static "**N tests / M files**" -> matching FAIL (new guard)', () => {
     const files = baseFixture();
     const cur = files.get('README.md') as string;
-    files.set('README.md', cur + '\n最近一次本地验证为 **467 tests / 29 files**。');
+    files.set('README.md', cur + '\n最近一次本地验证为 **471 tests / 29 files**。');
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain(
+      'README.md: no stale static "N tests / M files" claim',
+    );
+  });
+
+  it('13b. README plain-text "N tests / M files" (no bold) -> matching FAIL', () => {
+    // Regression: the earlier regex required `**` bold markers, so a plain-text
+    // sentence like this one would silently slip past the guard even though it
+    // is exactly the drift-y phrasing README must not carry.
+    const files = baseFixture();
+    const cur = files.get('README.md') as string;
+    files.set('README.md', cur + '\n最近一次本地验证为 471 tests / 29 files。');
     const { failed } = runChecks(readerOf(files));
     expect(failed.map((f) => f.name)).toContain(
       'README.md: no stale static "N tests / M files" claim',
