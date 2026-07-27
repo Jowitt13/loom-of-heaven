@@ -51,7 +51,7 @@ const getFlag = (name: string): string | undefined => {
   const i = argv.indexOf(name);
   return i >= 0 ? argv[i + 1] : undefined;
 };
-const strict = argv.includes('--strict');
+const strict = argv.includes('--strict') || process.env.DEPENDENCY_AUDIT_STRICT === '1';
 const levelArg = (getFlag('--level') ?? 'low').toLowerCase();
 if (!SEVERITY_ORDER.includes(levelArg as Severity)) {
   process.stderr.write(
@@ -80,7 +80,10 @@ interface AuditReport {
 
 function loadAudit(): { report?: AuditReport; error?: string } {
   if (auditJsonFile) {
-    const p = join(root, auditJsonFile);
+    const p =
+      auditJsonFile.startsWith('/') || /^[A-Za-z]:/.test(auditJsonFile)
+        ? auditJsonFile
+        : join(root, auditJsonFile);
     if (!existsSync(p)) return { error: `--audit-json file not found: ${relative(root, p)}` };
     try {
       return { report: JSON.parse(readFileSync(p, 'utf8')) as AuditReport };
@@ -126,13 +129,64 @@ interface AllowEntry {
 function loadAllowlist(): AllowEntry[] {
   const p = join(root, 'tools', 'scan-deps.allowlist.json');
   if (!existsSync(p)) return [];
+  let parsed: unknown;
   try {
-    const parsed = JSON.parse(readFileSync(p, 'utf8'));
-    return Array.isArray(parsed) ? (parsed as AllowEntry[]) : [];
+    parsed = JSON.parse(readFileSync(p, 'utf8'));
   } catch {
+    if (strict) {
+      process.stdout.write('[FAIL] tools/scan-deps.allowlist.json is not valid JSON.\n');
+      process.exit(1);
+    }
     process.stdout.write('[WARN] tools/scan-deps.allowlist.json is not valid JSON; ignoring it.\n');
     return [];
   }
+  if (!Array.isArray(parsed)) {
+    if (strict) {
+      process.stdout.write('[FAIL] tools/scan-deps.allowlist.json must be a JSON array.\n');
+      process.exit(1);
+    }
+    process.stdout.write('[WARN] tools/scan-deps.allowlist.json is not an array; ignoring it.\n');
+    return [];
+  }
+  // Strict validation of each entry
+  if (strict) {
+    const seenIds = new Set<string>();
+    const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+    for (let i = 0; i < parsed.length; i++) {
+      const e = parsed[i] as Record<string, unknown>;
+      if (typeof e !== 'object' || e === null || Array.isArray(e)) {
+        process.stdout.write(`[FAIL] allowlist entry [${i}] is not an object.\n`);
+        process.exit(1);
+      }
+      if (e.id === undefined || (typeof e.id !== 'string' && typeof e.id !== 'number')) {
+        process.stdout.write(`[FAIL] allowlist entry [${i}] missing or invalid "id".\n`);
+        process.exit(1);
+      }
+      if (typeof e.reason !== 'string' || e.reason.trim().length === 0) {
+        process.stdout.write(`[FAIL] allowlist entry [${i}] missing or empty "reason".\n`);
+        process.exit(1);
+      }
+      if (typeof e.expires !== 'string' || !DATE_RE.test(e.expires)) {
+        process.stdout.write(
+          `[FAIL] allowlist entry [${i}] missing or malformed "expires" (need YYYY-MM-DD).\n`,
+        );
+        process.exit(1);
+      }
+      const idKey = String(e.id);
+      if (seenIds.has(idKey)) {
+        process.stdout.write(`[FAIL] allowlist has duplicate id "${idKey}".\n`);
+        process.exit(1);
+      }
+      seenIds.add(idKey);
+      if (e.expires < today) {
+        process.stdout.write(
+          `[FAIL] allowlist entry "${idKey}" expired on ${e.expires as string}; strict mode rejects expired entries.\n`,
+        );
+        process.exit(1);
+      }
+    }
+  }
+  return parsed as AllowEntry[];
 }
 const today = new Date().toISOString().slice(0, 10);
 function allowMatch(adv: Advisory, allow: AllowEntry[]): AllowEntry | undefined {
@@ -147,6 +201,11 @@ function allowMatch(adv: Advisory, allow: AllowEntry[]): AllowEntry | undefined 
 }
 
 // --- Run ---
+process.stdout.write(
+  strict
+    ? '[STRICT] Dependency audit (fail-closed mode).\n'
+    : '[LOCAL DIAGNOSTIC] Dependency audit (offline-safe mode).\n',
+);
 const { report, error } = loadAudit();
 
 if (!report) {

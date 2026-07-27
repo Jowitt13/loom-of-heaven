@@ -381,6 +381,42 @@ function main(): void {
   }
 
   const failed = checks.filter((c) => !c.ok);
+
+  // --- CI gate truthfulness assertions (P0.5) ---
+  const workflow = read('.github/workflows/verify.yml');
+  if (workflow) {
+    add(
+      'workflow: DEPENDENCY_AUDIT_STRICT env set in verify job',
+      workflow.includes('DEPENDENCY_AUDIT_STRICT'),
+    );
+    add(
+      'workflow: no stale "NOT wired in" license/SBOM claim',
+      !/(NOT wired in|not yet wired)/i.test(workflow),
+    );
+  }
+  const validationMd = read('docs/VALIDATION.md');
+  if (validationMd) {
+    add(
+      'VALIDATION.md: no stale "numeric character references decoded"',
+      !validationMd.includes('numeric character references decoded'),
+    );
+    add(
+      'VALIDATION.md: no stale "two-layer reference decoding"',
+      !validationMd.includes('two-layer reference decoding'),
+    );
+  }
+  const arch = read('docs/ARCHITECTURE.md');
+  if (arch) {
+    add('ARCHITECTURE.md: no stale "not created yet"', !arch.includes('not created yet'));
+  }
+  const readmeMd = read('README.md');
+  if (readmeMd) {
+    add(
+      'README.md: verify:cloud chain includes scan:licenses',
+      /scan:deps.*scan:licenses.*scan:secrets/.test(readmeMd),
+    );
+  }
+
   for (const c of checks) {
     process.stdout.write(
       `[${c.ok ? 'PASS' : 'FAIL'}] ${c.name}${c.detail ? ` (${c.detail})` : ''}\n`,

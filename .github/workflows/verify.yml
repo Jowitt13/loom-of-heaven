@@ -17,8 +17,9 @@ name: verify
 # bundle, which must run on Node >= 22 (the declared runtime floor for installed Skills).
 #
 # `lint` is the ESLint import-boundary gate. Supply-chain hardening (scan:deps / scan:secrets)
-# runs inside verify:cloud. A dependency LICENSE scan and an SPDX-format SBOM remain intentionally
-# NOT wired in — see docs/VALIDATION.md and docs/STATUS.md.
+# runs inside verify:cloud (incl. scan:deps + scan:licenses + scan:secrets).
+# scan:incident is NOT in CI — it requires a local-only private token file (fail-closed by design).
+# Dependency audit is CI-strict (DEPENDENCY_AUDIT_STRICT=1): unreachable service = CI failure.
 
 on:
   push:
@@ -53,6 +54,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run cloud gate (verify:cloud)
+        env:
+          DEPENDENCY_AUDIT_STRICT: '1'
         run: pnpm run verify:cloud
 
   runtime-node22:
