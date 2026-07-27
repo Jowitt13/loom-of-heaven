@@ -25,8 +25,9 @@ tools/
 docs/                  # this spec set + ADRs + STATUS
 ```
 
-Phase 2 adds `packages/western`, `bazi`, `ziwei`, `rules` — not created yet to avoid
-unbuildable placeholders (handoff §12).
+Production packages: `contracts`, `time-location`, `western`, `bazi`, `bazi-rules`,
+`western-rules`, `ziwei`, `ziwei-rules`, `interpret`, `synastry`, `orchestrator`.
+Test-only: `test-fixtures`.
 
 ## Dependency direction
 
@@ -41,7 +42,7 @@ contracts  <-  time-location  <-  orchestrator  ->  engine-entry (esbuild)  ->  
   These boundaries — no calculation package reverse-depends on `@ming/interpret`, and the offline
   compute core imports no network / AI-vendor-SDK / prompt module — are enforced by ESLint
   (`eslint.config.js`) via `pnpm run lint` in `verify:all` and CI.
-- Third-party libraries are reached only through provider adapters (Phase 2). Public schemas
+- Third-party libraries are reached only through provider adapters. Public schemas
   never expose third-party types.
 
 ## Engine facade (one function per CLI verb)

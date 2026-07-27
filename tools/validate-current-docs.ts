@@ -11,22 +11,26 @@ import { HOSTS } from './lib/host-config.ts';
  * topic report; verify:all doc stages include validate:docs). Includes positive + negative
  * self-tests proving the detectors actually fire on the old wrong text. Generated artifacts
  * (examples/) and engine-produced provenance labels are intentionally out of scope.
+ *
+ * The check pipeline is exposed as `runChecks(readDoc)` so tests can drive it against an
+ * in-memory fake reader without touching real repository files. `main()` runs the checks
+ * against disk and exits non-zero if ANY assertion fails — including the P0.5 anti-drift
+ * assertions, which are `add`ed to the same `checks` array before `failed` is computed.
  */
+
+export type DocReader = (rel: string) => string | null;
+
+export interface Check {
+  name: string;
+  ok: boolean;
+  detail?: string;
+}
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
 const SKILL = 'skills/calculate-birth-charts';
 
-interface Check {
-  name: string;
-  ok: boolean;
-  detail?: string;
-}
-const checks: Check[] = [];
-const add = (name: string, ok: boolean, detail?: string): void => {
-  checks.push(detail === undefined ? { name, ok } : { name, ok, detail });
-};
-const read = (rel: string): string | null => {
+const defaultReadDoc: DocReader = (rel: string): string | null => {
   const p = join(root, rel);
   return existsSync(p) ? readFileSync(p, 'utf8') : null;
 };
@@ -242,7 +246,7 @@ const DELETED_RELEASE_DOWNLOAD = /\/releases\/download\/v0\.1\.3\//;
 /** D3: an incomplete "chart now" prompt that omits the full input contract. */
 const BAD_CHART_PROMPT = /出生在[^，。\n]{1,8}的盘/;
 
-function selfTest(): void {
+function selfTest(add: (name: string, ok: boolean, detail?: string) => void): void {
   add('[self-test] DE441 检测命中', DE441.test('Astronomy Engine 基于 JPL DE441'));
   add(
     '[self-test] providers-missing 命中',
@@ -283,15 +287,42 @@ function selfTest(): void {
   );
 }
 
-function main(): void {
-  selfTest();
+/**
+ * Marker sentence for the P0.5-rewritten `validate-answer` description in
+ * VALIDATION.md. Any U+FFFD within a small window around this marker means
+ * this round's rewrite left a replacement character behind. We scope the
+ * window narrowly to avoid false alarms from pre-existing 乱码 elsewhere in
+ * the file (which is out of scope for this task).
+ */
+const U_FFFD_MARKER = 'heading/text fields are plain text';
+const U_FFFD_WINDOW = 300;
+
+/**
+ * Run every doc-consistency assertion against the supplied reader, returning
+ * the full `checks` list and its `failed` subset. Callers can inject an
+ * in-memory reader for unit tests; `main()` uses the default disk reader.
+ *
+ * All P0.5 anti-drift assertions are appended to `checks` BEFORE `failed` is
+ * computed, so a new-assertion FAIL is guaranteed to bubble up to a non-zero
+ * exit code from `main()`.
+ */
+export function runChecks(readDoc: DocReader = defaultReadDoc): {
+  checks: Check[];
+  failed: Check[];
+} {
+  const checks: Check[] = [];
+  const add = (name: string, ok: boolean, detail?: string): void => {
+    checks.push(detail === undefined ? { name, ok } : { name, ok, detail });
+  };
+
+  selfTest(add);
 
   // Capability consistency: docs must reflect what host-config declares.
   const allFull = HOSTS.every((h) => h.capability === 'full');
   add('host-config: 四宿主均为 full（本轮无 reading-lite 宿主）', allFull && HOSTS.length === 4);
 
   for (const rule of RULES) {
-    const text = read(rule.file);
+    const text = readDoc(rule.file);
     add(`${rule.file} 存在`, text !== null);
     if (text === null) continue;
     for (const m of rule.mustNot ?? []) {
@@ -304,7 +335,7 @@ function main(): void {
 
   // D2: user-facing publication claims must match the root manifest state. A withdrawn release is
   // not allowed to survive as an install link or be described as the current release.
-  const rootManifest = read('install-manifest.json');
+  const rootManifest = readDoc('install-manifest.json');
   let publication: { status?: unknown; releaseTag?: unknown; releaseVersion?: unknown } | undefined;
   try {
     publication = rootManifest
@@ -320,7 +351,7 @@ function main(): void {
   add('root install-manifest.json publication state is readable', publication !== undefined);
   if (publication?.status === 'published' && typeof publication.releaseTag === 'string') {
     // Round 14: STATUS.md's verify:install row must quote the CURRENT published tag.
-    const statusText = read('docs/STATUS.md');
+    const statusText = readDoc('docs/STATUS.md');
     if (statusText !== null) {
       const quoted = STATUS_INSTALL_TAG.exec(statusText)?.[1];
       add(
@@ -330,7 +361,7 @@ function main(): void {
       );
     }
     for (const f of PUBLICATION_ENTRY_DOCS) {
-      const text = read(f);
+      const text = readDoc(f);
       if (text === null) continue;
       const tags: string[] = [];
       for (const mm of text.matchAll(CURRENT_RELEASE_RE)) {
@@ -354,7 +385,7 @@ function main(): void {
         publication.releaseVersion === null,
     );
     for (const f of PUBLICATION_ENTRY_DOCS) {
-      const text = read(f);
+      const text = readDoc(f);
       if (text === null) continue;
       add(`${f}: states that host ZIPs are not published`, text.includes('尚未发布'));
       add(`${f}: has no deleted release download URL`, !DELETED_RELEASE_DOWNLOAD.test(text));
@@ -375,12 +406,95 @@ function main(): void {
     'docs/installers/workbuddy.md',
     'docs/installers/doubao.md',
   ]) {
-    const text = read(f);
+    const text = readDoc(f);
     if (text === null) continue;
     add(`${f}: 无不完整排盘示例(出生在X的盘)`, !BAD_CHART_PROMPT.test(text));
   }
 
+  // --- CI gate truthfulness assertions (P0.5) ---
+  //
+  // These are appended to the SAME `checks` array so `failed.length > 0` picks them up.
+  const workflow = readDoc('.github/workflows/verify.yml');
+  if (workflow) {
+    add(
+      'workflow: DEPENDENCY_AUDIT_STRICT env set in verify job',
+      workflow.includes('DEPENDENCY_AUDIT_STRICT'),
+    );
+    add(
+      'workflow: no stale "NOT wired in" license/SBOM claim',
+      !/(NOT wired in|not yet wired)/i.test(workflow),
+    );
+    add(
+      'workflow: header comment chain lists validate:provenance',
+      /validate:provenance/.test(workflow),
+    );
+    add('workflow: header comment chain lists scan:licenses', /scan:licenses/.test(workflow));
+  }
+  const validationMd = readDoc('docs/VALIDATION.md');
+  if (validationMd) {
+    add(
+      'VALIDATION.md: no stale "numeric character references decoded"',
+      !validationMd.includes('numeric character references decoded'),
+    );
+    add(
+      'VALIDATION.md: no stale "two-layer reference decoding"',
+      !validationMd.includes('two-layer reference decoding'),
+    );
+    // U+FFFD guard scoped narrowly to the P0.5-rewritten paragraph so it can
+    // NOT be triggered by pre-existing 乱码 elsewhere in the same file.
+    const i = validationMd.indexOf(U_FFFD_MARKER);
+    const window = i >= 0 ? validationMd.slice(i, i + U_FFFD_WINDOW) : '';
+    add(
+      'VALIDATION.md: P0.5 plain-text 段无 U+FFFD 替换字符',
+      i >= 0 && !window.includes('\uFFFD'),
+    );
+  }
+  const arch = readDoc('docs/ARCHITECTURE.md');
+  if (arch) {
+    add('ARCHITECTURE.md: no stale "not created yet"', !arch.includes('not created yet'));
+  }
+  const readmeMd = readDoc('README.md');
+  if (readmeMd) {
+    add(
+      'README.md: verify:cloud chain includes scan:licenses',
+      /scan:deps[\s\S]*scan:licenses[\s\S]*scan:secrets/.test(readmeMd),
+    );
+    // Static test counts drift the moment the suite grows; the real count lives
+    // on GitHub Actions `verify` + docs/VALIDATION.md, not in README. Match both
+    // bold Markdown form (`**471 tests / 29 files**`) and plain text form
+    // (`471 tests / 29 files`) so neither can slip past the guard.
+    add(
+      'README.md: no stale static "N tests / M files" claim',
+      !/\d+\s*tests\s*\/\s*\d+\s*files/i.test(readmeMd),
+    );
+    add(
+      'README.md: no static "tests-N passing" shield badge',
+      !/tests-\d+%20passing/.test(readmeMd),
+    );
+  }
+  const agentsMd = readDoc('AGENTS.md');
+  if (agentsMd) {
+    add(
+      'AGENTS.md: verify:cloud chain includes scan:licenses',
+      /scan:deps[\s\S]*scan:licenses[\s\S]*scan:secrets/.test(agentsMd),
+    );
+  }
+  // scan-deps.ts must not promise that CI has network. The fail-closed guarantee
+  // is DEPENDENCY_AUDIT_STRICT=1, not an implicit assumption about network reach.
+  const scanDepsTs = readDoc('tools/scan-deps.ts');
+  if (scanDepsTs) {
+    add(
+      'scan-deps.ts: no promise of "CI always has network" / "advisory service is reachable"',
+      !/CI always has network|advisory service is reachable/i.test(scanDepsTs),
+    );
+  }
+
   const failed = checks.filter((c) => !c.ok);
+  return { checks, failed };
+}
+
+function main(): void {
+  const { checks, failed } = runChecks();
   for (const c of checks) {
     process.stdout.write(
       `[${c.ok ? 'PASS' : 'FAIL'}] ${c.name}${c.detail ? ` (${c.detail})` : ''}\n`,
@@ -392,4 +506,8 @@ function main(): void {
   if (failed.length > 0) process.exit(1);
 }
 
-main();
+// Run main() when this file is invoked as a script, not when it is imported
+// by the test suite for `runChecks`.
+const invokedAsScript =
+  process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1];
+if (invokedAsScript) main();

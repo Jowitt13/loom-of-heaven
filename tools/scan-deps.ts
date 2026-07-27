@@ -16,10 +16,13 @@ import { fileURLToPath } from 'node:url';
  * Behaviour:
  *   - advisory >= --level found            -> [FAIL], exit 1
  *   - clean                                -> [PASS], exit 0
- *   - advisory service unreachable/offline -> [WARN], exit 0 so local runs stay
- *     usable without network. CI always has network (the workflow's
- *     `pnpm install --frozen-lockfile` runs first), so CI still enforces.
- *     Pass `--strict` to turn an unreachable service into a failure.
+ *   - advisory service unreachable/offline -> [WARN], exit 0 in local
+ *     non-strict mode, so offline dev workflows stay usable for diagnostics.
+ *     Pass `--strict` (or set env `DEPENDENCY_AUDIT_STRICT=1`, which the CI
+ *     verify job does) to turn an unreachable service into a hard failure.
+ *     The fail-closed guarantee comes from that strict flag alone; the tool
+ *     makes no assumption about network availability in CI or after any
+ *     particular install step.
  *
  * Flags:
  *   --level <info|low|moderate|high|critical>  minimum severity to fail on (default: low)
@@ -27,12 +30,20 @@ import { fileURLToPath } from 'node:url';
  *   --audit-json <file>                        read a pre-captured `pnpm audit --json`
  *                                              document instead of spawning pnpm
  *                                              (deterministic testing / CI debug)
+ *   --allowlist <file>                         override the default allowlist path
+ *                                              (default: tools/scan-deps.allowlist.json).
+ *                                              Used by isolated tests so they never write
+ *                                              into the real repo path.
  *
  * Optional allowlist (tools/scan-deps.allowlist.json):
  *   [{ "id": <advisory id | GHSA-… | CVE-…>, "reason": "…", "expires": "YYYY-MM-DD" }]
  *   A matching, non-expired entry downgrades that advisory to a note (for issues
- *   with no available fix) so the gate can stay green without being disabled. An
- *   expired entry is ignored — the advisory re-blocks — and is reported.
+ *   with no available fix) so the gate can stay green without being disabled.
+ *
+ *   Expiry semantics are inclusive: an entry whose `expires` equals today (UTC,
+ *   `YYYY-MM-DD`) is still valid; only entries whose `expires` is strictly before
+ *   today are treated as expired. Expired entries are ignored — the advisory
+ *   re-blocks — and are reported. Under --strict, expired entries fail the gate.
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -51,7 +62,7 @@ const getFlag = (name: string): string | undefined => {
   const i = argv.indexOf(name);
   return i >= 0 ? argv[i + 1] : undefined;
 };
-const strict = argv.includes('--strict');
+const strict = argv.includes('--strict') || process.env.DEPENDENCY_AUDIT_STRICT === '1';
 const levelArg = (getFlag('--level') ?? 'low').toLowerCase();
 if (!SEVERITY_ORDER.includes(levelArg as Severity)) {
   process.stderr.write(
@@ -61,6 +72,7 @@ if (!SEVERITY_ORDER.includes(levelArg as Severity)) {
 }
 const level = levelArg as Severity;
 const auditJsonFile = getFlag('--audit-json');
+const allowlistArg = getFlag('--allowlist');
 
 // --- Audit input: a captured document (testing) or a live `pnpm audit` run. ---
 interface Advisory {
@@ -80,7 +92,10 @@ interface AuditReport {
 
 function loadAudit(): { report?: AuditReport; error?: string } {
   if (auditJsonFile) {
-    const p = join(root, auditJsonFile);
+    const p =
+      auditJsonFile.startsWith('/') || /^[A-Za-z]:/.test(auditJsonFile)
+        ? auditJsonFile
+        : join(root, auditJsonFile);
     if (!existsSync(p)) return { error: `--audit-json file not found: ${relative(root, p)}` };
     try {
       return { report: JSON.parse(readFileSync(p, 'utf8')) as AuditReport };
@@ -123,30 +138,118 @@ interface AllowEntry {
   reason?: string;
   expires?: string;
 }
+const today = new Date().toISOString().slice(0, 10);
+
+/** Resolve the allowlist file path. --allowlist wins over the default; a value that
+ *  is not an absolute path is resolved relative to repo root (same rule as --audit-json). */
+function resolveAllowlistPath(): string {
+  if (allowlistArg) {
+    return allowlistArg.startsWith('/') || /^[A-Za-z]:/.test(allowlistArg)
+      ? allowlistArg
+      : join(root, allowlistArg);
+  }
+  return join(root, 'tools', 'scan-deps.allowlist.json');
+}
+
+/** True iff `s` is a syntactically well-formed YYYY-MM-DD AND a real calendar date.
+ *  E.g. rejects `2025-13-01` and `2025-02-30`. */
+function isRealDate(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const [y, m, d] = s.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+}
+
 function loadAllowlist(): AllowEntry[] {
-  const p = join(root, 'tools', 'scan-deps.allowlist.json');
+  const p = resolveAllowlistPath();
+  const label = relative(root, p) || p;
   if (!existsSync(p)) return [];
+  let parsed: unknown;
   try {
-    const parsed = JSON.parse(readFileSync(p, 'utf8'));
-    return Array.isArray(parsed) ? (parsed as AllowEntry[]) : [];
+    parsed = JSON.parse(readFileSync(p, 'utf8'));
   } catch {
-    process.stdout.write('[WARN] tools/scan-deps.allowlist.json is not valid JSON; ignoring it.\n');
+    if (strict) {
+      process.stdout.write(`[FAIL] ${label} is not valid JSON.\n`);
+      process.exit(1);
+    }
+    process.stdout.write(`[WARN] ${label} is not valid JSON; ignoring it.\n`);
     return [];
   }
+  if (!Array.isArray(parsed)) {
+    if (strict) {
+      process.stdout.write(`[FAIL] ${label} must be a JSON array.\n`);
+      process.exit(1);
+    }
+    process.stdout.write(`[WARN] ${label} is not an array; ignoring it.\n`);
+    return [];
+  }
+  // Strict validation of each entry.
+  //
+  // Expiry semantics are inclusive of today: `expires === today` is still valid;
+  // only `expires < today` (both YYYY-MM-DD, so ordinary lexicographic string
+  // comparison is a correct date comparison) is expired. Tests exercise the
+  // today-boundary and today-minus-one-day cases explicitly.
+  if (strict) {
+    const seenIds = new Set<string>();
+    for (let i = 0; i < parsed.length; i++) {
+      const e = parsed[i] as Record<string, unknown>;
+      if (typeof e !== 'object' || e === null || Array.isArray(e)) {
+        process.stdout.write(`[FAIL] allowlist entry [${i}] is not an object.\n`);
+        process.exit(1);
+      }
+      // String id 必须 trim 后仍非空——纯空白当作缺失 id。整数 number 保持不变。
+      const idOk =
+        (typeof e.id === 'string' && e.id.trim().length > 0) ||
+        (typeof e.id === 'number' && Number.isInteger(e.id));
+      if (!idOk) {
+        process.stdout.write(`[FAIL] allowlist entry [${i}] missing or invalid "id".\n`);
+        process.exit(1);
+      }
+      if (typeof e.reason !== 'string' || e.reason.trim().length === 0) {
+        process.stdout.write(`[FAIL] allowlist entry [${i}] missing or empty "reason".\n`);
+        process.exit(1);
+      }
+      if (typeof e.expires !== 'string' || !isRealDate(e.expires)) {
+        process.stdout.write(
+          `[FAIL] allowlist entry [${i}] missing or malformed "expires" (need real YYYY-MM-DD date).\n`,
+        );
+        process.exit(1);
+      }
+      const idKey = String(e.id);
+      if (seenIds.has(idKey)) {
+        process.stdout.write(`[FAIL] allowlist has duplicate id "${idKey}".\n`);
+        process.exit(1);
+      }
+      seenIds.add(idKey);
+      if (e.expires < today) {
+        process.stdout.write(
+          `[FAIL] allowlist entry "${idKey}" expired on ${e.expires as string}; strict mode rejects expired entries.\n`,
+        );
+        process.exit(1);
+      }
+    }
+  }
+  return parsed as AllowEntry[];
 }
-const today = new Date().toISOString().slice(0, 10);
 function allowMatch(adv: Advisory, allow: AllowEntry[]): AllowEntry | undefined {
   const ids = [adv.id, adv.github_advisory_id, ...(adv.cves ?? [])]
     .filter((v): v is string | number => v !== undefined)
     .map(String);
+  // Inclusive today: `expires === today` still matches; only `expires < today`
+  // is considered expired and no longer suppresses the advisory.
   return allow.find((e) => {
     if (!ids.includes(String(e.id))) return false;
-    if (e.expires && e.expires < today) return false; // expired -> no longer allowed
+    if (e.expires && e.expires < today) return false;
     return true;
   });
 }
 
 // --- Run ---
+process.stdout.write(
+  strict
+    ? '[STRICT] Dependency audit (fail-closed mode).\n'
+    : '[LOCAL DIAGNOSTIC] Dependency audit (offline-safe mode).\n',
+);
 const { report, error } = loadAudit();
 
 if (!report) {
@@ -157,8 +260,10 @@ if (!report) {
   }
   process.stdout.write(
     `[WARN] dependency audit could not run: ${msg}\n` +
-      '       Skipping the vulnerability gate for this run. This is expected offline;\n' +
-      '       CI runs it after `pnpm install`, where the advisory service is reachable.\n',
+      '       Skipping the vulnerability gate for this LOCAL diagnostic run.\n' +
+      '       CI runs with `DEPENDENCY_AUDIT_STRICT=1`, so an unreachable\n' +
+      '       advisory service is a hard failure there — the fail-closed\n' +
+      '       guarantee is the strict env, not an implicit "CI has network".\n',
   );
   process.exit(0);
 }
