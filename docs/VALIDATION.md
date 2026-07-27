@@ -32,7 +32,7 @@ Before a release or a visibility change, run `pnpm run verify:all` and
 | Host packages    | `pnpm run package:hosts && pnpm run verify:hosts` | Candidate ZIP structure and runtime behavior remain reproducible.                                      |
 | Install state    | `pnpm run verify:install`                         | Root published state, immutable Release URL/SHA-256, and candidate boundary are honest and consistent. |
 | Doc counts       | `pnpm run check:doc-counts`                       | Re-runs the suite; fails if a doc's `N tests / M files` drifts from the run.                           |
-| Dep vuln scan    | `pnpm run scan:deps`                              | `pnpm audit --prod` over shipped deps; fails on an advisory (offline: skip+warn).                      |
+| Dep vuln scan    | `pnpm run scan:deps`                              | Local: WARN + exit 0 if offline. CI: `DEPENDENCY_AUDIT_STRICT=1` fails closed on unreachable/parse.    |
 | License scan     | `pnpm run scan:licenses`                          | Offline `pnpm licenses` policy gate (LICENSE_AUDIT allowlist) + SBOM license cross-check; fail-closed. |
 | Secret scan      | `pnpm run scan:secrets`                           | Dependency-free scan of tracked files; fails on a leaked credential.                                   |
 | Incident scan    | local `pnpm run verify:all`                       | Exact incident tokens; fail-closed if the controlled token file is unavailable.                        |
@@ -58,7 +58,7 @@ the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not h
 resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **445 tests / 28 files ï¿?all passing**. The Western provider
+- Typecheck: clean. Tests: **467 tests / 29 files ï¿?all passing**. The Western provider
   (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 ï¿?ï¿?gate two ways: wrapper-consistency
   (vs astronomy-engine's own output) plus an **independent JPL Horizons golden** (10 bodies Ã— 3
   technical epochs fetched from the NASA/JPL Horizons service, query recorded in
@@ -91,7 +91,7 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   while every provided sourceFactId is unconditionally checked against `allowedFactIds`; a
   clause-anchored canonical safety-disclaimer mask (no free spans; double-negation prefixes,
   adversatives and line breaks never enter a mask); a normalized high-risk scan over **every heading
-  and paragraph** in one shared pipeline (heading/text fields are plain text â€?HTML/entity/Markdown
+  and paragraph** in one shared pipeline (heading/text fields are plain text â€” HTML/entity/Markdown
   structural characters are rejected by `CONTAINS_MARKUP` before the scan; the scan strips Unicode
   `\p{Default_Ignorable_Code_Point}` and case-folds); caveat/warning consistency between `constraintRefs` and the attestation arrays; and
   per-item disclaimer coverage ï¿?EVERY plan disclaimer must be referenced (error severity, explicit

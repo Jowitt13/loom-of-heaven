@@ -27,12 +27,20 @@ import { fileURLToPath } from 'node:url';
  *   --audit-json <file>                        read a pre-captured `pnpm audit --json`
  *                                              document instead of spawning pnpm
  *                                              (deterministic testing / CI debug)
+ *   --allowlist <file>                         override the default allowlist path
+ *                                              (default: tools/scan-deps.allowlist.json).
+ *                                              Used by isolated tests so they never write
+ *                                              into the real repo path.
  *
  * Optional allowlist (tools/scan-deps.allowlist.json):
  *   [{ "id": <advisory id | GHSA-… | CVE-…>, "reason": "…", "expires": "YYYY-MM-DD" }]
  *   A matching, non-expired entry downgrades that advisory to a note (for issues
- *   with no available fix) so the gate can stay green without being disabled. An
- *   expired entry is ignored — the advisory re-blocks — and is reported.
+ *   with no available fix) so the gate can stay green without being disabled.
+ *
+ *   Expiry semantics are inclusive: an entry whose `expires` equals today (UTC,
+ *   `YYYY-MM-DD`) is still valid; only entries whose `expires` is strictly before
+ *   today are treated as expired. Expired entries are ignored — the advisory
+ *   re-blocks — and are reported. Under --strict, expired entries fail the gate.
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -61,6 +69,7 @@ if (!SEVERITY_ORDER.includes(levelArg as Severity)) {
 }
 const level = levelArg as Severity;
 const auditJsonFile = getFlag('--audit-json');
+const allowlistArg = getFlag('--allowlist');
 
 // --- Audit input: a captured document (testing) or a live `pnpm audit` run. ---
 interface Advisory {
@@ -126,39 +135,71 @@ interface AllowEntry {
   reason?: string;
   expires?: string;
 }
+const today = new Date().toISOString().slice(0, 10);
+
+/** Resolve the allowlist file path. --allowlist wins over the default; a value that
+ *  is not an absolute path is resolved relative to repo root (same rule as --audit-json). */
+function resolveAllowlistPath(): string {
+  if (allowlistArg) {
+    return allowlistArg.startsWith('/') || /^[A-Za-z]:/.test(allowlistArg)
+      ? allowlistArg
+      : join(root, allowlistArg);
+  }
+  return join(root, 'tools', 'scan-deps.allowlist.json');
+}
+
+/** True iff `s` is a syntactically well-formed YYYY-MM-DD AND a real calendar date.
+ *  E.g. rejects `2025-13-01` and `2025-02-30`. */
+function isRealDate(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const [y, m, d] = s.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+}
+
 function loadAllowlist(): AllowEntry[] {
-  const p = join(root, 'tools', 'scan-deps.allowlist.json');
+  const p = resolveAllowlistPath();
+  const label = relative(root, p) || p;
   if (!existsSync(p)) return [];
   let parsed: unknown;
   try {
     parsed = JSON.parse(readFileSync(p, 'utf8'));
   } catch {
     if (strict) {
-      process.stdout.write('[FAIL] tools/scan-deps.allowlist.json is not valid JSON.\n');
+      process.stdout.write(`[FAIL] ${label} is not valid JSON.\n`);
       process.exit(1);
     }
-    process.stdout.write('[WARN] tools/scan-deps.allowlist.json is not valid JSON; ignoring it.\n');
+    process.stdout.write(`[WARN] ${label} is not valid JSON; ignoring it.\n`);
     return [];
   }
   if (!Array.isArray(parsed)) {
     if (strict) {
-      process.stdout.write('[FAIL] tools/scan-deps.allowlist.json must be a JSON array.\n');
+      process.stdout.write(`[FAIL] ${label} must be a JSON array.\n`);
       process.exit(1);
     }
-    process.stdout.write('[WARN] tools/scan-deps.allowlist.json is not an array; ignoring it.\n');
+    process.stdout.write(`[WARN] ${label} is not an array; ignoring it.\n`);
     return [];
   }
-  // Strict validation of each entry
+  // Strict validation of each entry.
+  //
+  // Expiry semantics are inclusive of today: `expires === today` is still valid;
+  // only `expires < today` (both YYYY-MM-DD, so ordinary lexicographic string
+  // comparison is a correct date comparison) is expired. Tests exercise the
+  // today-boundary and today-minus-one-day cases explicitly.
   if (strict) {
     const seenIds = new Set<string>();
-    const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
     for (let i = 0; i < parsed.length; i++) {
       const e = parsed[i] as Record<string, unknown>;
       if (typeof e !== 'object' || e === null || Array.isArray(e)) {
         process.stdout.write(`[FAIL] allowlist entry [${i}] is not an object.\n`);
         process.exit(1);
       }
-      if (e.id === undefined || (typeof e.id !== 'string' && typeof e.id !== 'number')) {
+      // id: string (non-empty) OR integer number. Anything else — null, boolean,
+      // empty string, non-finite / non-integer number, array, object — is rejected.
+      const idOk =
+        (typeof e.id === 'string' && e.id.length > 0) ||
+        (typeof e.id === 'number' && Number.isInteger(e.id));
+      if (!idOk) {
         process.stdout.write(`[FAIL] allowlist entry [${i}] missing or invalid "id".\n`);
         process.exit(1);
       }
@@ -166,9 +207,9 @@ function loadAllowlist(): AllowEntry[] {
         process.stdout.write(`[FAIL] allowlist entry [${i}] missing or empty "reason".\n`);
         process.exit(1);
       }
-      if (typeof e.expires !== 'string' || !DATE_RE.test(e.expires)) {
+      if (typeof e.expires !== 'string' || !isRealDate(e.expires)) {
         process.stdout.write(
-          `[FAIL] allowlist entry [${i}] missing or malformed "expires" (need YYYY-MM-DD).\n`,
+          `[FAIL] allowlist entry [${i}] missing or malformed "expires" (need real YYYY-MM-DD date).\n`,
         );
         process.exit(1);
       }
@@ -188,14 +229,15 @@ function loadAllowlist(): AllowEntry[] {
   }
   return parsed as AllowEntry[];
 }
-const today = new Date().toISOString().slice(0, 10);
 function allowMatch(adv: Advisory, allow: AllowEntry[]): AllowEntry | undefined {
   const ids = [adv.id, adv.github_advisory_id, ...(adv.cves ?? [])]
     .filter((v): v is string | number => v !== undefined)
     .map(String);
+  // Inclusive today: `expires === today` still matches; only `expires < today`
+  // is considered expired and no longer suppresses the advisory.
   return allow.find((e) => {
     if (!ids.includes(String(e.id))) return false;
-    if (e.expires && e.expires < today) return false; // expired -> no longer allowed
+    if (e.expires && e.expires < today) return false;
     return true;
   });
 }
