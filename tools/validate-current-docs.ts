@@ -459,12 +459,31 @@ export function runChecks(readDoc: DocReader = defaultReadDoc): {
       'README.md: verify:cloud chain includes scan:licenses',
       /scan:deps[\s\S]*scan:licenses[\s\S]*scan:secrets/.test(readmeMd),
     );
+    // Static test counts drift the moment the suite grows; the real count lives
+    // on GitHub Actions `verify` + docs/VALIDATION.md, not in README.
+    add(
+      'README.md: no stale static "N tests / M files" claim',
+      !/\*\*\d+\s*tests\s*\/\s*\d+\s*files\*\*/.test(readmeMd),
+    );
+    add(
+      'README.md: no static "tests-N passing" shield badge',
+      !/tests-\d+%20passing/.test(readmeMd),
+    );
   }
   const agentsMd = readDoc('AGENTS.md');
   if (agentsMd) {
     add(
       'AGENTS.md: verify:cloud chain includes scan:licenses',
       /scan:deps[\s\S]*scan:licenses[\s\S]*scan:secrets/.test(agentsMd),
+    );
+  }
+  // scan-deps.ts must not promise that CI has network. The fail-closed guarantee
+  // is DEPENDENCY_AUDIT_STRICT=1, not an implicit assumption about network reach.
+  const scanDepsTs = readDoc('tools/scan-deps.ts');
+  if (scanDepsTs) {
+    add(
+      'scan-deps.ts: no promise of "CI always has network" / "advisory service is reachable"',
+      !/CI always has network|advisory service is reachable/i.test(scanDepsTs),
     );
   }
 

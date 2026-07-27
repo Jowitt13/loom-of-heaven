@@ -198,6 +198,22 @@ describe('scan-deps offline gate tests', () => {
     }
   });
 
+  it('9b. whitespace-only string id (strict) -> exit 1', () => {
+    // Regression: strict mode used to accept a non-empty string id even when it
+    // was pure whitespace. That is not a real advisory identifier and must be
+    // rejected exactly like an empty string.
+    const audit = writeAuditFixture({ advisories: {}, metadata: {} });
+    const allow = writeAllowFixture([{ id: '   ', reason: 'r', expires: daysAhead(30) }]);
+    try {
+      const r = run(['--audit-json', audit.path, '--allowlist', allow.path, '--strict']);
+      expect(r.code).toBe(1);
+      expect(r.stdout).toContain('missing or invalid "id"');
+    } finally {
+      allow.cleanup();
+      audit.cleanup();
+    }
+  });
+
   it('10. non-string/non-number id (strict) -> exit 1', () => {
     const audit = writeAuditFixture({ advisories: {}, metadata: {} });
     const allow = writeAllowFixture([{ id: null, reason: 'r', expires: daysAhead(30) }]);

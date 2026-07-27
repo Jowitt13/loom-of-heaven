@@ -143,6 +143,16 @@ function baseFixture(): Map<string, string> {
     ].join('\n'),
   );
 
+  // scan-deps.ts: clean wording that does NOT promise CI has network. Real file
+  // is much longer; the fixture only needs enough to be scanned by the guard.
+  files.set(
+    'tools/scan-deps.ts',
+    [
+      '// Under --strict / DEPENDENCY_AUDIT_STRICT=1 an unreachable advisory service is a hard failure.',
+      '// The fail-closed guarantee comes from the strict flag alone; no assumption is made about network.',
+    ].join('\n'),
+  );
+
   return files;
 }
 
@@ -311,6 +321,44 @@ describe('validate-current-docs: injected reader', () => {
     const { failed } = runChecks(readerOf(files));
     expect(failed.map((f) => f.name)).not.toContain(
       'VALIDATION.md: P0.5 plain-text 段无 U+FFFD 替换字符',
+    );
+  });
+
+  it('13. README contains static "**N tests / M files**" -> matching FAIL (new guard)', () => {
+    const files = baseFixture();
+    const cur = files.get('README.md') as string;
+    files.set('README.md', cur + '\n最近一次本地验证为 **467 tests / 29 files**。');
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain(
+      'README.md: no stale static "N tests / M files" claim',
+    );
+  });
+
+  it('14. README contains "tests-N passing" shield badge -> matching FAIL (new guard)', () => {
+    const files = baseFixture();
+    const cur = files.get('README.md') as string;
+    files.set(
+      'README.md',
+      cur + '\n<img src="https://img.shields.io/badge/tests-467%20passing-success.svg" />',
+    );
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain(
+      'README.md: no static "tests-N passing" shield badge',
+    );
+  });
+
+  it('15. scan-deps.ts promises "CI always has network" -> matching FAIL (new guard)', () => {
+    const files = baseFixture();
+    files.set(
+      'tools/scan-deps.ts',
+      [
+        '// CI always has network (the workflow pnpm install runs first),',
+        '// so CI still enforces even when the advisory service is reachable.',
+      ].join('\n'),
+    );
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain(
+      'scan-deps.ts: no promise of "CI always has network" / "advisory service is reachable"',
     );
   });
 });

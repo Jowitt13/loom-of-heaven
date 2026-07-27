@@ -15,7 +15,6 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A522-brightgreen.svg" alt="Node >= 22" />
   <img src="https://img.shields.io/badge/offline-100%25-success.svg" alt="100% offline" />
   <img src="https://img.shields.io/badge/deterministic-byte--identical-8A2BE2.svg" alt="Deterministic" />
-  <img src="https://img.shields.io/badge/tests-261%20passing-success.svg" alt="261 tests passing" />
   <img src="https://img.shields.io/badge/LLM-never%20computes-critical.svg" alt="LLM never computes" />
 </p>
 
@@ -208,7 +207,7 @@ pnpm run package      # 生成 dist/*.zip + .sha256（自校验完整性）
 `verify:cloud` 依次运行：`format:check → lint → typecheck → test → build → validate:provenance →
 validate:skill → validate:reading → validate:docs → smoke → forward:test → package:hosts →
 verify:hosts → verify:install → check:doc-counts → scan:deps → scan:licenses → scan:secrets`。`verify:all` 只在其后追加
-`scan:incident`，该扫描的私密 token 文件绝不进入 CI；缺失时必须 fail-closed。最近一次本地验证的测试阶段为 **261 tests / 22 files**。
+`scan:incident`，该扫描的私密 token 文件绝不进入 CI；缺失时必须 fail-closed。本仓库当前的真实测试计数由 GitHub Actions 的 `verify` job 与 [`docs/VALIDATION.md`](docs/VALIDATION.md) 的门禁段落负责同步（不再在 README 内维护一个易过期的静态数字）。
 
 深入阅读：[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/VALIDATION.md`](docs/VALIDATION.md) ·
 [`docs/LICENSE_AUDIT.md`](docs/LICENSE_AUDIT.md) · [`docs/PRIVACY.md`](docs/PRIVACY.md) ·

@@ -16,10 +16,13 @@ import { fileURLToPath } from 'node:url';
  * Behaviour:
  *   - advisory >= --level found            -> [FAIL], exit 1
  *   - clean                                -> [PASS], exit 0
- *   - advisory service unreachable/offline -> [WARN], exit 0 so local runs stay
- *     usable without network. CI always has network (the workflow's
- *     `pnpm install --frozen-lockfile` runs first), so CI still enforces.
- *     Pass `--strict` to turn an unreachable service into a failure.
+ *   - advisory service unreachable/offline -> [WARN], exit 0 in local
+ *     non-strict mode, so offline dev workflows stay usable for diagnostics.
+ *     Pass `--strict` (or set env `DEPENDENCY_AUDIT_STRICT=1`, which the CI
+ *     verify job does) to turn an unreachable service into a hard failure.
+ *     The fail-closed guarantee comes from that strict flag alone; the tool
+ *     makes no assumption about network availability in CI or after any
+ *     particular install step.
  *
  * Flags:
  *   --level <info|low|moderate|high|critical>  minimum severity to fail on (default: low)
@@ -194,10 +197,9 @@ function loadAllowlist(): AllowEntry[] {
         process.stdout.write(`[FAIL] allowlist entry [${i}] is not an object.\n`);
         process.exit(1);
       }
-      // id: string (non-empty) OR integer number. Anything else — null, boolean,
-      // empty string, non-finite / non-integer number, array, object — is rejected.
+      // String id 必须 trim 后仍非空——纯空白当作缺失 id。整数 number 保持不变。
       const idOk =
-        (typeof e.id === 'string' && e.id.length > 0) ||
+        (typeof e.id === 'string' && e.id.trim().length > 0) ||
         (typeof e.id === 'number' && Number.isInteger(e.id));
       if (!idOk) {
         process.stdout.write(`[FAIL] allowlist entry [${i}] missing or invalid "id".\n`);
@@ -258,8 +260,10 @@ if (!report) {
   }
   process.stdout.write(
     `[WARN] dependency audit could not run: ${msg}\n` +
-      '       Skipping the vulnerability gate for this run. This is expected offline;\n' +
-      '       CI runs it after `pnpm install`, where the advisory service is reachable.\n',
+      '       Skipping the vulnerability gate for this LOCAL diagnostic run.\n' +
+      '       CI runs with `DEPENDENCY_AUDIT_STRICT=1`, so an unreachable\n' +
+      '       advisory service is a hard failure there — the fail-closed\n' +
+      '       guarantee is the strict env, not an implicit "CI has network".\n',
   );
   process.exit(0);
 }
