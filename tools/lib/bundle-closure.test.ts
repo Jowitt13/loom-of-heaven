@@ -1,0 +1,244 @@
+// Offline unit tests for tools/lib/bundle-closure.ts.
+// Every test uses either an injected in-memory readPackageJson OR a tmpdir
+// synthetic node_modules layout — never the real repo tree.
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, sep } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { computeBundleClosure, extractLicense } from './bundle-closure.ts';
+
+/**
+ * In-memory readPackageJson factory: returns a function that answers
+ * package.json lookups for the given absolute-directory -> parsed JSON map.
+ * Any dir not present in the map returns null (equivalent to "no package.json").
+ */
+function makeReader(map: Map<string, unknown>): (dir: string) => unknown {
+  return (dir: string) => map.get(dir) ?? null;
+}
+
+/** Build a virtual root path so tests stay OS-independent. */
+const ROOT = process.platform === 'win32' ? 'C:\\repo' : '/repo';
+const nm = (p: string): string => join(ROOT, ...p.split('/'));
+
+describe('bundle-closure: extractLicense', () => {
+  it('accepts modern SPDX string', () => {
+    expect(extractLicense({ license: 'MIT' })).toBe('MIT');
+  });
+  it('accepts legacy object license.type', () => {
+    expect(extractLicense({ license: { type: 'Apache-2.0' } })).toBe('Apache-2.0');
+  });
+  it('builds OR expression from legacy licenses[] array', () => {
+    expect(
+      extractLicense({
+        licenses: [{ type: 'MIT' }, { type: 'Apache-2.0' }],
+      }),
+    ).toBe('(MIT OR Apache-2.0)');
+  });
+  it('rejects UNLICENSED', () => {
+    expect(() => extractLicense({ license: 'UNLICENSED' })).toThrow(/unresolvable license/);
+  });
+  it('rejects "SEE LICENSE IN <file>"', () => {
+    expect(() => extractLicense({ license: 'SEE LICENSE IN COPYING' })).toThrow(
+      /unresolvable license/,
+    );
+  });
+  it('rejects missing license field entirely', () => {
+    expect(() => extractLicense({})).toThrow(/unresolvable license/);
+  });
+});
+
+describe('bundle-closure: computeBundleClosure', () => {
+  const dirZod = nm('node_modules/zod');
+  const dirScoped = nm('node_modules/@scope/pkg');
+  const dirPnpmFoo = nm('node_modules/.pnpm/foo@1.2.3/node_modules/foo');
+  const dirPnpmScoped = nm('node_modules/.pnpm/@scope+bar@2.0.0/node_modules/@scope/bar');
+  const dirMoment = nm('node_modules/moment');
+
+  const pkgMap = new Map<string, unknown>([
+    [dirZod, { name: 'zod', version: '4.4.3', license: 'MIT' }],
+    [dirScoped, { name: '@scope/pkg', version: '0.1.0', license: 'MIT' }],
+    [dirPnpmFoo, { name: 'foo', version: '1.2.3', license: 'MIT' }],
+    [dirPnpmScoped, { name: '@scope/bar', version: '2.0.0', license: 'MIT' }],
+    [dirMoment, { name: 'moment', version: '2.30.1', license: 'MIT' }],
+  ]);
+  const readPackageJson = makeReader(pkgMap);
+
+  function run(paths: string[]) {
+    const inputs: Record<string, unknown> = {};
+    for (const p of paths) inputs[p] = {};
+    return computeBundleClosure({ inputs }, { root: ROOT, readPackageJson });
+  }
+
+  it('1. direct dependency at node_modules/<name>', () => {
+    const r = run(['node_modules/zod/index.js']);
+    expect(r.packages.map((p) => `${p.name}@${p.version}`)).toEqual(['zod@4.4.3']);
+    expect(r.packages[0]!.purl).toBe('pkg:npm/zod@4.4.3');
+    expect(r.packages[0]!.license).toBe('MIT');
+  });
+
+  it('2. transitive dependency alongside a direct one', () => {
+    const r = run(['node_modules/moment/moment.js', 'node_modules/zod/index.js']);
+    expect(r.packages.map((p) => p.name)).toEqual(['moment', 'zod']);
+  });
+
+  it('3. scoped package at node_modules/@scope/<name>', () => {
+    const r = run(['node_modules/@scope/pkg/index.js']);
+    expect(r.packages[0]!.name).toBe('@scope/pkg');
+    expect(r.packages[0]!.purl).toBe('pkg:npm/@scope/pkg@0.1.0');
+  });
+
+  it('4. pnpm nested layout attributes to the real package, not the hash dir', () => {
+    const r = run([
+      'node_modules/.pnpm/foo@1.2.3/node_modules/foo/lib/a.js',
+      'node_modules/.pnpm/foo@1.2.3/node_modules/foo/lib/b.js',
+    ]);
+    expect(r.packages.map((p) => `${p.name}@${p.version}`)).toEqual(['foo@1.2.3']);
+    expect(r.packages[0]!.inputs).toHaveLength(2);
+  });
+
+  it('5. pnpm nested + scoped', () => {
+    const r = run(['node_modules/.pnpm/@scope+bar@2.0.0/node_modules/@scope/bar/index.js']);
+    expect(r.packages[0]!.name).toBe('@scope/bar');
+    expect(r.packages[0]!.version).toBe('2.0.0');
+  });
+
+  it('6. repo-internal packages/<workspace> are ignored', () => {
+    const r = run(['packages/orchestrator/src/engine-entry.ts', 'node_modules/zod/index.js']);
+    expect(r.packages.map((p) => p.name)).toEqual(['zod']);
+    expect(r.ignored.repoInternal).toContain('packages/orchestrator/src/engine-entry.ts');
+  });
+
+  it('7. Node built-in node:crypto is ignored', () => {
+    const r = run(['node:crypto', 'node_modules/zod/index.js']);
+    expect(r.ignored.nodeBuiltin).toEqual(['node:crypto']);
+    expect(r.packages.map((p) => p.name)).toEqual(['zod']);
+  });
+
+  it('8. esbuild synthetic <define:...> input is ignored', () => {
+    const r = run(['<define:process.env.NODE_ENV>', 'node_modules/zod/index.js']);
+    expect(r.ignored.virtual).toEqual(['<define:process.env.NODE_ENV>']);
+    expect(r.packages.map((p) => p.name)).toEqual(['zod']);
+  });
+
+  it('9. multiple inputs for the same package deduplicate and sort inputs', () => {
+    const r = run(['node_modules/zod/z.js', 'node_modules/zod/a.js', 'node_modules/zod/m.js']);
+    expect(r.packages).toHaveLength(1);
+    expect(r.packages[0]!.inputs).toEqual([
+      'node_modules/zod/a.js',
+      'node_modules/zod/m.js',
+      'node_modules/zod/z.js',
+    ]);
+  });
+
+  it('10. same package name at two different roots with different versions -> throw', () => {
+    // Simulate a second `foo` package.json at a different pnpm hash dir.
+    const dirFooOther = nm('node_modules/.pnpm/foo@9.9.9/node_modules/foo');
+    const map = new Map(pkgMap);
+    map.set(dirFooOther, { name: 'foo', version: '9.9.9', license: 'MIT' });
+    expect(() =>
+      computeBundleClosure(
+        {
+          inputs: {
+            'node_modules/.pnpm/foo@1.2.3/node_modules/foo/a.js': {},
+            'node_modules/.pnpm/foo@9.9.9/node_modules/foo/b.js': {},
+          },
+        },
+        { root: ROOT, readPackageJson: makeReader(map) },
+      ),
+    ).toThrow(/multiple versions/);
+  });
+
+  it('11. missing license field -> throw', () => {
+    const dirBad = nm('node_modules/badpkg');
+    const map = new Map<string, unknown>([[dirBad, { name: 'badpkg', version: '1.0.0' }]]);
+    expect(() =>
+      computeBundleClosure(
+        { inputs: { 'node_modules/badpkg/index.js': {} } },
+        { root: ROOT, readPackageJson: makeReader(map) },
+      ),
+    ).toThrow(/unresolvable license/);
+  });
+
+  it('12. license "UNLICENSED" -> throw', () => {
+    const dirBad = nm('node_modules/unl');
+    const map = new Map<string, unknown>([
+      [dirBad, { name: 'unl', version: '1.0.0', license: 'UNLICENSED' }],
+    ]);
+    expect(() =>
+      computeBundleClosure(
+        { inputs: { 'node_modules/unl/index.js': {} } },
+        { root: ROOT, readPackageJson: makeReader(map) },
+      ),
+    ).toThrow(/unresolvable license/);
+  });
+
+  it('13. legacy licenses[] array yields OR expression', () => {
+    const dirDual = nm('node_modules/dual');
+    const map = new Map<string, unknown>([
+      [
+        dirDual,
+        {
+          name: 'dual',
+          version: '3.0.0',
+          licenses: [{ type: 'MIT' }, { type: 'Apache-2.0' }],
+        },
+      ],
+    ]);
+    const r = computeBundleClosure(
+      { inputs: { 'node_modules/dual/index.js': {} } },
+      { root: ROOT, readPackageJson: makeReader(map) },
+    );
+    expect(r.packages[0]!.license).toBe('(MIT OR Apache-2.0)');
+  });
+
+  it('14. output is deterministic: same metafile -> byte-identical JSON', () => {
+    const inputs = {
+      'node_modules/zod/index.js': {},
+      'node_modules/moment/moment.js': {},
+      'node_modules/@scope/pkg/index.js': {},
+    };
+    const a = computeBundleClosure({ inputs }, { root: ROOT, readPackageJson });
+    const b = computeBundleClosure({ inputs }, { root: ROOT, readPackageJson });
+    expect(JSON.stringify(a.packages)).toBe(JSON.stringify(b.packages));
+  });
+
+  it('15. package.json living outside node_modules -> throw (never attribute)', () => {
+    // Simulate a stray package.json in the repo root that a naive walker
+    // would trip on. The classifier must land the input into thirdParty (path
+    // contains node_modules) and refuse to attribute to a non-node_modules root.
+    const dirStray = nm('foo');
+    const map = new Map<string, unknown>([
+      [dirStray, { name: 'foo', version: '0.0.0', license: 'MIT' }],
+    ]);
+    // Also provide a proper node_modules entry so the walk-up would otherwise
+    // pass; here we pass an input whose *only* package.json is at the stray dir.
+    expect(() =>
+      computeBundleClosure(
+        { inputs: { 'node_modules/no-such-pkg/index.js': {} } },
+        { root: ROOT, readPackageJson: makeReader(map) },
+      ),
+    ).toThrow(/could not resolve package root/);
+  });
+});
+
+describe('bundle-closure: real disk smoke via tmpdir', () => {
+  it('resolves against a real node_modules layout without touching the repo tree', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bc-'));
+    try {
+      const pkgDir = join(dir, 'node_modules', 'realfoo');
+      mkdirSync(pkgDir, { recursive: true });
+      writeFileSync(
+        join(pkgDir, 'package.json'),
+        JSON.stringify({ name: 'realfoo', version: '0.0.1', license: 'MIT' }),
+      );
+      writeFileSync(join(pkgDir, 'index.js'), '// stub');
+      const rel = ['node_modules', 'realfoo', 'index.js'].join('/');
+      const inputs: Record<string, unknown> = { [rel]: {} };
+      const r = computeBundleClosure({ inputs }, { root: dir });
+      expect(r.packages.map((p) => p.name + '@' + p.version)).toEqual(['realfoo@0.0.1']);
+      expect(r.packages[0]!.inputs[0]!.split(sep).join('/')).toBe(rel);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

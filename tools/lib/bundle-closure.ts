@@ -1,0 +1,310 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, isAbsolute, join, relative, sep } from 'node:path';
+
+/**
+ * Derive the third-party runtime dependency closure of a bundle from an esbuild
+ * metafile. The result is what `sbom.cdx.json` and `sbom.spdx.json` MUST
+ * describe: every third-party npm package whose source ended up in
+ * `scripts/dist/engine.mjs`.
+ *
+ * The function is pure over `(metafile, root, readPackageJson)` — no filesystem
+ * writes, no network. Callers inject `readPackageJson` in tests so nothing on
+ * disk is touched. The real build wires the default disk reader.
+ *
+ * Fail-closed policy:
+ *   - Any third-party input path whose containing package cannot be resolved
+ *     (missing package.json, missing `name` or `version`, ambiguous package
+ *     layout, `.pnpm` hash directory misidentified as a package root, same
+ *     name resolved to two different versions) causes a hard throw.
+ *   - Any package with a license that cannot be resolved into an SPDX id or
+ *     SPDX-`OR` expression (`UNLICENSED`, `SEE LICENSE IN LICENSE`, missing)
+ *     causes a hard throw.
+ *   - Path types we intentionally exclude are collected in `ignored` for
+ *     observability but never silently discarded.
+ *
+ * The returned `packages` array is sorted by `name`; each package's `inputs`
+ * array is sorted lexicographically. Same metafile in → byte-identical
+ * `JSON.stringify(packages)` out.
+ */
+
+export interface BundlePackage {
+  /** Full npm package name, including `@scope/` for scoped packages. */
+  name: string;
+  /** Exact version read from the package's `package.json`. */
+  version: string;
+  /**
+   * SPDX license id (`"MIT"`) or an OR expression built from a legacy
+   * `licenses` array (`"(MIT OR Apache-2.0)"`). Never `undefined`.
+   */
+  license: string;
+  /** Package URL derived from `name` and `version`. */
+  purl: string;
+  /** Absolute directory containing the package's `package.json`. */
+  packageRoot: string;
+  /**
+   * All metafile input paths (relative to `root`) that resolved into this
+   * package, sorted lexicographically. Useful for diagnostics.
+   */
+  inputs: string[];
+}
+
+export interface BundleClosureResult {
+  packages: BundlePackage[];
+  ignored: {
+    repoInternal: string[];
+    nodeBuiltin: string[];
+    virtual: string[];
+  };
+}
+
+export interface ComputeBundleClosureOptions {
+  root: string;
+  /**
+   * Read the package.json at the given absolute directory, returning its
+   * parsed JSON value or `null` if not present. Default: read from disk.
+   */
+  readPackageJson?: (dir: string) => unknown;
+}
+
+/** Parse a package.json value into a bare `{ name, version, license }` triple. */
+interface RawPackageJson {
+  name?: unknown;
+  version?: unknown;
+  license?: unknown;
+  licenses?: unknown;
+}
+
+function defaultReadPackageJson(dir: string): unknown {
+  const p = join(dir, 'package.json');
+  if (!existsSync(p)) return null;
+  try {
+    return JSON.parse(readFileSync(p, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extract an SPDX id or an SPDX-OR expression from a `package.json` license
+ * field. Fail-closed on anything unresolvable.
+ */
+export function extractLicense(pkg: RawPackageJson): string {
+  const bad = (why: string): never => {
+    throw new Error(`unresolvable license: ${why}`);
+  };
+
+  // Modern SPDX form.
+  if (typeof pkg.license === 'string') {
+    const v = pkg.license.trim();
+    if (v === '' || /^UNLICENSED$/i.test(v) || /^SEE LICENSE IN /i.test(v)) {
+      bad(`license string "${pkg.license}"`);
+    }
+    return v;
+  }
+  // Legacy single-object form: { license: { type: "MIT" } }.
+  if (
+    pkg.license !== null &&
+    typeof pkg.license === 'object' &&
+    typeof (pkg.license as { type?: unknown }).type === 'string'
+  ) {
+    const t = ((pkg.license as { type: string }).type ?? '').trim();
+    if (t === '') bad('empty license.type');
+    return t;
+  }
+  // Legacy array form: { licenses: [{ type: "MIT" }, { type: "Apache-2.0" }] }.
+  if (Array.isArray(pkg.licenses)) {
+    const ids: string[] = [];
+    for (const entry of pkg.licenses) {
+      if (
+        entry !== null &&
+        typeof entry === 'object' &&
+        typeof (entry as { type?: unknown }).type === 'string'
+      ) {
+        const t = ((entry as { type: string }).type ?? '').trim();
+        if (t === '') bad('empty licenses[i].type');
+        ids.push(t);
+      } else {
+        bad('malformed licenses[] entry');
+      }
+    }
+    if (ids.length === 0) bad('empty licenses[]');
+    if (ids.length === 1) return ids[0]!;
+    return `(${ids.join(' OR ')})`;
+  }
+  bad('no license or licenses field');
+  // Unreachable; `bad` throws.
+  return '';
+}
+
+/**
+ * Classify a metafile input path.
+ *
+ * The metafile paths esbuild emits are relative to the invocation cwd (in the
+ * ming build, that is the repo root). We only care about three exclusion
+ * categories plus everything else, which we treat as "third-party under
+ * node_modules and must be resolvable to a package root".
+ */
+type Category =
+  { kind: 'virtual' } | { kind: 'nodeBuiltin' } | { kind: 'repoInternal' } | { kind: 'thirdParty' };
+
+function classifyInput(input: string): Category {
+  // esbuild emits synthetic entries like `<define:X>` and `<runtime>`.
+  if (input.startsWith('<') || input.includes('\x00')) return { kind: 'virtual' };
+  if (input.startsWith('node:')) return { kind: 'nodeBuiltin' };
+  // Normalise to forward slashes for consistent classification on Windows.
+  const norm = input.split(sep).join('/');
+  if (norm.startsWith('packages/') || norm.includes('/packages/')) {
+    return { kind: 'repoInternal' };
+  }
+  if (norm.startsWith('node_modules/') || norm.includes('/node_modules/')) {
+    return { kind: 'thirdParty' };
+  }
+  // Anything else (a bare workspace-relative source that is neither packages/
+  // nor node_modules) is likely a repo-internal file too; treat as internal so
+  // we never silently label it "unknown third-party".
+  return { kind: 'repoInternal' };
+}
+
+/**
+ * Walk up from a metafile input's absolute path, looking for the containing
+ * package.json. Returns the package root and its parsed JSON. Fail-closed if
+ * the path is not truly inside a valid npm package layout.
+ */
+function resolvePackageRoot(
+  inputAbs: string,
+  opts: { root: string; readPackageJson: (dir: string) => unknown },
+): { dir: string; json: RawPackageJson } {
+  let cur = dirname(inputAbs);
+  const stopAt = opts.root;
+  while (cur.length >= stopAt.length) {
+    const parsed = opts.readPackageJson(cur);
+    if (parsed !== null && parsed !== undefined && typeof parsed === 'object') {
+      const pkg = parsed as RawPackageJson;
+      if (typeof pkg.name === 'string' && typeof pkg.version === 'string') {
+        // Verify layout: the directory containing package.json must live
+        // directly under a node_modules dir (allowing `@scope/name`).
+        const rel = relative(opts.root, cur).split(sep).join('/');
+        const parts = rel.split('/');
+        const nmIdx = parts.lastIndexOf('node_modules');
+        if (nmIdx < 0) {
+          throw new Error(
+            `package.json at ${rel} is not under node_modules; refusing to attribute input ${relative(opts.root, inputAbs)}`,
+          );
+        }
+        const after = parts.slice(nmIdx + 1);
+        // Either ['name'] or ['@scope', 'name'].
+        const expected =
+          after.length === 1
+            ? after[0]
+            : after.length === 2 && after[0]!.startsWith('@')
+              ? `${after[0]}/${after[1]}`
+              : null;
+        if (expected === null || expected !== pkg.name) {
+          throw new Error(
+            `package layout mismatch for input ${relative(opts.root, inputAbs)}: package.json name "${pkg.name}" but directory tail "${after.join('/')}"`,
+          );
+        }
+        return { dir: cur, json: pkg };
+      }
+    }
+    const next = dirname(cur);
+    if (next === cur) break;
+    cur = next;
+  }
+  throw new Error(`could not resolve package root for input ${relative(opts.root, inputAbs)}`);
+}
+
+/** Sort a string array in place with a stable, locale-independent comparator. */
+function sortAscii(xs: string[]): string[] {
+  xs.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return xs;
+}
+
+export function computeBundleClosure(
+  metafile: { inputs: Record<string, unknown> },
+  opts: ComputeBundleClosureOptions,
+): BundleClosureResult {
+  const readPackageJson = opts.readPackageJson ?? defaultReadPackageJson;
+  if (!isAbsolute(opts.root)) {
+    throw new Error(`root must be absolute, got ${opts.root}`);
+  }
+
+  const ignored: BundleClosureResult['ignored'] = {
+    repoInternal: [],
+    nodeBuiltin: [],
+    virtual: [],
+  };
+  /** Package root dir -> aggregated data. Keyed by absolute dir. */
+  const byRoot = new Map<string, BundlePackage>();
+
+  const inputs = Object.keys(metafile.inputs);
+  for (const raw of inputs) {
+    const c = classifyInput(raw);
+    if (c.kind === 'virtual') {
+      ignored.virtual.push(raw);
+      continue;
+    }
+    if (c.kind === 'nodeBuiltin') {
+      ignored.nodeBuiltin.push(raw);
+      continue;
+    }
+    if (c.kind === 'repoInternal') {
+      ignored.repoInternal.push(raw);
+      continue;
+    }
+    // Third-party. Resolve to an absolute path relative to root, then walk up.
+    const abs = isAbsolute(raw) ? raw : join(opts.root, raw);
+    const { dir, json } = resolvePackageRoot(abs, {
+      root: opts.root,
+      readPackageJson,
+    });
+    const license = extractLicense(json);
+    const name = json.name as string;
+    const version = json.version as string;
+    const existing = byRoot.get(dir);
+    if (existing) {
+      if (existing.version !== version || existing.license !== license) {
+        throw new Error(
+          `package ${name} resolved to conflicting metadata at ${dir}: ` +
+            `${existing.version}/${existing.license} vs ${version}/${license}`,
+        );
+      }
+      existing.inputs.push(relative(opts.root, abs).split(sep).join('/'));
+      continue;
+    }
+    // Also fail-closed if a *different* dir maps to the *same* package name
+    // but a different version — we detect this later via the flattened list.
+    byRoot.set(dir, {
+      name,
+      version,
+      license,
+      purl: `pkg:npm/${name}@${version}`,
+      packageRoot: dir,
+      inputs: [relative(opts.root, abs).split(sep).join('/')],
+    });
+  }
+
+  // Detect name-collision-across-roots after aggregation.
+  const packages = [...byRoot.values()];
+  const byName = new Map<string, BundlePackage>();
+  for (const p of packages) {
+    const seen = byName.get(p.name);
+    if (seen && (seen.version !== p.version || seen.license !== p.license)) {
+      throw new Error(
+        `package ${p.name} resolved to multiple versions in the bundle: ` +
+          `${seen.version}/${seen.license} at ${seen.packageRoot} and ` +
+          `${p.version}/${p.license} at ${p.packageRoot}`,
+      );
+    }
+    if (!seen) byName.set(p.name, p);
+  }
+
+  for (const p of packages) sortAscii(p.inputs);
+  packages.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+
+  sortAscii(ignored.repoInternal);
+  sortAscii(ignored.nodeBuiltin);
+  sortAscii(ignored.virtual);
+
+  return { packages, ignored };
+}

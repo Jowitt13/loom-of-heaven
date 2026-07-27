@@ -1,15 +1,28 @@
 import { build } from 'esbuild';
-import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { mkdirSync, statSync, writeFileSync } from 'node:fs';
+import { computeBundleClosure, type BundlePackage } from './lib/bundle-closure.ts';
 
 /**
  * Bundle the deterministic engine into the Skill as a single self-contained ESM
- * file (scripts/dist/engine.mjs) and emit a CycloneDX SBOM plus an SPDX 2.3 SBOM.
- * The bundle inlines zod + moment-timezone (including its packed TZDB), so the
- * published Skill has no dependency on the repo's packages/ or on `npm install`
- * (handoff §3.1, §12).
+ * file (scripts/dist/engine.mjs) and emit a CycloneDX SBOM plus an SPDX 2.3
+ * SBOM. The bundle inlines every runtime dependency into engine.mjs, so the
+ * published Skill has no dependency on the repo's packages/ or on
+ * `npm install` (handoff §3.1, §12).
+ *
+ * The two SBOMs are derived from the esbuild metafile's `inputs` list via
+ * `computeBundleClosure` (see tools/lib/bundle-closure.ts). There is no
+ * hand-maintained package list here — if a new third-party package ends up in
+ * the bundle, both SBOMs pick it up automatically; conversely, if a package
+ * disappears from the bundle, both SBOMs drop it. The closure derivation is
+ * fail-closed on missing / unresolvable license metadata, so an unaudited
+ * dependency cannot silently ship.
+ *
+ * Byte-stability: components and packages are sorted by name; the SPDX
+ * `created` timestamp is pinned to a fixed value so committed SBOM artifacts
+ * are byte-identical across rebuilds. `pnpm run validate:sbom` later verifies
+ * this end-to-end against a fresh esbuild pass.
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -18,21 +31,31 @@ const skillDir = join(root, 'skills', 'calculate-birth-charts');
 const entry = join(root, 'packages', 'orchestrator', 'src', 'engine-entry.ts');
 const outfile = join(skillDir, 'scripts', 'dist', 'engine.mjs');
 
-function resolveVersion(name: string, fromPkgJson: string): { version: string; dir: string } {
-  // Resolve the package entry point, then walk up to package.json (some packages
-  // don't export './package.json' in their "exports" map — e.g. tyme4ts).
-  const requireFrom = createRequire(fromPkgJson);
-  const entryPath = requireFrom.resolve(name);
-  // Walk up from the resolved entry to find the package root.
-  let current = dirname(entryPath);
-  while (!existsSync(join(current, 'package.json'))) {
-    const parent = dirname(current);
-    if (parent === current) throw new Error(`Cannot find package root for ${name}`);
-    current = parent;
-  }
-  const pkgPath = join(current, 'package.json');
-  const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as { version: string };
-  return { version: pkg.version, dir: current };
+const APP_NAME = 'calculate-birth-charts';
+const APP_VERSION = '0.1.0';
+// SPDX requires creationInfo.created; a wall-clock value would break the
+// v0.1.2 byte-reproducibility of committed build artifacts, so this is a
+// FIXED deterministic build timestamp (not the real build instant — the
+// pinned dependency versions in `components` are the record).
+const SPDX_FIXED_CREATED = '2026-01-01T00:00:00Z';
+
+interface CycloneDxComponent {
+  type: 'library';
+  name: string;
+  version: string;
+  purl: string;
+  licenses: unknown[];
+}
+
+/**
+ * Build the CycloneDX `licenses` array for one component from the closure's
+ * SPDX id or OR expression.
+ *   - "MIT"                 -> [{ license: { id: "MIT" } }]
+ *   - "(MIT OR Apache-2.0)" -> [{ expression: "(MIT OR Apache-2.0)" }]
+ */
+function buildCycloneDxLicenseField(spdx: string): unknown[] {
+  if (spdx.startsWith('(')) return [{ expression: spdx }];
+  return [{ license: { id: spdx } }];
 }
 
 async function main(): Promise<void> {
@@ -55,83 +78,70 @@ async function main(): Promise<void> {
   const bytes = statSync(outfile).size;
   console.log(`engine.mjs bundled: ${(bytes / 1024).toFixed(1)} KiB`);
 
-  // --- CycloneDX SBOM from the actual bundled runtime dependencies ---
-  const timeLocPkg = join(root, 'packages', 'time-location', 'package.json');
-  const baziPkg = join(root, 'packages', 'bazi', 'package.json');
-  const ziweiPkg = join(root, 'packages', 'ziwei', 'package.json');
-  const westernPkg = join(root, 'packages', 'western', 'package.json');
-  const zod = resolveVersion('zod', timeLocPkg);
-  const momentTz = resolveVersion('moment-timezone', timeLocPkg);
-  const moment = resolveVersion('moment', join(momentTz.dir, 'package.json'));
-  const tyme = resolveVersion('tyme4ts', baziPkg);
-  const iztro = resolveVersion('iztro', ziweiPkg);
-  const astroEngine = resolveVersion('astronomy-engine', westernPkg);
+  // --- Derive the actual third-party runtime closure from esbuild metafile ---
+  const closure = computeBundleClosure(result.metafile, { root });
+  console.log(
+    `bundle closure: ${closure.packages.length} third-party package(s); ` +
+      `ignored ${closure.ignored.repoInternal.length} repo-internal, ` +
+      `${closure.ignored.nodeBuiltin.length} node builtin, ` +
+      `${closure.ignored.virtual.length} virtual input(s).`,
+  );
 
-  const components = [
-    { name: 'zod', version: zod.version, license: 'MIT' },
-    { name: 'moment-timezone', version: momentTz.version, license: 'MIT' },
-    { name: 'moment', version: moment.version, license: 'MIT' },
-    { name: 'tyme4ts', version: tyme.version, license: 'MIT' },
-    { name: 'iztro', version: iztro.version, license: 'MIT' },
-    { name: 'astronomy-engine', version: astroEngine.version, license: 'MIT' },
-  ].map((c) => ({
+  const components: CycloneDxComponent[] = closure.packages.map((p: BundlePackage) => ({
     type: 'library',
-    name: c.name,
-    version: c.version,
-    purl: `pkg:npm/${c.name}@${c.version}`,
-    licenses: [{ license: { id: c.license } }],
+    name: p.name,
+    version: p.version,
+    purl: p.purl,
+    licenses: buildCycloneDxLicenseField(p.license),
   }));
 
-  const sbom = {
+  const sbomCdx = {
     bomFormat: 'CycloneDX',
     specVersion: '1.5',
     version: 1,
     metadata: {
-      // No wall-clock timestamp: the SBOM is a COMMITTED build artifact and must stay
-      // byte-stable across rebuilds/machines (v0.1.2 reproducibility). The pinned dependency
-      // versions below are the authoritative record.
+      // No wall-clock timestamp: the SBOM is a COMMITTED build artifact and
+      // must stay byte-stable across rebuilds/machines (v0.1.2
+      // reproducibility). The pinned dependency versions below are the
+      // authoritative record.
       component: {
         type: 'application',
-        name: 'calculate-birth-charts',
-        version: '0.1.0',
+        name: APP_NAME,
+        version: APP_VERSION,
       },
       tools: [{ name: 'ming-build-skill', version: '0.1.0' }],
     },
     components,
   };
 
-  writeFileSync(join(skillDir, 'sbom.cdx.json'), `${JSON.stringify(sbom, null, 2)}\n`, 'utf8');
+  writeFileSync(join(skillDir, 'sbom.cdx.json'), `${JSON.stringify(sbomCdx, null, 2)}\n`, 'utf8');
   console.log(
-    `sbom.cdx.json written (zod ${zod.version}, moment-timezone ${momentTz.version}, moment ${moment.version}, tyme4ts ${tyme.version}, iztro ${iztro.version}, astronomy-engine ${astroEngine.version})`,
+    `sbom.cdx.json written (${closure.packages.map((p) => `${p.name} ${p.version}`).join(', ')})`,
   );
 
-  // --- SPDX 2.3 SBOM from the SAME component data (Phase 6: second standard format) ---
-  // SPDX requires creationInfo.created; a wall-clock value would break the v0.1.2
-  // byte-reproducibility of committed build artifacts, so this is a FIXED deterministic
-  // build timestamp (not the real build instant — the pinned versions are the record).
-  const SPDX_FIXED_CREATED = '2026-01-01T00:00:00Z';
-  const spdxPackages = components.map((c) => ({
-    name: c.name,
-    SPDXID: `SPDXRef-Package-${c.name.replace(/[^A-Za-z0-9.-]/g, '-')}`,
-    versionInfo: c.version,
+  // --- SPDX 2.3 SBOM from the SAME closure (Phase 6: second standard format) ---
+  const spdxPackages = closure.packages.map((p) => ({
+    name: p.name,
+    SPDXID: `SPDXRef-Package-${p.name.replace(/[^A-Za-z0-9.-]/g, '-')}`,
+    versionInfo: p.version,
     downloadLocation: 'NOASSERTION',
     filesAnalyzed: false,
-    licenseConcluded: c.licenses[0]!.license.id,
-    licenseDeclared: c.licenses[0]!.license.id,
+    licenseConcluded: p.license,
+    licenseDeclared: p.license,
     externalRefs: [
       {
         referenceCategory: 'PACKAGE-MANAGER',
         referenceType: 'purl',
-        referenceLocator: c.purl,
+        referenceLocator: p.purl,
       },
     ],
   }));
-  const spdx = {
+  const sbomSpdx = {
     spdxVersion: 'SPDX-2.3',
     dataLicense: 'CC0-1.0',
     SPDXID: 'SPDXRef-DOCUMENT',
-    name: 'calculate-birth-charts-0.1.0',
-    documentNamespace: 'https://github.com/Jowitt13/ming-engine/spdx/calculate-birth-charts-0.1.0',
+    name: `${APP_NAME}-${APP_VERSION}`,
+    documentNamespace: `https://github.com/Jowitt13/ming-engine/spdx/${APP_NAME}-${APP_VERSION}`,
     creationInfo: {
       created: SPDX_FIXED_CREATED,
       creators: ['Tool: ming-build-skill-0.1.0'],
@@ -140,9 +150,9 @@ async function main(): Promise<void> {
     },
     packages: [
       {
-        name: 'calculate-birth-charts',
-        SPDXID: 'SPDXRef-Package-calculate-birth-charts',
-        versionInfo: '0.1.0',
+        name: APP_NAME,
+        SPDXID: `SPDXRef-Package-${APP_NAME}`,
+        versionInfo: APP_VERSION,
         downloadLocation: 'NOASSERTION',
         filesAnalyzed: false,
         licenseConcluded: 'MIT',
@@ -154,16 +164,16 @@ async function main(): Promise<void> {
       {
         spdxElementId: 'SPDXRef-DOCUMENT',
         relationshipType: 'DESCRIBES',
-        relatedSpdxElement: 'SPDXRef-Package-calculate-birth-charts',
+        relatedSpdxElement: `SPDXRef-Package-${APP_NAME}`,
       },
       ...spdxPackages.map((p) => ({
-        spdxElementId: 'SPDXRef-Package-calculate-birth-charts',
+        spdxElementId: `SPDXRef-Package-${APP_NAME}`,
         relationshipType: 'DEPENDS_ON',
         relatedSpdxElement: p.SPDXID,
       })),
     ],
   };
-  writeFileSync(join(skillDir, 'sbom.spdx.json'), `${JSON.stringify(spdx, null, 2)}\n`, 'utf8');
+  writeFileSync(join(skillDir, 'sbom.spdx.json'), `${JSON.stringify(sbomSpdx, null, 2)}\n`, 'utf8');
   console.log(`sbom.spdx.json written (SPDX 2.3, ${spdxPackages.length} dependency packages)`);
 
   const outputs = Object.keys(result.metafile.outputs);

@@ -22,9 +22,9 @@
       "licenseDeclared": "MIT"
     },
     {
-      "name": "zod",
-      "SPDXID": "SPDXRef-Package-zod",
-      "versionInfo": "4.4.3",
+      "name": "astronomy-engine",
+      "SPDXID": "SPDXRef-Package-astronomy-engine",
+      "versionInfo": "2.1.19",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "MIT",
@@ -33,14 +33,14 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/zod@4.4.3"
+          "referenceLocator": "pkg:npm/astronomy-engine@2.1.19"
         }
       ]
     },
     {
-      "name": "moment-timezone",
-      "SPDXID": "SPDXRef-Package-moment-timezone",
-      "versionInfo": "0.6.3",
+      "name": "dayjs",
+      "SPDXID": "SPDXRef-Package-dayjs",
+      "versionInfo": "1.11.21",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "MIT",
@@ -49,14 +49,14 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/moment-timezone@0.6.3"
+          "referenceLocator": "pkg:npm/dayjs@1.11.21"
         }
       ]
     },
     {
-      "name": "moment",
-      "SPDXID": "SPDXRef-Package-moment",
-      "versionInfo": "2.30.1",
+      "name": "i18next",
+      "SPDXID": "SPDXRef-Package-i18next",
+      "versionInfo": "23.16.8",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "MIT",
@@ -65,23 +65,7 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/moment@2.30.1"
-        }
-      ]
-    },
-    {
-      "name": "tyme4ts",
-      "SPDXID": "SPDXRef-Package-tyme4ts",
-      "versionInfo": "1.5.2",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "licenseConcluded": "MIT",
-      "licenseDeclared": "MIT",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceType": "purl",
-          "referenceLocator": "pkg:npm/tyme4ts@1.5.2"
+          "referenceLocator": "pkg:npm/i18next@23.16.8"
         }
       ]
     },
@@ -102,9 +86,9 @@
       ]
     },
     {
-      "name": "astronomy-engine",
-      "SPDXID": "SPDXRef-Package-astronomy-engine",
-      "versionInfo": "2.1.19",
+      "name": "lunar-lite",
+      "SPDXID": "SPDXRef-Package-lunar-lite",
+      "versionInfo": "0.2.8",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "MIT",
@@ -113,7 +97,87 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/astronomy-engine@2.1.19"
+          "referenceLocator": "pkg:npm/lunar-lite@0.2.8"
+        }
+      ]
+    },
+    {
+      "name": "lunar-typescript",
+      "SPDXID": "SPDXRef-Package-lunar-typescript",
+      "versionInfo": "1.8.6",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/lunar-typescript@1.8.6"
+        }
+      ]
+    },
+    {
+      "name": "moment",
+      "SPDXID": "SPDXRef-Package-moment",
+      "versionInfo": "2.30.1",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/moment@2.30.1"
+        }
+      ]
+    },
+    {
+      "name": "moment-timezone",
+      "SPDXID": "SPDXRef-Package-moment-timezone",
+      "versionInfo": "0.6.3",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/moment-timezone@0.6.3"
+        }
+      ]
+    },
+    {
+      "name": "tyme4ts",
+      "SPDXID": "SPDXRef-Package-tyme4ts",
+      "versionInfo": "1.5.2",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/tyme4ts@1.5.2"
+        }
+      ]
+    },
+    {
+      "name": "zod",
+      "SPDXID": "SPDXRef-Package-zod",
+      "versionInfo": "4.4.3",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/zod@4.4.3"
         }
       ]
     }
@@ -127,22 +191,17 @@
     {
       "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-Package-zod"
+      "relatedSpdxElement": "SPDXRef-Package-astronomy-engine"
     },
     {
       "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-Package-moment-timezone"
+      "relatedSpdxElement": "SPDXRef-Package-dayjs"
     },
     {
       "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-Package-moment"
-    },
-    {
-      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
-      "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-Package-tyme4ts"
+      "relatedSpdxElement": "SPDXRef-Package-i18next"
     },
     {
       "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
@@ -152,7 +211,32 @@
     {
       "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-Package-astronomy-engine"
+      "relatedSpdxElement": "SPDXRef-Package-lunar-lite"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-lunar-typescript"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-moment"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-moment-timezone"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-tyme4ts"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-zod"
     }
   ]
 }

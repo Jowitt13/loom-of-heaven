@@ -56,7 +56,7 @@ pnpm run build        # rebuild scripts/dist/engine.mjs + sbom.cdx.json (commit 
 `verify:cloud` runs the reproducible, non-sensitive stages: `format:check → lint → typecheck → test
 → build → validate:provenance → validate:skill → validate:reading → validate:docs → smoke →
 forward:test → package:hosts → verify:hosts → verify:install → check:doc-counts → scan:deps →
-scan:licenses → scan:secrets`. `verify:all` then adds `scan:incident`; its precise token file is ignored, must never
+scan:licenses → validate:sbom → scan:secrets`. `verify:all` then adds `scan:incident`; its precise token file is ignored, must never
 enter CI, and its absence is intentionally fail-closed. If you change the test count, update
 `docs/STATUS.md` and `docs/VALIDATION.md` from a real run (never by hand).
 

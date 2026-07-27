@@ -34,6 +34,7 @@ Before a release or a visibility change, run `pnpm run verify:all` and
 | Doc counts       | `pnpm run check:doc-counts`                       | Re-runs the suite; fails if a doc's `N tests / M files` drifts from the run.                           |
 | Dep vuln scan    | `pnpm run scan:deps`                              | Local: WARN + exit 0 if offline. CI: `DEPENDENCY_AUDIT_STRICT=1` fails closed on unreachable/parse.    |
 | License scan     | `pnpm run scan:licenses`                          | Offline `pnpm licenses` policy gate (LICENSE_AUDIT allowlist) + SBOM license cross-check; fail-closed. |
+| SBOM validate    | `pnpm run validate:sbom`                          | Fresh esbuild bundle closure vs both committed SBOMs; any drift/ghost/byte diff fails closed.          |
 | Secret scan      | `pnpm run scan:secrets`                           | Dependency-free scan of tracked files; fails on a leaked credential.                                   |
 | Incident scan    | local `pnpm run verify:all`                       | Exact incident tokens; fail-closed if the controlled token file is unavailable.                        |
 
@@ -58,7 +59,7 @@ the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not h
 resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **472 tests / 29 files ï¿?all passing**. The Western provider
+- Typecheck: clean. Tests: **509 tests / 31 files ï¿?all passing**. The Western provider
   (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 ï¿?ï¿?gate two ways: wrapper-consistency
   (vs astronomy-engine's own output) plus an **independent JPL Horizons golden** (10 bodies Ã— 3
   technical epochs fetched from the NASA/JPL Horizons service, query recorded in
