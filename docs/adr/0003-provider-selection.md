@@ -1,7 +1,8 @@
 # ADR 0003: Provider selection behind adapters (deferred to Phase 2)
 
-- Status: Accepted (selection); providers not yet integrated
+- Status: Accepted (selection); Western integrated via astronomy-engine; celestine rejected
 - Date: 2026-07-21
+- Updated: 2026-07-28 (current-status annotation; historical evaluation preserved below)
 
 ## Context
 
@@ -32,7 +33,7 @@ Explicitly **not** adopted for the default build without owner approval: Swiss E
   BaZi/Zi Wei goldens need sourced references, and Western needs JPL/Swiss cross-checks.
 - Re-verify each LICENSE and package metadata at integration time (see `docs/LICENSE_AUDIT.md`).
 
-## Outcome — Western evaluation (2026-07-21)
+## Outcome — Western evaluation (2026-07-21) [HISTORICAL]
 
 celestine 0.2.1 was run through the precision regression (geocentric ecliptic longitude vs
 astronomy-engine (VSOP87 + NOVAS 上游；此为包装层一致性对照，非独立 JPL Horizons 金标对照), five dates 1955–2024). Sun–Neptune (8 bodies) agree to ≤1 arc-minute,
@@ -40,3 +41,15 @@ but Mercury deviates up to ~17′ and Pluto up to ~37′ — the gate is **not m
 not wired in and Western still returns `SYSTEM_NOT_YET_IMPLEMENTED`. The reproducible harness is
 `packages/western/test/precision-regression.test.ts`; re-run it against any future celestine
 release or replacement MIT provider before adoption.
+
+## Current status (2026-07-28)
+
+- **Western provider**: astronomy-engine 2.1.19 (MIT) is now the integrated domain provider
+  (not merely the cross-check). `SYSTEM_NOT_YET_IMPLEMENTED` is no longer returned for
+  Western calculations.
+- **Precision verification**: Two independent golden fixtures validate absolute accuracy:
+  1. JPL Horizons golden (10 main bodies × 3 synthetic technical epochs; worst 0.20′);
+  2. Swiss Ephemeris house golden (5 systems × 5 synthetic cases; worst 0.69′).
+     Both hold the ≤1′ gate.
+- **celestine**: Remains rejected (ADR evaluation above unchanged).
+- **BaZi / Zi Wei**: Integrated via tyme4ts + iztro respectively (as selected above).

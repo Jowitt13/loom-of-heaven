@@ -28,6 +28,8 @@ function baseFixture(): Map<string, string> {
       '',
       '需要脚本执行 能力。',
       '',
+      '主星体经独立 JPL Horizons 金标交叉校验。',
+      '',
       'verify:cloud 依次运行 scan:deps → scan:licenses → validate:sbom → scan:secrets.',
       '',
       '指向 GitHub Release `v0.1.6`.',
@@ -419,6 +421,68 @@ describe('validate-current-docs: injected reader', () => {
     const { failed } = runChecks(readerOf(files));
     expect(failed.map((f) => f.name)).toContain(
       'scan-deps.ts: no promise of "CI always has network" / "advisory service is reachable"',
+    );
+  });
+
+  it('13. README says JPL golden 待补 -> matching FAIL (stale claim)', () => {
+    const files = baseFixture();
+    files.set(
+      'README.md',
+      files
+        .get('README.md')!
+        .replace('主星体经独立 JPL Horizons 金标交叉校验。', '本仓库独立 JPL Horizons 金标待补。'),
+    );
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain('README.md: 不含 JPL golden 已存在，不得声称待补');
+  });
+
+  it('14. README says SYSTEM_NOT_YET_IMPLEMENTED -> matching FAIL (outdated)', () => {
+    const files = baseFixture();
+    files.set(
+      'README.md',
+      files.get('README.md')! + '\nWestern returns SYSTEM_NOT_YET_IMPLEMENTED.',
+    );
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain(
+      'README.md: 不含 不得声称 Western 返回 SYSTEM_NOT_YET_IMPLEMENTED（已集成）',
+    );
+  });
+
+  it('15. README missing JPL golden existence statement -> matching FAIL', () => {
+    const files = baseFixture();
+    files.set(
+      'README.md',
+      files
+        .get('README.md')!
+        .replace('主星体经独立 JPL Horizons 金标交叉校验。', '主星体精度回归。'),
+    );
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain('README.md: 含 缺 JPL Horizons 金标已完成声明');
+  });
+
+  it('16. STATUS.md says SYSTEM_NOT_YET_IMPLEMENTED -> matching FAIL (stale)', () => {
+    const files = baseFixture();
+    files.set(
+      'docs/STATUS.md',
+      files.get('docs/STATUS.md')! + '\nWestern still emits SYSTEM_NOT_YET_IMPLEMENTED.',
+    );
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain(
+      'docs/STATUS.md: 不含 不得在当前状态段声称 Western 仍返回 SYSTEM_NOT_YET_IMPLEMENTED',
+    );
+  });
+
+  it('16b. ADR 0003 [HISTORICAL] containing SYSTEM_NOT_YET_IMPLEMENTED does NOT trip the guard', () => {
+    const files = baseFixture();
+    // ADR fixture already contains the string in its historical evaluation
+    files.set(
+      'docs/adr/0003-provider-selection.md',
+      'VSOP87 NOVAS. Western still returns SYSTEM_NOT_YET_IMPLEMENTED. [HISTORICAL]',
+    );
+    const { failed } = runChecks(readerOf(files));
+    // The ADR rule has no mustNot for SYSTEM_NOT_YET_IMPLEMENTED, so it must pass
+    expect(failed.map((f) => f.name)).not.toContain(
+      'docs/adr/0003-provider-selection.md: 不含 不得在当前状态段声称 Western 仍返回 SYSTEM_NOT_YET_IMPLEMENTED',
     );
   });
 });

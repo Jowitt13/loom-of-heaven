@@ -68,14 +68,26 @@ const RULES: DocRule[] = [
     file: 'README.md',
     mustNot: [
       { re: DE441, msg: 'DE441 错误声明' },
-      { re: /三大\s*Agent/, msg: '“三大 Agent”过期表述' },
-      { re: NO_NODE, msg: '“不需要 Node”错误声明' },
+      { re: /三大\s*Agent/, msg: '"三大 Agent"过期表述' },
+      { re: NO_NODE, msg: '"不需要 Node"错误声明' },
+      {
+        re: /JPL[^。\n]{0,20}(待补|pending|尚未|还未)/i,
+        msg: 'JPL golden 已存在，不得声称待补',
+      },
+      {
+        re: /SYSTEM_NOT_YET_IMPLEMENTED/,
+        msg: '不得声称 Western 返回 SYSTEM_NOT_YET_IMPLEMENTED（已集成）',
+      },
     ],
     must: [
       { re: /VSOP87|NOVAS/, msg: '缺 VSOP87/NOVAS 正确归因' },
       { re: RUN_NODE, msg: '缺 运行 Node ≥ 22' },
       { re: /Node(\.js)?\s*[>≥]=?\s*24/, msg: '缺 开发 Node ≥ 24' },
       { re: /脚本执行|执行脚本|运行脚本/, msg: '缺 需要脚本执行能力说明' },
+      {
+        re: /JPL Horizons[^。\n]{0,40}金标|独立 JPL Horizons/,
+        msg: '缺 JPL Horizons 金标已完成声明',
+      },
     ],
   },
   {
@@ -115,6 +127,10 @@ const RULES: DocRule[] = [
     mustNot: [
       { re: DE441, msg: 'DE441 错误声明' },
       { re: STARTMOON, msg: '仍指向已废弃 startmoon 旧工作区' },
+      {
+        re: /SYSTEM_NOT_YET_IMPLEMENTED/,
+        msg: '不得在当前状态段声称 Western 仍返回 SYSTEM_NOT_YET_IMPLEMENTED',
+      },
     ],
     must: [
       { re: /validate:docs/, msg: '缺 validate:docs 阶段' },
@@ -254,6 +270,22 @@ function selfTest(add: (name: string, ok: boolean, detail?: string) => void): vo
   );
   add('[self-test] 不需要-Node 命中', NO_NODE.test('也不需要安装 pnpm、Node 或 Git'));
   add('[self-test] HTML/SVG 输出命中', HTML_SVG_OUT.test('当前输出 HTML/SVG 报告'));
+  add(
+    '[self-test] JPL待补命中',
+    /JPL[^。\n]{0,20}(待补|pending|尚未|还未)/i.test('本仓库独立 JPL Horizons 金标待补'),
+  );
+  add(
+    '[self-test] JPL已完成不误报',
+    !/JPL[^。\n]{0,20}(待补|pending|尚未|还未)/i.test('独立 JPL Horizons 金标交叉校验'),
+  );
+  add(
+    '[self-test] SYSTEM_NOT_YET_IMPLEMENTED命中',
+    /SYSTEM_NOT_YET_IMPLEMENTED/.test('Western returns SYSTEM_NOT_YET_IMPLEMENTED'),
+  );
+  add(
+    '[self-test] SYSTEM_NOT_YET_IMPLEMENTED不误报历史ADR',
+    !/SYSTEM_NOT_YET_IMPLEMENTED/.test('astronomy-engine integrated'),
+  );
   add('[self-test] 干净归因不误报', !DE441.test('astronomy-engine 基于 VSOP87 与 NOVAS'));
   add('[self-test] 需要Node不误报', !NO_NODE.test('无需 pnpm、Git；运行需要 Node.js ≥ 22'));
   add('[self-test] 不完整排盘示例命中', BAD_CHART_PROMPT.test('帮我排一下 1990…出生在武汉的盘'));
