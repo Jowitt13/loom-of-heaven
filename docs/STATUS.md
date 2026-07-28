@@ -66,7 +66,7 @@ retired and must never be pushed from or copied from.
     luck cycle `null` while year/month/day pillars remain;
   - approximate time �?`TIME_ACCURACY_APPROXIMATE`, charts still computed;
   - lunar input �?`LUNAR_CONVERTED` (lunar 1990-01-01 �?Gregorian 1990-01-27), charts computed.
-- Western still emits `SYSTEM_NOT_YET_IMPLEMENTED` (ADR 0003 gate), never a fabricated chart.
+- Western is integrated via astronomy-engine and computes all supported systems; unsupported or invalid inputs return structured errors or warnings — results are never fabricated.
 - Byte-identical canonical JSON between the source CLI and the isolated Skill reaffirmed.
 - `pnpm run forward:test` wired into `verify:all` as an enforced gate (runs after `smoke`).
 
@@ -179,7 +179,7 @@ never by hand.
 | Command                        | Result                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm run typecheck`           | clean (tsc strict over packages, tools, tests)                                                                                                                                                                                                                                                                                            |
-| `pnpm run test`                | 675 tests / 33 files �?all passing (all systems + JPL Horizons 独立 golden + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + validate-answer v2 结构与措辞门禁（约束引用事实豁免+全可见文本安全扫�?资源上限+有界解析入口，非语义正确性证明） + western-rules/ziwei-rules 语义规则 + 版本迁移/回滚/目标白名�?+ PII 隐私护栏 green) |
+| `pnpm run test`                | 680 tests / 33 files �?all passing (all systems + JPL Horizons 独立 golden + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + validate-answer v2 结构与措辞门禁（约束引用事实豁免+全可见文本安全扫�?资源上限+有界解析入口，非语义正确性证明） + western-rules/ziwei-rules 语义规则 + 版本迁移/回滚/目标白名�?+ PII 隐私护栏 green) |
 | `pnpm run build`               | `engine.mjs` �?2.8 MB + `sbom.cdx.json` + `sbom.spdx.json` (6 runtime deps)                                                                                                                                                                                                                                                               |
 | `pnpm run validate:skill`      | 40 / 40 (incl. scripts/ no-stray-files guard + CycloneDX/SPDX SBOM checks + validate-answer/lint-reading gate-workflow doc checks)                                                                                                                                                                                                        |
 | `pnpm run validate:reading`    | 53 / 53 (topic example libraries + output-spec structure + 无术语区 firewall; offline, no LLM)                                                                                                                                                                                                                                            |
