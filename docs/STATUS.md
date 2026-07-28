@@ -179,7 +179,7 @@ never by hand.
 | Command                        | Result                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm run typecheck`           | clean (tsc strict over packages, tools, tests)                                                                                                                                                                                                                                                                                            |
-| `pnpm run test`                | 556 tests / 31 files �?all passing (all systems + JPL Horizons 独立 golden + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + validate-answer v2 结构与措辞门禁（约束引用事实豁免+全可见文本安全扫�?资源上限+有界解析入口，非语义正确性证明） + western-rules/ziwei-rules 语义规则 + 版本迁移/回滚/目标白名�?+ PII 隐私护栏 green) |
+| `pnpm run test`                | 675 tests / 33 files �?all passing (all systems + JPL Horizons 独立 golden + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + validate-answer v2 结构与措辞门禁（约束引用事实豁免+全可见文本安全扫�?资源上限+有界解析入口，非语义正确性证明） + western-rules/ziwei-rules 语义规则 + 版本迁移/回滚/目标白名�?+ PII 隐私护栏 green) |
 | `pnpm run build`               | `engine.mjs` �?2.8 MB + `sbom.cdx.json` + `sbom.spdx.json` (6 runtime deps)                                                                                                                                                                                                                                                               |
 | `pnpm run validate:skill`      | 40 / 40 (incl. scripts/ no-stray-files guard + CycloneDX/SPDX SBOM checks + validate-answer/lint-reading gate-workflow doc checks)                                                                                                                                                                                                        |
 | `pnpm run validate:reading`    | 53 / 53 (topic example libraries + output-spec structure + 无术语区 firewall; offline, no LLM)                                                                                                                                                                                                                                            |
@@ -216,9 +216,10 @@ runnable from a clean copy outside the repo, offline, deterministic.
 ## Open risks
 
 - Western angles/houses are derived in-house (not astronomy-engine); they are validated against
-  the MC=RAMC and eastern-horizon oracles, but an independent golden house-table (e.g. a Swiss
-  Ephemeris reference chart) would further harden them. (Planetary longitudes now HAVE an
-  independent JPL Horizons golden; only the house layer still lacks one.)
+  the MC=RAMC and eastern-horizon oracles and an independent Swiss Ephemeris house golden
+  (swetest 2.10.03, 5 synthetic cases x 5 systems, 12 cusps + angles each, worst measured
+  deviation 0.69 arc-minutes; see packages/western/goldens/README.md). The golden covers
+  normal latitudes; circumpolar instants are contract-tested (HOUSE_SYSTEM_UNAVAILABLE).
 - LMT-era (early 1901+) offsets are whole-minute precision (moment-timezone limitation).
 - Equation of time is an approximation (~tenths of a minute); fine for display, not high-precision.
 - TypeScript pinned to 5.9 while registry `latest` is 7.0; revisit after TS 7 soaks.

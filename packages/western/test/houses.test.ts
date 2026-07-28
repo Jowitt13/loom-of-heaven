@@ -130,15 +130,19 @@ describe('house systems', () => {
   });
 
   it('quadrant systems fail at high latitude instead of fabricating cusps', () => {
-    // At 78°N, some semi-arc becomes undefined (|tan φ·tan δ| > 1), so Placidus/Koch
-    // must raise HOUSE_SYSTEM_UNAVAILABLE rather than emit a made-up cusp.
-    let threw = false;
-    try {
-      computeHouseCusps('placidus', dateMs, 78, lon);
-    } catch (err) {
-      threw = err instanceof EngineError && err.code === ERROR_CODES.HOUSE_SYSTEM_UNAVAILABLE;
+    // At 78°N on this instant, the relevant semi-arc is undefined
+    // (|tan φ·tan δ| > 1): Placidus hits it in its per-cusp iteration and
+    // koch on the MC degree itself (verified: both throw here), so they must
+    // raise HOUSE_SYSTEM_UNAVAILABLE rather than emit a made-up cusp.
+    for (const system of ['placidus', 'koch'] as const) {
+      let threw = false;
+      try {
+        computeHouseCusps(system, dateMs, 78, lon);
+      } catch (err) {
+        threw = err instanceof EngineError && err.code === ERROR_CODES.HOUSE_SYSTEM_UNAVAILABLE;
+      }
+      expect(threw, `${system} must throw HOUSE_SYSTEM_UNAVAILABLE`).toBe(true);
     }
-    expect(threw).toBe(true);
   });
 });
 

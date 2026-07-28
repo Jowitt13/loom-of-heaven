@@ -59,7 +59,7 @@ the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not h
 resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **556 tests / 31 files ï¿?all passing**. The Western provider
+- Typecheck: clean. Tests: **675 tests / 33 files ï¿?all passing**. The Western provider
   (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 ï¿?ï¿?gate two ways: wrapper-consistency
   (vs astronomy-engine's own output) plus an **independent JPL Horizons golden** (10 bodies Ã— 3
   technical epochs fetched from the NASA/JPL Horizons service, query recorded in
@@ -133,11 +133,11 @@ canonical-JSON order independence; deterministic hashing; calculate determinism.
   why it is trustworthy.
 - Western: at least one set cross-checked against JPL/Swiss; main-body positions within ï¿?
   arc-minute; discrete classifications (sign/house changes) must match exactly. (Planetary
-  longitudes: met via the JPL Horizons golden; an independent house table is still open.)
+  longitudes: met via the JPL Horizons golden; house cusps: met via the Swiss Ephemeris house golden.)
 - BaZi/Zi Wei: sourced references, NOT another wrapper of the same core library.
 - Snapshots guard against regressions only; they never become ground truth.
-- Minimum targets: time/location 30 (met: 36), Western 20 (met: 30 ï¿?JPL Horizons golden
-  longitudes), BaZi 40, Zi Wei 20.
+- Minimum targets: time/location 30 (met: 36), Western 20 (met: 55 ï¿?JPL Horizons golden
+  longitudes + 25 Swiss Ephemeris house-cusp sets), BaZi 40, Zi Wei 20.
 
 ## Must-test boundaries (tracked to Phase 2)
 

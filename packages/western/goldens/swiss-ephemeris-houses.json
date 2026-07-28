@@ -1,0 +1,362 @@
+{
+  "status": "populated",
+  "note": "Independent Swiss Ephemeris house golden. Populated from a locally reviewed swetest capture (see source block; raw files live in the untracked .tmp/house-golden-raw/ and are identified by SHA-256 below). All sample instants/coordinates are SYNTHETIC technical epochs, not real birth data. Do NOT edit values by hand; regenerate via tools/generate-house-golden.ts and re-review.",
+  "source": {
+    "tool": "swetest (Swiss Ephemeris command-line)",
+    "version": "Version: 2.10.03",
+    "captureDateUtc": "2026-07-28T10:10:32.404Z",
+    "commandTemplate": "SWETEST_PATH=<local path> node --experimental-strip-types tools/generate-house-golden.ts  (per call: swetest -b<DD.MM.YYYY> -utc<HH:MM:SS> -house<lonE>,<lat>,<LETTER> -emos -head)",
+    "referenceInputTimeScale": "UTC",
+    "houseLetterMap": {
+      "placidus": "P",
+      "koch": "K",
+      "porphyry": "O",
+      "equal": "E",
+      "whole-sign": "W"
+    },
+    "coordinateSemantics": "tropical ecliptic of date, geocentric; input longitude east-positive; -emos Moshier (reference command requires no ephemeris data files in the repository)",
+    "docs": [
+      "https://www.astro.com/swisseph-download/doc/swisseph.pdf",
+      "https://www.astro.com/cgi/prep.cgi/swisseph/ae/hcs_P_e.pdf"
+    ],
+    "rawSha256": {
+      "version.stdout.txt": "c6e2c69a85d3e300a14cf7d172450acd201bdb85d7f98d7eabb949dcb94f2ec6",
+      "version.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s1-placidus.stdout.txt": "ac477e7b6d7c334a40afcb5ae3c830e316cfd6e7e1f73a704fbe0950029d2628",
+      "case-s1-placidus.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s1-koch.stdout.txt": "0e9095d2edae135d840d316bb70c22aef80f48f959ed1c84968902ab0a598bc1",
+      "case-s1-koch.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s1-porphyry.stdout.txt": "ae04d038d4f156088c422c3d23fd9652d544fa202beb4d04c34c4769785e1d50",
+      "case-s1-porphyry.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s1-equal.stdout.txt": "da710fca8d93b4ac5d792a7028c6c07bad7af6a295be905013b8976f654314e5",
+      "case-s1-equal.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s1-whole-sign.stdout.txt": "7d56360aa81cb86efea93339974d5d5d5a165f4a33c29f4eccbc4ee4b7eafbd5",
+      "case-s1-whole-sign.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s2-placidus.stdout.txt": "0a3977c275774c81a4b43aceb82ee425d1e8255a0877a712dc644727df5653f8",
+      "case-s2-placidus.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s2-koch.stdout.txt": "9161261f0dd4ed5b06e85d4980fcc5164be21f34dc362703abf64af68df0d91a",
+      "case-s2-koch.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s2-porphyry.stdout.txt": "d90854cc59cf3d5bfaefbab362a9916424209f0517d7cb94e7732bafeb3f0754",
+      "case-s2-porphyry.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s2-equal.stdout.txt": "45cf879dbf453c0f1d671668c0fd5d9b379682734bb761a2274ee87a115ae13f",
+      "case-s2-equal.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s2-whole-sign.stdout.txt": "9c0419d1de429e13e0d7ec5cc169e38fd5223e4e3ad3cf547fea44d55adc8d2e",
+      "case-s2-whole-sign.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s3-placidus.stdout.txt": "5d7b0ae6e79fd3aa6c6e3a3ff7bf1bede8577847366ff9522462c48d34a2e26b",
+      "case-s3-placidus.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s3-koch.stdout.txt": "6985310c22a730ab1bf496cf739e97f8a5ad757a79b61d5c8b5d2dfb6ee2333e",
+      "case-s3-koch.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s3-porphyry.stdout.txt": "c943dfb33d4173c1a1ef14e589e6d276f326c9b42aa4e5114c1604cdac3720a9",
+      "case-s3-porphyry.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s3-equal.stdout.txt": "ce481e783c19722e0b8cdaf5c855d2a91adde78835a2f402132571840faff410",
+      "case-s3-equal.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s3-whole-sign.stdout.txt": "d3c624476ed8dff558ac03892cfdc01c423f14ca0203ee1e7a537b57b09bc66c",
+      "case-s3-whole-sign.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s4-placidus.stdout.txt": "95d5836279f25dec67fd5ea186c60442a28c671eb71aba21688ce1bd82576880",
+      "case-s4-placidus.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s4-koch.stdout.txt": "929084640272484942c041b7b375d361c1d74ddcd5eb9619972812a9ef23e230",
+      "case-s4-koch.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s4-porphyry.stdout.txt": "fbc7fa78929fdbf635a87bd23a00c089519261566e31177988f36dc555f45aec",
+      "case-s4-porphyry.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s4-equal.stdout.txt": "94299d051cc4c4911340bd7834a06976d409d4f8ca270a824be5c600fd29fabe",
+      "case-s4-equal.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s4-whole-sign.stdout.txt": "ec2be8d7ac5d0220f8d356a76064b97ce19e7d0a5e7789fa2dad3334ff982f46",
+      "case-s4-whole-sign.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s5-placidus.stdout.txt": "a84f5674198ddee8ca5df8db08477c32afb66cc05bcfd45c5962d26005f4c373",
+      "case-s5-placidus.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s5-koch.stdout.txt": "86cecc03362300897c2bc45c1901a58e33e378afcba6b2b2e6cb4f1a4912609c",
+      "case-s5-koch.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s5-porphyry.stdout.txt": "d395a9c79d728ba9c21b0d81cb4af49cd96b5064e461a2e54f80fc6b748e6632",
+      "case-s5-porphyry.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s5-equal.stdout.txt": "6c53c3a9019bbefebf1754e4e17064a3eaa3c697c7b982a5ac61dec70d6731a2",
+      "case-s5-equal.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "case-s5-whole-sign.stdout.txt": "06fc8be1d0bfc1421d633afd6b2458d7ef6dbdd4a153bac6fabb819a5fbc18cb",
+      "case-s5-whole-sign.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "toleranceArcmin": {
+    "placidus": 0.5,
+    "koch": 0.9,
+    "porphyry": 0.35,
+    "equal": 0.35,
+    "whole-sign": 0.35
+  },
+  "toleranceRationale": "Measured max wrapped deviation across all 5 cases x (12 cusps + ASC/MC/IC/DESC) at population time, adopted tolerance, and exact margin (tolerance - measured max) per system: placidus 0.285887' -> 0.50' (margin 0.214113'); koch 0.687815' -> 0.90' (margin 0.212185'); porphyry 0.187365' -> 0.35' (margin 0.162635'); equal 0.187365' -> 0.35' (margin 0.162635'); whole-sign 0.187365' -> 0.35' (margin 0.162635'). Tolerance values lie on a 0.05' grid; the margins are exact differences and are NOT themselves rounded. All tolerances stay under the 1' spec ceiling. The residual comes mainly from this engine using the MEAN obliquity (astronomy-engine e_tilt().mobl) while the Swiss reference uses the true obliquity; koch's residual is larger because its cusps are ascendants at shifted sidereal times, which amplifies the obliquity difference at higher latitude (worst case s5, 59.9N).",
+  "cases": [
+    {
+      "id": "s1",
+      "description": "Northern mid-latitude, east longitude (synthetic)",
+      "utcIso": "1990-03-10T00:15:00Z",
+      "latDeg": 30.5,
+      "lonEastDeg": 114.3,
+      "systems": {
+        "placidus": {
+          "cusps": [
+            22.31782822222222, 55.68810133333333, 81.11792216666666, 104.24916869444445,
+            129.37590605555556, 161.07921425, 202.31782822222223, 235.68810133333335,
+            261.1179221666667, 284.24916869444445, 309.37590605555556, 341.07921425
+          ],
+          "ascendant": 22.31782822222222,
+          "mc": 284.24916869444445,
+          "armc": 285.47205291666666
+        },
+        "koch": {
+          "cusps": [
+            22.31782822222222, 54.75415352777778, 81.33188575, 104.24916869444445,
+            132.00789947222222, 165.77248597222223, 202.31782822222223, 234.7541535277778,
+            261.33188574999997, 284.24916869444445, 312.0078994722222, 345.7724859722222
+          ],
+          "ascendant": 22.31782822222222,
+          "mc": 284.24916869444445,
+          "armc": 285.47205291666666
+        },
+        "porphyry": {
+          "cusps": [
+            22.31782822222222, 49.628275055555555, 76.93872188888889, 104.24916869444445,
+            136.9387218888889, 169.62827505555558, 202.31782822222223, 229.62827505555558,
+            256.9387218888889, 284.24916869444445, 316.9387218888889, 349.62827505555555
+          ],
+          "ascendant": 22.31782822222222,
+          "mc": 284.24916869444445,
+          "armc": 285.47205291666666
+        },
+        "equal": {
+          "cusps": [
+            22.31782822222222, 52.317828222222225, 82.31782822222222, 112.31782822222222,
+            142.31782822222223, 172.31782822222223, 202.31782822222223, 232.31782822222223,
+            262.3178282222222, 292.3178282222222, 322.3178282222222, 352.3178282222222
+          ],
+          "ascendant": 22.31782822222222,
+          "mc": 284.24916869444445,
+          "armc": 285.47205291666666
+        },
+        "whole-sign": {
+          "cusps": [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
+          "ascendant": 22.31782822222222,
+          "mc": 284.24916869444445,
+          "armc": 285.47205291666666
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "description": "Northern mid-latitude, west longitude (synthetic)",
+      "utcIso": "2000-07-04T16:00:00Z",
+      "latDeg": 40.7,
+      "lonEastDeg": -74,
+      "systems": {
+        "placidus": {
+          "cusps": [
+            179.17972466666666, 205.15575705555557, 235.51365169444443, 269.0519991388889,
+            302.6237772777778, 333.0682624722222, 359.1797246666667, 25.155757055555554,
+            55.51365169444444, 89.05199913888889, 122.62377727777778, 153.06826247222222
+          ],
+          "ascendant": 179.17972466666666,
+          "mc": 89.05199913888889,
+          "armc": 88.96676416666666
+        },
+        "koch": {
+          "cusps": [
+            179.17972466666666, 208.66641625, 237.89458152777777, 269.0519991388889,
+            300.4680452222222, 329.71232008333334, 359.1797246666667, 28.666416249999997,
+            57.894581527777774, 89.05199913888889, 120.46804522222223, 149.7123200833333
+          ],
+          "ascendant": 179.17972466666666,
+          "mc": 89.05199913888889,
+          "armc": 88.96676416666666
+        },
+        "porphyry": {
+          "cusps": [
+            179.17972466666666, 209.1371494722222, 239.09457430555557, 269.0519991388889,
+            299.0945743055555, 329.13714947222223, 359.1797246666667, 29.137149472222223,
+            59.09457430555556, 89.05199913888889, 119.09457430555555, 149.1371494722222
+          ],
+          "ascendant": 179.17972466666666,
+          "mc": 89.05199913888889,
+          "armc": 88.96676416666666
+        },
+        "equal": {
+          "cusps": [
+            179.17972466666666, 209.17972466666666, 239.17972466666666, 269.1797246666667,
+            299.1797246666667, 329.1797246666667, 359.1797246666667, 29.17972466666667,
+            59.179724666666665, 89.17972466666667, 119.17972466666667, 149.17972466666666
+          ],
+          "ascendant": 179.17972466666666,
+          "mc": 89.05199913888889,
+          "armc": 88.96676416666666
+        },
+        "whole-sign": {
+          "cusps": [150, 180, 210, 240, 270, 300, 330, 0, 30, 60, 90, 120],
+          "ascendant": 179.17972466666666,
+          "mc": 89.05199913888889,
+          "armc": 88.96676416666666
+        }
+      }
+    },
+    {
+      "id": "s3",
+      "description": "Southern mid-latitude, east longitude, December solstice (synthetic)",
+      "utcIso": "2010-12-21T03:30:00Z",
+      "latDeg": -33.9,
+      "lonEastDeg": 151.2,
+      "systems": {
+        "placidus": {
+          "cusps": [
+            19.617875472222224, 47.795211055555555, 78.77088069444444, 111.56475544444444,
+            144.08685108333333, 173.89121566666665, 199.61787547222224, 227.79521105555554,
+            258.77088069444443, 291.5647554444445, 324.08685108333333, 353.89121566666665
+          ],
+          "ascendant": 19.617875472222224,
+          "mc": 291.5647554444445,
+          "armc": 293.3043200833333
+        },
+        "koch": {
+          "cusps": [
+            19.617875472222224, 48.77214158333333, 78.17887161111112, 111.56475544444444,
+            140.64917383333332, 169.989634, 199.61787547222224, 228.77214158333334,
+            258.1788716111111, 291.5647554444445, 320.64917383333335, 349.989634
+          ],
+          "ascendant": 19.617875472222224,
+          "mc": 291.5647554444445,
+          "armc": 293.3043200833333
+        },
+        "porphyry": {
+          "cusps": [
+            19.617875472222224, 50.26683547222222, 80.91579544444446, 111.56475544444444,
+            140.91579544444446, 170.26683547222223, 199.61787547222224, 230.26683547222223,
+            260.9157954444444, 291.5647554444445, 320.9157954444444, 350.2668354722222
+          ],
+          "ascendant": 19.617875472222224,
+          "mc": 291.5647554444445,
+          "armc": 293.3043200833333
+        },
+        "equal": {
+          "cusps": [
+            19.617875472222224, 49.617875472222224, 79.61787547222221, 109.61787547222221,
+            139.61787547222224, 169.61787547222224, 199.61787547222224, 229.61787547222224,
+            259.61787547222224, 289.61787547222224, 319.61787547222224, 349.61787547222224
+          ],
+          "ascendant": 19.617875472222224,
+          "mc": 291.5647554444445,
+          "armc": 293.3043200833333
+        },
+        "whole-sign": {
+          "cusps": [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
+          "ascendant": 19.617875472222224,
+          "mc": 291.5647554444445,
+          "armc": 293.3043200833333
+        }
+      }
+    },
+    {
+      "id": "s4",
+      "description": "Near-equator low latitude, earlier era (synthetic)",
+      "utcIso": "1975-01-30T12:00:00Z",
+      "latDeg": 1.35,
+      "lonEastDeg": 103.8,
+      "systems": {
+        "placidus": {
+          "cusps": [
+            140.86329644444444, 172.32664066666666, 204.64760541666666, 235.2494834722222,
+            263.6638773333333, 291.52627530555554, 320.8632964444445, 352.32664066666666,
+            24.647605416666668, 55.249483472222224, 83.66387733333335, 111.52627530555556
+          ],
+          "ascendant": 140.86329644444444,
+          "mc": 55.249483472222224,
+          "armc": 52.90541897222222
+        },
+        "koch": {
+          "cusps": [
+            140.86329644444444, 172.5199063888889, 204.81547502777778, 235.2494834722222,
+            263.7339943055556, 291.54841052777783, 320.8632964444445, 352.5199063888889,
+            24.81547502777778, 55.249483472222224, 83.73399430555556, 111.54841052777778
+          ],
+          "ascendant": 140.86329644444444,
+          "mc": 55.249483472222224,
+          "armc": 52.90541897222222
+        },
+        "porphyry": {
+          "cusps": [
+            140.86329644444444, 172.32535877777778, 203.78742113888887, 235.2494834722222,
+            263.78742113888893, 292.32535877777775, 320.8632964444445, 352.32535877777775,
+            23.78742113888889, 55.249483472222224, 83.78742113888889, 112.32535877777778
+          ],
+          "ascendant": 140.86329644444444,
+          "mc": 55.249483472222224,
+          "armc": 52.90541897222222
+        },
+        "equal": {
+          "cusps": [
+            140.86329644444444, 170.86329644444444, 200.86329644444444, 230.86329644444444,
+            260.8632964444445, 290.8632964444445, 320.8632964444445, 350.8632964444445,
+            20.863296444444448, 50.863296444444444, 80.86329644444444, 110.86329644444444
+          ],
+          "ascendant": 140.86329644444444,
+          "mc": 55.249483472222224,
+          "armc": 52.90541897222222
+        },
+        "whole-sign": {
+          "cusps": [120, 150, 180, 210, 240, 270, 300, 330, 0, 30, 60, 90],
+          "ascendant": 140.86329644444444,
+          "mc": 55.249483472222224,
+          "armc": 52.90541897222222
+        }
+      }
+    },
+    {
+      "id": "s5",
+      "description": "Higher (but well-defined) northern latitude, summer (synthetic)",
+      "utcIso": "2024-06-15T18:45:00Z",
+      "latDeg": 59.9,
+      "lonEastDeg": 10.75,
+      "systems": {
+        "placidus": {
+          "cusps": [
+            246.09074258333334, 284.6197638055556, 340.61999636111113, 17.935423305555556,
+            39.91684583333333, 54.69598072222222, 66.09074258333332, 104.61976380555555,
+            160.6199963611111, 197.93542330555556, 219.91684583333333, 234.69598072222223
+          ],
+          "ascendant": 246.09074258333334,
+          "mc": 197.93542330555556,
+          "armc": 196.5396851388889
+        },
+        "koch": {
+          "cusps": [
+            246.09074258333334, 264.81100141666667, 294.2910993055556, 17.935423305555556,
+            33.881787833333334, 49.744796666666666, 66.09074258333332, 84.81100141666667,
+            114.29109930555555, 197.93542330555556, 213.88178783333333, 229.74479666666664
+          ],
+          "ascendant": 246.09074258333334,
+          "mc": 197.93542330555556,
+          "armc": 196.5396851388889
+        },
+        "porphyry": {
+          "cusps": [
+            246.09074258333334, 290.0389695, 333.9871963888889, 17.935423305555556,
+            33.98719638888889, 50.0389695, 66.09074258333332, 110.0389695, 153.98719638888886,
+            197.93542330555556, 213.98719638888886, 230.0389695
+          ],
+          "ascendant": 246.09074258333334,
+          "mc": 197.93542330555556,
+          "armc": 196.5396851388889
+        },
+        "equal": {
+          "cusps": [
+            246.09074258333334, 276.09074258333334, 306.09074258333334, 336.09074258333334,
+            6.090742583333333, 36.09074258333334, 66.09074258333332, 96.09074258333332,
+            126.09074258333332, 156.09074258333334, 186.09074258333334, 216.09074258333334
+          ],
+          "ascendant": 246.09074258333334,
+          "mc": 197.93542330555556,
+          "armc": 196.5396851388889
+        },
+        "whole-sign": {
+          "cusps": [240, 270, 300, 330, 0, 30, 60, 90, 120, 150, 180, 210],
+          "ascendant": 246.09074258333334,
+          "mc": 197.93542330555556,
+          "armc": 196.5396851388889
+        }
+      }
+    }
+  ]
+}

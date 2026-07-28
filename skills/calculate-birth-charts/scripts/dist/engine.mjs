@@ -51519,13 +51519,12 @@ function computeHouseCusps(system, dateMs, latDeg, lonEastDeg) {
       break;
     }
     case "koch": {
-      const declAsc = declinationOf(ascendant, eps);
-      const sda = semiDiurnalArc(declAsc, latDeg);
-      const sna = 180 - sda;
-      cusps[10] = raToLambda(ramc + sda / 3, eps);
-      cusps[11] = raToLambda(ramc + 2 * sda / 3, eps);
-      cusps[1] = raToLambda(ramc + sda + sna / 3, eps);
-      cusps[2] = raToLambda(ramc + sda + 2 * sna / 3, eps);
+      const declMc = declinationOf(mc, eps);
+      const sda = semiDiurnalArc(declMc, latDeg);
+      cusps[10] = ascendantLongitude(norm360(ramc - 2 * sda / 3), latDeg, eps);
+      cusps[11] = ascendantLongitude(norm360(ramc - sda / 3), latDeg, eps);
+      cusps[1] = ascendantLongitude(norm360(ramc + sda / 3), latDeg, eps);
+      cusps[2] = ascendantLongitude(norm360(ramc + 2 * sda / 3), latDeg, eps);
       break;
     }
     case "placidus": {
