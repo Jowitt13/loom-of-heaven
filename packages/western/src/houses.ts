@@ -120,15 +120,36 @@ export function computeHouseCusps(
       break;
     }
     case 'koch': {
-      // Birthplace houses: trisect the ASCENDANT's own semi-arc (constant), so the
-      // cusp right ascensions are linear in RAMC — no iteration needed.
-      const declAsc = declinationOf(ascendant, eps);
-      const sda = semiDiurnalArc(declAsc, latDeg);
-      const sna = 180 - sda;
-      cusps[10] = raToLambda(ramc + sda / 3, eps); // house 11
-      cusps[11] = raToLambda(ramc + (2 * sda) / 3, eps); // house 12
-      cusps[1] = raToLambda(ramc + sda + sna / 3, eps); // house 2
-      cusps[2] = raToLambda(ramc + sda + (2 * sna) / 3, eps); // house 3
+      // Koch (GOH / "Birthplace") houses — independent derivation, no Swiss
+      // Ephemeris code used or consulted (Swiss serves only as an external
+      // numeric acceptance oracle via the tracked golden fixture).
+      //
+      // Definition (Koch & Schäck, "Häusertabellen des Geburtsortes", 1971;
+      // described in swisseph.pdf §house systems and Holden, "The Elements of
+      // House Division"): the MC ecliptic degree needed SDA degrees of
+      // sidereal time (its own semi-diurnal arc) to travel from the eastern
+      // horizon to the meridian. Trisecting that TIME interval, the
+      // intermediate cusps are the ASCENDANTS at the shifted sidereal times:
+      //   cusp 11 = Asc(RAMC − 2·SDA/3)   cusp 12 = Asc(RAMC − SDA/3)
+      //   cusp  2 = Asc(RAMC + SDA/3)     cusp  3 = Asc(RAMC + 2·SDA/3)
+      // with SDA = acos(−tan φ · tan δ_MC) and δ_MC = asin(sin ε · sin λ_MC)
+      // (standard spherical-astronomy formulas). Endpoint self-consistency:
+      // Asc(RAMC − SDA) = λ_MC (the MC degree was rising) and
+      // Asc(RAMC + SDA) = λ_IC (the IC degree rises as the MC degree sets),
+      // so the trisection interpolates exactly between the four angles.
+      //
+      // The system is geometrically undefined when the MC degree is
+      // circumpolar (|tan φ · tan δ_MC| > 1, beyond the polar circles);
+      // semiDiurnalArc then raises HOUSE_SYSTEM_UNAVAILABLE — no silent
+      // fallback. Known limitation: this engine uses the MEAN obliquity
+      // (e_tilt().mobl) while the reference uses the true obliquity, leaving
+      // a sub-arcminute residual of the same order as Placidus (~0.3').
+      const declMc = declinationOf(mc, eps);
+      const sda = semiDiurnalArc(declMc, latDeg);
+      cusps[10] = ascendantLongitude(norm360(ramc - (2 * sda) / 3), latDeg, eps); // house 11
+      cusps[11] = ascendantLongitude(norm360(ramc - sda / 3), latDeg, eps); // house 12
+      cusps[1] = ascendantLongitude(norm360(ramc + sda / 3), latDeg, eps); // house 2
+      cusps[2] = ascendantLongitude(norm360(ramc + (2 * sda) / 3), latDeg, eps); // house 3
       break;
     }
     case 'placidus': {
