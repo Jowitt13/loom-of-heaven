@@ -253,6 +253,41 @@ export function validateSbom(inputs: ValidateSbomInputs): Check[] {
     add(`spdx no duplicate third-party package: ${d}`, false, 'appears more than once');
   }
 
+  // 0b. Structural completeness: every CycloneDX library component must carry
+  //     all required identity fields. A component that lacks any of these was
+  //     silently skipped by the old extract-and-Map logic; now it's a hard FAIL.
+  for (const [i, c] of (cdx.components ?? []).entries()) {
+    if (c.type !== 'library') continue;
+    if (typeof c.name !== 'string' || c.name === '')
+      add(`cyclonedx component[${i}] has name`, false, 'missing or empty');
+    if (typeof c.version !== 'string' || c.version === '')
+      add(`cyclonedx component[${i}] has version`, false, 'missing or empty');
+    if (typeof c.purl !== 'string' || c.purl === '')
+      add(`cyclonedx component[${i}] has purl`, false, 'missing or empty');
+    const lic = c.licenses?.[0];
+    if (!lic || (lic.license?.id === undefined && lic.expression === undefined))
+      add(`cyclonedx component[${i}] has license`, false, 'no license.id or expression');
+  }
+
+  // 0c. Structural completeness for SPDX third-party packages.
+  for (const [i, p] of (spdx.packages ?? []).entries()) {
+    if (typeof p.name !== 'string') {
+      add(`spdx package[${i}] has name`, false, 'missing');
+      continue;
+    }
+    if (p.name === APP_NAME) continue;
+    if (!p.versionInfo)
+      add(`spdx package[${i}] "${p.name}" has versionInfo`, false, 'missing or empty');
+    const purl = p.externalRefs?.find((r) => r.referenceType === 'purl')?.referenceLocator;
+    if (!purl) add(`spdx package[${i}] "${p.name}" has purl`, false, 'no purl in externalRefs');
+    if (!p.licenseConcluded && !p.licenseDeclared)
+      add(
+        `spdx package[${i}] "${p.name}" has license`,
+        false,
+        'no licenseConcluded or licenseDeclared',
+      );
+  }
+
   // 1. Every truth-set package must exist in both SBOMs with matching fields.
   //    Purls are checked against the CANONICAL form recomputed here from
   //    (name, version) via the shared npmPurl — not merely string-equality

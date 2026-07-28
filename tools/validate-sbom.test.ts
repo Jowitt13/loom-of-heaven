@@ -440,4 +440,181 @@ describe('validate-sbom (offline synthetic)', () => {
     const failed = failedNames(t);
     expect(failed).toContain('spdx no duplicate third-party package: bar');
   });
+
+  // --- P1-fix-4: structural completeness (missing identity fields) -----------
+
+  it('19. CycloneDX library component missing name -> FAIL', () => {
+    const closure = [pkg('foo', '1.0.0')];
+    const cdxObj = JSON.parse(ser(cdx([{ name: 'foo', version: '1.0.0' }])));
+    // Inject a nameless library component.
+    cdxObj.components.push({
+      type: 'library',
+      version: '1.0.0',
+      purl: 'pkg:npm/x@1.0.0',
+      licenses: [{ license: { id: 'MIT' } }],
+    });
+    const spdxObj = spdx([{ name: 'foo', version: '1.0.0' }]);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(spdxObj),
+      exceptions: [],
+      cdxPath: '/m/c',
+      spdxPath: '/m/s',
+    };
+    const failed = failedNames(t);
+    expect(failed.some((n) => n.includes('has name'))).toBe(true);
+  });
+
+  it('20. CycloneDX library component missing version -> FAIL', () => {
+    const closure = [pkg('foo', '1.0.0')];
+    const cdxObj = JSON.parse(ser(cdx([{ name: 'foo', version: '1.0.0' }])));
+    cdxObj.components.push({
+      type: 'library',
+      name: 'bar',
+      purl: 'pkg:npm/bar@1.0.0',
+      licenses: [{ license: { id: 'MIT' } }],
+    });
+    const spdxObj = spdx([{ name: 'foo', version: '1.0.0' }]);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(spdxObj),
+      exceptions: [],
+      cdxPath: '/m/c',
+      spdxPath: '/m/s',
+    };
+    const failed = failedNames(t);
+    expect(failed.some((n) => n.includes('has version'))).toBe(true);
+  });
+
+  it('21. CycloneDX library component missing purl -> FAIL', () => {
+    const closure = [pkg('foo', '1.0.0')];
+    const cdxObj = JSON.parse(ser(cdx([{ name: 'foo', version: '1.0.0' }])));
+    cdxObj.components.push({
+      type: 'library',
+      name: 'bar',
+      version: '1.0.0',
+      licenses: [{ license: { id: 'MIT' } }],
+    });
+    const spdxObj = spdx([{ name: 'foo', version: '1.0.0' }]);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(spdxObj),
+      exceptions: [],
+      cdxPath: '/m/c',
+      spdxPath: '/m/s',
+    };
+    const failed = failedNames(t);
+    expect(failed.some((n) => n.includes('has purl'))).toBe(true);
+  });
+
+  it('22. CycloneDX library component missing license -> FAIL', () => {
+    const closure = [pkg('foo', '1.0.0')];
+    const cdxObj = JSON.parse(ser(cdx([{ name: 'foo', version: '1.0.0' }])));
+    cdxObj.components.push({
+      type: 'library',
+      name: 'bar',
+      version: '1.0.0',
+      purl: 'pkg:npm/bar@1.0.0',
+    });
+    const spdxObj = spdx([{ name: 'foo', version: '1.0.0' }]);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(spdxObj),
+      exceptions: [],
+      cdxPath: '/m/c',
+      spdxPath: '/m/s',
+    };
+    const failed = failedNames(t);
+    expect(failed.some((n) => n.includes('has license'))).toBe(true);
+  });
+
+  it('23. SPDX third-party package missing versionInfo -> FAIL', () => {
+    const closure = [pkg('foo', '1.0.0')];
+    const cdxObj = cdx([{ name: 'foo', version: '1.0.0' }]);
+    const baseSpdx = JSON.parse(ser(spdx([{ name: 'foo', version: '1.0.0' }]))) as any;
+    baseSpdx.packages.push({
+      name: 'bar',
+      SPDXID: 'SPDXRef-Package-bar',
+      downloadLocation: 'NOASSERTION',
+      filesAnalyzed: false,
+      licenseConcluded: 'MIT',
+      licenseDeclared: 'MIT',
+      externalRefs: [
+        {
+          referenceCategory: 'PACKAGE-MANAGER',
+          referenceType: 'purl',
+          referenceLocator: 'pkg:npm/bar@1.0.0',
+        },
+      ],
+    });
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(baseSpdx),
+      exceptions: [],
+      cdxPath: '/m/c',
+      spdxPath: '/m/s',
+    };
+    const failed = failedNames(t);
+    expect(failed.some((n) => n.includes('has versionInfo'))).toBe(true);
+  });
+
+  it('24. SPDX third-party package missing purl -> FAIL', () => {
+    const closure = [pkg('foo', '1.0.0')];
+    const cdxObj = cdx([{ name: 'foo', version: '1.0.0' }]);
+    const baseSpdx = JSON.parse(ser(spdx([{ name: 'foo', version: '1.0.0' }]))) as any;
+    baseSpdx.packages.push({
+      name: 'bar',
+      SPDXID: 'SPDXRef-Package-bar',
+      versionInfo: '1.0.0',
+      downloadLocation: 'NOASSERTION',
+      filesAnalyzed: false,
+      licenseConcluded: 'MIT',
+      licenseDeclared: 'MIT',
+    });
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(baseSpdx),
+      exceptions: [],
+      cdxPath: '/m/c',
+      spdxPath: '/m/s',
+    };
+    const failed = failedNames(t);
+    expect(failed.some((n) => n.includes('has purl'))).toBe(true);
+  });
+
+  it('25. SPDX third-party package missing license -> FAIL', () => {
+    const closure = [pkg('foo', '1.0.0')];
+    const cdxObj = cdx([{ name: 'foo', version: '1.0.0' }]);
+    const baseSpdx = JSON.parse(ser(spdx([{ name: 'foo', version: '1.0.0' }]))) as any;
+    baseSpdx.packages.push({
+      name: 'bar',
+      SPDXID: 'SPDXRef-Package-bar',
+      versionInfo: '1.0.0',
+      downloadLocation: 'NOASSERTION',
+      filesAnalyzed: false,
+      externalRefs: [
+        {
+          referenceCategory: 'PACKAGE-MANAGER',
+          referenceType: 'purl',
+          referenceLocator: 'pkg:npm/bar@1.0.0',
+        },
+      ],
+    });
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(baseSpdx),
+      exceptions: [],
+      cdxPath: '/m/c',
+      spdxPath: '/m/s',
+    };
+    const failed = failedNames(t);
+    expect(failed.some((n) => n.includes('has license'))).toBe(true);
+  });
 });

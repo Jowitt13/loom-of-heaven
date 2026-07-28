@@ -380,6 +380,21 @@ describe('bundle-closure: spdxKind / cycloneDxLicenses', () => {
   it('nested parens (A OR (B AND C)) -> expression (valid)', () => {
     expect(spdxKind('(A OR (B AND C))')).toBe('expression');
   });
+  // --- P1-fix-4: WITH position restriction ---
+  it('WITH on compound expression -> throw', () => {
+    expect(() => spdxKind('(MIT OR Apache-2.0) WITH Classpath-exception-2.0')).toThrow(
+      /WITH can only follow a bare SPDX id/,
+    );
+  });
+  it('WITH exception is parens -> throw', () => {
+    expect(() => spdxKind('MIT WITH (A OR B)')).toThrow(/SPDX parse error/);
+  });
+  it('double WITH -> throw', () => {
+    expect(() => spdxKind('MIT WITH WITH X')).toThrow(/SPDX parse error/);
+  });
+  it('bare id WITH exception then OR continuation -> expression (valid)', () => {
+    expect(spdxKind('MIT WITH Classpath-exception-2.0 OR Apache-2.0')).toBe('expression');
+  });
   it('cycloneDxLicenses: id form -> license.id entry', () => {
     expect(cycloneDxLicenses('MIT')).toEqual([{ license: { id: 'MIT' } }]);
   });

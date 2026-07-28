@@ -221,11 +221,18 @@ export function spdxKind(license: string): 'id' | 'expression' {
   }
 
   function parseTerm(): void {
-    parseAtom();
+    const atomKind = parseAtom();
     // Optional WITH clause (a license exception like `GPL-2.0 WITH Classpath-exception-2.0`).
+    // Per SPDX spec, WITH can only follow a BARE license id, not a compound
+    // (parenthesized) expression. `(MIT OR Apache-2.0) WITH X` is invalid.
     if (pos < tokens.length && peek() === 'WITH') {
+      if (atomKind !== 'id') {
+        throw new Error(
+          `SPDX parse error in "${license}": WITH can only follow a bare SPDX id, not a compound expression`,
+        );
+      }
       advance(); // consume WITH
-      // The WITH operand must be a single SPDX id (not a sub-expression).
+      // The WITH operand must be a single SPDX id (not a sub-expression or parens).
       const ex = advance();
       if (!SPDX_ID_RE.test(ex)) {
         throw new Error(
@@ -235,7 +242,7 @@ export function spdxKind(license: string): 'id' | 'expression' {
     }
   }
 
-  function parseAtom(): void {
+  function parseAtom(): 'id' | 'paren' {
     const tok = advance();
     if (tok === '(') {
       if (peek() === ')') {
@@ -246,7 +253,7 @@ export function spdxKind(license: string): 'id' | 'expression' {
       if (close !== ')') {
         throw new Error(`SPDX parse error in "${license}": expected ')' but got "${close}"`);
       }
-      return;
+      return 'paren';
     }
     if (tok === ')') {
       throw new Error(`SPDX parse error in "${license}": unexpected ')'`);
@@ -259,7 +266,7 @@ export function spdxKind(license: string): 'id' | 'expression' {
     if (!SPDX_ID_RE.test(tok)) {
       throw new Error(`SPDX parse error in "${license}": "${tok}" is not a valid SPDX id`);
     }
-    // Valid id — consumed.
+    return 'id';
   }
 
   parseExpr();
