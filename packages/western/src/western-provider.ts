@@ -1,4 +1,10 @@
-import { WARNING_CODES, makeWarning } from '@ming/contracts';
+import {
+  WARNING_CODES,
+  makeWarning,
+  ERROR_CODES,
+  EngineError,
+  WESTERN_RULESET_RETIRED,
+} from '@ming/contracts';
 import type {
   EngineWarning,
   NormalizedBirthData,
@@ -48,6 +54,16 @@ export function computeWestern(
   normalized: NormalizedBirthData,
   settings: WesternSettings,
 ): { result: WesternChartResult | null; warnings: EngineWarning[] } {
+  // Guard: retired ruleset versions are rejected with a stable error code.
+  // The caller explicitly requested a version that is no longer computed
+  // (Koch was corrected in 0.2.0; the old erroneous results are not reproducible).
+  if ((WESTERN_RULESET_RETIRED as readonly string[]).includes(settings.rulesetId)) {
+    throw new EngineError(
+      ERROR_CODES.RULESET_UNSUPPORTED,
+      `Ruleset "${settings.rulesetId}" has been retired. Migrate to western-tropical-placidus@0.2.0 (see INSTALL.md migration notes). Historical results from v0.1.x releases remain available in those published releases.`,
+      { requestedRuleset: settings.rulesetId, currentRuleset: 'western-tropical-placidus@0.2.0' },
+    );
+  }
   const warnings: EngineWarning[] = [];
   const dateMs = normalized.utcInstantMs;
   const latitude = normalized.location.latitude;

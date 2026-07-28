@@ -25279,7 +25279,7 @@ var require_lib2 = __commonJS({
 
 // packages/contracts/src/version.ts
 var SCHEMA_VERSION = "0.1.0";
-var ENGINE_VERSION = "0.1.1";
+var ENGINE_VERSION = "0.2.0";
 var ENGINE_NAME = "ming-engine";
 var SUPPORTED_YEAR_MIN = 1901;
 var SUPPORTED_YEAR_MAX = 2100;
@@ -39989,8 +39989,10 @@ var GeoLocation = external_exports.strictObject({
   /** Where the coordinates came from; geocoder use requires separate consent. */
   source: external_exports.enum(["user", "geocoder", "import"])
 });
+var WESTERN_RULESET_CURRENT = "western-tropical-placidus@0.2.0";
+var WESTERN_RULESET_RETIRED = ["western-tropical-placidus@0.1.0"];
 var WesternSettings = external_exports.strictObject({
-  rulesetId: external_exports.string().default("western-tropical-placidus@0.1.0"),
+  rulesetId: external_exports.string().default(WESTERN_RULESET_CURRENT),
   zodiac: external_exports.enum(["tropical", "sidereal"]).default("tropical"),
   /** Sidereal ayanamsha model; only applied when zodiac = 'sidereal'. */
   ayanamsha: external_exports.enum(["lahiri", "fagan-bradley"]).default("lahiri"),
@@ -51617,6 +51619,13 @@ function round6(n) {
   return Math.round(n * 1e6) / 1e6;
 }
 function computeWestern(normalized, settings) {
+  if (WESTERN_RULESET_RETIRED.includes(settings.rulesetId)) {
+    throw new EngineError(
+      ERROR_CODES.RULESET_UNSUPPORTED,
+      `Ruleset "${settings.rulesetId}" has been retired. Migrate to western-tropical-placidus@0.2.0 (see INSTALL.md migration notes). Historical results from v0.1.x releases remain available in those published releases.`,
+      { requestedRuleset: settings.rulesetId, currentRuleset: "western-tropical-placidus@0.2.0" }
+    );
+  }
   const warnings = [];
   const dateMs = normalized.utcInstantMs;
   const latitude = normalized.location.latitude;

@@ -12,7 +12,7 @@ export const SCHEMA_VERSION = '0.1.0';
  * corrected to the accurate "astronomy-engine/VSOP87+NOVAS" attribution, which changes emitted
  * provenance text (not any numeric result), hence a new engine version.
  */
-export const ENGINE_VERSION = '0.1.1';
+export const ENGINE_VERSION = '0.2.0';
 
 /** Human-facing engine name. */
 export const ENGINE_NAME = 'ming-engine';

@@ -82,6 +82,16 @@
 
 > 后续发布必须使用新的不可变 tag 与独立 ZIP；创建 Release、上传资产并完成重下 SHA-256 校验后，才可更新清单。不得使用 `latest/download`，不得复用已撤下的历史发布地址。
 
+## 从 v0.1.x 迁移到 v0.2.0
+
+v0.2.0 的主要变化：
+
+1. **西方宫制规则版本**：默认 rulesetId 从 `western-tropical-placidus@0.1.0` 升级为 `western-tropical-placidus@0.2.0`。Koch 宫制计算已修正（旧版有最大 36° 偏差）。显式传入旧 `@0.1.0` 将返回 `RULESET_UNSUPPORTED` 错误，不会静默映射也不会继续计算错误结果。迁移方法：删除输入中的 `rulesetId` 字段（使用默认值），或显式改为 `western-tropical-placidus@0.2.0`。
+2. **validate-answer 契约**：仅接受 `reading-draft/v2`；v1 返回 `UNSUPPORTED_CONTRACT_VERSION`。迁移方法见 `references/answer-contract.md`。
+3. **引擎版本**：engineVersion 从 0.1.1 升至 0.2.0（Koch 宫制修正 + Swiss Ephemeris 独立金标覆盖）。
+
+已发布的 v0.1.x Release 保持不变，作为历史可复现边界。
+
 ## ZIP 解压安全配额
 
 所有宿主 Agent 在解压安装包时必须执行以下配额检查（基于 inflate 前的 central directory 元数据）：
