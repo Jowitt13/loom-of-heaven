@@ -379,6 +379,65 @@ describe('validate-sbom (offline synthetic)', () => {
       cdxPath: '/mem/sbom.cdx.json',
       spdxPath: '/mem/sbom.spdx.json',
     };
-    expect(() => validateSbom(t)).toThrow(/unrecognized SPDX license form/);
+    expect(() => validateSbom(t)).toThrow(/SPDX parse error/);
+  });
+
+  // --- P1-fix-3: duplicate component/package detection -----------------------
+
+  it('17. CycloneDX with two same-name library components -> FAIL duplicate', () => {
+    const closure = [pkg('foo', '1.0.0')];
+    // Build CycloneDX with `foo` listed twice.
+    const cdxObj = {
+      ...JSON.parse(ser(cdx([{ name: 'foo', version: '1.0.0' }]))),
+      components: [
+        {
+          type: 'library',
+          name: 'foo',
+          version: '1.0.0',
+          purl: npmPurl('foo', '1.0.0'),
+          licenses: [{ license: { id: 'MIT' } }],
+        },
+        {
+          type: 'library',
+          name: 'foo',
+          version: '1.0.0',
+          purl: npmPurl('foo', '1.0.0'),
+          licenses: [{ license: { id: 'MIT' } }],
+        },
+      ],
+    };
+    const spdxObj = spdx([{ name: 'foo', version: '1.0.0' }]);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(spdxObj),
+      exceptions: [],
+      cdxPath: '/mem/cdx',
+      spdxPath: '/mem/spdx',
+    };
+    const failed = failedNames(t);
+    expect(failed).toContain('cyclonedx no duplicate library component: foo');
+  });
+
+  it('18. SPDX with two same-name third-party packages -> FAIL duplicate', () => {
+    const closure = [pkg('bar', '2.0.0')];
+    const cdxObj = cdx([{ name: 'bar', version: '2.0.0' }]);
+    // Build SPDX with `bar` listed twice.
+    const baseSpdx = JSON.parse(ser(spdx([{ name: 'bar', version: '2.0.0' }]))) as Record<
+      string,
+      unknown
+    >;
+    const barPkg = (baseSpdx.packages as unknown[]).find((p: any) => p.name === 'bar');
+    (baseSpdx.packages as unknown[]).push(barPkg);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(baseSpdx),
+      exceptions: [],
+      cdxPath: '/mem/cdx',
+      spdxPath: '/mem/spdx',
+    };
+    const failed = failedNames(t);
+    expect(failed).toContain('spdx no duplicate third-party package: bar');
   });
 });

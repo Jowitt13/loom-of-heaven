@@ -349,14 +349,36 @@ describe('bundle-closure: spdxKind / cycloneDxLicenses', () => {
     expect(spdxKind('GPL-2.0 WITH Classpath-exception-2.0')).toBe('expression');
   });
   it('arbitrary prose -> throw (never silently treated as SPDX id)', () => {
-    expect(() => spdxKind('see license file')).toThrow(/unrecognized SPDX license form/);
-    expect(() => spdxKind('Custom License v2!')).toThrow(/unrecognized SPDX license form/);
+    expect(() => spdxKind('see license file')).toThrow(/SPDX parse error/);
+    expect(() => spdxKind('Custom License v2!')).toThrow(/SPDX parse error/);
   });
   it('dangling operator -> throw', () => {
-    expect(() => spdxKind('MIT OR')).toThrow(/unrecognized SPDX license form/);
+    expect(() => spdxKind('MIT OR')).toThrow(/SPDX parse error/);
   });
   it('empty -> throw', () => {
     expect(() => spdxKind('   ')).toThrow(/empty SPDX license/);
+  });
+  // --- P1-fix-3 regression: recursive-descent parser catches malformed expressions ---
+  it('consecutive operators (MIT OR OR Apache-2.0) -> throw', () => {
+    expect(() => spdxKind('MIT OR OR Apache-2.0')).toThrow(/SPDX parse error/);
+  });
+  it('trailing operator + consecutive ids (MIT Apache-2.0 OR) -> throw', () => {
+    expect(() => spdxKind('MIT Apache-2.0 OR')).toThrow(/SPDX parse error/);
+  });
+  it('unmatched parens ((MIT OR Apache-2.0) -> throw', () => {
+    expect(() => spdxKind('((MIT OR Apache-2.0)')).toThrow(/SPDX parse error/);
+  });
+  it('leading operator (OR MIT) -> throw', () => {
+    expect(() => spdxKind('OR MIT')).toThrow(/SPDX parse error/);
+  });
+  it('empty parens () -> throw', () => {
+    expect(() => spdxKind('()')).toThrow(/SPDX parse error/);
+  });
+  it('dangling WITH (MIT WITH) -> throw', () => {
+    expect(() => spdxKind('MIT WITH')).toThrow(/SPDX parse error/);
+  });
+  it('nested parens (A OR (B AND C)) -> expression (valid)', () => {
+    expect(spdxKind('(A OR (B AND C))')).toBe('expression');
   });
   it('cycloneDxLicenses: id form -> license.id entry', () => {
     expect(cycloneDxLicenses('MIT')).toEqual([{ license: { id: 'MIT' } }]);

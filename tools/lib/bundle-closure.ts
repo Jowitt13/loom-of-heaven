@@ -165,34 +165,108 @@ export function npmPurl(name: string, version: string): string {
 const SPDX_ID_RE = /^[A-Za-z0-9.-]+\+?$/;
 
 /**
- * Distinguish a single SPDX license id from an SPDX license expression.
+ * Distinguish a single SPDX license id from an SPDX license expression using
+ * a proper recursive-descent parser that validates token sequence, bracket
+ * pairing, and operator grammar. This replaces the previous count-based
+ * heuristic which accepted malformed expressions such as
+ * `MIT OR OR Apache-2.0`, `MIT Apache-2.0 OR`, and `((MIT OR Apache-2.0)`.
  *
- *   'MIT'                    -> 'id'
- *   'Apache-2.0'             -> 'id'
- *   'GPL-2.0+'               -> 'id'
- *   'MIT OR Apache-2.0'      -> 'expression'   (no parens required!)
- *   '(MIT OR Apache-2.0)'    -> 'expression'
- *   'A AND B', 'A WITH e'    -> 'expression'
- *   anything else            -> throw (fail-closed; arbitrary prose is never
- *                               silently treated as an SPDX id)
+ * Grammar (simplified SPDX compound expression):
+ *
+ *   expr := term ((OR | AND) term)*
+ *   term := atom (WITH atom)?
+ *   atom := id | '(' expr ')'
+ *
+ * Where:
+ *   id = SPDX_ID_RE (letters, digits, dot, dash, optional trailing `+`)
+ *
+ * Rejects: consecutive operators, consecutive ids without an operator,
+ * unmatched parens, empty parens, trailing/leading operators, dangling WITH.
+ *
+ * Returns:
+ *   'id'         if the entire string is a single SPDX id
+ *   'expression' if it is a well-formed compound expression
+ *   throws       on anything else (fail-closed)
  */
 export function spdxKind(license: string): 'id' | 'expression' {
   const t = license.trim();
   if (t === '') throw new Error('empty SPDX license');
-  if (SPDX_ID_RE.test(t)) return 'id';
-  // Candidate expression: strip parens, tokenize, and require a well-formed
-  // alternation of SPDX ids and OR/AND/WITH operators.
-  const tokens = t
-    .replace(/[()]/g, ' ')
+  if (SPDX_ID_RE.test(t)) return 'id'; // fast path: single bare id
+
+  // Tokenize: insert spaces around parens, split, filter empties.
+  const tokens: string[] = t
+    .replace(/[()]/g, (m) => ` ${m} `)
     .split(/\s+/)
     .filter((x) => x.length > 0);
-  const isOp = (x: string): boolean => /^(OR|AND|WITH)$/i.test(x);
-  const ops = tokens.filter(isOp);
-  const operands = tokens.filter((x) => !isOp(x));
-  if (ops.length >= 1 && operands.length >= 2 && operands.every((x) => SPDX_ID_RE.test(x))) {
-    return 'expression';
+  if (tokens.length === 0) throw new Error('empty SPDX license');
+  if (tokens.length === 1 && SPDX_ID_RE.test(tokens[0]!)) return 'id';
+
+  // Recursive-descent parser.
+  let pos = 0;
+  const peek = (): string | undefined => tokens[pos];
+  const advance = (): string => {
+    if (pos >= tokens.length) {
+      throw new Error(`SPDX parse error in "${license}": unexpected end of expression`);
+    }
+    return tokens[pos++]!;
+  };
+  const isOp = (x: string): boolean => x === 'OR' || x === 'AND';
+
+  function parseExpr(): void {
+    parseTerm();
+    while (pos < tokens.length && peek() !== ')' && isOp(peek()!)) {
+      advance(); // consume OR | AND
+      parseTerm();
+    }
   }
-  throw new Error(`unrecognized SPDX license form: "${license}"`);
+
+  function parseTerm(): void {
+    parseAtom();
+    // Optional WITH clause (a license exception like `GPL-2.0 WITH Classpath-exception-2.0`).
+    if (pos < tokens.length && peek() === 'WITH') {
+      advance(); // consume WITH
+      // The WITH operand must be a single SPDX id (not a sub-expression).
+      const ex = advance();
+      if (!SPDX_ID_RE.test(ex)) {
+        throw new Error(
+          `SPDX parse error in "${license}": expected exception id after WITH, got "${ex}"`,
+        );
+      }
+    }
+  }
+
+  function parseAtom(): void {
+    const tok = advance();
+    if (tok === '(') {
+      if (peek() === ')') {
+        throw new Error(`SPDX parse error in "${license}": empty parentheses`);
+      }
+      parseExpr();
+      const close = advance();
+      if (close !== ')') {
+        throw new Error(`SPDX parse error in "${license}": expected ')' but got "${close}"`);
+      }
+      return;
+    }
+    if (tok === ')') {
+      throw new Error(`SPDX parse error in "${license}": unexpected ')'`);
+    }
+    if (isOp(tok) || tok === 'WITH') {
+      throw new Error(
+        `SPDX parse error in "${license}": unexpected operator "${tok}" where id was expected`,
+      );
+    }
+    if (!SPDX_ID_RE.test(tok)) {
+      throw new Error(`SPDX parse error in "${license}": "${tok}" is not a valid SPDX id`);
+    }
+    // Valid id — consumed.
+  }
+
+  parseExpr();
+  if (pos !== tokens.length) {
+    throw new Error(`SPDX parse error in "${license}": unexpected trailing token "${tokens[pos]}"`);
+  }
+  return 'expression';
 }
 
 /**

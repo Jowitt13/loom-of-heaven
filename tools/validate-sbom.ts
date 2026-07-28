@@ -234,6 +234,25 @@ export function validateSbom(inputs: ValidateSbomInputs): Check[] {
   for (const p of inputs.closure) truthByName.set(p.name, p);
   const exemptedNames = new Set(inputs.exceptions.map((e) => e.name));
 
+  // 0. Duplicate-name detection: any SBOM that lists the same third-party
+  //    package name more than once is malformed. Previous code used Map.set
+  //    which silently overwrote duplicates; now we fail-closed.
+  const cdxLibNames = (cdx.components ?? [])
+    .filter((c) => c.type === 'library')
+    .map((c) => c.name)
+    .filter((n): n is string => typeof n === 'string');
+  const cdxDups = [...new Set(cdxLibNames.filter((n, i) => cdxLibNames.indexOf(n) !== i))];
+  for (const d of cdxDups) {
+    add(`cyclonedx no duplicate library component: ${d}`, false, 'appears more than once');
+  }
+  const spdxPkgNames = (spdx.packages ?? [])
+    .filter((p) => typeof p.name === 'string' && p.name !== APP_NAME)
+    .map((p) => p.name as string);
+  const spdxDups = [...new Set(spdxPkgNames.filter((n, i) => spdxPkgNames.indexOf(n) !== i))];
+  for (const d of spdxDups) {
+    add(`spdx no duplicate third-party package: ${d}`, false, 'appears more than once');
+  }
+
   // 1. Every truth-set package must exist in both SBOMs with matching fields.
   //    Purls are checked against the CANONICAL form recomputed here from
   //    (name, version) via the shared npmPurl — not merely string-equality
