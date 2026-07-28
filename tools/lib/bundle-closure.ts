@@ -137,6 +137,75 @@ export function extractLicense(pkg: RawPackageJson): string {
 }
 
 /**
+ * Canonical npm Package URL (purl) per the purl spec
+ * (https://github.com/package-url/purl-spec): for scoped packages the scope
+ * is the purl namespace and its `@` MUST be percent-encoded, e.g.
+ *   pkg:npm/%40scope/name@1.2.3
+ * Unscoped packages keep the plain form:
+ *   pkg:npm/name@1.2.3
+ *
+ * This is the ONLY place npm purls are generated — build-skill, validate-sbom
+ * and test fixtures all call this function so no caller can hand-write a
+ * divergent (non-canonical) purl string.
+ */
+export function npmPurl(name: string, version: string): string {
+  if (name.startsWith('@')) {
+    const slash = name.indexOf('/');
+    if (slash <= 1 || slash === name.length - 1) {
+      throw new Error(`invalid scoped npm package name: ${name}`);
+    }
+    const scope = name.slice(1, slash); // without the leading '@'
+    const rest = name.slice(slash + 1);
+    return `pkg:npm/%40${scope}/${rest}@${version}`;
+  }
+  return `pkg:npm/${name}@${version}`;
+}
+
+/** One bare SPDX id: letters, digits, dot, dash, optional trailing `+`. */
+const SPDX_ID_RE = /^[A-Za-z0-9.-]+\+?$/;
+
+/**
+ * Distinguish a single SPDX license id from an SPDX license expression.
+ *
+ *   'MIT'                    -> 'id'
+ *   'Apache-2.0'             -> 'id'
+ *   'GPL-2.0+'               -> 'id'
+ *   'MIT OR Apache-2.0'      -> 'expression'   (no parens required!)
+ *   '(MIT OR Apache-2.0)'    -> 'expression'
+ *   'A AND B', 'A WITH e'    -> 'expression'
+ *   anything else            -> throw (fail-closed; arbitrary prose is never
+ *                               silently treated as an SPDX id)
+ */
+export function spdxKind(license: string): 'id' | 'expression' {
+  const t = license.trim();
+  if (t === '') throw new Error('empty SPDX license');
+  if (SPDX_ID_RE.test(t)) return 'id';
+  // Candidate expression: strip parens, tokenize, and require a well-formed
+  // alternation of SPDX ids and OR/AND/WITH operators.
+  const tokens = t
+    .replace(/[()]/g, ' ')
+    .split(/\s+/)
+    .filter((x) => x.length > 0);
+  const isOp = (x: string): boolean => /^(OR|AND|WITH)$/i.test(x);
+  const ops = tokens.filter(isOp);
+  const operands = tokens.filter((x) => !isOp(x));
+  if (ops.length >= 1 && operands.length >= 2 && operands.every((x) => SPDX_ID_RE.test(x))) {
+    return 'expression';
+  }
+  throw new Error(`unrecognized SPDX license form: "${license}"`);
+}
+
+/**
+ * Build the CycloneDX `licenses` array for one component. Single SPDX ids go
+ * into `{ license: { id } }`; every expression (with or without outer parens)
+ * goes into `{ expression }`. Unrecognized forms throw via spdxKind.
+ */
+export function cycloneDxLicenses(license: string): unknown[] {
+  const t = license.trim();
+  return spdxKind(t) === 'id' ? [{ license: { id: t } }] : [{ expression: t }];
+}
+
+/**
  * Classify a metafile input path into one of four categories, or 'unknown'
  * if the path cannot be safely attributed. The classifier uses
  * PATH-SEGMENT precise matching, never a substring `includes()`, so a
@@ -305,7 +374,7 @@ export function computeBundleClosure(
       name,
       version,
       license,
-      purl: `pkg:npm/${name}@${version}`,
+      purl: npmPurl(name, version),
       packageRoot: dir,
       inputs: [relative(opts.root, abs).split(sep).join('/')],
     });

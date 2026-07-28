@@ -2,7 +2,12 @@ import { build } from 'esbuild';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { computeBundleClosure, type BundlePackage } from './lib/bundle-closure.ts';
+import {
+  computeBundleClosure,
+  npmPurl,
+  spdxKind,
+  type BundlePackage,
+} from './lib/bundle-closure.ts';
 
 /**
  * Reverse gate for the CycloneDX + SPDX SBOMs shipped with the Skill.
@@ -128,18 +133,29 @@ interface SpdxSbom {
   packages?: SpdxPackage[];
 }
 
-/** Read a CycloneDX SBOM and normalise the third-party components. */
+/** Read a CycloneDX SBOM and normalise the third-party components.
+ *  `form` records HOW the license was written: `id` (license.id), `expression`
+ *  (SPDX expression field) or `none`. validate-sbom uses it to reject SBOMs
+ *  that smuggle an SPDX expression into `license.id`. */
 function extractCdxPackages(
   sbom: CdxSbom,
-): Map<string, { version: string; purl: string; license: string }> {
-  const out = new Map<string, { version: string; purl: string; license: string }>();
+): Map<
+  string,
+  { version: string; purl: string; license: string; form: 'id' | 'expression' | 'none' }
+> {
+  const out = new Map<
+    string,
+    { version: string; purl: string; license: string; form: 'id' | 'expression' | 'none' }
+  >();
   for (const c of sbom.components ?? []) {
     if (c.type !== 'library') continue;
     if (typeof c.name !== 'string' || typeof c.version !== 'string' || typeof c.purl !== 'string')
       continue;
     const lic = c.licenses?.[0];
+    const form: 'id' | 'expression' | 'none' =
+      lic?.expression !== undefined ? 'expression' : lic?.license?.id !== undefined ? 'id' : 'none';
     const license = lic?.expression ?? lic?.license?.id ?? '';
-    out.set(c.name, { version: c.version, purl: c.purl, license });
+    out.set(c.name, { version: c.version, purl: c.purl, license, form });
   }
   return out;
 }
@@ -219,7 +235,14 @@ export function validateSbom(inputs: ValidateSbomInputs): Check[] {
   const exemptedNames = new Set(inputs.exceptions.map((e) => e.name));
 
   // 1. Every truth-set package must exist in both SBOMs with matching fields.
+  //    Purls are checked against the CANONICAL form recomputed here from
+  //    (name, version) via the shared npmPurl — not merely string-equality
+  //    with the closure — so a systematically wrong purl generator can never
+  //    self-certify. CycloneDX license FORM is checked against spdxKind so an
+  //    expression can never masquerade as `license.id`.
   for (const p of inputs.closure) {
+    const canonicalPurl = npmPurl(p.name, p.version);
+    const expectedForm = spdxKind(p.license); // throws on unrecognized license (fail-closed)
     const c = cdxMap.get(p.name);
     add(
       `cyclonedx has ${p.name}`,
@@ -233,14 +256,19 @@ export function validateSbom(inputs: ValidateSbomInputs): Check[] {
         `sbom=${c.version} closure=${p.version}`,
       );
       add(
-        `cyclonedx purl matches: ${p.name}`,
-        c.purl === p.purl,
-        `sbom=${c.purl} closure=${p.purl}`,
+        `cyclonedx purl is canonical: ${p.name}`,
+        c.purl === canonicalPurl,
+        `sbom=${c.purl} canonical=${canonicalPurl}`,
       );
       add(
         `cyclonedx license matches: ${p.name}`,
         c.license === p.license,
         `sbom=${c.license} closure=${p.license}`,
+      );
+      add(
+        `cyclonedx license form is correct: ${p.name}`,
+        c.form === expectedForm,
+        `sbom-form=${c.form} expected=${expectedForm}`,
       );
     }
     const s = spdxMap.get(p.name);
@@ -255,7 +283,11 @@ export function validateSbom(inputs: ValidateSbomInputs): Check[] {
         s.version === p.version,
         `sbom=${s.version} closure=${p.version}`,
       );
-      add(`spdx purl matches: ${p.name}`, s.purl === p.purl, `sbom=${s.purl} closure=${p.purl}`);
+      add(
+        `spdx purl is canonical: ${p.name}`,
+        s.purl === canonicalPurl,
+        `sbom=${s.purl} canonical=${canonicalPurl}`,
+      );
       add(
         `spdx license matches: ${p.name}`,
         s.license === p.license,

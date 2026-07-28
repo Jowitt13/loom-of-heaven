@@ -5,7 +5,13 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, sep } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { computeBundleClosure, extractLicense } from './bundle-closure.ts';
+import {
+  computeBundleClosure,
+  cycloneDxLicenses,
+  extractLicense,
+  npmPurl,
+  spdxKind,
+} from './bundle-closure.ts';
 
 /**
  * In-memory readPackageJson factory: returns a function that answers
@@ -84,7 +90,8 @@ describe('bundle-closure: computeBundleClosure', () => {
   it('3. scoped package at node_modules/@scope/<name>', () => {
     const r = run(['node_modules/@scope/pkg/index.js']);
     expect(r.packages[0]!.name).toBe('@scope/pkg');
-    expect(r.packages[0]!.purl).toBe('pkg:npm/@scope/pkg@0.1.0');
+    // Canonical purl: the scope's `@` is percent-encoded per the purl spec.
+    expect(r.packages[0]!.purl).toBe('pkg:npm/%40scope/pkg@0.1.0');
   });
 
   it('4. pnpm nested layout attributes to the real package, not the hash dir', () => {
@@ -304,6 +311,63 @@ describe('bundle-closure: computeBundleClosure', () => {
     );
     expect(r.packages.map((p) => `${p.name}@${p.version}`)).toEqual(['backslashy@0.0.9']);
     expect(r.ignored.repoInternal).toEqual([]);
+  });
+});
+
+describe('bundle-closure: npmPurl (canonical purl)', () => {
+  it('unscoped package keeps the plain form', () => {
+    expect(npmPurl('zod', '4.4.3')).toBe('pkg:npm/zod@4.4.3');
+  });
+  it('scoped package percent-encodes the scope @', () => {
+    expect(npmPurl('@scope/pkg', '1.0.0')).toBe('pkg:npm/%40scope/pkg@1.0.0');
+  });
+  it('deeply-named scope works (@a-b.c/x)', () => {
+    expect(npmPurl('@a-b.c/x', '0.0.1')).toBe('pkg:npm/%40a-b.c/x@0.0.1');
+  });
+  it('malformed scoped name (no slash) -> throw', () => {
+    expect(() => npmPurl('@scopeonly', '1.0.0')).toThrow(/invalid scoped npm package name/);
+  });
+  it('malformed scoped name (trailing slash) -> throw', () => {
+    expect(() => npmPurl('@scope/', '1.0.0')).toThrow(/invalid scoped npm package name/);
+  });
+});
+
+describe('bundle-closure: spdxKind / cycloneDxLicenses', () => {
+  it('single SPDX id -> id', () => {
+    expect(spdxKind('MIT')).toBe('id');
+    expect(spdxKind('Apache-2.0')).toBe('id');
+    expect(spdxKind('GPL-2.0+')).toBe('id');
+  });
+  it('parenthesised OR expression -> expression', () => {
+    expect(spdxKind('(MIT OR Apache-2.0)')).toBe('expression');
+  });
+  it('bare OR expression WITHOUT parens -> expression (regression: was mis-typed as id)', () => {
+    expect(spdxKind('MIT OR Apache-2.0')).toBe('expression');
+  });
+  it('AND / WITH operators -> expression', () => {
+    expect(spdxKind('MIT AND BSD-3-Clause')).toBe('expression');
+    expect(spdxKind('GPL-2.0 WITH Classpath-exception-2.0')).toBe('expression');
+  });
+  it('arbitrary prose -> throw (never silently treated as SPDX id)', () => {
+    expect(() => spdxKind('see license file')).toThrow(/unrecognized SPDX license form/);
+    expect(() => spdxKind('Custom License v2!')).toThrow(/unrecognized SPDX license form/);
+  });
+  it('dangling operator -> throw', () => {
+    expect(() => spdxKind('MIT OR')).toThrow(/unrecognized SPDX license form/);
+  });
+  it('empty -> throw', () => {
+    expect(() => spdxKind('   ')).toThrow(/empty SPDX license/);
+  });
+  it('cycloneDxLicenses: id form -> license.id entry', () => {
+    expect(cycloneDxLicenses('MIT')).toEqual([{ license: { id: 'MIT' } }]);
+  });
+  it('cycloneDxLicenses: unparenthesised expression -> expression entry', () => {
+    expect(cycloneDxLicenses('MIT OR Apache-2.0')).toEqual([{ expression: 'MIT OR Apache-2.0' }]);
+  });
+  it('cycloneDxLicenses: parenthesised expression -> expression entry', () => {
+    expect(cycloneDxLicenses('(MIT OR Apache-2.0)')).toEqual([
+      { expression: '(MIT OR Apache-2.0)' },
+    ]);
   });
 });
 

@@ -2,7 +2,11 @@ import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { mkdirSync, statSync, writeFileSync } from 'node:fs';
-import { computeBundleClosure, type BundlePackage } from './lib/bundle-closure.ts';
+import {
+  computeBundleClosure,
+  cycloneDxLicenses,
+  type BundlePackage,
+} from './lib/bundle-closure.ts';
 
 /**
  * Bundle the deterministic engine into the Skill as a single self-contained ESM
@@ -47,17 +51,6 @@ interface CycloneDxComponent {
   licenses: unknown[];
 }
 
-/**
- * Build the CycloneDX `licenses` array for one component from the closure's
- * SPDX id or OR expression.
- *   - "MIT"                 -> [{ license: { id: "MIT" } }]
- *   - "(MIT OR Apache-2.0)" -> [{ expression: "(MIT OR Apache-2.0)" }]
- */
-function buildCycloneDxLicenseField(spdx: string): unknown[] {
-  if (spdx.startsWith('(')) return [{ expression: spdx }];
-  return [{ license: { id: spdx } }];
-}
-
 async function main(): Promise<void> {
   mkdirSync(dirname(outfile), { recursive: true });
 
@@ -92,7 +85,7 @@ async function main(): Promise<void> {
     name: p.name,
     version: p.version,
     purl: p.purl,
-    licenses: buildCycloneDxLicenseField(p.license),
+    licenses: cycloneDxLicenses(p.license),
   }));
 
   const sbomCdx = {

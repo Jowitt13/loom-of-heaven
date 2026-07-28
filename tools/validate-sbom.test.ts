@@ -3,6 +3,7 @@
 // memory. Nothing on disk is read or written; no real SBOM is touched.
 import { describe, expect, it } from 'vitest';
 import { validateSbom, type ValidateSbomInputs } from './validate-sbom.ts';
+import { npmPurl } from './lib/bundle-closure.ts';
 import type { BundlePackage } from './lib/bundle-closure.ts';
 
 /** Build a canonical BundlePackage; individual tests can override fields. */
@@ -11,7 +12,7 @@ function pkg(name: string, version: string, license = 'MIT'): BundlePackage {
     name,
     version,
     license,
-    purl: `pkg:npm/${name}@${version}`,
+    purl: npmPurl(name, version),
     packageRoot: `/fake/${name}`,
     inputs: [`node_modules/${name}/index.js`],
   };
@@ -42,7 +43,7 @@ function cdx(
       type: c.type ?? 'library',
       name: c.name,
       version: c.version,
-      purl: c.purl ?? `pkg:npm/${c.name}@${c.version}`,
+      purl: c.purl ?? npmPurl(c.name, c.version),
       licenses: c.expression
         ? [{ expression: c.expression }]
         : [{ license: { id: c.license ?? 'MIT' } }],
@@ -63,7 +64,7 @@ function spdx(components: { name: string; version: string; purl?: string; licens
       {
         referenceCategory: 'PACKAGE-MANAGER',
         referenceType: 'purl',
-        referenceLocator: c.purl ?? `pkg:npm/${c.name}@${c.version}`,
+        referenceLocator: c.purl ?? npmPurl(c.name, c.version),
       },
     ],
   }));
@@ -198,7 +199,7 @@ describe('validate-sbom (offline synthetic)', () => {
     ]);
     t.cdxText = ser(cdxObj);
     const failed = failedNames(t);
-    expect(failed).toContain('cyclonedx purl matches: zod');
+    expect(failed).toContain('cyclonedx purl is canonical: zod');
   });
 
   it('7. application component name drift -> FAIL', () => {
@@ -293,5 +294,91 @@ describe('validate-sbom (offline synthetic)', () => {
     const failed = failedNames(t);
     expect(failed).toContain('spdx has moment');
     expect(failed).toContain('cyclonedx set equals spdx set');
+  });
+
+  // --- P1-fix-2: canonical purl + CycloneDX SPDX-expression form -----------
+
+  it('12. scoped package: canonical %40-encoded purl passes end-to-end in both SBOMs', () => {
+    const closure = [pkg('@scope/pkg', '1.0.0')];
+    // Fixture helpers derive purls via the same shared npmPurl -> canonical.
+    const cdxObj = cdx([{ name: '@scope/pkg', version: '1.0.0' }]);
+    const spdxObj = spdx([{ name: '@scope/pkg', version: '1.0.0' }]);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(spdxObj),
+      exceptions: [],
+      cdxPath: '/mem/sbom.cdx.json',
+      spdxPath: '/mem/sbom.spdx.json',
+    };
+    expect(failedNames(t)).toEqual([]);
+    // Sanity: the canonical purl really is the %40-encoded form.
+    expect(closure[0]!.purl).toBe('pkg:npm/%40scope/pkg@1.0.0');
+  });
+
+  it('13. scoped package with NON-canonical raw-@ purl in both SBOMs -> canonical checks FAIL', () => {
+    const closure = [pkg('@scope/pkg', '1.0.0')];
+    const raw = 'pkg:npm/@scope/pkg@1.0.0'; // NOT percent-encoded — non-canonical
+    const cdxObj = cdx([{ name: '@scope/pkg', version: '1.0.0', purl: raw }]);
+    const spdxObj = spdx([{ name: '@scope/pkg', version: '1.0.0', purl: raw }]);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(spdxObj),
+      exceptions: [],
+      cdxPath: '/mem/sbom.cdx.json',
+      spdxPath: '/mem/sbom.spdx.json',
+    };
+    const failed = failedNames(t);
+    expect(failed).toContain('cyclonedx purl is canonical: @scope/pkg');
+    expect(failed).toContain('spdx purl is canonical: @scope/pkg');
+  });
+
+  it('14. bare OR expression license correctly in CycloneDX expression field -> pass', () => {
+    const closure = [pkg('dual', '3.0.0', 'MIT OR Apache-2.0')];
+    const cdxObj = cdx([{ name: 'dual', version: '3.0.0', expression: 'MIT OR Apache-2.0' }]);
+    const spdxObj = spdx([{ name: 'dual', version: '3.0.0', license: 'MIT OR Apache-2.0' }]);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(spdxObj),
+      exceptions: [],
+      cdxPath: '/mem/sbom.cdx.json',
+      spdxPath: '/mem/sbom.spdx.json',
+    };
+    expect(failedNames(t)).toEqual([]);
+  });
+
+  it('15. expression smuggled into license.id -> form check FAILs', () => {
+    const closure = [pkg('dual', '3.0.0', 'MIT OR Apache-2.0')];
+    // Fixture writes the expression as license.id (the old buggy behaviour of
+    // the paren-only detector). validate-sbom must reject the disguise.
+    const cdxObj = cdx([{ name: 'dual', version: '3.0.0', license: 'MIT OR Apache-2.0' }]);
+    const spdxObj = spdx([{ name: 'dual', version: '3.0.0', license: 'MIT OR Apache-2.0' }]);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(spdxObj),
+      exceptions: [],
+      cdxPath: '/mem/sbom.cdx.json',
+      spdxPath: '/mem/sbom.spdx.json',
+    };
+    const failed = failedNames(t);
+    expect(failed).toContain('cyclonedx license form is correct: dual');
+  });
+
+  it('16. malformed/unknown license in closure -> validateSbom throws (fail-closed)', () => {
+    const closure = [pkg('weird', '1.0.0', 'see license file')];
+    const cdxObj = cdx([{ name: 'weird', version: '1.0.0', license: 'see license file' }]);
+    const spdxObj = spdx([{ name: 'weird', version: '1.0.0', license: 'see license file' }]);
+    const t: ValidateSbomInputs = {
+      closure,
+      cdxText: ser(cdxObj),
+      spdxText: ser(spdxObj),
+      exceptions: [],
+      cdxPath: '/mem/sbom.cdx.json',
+      spdxPath: '/mem/sbom.spdx.json',
+    };
+    expect(() => validateSbom(t)).toThrow(/unrecognized SPDX license form/);
   });
 });
