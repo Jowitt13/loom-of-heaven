@@ -47,9 +47,10 @@
 - [ ] **C2 提升根清单**：仅在 C1 完整性通过后执行
       `pnpm run promote:release -- --confirm-published`（唯一允许覆写根
       `install-manifest.json` / `SHA256SUMS.txt` 的工具，且刻意不在 `verify:all` 内）。在同一
-      受审改动中更新 `tools/lib/host-config.ts` 的 `PUBLISHED_RELEASE_VERSION` /
-      `PUBLISHED_RELEASE_TAG`，然后重跑 `pnpm run verify:install` 与 `pnpm run verify:all`
-      通过后再提交。
+      受审改动中更新 `tools/lib/host-config.ts` 的 `ROOT_ENGINE_VERSION`（引擎版本变更时）以及
+      `PUBLISHED_RELEASE_VERSION` / `PUBLISHED_RELEASE_TAG`；再将 `CANDIDATE_RELEASE_VERSION`
+      推进到下一个与已发布 tag 不同的未发布版本。然后重跑 `pnpm run verify:install` 与
+      `pnpm run verify:all` 通过后再提交。
 
 ## 附注
 
