@@ -6,7 +6,7 @@ name: verify
 #   format:check -> lint -> typecheck -> test -> build -> validate:provenance ->
 #   validate:skill -> validate:reading -> validate:docs -> smoke -> forward:test ->
 #   package:hosts -> verify:hosts -> verify:install -> check:doc-counts ->
-#   scan:deps -> scan:licenses -> scan:secrets
+#   scan:deps -> scan:licenses -> validate:sbom -> scan:secrets
 #
 # The full local gate is `pnpm run verify:all = verify:cloud + scan:incident`.  Its precise
 # incident tokens intentionally live only in a controlled local file and must never be copied to

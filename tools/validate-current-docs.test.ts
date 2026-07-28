@@ -28,7 +28,7 @@ function baseFixture(): Map<string, string> {
       '',
       '需要脚本执行 能力。',
       '',
-      'verify:cloud 依次运行 scan:deps → scan:licenses → scan:secrets.',
+      'verify:cloud 依次运行 scan:deps → scan:licenses → validate:sbom → scan:secrets.',
       '',
       '指向 GitHub Release `v0.1.6`.',
     ].join('\n'),
@@ -100,7 +100,7 @@ function baseFixture(): Map<string, string> {
 
   files.set(
     'AGENTS.md',
-    'render disabled exit 3. verify:cloud runs scan:deps → scan:licenses → scan:secrets.',
+    'render disabled exit 3. verify:cloud runs scan:deps → scan:licenses → validate:sbom → scan:secrets.',
   );
 
   files.set('docs/PRODUCT_SPEC.md', 'JSON output only.');
@@ -130,14 +130,15 @@ function baseFixture(): Map<string, string> {
   );
   files.set('docs/installers/doubao.md', 'doubao installer');
 
-  // Workflow with the accurate full chain including validate:provenance and scan:licenses.
+  // Workflow with the accurate full chain including validate:provenance,
+  // scan:licenses and validate:sbom.
   files.set(
     '.github/workflows/verify.yml',
     [
       '# format:check -> lint -> typecheck -> test -> build -> validate:provenance ->',
       '# validate:skill -> validate:reading -> validate:docs -> smoke -> forward:test ->',
       '# package:hosts -> verify:hosts -> verify:install -> check:doc-counts ->',
-      '# scan:deps -> scan:licenses -> scan:secrets',
+      '# scan:deps -> scan:licenses -> validate:sbom -> scan:secrets',
       'env:',
       "  DEPENDENCY_AUDIT_STRICT: '1'",
     ].join('\n'),
@@ -238,7 +239,10 @@ describe('validate-current-docs: injected reader', () => {
     const cur = files.get('README.md') as string;
     files.set(
       'README.md',
-      cur.replace('scan:deps → scan:licenses → scan:secrets', 'scan:deps → scan:secrets'),
+      cur.replace(
+        'scan:deps → scan:licenses → validate:sbom → scan:secrets',
+        'scan:deps → scan:secrets',
+      ),
     );
     const { failed } = runChecks(readerOf(files));
     expect(failed.map((f) => f.name)).toContain(
@@ -344,6 +348,49 @@ describe('validate-current-docs: injected reader', () => {
     const { failed } = runChecks(readerOf(files));
     expect(failed.map((f) => f.name)).toContain(
       'README.md: no stale static "N tests / M files" claim',
+    );
+  });
+
+  it('16. workflow header missing validate:sbom -> matching FAIL (new guard)', () => {
+    const files = baseFixture();
+    files.set(
+      '.github/workflows/verify.yml',
+      [
+        '# format:check -> ... -> validate:provenance -> ... -> scan:licenses -> scan:secrets',
+        "env:\n  DEPENDENCY_AUDIT_STRICT: '1'",
+      ].join('\n'),
+    );
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain(
+      'workflow: header comment chain lists validate:sbom',
+    );
+  });
+
+  it('17. README verify:cloud chain missing validate:sbom -> matching FAIL (new guard)', () => {
+    const files = baseFixture();
+    const cur = files.get('README.md') as string;
+    files.set(
+      'README.md',
+      cur.replace(
+        'scan:deps → scan:licenses → validate:sbom → scan:secrets',
+        'scan:deps → scan:licenses → scan:secrets',
+      ),
+    );
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain(
+      'README.md: verify:cloud chain includes validate:sbom',
+    );
+  });
+
+  it('18. AGENTS.md verify:cloud chain missing validate:sbom -> matching FAIL (new guard)', () => {
+    const files = baseFixture();
+    files.set(
+      'AGENTS.md',
+      'render disabled exit 3. verify:cloud runs scan:deps → scan:licenses → scan:secrets.',
+    );
+    const { failed } = runChecks(readerOf(files));
+    expect(failed.map((f) => f.name)).toContain(
+      'AGENTS.md: verify:cloud chain includes validate:sbom',
     );
   });
 

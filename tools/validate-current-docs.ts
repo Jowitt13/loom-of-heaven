@@ -429,6 +429,7 @@ export function runChecks(readDoc: DocReader = defaultReadDoc): {
       /validate:provenance/.test(workflow),
     );
     add('workflow: header comment chain lists scan:licenses', /scan:licenses/.test(workflow));
+    add('workflow: header comment chain lists validate:sbom', /validate:sbom/.test(workflow));
   }
   const validationMd = readDoc('docs/VALIDATION.md');
   if (validationMd) {
@@ -459,6 +460,10 @@ export function runChecks(readDoc: DocReader = defaultReadDoc): {
       'README.md: verify:cloud chain includes scan:licenses',
       /scan:deps[\s\S]*scan:licenses[\s\S]*scan:secrets/.test(readmeMd),
     );
+    add(
+      'README.md: verify:cloud chain includes validate:sbom',
+      /scan:licenses[\s\S]*validate:sbom[\s\S]*scan:secrets/.test(readmeMd),
+    );
     // Static test counts drift the moment the suite grows; the real count lives
     // on GitHub Actions `verify` + docs/VALIDATION.md, not in README. Match both
     // bold Markdown form (`**471 tests / 29 files**`) and plain text form
@@ -477,6 +482,10 @@ export function runChecks(readDoc: DocReader = defaultReadDoc): {
     add(
       'AGENTS.md: verify:cloud chain includes scan:licenses',
       /scan:deps[\s\S]*scan:licenses[\s\S]*scan:secrets/.test(agentsMd),
+    );
+    add(
+      'AGENTS.md: verify:cloud chain includes validate:sbom',
+      /scan:licenses[\s\S]*validate:sbom[\s\S]*scan:secrets/.test(agentsMd),
     );
   }
   // scan-deps.ts must not promise that CI has network. The fail-closed guarantee

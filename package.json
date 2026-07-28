@@ -18,6 +18,7 @@
     "validate:reading": "node tools/validate-reading-examples.ts",
     "validate:docs": "node tools/validate-current-docs.ts",
     "validate:provenance": "node tools/validate-provenance.ts",
+    "validate:sbom": "node tools/validate-sbom.ts",
     "smoke": "node tools/smoke-clean-dir.ts",
     "forward:test": "node tools/forward-test.ts",
     "example": "node tools/gen-example.ts",
@@ -37,7 +38,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint packages",
-    "verify:cloud": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run validate:provenance && pnpm run validate:skill && pnpm run validate:reading && pnpm run validate:docs && pnpm run smoke && pnpm run forward:test && pnpm run package:hosts && pnpm run verify:hosts && pnpm run verify:install && pnpm run check:doc-counts && pnpm run scan:deps && pnpm run scan:licenses && pnpm run scan:secrets",
+    "verify:cloud": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run validate:provenance && pnpm run validate:skill && pnpm run validate:reading && pnpm run validate:docs && pnpm run smoke && pnpm run forward:test && pnpm run package:hosts && pnpm run verify:hosts && pnpm run verify:install && pnpm run check:doc-counts && pnpm run scan:deps && pnpm run scan:licenses && pnpm run validate:sbom && pnpm run scan:secrets",
     "verify:all": "pnpm run verify:cloud && pnpm run scan:incident"
   },
   "devDependencies": {

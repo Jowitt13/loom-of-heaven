@@ -66,6 +66,13 @@ contracts  <-  time-location  <-  orchestrator  ->  engine-entry (esbuild)  ->  
 - its packed TZDB) into `scripts/dist/engine.mjs`, and writes `sbom.cdx.json`. The published Skill
   depends on neither `packages/` nor `node_modules`, and performs no install or network at runtime.
 
+Both SBOMs (`sbom.cdx.json` CycloneDX and `sbom.spdx.json` SPDX 2.3) are derived from the esbuild
+metafile's `inputs` list via `tools/lib/bundle-closure.ts` — there is no hand-maintained package
+list. If a new third-party package ends up in the bundle, both SBOMs pick it up; if a package
+disappears, both SBOMs drop it. `pnpm run validate:sbom` re-runs esbuild independently in
+`verify:cloud` and requires an exact match (name/version/purl/license) between the fresh closure
+and both committed SBOMs, fail-closed on any drift.
+
 ## Time & location (the critical layer)
 
 Local civil time is normalized exactly once: parse wall clock → resolve against historical IANA

@@ -7,6 +7,11 @@
 - **Enforced in the gate**: `pnpm run scan:licenses` (in `verify:cloud`) checks the whole
   production dependency closure against this policy offline and cross-checks the committed SBOM
   license claims; it fails closed.
+- **Bundle-closure gate**: `pnpm run validate:sbom` (also in `verify:cloud`) re-runs esbuild,
+  derives the actual third-party runtime closure from the metafile, and requires both
+  `sbom.cdx.json` and `sbom.spdx.json` to record exactly that closure with matching
+  name/version/purl/license. The SBOM is derived from the metafile at build time — no
+  hand-maintained package list can drift from bundle reality.
 - This file is not legal advice; re-verify before any commercial release.
 
 ## Bundled into the published engine (`scripts/dist/engine.mjs`)

@@ -206,7 +206,7 @@ pnpm run package      # 生成 dist/*.zip + .sha256（自校验完整性）
 
 `verify:cloud` 依次运行：`format:check → lint → typecheck → test → build → validate:provenance →
 validate:skill → validate:reading → validate:docs → smoke → forward:test → package:hosts →
-verify:hosts → verify:install → check:doc-counts → scan:deps → scan:licenses → scan:secrets`。`verify:all` 只在其后追加
+verify:hosts → verify:install → check:doc-counts → scan:deps → scan:licenses → validate:sbom → scan:secrets`。`verify:all` 只在其后追加
 `scan:incident`，该扫描的私密 token 文件绝不进入 CI；缺失时必须 fail-closed。本仓库当前的真实测试计数由 GitHub Actions 的 `verify` job 与 [`docs/VALIDATION.md`](docs/VALIDATION.md) 的门禁段落负责同步（不再在 README 内维护一个易过期的静态数字）。
 
 深入阅读：[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/VALIDATION.md`](docs/VALIDATION.md) ·
