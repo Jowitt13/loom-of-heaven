@@ -430,7 +430,12 @@ export function computeBundleClosure(
       throw new Error(`could not classify metafile input: ${raw}`);
     }
     // Third-party. Resolve to an absolute path relative to root, then walk up.
-    const abs = isAbsolute(raw) ? raw : join(opts.root, raw);
+    // Normalise the raw metafile key to forward slashes before handing it to
+    // path.join/path.isAbsolute, because Linux does not interpret `\` as a
+    // separator. The original `raw` is preserved for error messages, the
+    // `ignored` arrays, and the deterministic `inputs` field.
+    const fsPath = raw.replace(/\\/g, '/');
+    const abs = isAbsolute(fsPath) ? fsPath : join(opts.root, fsPath);
     const { dir, json } = resolvePackageRoot(abs, {
       root: opts.root,
       readPackageJson,

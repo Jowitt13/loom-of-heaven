@@ -312,6 +312,23 @@ describe('bundle-closure: computeBundleClosure', () => {
     expect(r.packages.map((p) => `${p.name}@${p.version}`)).toEqual(['backslashy@0.0.9']);
     expect(r.ignored.repoInternal).toEqual([]);
   });
+
+  it('22. mixed-separator input resolves via file-system path (not just classification)', () => {
+    // Forward + backward slashes mixed in the same key. Must survive both
+    // classifyInput (segment logic) AND resolvePackageRoot (dirname walk).
+    // If the backslash-to-forward-slash normalisation only happened in
+    // classifyInput but NOT in the file-system resolution stage, this test
+    // would throw on Linux.
+    const dirMixed = nm('node_modules/mixedpkg');
+    const map = new Map<string, unknown>([
+      [dirMixed, { name: 'mixedpkg', version: '2.0.0', license: 'MIT' }],
+    ]);
+    const r = computeBundleClosure(
+      { inputs: { 'node_modules/mixedpkg\\src/index.js': {} } },
+      { root: ROOT, readPackageJson: makeReader(map) },
+    );
+    expect(r.packages[0]!.name).toBe('mixedpkg');
+  });
 });
 
 describe('bundle-closure: npmPurl (canonical purl)', () => {
