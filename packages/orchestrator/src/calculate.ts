@@ -25,6 +25,7 @@ import {
 import { computeBazi, lunarToGregorian } from '@ming/bazi';
 import { computeZiwei, computeZiweiHoroscope } from '@ming/ziwei';
 import { computeWestern } from '@ming/western';
+import { computeVedic } from '@ming/vedic';
 import { buildProvenance, parseRulesetId } from './provenance-build.ts';
 
 export interface CalculateOptions {
@@ -186,6 +187,15 @@ export function calculate(input: BirthInput, options: CalculateOptions = {}): Ch
         bundle.western = result;
         providers.push(result.provider);
         rulesets.push(parseRulesetId(result.rulesetId));
+      }
+    } else if (system === 'vedic') {
+      // ADR 0013 P1: skeleton only. computeVedic always returns null + a
+      // SYSTEM_NOT_YET_IMPLEMENTED warning; nothing is fabricated, so no
+      // bundle slot, provider or ruleset is recorded until P2/P3 compute for real.
+      const { result, warnings: vedicWarnings } = computeVedic(normalized, resolved.settings.vedic);
+      warnings.push(...vedicWarnings);
+      if (result !== null) {
+        bundle.vedic = result;
       }
     } else {
       warnings.push(pendingSystemWarning(system));

@@ -39871,7 +39871,7 @@ var WARNING_CODES = {
   RULESET_VARIANT_DEFAULTED: "RULESET_VARIANT_DEFAULTED"
 };
 var WarningSeverity = external_exports.enum(["info", "warning"]);
-var EngineSystem = external_exports.enum(["time", "western", "bazi", "ziwei", "engine"]);
+var EngineSystem = external_exports.enum(["time", "western", "bazi", "ziwei", "vedic", "engine"]);
 var EngineWarning = external_exports.object({
   code: external_exports.enum(Object.values(WARNING_CODES)),
   severity: WarningSeverity,
@@ -39974,12 +39974,25 @@ var Provenance = external_exports.object({
   rulesets: external_exports.array(RulesetRef)
 });
 
+// packages/contracts/src/vedic.ts
+var VedicSettings = external_exports.strictObject({
+  rulesetId: external_exports.string().default("vedic-parashara-lahiri@0.1.0"),
+  /** Rahu node model. No default: owner decision pending (ADR 0013 Open question 1). */
+  nodes: external_exports.enum(["mean", "true"]).optional(),
+  /** Vimshottari year model. No default: BLOCKED owner decision (ADR 0013 Open question 2). */
+  dashaYear: external_exports.enum(["julian-365.25", "savana-360", "sidereal"]).optional()
+});
+var VedicChartResult = external_exports.object({
+  rulesetId: external_exports.string(),
+  provider: ProviderRef
+});
+
 // packages/contracts/src/birth-input.ts
 var DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 var TIME_RE = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 var CalendarSystem = external_exports.enum(["gregorian", "lunar"]);
 var TimeAccuracy = external_exports.enum(["exact", "approximate", "unknown"]);
-var ChartSystem = external_exports.enum(["western", "bazi", "ziwei"]);
+var ChartSystem = external_exports.enum(["western", "bazi", "ziwei", "vedic"]);
 var FoldChoice = external_exports.enum(["earlier", "later"]);
 var GeoLocation = external_exports.strictObject({
   displayName: external_exports.string().optional(),
@@ -40013,10 +40026,12 @@ var ZiweiSettings = external_exports.strictObject({
   useApparentSolarTime: external_exports.boolean().default(false)
 });
 var CalculationSettings = external_exports.strictObject({
+  /** Default stays the three implemented systems; 'vedic' is opt-in only (ADR 0013 P1). */
   systems: external_exports.array(ChartSystem).min(1).default(["western", "bazi", "ziwei"]),
   western: WesternSettings.prefault({}),
   bazi: BaziSettings.prefault({}),
-  ziwei: ZiweiSettings.prefault({})
+  ziwei: ZiweiSettings.prefault({}),
+  vedic: VedicSettings.prefault({})
 });
 var BirthInput = external_exports.strictObject({
   schemaVersion: external_exports.string().default(SCHEMA_VERSION),
@@ -40465,6 +40480,9 @@ var EvidenceKind = external_exports.enum([
   "bazi-rule",
   "western-rule",
   "ziwei-rule",
+  // Reserved for the Vedic P4 slice (ADR 0013); no producer emits these yet.
+  "vedic",
+  "vedic-rule",
   "time"
 ]);
 var InterpretationEvidence = external_exports.object({
@@ -40882,6 +40900,8 @@ var ChartBundle = external_exports.object({
   western: WesternChartResult.optional(),
   bazi: BaziChartResult.optional(),
   ziwei: ZiweiChartResult.optional(),
+  /** Reserved slot (ADR 0013 P1): never populated until the Vedic provider computes for real. */
+  vedic: VedicChartResult.optional(),
   warnings: external_exports.array(EngineWarning),
   provenance: Provenance
 });
@@ -51771,6 +51791,21 @@ function computeWestern(normalized, settings) {
   return { result, warnings };
 }
 
+// packages/vedic/src/vedic-provider.ts
+function computeVedic(_normalized, _settings) {
+  return {
+    result: null,
+    warnings: [
+      makeWarning(
+        WARNING_CODES.SYSTEM_NOT_YET_IMPLEMENTED,
+        "vedic",
+        "The vedic provider is a P1 skeleton (ADR 0013): contracts are reserved, but no calculation exists yet. Nothing is fabricated; graha/Lagna/panchanga/dasha values arrive only after the P2/P3 slices pass their independent goldens.",
+        { severity: "info" }
+      )
+    ]
+  };
+}
+
 // packages/orchestrator/src/calculate.ts
 function pad23(n) {
   return String(n).padStart(2, "0");
@@ -51877,6 +51912,12 @@ function calculate(input, options = {}) {
         bundle.western = result;
         providers.push(result.provider);
         rulesets.push(parseRulesetId(result.rulesetId));
+      }
+    } else if (system === "vedic") {
+      const { result, warnings: vedicWarnings } = computeVedic(normalized, resolved.settings.vedic);
+      warnings.push(...vedicWarnings);
+      if (result !== null) {
+        bundle.vedic = result;
       }
     } else {
       warnings.push(pendingSystemWarning(system));

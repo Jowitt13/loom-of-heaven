@@ -5,6 +5,7 @@ import { Provenance } from './provenance.ts';
 import { BaziChartResult } from './bazi.ts';
 import { ZiweiChartResult } from './ziwei.ts';
 import { WesternChartResult } from './western.ts';
+import { VedicChartResult } from './vedic.ts';
 
 /**
  * Per-system result envelopes. Each system keeps its own schema rather than being
@@ -41,6 +42,8 @@ export const ChartBundle = z.object({
   western: WesternChartResult.optional(),
   bazi: BaziChartResult.optional(),
   ziwei: ZiweiChartResult.optional(),
+  /** Reserved slot (ADR 0013 P1): never populated until the Vedic provider computes for real. */
+  vedic: VedicChartResult.optional(),
   warnings: z.array(EngineWarning),
   provenance: Provenance,
 });
