@@ -38,6 +38,17 @@ interpretation rules that must carry an explicit source + version.
 One named ruleset first; schools via configuration. Records star-placement ruleset, 四化 table
 version, brightness table version, whether true solar time applies, and limit configuration.
 
+## Vedic (Jyotish) — `vedic-parashara-lahiri@0.1.0` (PLANNED, not implemented)
+
+Roadmap only — **no Vedic calculation exists in the engine today** and no user-facing surface may
+claim otherwise until the ADR 0013 P5 slice ships. The frozen engineering boundaries (Lahiri =
+IAE-1985 standard / Swiss `SE_SIDM_LAHIRI`, Ketu = Rahu+180°, whole-sign bhava, 27-nakshatra
+scheme, instantaneous panchanga, D1/D9) plus the proposed-but-unconfirmed defaults (mean Rahu;
+upper-limb sunrise target; Vimshottari year model **candidate `julian-365.25` — P3
+implementation blocked on the owner decision and a same-model dual-implementation cross-check**)
+live in [ADR 0013](adr/0013-vedic-architecture.md) and the per-topic source registry
+[`docs/VEDIC_SOURCE_MATRIX.md`](VEDIC_SOURCE_MATRIX.md). Target product version: v0.3.0.
+
 ## Solar-time rule (invariant)
 
 Mean/apparent solar time feed BaZi/Zi Wei only and never replace the Western UTC instant +
