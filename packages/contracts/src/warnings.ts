@@ -35,7 +35,7 @@ export type WarningCode = (typeof WARNING_CODES)[keyof typeof WARNING_CODES];
 export const WarningSeverity = z.enum(['info', 'warning']);
 export type WarningSeverity = z.infer<typeof WarningSeverity>;
 
-export const EngineSystem = z.enum(['time', 'western', 'bazi', 'ziwei', 'engine']);
+export const EngineSystem = z.enum(['time', 'western', 'bazi', 'ziwei', 'vedic', 'engine']);
 export type EngineSystem = z.infer<typeof EngineSystem>;
 
 export const EngineWarning = z.object({

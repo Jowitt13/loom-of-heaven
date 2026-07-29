@@ -111,6 +111,13 @@ describe('vedic docs gate: no premature capability claims on user-facing surface
     expect(offenders, `remove vedic claims from: ${offenders.join(', ')}`).toEqual([]);
   });
 
+  it('CLI --systems all still expands to exactly the three implemented systems (P5 owns the flip)', () => {
+    const cli = read('skills/calculate-birth-charts/scripts/ming-chart.mjs');
+    // The literal all-expansion list must stay three-system until P5 ships Vedic for real.
+    expect(cli).toContain("['western', 'bazi', 'ziwei']");
+    expect(cli).not.toMatch(/vedic|jyotish/i);
+  });
+
   it('README mentions vedic only as an explicit plan, never as a current system', () => {
     const readme = read('README.md');
     const mentions = readme.match(/^.*(vedic|jyotish).*$/gim) ?? [];

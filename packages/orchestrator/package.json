@@ -17,6 +17,7 @@
     "@ming/interpret": "workspace:*",
     "@ming/synastry": "workspace:*",
     "@ming/time-location": "workspace:*",
+    "@ming/vedic": "workspace:*",
     "@ming/western": "workspace:*",
     "@ming/ziwei": "workspace:*",
     "zod": "^4.4.3"

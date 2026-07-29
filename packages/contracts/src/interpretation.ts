@@ -31,6 +31,9 @@ export const EvidenceKind = z.enum([
   'bazi-rule',
   'western-rule',
   'ziwei-rule',
+  // Reserved for the Vedic P4 slice (ADR 0013); no producer emits these yet.
+  'vedic',
+  'vedic-rule',
   'time',
 ]);
 export type EvidenceKind = z.infer<typeof EvidenceKind>;

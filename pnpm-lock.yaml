@@ -87,6 +87,9 @@ importers:
       '@ming/time-location':
         specifier: workspace:*
         version: link:../time-location
+      '@ming/vedic':
+        specifier: workspace:*
+        version: link:../vedic
       '@ming/western':
         specifier: workspace:*
         version: link:../western
@@ -137,6 +140,22 @@ importers:
       '@ming/test-fixtures':
         specifier: workspace:*
         version: link:../test-fixtures
+
+  packages/vedic:
+    dependencies:
+      '@ming/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+    devDependencies:
+      '@ming/time-location':
+        specifier: workspace:*
+        version: link:../time-location
+
+  packages/vedic-rules:
+    dependencies:
+      '@ming/contracts':
+        specifier: workspace:*
+        version: link:../contracts
 
   packages/western:
     dependencies:

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { SCHEMA_VERSION } from './version.ts';
+import { VedicSettings } from './vedic.ts';
 
 /** YYYY-MM-DD (calendar-agnostic wall date). */
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -12,7 +13,12 @@ export type CalendarSystem = z.infer<typeof CalendarSystem>;
 export const TimeAccuracy = z.enum(['exact', 'approximate', 'unknown']);
 export type TimeAccuracy = z.infer<typeof TimeAccuracy>;
 
-export const ChartSystem = z.enum(['western', 'bazi', 'ziwei']);
+/**
+ * Chart systems. 'vedic' is contract-reserved as of P1 (ADR 0013): explicitly
+ * requesting it is valid input, but the provider returns SYSTEM_NOT_YET_IMPLEMENTED
+ * until the P2/P3 slices land. It is NOT part of the default systems array.
+ */
+export const ChartSystem = z.enum(['western', 'bazi', 'ziwei', 'vedic']);
 export type ChartSystem = z.infer<typeof ChartSystem>;
 
 /** DST fall-back disambiguation: which of two identical wall clocks to keep. */
@@ -63,10 +69,12 @@ export const ZiweiSettings = z.strictObject({
 export type ZiweiSettings = z.infer<typeof ZiweiSettings>;
 
 export const CalculationSettings = z.strictObject({
+  /** Default stays the three implemented systems; 'vedic' is opt-in only (ADR 0013 P1). */
   systems: z.array(ChartSystem).min(1).default(['western', 'bazi', 'ziwei']),
   western: WesternSettings.prefault({}),
   bazi: BaziSettings.prefault({}),
   ziwei: ZiweiSettings.prefault({}),
+  vedic: VedicSettings.prefault({}),
 });
 export type CalculationSettings = z.infer<typeof CalculationSettings>;
 

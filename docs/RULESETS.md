@@ -41,7 +41,11 @@ version, brightness table version, whether true solar time applies, and limit co
 ## Vedic (Jyotish) — `vedic-parashara-lahiri@0.1.0` (PLANNED, not implemented)
 
 Roadmap only — **no Vedic calculation exists in the engine today** and no user-facing surface may
-claim otherwise until the ADR 0013 P5 slice ships. The frozen engineering boundaries (Lahiri =
+claim otherwise until the ADR 0013 P5 slice ships. P1 status: the contracts reserve the `vedic`
+system id (`VedicSettings`/`VedicChartResult`, opt-in only — the default `systems` array stays
+three-system) and `@ming/vedic` / `@ming/vedic-rules` exist as skeletons whose provider always
+returns `SYSTEM_NOT_YET_IMPLEMENTED`; nothing is computed and no defaults are wired for the
+unresolved knobs (`nodes`, `dashaYear`). The frozen engineering boundaries (Lahiri =
 IAE-1985 standard / Swiss `SE_SIDM_LAHIRI`, Ketu = Rahu+180°, whole-sign bhava, 27-nakshatra
 scheme, instantaneous panchanga, D1/D9) plus the proposed-but-unconfirmed defaults (mean Rahu;
 upper-limb sunrise target; Vimshottari year model **candidate `julian-365.25` — P3
