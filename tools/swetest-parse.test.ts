@@ -63,8 +63,8 @@ describe('parseSwetestAngle', () => {
 
 /**
  * Build a synthetic, fully-populated TWO-COLUMN swetest -house stdout.
- * Column 1 mixes DMS and decimal forms; column 2 is always a valid DMS
- * lexeme (including one with an internal space before the seconds) whose
+ * Column 1 mixes DMS and decimal forms; column 2 uses valid DMS and decimal
+ * lexemes (including one with an internal space before the seconds) whose
  * value must never leak into the parsed result.
  */
 function syntheticStdout(omit?: 'house7' | 'Ascendant' | 'MC'): string {
@@ -74,8 +74,15 @@ function syntheticStdout(omit?: 'house7' | 'Ascendant' | 'MC'): string {
     // Alternate DMS and decimal forms in column 1 to exercise both branches.
     const base = (i * 30 + 3) % 360;
     const col1 = i % 2 === 0 ? `${base}.5000000` : `${base}°15'30.0000`;
-    // One second column with an internal space before the seconds.
-    const col2 = i === 3 ? "94°45' 1.3614" : "12°34'56.7890";
+    // Exercise a spaced DMS, decimal, and valid ARMC-like >360° auxiliary column.
+    const col2 =
+      i === 3
+        ? "94°45' 1.3614"
+        : i === 4
+          ? '12.3456789'
+          : i === 5
+            ? "1393°19'27.6680"
+            : "12°34'56.7890";
     lines.push(`house ${i}  ${col1}  ${col2}`);
   }
   if (omit !== 'Ascendant') lines.push("Ascendant  93°10'50.7734   8°15'20.0000");

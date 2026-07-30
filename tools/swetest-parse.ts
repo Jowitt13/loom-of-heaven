@@ -23,7 +23,13 @@ const DECIMAL_RE = /^\d{1,3}(?:\.\d+)?$/;
 // reject a missing second column, a third column and any trailing garbage.
 const DMS_LEX = /\d{1,3}°\s*\d{1,2}'\s*\d{1,2}(?:\.\d+)?"?/;
 const FIELD_LEX = new RegExp(`(?:${DMS_LEX.source}|\\d{1,3}(?:\\.\\d+)?)`);
-const TWO_COL_RE = new RegExp(`^(${FIELD_LEX.source})\\s+(${DMS_LEX.source})$`);
+// The ignored auxiliary column can contain an ARMC-related value beyond a
+// full turn, which Swiss emits with four degree digits on some dates.
+const AUX_DMS_RE = /^(\d{1,4})°\s*(\d{1,2})'\s*(\d{1,2}(?:\.\d+)?)"?$/;
+const AUX_DMS_LEX = /\d{1,4}°\s*\d{1,2}'\s*\d{1,2}(?:\.\d+)?"?/;
+const AUX_DECIMAL_RE = /^\d{1,4}(?:\.\d+)?$/;
+const AUX_FIELD_LEX = new RegExp(`(?:${AUX_DMS_LEX.source}|\\d{1,4}(?:\\.\\d+)?)`);
+const TWO_COL_RE = new RegExp(`^(${FIELD_LEX.source})\\s+(${AUX_FIELD_LEX.source})$`);
 
 /**
  * Parse a single swetest angle field into decimal degrees.
@@ -64,6 +70,26 @@ export function parseSwetestAngle(field: string, context = 'angle'): number {
   return value;
 }
 
+/**
+ * Validate the ignored second `-house` column. It has the same lexical forms
+ * as an angle, but ARMC-related rows can legitimately exceed 360° there, so
+ * it must not inherit the retained first column's [0,360) range contract.
+ */
+function validateSwetestAuxiliaryAngle(field: string, context: string): void {
+  const trimmed = field.trim();
+  const dms = AUX_DMS_RE.exec(trimmed);
+  if (dms) {
+    const min = Number(dms[2]);
+    const sec = Number(dms[3]);
+    if (min >= 60 || sec >= 60) {
+      throw new Error(`auxiliary angle component out of range (${context})`);
+    }
+    return;
+  }
+  if (AUX_DECIMAL_RE.test(trimmed) && Number.isFinite(Number(trimmed))) return;
+  throw new Error(`malformed auxiliary angle (${context})`);
+}
+
 export interface ParsedHouse {
   cusps: number[]; // index 0 = house 1 ... index 11 = house 12
   ascendant: number;
@@ -76,16 +102,22 @@ export interface ParsedHouse {
  * parsed FIRST column. Column 1 must be a strictly valid DMS or decimal
  * angle in [0,360) (re-checked by parseSwetestAngle's full-consumption
  * contract) and is the value we keep. Column 2 must be present and fully
- * match the swetest DMS lexeme, but is deliberately NOT captured as a golden
- * value. Anything else — missing second column, a third column, trailing
- * garbage, a garbled or incomplete second column — is rejected. The error
- * stays structural: no raw external content is echoed.
+ * match the same strict DMS-or-decimal angle grammar, but is deliberately NOT
+ * captured as a golden value. Swiss emits decimal second columns for some
+ * valid historical house rows, and ARMC-related auxiliary values can exceed
+ * 360°, so requiring DMS or a longitude range there would reject a real
+ * reference capture. Anything else — missing second column, a third column,
+ * trailing garbage, a garbled or incomplete second column — is rejected. The
+ * error stays structural: no raw external content is echoed.
  */
 function parseTwoColumnValue(rest: string, where: string): number {
   const m = TWO_COL_RE.exec(rest.trim());
   if (!m) {
     throw new Error(`malformed two-column line (${where})`);
   }
+  // Validate the ignored reference column syntactically. Its ARMC-related
+  // values may lie outside [0,360), unlike the retained ecliptic longitude.
+  validateSwetestAuxiliaryAngle(m[2]!, `${where} column 2`);
   return parseSwetestAngle(m[1]!, where);
 }
 
