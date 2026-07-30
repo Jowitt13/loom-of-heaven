@@ -44,16 +44,25 @@ describe('vedic docs gate: P0 deliverables present and complete', () => {
     expect(adr).toMatch(/never be\s+treated as\s+synonyms/i);
   });
 
-  it('ADR 0013 keeps semantic defaults as proposed/blocked, not silently accepted', () => {
+  it('ADR 0013 keeps owner-confirmed defaults and verification gates distinct', () => {
     const adr = read(ADR);
-    // Status must stay Proposed until the owner confirms the semantic defaults.
+    // Status must stay Proposed while the Rahu node default awaits owner confirmation.
     expect(adr).toMatch(/- Status: Proposed/);
     expect(adr).not.toMatch(/- Status: Accepted/);
-    // The Vimshottari year model is an explicit blocker, never a wired default.
-    expect(adr).toMatch(/BLOCKED \/ owner decision.*Vimshottari year model/is);
-    expect(adr).not.toMatch(/default is the \*\*365\.25-day/i);
-    // Sunrise backend mapping stays an unverified P2/P3 blocker until evidence lands.
+    // julian-365.25 is the owner-confirmed default (2026-07-31), not a pending candidate.
+    expect(adr).toMatch(/Owner-confirmed default \(2026-07-31\):\s+`julian-365\.25`/i);
+    expect(adr).not.toMatch(/BLOCKED \/ owner decision.*Vimshottari year model/is);
+    // The only remaining Vimshottari gate is the same-model dual-implementation cross-check.
+    expect(adr).toMatch(
+      /remaining Vimshottari blocker is verification[\s\S]*?identical `julian-365\.25` model/i,
+    );
+    // Sunrise rule is owner-confirmed upper-limb + standard 34′ refraction.
+    expect(adr).toMatch(/Owner-confirmed \(2026-07-31\): upper-limb sunrise with standard 34′/);
+    expect(adr).toContain('upper-limb-standard-refraction');
+    // The −50′ backend mapping stays an unverified P2/P3 blocker until goldens land.
     expect(adr).toMatch(/not yet verified and is a P2\/P3\s+implementation blocker/i);
+    // Rahu remains the single undecided semantic default.
+    expect(adr).toMatch(/\*\*Proposed\*\* default `nodes: 'mean'`/);
   });
 
   it('keeps the P2 evidence amendment field-scoped without lowering the Swiss gate', () => {
