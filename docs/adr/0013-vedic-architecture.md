@@ -286,10 +286,45 @@ decision (§Open questions); the engine capability does not depend on it.
   the isolated two-phase `swetest -sid1` workflow (staging dir → SHA-256 manifest → reviewed
   transcription; binaries/ephemeris files never enter the repo), gate ≤1′ for grahas, nodes and
   Lagna; Rahu/Ketu opposition asserted; cross-checked against at least one independent MIT
-  implementation (candidate: jyotishganit, Python/Skyfield/JPL) — discrepancies are **recorded
-  per-source in the fixture, never majority-voted away**. All inputs marked synthetic.
-  **Blocker carried into P2/P3**: pin the sunrise backend parameter mapping (§9) with sunrise
-  spot-check goldens before any Vaara output.
+  implementation where one is available — discrepancies are **recorded per-source in the fixture,
+  never majority-voted away**. The field-scoped evidence policy below is binding. All inputs marked
+  synthetic. **Blocker carried into P2/P3**: pin the sunrise backend parameter mapping (§9) with
+  sunrise spot-check goldens before any Vaara output.
+
+### P2 verification evidence boundary (amended 2026-07-30)
+
+This amendment supersedes the generic all-fields independent-MIT wording in the P2 bullet above.
+It does **not** lower any numerical acceptance threshold.
+
+1. **Swiss remains the hard acceptance oracle for every P2 numeric field.** The implementation
+   must match reviewed, isolated `swetest -sid1 -utc -emos` fixtures within ≤1′ for every graha,
+   both Rahu modes and Lagna; Ketu remains an exact opposition invariant. A passing result may be
+   described only as “matches the recorded Swiss fixtures within ≤1′”, never as a general claim of
+   physical or absolute astrometric accuracy.
+2. **MIT cross-checks are field-scoped supplementary evidence, not a substitute oracle.** A
+   passing independent MIT implementation is recorded for the individual fields it demonstrably
+   covers. Its absence or failure for another field never relaxes the Swiss gate; that field is
+   explicitly marked **Swiss-only external numeric reference** in the fixture and public
+   provenance notes. No majority vote is allowed.
+3. **NDAstro 0.28.1 audit record.** Its MIT wheel and tag `v0.28.1` sources were byte-for-byte
+   bound; its Skyfield/JPL route contains no Swiss runtime dependency. Against 11 synthetic cases
+   (110 comparisons) using ordinary `lahiri` only — never its mode-43-compatible
+   `true_lahiri` / `lahiri_traditional` paths — it passed Sun..Saturn (worst 0.710′) and mean
+   Rahu (worst 0.046′). It failed true Rahu (worst 7.633′) and Lagna (worst 10.286′), so it is
+   **REJECTED_FOR_MODE1_REFERENCE** as a full P2 oracle. It is retained only as supplementary
+   pre-screen evidence for the fields that passed; it is never embedded, copied or made a runtime
+   dependency.
+4. **Compensating Swiss-only safeguards.** P2 now requires at least **100 synthetic cases**,
+   including the stated multi-decade, hemisphere, IANA-zone and classification-boundary coverage.
+   Each capture must retain the exact argv, `swetest` version, raw stdout/stderr SHA-256 manifest
+   and reviewed transcription trail outside the repository. True-node tests additionally assert
+   Ketu opposition, continuity and no boundary jump; Lagna tests assert the explicit tropical-to-
+   sidereal transform and the existing high-latitude contract. These are implementation checks,
+   not a claim of a second independent ephemeris.
+
+Until a future independent source passes a field, user-facing and release documentation must say
+“Swiss-only external numeric reference” for that field and must not claim two-source validation.
+
 - **P3 — classifications**: Rashi/Bhava/Nakshatra/Pada/Panchanga/D1/D9/Vimshottari per §§7–12,
   including boundary-case unit tests on both sides of every segment edge. **Blocked until** the
   Vimshottari year-model owner decision + same-model dual-implementation cross-check (§11) and

@@ -76,11 +76,28 @@ Acceptable error | Unresolved questions**
 - Captured with the existing two-phase isolated workflow (staging dir → atomic rename →
   SHA-256 manifest of every stdout/stderr/argv → reviewed transcription). swetest binaries and
   ephemeris files never enter the repo; `.tmp` capture dirs stay untracked.
-- Cross-verification: Swiss (`-sid1`) is the primary reference; at least one independent MIT
-  implementation (jyotishganit candidate) is recorded **per-source** in the fixture. Any
-  disagreement above tolerance is preserved and investigated — never resolved by majority vote.
+- Cross-verification: Swiss (`-sid1`) is the hard primary reference. Independent MIT results are
+  recorded **per field only where they demonstrably pass**; any disagreement above tolerance is
+  preserved and investigated — never resolved by majority vote. A field without such a passing
+  cross-check is explicitly disclosed as a Swiss-only external numeric reference.
 - Gate: grahas, nodes (both modes) and Lagna ≤1 arc-minute; Ketu opposition exact; derived
-  classifications must match the classification of the golden longitude.
+  classifications must match the classification of the golden longitude. The minimum matrix is
+  **100 synthetic cases** (this supersedes the earlier 50-case planning minimum).
+
+### P2 validation-evidence amendment (2026-07-30)
+
+The following audit record narrows the meaning of “second source” without lowering the Swiss
+numeric gate. It is a source-audit record only: it adds no Vedic code, fixture or precision claim.
+
+| Candidate                          | Audit outcome                                                                                                                                                                                       | Fields usable as supplementary evidence              | Fields explicitly not covered                   | Binding consequence                                                                                                                                                                                |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NDAstro 0.28.1 (MIT; Skyfield/JPL) | Wheel and fixed `v0.28.1` tag sources matched byte-for-byte; no Swiss runtime import; ordinary `lahiri` pre-screened against `swetest -sid1 -utc -emos` across 11 synthetic cases / 110 comparisons | Sun..Saturn (worst 0.710′); mean Rahu (worst 0.046′) | true Rahu (worst 7.633′); Lagna (worst 10.286′) | **REJECTED_FOR_MODE1_REFERENCE** as a full oracle. It may be recorded only for passing fields; true Rahu and Lagna remain Swiss-only external numeric references until another source passes them. |
+
+For every Swiss-only field, the P2 fixture must carry the raw-capture argv, `swetest` version,
+stdout/stderr SHA-256 manifest and reviewed transcription trail. P2 adds Ketu opposition,
+true-node continuity/no-boundary-jump and Lagna tropical-to-sidereal transform assertions. These
+checks detect implementation and fixture wiring errors; they are not presented as a second
+independent astronomical implementation.
 
 ## Blocked items
 

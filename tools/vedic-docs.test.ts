@@ -56,6 +56,20 @@ describe('vedic docs gate: P0 deliverables present and complete', () => {
     expect(adr).toMatch(/not yet verified and is a P2\/P3\s+implementation blocker/i);
   });
 
+  it('keeps the P2 evidence amendment field-scoped without lowering the Swiss gate', () => {
+    const adr = read(ADR);
+    const matrix = read(MATRIX);
+    for (const text of [adr, matrix]) {
+      expect(text).toContain('Swiss-only external numeric reference');
+      expect(text).toContain('100 synthetic cases');
+      expect(text).toContain('REJECTED_FOR_MODE1_REFERENCE');
+    }
+    expect(adr).toContain('worst 7.633′');
+    expect(adr).toContain('worst 10.286′');
+    expect(adr).toMatch(/Swiss remains the hard acceptance oracle/i);
+    expect(adr).toMatch(/never as a general claim of[\s\S]*accuracy/i);
+  });
+
   it('source matrix exists with the ten required columns and license boundary', () => {
     const matrix = read(MATRIX);
     const requiredColumns = [
