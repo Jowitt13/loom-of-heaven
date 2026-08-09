@@ -2,8 +2,9 @@
 
 Companion to [ADR 0013](adr/0013-vedic-architecture.md). One row per calculation topic. Every
 implementation PR (P1–P5) must trace its behavior back to a row here; changing a row means
-changing ADR 0013 first. **P2 implements only the precision-gated numeric substrate; all P3
-classification, panchanga, dasha and user-facing work remains unimplemented.**
+changing ADR 0013 first. **P2 implements the precision-gated numeric substrate. P3A implements
+the deterministic rashi/whole-sign/nakshatra/pada/instantaneous-panchanga/D1/D9 overlay; Vaara,
+Vimshottari and all user-facing work remain unimplemented.**
 
 Source classes are kept separate on purpose:
 
@@ -18,17 +19,21 @@ Source classes are kept separate on purpose:
 
 Blog aggregations or unsourced web pages are never the sole basis for a row.
 
-## P2 implementation record (2026-08-09)
+## P2/P3A implementation record (2026-08-09)
 
 - Runtime file: `packages/vedic/src/vedic-provider.ts`; it uses only
   `caelus@0.23.0` and the package's static `data-embedded` export. No Swiss code, binary or data
   file is present in the runtime dependency closure.
 - Contract scope: `packages/contracts/src/vedic.ts` exports seven grahas, both Rahu/Ketu modes,
-  and nullable Lagna. It deliberately exports no rashi, nakshatra, bhava, panchanga, D1/D9,
-  Vimshottari or Vaara value.
+  nullable Lagna, and a nullable P3A derived overlay. For a known birth time that overlay has
+  rashi (D1), whole-sign bhava, 27-nakshatra/pada, D9, and instantaneous Tithi/Yoga/Karana. It
+  deliberately exports no Vaara or Vimshottari value; it is wholly suppressed for unknown time
+  rather than presenting the normalizer's noon anchor as a claimed classification.
 - Acceptance: `packages/vedic/test/vedic-swiss-golden-fixture.test.ts` evaluates every runtime
   field against all 100 reviewed synthetic `swetest -sid1 -utc -emos` records at ≤1′ and asserts
-  exact Ketu opposition. It is an offline regression, not a Swiss runtime integration.
+  exact Ketu opposition. `packages/vedic/test/classifications.test.ts` covers both sides of the
+  rashi/nakshatra/pada/tithi/yoga/karana/D9 boundaries and cross-checks the two D9 formulations.
+  These are offline regressions, not a Swiss runtime integration.
 
 ## License boundary for external tools (binding)
 

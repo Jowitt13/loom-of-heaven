@@ -2,9 +2,10 @@ import { z } from 'zod';
 import { ProviderRef } from './provenance.ts';
 
 /**
- * Vedic (Jyotish) domain contracts. P2 provides only the precision-gated numeric
- * substrate: seven graha longitudes, both node modes and (when a time is known)
- * Lagna. Nakshatra, panchanga, bhava, vargas and dashas remain P3 work.
+ * Vedic (Jyotish) domain contracts. P2 provides the precision-gated numeric
+ * substrate; P3A derives deterministic rashi, whole-sign bhava, nakshatra/pada,
+ * instantaneous panchanga and D1/D9 classifications from that substrate. Vaara
+ * and Vimshottari remain deliberately absent behind their separate evidence gates.
  */
 
 /**
@@ -30,11 +31,85 @@ export const VedicSettings = z.strictObject({
 });
 export type VedicSettings = z.infer<typeof VedicSettings>;
 
-/** P2's seven classical grahas with Swiss-fixture-gated sidereal longitudes. */
+/** Seven classical grahas with Swiss-fixture-gated sidereal longitudes. */
 export const VedicGraha = z.enum(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn']);
 export type VedicGraha = z.infer<typeof VedicGraha>;
 
-/** A normalized sidereal ecliptic longitude. P2 emits no derived classification. */
+/** Twelve sidereal rashis in zodiacal order, beginning at 0° Aries (Mesha). */
+export const VedicRashi = z.enum([
+  'Mesha',
+  'Vrishabha',
+  'Mithuna',
+  'Karka',
+  'Simha',
+  'Kanya',
+  'Tula',
+  'Vrishchika',
+  'Dhanu',
+  'Makara',
+  'Kumbha',
+  'Meena',
+]);
+export type VedicRashi = z.infer<typeof VedicRashi>;
+
+/** The 27-nakshatra scheme; Abhijit and any 28-nakshatra convention are out of scope. */
+export const VedicNakshatraName = z.enum([
+  'Ashwini',
+  'Bharani',
+  'Krittika',
+  'Rohini',
+  'Mrigashira',
+  'Ardra',
+  'Punarvasu',
+  'Pushya',
+  'Ashlesha',
+  'Magha',
+  'PurvaPhalguni',
+  'UttaraPhalguni',
+  'Hasta',
+  'Chitra',
+  'Swati',
+  'Vishakha',
+  'Anuradha',
+  'Jyeshtha',
+  'Mula',
+  'PurvaAshadha',
+  'UttaraAshadha',
+  'Shravana',
+  'Dhanishtha',
+  'Shatabhisha',
+  'PurvaBhadrapada',
+  'UttaraBhadrapada',
+  'Revati',
+]);
+export type VedicNakshatraName = z.infer<typeof VedicNakshatraName>;
+
+export const VedicNakshatraPlacement = z.strictObject({
+  /** One-based conventional nakshatra number (1=Ashwini … 27=Revati). */
+  index: z.number().int().min(1).max(27),
+  name: VedicNakshatraName,
+  /** One-based quarter within the nakshatra. */
+  pada: z.number().int().min(1).max(4),
+});
+export type VedicNakshatraPlacement = z.infer<typeof VedicNakshatraPlacement>;
+
+/** The eleven names used by the 60 half-tithi karana positions. */
+export const VedicKaranaName = z.enum([
+  'Kimstughna',
+  'Bava',
+  'Balava',
+  'Kaulava',
+  'Taitila',
+  'Garaja',
+  'Vanija',
+  'Vishti',
+  'Shakuni',
+  'Chatushpada',
+  'Naga',
+]);
+export type VedicKaranaName = z.infer<typeof VedicKaranaName>;
+
+/** A normalized sidereal ecliptic longitude, used by both the P2 substrate and P3A overlay. */
 export const VedicLongitude = z.number().min(0).lt(360);
 export type VedicLongitude = z.infer<typeof VedicLongitude>;
 
@@ -52,9 +127,68 @@ export const VedicNodePair = z.strictObject({
 export type VedicNodePair = z.infer<typeof VedicNodePair>;
 
 /**
- * Vedic P2 numeric result envelope. Both node modes are emitted until the owner
- * selects a product default. Lagna is null when no birth time is known; the engine
- * never treats its normalization anchor as a real birth time.
+ * P3A classification for one already-canonical sidereal longitude. `bhava` is
+ * a one-based whole-sign house, derived only after a real Lagna is available.
+ */
+export const VedicDerivedPlacement = z.strictObject({
+  longitudeDeg: VedicLongitude,
+  rashi: VedicRashi,
+  nakshatra: VedicNakshatraPlacement,
+  /** D9 rashi under the frozen Parashari mapping. */
+  navamsha: VedicRashi,
+  bhava: z.number().int().min(1).max(12),
+});
+export type VedicDerivedPlacement = z.infer<typeof VedicDerivedPlacement>;
+
+export const VedicGrahaDerivedPlacement = VedicDerivedPlacement.extend({
+  graha: VedicGraha,
+}).strict();
+export type VedicGrahaDerivedPlacement = z.infer<typeof VedicGrahaDerivedPlacement>;
+
+export const VedicNodeDerivedPair = z.strictObject({
+  rahu: VedicDerivedPlacement,
+  ketu: VedicDerivedPlacement,
+});
+export type VedicNodeDerivedPair = z.infer<typeof VedicNodeDerivedPair>;
+
+/** Instantaneous panchanga only: Vaara needs its separately gated sunrise mapping. */
+export const VedicInstantaneousPanchanga = z.strictObject({
+  tithi: z.strictObject({
+    number: z.number().int().min(1).max(30),
+    paksha: z.enum(['shukla', 'krishna']),
+  }),
+  yoga: z.strictObject({
+    number: z.number().int().min(1).max(27),
+  }),
+  karana: z.strictObject({
+    /** Zero-based half-tithi position, 0 through 59. */
+    slot: z.number().int().min(0).max(59),
+    name: VedicKaranaName,
+  }),
+});
+export type VedicInstantaneousPanchanga = z.infer<typeof VedicInstantaneousPanchanga>;
+
+/**
+ * P3A overlay over the P2 numerical substrate. It is null when the birth time is
+ * unknown: the normalizer's noon anchor is not a claimed chart instant, and P4
+ * owns the finer day-stability and public-warning policy.
+ */
+export const VedicDerivedChart = z.strictObject({
+  grahas: z.array(VedicGrahaDerivedPlacement).length(7),
+  nodes: z.strictObject({
+    mean: VedicNodeDerivedPair,
+    true: VedicNodeDerivedPair,
+  }),
+  /** Lagna itself is always the first whole-sign bhava. */
+  lagna: VedicDerivedPlacement,
+  panchanga: VedicInstantaneousPanchanga,
+});
+export type VedicDerivedChart = z.infer<typeof VedicDerivedChart>;
+
+/**
+ * P2/P3A Vedic result envelope. Both node modes are emitted until the owner selects
+ * a product default. Lagna and the derived overlay are null when no birth time is
+ * known; the engine never treats its normalization anchor as a real birth time.
  */
 export const VedicChartResult = z.strictObject({
   rulesetId: z.string(),
@@ -69,6 +203,7 @@ export const VedicChartResult = z.strictObject({
     true: VedicNodePair,
   }),
   lagnaLongitudeDeg: VedicLongitude.nullable(),
+  derived: VedicDerivedChart.nullable(),
   /** Granted only by the offline P2 Swiss fixture regression (≤1′ for every P2 field). */
   precision: z.literal('high'),
 });

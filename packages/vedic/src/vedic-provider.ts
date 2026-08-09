@@ -8,6 +8,7 @@ import type {
   VedicGraha,
   VedicSettings,
 } from '@ming/contracts';
+import { deriveVedicClassifications } from './classifications.ts';
 
 /** Pinned numerical provider; its package version is independently source-bound in ADR 0013. */
 export const CAELUS_VERSION = '0.23.0';
@@ -77,9 +78,9 @@ export function computeVedicP2Positions(input: VedicP2PositionInput): VedicP2Pos
 }
 
 /**
- * P2 Vedic provider: precise Lahiri numerical substrate only. Both node modes
- * are emitted, so the unresolved Rahu default cannot affect a chart silently.
- * P3 classifications, panchanga, bhava, vargas and dasha are deliberately absent.
+ * P2/P3A Vedic provider. Both node modes are emitted, so the unresolved Rahu
+ * default cannot affect a chart silently. The P3A overlay contains only the
+ * evidence-unblocked classifications; Vaara and dasha remain absent.
  */
 export function computeVedic(
   normalized: NormalizedBirthData,
@@ -108,6 +109,9 @@ export function computeVedic(
     // Normalization anchors an unknown wall time at noon only for date-based work;
     // that anchor must never become a claimed ascendant.
     lagnaLongitudeDeg: normalized.timeKnown ? positions.lagnaLongitudeDeg : null,
+    // The same anchor must not leak as a derived natal classification. P4 owns the
+    // finer day-stability and public warning policy for unknown birth times.
+    derived: normalized.timeKnown ? deriveVedicClassifications(positions) : null,
     precision: 'high',
   };
   return { result, warnings: [] };

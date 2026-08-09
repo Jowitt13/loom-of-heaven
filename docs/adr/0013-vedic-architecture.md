@@ -1,8 +1,9 @@
 # ADR 0013: Vedic (Jyotish) system architecture & rule-convention freeze (P0)
 
-- Status: Proposed — P2's precision-gated numeric substrate is implemented; only the Rahu node
-  default (§5) still awaits owner confirmation. P3 classifications, panchanga, bhava, vargas,
-  Vimshottari and Vaara remain unimplemented and must not be presented as shipped capability.
+- Status: Proposed — P2's precision-gated numeric substrate and the evidence-unblocked P3A
+  classification overlay are implemented; only the Rahu node default (§5) still awaits owner
+  confirmation. Vaara and Vimshottari remain separately evidence-gated and unimplemented; no
+  Vedic capability may be presented as a user-facing shipped product before P5.
   Engineering boundaries in §§1–4, 6–10, 12–16 are frozen. The sunrise rule target (§9) and
   the Vimshottari year model (§11) are **owner-confirmed defaults (2026-07-31) with remaining
   verification gates**: each still carries an evidence gate (sunrise backend mapping; same-model
@@ -339,11 +340,15 @@ and acceptance record, not a second-reference claim; Swiss remains external-only
 Until a future independent source passes a field, user-facing and release documentation must say
 “Swiss-only external numeric reference” for that field and must not claim two-source validation.
 
-- **P3 — classifications**: Rashi/Bhava/Nakshatra/Pada/Panchanga/D1/D9/Vimshottari per §§7–12,
-  including boundary-case unit tests on both sides of every segment edge. Both owner decisions
-  are done (2026-07-31); what still gates delivery is evidence: Vimshottari cannot ship until
-  the same-model (`julian-365.25`) dual-implementation cross-check (§11) passes, and Vaara
-  cannot ship until the sunrise mapping verification (§9) passes.
+- **P3A — classifications (implemented)**: Rashi (D1), whole-sign Bhava, 27-Nakshatra/Pada,
+  instantaneous Tithi/Yoga/Karana, and D9 now derive from the P2 canonical longitudes only when
+  the birth time is known. Unit tests cover both sides of every represented segment edge and
+  independently cross-check the modality and triplicity D9 formulations. The overlay contains no
+  Vaara or Vimshottari and is not user-facing.
+- **P3B — evidence-gated classifications**: Both owner decisions are done (2026-07-31); what
+  still gates delivery is evidence: Vimshottari cannot ship until the same-model
+  (`julian-365.25`) dual-implementation cross-check (§11) passes, and Vaara cannot ship until
+  the sunrise mapping verification (§9) passes.
 - **P4 — facts & answer layer**: `vedic-rules` sourced findings, InterpretationFacts wiring,
   AnswerPlan/PublicResult v2, validate-answer update, warning codes + public-copy table,
   timeAccuracy gating (§13).

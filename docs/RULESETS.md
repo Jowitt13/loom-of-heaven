@@ -38,14 +38,16 @@ interpretation rules that must carry an explicit source + version.
 One named ruleset first; schools via configuration. Records star-placement ruleset, 四化 table
 version, brightness table version, whether true solar time applies, and limit configuration.
 
-## Vedic (Jyotish) — `vedic-parashara-lahiri@0.1.0` (P2 numeric substrate; not user-facing)
+## Vedic (Jyotish) — `vedic-parashara-lahiri@0.1.0` (P2/P3A substrate; not user-facing)
 
-P2 computes a **numeric-only**, opt-in substrate: Lahiri Sun..Saturn, both Rahu modes with Ketu
-as exact opposition, and Lagna when a birth time is known. It is held to the reviewed offline
-Swiss mode-1 fixture at ≤1′ and uses the MIT `caelus@0.23.0` embedded-data provider. This is not
-a user-facing product system: the default `systems` array remains three-system and no Skill or
-host surface may claim Vedic capability until the ADR 0013 P5 slice ships. P3-only products
-(rashi/bhava/nakshatra/panchanga/D1/D9/Vimshottari/Vaara) are absent.
+P2 computes an opt-in numeric substrate: Lahiri Sun..Saturn, both Rahu modes with Ketu as exact
+opposition, and Lagna when a birth time is known. P3A deterministically derives rashi (D1),
+whole-sign bhava, 27-nakshatra/pada, D9, and instantaneous Tithi/Yoga/Karana from those canonical
+longitudes; it suppresses the entire overlay when the birth time is unknown. It is held to the
+reviewed offline Swiss mode-1 fixture at ≤1′ and uses the MIT `caelus@0.23.0` embedded-data
+provider. This is not a user-facing product system: the default `systems` array remains
+three-system and no Skill or host surface may claim Vedic capability until the ADR 0013 P5 slice
+ships. Vaara and Vimshottari remain absent.
 Owner-confirmed defaults (2026-07-31): the Vimshottari year model is
 `dashaYear: 'julian-365.25'` (365.25 × 86400 SI seconds; savana-360/sidereal only as future new
 rulesets) and the Vaara sunrise rule is `upper-limb-standard-refraction` (upper limb + standard

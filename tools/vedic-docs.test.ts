@@ -98,19 +98,21 @@ describe('vedic docs gate: P0 deliverables present and complete', () => {
     }
   });
 
-  it('RULESETS.md scopes the ruleset to the P2 numeric substrate and links ADR 0013', () => {
+  it('RULESETS.md scopes the ruleset to the P2/P3A internal substrate and links ADR 0013', () => {
     const rulesets = read('docs/RULESETS.md');
     expect(rulesets).toContain('vedic-parashara-lahiri@0.1.0');
-    expect(rulesets).toMatch(/P2 numeric substrate; not user-facing/);
-    expect(rulesets).toContain('P3-only products');
+    expect(rulesets).toMatch(/P2\/P3A substrate; not user-facing/);
+    expect(rulesets).toContain('Vaara and Vimshottari remain absent');
     expect(rulesets).toContain('adr/0013-vedic-architecture.md');
   });
 
-  it('P2 docs disclose their narrow implemented scope and retain the P3 boundary', () => {
+  it('P2/P3A docs disclose their narrow implemented scope and retain the P3B boundary', () => {
     for (const rel of [ADR, MATRIX]) {
-      expect(read(rel), `${rel} must describe the P2 numeric boundary`).toMatch(/P2.*numeric/i);
-      expect(read(rel), `${rel} must retain an unimplemented P3 boundary`).toMatch(
-        /P3[\s\S]*unimplemented/i,
+      const text = read(rel);
+      expect(text, `${rel} must describe the P2 numeric boundary`).toMatch(/P2.*numeric/i);
+      expect(text, `${rel} must describe the implemented P3A boundary`).toMatch(/P3A/i);
+      expect(text, `${rel} must retain the evidence-gated Vaara and Vimshottari boundary`).toMatch(
+        /Vaara[\s\S]*Vimshottari|Vimshottari[\s\S]*Vaara/i,
       );
     }
   });

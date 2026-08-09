@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Vedic (Jyotish) P2 numeric provider (ADR 0013): precise Lahiri grahas, both node modes and Lagna behind the offline Swiss golden; P3 classifications and dashas remain unimplemented.",
+  "description": "Vedic (Jyotish) P2 numeric provider plus P3A deterministic classifications (ADR 0013); Vaara and dashas remain evidence-gated and unimplemented.",
   "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

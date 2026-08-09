@@ -39983,6 +39983,69 @@ var VedicSettings = external_exports.strictObject({
   dashaYear: external_exports.enum(["julian-365.25", "savana-360", "sidereal"]).optional()
 });
 var VedicGraha = external_exports.enum(["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"]);
+var VedicRashi = external_exports.enum([
+  "Mesha",
+  "Vrishabha",
+  "Mithuna",
+  "Karka",
+  "Simha",
+  "Kanya",
+  "Tula",
+  "Vrishchika",
+  "Dhanu",
+  "Makara",
+  "Kumbha",
+  "Meena"
+]);
+var VedicNakshatraName = external_exports.enum([
+  "Ashwini",
+  "Bharani",
+  "Krittika",
+  "Rohini",
+  "Mrigashira",
+  "Ardra",
+  "Punarvasu",
+  "Pushya",
+  "Ashlesha",
+  "Magha",
+  "PurvaPhalguni",
+  "UttaraPhalguni",
+  "Hasta",
+  "Chitra",
+  "Swati",
+  "Vishakha",
+  "Anuradha",
+  "Jyeshtha",
+  "Mula",
+  "PurvaAshadha",
+  "UttaraAshadha",
+  "Shravana",
+  "Dhanishtha",
+  "Shatabhisha",
+  "PurvaBhadrapada",
+  "UttaraBhadrapada",
+  "Revati"
+]);
+var VedicNakshatraPlacement = external_exports.strictObject({
+  /** One-based conventional nakshatra number (1=Ashwini … 27=Revati). */
+  index: external_exports.number().int().min(1).max(27),
+  name: VedicNakshatraName,
+  /** One-based quarter within the nakshatra. */
+  pada: external_exports.number().int().min(1).max(4)
+});
+var VedicKaranaName = external_exports.enum([
+  "Kimstughna",
+  "Bava",
+  "Balava",
+  "Kaulava",
+  "Taitila",
+  "Garaja",
+  "Vanija",
+  "Vishti",
+  "Shakuni",
+  "Chatushpada",
+  "Naga"
+]);
 var VedicLongitude = external_exports.number().min(0).lt(360);
 var VedicGrahaPlacement = external_exports.strictObject({
   graha: VedicGraha,
@@ -39991,6 +40054,45 @@ var VedicGrahaPlacement = external_exports.strictObject({
 var VedicNodePair = external_exports.strictObject({
   rahuLongitudeDeg: VedicLongitude,
   ketuLongitudeDeg: VedicLongitude
+});
+var VedicDerivedPlacement = external_exports.strictObject({
+  longitudeDeg: VedicLongitude,
+  rashi: VedicRashi,
+  nakshatra: VedicNakshatraPlacement,
+  /** D9 rashi under the frozen Parashari mapping. */
+  navamsha: VedicRashi,
+  bhava: external_exports.number().int().min(1).max(12)
+});
+var VedicGrahaDerivedPlacement = VedicDerivedPlacement.extend({
+  graha: VedicGraha
+}).strict();
+var VedicNodeDerivedPair = external_exports.strictObject({
+  rahu: VedicDerivedPlacement,
+  ketu: VedicDerivedPlacement
+});
+var VedicInstantaneousPanchanga = external_exports.strictObject({
+  tithi: external_exports.strictObject({
+    number: external_exports.number().int().min(1).max(30),
+    paksha: external_exports.enum(["shukla", "krishna"])
+  }),
+  yoga: external_exports.strictObject({
+    number: external_exports.number().int().min(1).max(27)
+  }),
+  karana: external_exports.strictObject({
+    /** Zero-based half-tithi position, 0 through 59. */
+    slot: external_exports.number().int().min(0).max(59),
+    name: VedicKaranaName
+  })
+});
+var VedicDerivedChart = external_exports.strictObject({
+  grahas: external_exports.array(VedicGrahaDerivedPlacement).length(7),
+  nodes: external_exports.strictObject({
+    mean: VedicNodeDerivedPair,
+    true: VedicNodeDerivedPair
+  }),
+  /** Lagna itself is always the first whole-sign bhava. */
+  lagna: VedicDerivedPlacement,
+  panchanga: VedicInstantaneousPanchanga
 });
 var VedicChartResult = external_exports.strictObject({
   rulesetId: external_exports.string(),
@@ -40005,6 +40107,7 @@ var VedicChartResult = external_exports.strictObject({
     true: VedicNodePair
   }),
   lagnaLongitudeDeg: VedicLongitude.nullable(),
+  derived: VedicDerivedChart.nullable(),
   /** Granted only by the offline P2 Swiss fixture regression (≤1′ for every P2 field). */
   precision: external_exports.literal("high")
 });
@@ -53595,13 +53698,173 @@ var embeddedData = {
   constellations: constellations_default
 };
 
+// packages/vedic/src/math.ts
+function norm3602(value) {
+  const out = value % 360;
+  return out < 0 ? out + 360 : out;
+}
+function canonicalLongitude(value) {
+  return norm3602(roundTo(value, 6));
+}
+
+// packages/vedic/src/rashi.ts
+var RASHIS = [
+  "Mesha",
+  "Vrishabha",
+  "Mithuna",
+  "Karka",
+  "Simha",
+  "Kanya",
+  "Tula",
+  "Vrishchika",
+  "Dhanu",
+  "Makara",
+  "Kumbha",
+  "Meena"
+];
+function rashiIndexOf(longitudeDeg) {
+  return Math.floor(canonicalLongitude(longitudeDeg) / 30);
+}
+function rashiOf(longitudeDeg) {
+  return RASHIS[rashiIndexOf(longitudeDeg)];
+}
+
+// packages/vedic/src/bhava.ts
+function wholeSignBhavaOf(longitudeDeg, lagnaLongitudeDeg) {
+  return (rashiIndexOf(longitudeDeg) - rashiIndexOf(lagnaLongitudeDeg) + 12) % 12 + 1;
+}
+
+// packages/vedic/src/nakshatra.ts
+var DEGREES_PER_NAKSHATRA = 360 / 27;
+var DEGREES_PER_PADA = DEGREES_PER_NAKSHATRA / 4;
+var NAKSHATRAS = [
+  "Ashwini",
+  "Bharani",
+  "Krittika",
+  "Rohini",
+  "Mrigashira",
+  "Ardra",
+  "Punarvasu",
+  "Pushya",
+  "Ashlesha",
+  "Magha",
+  "PurvaPhalguni",
+  "UttaraPhalguni",
+  "Hasta",
+  "Chitra",
+  "Swati",
+  "Vishakha",
+  "Anuradha",
+  "Jyeshtha",
+  "Mula",
+  "PurvaAshadha",
+  "UttaraAshadha",
+  "Shravana",
+  "Dhanishtha",
+  "Shatabhisha",
+  "PurvaBhadrapada",
+  "UttaraBhadrapada",
+  "Revati"
+];
+function nakshatraOf(longitudeDeg) {
+  const longitude = canonicalLongitude(longitudeDeg);
+  const indexZero = Math.floor(longitude / DEGREES_PER_NAKSHATRA);
+  const offset = longitude - indexZero * DEGREES_PER_NAKSHATRA;
+  return {
+    index: indexZero + 1,
+    name: NAKSHATRAS[indexZero],
+    pada: Math.floor(offset / DEGREES_PER_PADA) + 1
+  };
+}
+
+// packages/vedic/src/panchanga.ts
+var DEGREES_PER_YOGA = 360 / 27;
+var MOVABLE_KARANAS = [
+  "Bava",
+  "Balava",
+  "Kaulava",
+  "Taitila",
+  "Garaja",
+  "Vanija",
+  "Vishti"
+];
+function instantaneousPanchanga(sunLongitudeDeg, moonLongitudeDeg) {
+  const sun = canonicalLongitude(sunLongitudeDeg);
+  const moon = canonicalLongitude(moonLongitudeDeg);
+  const elongation = norm3602(moon - sun);
+  const tithiNumber = Math.floor(elongation / 12) + 1;
+  const karanaSlot = Math.floor(elongation / 6);
+  const karanaName = karanaSlot === 0 ? "Kimstughna" : karanaSlot <= 56 ? MOVABLE_KARANAS[(karanaSlot - 1) % MOVABLE_KARANAS.length] : karanaSlot === 57 ? "Shakuni" : karanaSlot === 58 ? "Chatushpada" : "Naga";
+  return {
+    tithi: { number: tithiNumber, paksha: tithiNumber <= 15 ? "shukla" : "krishna" },
+    // This is deliberately the sidereal sum: ayanamsha does not cancel in Yoga.
+    yoga: { number: Math.floor(norm3602(moon + sun) / DEGREES_PER_YOGA) + 1 },
+    karana: { slot: karanaSlot, name: karanaName }
+  };
+}
+
+// packages/vedic/src/varga.ts
+var DEGREES_PER_NAVAMSHA = 30 / 9;
+function navamshaRashiIndexByModality(longitudeDeg) {
+  const longitude = canonicalLongitude(longitudeDeg);
+  const rashiIndex = rashiIndexOf(longitude);
+  const division = Math.floor((longitude - rashiIndex * 30) / DEGREES_PER_NAVAMSHA);
+  const modality = rashiIndex % 3;
+  const start = modality === 0 ? rashiIndex : modality === 1 ? (rashiIndex + 8) % 12 : (rashiIndex + 4) % 12;
+  return (start + division) % 12;
+}
+function navamshaOf(longitudeDeg) {
+  return RASHIS[navamshaRashiIndexByModality(longitudeDeg)];
+}
+
+// packages/vedic/src/classifications.ts
+var GRAHAS = [
+  "Sun",
+  "Moon",
+  "Mercury",
+  "Venus",
+  "Mars",
+  "Jupiter",
+  "Saturn"
+];
+function classifyPlacement(longitudeDeg, lagnaLongitudeDeg) {
+  return {
+    longitudeDeg,
+    rashi: rashiOf(longitudeDeg),
+    nakshatra: nakshatraOf(longitudeDeg),
+    navamsha: navamshaOf(longitudeDeg),
+    bhava: wholeSignBhavaOf(longitudeDeg, lagnaLongitudeDeg)
+  };
+}
+function deriveVedicClassifications(positions) {
+  const lagna = classifyPlacement(positions.lagnaLongitudeDeg, positions.lagnaLongitudeDeg);
+  return {
+    grahas: GRAHAS.map((graha) => ({
+      graha,
+      ...classifyPlacement(positions.grahas[graha], positions.lagnaLongitudeDeg)
+    })),
+    nodes: {
+      mean: {
+        rahu: classifyPlacement(positions.meanRahuLongitudeDeg, positions.lagnaLongitudeDeg),
+        ketu: classifyPlacement(positions.meanKetuLongitudeDeg, positions.lagnaLongitudeDeg)
+      },
+      true: {
+        rahu: classifyPlacement(positions.trueRahuLongitudeDeg, positions.lagnaLongitudeDeg),
+        ketu: classifyPlacement(positions.trueKetuLongitudeDeg, positions.lagnaLongitudeDeg)
+      }
+    },
+    lagna,
+    panchanga: instantaneousPanchanga(positions.grahas.Sun, positions.grahas.Moon)
+  };
+}
+
 // packages/vedic/src/vedic-provider.ts
 var CAELUS_VERSION = "0.23.0";
 var PROVIDER4 = { id: "caelus", version: CAELUS_VERSION, license: "MIT" };
 var ENGINE = new Engine(embeddedData);
 var MS_PER_DAY3 = 864e5;
 var UNIX_EPOCH_JD = 24405875e-1;
-var GRAHAS = [
+var GRAHAS2 = [
   ["Sun", "sun"],
   ["Moon", "moon"],
   ["Mercury", "mercury"],
@@ -53610,7 +53873,7 @@ var GRAHAS = [
   ["Jupiter", "jupiter"],
   ["Saturn", "saturn"]
 ];
-function norm3602(value) {
+function norm3603(value) {
   const out = value % 360;
   return out < 0 ? out + 360 : out;
 }
@@ -53624,15 +53887,15 @@ function computeVedicP2Positions(input) {
     houseSystem: "whole_sign"
   });
   const grahas = {};
-  for (const [graha, body] of GRAHAS) grahas[graha] = round62(chart.bodies[body].lon);
+  for (const [graha, body] of GRAHAS2) grahas[graha] = round62(chart.bodies[body].lon);
   const meanRahuLongitudeDeg = round62(chart.bodies.mean_node.lon);
   const trueRahuLongitudeDeg = round62(chart.bodies.true_node.lon);
   return {
     grahas,
     meanRahuLongitudeDeg,
-    meanKetuLongitudeDeg: round62(norm3602(meanRahuLongitudeDeg + 180)),
+    meanKetuLongitudeDeg: round62(norm3603(meanRahuLongitudeDeg + 180)),
     trueRahuLongitudeDeg,
-    trueKetuLongitudeDeg: round62(norm3602(trueRahuLongitudeDeg + 180)),
+    trueKetuLongitudeDeg: round62(norm3603(trueRahuLongitudeDeg + 180)),
     lagnaLongitudeDeg: round62(chart.angles.asc)
   };
 }
@@ -53646,7 +53909,7 @@ function computeVedic(normalized, settings) {
     rulesetId: settings.rulesetId,
     provider: PROVIDER4,
     ayanamsha: { id: "lahiri-iae-1985", swissReferenceMode: "SE_SIDM_LAHIRI" },
-    grahas: GRAHAS.map(([graha]) => ({ graha, longitudeDeg: positions.grahas[graha] })),
+    grahas: GRAHAS2.map(([graha]) => ({ graha, longitudeDeg: positions.grahas[graha] })),
     nodes: {
       mean: {
         rahuLongitudeDeg: positions.meanRahuLongitudeDeg,
@@ -53660,6 +53923,9 @@ function computeVedic(normalized, settings) {
     // Normalization anchors an unknown wall time at noon only for date-based work;
     // that anchor must never become a claimed ascendant.
     lagnaLongitudeDeg: normalized.timeKnown ? positions.lagnaLongitudeDeg : null,
+    // The same anchor must not leak as a derived natal classification. P4 owns the
+    // finer day-stability and public warning policy for unknown birth times.
+    derived: normalized.timeKnown ? deriveVedicClassifications(positions) : null,
     precision: "high"
   };
   return { result, warnings: [] };

@@ -19,8 +19,8 @@ function norm360(value: number): number {
   return out < 0 ? out + 360 : out;
 }
 
-describe('computeVedic (P2 precision substrate)', () => {
-  it('returns only precision-gated numeric fields and the Caelus provenance', () => {
+describe('computeVedic (P2 substrate + P3A classifications)', () => {
+  it('returns the precision-gated substrate, deterministic overlay and Caelus provenance', () => {
     const normalized = normalizeBirthData(input);
     const { result, warnings } = computeVedic(normalized, input.settings.vedic);
     expect(warnings).toEqual([]);
@@ -44,10 +44,13 @@ describe('computeVedic (P2 precision substrate)', () => {
       expect(placement.longitudeDeg).toBeLessThan(360);
     }
     expect(result.lagnaLongitudeDeg).not.toBeNull();
-    // P3-only derived products must not leak into the P2 substrate.
-    expect(result).not.toHaveProperty('nakshatras');
-    expect(result).not.toHaveProperty('panchanga');
-    expect(result).not.toHaveProperty('dashas');
+    expect(result.derived?.grahas).toHaveLength(7);
+    expect(result.derived?.lagna.bhava).toBe(1);
+    expect(result.derived?.panchanga.tithi.number).toBeGreaterThanOrEqual(1);
+    expect(result.derived?.panchanga.tithi.number).toBeLessThanOrEqual(30);
+    // Evidence-gated P3 products must remain absent.
+    expect(result.derived).not.toHaveProperty('vaara');
+    expect(result.derived).not.toHaveProperty('dashas');
   });
 
   it('always emits both node modes and derives Ketu by exact opposition', () => {
@@ -63,7 +66,7 @@ describe('computeVedic (P2 precision substrate)', () => {
     ).toBeCloseTo(180, 9);
   });
 
-  it('suppresses Lagna when the input has no birth time but retains instant-based grahas and nodes', () => {
+  it('suppresses Lagna and the entire P3A overlay when the input has no birth time', () => {
     const unknown = parseBirthInput({
       calendar: 'gregorian',
       localDate: '1984-11-05',
@@ -74,7 +77,24 @@ describe('computeVedic (P2 precision substrate)', () => {
     });
     const result = computeVedic(normalizeBirthData(unknown), unknown.settings.vedic).result;
     expect(result.lagnaLongitudeDeg).toBeNull();
+    expect(result.derived).toBeNull();
     expect(result.grahas).toHaveLength(7);
     expect(result.nodes.mean.rahuLongitudeDeg).toBeGreaterThanOrEqual(0);
+  });
+
+  it('keeps the internal P3A overlay for an approximate time; P4 owns its public caveat', () => {
+    const approximate = parseBirthInput({
+      calendar: 'gregorian',
+      localDate: '1984-11-05',
+      localTime: '06:45',
+      timeAccuracy: 'approximate',
+      timezone: 'Asia/Kolkata',
+      location: { latitude: 19.07, longitude: 72.87, source: 'user' },
+      settings: { systems: ['vedic'] },
+    });
+    const result = computeVedic(normalizeBirthData(approximate), approximate.settings.vedic).result;
+    expect(result.lagnaLongitudeDeg).not.toBeNull();
+    expect(result.derived?.lagna.bhava).toBe(1);
+    expect(result.derived?.panchanga).toBeDefined();
   });
 });
