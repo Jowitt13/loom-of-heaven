@@ -144,5 +144,6 @@ fixtures now satisfy the gates while preserving the external-tool license bounda
    16 synthetic external Swiss `swetest -rise -emos` records using the selected upper-limb + 34′
    refraction semantics. Maximum residual: 5.457 seconds; fixture gate: 10 seconds.
 
-These records do not broaden the P2 ephemeris validation claim and do not make Vedic user-facing.
-The remaining owner decision is the Rahu node default, listed in ADR 0013 "Open questions".
+These records do not broaden the P2 ephemeris validation claim. They support the bounded P5
+technical-chart surface only; they are not a general astrometric accuracy claim. The owner
+confirmed the Rahu default as `nodes: 'mean'` on 2026-08-09; callers may explicitly select true.

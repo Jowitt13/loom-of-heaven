@@ -55,7 +55,7 @@ Negative (should NOT trigger): "生成一张销售数据星形图 / 雷达图" (
 
 The model collects and restates inputs (time, place, coordinates, IANA zone, calendar,
 ruleset), confirms DST/approximate/near-boundary risks, then runs `doctor → normalize →
-calculate --systems all`, **displays all three systems in full** (Western / BaZi / Zi Wei),
+calculate --systems all`, **displays all four systems in full** (Western / BaZi / Zi Wei / Vedic),
 checks exit code + `warnings` + `provenance`, and hands back `chart.json`. For a natural-language
 reading (婚姻 / 财运 / 事业 / 学业 / 流年) it additionally runs `interpret` and narrates ONLY from
 the resulting `interpretation.json` — leading with the 吉凶 verdict, citing evidence + reason,
@@ -90,13 +90,13 @@ zero-install, deterministic behavior in a clean directory.
 3. Trigger with a full-contract chart request, e.g. “男，公历 1990-06-15 14:20（时间准确），出生地 示例城市，时区 Asia/Shanghai，纬度 30.00、经度 120.00，帮我看事业”.
    The model should restate time/place/coordinates/IANA zone/calendar/ruleset and confirm before
    computing.
-4. Confirm it runs `doctor → normalize → calculate --systems all`, **displays all three systems in
+4. Confirm it runs `doctor → normalize → calculate --systems all`, **displays all four systems in
    full**, relays every warning plainly (unknown time suppresses the ascendant/houses; approximate
    sidereal/true-node/asteroid notes), and returns `chart.json`. For a reading request, confirm it
    runs `interpret` and narrates only from `interpretation.json` (leading with 吉凶, citing evidence
    - reason, honoring caveats/disclaimers, closing with the follow-up offers).
 5. Negative trigger: “生成一张销售数据星形图 / 雷达图” must NOT activate the Skill.
 6. Verify no implicit network request occurs during calculation (host network monitor stays idle).
-7. Confirm the reply shows all three systems in full (Western planets/houses/aspects, BaZi four
-   pillars with 日主 shown, Zi Wei palaces), the warnings, the provenance, and a closing follow-up
+7. Confirm the reply shows all four systems in full (Western planets/houses/aspects, BaZi four
+   pillars with 日主 shown, Zi Wei palaces, Vedic grahas/nodes/derived values), the warnings, the provenance, and a closing follow-up
    offer. (No HTML/SVG report is produced in this version.)

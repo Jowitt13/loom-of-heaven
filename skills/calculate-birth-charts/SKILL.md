@@ -41,14 +41,14 @@ For a full technical chart, `calculate --systems all` explicitly requests Wester
 and **Vedic / Jyotish**. The Vedic result contains Lahiri sidereal Sun–Saturn, both
 `nodes.mean` and `nodes.true` (Ketu is exactly opposite the corresponding Rahu), plus Lagna,
 whole-sign bhava, nakshatra/pada, panchanga, D1/D9 and Vimshottari only when the engine returns
-them. Never describe mean or true Rahu as the product default: the user or host may select
-`vedic.nodes` explicitly, but the owner-level default remains pending.
+them. The owner-confirmed product default is `vedic.nodes: "mean"`; callers may still select
+`"true"` explicitly, and both node modes remain visible in the result for comparison.
 
 `precision: "high"` is limited to the recorded Swiss-only external numeric-reference fixture;
 Swiss Ephemeris never runs in the bundle or at runtime. When birth time is unknown, relay
 `VEDIC_TIME_REQUIRED`: Lagna, bhava, D9 Lagna, Vaara and Vimshottari are suppressed rather than
-inferred from a noon anchor. The raw `calculate` input without `--systems` retains its legacy
-three-system default for compatibility.
+inferred from a noon anchor. The raw `calculate` input without `--systems` defaults to all four
+shipped systems; callers may pass an explicit subset when needed.
 
 ## Inputs to collect (only what calculation needs)
 
@@ -63,7 +63,7 @@ per-system rule settings (Western `zodiac: tropical|sidereal`, `ayanamsha`, `ast
 
 To keep results consistent across models, the **calculation** workflow is mandatory: skipping
 `calculate`/`interpret`, a system's computation, or any `warnings` is a **failed run**. The
-**display** of the full three-system chart is now conditional — see step 4 (topic-first).
+**display** of the full four-system chart is now conditional — see step 4 (topic-first).
 
 1. Confirm inputs and restate the local time, place, latitude/longitude, IANA timezone,
    calendar/leap month, rule gender and ruleset. Explicitly flag when the time is approximate,
@@ -71,16 +71,16 @@ To keep results consistent across models, the **calculation** workflow is mandat
 2. Build `birth-input.json` (see `references/input-contract.md`).
 3. Run `doctor`, then `normalize`. For a **full technical chart**, run BOTH `calculate --systems all`
    and `interpret`. For an **ordinary question**, run `answer-plan --topic <bounded-topic>` instead:
-   it always computes all three systems internally, then returns only a de-identified `publicResult`
+   it always computes all four systems internally, then returns only a de-identified `publicResult`
    and a topic-scoped `answerPlan`. Do not create or attach raw chart artifacts for an ordinary
-   question. `calculate` returns the private three-system chart; `interpret` runs the sourced BaZi
+   question. `calculate` returns the private four-system chart; `interpret` runs the sourced BaZi
    rules (旺衰强弱 / 格局 / 喜用神 / 神煞 / 刑冲合害 / 大运·流年吉凶) and cross-system facts.
 4. **Choose one output channel — never front-load the three raw charts into a topic report:**
-   - **Channel A — 排盘 / 原始数据 / 完整命盘 / 技术报告:** full three-system charts (step 5) + the full BaZi interpretation (step 6) + all warnings/provenance.
+   - **Channel A — 排盘 / 原始数据 / 完整命盘 / 技术报告:** full four-system charts (step 5) + the full BaZi interpretation (step 6) + all warnings/provenance.
    - **Channel B — a single topic (事业/感情/财运/学业/流年):** use only `answerPlan.selectedFacts` and its
      `allowedFactIds`; do not read or attach `chart.json` / `interpretation.json`. The body shows
      **only the facts relevant to that topic**, with terms under a “专业依据” section. There is no
-     requirement to display all three raw charts or the full 八字 fact set in a topic report.
+     requirement to display all four raw charts or the full 八字 fact set in a topic report.
    - Per-topic loading: 事业 → `references/reading-style.md` + `references/examples-career.md`; 感情 → `+ references/examples-love.md`; 财运 → `+ references/examples-wealth.md`; 学业/流年 → `reading-style.md`（不加载无关案例文件）。
    - **Channel B 是强制三阶段写作——第 1-5 部分与追问是无命理术语区：**
      1. 选事实（内部）：只使用 `answerPlan.selectedFacts`，并保留 `id` / `reason` / `evidence.ref` / `caveat`；**不直接给用户**。
@@ -153,8 +153,7 @@ node scripts/ming-chart.mjs migrate --host qoder|workbuddy --source <extracted-n
 ```
 
 - `--systems` accepts `all` or a comma list of `western,bazi,ziwei,vedic`. `all` explicitly
-  requests all four systems. Without the flag, raw `calculate` keeps the legacy three-system
-  default for compatibility.
+  requests all four systems. Without the flag, raw `calculate` also defaults to all four systems.
 - `calculate` accepts `--now <iso|ms>` and `--request-id <id>` for reproducible output.
 - `version` reads the sibling `BUILD_MANIFEST.json` and reports the REAL installed version
   (engineVersion / releaseVersion / releaseTag / legacy / doubleNested) — never guessed, and not
@@ -171,7 +170,7 @@ node scripts/ming-chart.mjs migrate --host qoder|workbuddy --source <extracted-n
 - `answer-plan` is the ordinary-question entry point. It accepts only a bounded `--topic`
   (`character|career|wealth|marriage|studies|health|general`) and `--lens`
   (`overview|strengths|risks|timing|advice|explain`), never free-form question text. It computes
-  all three systems internally and returns `publicResult` plus `answerPlan`; see
+  all four systems internally and returns `publicResult` plus `answerPlan`; see
   `references/answer-contract.md`. Use `general` only for an explicitly requested complete
   overview, never as the fallback for an unclear question.
 - **`render` is temporarily disabled.** HTML/SVG reports could not be produced reliably across

@@ -32,14 +32,17 @@ describe('calculate', () => {
     expect(calculate(input, { now: FIXED }).requestId).toBe(computeRequestId(input));
   });
 
-  it('computes all three systems with nothing fabricated or left pending', () => {
-    const input = parseBirthInput({ ...raw, settings: { systems: ['western', 'bazi', 'ziwei'] } });
+  it('computes all four systems with nothing fabricated or left pending', () => {
+    const input = parseBirthInput({
+      ...raw,
+      settings: { systems: ['western', 'bazi', 'ziwei', 'vedic'] },
+    });
     const bundle = calculate(input, { now: FIXED });
     const pending = bundle.warnings
       .filter((w) => w.code === 'SYSTEM_NOT_YET_IMPLEMENTED')
       .map((w) => w.system)
       .sort();
-    // All three systems are now implemented (Western via astronomy-engine). Zi Wei is
+    // All four systems are now implemented. Zi Wei is
     // skipped here only for lack of a gender rule (raw has none) — that is
     // ZIWEI_INPUT_REQUIRED, not "pending implementation", so nothing is pending.
     expect(pending).toEqual([]);

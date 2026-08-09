@@ -10,11 +10,11 @@ import { ProviderRef } from './provenance.ts';
  */
 
 /**
- * Vedic settings. The Rahu convention stays OPTIONAL WITHOUT A DEFAULT because its
- * owner decision is still open (ADR 0013, Open question 1). The P3B
- * Vimshottari model is owner-confirmed and independently cross-checked.
+ * Vedic settings. The owner-confirmed Rahu convention defaults to the mean node;
+ * callers may still explicitly select the true node. The P3B Vimshottari model
+ * is owner-confirmed and independently cross-checked.
  *
- * - `nodes`: mean vs true Rahu (proposed default 'mean', NOT confirmed).
+ * - `nodes`: mean vs true Rahu (owner-confirmed product default: 'mean').
  * - `dashaYear`: `julian-365.25` is the owner-confirmed P3B default. Alternate
  *   reserved values are rejected explicitly until a future ruleset implements them.
  *
@@ -23,8 +23,8 @@ import { ProviderRef } from './provenance.ts';
  */
 export const VedicSettings = z.strictObject({
   rulesetId: z.string().default('vedic-parashara-lahiri@0.1.0'),
-  /** Rahu node model. No default: owner decision pending (ADR 0013 Open question 1). */
-  nodes: z.enum(['mean', 'true']).optional(),
+  /** Rahu node model. The product default is the owner-confirmed mean-node convention. */
+  nodes: z.enum(['mean', 'true']).default('mean'),
   /** Owner-confirmed P3B default; future models require new ruleset versions. */
   dashaYear: z.enum(['julian-365.25', 'savana-360', 'sidereal']).default('julian-365.25'),
 });

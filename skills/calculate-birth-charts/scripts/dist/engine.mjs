@@ -25279,7 +25279,7 @@ var require_lib2 = __commonJS({
 
 // packages/contracts/src/version.ts
 var SCHEMA_VERSION = "0.1.0";
-var ENGINE_VERSION = "0.3.0";
+var ENGINE_VERSION = "0.4.0";
 var ENGINE_NAME = "ming-engine";
 var SUPPORTED_YEAR_MIN = 1901;
 var SUPPORTED_YEAR_MAX = 2100;
@@ -39983,8 +39983,8 @@ var Provenance = external_exports.object({
 // packages/contracts/src/vedic.ts
 var VedicSettings = external_exports.strictObject({
   rulesetId: external_exports.string().default("vedic-parashara-lahiri@0.1.0"),
-  /** Rahu node model. No default: owner decision pending (ADR 0013 Open question 1). */
-  nodes: external_exports.enum(["mean", "true"]).optional(),
+  /** Rahu node model. The product default is the owner-confirmed mean-node convention. */
+  nodes: external_exports.enum(["mean", "true"]).default("mean"),
   /** Owner-confirmed P3B default; future models require new ruleset versions. */
   dashaYear: external_exports.enum(["julian-365.25", "savana-360", "sidereal"]).default("julian-365.25")
 });
@@ -40204,8 +40204,8 @@ var ZiweiSettings = external_exports.strictObject({
   useApparentSolarTime: external_exports.boolean().default(false)
 });
 var CalculationSettings = external_exports.strictObject({
-  /** Default stays the three implemented systems; 'vedic' is opt-in only (ADR 0013 P1). */
-  systems: external_exports.array(ChartSystem).min(1).default(["western", "bazi", "ziwei"]),
+  /** Default requests every shipped chart system; callers may still select a subset explicitly. */
+  systems: external_exports.array(ChartSystem).min(1).default(["western", "bazi", "ziwei", "vedic"]),
   western: WesternSettings.prefault({}),
   bazi: BaziSettings.prefault({}),
   ziwei: ZiweiSettings.prefault({}),

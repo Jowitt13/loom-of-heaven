@@ -1,17 +1,19 @@
 # ADR 0013: Vedic (Jyotish) system architecture & rule-convention freeze (P0)
 
-- Status: Proposed — P2's precision-gated numeric substrate and the P3B classification overlay
-  are implemented; only the Rahu node default (§5) still awaits owner confirmation. Vaara and
-  Vimshottari have offline evidence fixtures but remain internal-only; no Vedic capability may
-  be presented as a user-facing shipped product before P5.
-  Engineering boundaries in §§1–4, 6–10, 12–16 are frozen. The sunrise rule target (§9) and
-  Vimshottari year model (§11) are owner-confirmed and their P3B verification gates are now
-  satisfied. See "Open questions" for the remaining Rahu decision.
+- Status: Accepted — P2's precision-gated numeric substrate, the P3B classification overlay and
+  P5's bounded user-facing technical-chart surface are implemented. Owner defaults for Rahu
+  (§5), sunrise (§9), Vimshottari (§11), and the raw no-settings four-system calculation are
+  confirmed. Engineering boundaries in §§1–4, 6–10, 12–16 are frozen; their evidence gates
+  define the scope of the recorded claims.
 - Date: 2026-07-29
 - P4 update (2026-08-09): internal sourced Vedic structural facts, the four-system
   `PublicResult` / `AnswerPlan` v2, and the P4 warning table are implemented. The owner
   selected a **hard cut**: `public-result/v1` and `answer-plan/v1` are neither emitted nor
   accepted. P5 still exclusively owns all CLI, Skill and host-facing Vedic exposure.
+- P7 update (2026-08-09): the owner confirmed `vedic.nodes: 'mean'` and made Vedic part of the
+  raw no-settings calculation default. This changes normalized inputs, deterministic request IDs
+  and provenance, so the next unpublished source candidate is `0.4.0`; published v0.3.0 assets
+  remain immutable.
 - Scope: adds the fourth first-class system `vedic` in staged slices. P0 froze definitions and
   boundaries; P1 reserved contracts; P2 implements the accepted numeric substrate. Companion
   source registry: [`docs/VEDIC_SOURCE_MATRIX.md`](../VEDIC_SOURCE_MATRIX.md).
@@ -102,13 +104,13 @@ properties frozen here:
 
 ### 5. Rahu: mean vs true
 
-**Proposed default: mean node (owner confirmation pending, Open question 1).** Classical
+**Owner-confirmed default (2026-08-09): mean node.** Classical
 dasha/panchanga practice and the traditional ephemerides assume the mean (uniformly regressing)
 node; KP sources also traditionally use the mean node.
 The true (osculating) node oscillates ±~1.7° around the mean, which can move Rahu's nakshatra
 and pada — a genuine school split, so:
 
-- `settings.vedic.nodes: 'mean' | 'true'`, proposed default `'mean'`, recorded in provenance.
+- `settings.vedic.nodes: 'mean' | 'true'`, owner-confirmed default `'mean'`, recorded in provenance.
 - The P2 golden covers **both** modes against Swiss (`swetest -p` true node `t` / mean node `m`).
 - The existing Western node implementations are not reused. Caelus supplies both P2 modes and
   each is held to its own ≤1′ Swiss fixture rows; neither is promoted to shared code by assumption.
@@ -289,8 +291,9 @@ Additive-but-breaking surface (implemented in P1, shipped in v0.3.0):
 | `ENGINE_VERSION`                                                  | → `0.3.0` at release-prep (P6)                                                             | Deterministic request ids change, as with every engine bump.                         |
 | `SCHEMA_VERSION`                                                  | evaluate in P1: stays `0.1.0` if all input changes are default-compatible, else minor bump | Decision recorded in P1 PR.                                                          |
 
-Whether v0.3.0 flips the **default** `systems` array to include `vedic` is an open product
-decision (§Open questions); the engine capability does not depend on it.
+The v0.3.0 release initially kept the three-system raw default. The owner subsequently confirmed
+that the next unpublished source candidate, v0.4.0, defaults the `systems` array to all four
+systems; callers can retain a three-system calculation by selecting that explicit subset.
 
 ## Rollout: six independent PRs
 
@@ -357,10 +360,10 @@ Until a future independent source passes a field, user-facing and release docume
   instantaneous Tithi/Yoga/Karana, and D9 derive from the P2 canonical longitudes only when the
   birth time is known. Unit tests cover both sides of every represented segment edge and
   independently cross-check the modality and triplicity D9 formulations.
-- **P3B — evidence-verified classifications (implemented, internal-only)**: Vaara derives from
+- **P3B — evidence-verified classifications (implemented)**: Vaara derives from
   the reviewed sunrise fixture (§9), and Vimshottari Maha/Antar derives under the owner-confirmed
-  `julian-365.25` model and is checked against NDAstro (§11). The Vedic provider remains opt-in;
-  its default system list, CLI, Skill and host surfaces remain unchanged until P5.
+  `julian-365.25` model and is checked against NDAstro (§11). P5 exposes the Vedic provider on
+  CLI, Skill and host surfaces; v0.4.0 additionally makes it part of the raw no-settings default.
 - **P4 — facts & answer layer**: `vedic-rules` sourced findings, InterpretationFacts wiring,
   AnswerPlan/PublicResult v2, validate-answer update, warning codes + public-copy table,
   timeAccuracy gating (§13).
@@ -381,18 +384,18 @@ Until a future independent source passes a field, user-facing and release docume
 | jyotishganit    | MIT (Python/Skyfield)  | Independent cross-check candidate for goldens; not a runtime dependency in this phase.                       |
 | VedAstro        | MIT (C#/.NET/API)      | Public-contract reference and independent result comparison; never embedded in the Node Skill.               |
 
-## Open questions (owner decisions pending)
+## Owner decisions
 
-1. **Proposed** default `nodes: 'mean'` (vs `'true'`) for `vedic-parashara-lahiri@0.1.0` —
-   awaiting confirmation.
+1. **Resolved 2026-08-09:** `vedic-parashara-lahiri@0.1.0` defaults `nodes` to `'mean'`.
+   Callers can explicitly select `'true'`; both modes remain in the technical chart.
 2. **Resolved 2026-07-31; verified P3B**: Vimshottari year model — owner confirmed
    `julian-365.25` (dasha year = 365.25 × 86400 SI seconds; `savana-360`/`sidereal`
    future-ruleset-only). The same-model NDAstro cross-check is recorded in §11.
 3. **Resolved 2026-07-31; verified P3B**: Vaara sunrise rule — owner confirmed upper-limb +
    standard 34′ refraction (`upper-limb-standard-refraction`). The external sunrise spot-check
    golden is recorded in §9.
-4. Should v0.3.0 flip the default `systems` array to all four, or keep 3 and make `vedic`
-   opt-in initially?
+4. **Resolved 2026-08-09:** v0.4.0's raw no-settings `systems` default includes all four
+   systems. Explicit `western,bazi,ziwei` selection remains available when a caller needs it.
 5. **Resolved 2026-08-09 (P4): hard cut.** `public-result/v1` and `answer-plan/v1` are
    rejected; v2 is the only public result and answer-plan contract. There is no dual-emission or
    migration shim at runtime.
@@ -400,10 +403,10 @@ Until a future independent source passes a field, user-facing and release docume
 ## P5 implementation note (2026-08-09)
 
 P5 is implemented: `--systems all` requests all four systems and the current Skill/host source
-metadata documents the bounded Vedic technical chart. The raw no-settings default remains three
-systems for compatibility. Both node modes stay visible without implying a product default, and
-the user-facing precision statement remains Swiss-only external numeric-reference evidence rather
-than a general accuracy claim. P6 has published the v0.3.0 assets after C1 download/hash
+metadata documents the bounded Vedic technical chart. The v0.4.0 raw no-settings default also
+requests all four systems. Both node modes stay visible, with mean as the owner-confirmed default,
+and the user-facing precision statement remains Swiss-only external numeric-reference evidence
+rather than a general accuracy claim. P6 has published the v0.3.0 assets after C1 download/hash
 verification and promoted their immutable URLs and SHA-256 hashes into the stable root manifest.
 
 ## Consequences
@@ -415,12 +418,10 @@ verification and promoted their immutable URLs and SHA-256 hashes into the stabl
   contract-break plan, license boundary, golden methodology) are frozen: implementation PRs may
   not silently deviate — a deviation requires editing this ADR first. Two categories must not
   be conflated: the **frozen owner defaults** (`dashaYear: 'julian-365.25'`; sunrise
-  `upper-limb-standard-refraction` — both confirmed 2026-07-31) are decided and no longer
-  reopenable without a new owner decision; P3B has satisfied the same-model Vimshottari and
-  sunrise backend-mapping evidence gates recorded above. The P2 ≤1′ Swiss golden now holds for
-  grahas/nodes/Lagna. The
-  one remaining **undecided** semantic default is the Rahu node model
-  (§5), which must not be treated as decided until the owner confirms.
+  `upper-limb-standard-refraction`; `nodes: 'mean'`; and the v0.4.0 four-system raw default) are
+  decided and no longer reopenable without a new owner decision. P3B has satisfied the
+  same-model Vimshottari and sunrise backend-mapping evidence gates recorded above. The P2 ≤1′
+  Swiss golden now holds for grahas/nodes/Lagna.
 - The engine keeps its golden rules: the model never computes charts; missing values are
   reported, never backfilled; Vedic capability must not be claimed anywhere user-facing until P5
   ships (guarded by `tools/vedic-docs.test.ts`). Any P2 precision statement is limited to the
