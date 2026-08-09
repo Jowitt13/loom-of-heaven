@@ -5,8 +5,9 @@
 > product node default, suppresses time-of-day fields with `VEDIC_TIME_REQUIRED` when birth time
 > is unknown, and uses an offline MIT provider. Its `precision: "high"` is limited to the covered
 > **Swiss-only external numeric reference** fixture (<=1 arc-minute), not a general astrometric
-> accuracy claim. Swiss Ephemeris is never bundled or loaded at runtime; published v0.2 assets
-> remain unchanged until P6 release preparation.
+> accuracy claim. Swiss Ephemeris is never bundled or loaded at runtime; the local v0.3.0
+> candidate remains unpublished, and published v0.2 assets remain unchanged until a separately
+> authorized Release.
 
 <p align="center">
   <img src="docs/assets/hero.png" alt="ming-engine — deterministic Western natal, BaZi and Zi Wei Dou Shu engine" width="100%" />

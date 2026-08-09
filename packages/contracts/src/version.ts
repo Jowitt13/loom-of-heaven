@@ -7,12 +7,12 @@
 export const SCHEMA_VERSION = '0.1.0';
 
 /**
- * Deterministic calculation engine version. Bumped to 0.1.1 for the v0.1.2 candidate:
- * the chart MATH is byte-identical to 0.1.0, but the Western provenance `source` label was
- * corrected to the accurate "astronomy-engine/VSOP87+NOVAS" attribution, which changes emitted
- * provenance text (not any numeric result), hence a new engine version.
+ * Deterministic calculation engine version. v0.3.0 is the release-preparation bump for the
+ * shipped Vedic/Jyotish system and public-result/answer-plan v2 hard cut. It changes emitted
+ * contracts, deterministic request ids, and provenance; consumers must record this version
+ * alongside every result.
  */
-export const ENGINE_VERSION = '0.2.0';
+export const ENGINE_VERSION = '0.3.0';
 
 /** Human-facing engine name. */
 export const ENGINE_NAME = 'ming-engine';

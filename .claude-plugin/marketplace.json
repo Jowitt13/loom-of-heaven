@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Deterministic four-system birth-chart Skill: Western natal, BaZi, Zi Wei Dou Shu, and bounded Vedic/Jyotish.",
-    "version": "0.1.0"
+    "version": "0.3.0"
   },
   "plugins": [
     {
       "name": "calculate-birth-charts",
       "source": "./",
-      "description": "Calculate Western natal charts, BaZi and Zi Wei Dou Shu offline and deterministically, then on request narrate a sourced reading (吉凶/喜用神/大运流年) and 1-5 person 合婚/relationship synastry. The bundled CLI does all math — the model never computes charts.",
+      "description": "Calculate Western natal charts, BaZi, Zi Wei Dou Shu, and bounded Vedic/Jyotish charts offline and deterministically. Vedic output reports both node modes without a product default; the bundled CLI does all math and the model never computes charts.",
       "category": "productivity",
       "strict": false
     }

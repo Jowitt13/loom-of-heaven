@@ -25279,7 +25279,7 @@ var require_lib2 = __commonJS({
 
 // packages/contracts/src/version.ts
 var SCHEMA_VERSION = "0.1.0";
-var ENGINE_VERSION = "0.2.0";
+var ENGINE_VERSION = "0.3.0";
 var ENGINE_NAME = "ming-engine";
 var SUPPORTED_YEAR_MIN = 1901;
 var SUPPORTED_YEAR_MAX = 2100;

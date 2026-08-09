@@ -1,7 +1,7 @@
 {
   "name": "calculate-birth-charts",
-  "version": "0.1.0",
-  "description": "Deterministically calculate Western natal charts (with sidereal zodiac, true node and asteroids), Four Pillars/BaZi (四柱八字) and Zi Wei Dou Shu (紫微斗数), a sourced reading with 吉凶/喜用神/大运流年 facts, and 1-5 person 合婚/relationship synastry. All math is done by a bundled offline CLI; the model never computes charts.",
+  "version": "0.3.0",
+  "description": "Deterministically calculate Western natal charts, Four Pillars/BaZi, Zi Wei Dou Shu, and bounded Vedic/Jyotish charts. Vedic output reports both node modes without a product default; its high-precision statement is limited to the documented Swiss-only external numeric-reference fixture. All math is done by a bundled offline CLI; the model never computes charts.",
   "author": {
     "name": "Jowitt13",
     "url": "https://github.com/Jowitt13"

@@ -2,12 +2,12 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "calculate-birth-charts-0.1.0",
-  "documentNamespace": "https://github.com/Jowitt13/ming-engine/spdx/calculate-birth-charts-0.1.0",
+  "name": "calculate-birth-charts-0.3.0",
+  "documentNamespace": "https://github.com/Jowitt13/ming-engine/spdx/calculate-birth-charts-0.3.0",
   "creationInfo": {
     "created": "2026-01-01T00:00:00Z",
     "creators": [
-      "Tool: ming-build-skill-0.1.0"
+      "Tool: ming-build-skill-0.3.0"
     ],
     "comment": "Deterministic committed artifact: created is a fixed build timestamp, not the real build instant."
   },
@@ -15,7 +15,7 @@
     {
       "name": "calculate-birth-charts",
       "SPDXID": "SPDXRef-Package-calculate-birth-charts",
-      "versionInfo": "0.1.0",
+      "versionInfo": "0.3.0",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "MIT",

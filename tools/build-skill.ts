@@ -2,6 +2,7 @@ import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { mkdirSync, statSync, writeFileSync } from 'node:fs';
+import { ENGINE_VERSION } from '../packages/contracts/src/version.ts';
 import {
   computeBundleClosure,
   cycloneDxLicenses,
@@ -36,7 +37,7 @@ const entry = join(root, 'packages', 'orchestrator', 'src', 'engine-entry.ts');
 const outfile = join(skillDir, 'scripts', 'dist', 'engine.mjs');
 
 const APP_NAME = 'calculate-birth-charts';
-const APP_VERSION = '0.1.0';
+const APP_VERSION = ENGINE_VERSION;
 // SPDX requires creationInfo.created; a wall-clock value would break the
 // v0.1.2 byte-reproducibility of committed build artifacts, so this is a
 // FIXED deterministic build timestamp (not the real build instant — the
@@ -102,7 +103,7 @@ async function main(): Promise<void> {
         name: APP_NAME,
         version: APP_VERSION,
       },
-      tools: [{ name: 'ming-build-skill', version: '0.1.0' }],
+      tools: [{ name: 'ming-build-skill', version: APP_VERSION }],
     },
     components,
   };
@@ -137,7 +138,7 @@ async function main(): Promise<void> {
     documentNamespace: `https://github.com/Jowitt13/ming-engine/spdx/${APP_NAME}-${APP_VERSION}`,
     creationInfo: {
       created: SPDX_FIXED_CREATED,
-      creators: ['Tool: ming-build-skill-0.1.0'],
+      creators: [`Tool: ming-build-skill-${APP_VERSION}`],
       comment:
         'Deterministic committed artifact: created is a fixed build timestamp, not the real build instant.',
     },
