@@ -3,31 +3,30 @@ import { ProviderRef } from './provenance.ts';
 
 /**
  * Vedic (Jyotish) domain contracts. P2 provides the precision-gated numeric
- * substrate; P3A derives deterministic rashi, whole-sign bhava, nakshatra/pada,
- * instantaneous panchanga and D1/D9 classifications from that substrate. Vaara
- * and Vimshottari remain deliberately absent behind their separate evidence gates.
+ * substrate; P3 derives deterministic rashi, whole-sign bhava, nakshatra/pada,
+ * panchanga/Vaara, D1/D9 and Vimshottari classifications from that substrate.
+ * Vaara/Vimshottari are nullable only where an input cannot support a truthful
+ * value (unknown time, polar no-sunrise, or a reserved future dasha model).
  */
 
 /**
  * Vedic settings. The Rahu convention stays OPTIONAL WITHOUT A DEFAULT because its
- * owner decision is still open (ADR 0013, Open question 1). `dashaYear` is also
- * intentionally not wired in P2: the owner-confirmed model lands with P3 dasha
- * calculations and their same-model cross-check.
+ * owner decision is still open (ADR 0013, Open question 1). The P3B
+ * Vimshottari model is owner-confirmed and independently cross-checked.
  *
  * - `nodes`: mean vs true Rahu (proposed default 'mean', NOT confirmed).
- * - `dashaYear`: owner-confirmed as 'julian-365.25', but P3 remains blocked on a
- *   same-model dual-implementation cross-check. The enum is reserved here so the
- *   contract surface is stable, but no value is wired into P2.
+ * - `dashaYear`: `julian-365.25` is the owner-confirmed P3B default. Alternate
+ *   reserved values are rejected explicitly until a future ruleset implements them.
  *
- * The owner-confirmed Vaara sunrise model has NO field until its P2 backend-mapping
- * verification is done.
+ * Vaara has no settings switch in v1: its verified model is upper limb + standard
+ * refraction at sea level (ADR 0013 §9).
  */
 export const VedicSettings = z.strictObject({
   rulesetId: z.string().default('vedic-parashara-lahiri@0.1.0'),
   /** Rahu node model. No default: owner decision pending (ADR 0013 Open question 1). */
   nodes: z.enum(['mean', 'true']).optional(),
-  /** Vimshottari year model. No default until P3 wires the confirmed model. */
-  dashaYear: z.enum(['julian-365.25', 'savana-360', 'sidereal']).optional(),
+  /** Owner-confirmed P3B default; future models require new ruleset versions. */
+  dashaYear: z.enum(['julian-365.25', 'savana-360', 'sidereal']).default('julian-365.25'),
 });
 export type VedicSettings = z.infer<typeof VedicSettings>;
 
@@ -151,7 +150,7 @@ export const VedicNodeDerivedPair = z.strictObject({
 });
 export type VedicNodeDerivedPair = z.infer<typeof VedicNodeDerivedPair>;
 
-/** Instantaneous panchanga only: Vaara needs its separately gated sunrise mapping. */
+/** The instantaneous Panchanga members; P3B adds Vaara in VedicPanchanga below. */
 export const VedicInstantaneousPanchanga = z.strictObject({
   tithi: z.strictObject({
     number: z.number().int().min(1).max(30),
@@ -168,6 +167,61 @@ export const VedicInstantaneousPanchanga = z.strictObject({
 });
 export type VedicInstantaneousPanchanga = z.infer<typeof VedicInstantaneousPanchanga>;
 
+/** Traditional weekday names in the Sunday-to-Saturday order. */
+export const VedicVaara = z.enum([
+  'Ravivara',
+  'Somavara',
+  'Mangalavara',
+  'Budhavara',
+  'Guruvara',
+  'Shukravara',
+  'Shanivara',
+]);
+export type VedicVaara = z.infer<typeof VedicVaara>;
+
+/** P3B panchanga: instantaneous members plus the verified local-sunrise Vaara. */
+export const VedicPanchanga = VedicInstantaneousPanchanga.extend({
+  /** Null only when the location has no nearby sunrise (never silently assigned). */
+  vaara: VedicVaara.nullable(),
+}).strict();
+export type VedicPanchanga = z.infer<typeof VedicPanchanga>;
+
+export const VedicDashaLord = z.enum([
+  'Ketu',
+  'Venus',
+  'Sun',
+  'Moon',
+  'Mars',
+  'Rahu',
+  'Jupiter',
+  'Saturn',
+  'Mercury',
+]);
+export type VedicDashaLord = z.infer<typeof VedicDashaLord>;
+
+export const VedicDashaAntarPeriod = z.strictObject({
+  lord: VedicDashaLord,
+  startUtc: z.string(),
+  endUtc: z.string(),
+});
+export type VedicDashaAntarPeriod = z.infer<typeof VedicDashaAntarPeriod>;
+
+/** Full Maha period; children partition its exact half-open interval. */
+export const VedicDashaMahaPeriod = VedicDashaAntarPeriod.extend({
+  antar: z.array(VedicDashaAntarPeriod).length(9),
+}).strict();
+export type VedicDashaMahaPeriod = z.infer<typeof VedicDashaMahaPeriod>;
+
+/** Owner-confirmed, independently cross-checked P3B Vimshottari output. */
+export const VedicVimshottari = z.strictObject({
+  dashaYear: z.literal('julian-365.25'),
+  birthMoonLongitudeDeg: VedicLongitude,
+  birthNakshatraIndex: z.number().int().min(1).max(27),
+  nakshatraProgressFraction: z.number().min(0).lt(1),
+  mahadashas: z.array(VedicDashaMahaPeriod).length(9),
+});
+export type VedicVimshottari = z.infer<typeof VedicVimshottari>;
+
 /**
  * P3A overlay over the P2 numerical substrate. It is null when the birth time is
  * unknown: the normalizer's noon anchor is not a claimed chart instant, and P4
@@ -181,7 +235,9 @@ export const VedicDerivedChart = z.strictObject({
   }),
   /** Lagna itself is always the first whole-sign bhava. */
   lagna: VedicDerivedPlacement,
-  panchanga: VedicInstantaneousPanchanga,
+  panchanga: VedicPanchanga,
+  /** Null when a future reserved dasha model was explicitly requested. */
+  vimshottari: VedicVimshottari.nullable(),
 });
 export type VedicDerivedChart = z.infer<typeof VedicDerivedChart>;
 

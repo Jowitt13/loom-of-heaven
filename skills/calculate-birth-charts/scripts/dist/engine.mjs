@@ -4050,18 +4050,18 @@ var require_moment_timezone = __commonJS({
       } else {
         factory(root.moment);
       }
-    })(exports, function(moment2) {
+    })(exports, function(moment3) {
       "use strict";
-      if (moment2.version === void 0 && moment2.default) {
-        moment2 = moment2.default;
+      if (moment3.version === void 0 && moment3.default) {
+        moment3 = moment3.default;
       }
       var VERSION = "0.6.3", zones = {}, links = {}, countries = {}, names = {}, guesses = {}, cachedGuess;
-      if (!moment2 || typeof moment2.version !== "string") {
+      if (!moment3 || typeof moment3.version !== "string") {
         logError("Moment Timezone requires Moment.js. See https://momentjs.com/timezone/docs/#/use-it/browser/");
       }
-      var momentVersion2 = moment2.version.split("."), major = +momentVersion2[0], minor = +momentVersion2[1];
+      var momentVersion2 = moment3.version.split("."), major = +momentVersion2[0], minor = +momentVersion2[1];
       if (major < 2 || major === 2 && minor < 6) {
-        logError("Moment Timezone requires Moment.js >= 2.6.0. You are using Moment.js " + moment2.version + ". See momentjs.com");
+        logError("Moment Timezone requires Moment.js >= 2.6.0. You are using Moment.js " + moment3.version + ". See momentjs.com");
       }
       function charCodeToInt(charCode) {
         if (charCode > 96) {
@@ -4450,8 +4450,8 @@ var require_moment_timezone = __commonJS({
         }
       }
       function tz(input) {
-        var args = Array.prototype.slice.call(arguments, 0, -1), name = arguments[arguments.length - 1], out = moment2.utc.apply(null, args), zone;
-        if (!moment2.isMoment(input) && needsOffset(out) && (zone = getZone(name))) {
+        var args = Array.prototype.slice.call(arguments, 0, -1), name = arguments[arguments.length - 1], out = moment3.utc.apply(null, args), zone;
+        if (!moment3.isMoment(input) && needsOffset(out) && (zone = getZone(name))) {
           out.add(zone.parse(out), "minutes");
         }
         out.tz(name);
@@ -4478,14 +4478,14 @@ var require_moment_timezone = __commonJS({
       tz.moveAmbiguousForward = false;
       tz.countries = getCountryNames;
       tz.zonesForCountry = zonesForCountry;
-      var fn = moment2.fn;
-      moment2.tz = tz;
-      moment2.defaultZone = null;
-      moment2.updateOffset = function(mom, keepTime) {
-        var zone = moment2.defaultZone, offset;
+      var fn = moment3.fn;
+      moment3.tz = tz;
+      moment3.defaultZone = null;
+      moment3.updateOffset = function(mom, keepTime) {
+        var zone = moment3.defaultZone, offset;
         if (mom._z === void 0) {
           if (zone && needsOffset(mom) && !mom._isUTC && mom.isValid()) {
-            mom._d = moment2.utc(mom._a)._d;
+            mom._d = moment3.utc(mom._a)._d;
             mom.utc().add(zone.parse(mom), "minutes");
           }
           mom._z = zone;
@@ -4511,7 +4511,7 @@ var require_moment_timezone = __commonJS({
           }
           this._z = getZone(name);
           if (this._z) {
-            moment2.updateOffset(this, keepTime);
+            moment3.updateOffset(this, keepTime);
           } else {
             logError("Moment Timezone has no data for " + name + ". See http://momentjs.com/timezone/docs/#/data-loading/.");
           }
@@ -4546,21 +4546,21 @@ var require_moment_timezone = __commonJS({
       fn.utc = resetZoneWrap(fn.utc);
       fn.local = resetZoneWrap(fn.local);
       fn.utcOffset = resetZoneWrap2(fn.utcOffset);
-      moment2.tz.setDefault = function(name) {
+      moment3.tz.setDefault = function(name) {
         if (major < 2 || major === 2 && minor < 9) {
-          logError("Moment Timezone setDefault() requires Moment.js >= 2.9.0. You are using Moment.js " + moment2.version + ".");
+          logError("Moment Timezone setDefault() requires Moment.js >= 2.9.0. You are using Moment.js " + moment3.version + ".");
         }
-        moment2.defaultZone = name ? getZone(name) : null;
-        return moment2;
+        moment3.defaultZone = name ? getZone(name) : null;
+        return moment3;
       };
-      var momentProperties = moment2.momentProperties;
+      var momentProperties = moment3.momentProperties;
       if (Object.prototype.toString.call(momentProperties) === "[object Array]") {
         momentProperties.push("_z");
         momentProperties.push("_a");
       } else if (momentProperties) {
         momentProperties._z = null;
       }
-      return moment2;
+      return moment3;
     });
   }
 });
@@ -5427,8 +5427,8 @@ var require_latest = __commonJS({
 // node_modules/.pnpm/moment-timezone@0.6.3/node_modules/moment-timezone/index.js
 var require_moment_timezone2 = __commonJS({
   "node_modules/.pnpm/moment-timezone@0.6.3/node_modules/moment-timezone/index.js"(exports, module) {
-    var moment2 = module.exports = require_moment_timezone();
-    moment2.tz.load(require_latest());
+    var moment3 = module.exports = require_moment_timezone();
+    moment3.tz.load(require_latest());
   }
 });
 
@@ -39868,7 +39868,11 @@ var WARNING_CODES = {
   /** Zi Wei needs a gender rule and a known time; the chart was not computed. */
   ZIWEI_INPUT_REQUIRED: "ZIWEI_INPUT_REQUIRED",
   /** A requested rule variant is not implemented; the provider default was applied. */
-  RULESET_VARIANT_DEFAULTED: "RULESET_VARIANT_DEFAULTED"
+  RULESET_VARIANT_DEFAULTED: "RULESET_VARIANT_DEFAULTED",
+  /** A Vedic location has no sunrise in the bounded local search window. */
+  VEDIC_SUNRISE_UNAVAILABLE: "VEDIC_SUNRISE_UNAVAILABLE",
+  /** A reserved Vimshottari year model was requested but has no implementation. */
+  VEDIC_DASHA_YEAR_UNSUPPORTED: "VEDIC_DASHA_YEAR_UNSUPPORTED"
 };
 var WarningSeverity = external_exports.enum(["info", "warning"]);
 var EngineSystem = external_exports.enum(["time", "western", "bazi", "ziwei", "vedic", "engine"]);
@@ -39979,8 +39983,8 @@ var VedicSettings = external_exports.strictObject({
   rulesetId: external_exports.string().default("vedic-parashara-lahiri@0.1.0"),
   /** Rahu node model. No default: owner decision pending (ADR 0013 Open question 1). */
   nodes: external_exports.enum(["mean", "true"]).optional(),
-  /** Vimshottari year model. No default until P3 wires the confirmed model. */
-  dashaYear: external_exports.enum(["julian-365.25", "savana-360", "sidereal"]).optional()
+  /** Owner-confirmed P3B default; future models require new ruleset versions. */
+  dashaYear: external_exports.enum(["julian-365.25", "savana-360", "sidereal"]).default("julian-365.25")
 });
 var VedicGraha = external_exports.enum(["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"]);
 var VedicRashi = external_exports.enum([
@@ -40084,6 +40088,45 @@ var VedicInstantaneousPanchanga = external_exports.strictObject({
     name: VedicKaranaName
   })
 });
+var VedicVaara = external_exports.enum([
+  "Ravivara",
+  "Somavara",
+  "Mangalavara",
+  "Budhavara",
+  "Guruvara",
+  "Shukravara",
+  "Shanivara"
+]);
+var VedicPanchanga = VedicInstantaneousPanchanga.extend({
+  /** Null only when the location has no nearby sunrise (never silently assigned). */
+  vaara: VedicVaara.nullable()
+}).strict();
+var VedicDashaLord = external_exports.enum([
+  "Ketu",
+  "Venus",
+  "Sun",
+  "Moon",
+  "Mars",
+  "Rahu",
+  "Jupiter",
+  "Saturn",
+  "Mercury"
+]);
+var VedicDashaAntarPeriod = external_exports.strictObject({
+  lord: VedicDashaLord,
+  startUtc: external_exports.string(),
+  endUtc: external_exports.string()
+});
+var VedicDashaMahaPeriod = VedicDashaAntarPeriod.extend({
+  antar: external_exports.array(VedicDashaAntarPeriod).length(9)
+}).strict();
+var VedicVimshottari = external_exports.strictObject({
+  dashaYear: external_exports.literal("julian-365.25"),
+  birthMoonLongitudeDeg: VedicLongitude,
+  birthNakshatraIndex: external_exports.number().int().min(1).max(27),
+  nakshatraProgressFraction: external_exports.number().min(0).lt(1),
+  mahadashas: external_exports.array(VedicDashaMahaPeriod).length(9)
+});
 var VedicDerivedChart = external_exports.strictObject({
   grahas: external_exports.array(VedicGrahaDerivedPlacement).length(7),
   nodes: external_exports.strictObject({
@@ -40092,7 +40135,9 @@ var VedicDerivedChart = external_exports.strictObject({
   }),
   /** Lagna itself is always the first whole-sign bhava. */
   lagna: VedicDerivedPlacement,
-  panchanga: VedicInstantaneousPanchanga
+  panchanga: VedicPanchanga,
+  /** Null when a future reserved dasha model was explicitly requested. */
+  vimshottari: VedicVimshottari.nullable()
 });
 var VedicChartResult = external_exports.strictObject({
   rulesetId: external_exports.string(),
@@ -49364,7 +49409,9 @@ function computeZiweiHoroscope(normalized, settings, ruleGender, target) {
 var C_AUDAY = 173.1446326846693;
 var KM_PER_AU = 14959787069098932e-8;
 var DEG2RAD = 0.017453292519943295;
+var HOUR2RAD = 0.26179938779914946;
 var RAD2DEG = 57.29577951308232;
+var RAD2HOUR = 3.819718634205488;
 var DAYS_PER_TROPICAL_YEAR = 365.24217;
 var J2000 = /* @__PURE__ */ new Date("2000-01-01T12:00:00Z");
 var PI2 = 2 * Math.PI;
@@ -49372,10 +49419,12 @@ var ARC = 3600 * (180 / Math.PI);
 var ASEC2RAD = 484813681109536e-20;
 var ASEC180 = 180 * 60 * 60;
 var ASEC360 = 2 * ASEC180;
+var ANGVEL = 7292115e-11;
 var AU_PER_PARSEC = ASEC180 / Math.PI;
 var SUN_MAG_1AU = -0.17 - 5 * Math.log10(AU_PER_PARSEC);
 var SECONDS_PER_DAY = 24 * 3600;
 var MILLIS_PER_DAY = SECONDS_PER_DAY * 1e3;
+var SOLAR_DAYS_PER_SIDEREAL_DAY = 0.9972695717592592;
 var SUN_RADIUS_KM = 695700;
 var SUN_RADIUS_AU = SUN_RADIUS_KM / KM_PER_AU;
 var EARTH_FLATTENING = 0.996647180302104;
@@ -50292,6 +50341,9 @@ var AstroTime = class _AstroTime {
     return new _AstroTime(this.ut + days);
   }
 };
+function InterpolateTime(time1, time22, fraction) {
+  return new AstroTime(time1.ut + fraction * (time22.ut - time1.ut));
+}
 function MakeTime(date5) {
   if (date5 instanceof AstroTime) {
     return date5;
@@ -50705,6 +50757,23 @@ function SiderealTime(date5) {
   const time3 = MakeTime(date5);
   return sidereal_time(time3);
 }
+function terra(observer, st) {
+  const phi = observer.latitude * DEG2RAD;
+  const sinphi = Math.sin(phi);
+  const cosphi = Math.cos(phi);
+  const c = 1 / Math.hypot(cosphi, EARTH_FLATTENING * sinphi);
+  const s = EARTH_FLATTENING_SQUARED * c;
+  const ht_km = observer.height / 1e3;
+  const ach = EARTH_EQUATORIAL_RADIUS_KM * c + ht_km;
+  const ash = EARTH_EQUATORIAL_RADIUS_KM * s + ht_km;
+  const stlocl = (15 * st + observer.longitude) * DEG2RAD;
+  const sinst = Math.sin(stlocl);
+  const cosst = Math.cos(stlocl);
+  return {
+    pos: [ach * cosphi * cosst / KM_PER_AU, ach * cosphi * sinst / KM_PER_AU, ash * sinphi / KM_PER_AU],
+    vel: [-ANGVEL * ach * cosphi * sinst * 86400 / KM_PER_AU, ANGVEL * ach * cosphi * cosst * 86400 / KM_PER_AU, 0]
+  };
+}
 function nutation(pos, time3, dir) {
   const r = nutation_rot(time3, dir);
   return rotate(r, pos);
@@ -50745,6 +50814,14 @@ function nutation_rot(time3, dir) {
   }
   throw "Invalid precess direction";
 }
+function gyration(pos, time3, dir) {
+  return dir === PrecessDirection.Into2000 ? precession(nutation(pos, time3, dir), time3, dir) : nutation(precession(pos, time3, dir), time3, dir);
+}
+function geo_pos(time3, observer) {
+  const gast2 = sidereal_time(time3);
+  const pos = terra(observer, gast2).pos;
+  return gyration(pos, time3, PrecessDirection.Into2000);
+}
 var Vector = class {
   constructor(x, y, z2, t) {
     this.x = x;
@@ -50778,9 +50855,25 @@ var Spherical = class {
     this.dist = VerifyNumber(dist);
   }
 };
+var EquatorialCoordinates = class {
+  constructor(ra, dec, dist, vec) {
+    this.ra = VerifyNumber(ra);
+    this.dec = VerifyNumber(dec);
+    this.dist = VerifyNumber(dist);
+    this.vec = vec;
+  }
+};
 var RotationMatrix = class {
   constructor(rot) {
     this.rot = rot;
+  }
+};
+var HorizontalCoordinates = class {
+  constructor(azimuth, altitude, ra, dec) {
+    this.azimuth = VerifyNumber(azimuth);
+    this.altitude = VerifyNumber(altitude);
+    this.ra = VerifyNumber(ra);
+    this.dec = VerifyNumber(dec);
   }
 };
 var EclipticCoordinates = class {
@@ -50790,6 +50883,130 @@ var EclipticCoordinates = class {
     this.elon = VerifyNumber(elon);
   }
 };
+function VectorFromArray(av, time3) {
+  return new Vector(av[0], av[1], av[2], time3);
+}
+function vector2radec(pos, time3) {
+  const vec = VectorFromArray(pos, time3);
+  const xyproj = vec.x * vec.x + vec.y * vec.y;
+  const dist = Math.sqrt(xyproj + vec.z * vec.z);
+  if (xyproj === 0) {
+    if (vec.z === 0)
+      throw "Indeterminate sky coordinates";
+    return new EquatorialCoordinates(0, vec.z < 0 ? -90 : 90, dist, vec);
+  }
+  let ra = RAD2HOUR * Math.atan2(vec.y, vec.x);
+  if (ra < 0)
+    ra += 24;
+  const dec = RAD2DEG * Math.atan2(pos[2], Math.sqrt(xyproj));
+  return new EquatorialCoordinates(ra, dec, dist, vec);
+}
+function spin(angle, pos) {
+  const angr = angle * DEG2RAD;
+  const c = Math.cos(angr);
+  const s = Math.sin(angr);
+  return [c * pos[0] + s * pos[1], c * pos[1] - s * pos[0], pos[2]];
+}
+function Horizon(date5, observer, ra, dec, refraction) {
+  let time3 = MakeTime(date5);
+  VerifyObserver(observer);
+  VerifyNumber(ra);
+  VerifyNumber(dec);
+  const sinlat = Math.sin(observer.latitude * DEG2RAD);
+  const coslat = Math.cos(observer.latitude * DEG2RAD);
+  const sinlon = Math.sin(observer.longitude * DEG2RAD);
+  const coslon = Math.cos(observer.longitude * DEG2RAD);
+  const sindc = Math.sin(dec * DEG2RAD);
+  const cosdc = Math.cos(dec * DEG2RAD);
+  const sinra = Math.sin(ra * HOUR2RAD);
+  const cosra = Math.cos(ra * HOUR2RAD);
+  let uze = [coslat * coslon, coslat * sinlon, sinlat];
+  let une = [-sinlat * coslon, -sinlat * sinlon, coslat];
+  let uwe = [sinlon, -coslon, 0];
+  const spin_angle = -15 * sidereal_time(time3);
+  let uz = spin(spin_angle, uze);
+  let un = spin(spin_angle, une);
+  let uw = spin(spin_angle, uwe);
+  let p = [cosdc * cosra, cosdc * sinra, sindc];
+  const pz = p[0] * uz[0] + p[1] * uz[1] + p[2] * uz[2];
+  const pn = p[0] * un[0] + p[1] * un[1] + p[2] * un[2];
+  const pw = p[0] * uw[0] + p[1] * uw[1] + p[2] * uw[2];
+  let proj = Math.hypot(pn, pw);
+  let az;
+  if (proj > 0) {
+    az = -RAD2DEG * Math.atan2(pw, pn);
+    if (az < 0)
+      az += 360;
+  } else {
+    az = 0;
+  }
+  let zd = RAD2DEG * Math.atan2(proj, pz);
+  let out_ra = ra;
+  let out_dec = dec;
+  if (refraction) {
+    let zd0 = zd;
+    let refr = Refraction(refraction, 90 - zd);
+    zd -= refr;
+    if (refr > 0 && zd > 3e-4) {
+      const sinzd = Math.sin(zd * DEG2RAD);
+      const coszd = Math.cos(zd * DEG2RAD);
+      const sinzd0 = Math.sin(zd0 * DEG2RAD);
+      const coszd0 = Math.cos(zd0 * DEG2RAD);
+      const pr = [];
+      for (let j = 0; j < 3; ++j) {
+        pr.push((p[j] - coszd0 * uz[j]) / sinzd0 * sinzd + uz[j] * coszd);
+      }
+      proj = Math.hypot(pr[0], pr[1]);
+      if (proj > 0) {
+        out_ra = RAD2HOUR * Math.atan2(pr[1], pr[0]);
+        if (out_ra < 0) {
+          out_ra += 24;
+        }
+      } else {
+        out_ra = 0;
+      }
+      out_dec = RAD2DEG * Math.atan2(pr[2], proj);
+    }
+  }
+  return new HorizontalCoordinates(az, 90 - zd, out_ra, out_dec);
+}
+function VerifyObserver(observer) {
+  if (!(observer instanceof Observer)) {
+    throw `Not an instance of the Observer class: ${observer}`;
+  }
+  VerifyNumber(observer.latitude);
+  VerifyNumber(observer.longitude);
+  VerifyNumber(observer.height);
+  if (observer.latitude < -90 || observer.latitude > 90) {
+    throw `Latitude ${observer.latitude} is out of range. Must be -90..+90.`;
+  }
+  return observer;
+}
+var Observer = class {
+  constructor(latitude, longitude, height) {
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.height = height;
+    VerifyObserver(this);
+  }
+};
+function Equator(body, date5, observer, ofdate, aberration) {
+  VerifyObserver(observer);
+  VerifyBoolean(ofdate);
+  VerifyBoolean(aberration);
+  const time3 = MakeTime(date5);
+  const gc_observer = geo_pos(time3, observer);
+  const gc = GeoVector(body, time3, aberration);
+  const j2000 = [
+    gc.x - gc_observer[0],
+    gc.y - gc_observer[1],
+    gc.z - gc_observer[2]
+  ];
+  if (!ofdate)
+    return vector2radec(j2000, time3);
+  const datevect = gyration(j2000, time3, PrecessDirection.From2000);
+  return vector2radec(datevect, time3);
+}
 function RotateEquatorialToEcliptic(equ, cos_ob, sin_ob) {
   const ex = equ.x;
   const ey = equ.y * cos_ob + equ.z * sin_ob;
@@ -51362,6 +51579,303 @@ function HelioState(body, date5) {
       throw `HelioState: Unsupported body "${body}"`;
   }
 }
+function QuadInterp(tm, dt, fa, fm, fb) {
+  let Q = (fb + fa) / 2 - fm;
+  let R = (fb - fa) / 2;
+  let S = fm;
+  let x;
+  if (Q == 0) {
+    if (R == 0) {
+      return null;
+    }
+    x = -S / R;
+    if (x < -1 || x > 1)
+      return null;
+  } else {
+    let u = R * R - 4 * Q * S;
+    if (u <= 0)
+      return null;
+    let ru = Math.sqrt(u);
+    let x1 = (-R + ru) / (2 * Q);
+    let x2 = (-R - ru) / (2 * Q);
+    if (-1 <= x1 && x1 <= 1) {
+      if (-1 <= x2 && x2 <= 1)
+        return null;
+      x = x1;
+    } else if (-1 <= x2 && x2 <= 1) {
+      x = x2;
+    } else {
+      return null;
+    }
+  }
+  let t = tm + x * dt;
+  let df_dt = (2 * Q * x + R) / dt;
+  return { t, df_dt };
+}
+function Search(f, t1, t2, options) {
+  const dt_tolerance_seconds = VerifyNumber(options && options.dt_tolerance_seconds || 1);
+  const dt_days = Math.abs(dt_tolerance_seconds / SECONDS_PER_DAY);
+  let f1 = options && options.init_f1 || f(t1);
+  let f2 = options && options.init_f2 || f(t2);
+  let fmid = NaN;
+  let iter = 0;
+  let iter_limit = options && options.iter_limit || 20;
+  let calc_fmid = true;
+  while (true) {
+    if (++iter > iter_limit)
+      throw `Excessive iteration in Search()`;
+    let tmid = InterpolateTime(t1, t2, 0.5);
+    let dt = tmid.ut - t1.ut;
+    if (Math.abs(dt) < dt_days) {
+      return tmid;
+    }
+    if (calc_fmid)
+      fmid = f(tmid);
+    else
+      calc_fmid = true;
+    let q = QuadInterp(tmid.ut, t2.ut - tmid.ut, f1, fmid, f2);
+    if (q) {
+      let tq = MakeTime(q.t);
+      let fq = f(tq);
+      if (q.df_dt !== 0) {
+        if (Math.abs(fq / q.df_dt) < dt_days) {
+          return tq;
+        }
+        let dt_guess = 1.2 * Math.abs(fq / q.df_dt);
+        if (dt_guess < dt / 10) {
+          let tleft = tq.AddDays(-dt_guess);
+          let tright = tq.AddDays(+dt_guess);
+          if ((tleft.ut - t1.ut) * (tleft.ut - t2.ut) < 0) {
+            if ((tright.ut - t1.ut) * (tright.ut - t2.ut) < 0) {
+              let fleft = f(tleft);
+              let fright = f(tright);
+              if (fleft < 0 && fright >= 0) {
+                f1 = fleft;
+                f2 = fright;
+                t1 = tleft;
+                t2 = tright;
+                fmid = fq;
+                calc_fmid = false;
+                continue;
+              }
+            }
+          }
+        }
+      }
+    }
+    if (f1 < 0 && fmid >= 0) {
+      t2 = tmid;
+      f2 = fmid;
+      continue;
+    }
+    if (fmid < 0 && f2 >= 0) {
+      t1 = tmid;
+      f1 = fmid;
+      continue;
+    }
+    return null;
+  }
+}
+var AtmosphereInfo = class {
+  constructor(pressure, temperature, density) {
+    this.pressure = pressure;
+    this.temperature = temperature;
+    this.density = density;
+  }
+};
+function Atmosphere(elevationMeters) {
+  const P0 = 101325;
+  const T0 = 288.15;
+  const T1 = 216.65;
+  if (!Number.isFinite(elevationMeters) || elevationMeters < -500 || elevationMeters > 1e5)
+    throw `Invalid elevation: ${elevationMeters}`;
+  let temperature;
+  let pressure;
+  if (elevationMeters <= 11e3) {
+    temperature = T0 - 65e-4 * elevationMeters;
+    pressure = P0 * Math.pow(T0 / temperature, -5.25577);
+  } else if (elevationMeters <= 2e4) {
+    temperature = T1;
+    pressure = 22632 * Math.exp(-15768832e-11 * (elevationMeters - 11e3));
+  } else {
+    temperature = T1 + 1e-3 * (elevationMeters - 2e4);
+    pressure = 5474.87 * Math.pow(T1 / temperature, 34.16319);
+  }
+  const density = pressure / temperature / (P0 / T0);
+  return new AtmosphereInfo(pressure, temperature, density);
+}
+function HorizonDipAngle(observer, metersAboveGround) {
+  const phi = observer.latitude * DEG2RAD;
+  const sinphi = Math.sin(phi);
+  const cosphi = Math.cos(phi);
+  const c = 1 / Math.hypot(cosphi, sinphi * EARTH_FLATTENING);
+  const s = c * (EARTH_FLATTENING * EARTH_FLATTENING);
+  const ht_km = (observer.height - metersAboveGround) / 1e3;
+  const ach = EARTH_EQUATORIAL_RADIUS_KM * c + ht_km;
+  const ash = EARTH_EQUATORIAL_RADIUS_KM * s + ht_km;
+  const radius_m = 1e3 * Math.hypot(ach * cosphi, ash * sinphi);
+  const k = 0.175 * Math.pow(1 - 65e-4 / 283.15 * (observer.height - 2 / 3 * metersAboveGround), 3.256);
+  return RAD2DEG * -(Math.sqrt(2 * (1 - k) * metersAboveGround / radius_m) / (1 - k));
+}
+function BodyRadiusAu(body) {
+  switch (body) {
+    case Body.Sun:
+      return SUN_RADIUS_AU;
+    case Body.Moon:
+      return MOON_EQUATORIAL_RADIUS_AU;
+    default:
+      return 0;
+  }
+}
+function SearchRiseSet(body, observer, direction, dateStart, limitDays, metersAboveGround = 0) {
+  if (!Number.isFinite(metersAboveGround) || metersAboveGround < 0)
+    throw `Invalid value for metersAboveGround: ${metersAboveGround}`;
+  const body_radius_au = BodyRadiusAu(body);
+  const atmos = Atmosphere(observer.height - metersAboveGround);
+  const dip = HorizonDipAngle(observer, metersAboveGround);
+  const altitude = dip - REFRACTION_NEAR_HORIZON * atmos.density;
+  return InternalSearchAltitude(body, observer, direction, dateStart, limitDays, body_radius_au, altitude);
+}
+var AscentInfo = class {
+  constructor(tx, ty, ax, ay) {
+    this.tx = tx;
+    this.ty = ty;
+    this.ax = ax;
+    this.ay = ay;
+  }
+};
+function FindAscent(depth, altdiff, max_deriv_alt, t1, t2, a1, a2) {
+  if (a1 < 0 && a2 >= 0) {
+    return new AscentInfo(t1, t2, a1, a2);
+  }
+  if (a1 >= 0 && a2 < 0) {
+    return null;
+  }
+  if (depth > 17) {
+    throw `Excessive recursion in rise/set ascent search.`;
+  }
+  const dt = t2.ut - t1.ut;
+  if (dt * SECONDS_PER_DAY < 1)
+    return null;
+  const da = Math.min(Math.abs(a1), Math.abs(a2));
+  if (da > max_deriv_alt * (dt / 2)) {
+    return null;
+  }
+  const tmid = new AstroTime((t1.ut + t2.ut) / 2);
+  const amid = altdiff(tmid);
+  return FindAscent(1 + depth, altdiff, max_deriv_alt, t1, tmid, a1, amid) || FindAscent(1 + depth, altdiff, max_deriv_alt, tmid, t2, amid, a2);
+}
+function MaxAltitudeSlope(body, latitude) {
+  if (latitude < -90 || latitude > 90)
+    throw `Invalid geographic latitude: ${latitude}`;
+  let deriv_ra;
+  let deriv_dec;
+  switch (body) {
+    case Body.Moon:
+      deriv_ra = 4.5;
+      deriv_dec = 8.2;
+      break;
+    case Body.Sun:
+      deriv_ra = 0.8;
+      deriv_dec = 0.5;
+      break;
+    case Body.Mercury:
+      deriv_ra = -1.6;
+      deriv_dec = 1;
+      break;
+    case Body.Venus:
+      deriv_ra = -0.8;
+      deriv_dec = 0.6;
+      break;
+    case Body.Mars:
+      deriv_ra = -0.5;
+      deriv_dec = 0.4;
+      break;
+    case Body.Jupiter:
+    case Body.Saturn:
+    case Body.Uranus:
+    case Body.Neptune:
+    case Body.Pluto:
+      deriv_ra = -0.2;
+      deriv_dec = 0.2;
+      break;
+    case Body.Star1:
+    case Body.Star2:
+    case Body.Star3:
+    case Body.Star4:
+    case Body.Star5:
+    case Body.Star6:
+    case Body.Star7:
+    case Body.Star8:
+      deriv_ra = -8e-3;
+      deriv_dec = 8e-3;
+      break;
+    default:
+      throw `Body not allowed for altitude search: ${body}`;
+  }
+  const latrad = DEG2RAD * latitude;
+  return Math.abs((360 / SOLAR_DAYS_PER_SIDEREAL_DAY - deriv_ra) * Math.cos(latrad)) + Math.abs(deriv_dec * Math.sin(latrad));
+}
+function InternalSearchAltitude(body, observer, direction, dateStart, limitDays, bodyRadiusAu, targetAltitude) {
+  VerifyObserver(observer);
+  VerifyNumber(limitDays);
+  VerifyNumber(bodyRadiusAu);
+  VerifyNumber(targetAltitude);
+  if (targetAltitude < -90 || targetAltitude > 90)
+    throw `Invalid target altitude angle: ${targetAltitude}`;
+  const RISE_SET_DT = 0.42;
+  const max_deriv_alt = MaxAltitudeSlope(body, observer.latitude);
+  function altdiff(time3) {
+    const ofdate = Equator(body, time3, observer, true, true);
+    const hor = Horizon(time3, observer, ofdate.ra, ofdate.dec);
+    const altitude = hor.altitude + RAD2DEG * Math.asin(bodyRadiusAu / ofdate.dist);
+    return direction * (altitude - targetAltitude);
+  }
+  const startTime = MakeTime(dateStart);
+  let t1 = startTime;
+  let t2 = startTime;
+  let a1 = altdiff(t1);
+  let a2 = a1;
+  for (; ; ) {
+    if (limitDays < 0) {
+      t1 = t2.AddDays(-RISE_SET_DT);
+      a1 = altdiff(t1);
+    } else {
+      t2 = t1.AddDays(+RISE_SET_DT);
+      a2 = altdiff(t2);
+    }
+    const ascent = FindAscent(0, altdiff, max_deriv_alt, t1, t2, a1, a2);
+    if (ascent) {
+      const time3 = Search(altdiff, ascent.tx, ascent.ty, {
+        dt_tolerance_seconds: 0.1,
+        init_f1: ascent.ax,
+        init_f2: ascent.ay
+      });
+      if (time3) {
+        if (limitDays < 0) {
+          if (time3.ut < startTime.ut + limitDays)
+            return null;
+        } else {
+          if (time3.ut > startTime.ut + limitDays)
+            return null;
+        }
+        return time3;
+      }
+      throw `Rise/set search failed after finding ascent: t1=${t1}, t2=${t2}, a1=${a1}, a2=${a2}`;
+    }
+    if (limitDays < 0) {
+      if (t1.ut < startTime.ut + limitDays)
+        return null;
+      t2 = t1;
+      a2 = a1;
+    } else {
+      if (t2.ut > startTime.ut + limitDays)
+        return null;
+      t1 = t2;
+      a1 = a2;
+    }
+  }
+}
 var ApsisKind;
 (function(ApsisKind2) {
   ApsisKind2[ApsisKind2["Pericenter"] = 0] = "Pericenter";
@@ -51373,6 +51887,26 @@ function VectorFromSphere(sphere, time3) {
   const radlon = sphere.lon * DEG2RAD;
   const rcoslat = sphere.dist * Math.cos(radlat);
   return new Vector(rcoslat * Math.cos(radlon), rcoslat * Math.sin(radlon), sphere.dist * Math.sin(radlat), time3);
+}
+function Refraction(refraction, altitude) {
+  let refr;
+  VerifyNumber(altitude);
+  if (altitude < -90 || altitude > 90)
+    return 0;
+  if (refraction === "normal" || refraction === "jplhor") {
+    let hd = altitude;
+    if (hd < -1)
+      hd = -1;
+    refr = 1.02 / Math.tan((hd + 10.3 / (hd + 5.11)) * DEG2RAD) / 60;
+    if (refraction === "normal" && altitude < -1) {
+      refr *= (altitude + 90) / 89;
+    }
+  } else if (!refraction) {
+    refr = 0;
+  } else {
+    throw `Invalid refraction option: ${refraction}`;
+  }
+  return refr;
 }
 var EclipseKind;
 (function(EclipseKind2) {
@@ -53817,6 +54351,85 @@ function navamshaOf(longitudeDeg) {
   return RASHIS[navamshaRashiIndexByModality(longitudeDeg)];
 }
 
+// packages/vedic/src/vimshottari.ts
+var VIMSHOTTARI_YEAR_DAYS = 365.25;
+var VIMSHOTTARI_YEAR_MS = VIMSHOTTARI_YEAR_DAYS * 864e5;
+var NAKSHATRA_DEGREES = 360 / 27;
+var CYCLE_YEARS = 120;
+var VIMSHOTTARI_LORDS = [
+  "Ketu",
+  "Venus",
+  "Sun",
+  "Moon",
+  "Mars",
+  "Rahu",
+  "Jupiter",
+  "Saturn",
+  "Mercury"
+];
+var VIMSHOTTARI_YEARS = {
+  Ketu: 7,
+  Venus: 20,
+  Sun: 6,
+  Moon: 10,
+  Mars: 7,
+  Rahu: 18,
+  Jupiter: 16,
+  Saturn: 19,
+  Mercury: 17
+};
+function toIso(utcMs) {
+  return new Date(utcMs).toISOString().replace(/\.000Z$/, "Z");
+}
+function rotateFrom(lord) {
+  const index = VIMSHOTTARI_LORDS.indexOf(lord);
+  if (index < 0) throw new Error(`unknown Vimshottari lord: ${lord}`);
+  return [...VIMSHOTTARI_LORDS.slice(index), ...VIMSHOTTARI_LORDS.slice(0, index)];
+}
+function interval(lord, startUtcMs, endUtcMs) {
+  return { lord, startUtc: toIso(startUtcMs), endUtc: toIso(endUtcMs) };
+}
+function buildAntars(mahaLord, startUtcMs, parentEndUtcMs) {
+  const mahaYears = VIMSHOTTARI_YEARS[mahaLord];
+  const lords = rotateFrom(mahaLord);
+  const antars = [];
+  let cursor = startUtcMs;
+  for (let index = 0; index < lords.length; index++) {
+    const lord = lords[index];
+    const childEndUtcMs = index === lords.length - 1 ? parentEndUtcMs : cursor + VIMSHOTTARI_YEAR_MS * mahaYears * VIMSHOTTARI_YEARS[lord] / CYCLE_YEARS;
+    antars.push(interval(lord, cursor, childEndUtcMs));
+    cursor = childEndUtcMs;
+  }
+  return antars;
+}
+function vimshottariFromMoon(birthUtcMs, siderealMoonLongitudeDeg) {
+  if (!Number.isFinite(birthUtcMs)) throw new Error("birthUtcMs must be finite");
+  const moon = canonicalLongitude(siderealMoonLongitudeDeg);
+  const nakshatraIndex = Math.floor(moon / NAKSHATRA_DEGREES);
+  const offset = moon - nakshatraIndex * NAKSHATRA_DEGREES;
+  const progressFraction = offset / NAKSHATRA_DEGREES;
+  const startLord = VIMSHOTTARI_LORDS[nakshatraIndex % VIMSHOTTARI_LORDS.length];
+  const firstMahaYears = VIMSHOTTARI_YEARS[startLord];
+  const lords = rotateFrom(startLord);
+  const mahadashas = [];
+  let startUtcMs = birthUtcMs - progressFraction * firstMahaYears * VIMSHOTTARI_YEAR_MS;
+  for (const lord of lords) {
+    const endUtcMs = startUtcMs + VIMSHOTTARI_YEARS[lord] * VIMSHOTTARI_YEAR_MS;
+    mahadashas.push({
+      ...interval(lord, startUtcMs, endUtcMs),
+      antar: buildAntars(lord, startUtcMs, endUtcMs)
+    });
+    startUtcMs = endUtcMs;
+  }
+  return {
+    dashaYear: "julian-365.25",
+    birthMoonLongitudeDeg: moon,
+    birthNakshatraIndex: nakshatraIndex + 1,
+    nakshatraProgressFraction: progressFraction,
+    mahadashas
+  };
+}
+
 // packages/vedic/src/classifications.ts
 var GRAHAS = [
   "Sun",
@@ -53836,7 +54449,7 @@ function classifyPlacement(longitudeDeg, lagnaLongitudeDeg) {
     bhava: wholeSignBhavaOf(longitudeDeg, lagnaLongitudeDeg)
   };
 }
-function deriveVedicClassifications(positions) {
+function deriveVedicClassifications(positions, options) {
   const lagna = classifyPlacement(positions.lagnaLongitudeDeg, positions.lagnaLongitudeDeg);
   return {
     grahas: GRAHAS.map((graha) => ({
@@ -53854,8 +54467,34 @@ function deriveVedicClassifications(positions) {
       }
     },
     lagna,
-    panchanga: instantaneousPanchanga(positions.grahas.Sun, positions.grahas.Moon)
+    panchanga: {
+      ...instantaneousPanchanga(positions.grahas.Sun, positions.grahas.Moon),
+      vaara: options.vaara
+    },
+    vimshottari: options.includeVimshottari ? vimshottariFromMoon(options.birthUtcMs, positions.grahas.Moon) : null
   };
+}
+
+// packages/vedic/src/sunrise.ts
+var import_moment_timezone2 = __toESM(require_moment_timezone2(), 1);
+var VAARAS = [
+  "Ravivara",
+  "Somavara",
+  "Mangalavara",
+  "Budhavara",
+  "Guruvara",
+  "Shukravara",
+  "Shanivara"
+];
+function previousSunriseUtcMs(input) {
+  const observer = new Observer(input.latitudeDeg, input.longitudeEastDeg, 0);
+  const event = SearchRiseSet(Body.Sun, observer, 1, new Date(input.utcMs), -3, 0);
+  return event === null ? null : event.date.getTime();
+}
+function vaaraAtInstant(input) {
+  const sunriseUtcMs = previousSunriseUtcMs(input);
+  if (sunriseUtcMs === null) return null;
+  return VAARAS[import_moment_timezone2.default.tz(sunriseUtcMs, input.timezone).day()];
 }
 
 // packages/vedic/src/vedic-provider.ts
@@ -53905,6 +54544,42 @@ function computeVedic(normalized, settings) {
     latitudeDeg: normalized.location.latitude,
     longitudeEastDeg: normalized.location.longitude
   });
+  const warnings = [];
+  let derived = null;
+  if (normalized.timeKnown) {
+    const vaara = vaaraAtInstant({
+      utcMs: normalized.utcInstantMs,
+      timezone: normalized.timezone,
+      latitudeDeg: normalized.location.latitude,
+      longitudeEastDeg: normalized.location.longitude
+    });
+    if (vaara === null) {
+      warnings.push(
+        makeWarning(
+          WARNING_CODES.VEDIC_SUNRISE_UNAVAILABLE,
+          "vedic",
+          "No nearby local sunrise is available for this location and instant; Vaara is omitted.",
+          { severity: "info" }
+        )
+      );
+    }
+    const includeVimshottari = settings.dashaYear === "julian-365.25";
+    if (!includeVimshottari) {
+      warnings.push(
+        makeWarning(
+          WARNING_CODES.VEDIC_DASHA_YEAR_UNSUPPORTED,
+          "vedic",
+          `Vimshottari dasha year model ${settings.dashaYear} is reserved for a future ruleset; only julian-365.25 is implemented.`,
+          { severity: "info", detail: { requestedDashaYear: settings.dashaYear } }
+        )
+      );
+    }
+    derived = deriveVedicClassifications(positions, {
+      birthUtcMs: normalized.utcInstantMs,
+      vaara,
+      includeVimshottari
+    });
+  }
   const result = {
     rulesetId: settings.rulesetId,
     provider: PROVIDER4,
@@ -53925,10 +54600,10 @@ function computeVedic(normalized, settings) {
     lagnaLongitudeDeg: normalized.timeKnown ? positions.lagnaLongitudeDeg : null,
     // The same anchor must not leak as a derived natal classification. P4 owns the
     // finer day-stability and public warning policy for unknown birth times.
-    derived: normalized.timeKnown ? deriveVedicClassifications(positions) : null,
+    derived,
     precision: "high"
   };
-  return { result, warnings: [] };
+  return { result, warnings };
 }
 
 // packages/orchestrator/src/calculate.ts
@@ -56214,6 +56889,14 @@ var PUBLIC_WARNING_COPY = {
   RULESET_VARIANT_DEFAULTED: {
     impact: "\u8BF7\u6C42\u7684\u89C4\u5219\u53D8\u4F53\u4E0D\u53EF\u7528\uFF0C\u5DF2\u91C7\u7528\u6587\u6863\u8BF4\u660E\u7684\u9ED8\u8BA4\u89C4\u5219\u3002",
     nextStep: "\u8BF7\u7ED3\u5408\u89C4\u5219\u8BF4\u660E\u7406\u89E3\u8BE5\u5DEE\u5F02\uFF0C\u907F\u514D\u628A\u5B83\u89C6\u4E3A\u552F\u4E00\u7B54\u6848\u3002"
+  },
+  VEDIC_SUNRISE_UNAVAILABLE: {
+    impact: "No nearby local sunrise is available, so the traditional sunrise-based weekday is omitted.",
+    nextStep: "Use a location and date with a nearby sunrise, or treat Vaara as unavailable."
+  },
+  VEDIC_DASHA_YEAR_UNSUPPORTED: {
+    impact: "The requested Vimshottari year model is not implemented by this ruleset.",
+    nextStep: "Use the documented julian-365.25 model or select a future ruleset that implements the requested model."
   }
 };
 function sanitizePublicText(text) {

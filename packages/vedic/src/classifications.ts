@@ -1,10 +1,16 @@
-import type { VedicDerivedChart, VedicDerivedPlacement, VedicGraha } from '@ming/contracts';
+import type {
+  VedicDerivedChart,
+  VedicDerivedPlacement,
+  VedicGraha,
+  VedicVaara,
+} from '@ming/contracts';
 import { wholeSignBhavaOf } from './bhava.ts';
 import { nakshatraOf } from './nakshatra.ts';
 import { instantaneousPanchanga } from './panchanga.ts';
 import { rashiOf } from './rashi.ts';
 import { navamshaOf } from './varga.ts';
 import type { VedicP2Positions } from './vedic-provider.ts';
+import { vimshottariFromMoon } from './vimshottari.ts';
 
 const GRAHAS: readonly VedicGraha[] = [
   'Sun',
@@ -27,10 +33,13 @@ function classifyPlacement(longitudeDeg: number, lagnaLongitudeDeg: number): Ved
 }
 
 /**
- * Deterministic P3A overlay. Call only for a known birth time; its caller owns
+ * Deterministic P3 overlay. Call only for a known birth time; its caller owns
  * suppression for the normalizer's unknown-time anchor.
  */
-export function deriveVedicClassifications(positions: VedicP2Positions): VedicDerivedChart {
+export function deriveVedicClassifications(
+  positions: VedicP2Positions,
+  options: { birthUtcMs: number; vaara: VedicVaara | null; includeVimshottari: boolean },
+): VedicDerivedChart {
   const lagna = classifyPlacement(positions.lagnaLongitudeDeg, positions.lagnaLongitudeDeg);
   return {
     grahas: GRAHAS.map((graha) => ({
@@ -48,6 +57,12 @@ export function deriveVedicClassifications(positions: VedicP2Positions): VedicDe
       },
     },
     lagna,
-    panchanga: instantaneousPanchanga(positions.grahas.Sun, positions.grahas.Moon),
+    panchanga: {
+      ...instantaneousPanchanga(positions.grahas.Sun, positions.grahas.Moon),
+      vaara: options.vaara,
+    },
+    vimshottari: options.includeVimshottari
+      ? vimshottariFromMoon(options.birthUtcMs, positions.grahas.Moon)
+      : null,
   };
 }

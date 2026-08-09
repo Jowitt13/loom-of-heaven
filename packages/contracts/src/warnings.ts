@@ -28,6 +28,10 @@ export const WARNING_CODES = {
   ZIWEI_INPUT_REQUIRED: 'ZIWEI_INPUT_REQUIRED',
   /** A requested rule variant is not implemented; the provider default was applied. */
   RULESET_VARIANT_DEFAULTED: 'RULESET_VARIANT_DEFAULTED',
+  /** A Vedic location has no sunrise in the bounded local search window. */
+  VEDIC_SUNRISE_UNAVAILABLE: 'VEDIC_SUNRISE_UNAVAILABLE',
+  /** A reserved Vimshottari year model was requested but has no implementation. */
+  VEDIC_DASHA_YEAR_UNSUPPORTED: 'VEDIC_DASHA_YEAR_UNSUPPORTED',
 } as const;
 
 export type WarningCode = (typeof WARNING_CODES)[keyof typeof WARNING_CODES];

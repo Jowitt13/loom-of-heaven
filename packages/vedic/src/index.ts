@@ -5,6 +5,14 @@ export { wholeSignBhavaOf } from './bhava.ts';
 export { canonicalLongitude, norm360 } from './math.ts';
 export { nakshatraOf } from './nakshatra.ts';
 export { instantaneousPanchanga } from './panchanga.ts';
+export { nextSunriseUtcMs, previousSunriseUtcMs, vaaraAtInstant } from './sunrise.ts';
+export {
+  VIMSHOTTARI_LORDS,
+  VIMSHOTTARI_YEAR_DAYS,
+  VIMSHOTTARI_YEAR_MS,
+  VIMSHOTTARI_YEARS,
+  vimshottariFromMoon,
+} from './vimshottari.ts';
 export { rashiIndexOf, rashiOf } from './rashi.ts';
 export {
   navamshaOf,

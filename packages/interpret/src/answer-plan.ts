@@ -80,6 +80,16 @@ const PUBLIC_WARNING_COPY: Record<
     impact: '请求的规则变体不可用，已采用文档说明的默认规则。',
     nextStep: '请结合规则说明理解该差异，避免把它视为唯一答案。',
   },
+  VEDIC_SUNRISE_UNAVAILABLE: {
+    impact:
+      'No nearby local sunrise is available, so the traditional sunrise-based weekday is omitted.',
+    nextStep: 'Use a location and date with a nearby sunrise, or treat Vaara as unavailable.',
+  },
+  VEDIC_DASHA_YEAR_UNSUPPORTED: {
+    impact: 'The requested Vimshottari year model is not implemented by this ruleset.',
+    nextStep:
+      'Use the documented julian-365.25 model or select a future ruleset that implements the requested model.',
+  },
 };
 
 /**

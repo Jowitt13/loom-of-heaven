@@ -4,9 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Vedic architecture gate (ADR 0013). It pins the P0 convention freeze and makes
- * P2's narrow numeric scope explicit while preventing a user-facing capability claim
- * before the ADR 0013 P5 slice actually ships.
+ * Vedic architecture gate (ADR 0013). P3B may expose internal provider fields
+ * only after its reviewed fixtures pass. P5 still owns every user-facing surface.
  */
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel: string): string => readFileSync(join(root, rel), 'utf8');
@@ -14,8 +13,8 @@ const read = (rel: string): string => readFileSync(join(root, rel), 'utf8');
 const ADR = 'docs/adr/0013-vedic-architecture.md';
 const MATRIX = 'docs/VEDIC_SOURCE_MATRIX.md';
 
-describe('vedic docs gate: P0 deliverables present and complete', () => {
-  it('ADR 0013 exists and freezes every contested convention', () => {
+describe('vedic docs gate: P0 conventions and P3B evidence', () => {
+  it('keeps ADR 0013 and every convention-freeze section', () => {
     const adr = read(ADR);
     const requiredSections = [
       'System id and package boundary',
@@ -37,30 +36,24 @@ describe('vedic docs gate: P0 deliverables present and complete', () => {
       'Rollout: six independent PRs',
       'License boundary',
     ];
-    const missing = requiredSections.filter((s) => !adr.includes(s));
+    const missing = requiredSections.filter((section) => !adr.includes(section));
     expect(missing, `ADR 0013 lost sections: ${missing.join(', ')}`).toEqual([]);
-    // The three Lahiri-family variants must never be treated as synonyms (tolerate wrapping).
     expect(adr).toMatch(/never be\s+treated as\s+synonyms/i);
   });
 
-  it('ADR 0013 keeps owner-confirmed defaults and verification gates distinct', () => {
+  it('keeps Rahu proposed while recording the bounded P3B evidence results', () => {
     const adr = read(ADR);
-    // Status must stay Proposed while the Rahu node default awaits owner confirmation.
     expect(adr).toMatch(/- Status: Proposed/);
     expect(adr).not.toMatch(/- Status: Accepted/);
-    // julian-365.25 is the owner-confirmed default (2026-07-31), not a pending candidate.
     expect(adr).toMatch(/Owner-confirmed default \(2026-07-31\):\s+`julian-365\.25`/i);
-    expect(adr).not.toMatch(/BLOCKED \/ owner decision.*Vimshottari year model/is);
-    // The only remaining Vimshottari gate is the same-model dual-implementation cross-check.
-    expect(adr).toMatch(
-      /remaining Vimshottari blocker is verification[\s\S]*?identical `julian-365\.25` model/i,
-    );
-    // Sunrise rule is owner-confirmed upper-limb + standard 34′ refraction.
-    expect(adr).toMatch(/Owner-confirmed \(2026-07-31\): upper-limb sunrise with standard 34′/);
     expect(adr).toContain('upper-limb-standard-refraction');
-    // The −50′ backend mapping stays an unverified P2/P3 blocker until goldens land.
-    expect(adr).toMatch(/not yet verified and is a P2\/P3\s+implementation blocker/i);
-    // Rahu remains the single undecided semantic default.
+    expect(adr).toMatch(/NDAstro 0\.28\.1/i);
+    expect(adr).toContain('16.610 seconds');
+    expect(adr).toContain('30 seconds');
+    expect(adr).toContain('5.457 seconds');
+    expect(adr).toMatch(/16 synthetic.*swetest -rise -emos/i);
+    expect(adr).not.toMatch(/remaining Vimshottari blocker is verification/i);
+    expect(adr).not.toMatch(/not yet verified and is a P2\/P3\s+implementation blocker/i);
     expect(adr).toMatch(/\*\*Proposed\*\* default `nodes: 'mean'`/);
   });
 
@@ -72,13 +65,11 @@ describe('vedic docs gate: P0 deliverables present and complete', () => {
       expect(text).toContain('100 synthetic cases');
       expect(text).toContain('REJECTED_FOR_MODE1_REFERENCE');
     }
-    expect(adr).toContain('worst 7.633′');
-    expect(adr).toContain('worst 10.286′');
     expect(adr).toMatch(/Swiss remains the hard acceptance oracle/i);
     expect(adr).toMatch(/never as a general claim of[\s\S]*accuracy/i);
   });
 
-  it('source matrix exists with the ten required columns and license boundary', () => {
+  it('keeps the source matrix complete and its external-tool boundary explicit', () => {
     const matrix = read(MATRIX);
     const requiredColumns = [
       'Adopted definition',
@@ -91,27 +82,33 @@ describe('vedic docs gate: P0 deliverables present and complete', () => {
       'Acceptable error',
       'Unresolved questions',
     ];
-    const missing = requiredColumns.filter((c) => !matrix.includes(c));
+    const missing = requiredColumns.filter((column) => !matrix.includes(column));
     expect(missing, `matrix lost columns: ${missing.join(', ')}`).toEqual([]);
     for (const tool of ['Swiss Ephemeris', 'PyJHora', 'node-jhora', 'jyotishganit', 'VedAstro']) {
       expect(matrix, `matrix must state the license boundary for ${tool}`).toContain(tool);
     }
+    expect(matrix).toContain('P3B evidence records (satisfied)');
+    expect(matrix).toContain('16.610 seconds');
+    expect(matrix).toContain('5.457 seconds');
   });
 
-  it('RULESETS.md scopes the ruleset to the P2/P3A internal substrate and links ADR 0013', () => {
+  it('scopes the ruleset to the P2/P3B internal substrate and links ADR 0013', () => {
     const rulesets = read('docs/RULESETS.md');
     expect(rulesets).toContain('vedic-parashara-lahiri@0.1.0');
-    expect(rulesets).toMatch(/P2\/P3A substrate; not user-facing/);
-    expect(rulesets).toContain('Vaara and Vimshottari remain absent');
+    expect(rulesets).toMatch(/P2\/P3B substrate; not user-facing/);
+    expect(rulesets).toContain('internal provider outputs only');
+    expect(rulesets).toContain('16.610 seconds');
+    expect(rulesets).toContain('5.457 seconds');
     expect(rulesets).toContain('adr/0013-vedic-architecture.md');
   });
 
-  it('P2/P3A docs disclose their narrow implemented scope and retain the P3B boundary', () => {
+  it('documents P2, P3A, and P3B as narrow internal work', () => {
     for (const rel of [ADR, MATRIX]) {
       const text = read(rel);
       expect(text, `${rel} must describe the P2 numeric boundary`).toMatch(/P2.*numeric/i);
-      expect(text, `${rel} must describe the implemented P3A boundary`).toMatch(/P3A/i);
-      expect(text, `${rel} must retain the evidence-gated Vaara and Vimshottari boundary`).toMatch(
+      expect(text, `${rel} must describe P3A`).toMatch(/P3A/i);
+      expect(text, `${rel} must describe P3B`).toMatch(/P3B/i);
+      expect(text, `${rel} must retain Vaara and Vimshottari`).toMatch(
         /Vaara[\s\S]*Vimshottari|Vimshottari[\s\S]*Vaara/i,
       );
     }
@@ -119,9 +116,6 @@ describe('vedic docs gate: P0 deliverables present and complete', () => {
 });
 
 describe('vedic docs gate: no premature capability claims on user-facing surfaces', () => {
-  // Surfaces a host or user reads to learn what the product can do TODAY. The repo-level
-  // README and docs/ may discuss the roadmap; the Skill surface may not mention vedic at
-  // all until P5 ships it for real.
   const skillSurfaces = [
     'skills/calculate-birth-charts/SKILL.md',
     'skills/calculate-birth-charts/agents/openai.yaml',
@@ -132,19 +126,18 @@ describe('vedic docs gate: no premature capability claims on user-facing surface
     'install-manifest.json',
   ];
 
-  it('Skill surfaces contain no vedic/jyotish claim', () => {
-    const offenders = skillSurfaces.filter((f) => /vedic|jyotish/i.test(read(f)));
-    expect(offenders, `remove vedic claims from: ${offenders.join(', ')}`).toEqual([]);
+  it('keeps skill surfaces free of Vedic or Jyotish claims', () => {
+    const offenders = skillSurfaces.filter((file) => /vedic|jyotish/i.test(read(file)));
+    expect(offenders, `remove Vedic claims from: ${offenders.join(', ')}`).toEqual([]);
   });
 
-  it('CLI --systems all still expands to exactly the three implemented systems (P5 owns the flip)', () => {
+  it('keeps CLI --systems all at the three shipped systems until P5', () => {
     const cli = read('skills/calculate-birth-charts/scripts/ming-chart.mjs');
-    // The literal all-expansion list must stay three-system until P5 ships Vedic for real.
     expect(cli).toContain("['western', 'bazi', 'ziwei']");
     expect(cli).not.toMatch(/vedic|jyotish/i);
   });
 
-  it('README mentions vedic only as an explicit plan, never as a current system', () => {
+  it('allows README to mention Vedic only as an explicit plan', () => {
     const readme = read('README.md');
     const mentions = readme.match(/^.*(vedic|jyotish).*$/gim) ?? [];
     const unplanned = mentions.filter(
@@ -152,7 +145,7 @@ describe('vedic docs gate: no premature capability claims on user-facing surface
     );
     expect(
       unplanned,
-      `README lines claiming vedic without a plan marker: ${unplanned.join(' | ')}`,
+      `README lines claiming Vedic without a plan marker: ${unplanned.join(' | ')}`,
     ).toEqual([]);
   });
 });

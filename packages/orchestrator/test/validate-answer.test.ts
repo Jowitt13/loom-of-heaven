@@ -1867,6 +1867,9 @@ describe('validate-answer — fact boundary and safety layer', () => {
   });
 
   describe('runtime bundle exports (docs-required surface)', () => {
+    // Importing the post-build 3 MB bundle can exceed Vitest's 5 s default while
+    // the full suite is concurrently exercising real ZIP and host-package builds.
+    // This keeps the existing assertions intact and bounds this I/O-heavy check.
     it('the built engine exports the documented validate-answer surface', async () => {
       const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
       const engineUrl = new URL(
@@ -1894,7 +1897,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
       ]) {
         expect(typeof engine[name]).toBe('number');
       }
-    });
+    }, 30_000);
 
     it('CLI: structurally invalid input yields exit != 0 and no echo of caller keys', () => {
       const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');

@@ -19,7 +19,7 @@ function norm360(value: number): number {
   return out < 0 ? out + 360 : out;
 }
 
-describe('computeVedic (P2 substrate + P3A classifications)', () => {
+describe('computeVedic (P2 substrate + P3B classifications)', () => {
   it('returns the precision-gated substrate, deterministic overlay and Caelus provenance', () => {
     const normalized = normalizeBirthData(input);
     const { result, warnings } = computeVedic(normalized, input.settings.vedic);
@@ -48,9 +48,9 @@ describe('computeVedic (P2 substrate + P3A classifications)', () => {
     expect(result.derived?.lagna.bhava).toBe(1);
     expect(result.derived?.panchanga.tithi.number).toBeGreaterThanOrEqual(1);
     expect(result.derived?.panchanga.tithi.number).toBeLessThanOrEqual(30);
-    // Evidence-gated P3 products must remain absent.
-    expect(result.derived).not.toHaveProperty('vaara');
-    expect(result.derived).not.toHaveProperty('dashas');
+    expect(result.derived?.panchanga.vaara).not.toBeNull();
+    expect(result.derived?.vimshottari).not.toBeNull();
+    expect(result.derived?.vimshottari?.dashaYear).toBe('julian-365.25');
   });
 
   it('always emits both node modes and derives Ketu by exact opposition', () => {
@@ -66,7 +66,19 @@ describe('computeVedic (P2 substrate + P3A classifications)', () => {
     ).toBeCloseTo(180, 9);
   });
 
-  it('suppresses Lagna and the entire P3A overlay when the input has no birth time', () => {
+  it('does not silently substitute an unimplemented alternate dasha-year model', () => {
+    const normalized = normalizeBirthData(input);
+    const { result, warnings } = computeVedic(normalized, {
+      ...input.settings.vedic,
+      dashaYear: 'savana-360',
+    });
+    expect(result.derived?.vimshottari).toBeNull();
+    expect(warnings).toContainEqual(
+      expect.objectContaining({ code: 'VEDIC_DASHA_YEAR_UNSUPPORTED', system: 'vedic' }),
+    );
+  });
+
+  it('suppresses Lagna and the entire P3B overlay when the input has no birth time', () => {
     const unknown = parseBirthInput({
       calendar: 'gregorian',
       localDate: '1984-11-05',
@@ -82,7 +94,7 @@ describe('computeVedic (P2 substrate + P3A classifications)', () => {
     expect(result.nodes.mean.rahuLongitudeDeg).toBeGreaterThanOrEqual(0);
   });
 
-  it('keeps the internal P3A overlay for an approximate time; P4 owns its public caveat', () => {
+  it('keeps the internal P3B overlay for an approximate time; P4 owns its public caveat', () => {
     const approximate = parseBirthInput({
       calendar: 'gregorian',
       localDate: '1984-11-05',

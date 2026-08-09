@@ -88,22 +88,25 @@ describe('Vedic P3A classifications: whole-sign bhava and D9', () => {
 
 describe('Vedic P3A classifications: complete overlay', () => {
   it('derives both node modes without selecting an unresolved Rahu default', () => {
-    const derived = deriveVedicClassifications({
-      grahas: {
-        Sun: 0,
-        Moon: 12,
-        Mercury: 30,
-        Venus: 60,
-        Mars: 90,
-        Jupiter: 120,
-        Saturn: 150,
+    const derived = deriveVedicClassifications(
+      {
+        grahas: {
+          Sun: 0,
+          Moon: 12,
+          Mercury: 30,
+          Venus: 60,
+          Mars: 90,
+          Jupiter: 120,
+          Saturn: 150,
+        },
+        meanRahuLongitudeDeg: 180,
+        meanKetuLongitudeDeg: 0,
+        trueRahuLongitudeDeg: 181,
+        trueKetuLongitudeDeg: 1,
+        lagnaLongitudeDeg: 15,
       },
-      meanRahuLongitudeDeg: 180,
-      meanKetuLongitudeDeg: 0,
-      trueRahuLongitudeDeg: 181,
-      trueKetuLongitudeDeg: 1,
-      lagnaLongitudeDeg: 15,
-    });
+      { birthUtcMs: Date.UTC(2000, 0, 1), vaara: 'Shanivara', includeVimshottari: true },
+    );
     expect(derived.grahas).toHaveLength(7);
     expect(derived.grahas[0]).toMatchObject({ graha: 'Sun', rashi: 'Mesha', bhava: 1 });
     expect(derived.grahas[1]).toMatchObject({
@@ -118,8 +121,11 @@ describe('Vedic P3A classifications: complete overlay', () => {
       tithi: { number: 2, paksha: 'shukla' },
       yoga: { number: 1 },
       karana: { slot: 2, name: 'Balava' },
+      vaara: 'Shanivara',
     });
-    expect(derived).not.toHaveProperty('vaara');
-    expect(derived).not.toHaveProperty('dashas');
+    expect(derived.vimshottari).toMatchObject({
+      dashaYear: 'julian-365.25',
+      birthNakshatraIndex: 1,
+    });
   });
 });

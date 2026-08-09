@@ -1,5 +1,6 @@
 import { Engine } from 'caelus';
 import { embeddedData } from 'caelus/data-embedded';
+import { WARNING_CODES, makeWarning } from '@ming/contracts';
 import type {
   EngineWarning,
   NormalizedBirthData,
@@ -9,6 +10,7 @@ import type {
   VedicSettings,
 } from '@ming/contracts';
 import { deriveVedicClassifications } from './classifications.ts';
+import { vaaraAtInstant } from './sunrise.ts';
 
 /** Pinned numerical provider; its package version is independently source-bound in ADR 0013. */
 export const CAELUS_VERSION = '0.23.0';
@@ -78,9 +80,9 @@ export function computeVedicP2Positions(input: VedicP2PositionInput): VedicP2Pos
 }
 
 /**
- * P2/P3A Vedic provider. Both node modes are emitted, so the unresolved Rahu
- * default cannot affect a chart silently. The P3A overlay contains only the
- * evidence-unblocked classifications; Vaara and dasha remain absent.
+ * P2/P3 Vedic provider. Both node modes are emitted, so the unresolved Rahu
+ * default cannot affect a chart silently. Vaara and the owner-confirmed
+ * julian-365.25 Vimshottari model are enabled only by their P3B evidence gates.
  */
 export function computeVedic(
   normalized: NormalizedBirthData,
@@ -91,6 +93,42 @@ export function computeVedic(
     latitudeDeg: normalized.location.latitude,
     longitudeEastDeg: normalized.location.longitude,
   });
+  const warnings: EngineWarning[] = [];
+  let derived: VedicChartResult['derived'] = null;
+  if (normalized.timeKnown) {
+    const vaara = vaaraAtInstant({
+      utcMs: normalized.utcInstantMs,
+      timezone: normalized.timezone,
+      latitudeDeg: normalized.location.latitude,
+      longitudeEastDeg: normalized.location.longitude,
+    });
+    if (vaara === null) {
+      warnings.push(
+        makeWarning(
+          WARNING_CODES.VEDIC_SUNRISE_UNAVAILABLE,
+          'vedic',
+          'No nearby local sunrise is available for this location and instant; Vaara is omitted.',
+          { severity: 'info' },
+        ),
+      );
+    }
+    const includeVimshottari = settings.dashaYear === 'julian-365.25';
+    if (!includeVimshottari) {
+      warnings.push(
+        makeWarning(
+          WARNING_CODES.VEDIC_DASHA_YEAR_UNSUPPORTED,
+          'vedic',
+          `Vimshottari dasha year model ${settings.dashaYear} is reserved for a future ruleset; only julian-365.25 is implemented.`,
+          { severity: 'info', detail: { requestedDashaYear: settings.dashaYear } },
+        ),
+      );
+    }
+    derived = deriveVedicClassifications(positions, {
+      birthUtcMs: normalized.utcInstantMs,
+      vaara,
+      includeVimshottari,
+    });
+  }
   const result: VedicChartResult = {
     rulesetId: settings.rulesetId,
     provider: PROVIDER,
@@ -111,8 +149,8 @@ export function computeVedic(
     lagnaLongitudeDeg: normalized.timeKnown ? positions.lagnaLongitudeDeg : null,
     // The same anchor must not leak as a derived natal classification. P4 owns the
     // finer day-stability and public warning policy for unknown birth times.
-    derived: normalized.timeKnown ? deriveVedicClassifications(positions) : null,
+    derived,
     precision: 'high',
   };
-  return { result, warnings: [] };
+  return { result, warnings };
 }

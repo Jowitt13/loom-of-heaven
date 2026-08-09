@@ -14,7 +14,8 @@ const MOVABLE_KARANAS = [
 
 /**
  * Instantaneous panchanga from canonical sidereal Sun/Moon longitudes. Vaara is
- * intentionally absent: it depends on the separately gated sunrise mapping.
+ * added separately by classifications.ts because it depends on the verified
+ * location-aware sunrise mapping in sunrise.ts.
  */
 export function instantaneousPanchanga(
   sunLongitudeDeg: number,

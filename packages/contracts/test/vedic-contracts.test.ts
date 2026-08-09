@@ -29,13 +29,13 @@ describe('vedic contracts (P1/P2)', () => {
     expect(parsed.settings.systems).toEqual(['vedic']);
   });
 
-  it('nodes and dashaYear have no schema defaults before their respective product slices wire them', () => {
+  it('keeps Rahu undecided while defaulting only the owner-confirmed P3B dasha model', () => {
     const settings = VedicSettings.parse({});
     expect(settings.nodes).toBeUndefined();
-    expect(settings.dashaYear).toBeUndefined();
+    expect(settings.dashaYear).toBe('julian-365.25');
     const parsed = parseBirthInput({ ...base, settings: { systems: ['vedic'] } });
     expect(parsed.settings.vedic.nodes).toBeUndefined();
-    expect(parsed.settings.vedic.dashaYear).toBeUndefined();
+    expect(parsed.settings.vedic.dashaYear).toBe('julian-365.25');
   });
 
   it('rejects values outside the reserved enums', () => {

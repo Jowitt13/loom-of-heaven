@@ -38,22 +38,23 @@ interpretation rules that must carry an explicit source + version.
 One named ruleset first; schools via configuration. Records star-placement ruleset, 四化 table
 version, brightness table version, whether true solar time applies, and limit configuration.
 
-## Vedic (Jyotish) — `vedic-parashara-lahiri@0.1.0` (P2/P3A substrate; not user-facing)
+## Vedic (Jyotish) — `vedic-parashara-lahiri@0.1.0` (P2/P3B substrate; not user-facing)
 
 P2 computes an opt-in numeric substrate: Lahiri Sun..Saturn, both Rahu modes with Ketu as exact
 opposition, and Lagna when a birth time is known. P3A deterministically derives rashi (D1),
 whole-sign bhava, 27-nakshatra/pada, D9, and instantaneous Tithi/Yoga/Karana from those canonical
-longitudes; it suppresses the entire overlay when the birth time is unknown. It is held to the
+longitudes, then P3B adds Vaara and Vimshottari under reviewed evidence gates; it suppresses the
+entire overlay when the birth time is unknown. It is held to the
 reviewed offline Swiss mode-1 fixture at ≤1′ and uses the MIT `caelus@0.23.0` embedded-data
 provider. This is not a user-facing product system: the default `systems` array remains
 three-system and no Skill or host surface may claim Vedic capability until the ADR 0013 P5 slice
-ships. Vaara and Vimshottari remain absent.
+ships. P3B's Vaara and Vimshottari are internal provider outputs only, not a product claim.
 Owner-confirmed defaults (2026-07-31): the Vimshottari year model is
 `dashaYear: 'julian-365.25'` (365.25 × 86400 SI seconds; savana-360/sidereal only as future new
 rulesets) and the Vaara sunrise rule is `upper-limb-standard-refraction` (upper limb + standard
-34′ refraction). Still undecided: the Rahu node default (`nodes`). Delivery gates remain:
-Vimshottari cannot ship before its same-model (`julian-365.25`) dual-implementation cross-check
-passes, and Vaara cannot ship before the sunrise backend-mapping goldens pass. The frozen
+34′ refraction). Their P3B gates are satisfied by the 12-case NDAstro same-model dasha fixture
+(maximum 16.610 seconds; 30-second input-bridge allowance) and the 16-case Swiss sunrise fixture
+(maximum 5.457 seconds; 10-second gate). Still undecided: the Rahu node default (`nodes`). The frozen
 engineering boundaries (Lahiri = IAE-1985 standard / Swiss `SE_SIDM_LAHIRI`, Ketu = Rahu+180°,
 whole-sign bhava, 27-nakshatra scheme, instantaneous panchanga, D1/D9)
 live in [ADR 0013](adr/0013-vedic-architecture.md) and the per-topic source registry
