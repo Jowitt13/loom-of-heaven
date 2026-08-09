@@ -31,6 +31,19 @@
     },
     {
       "type": "library",
+      "name": "caelus",
+      "version": "0.23.0",
+      "purl": "pkg:npm/caelus@0.23.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "dayjs",
       "version": "1.11.21",
       "purl": "pkg:npm/dayjs@1.11.21",

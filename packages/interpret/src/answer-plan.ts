@@ -18,7 +18,8 @@ import type {
   PublicWarning,
 } from '@ming/contracts';
 
-const SYSTEMS: ChartSystem[] = ['western', 'bazi', 'ziwei'];
+/** P4 v2 hard cut: public answer plans report every first-class system. */
+const SYSTEMS: ChartSystem[] = ['western', 'bazi', 'ziwei', 'vedic'];
 
 const ANSWER_GUARDRAILS = [
   'traditional-culture-only',
@@ -79,6 +80,22 @@ const PUBLIC_WARNING_COPY: Record<
   RULESET_VARIANT_DEFAULTED: {
     impact: '请求的规则变体不可用，已采用文档说明的默认规则。',
     nextStep: '请结合规则说明理解该差异，避免把它视为唯一答案。',
+  },
+  VEDIC_SUNRISE_UNAVAILABLE: {
+    impact:
+      'No nearby local sunrise is available, so the traditional sunrise-based weekday is omitted.',
+    nextStep: 'Use a location and date with a nearby sunrise, or treat Vaara as unavailable.',
+  },
+  VEDIC_DASHA_YEAR_UNSUPPORTED: {
+    impact: 'The requested Vimshottari year model is not implemented by this ruleset.',
+    nextStep:
+      'Use the documented julian-365.25 model or select a future ruleset that implements the requested model.',
+  },
+  VEDIC_TIME_REQUIRED: {
+    impact:
+      'Birth time is unknown, so unstable Vedic day-level facts and all time-of-day Vedic results are omitted.',
+    nextStep:
+      'Provide a documented birth time to calculate Lagna, whole-sign bhava, D9, Vaara and the Vimshottari balance.',
   },
 };
 
@@ -190,6 +207,9 @@ const LIMITING_WARNING_CODES = new Set<PublicWarning['code']>([
   'BAZI_GENDER_REQUIRED',
   'ZIWEI_INPUT_REQUIRED',
   'RULESET_VARIANT_DEFAULTED',
+  'VEDIC_SUNRISE_UNAVAILABLE',
+  'VEDIC_DASHA_YEAR_UNSUPPORTED',
+  'VEDIC_TIME_REQUIRED',
 ]);
 
 function contentOrder(lens: AnswerLens): AnswerPlan['responseRequirements']['contentOrder'] {

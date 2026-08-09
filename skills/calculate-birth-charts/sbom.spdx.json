@@ -38,6 +38,22 @@
       ]
     },
     {
+      "name": "caelus",
+      "SPDXID": "SPDXRef-Package-caelus",
+      "versionInfo": "0.23.0",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/caelus@0.23.0"
+        }
+      ]
+    },
+    {
       "name": "dayjs",
       "SPDXID": "SPDXRef-Package-dayjs",
       "versionInfo": "1.11.21",
@@ -192,6 +208,11 @@
       "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-Package-astronomy-engine"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-calculate-birth-charts",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-caelus"
     },
     {
       "spdxElementId": "SPDXRef-Package-calculate-birth-charts",

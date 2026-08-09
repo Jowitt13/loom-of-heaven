@@ -31,7 +31,7 @@ export const EvidenceKind = z.enum([
   'bazi-rule',
   'western-rule',
   'ziwei-rule',
-  // Reserved for the Vedic P4 slice (ADR 0013); no producer emits these yet.
+  // Produced by the sourced, structural Vedic P4 rules layer (ADR 0013).
   'vedic',
   'vedic-rule',
   'time',

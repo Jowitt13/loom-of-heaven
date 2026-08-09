@@ -1,0 +1,427 @@
+{
+  "schemaVersion": "vedic-vimshottari-reference/v1",
+  "status": "populated",
+  "source": {
+    "provider": "ndastro-engine",
+    "version": "0.28.1",
+    "license": "MIT",
+    "dashaYear": "julian-365.25",
+    "dashaYearDays": 365.25,
+    "wheelSha256": "672c547f6411f8453df4c6e0eeaff2988a8149f4247a26f819c320bf94ca7d93",
+    "sourceArchiveSha256": "fa09896a57eef839ab98e2892c9a554e13280a990072ba02ca70da9ad78b1159",
+    "de440tSha256": "4f003b4437a8b479aaca262716a779e3683413200adfd6353c4901aab5de800e",
+    "rawManifestSha256": "8172e9f8bf8155d24b0f3dbf98640c9f6860ea9c8f7c58e33a17489b55468cd2",
+    "sourceBinding": "all ndastro_engine Python modules matched byte-for-byte to fixed v0.28.1 source tag before capture"
+  },
+  "endpointToleranceMs": 30000,
+  "cases": [
+    {
+      "id": "dasha-001",
+      "description": "Synthetic early-window southern reference",
+      "birthUtcIso": "1901-01-03T00:00:00Z",
+      "latDeg": -54.2,
+      "lonEastDeg": -170.3,
+      "siderealMoonLongitudeDeg": 53.92352153849515,
+      "nakshatra": "MIRUGASIRISAM",
+      "startLord": "MARS",
+      "nakshatraProgressFraction": 0.04426411538713619,
+      "firstMaha": {
+        "lord": "MARS",
+        "startUtc": "1900-09-11T19:51:55.265Z",
+        "endUtc": "1907-09-12T13:51:55.265Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "MARS",
+          "startUtc": "1900-09-11T19:51:55.265Z",
+          "endUtc": "1901-02-07T23:18:55.265Z"
+        },
+        {
+          "lord": "MERCURY",
+          "startUtc": "1904-03-13T04:51:55.265Z",
+          "endUtc": "1905-03-10T09:48:55.265Z"
+        },
+        {
+          "lord": "MOON",
+          "startUtc": "1907-02-11T12:21:55.265Z",
+          "endUtc": "1907-09-12T13:51:55.265Z"
+        }
+      ],
+      "cycleEndUtc": "2020-09-11T19:51:55.265Z"
+    },
+    {
+      "id": "dasha-002",
+      "description": "Synthetic Pacific reference",
+      "birthUtcIso": "1918-06-12T07:13:00Z",
+      "latDeg": -36.9,
+      "lonEastDeg": 174.8,
+      "siderealMoonLongitudeDeg": 99.7592530568682,
+      "nakshatra": "POOSAM",
+      "startLord": "SATURN",
+      "nakshatraProgressFraction": 0.48194397926511456,
+      "firstMaha": {
+        "lord": "SATURN",
+        "startUtc": "1909-04-15T17:31:08.918Z",
+        "endUtc": "1928-04-15T11:31:08.918Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "SATURN",
+          "startUtc": "1909-04-15T17:31:08.918Z",
+          "endUtc": "1912-04-18T12:34:08.918Z"
+        },
+        {
+          "lord": "SUN",
+          "startUtc": "1919-04-07T02:22:08.918Z",
+          "endUtc": "1920-03-19T02:04:08.918Z"
+        },
+        {
+          "lord": "JUPITER",
+          "startUtc": "1925-10-03T04:19:08.918Z",
+          "endUtc": "1928-04-15T11:31:08.918Z"
+        }
+      ],
+      "cycleEndUtc": "2029-04-15T17:31:08.918Z"
+    },
+    {
+      "id": "dasha-003",
+      "description": "Synthetic Australian reference",
+      "birthUtcIso": "1935-11-23T14:26:00Z",
+      "latDeg": -33.8,
+      "lonEastDeg": 151.3,
+      "siderealMoonLongitudeDeg": 188.49072518388675,
+      "nakshatra": "SUVAATHI",
+      "startLord": "RAHU",
+      "nakshatraProgressFraction": 0.136804388791505,
+      "firstMaha": {
+        "lord": "RAHU",
+        "startUtc": "1933-06-07T04:20:32.764Z",
+        "endUtc": "1951-06-07T16:20:32.764Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "RAHU",
+          "startUtc": "1933-06-07T04:20:32.764Z",
+          "endUtc": "1936-02-18T08:32:32.764Z"
+        },
+        {
+          "lord": "KETHU",
+          "startUtc": "1943-12-07T07:20:32.764Z",
+          "endUtc": "1944-12-24T19:38:32.764Z"
+        },
+        {
+          "lord": "MARS",
+          "startUtc": "1950-05-20T04:02:32.764Z",
+          "endUtc": "1951-06-07T16:20:32.764Z"
+        }
+      ],
+      "cycleEndUtc": "2053-06-07T04:20:32.764Z"
+    },
+    {
+      "id": "dasha-004",
+      "description": "Synthetic equatorial reference",
+      "birthUtcIso": "1952-04-06T21:39:00Z",
+      "latDeg": -1.3,
+      "lonEastDeg": 36.8,
+      "siderealMoonLongitudeDeg": 133.37118295625032,
+      "nakshatra": "POORAM",
+      "startLord": "VENUS",
+      "nakshatraProgressFraction": 0.0028387217187734845,
+      "firstMaha": {
+        "lord": "VENUS",
+        "startUtc": "1952-03-17T03:57:55.109Z",
+        "endUtc": "1972-03-17T03:57:55.109Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "VENUS",
+          "startUtc": "1952-03-17T03:57:55.109Z",
+          "endUtc": "1955-07-17T15:57:55.109Z"
+        },
+        {
+          "lord": "RAHU",
+          "startUtc": "1959-05-17T18:57:55.109Z",
+          "endUtc": "1962-05-17T12:57:55.109Z"
+        },
+        {
+          "lord": "KETHU",
+          "startUtc": "1971-01-16T00:57:55.109Z",
+          "endUtc": "1972-03-17T03:57:55.109Z"
+        }
+      ],
+      "cycleEndUtc": "2072-03-17T03:57:55.109Z"
+    },
+    {
+      "id": "dasha-005",
+      "description": "Synthetic Gulf reference",
+      "birthUtcIso": "1969-09-17T04:52:00Z",
+      "latDeg": 25.2,
+      "lonEastDeg": 55.3,
+      "siderealMoonLongitudeDeg": 216.08955222446457,
+      "nakshatra": "ANUSHAM",
+      "startLord": "SATURN",
+      "nakshatraProgressFraction": 0.20671641683484196,
+      "firstMaha": {
+        "lord": "SATURN",
+        "startUtc": "1965-10-13T15:25:14.077Z",
+        "endUtc": "1984-10-13T09:25:14.077Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "SATURN",
+          "startUtc": "1965-10-13T15:25:14.077Z",
+          "endUtc": "1968-10-16T10:28:14.077Z"
+        },
+        {
+          "lord": "SUN",
+          "startUtc": "1975-10-05T00:16:14.077Z",
+          "endUtc": "1976-09-15T23:58:14.077Z"
+        },
+        {
+          "lord": "JUPITER",
+          "startUtc": "1982-04-02T02:13:14.077Z",
+          "endUtc": "1984-10-13T09:25:14.077Z"
+        }
+      ],
+      "cycleEndUtc": "2085-10-13T15:25:14.077Z"
+    },
+    {
+      "id": "dasha-006",
+      "description": "Synthetic Japanese reference",
+      "birthUtcIso": "1986-02-28T11:05:00Z",
+      "latDeg": 35.7,
+      "lonEastDeg": 139.7,
+      "siderealMoonLongitudeDeg": 185.73732845909103,
+      "nakshatra": "CHITHTHIRAI",
+      "startLord": "MARS",
+      "nakshatraProgressFraction": 0.9302996344318266,
+      "firstMaha": {
+        "lord": "MARS",
+        "startUtc": "1979-08-25T22:02:13.795Z",
+        "endUtc": "1986-08-25T16:02:13.795Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "MARS",
+          "startUtc": "1979-08-25T22:02:13.795Z",
+          "endUtc": "1980-01-22T01:29:13.795Z"
+        },
+        {
+          "lord": "MERCURY",
+          "startUtc": "1983-02-24T07:02:13.795Z",
+          "endUtc": "1984-02-21T11:59:13.795Z"
+        },
+        {
+          "lord": "MOON",
+          "startUtc": "1986-01-24T14:32:13.795Z",
+          "endUtc": "1986-08-25T16:02:13.795Z"
+        }
+      ],
+      "cycleEndUtc": "2099-08-25T22:02:13.795Z"
+    },
+    {
+      "id": "dasha-007",
+      "description": "Synthetic European reference",
+      "birthUtcIso": "2003-07-09T18:18:00Z",
+      "latDeg": 59.9,
+      "lonEastDeg": 10.7,
+      "siderealMoonLongitudeDeg": 208.5493411330599,
+      "nakshatra": "VISAAGAM",
+      "startLord": "JUPITER",
+      "nakshatraProgressFraction": 0.6412005849794923,
+      "firstMaha": {
+        "lord": "JUPITER",
+        "startUtc": "1993-04-05T14:04:14.711Z",
+        "endUtc": "2009-04-05T14:04:14.711Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "JUPITER",
+          "startUtc": "1993-04-05T14:04:14.711Z",
+          "endUtc": "1995-05-24T18:52:14.711Z"
+        },
+        {
+          "lord": "VENUS",
+          "startUtc": "2001-02-15T21:16:14.711Z",
+          "endUtc": "2003-10-17T21:16:14.711Z"
+        },
+        {
+          "lord": "RAHU",
+          "startUtc": "2006-11-10T23:40:14.711Z",
+          "endUtc": "2009-04-05T14:04:14.711Z"
+        }
+      ],
+      "cycleEndUtc": "2113-04-06T14:04:14.711Z"
+    },
+    {
+      "id": "dasha-008",
+      "description": "Synthetic British reference",
+      "birthUtcIso": "2020-12-20T01:31:00Z",
+      "latDeg": 51.5,
+      "lonEastDeg": -0.1,
+      "siderealMoonLongitudeDeg": 312.6789353898881,
+      "nakshatra": "SHATHAYAM",
+      "startLord": "RAHU",
+      "nakshatraProgressFraction": 0.4509201542416079,
+      "firstMaha": {
+        "lord": "RAHU",
+        "startUtc": "2012-11-07T11:43:38.529Z",
+        "endUtc": "2030-11-07T23:43:38.529Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "RAHU",
+          "startUtc": "2012-11-07T11:43:38.529Z",
+          "endUtc": "2015-07-21T15:55:38.529Z"
+        },
+        {
+          "lord": "KETHU",
+          "startUtc": "2023-05-09T14:43:38.529Z",
+          "endUtc": "2024-05-27T03:01:38.529Z"
+        },
+        {
+          "lord": "MARS",
+          "startUtc": "2029-10-20T11:25:38.529Z",
+          "endUtc": "2030-11-07T23:43:38.529Z"
+        }
+      ],
+      "cycleEndUtc": "2132-11-08T11:43:38.529Z"
+    },
+    {
+      "id": "dasha-009",
+      "description": "Synthetic eastern North American reference",
+      "birthUtcIso": "2037-05-01T08:44:00Z",
+      "latDeg": 40.7,
+      "lonEastDeg": -74,
+      "siderealMoonLongitudeDeg": 217.86166581643784,
+      "nakshatra": "ANUSHAM",
+      "startLord": "SATURN",
+      "nakshatraProgressFraction": 0.3396249362328369,
+      "firstMaha": {
+        "lord": "SATURN",
+        "startUtc": "2030-11-17T10:50:30.134Z",
+        "endUtc": "2049-11-17T04:50:30.134Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "SATURN",
+          "startUtc": "2030-11-17T10:50:30.134Z",
+          "endUtc": "2033-11-20T05:53:30.134Z"
+        },
+        {
+          "lord": "SUN",
+          "startUtc": "2040-11-07T19:41:30.134Z",
+          "endUtc": "2041-10-20T19:23:30.134Z"
+        },
+        {
+          "lord": "JUPITER",
+          "startUtc": "2047-05-06T21:38:30.134Z",
+          "endUtc": "2049-11-17T04:50:30.134Z"
+        }
+      ],
+      "cycleEndUtc": "2150-11-18T10:50:30.134Z"
+    },
+    {
+      "id": "dasha-010",
+      "description": "Synthetic Mexican reference",
+      "birthUtcIso": "2054-10-12T15:57:00Z",
+      "latDeg": 19.4,
+      "lonEastDeg": -99.1,
+      "siderealMoonLongitudeDeg": 309.724153722045,
+      "nakshatra": "SHATHAYAM",
+      "startLord": "RAHU",
+      "nakshatraProgressFraction": 0.22931152915337377,
+      "firstMaha": {
+        "lord": "RAHU",
+        "startUtc": "2050-08-27T01:20:32.776Z",
+        "endUtc": "2068-08-26T13:20:32.776Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "RAHU",
+          "startUtc": "2050-08-27T01:20:32.776Z",
+          "endUtc": "2053-05-09T05:32:32.776Z"
+        },
+        {
+          "lord": "KETHU",
+          "startUtc": "2061-02-25T04:20:32.776Z",
+          "endUtc": "2062-03-15T16:38:32.776Z"
+        },
+        {
+          "lord": "MARS",
+          "startUtc": "2067-08-09T01:02:32.776Z",
+          "endUtc": "2068-08-26T13:20:32.776Z"
+        }
+      ],
+      "cycleEndUtc": "2170-08-28T01:20:32.776Z"
+    },
+    {
+      "id": "dasha-011",
+      "description": "Synthetic western North American reference",
+      "birthUtcIso": "2071-03-25T22:10:00Z",
+      "latDeg": 49.3,
+      "lonEastDeg": -123.1,
+      "siderealMoonLongitudeDeg": 274.41678503168896,
+      "nakshatra": "UTHTHIRAADAM",
+      "startLord": "SUN",
+      "nakshatraProgressFraction": 0.5812588773766706,
+      "firstMaha": {
+        "lord": "SUN",
+        "startUtc": "2067-09-29T02:16:29.107Z",
+        "endUtc": "2073-09-28T14:16:29.107Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "SUN",
+          "startUtc": "2067-09-29T02:16:29.107Z",
+          "endUtc": "2068-01-16T16:04:29.107Z"
+        },
+        {
+          "lord": "JUPITER",
+          "startUtc": "2069-10-16T20:34:29.107Z",
+          "endUtc": "2070-08-05T01:22:29.107Z"
+        },
+        {
+          "lord": "VENUS",
+          "startUtc": "2072-09-28T08:16:29.107Z",
+          "endUtc": "2073-09-28T14:16:29.107Z"
+        }
+      ],
+      "cycleEndUtc": "2187-09-30T02:16:29.107Z"
+    },
+    {
+      "id": "dasha-012",
+      "description": "Synthetic late-window northern reference",
+      "birthUtcIso": "2098-08-05T05:23:00Z",
+      "latDeg": 61.2,
+      "lonEastDeg": -149.9,
+      "siderealMoonLongitudeDeg": 211.86083290850115,
+      "nakshatra": "VISAAGAM",
+      "startLord": "JUPITER",
+      "nakshatraProgressFraction": 0.8895624681375863,
+      "firstMaha": {
+        "lord": "JUPITER",
+        "startUtc": "2084-05-11T14:54:35.288Z",
+        "endUtc": "2100-05-12T14:54:35.288Z"
+      },
+      "antarCheckpoints": [
+        {
+          "lord": "JUPITER",
+          "startUtc": "2084-05-11T14:54:35.288Z",
+          "endUtc": "2086-06-29T19:42:35.288Z"
+        },
+        {
+          "lord": "VENUS",
+          "startUtc": "2092-03-23T22:06:35.288Z",
+          "endUtc": "2094-11-22T22:06:35.288Z"
+        },
+        {
+          "lord": "RAHU",
+          "startUtc": "2097-12-17T00:30:35.288Z",
+          "endUtc": "2100-05-12T14:54:35.288Z"
+        }
+      ],
+      "cycleEndUtc": "2204-05-13T14:54:35.288Z"
+    }
+  ]
+}

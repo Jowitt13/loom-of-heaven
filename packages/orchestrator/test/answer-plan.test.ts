@@ -19,7 +19,7 @@ const syntheticInput = parseBirthInput({
     displayName: 'Synthetic answer-plan location sentinel',
   },
   ruleGender: 'female',
-  // Deliberately partial: answer-plan must still calculate all three systems.
+  // Deliberately partial: P4 answer-plan v2 must still calculate all four systems.
   settings: { systems: ['bazi'] },
 });
 
@@ -30,6 +30,7 @@ describe('public result and answer plan', () => {
       { system: 'western', status: 'computed' },
       { system: 'bazi', status: 'computed' },
       { system: 'ziwei', status: 'computed' },
+      { system: 'vedic', status: 'computed' },
     ]);
   });
 

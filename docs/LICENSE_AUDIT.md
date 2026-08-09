@@ -16,14 +16,19 @@
 
 ## Bundled into the published engine (`scripts/dist/engine.mjs`)
 
-| Package          | Version | License | Code license | Data license                 | Notes                                                                           |
-| ---------------- | ------- | ------- | ------------ | ---------------------------- | ------------------------------------------------------------------------------- |
-| zod              | 4.4.3   | MIT     | MIT          | —                            | Zero dependencies.                                                              |
-| moment-timezone  | 0.6.3   | MIT     | MIT          | IANA tz data (public domain) | Ships packed IANA data; version recorded via `moment.tz.dataVersion` (`2026c`). |
-| moment           | 2.30.1  | MIT     | MIT          | —                            | Transitive dep of moment-timezone; maintenance mode but stable.                 |
-| tyme4ts          | 1.5.2   | MIT     | MIT          | —                            | Four Pillars / BaZi (八字) + lunar→Gregorian calendar conversion.               |
-| iztro            | 2.5.8   | MIT     | MIT          | —                            | Zi Wei Dou Shu (紫微斗数) natal chart computation.                              |
-| astronomy-engine | 2.1.19  | MIT     | MIT          | —                            | Western natal chart ephemeris (VSOP87 + NOVAS based).                           |
+| Package          | Version | License | Code license | Data license                        | Notes                                                                                              |
+| ---------------- | ------- | ------- | ------------ | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
+| zod              | 4.4.3   | MIT     | MIT          | —                                   | Zero dependencies.                                                                                 |
+| moment-timezone  | 0.6.3   | MIT     | MIT          | IANA tz data (public domain)        | Ships packed IANA data; version recorded via `moment.tz.dataVersion` (`2026c`).                    |
+| moment           | 2.30.1  | MIT     | MIT          | —                                   | Transitive dep of moment-timezone; maintenance mode but stable.                                    |
+| tyme4ts          | 1.5.2   | MIT     | MIT          | —                                   | Four Pillars / BaZi (八字) + lunar→Gregorian calendar conversion.                                  |
+| iztro            | 2.5.8   | MIT     | MIT          | —                                   | Zi Wei Dou Shu (紫微斗数) natal chart computation.                                                 |
+| astronomy-engine | 2.1.19  | MIT     | MIT          | —                                   | Western natal chart ephemeris (VSOP87 + NOVAS based).                                              |
+| caelus           | 0.23.0  | MIT     | MIT          | Embedded static astronomical series | Vedic P2 numeric substrate; fixed source tag `v0.23.0` rebuilt and byte-bound during the P2 audit. |
+| dayjs            | 1.11.21 | MIT     | MIT          | —                                   | Transitive runtime dependency of iztro.                                                            |
+| i18next          | 23.16.8 | MIT     | MIT          | —                                   | Transitive runtime dependency of iztro.                                                            |
+| lunar-lite       | 0.2.8   | MIT     | MIT          | —                                   | Transitive runtime dependency of iztro.                                                            |
+| lunar-typescript | 1.8.6   | MIT     | MIT          | —                                   | Transitive runtime dependency of iztro and lunar-lite.                                             |
 
 ## Dev-only (NOT shipped in the Skill)
 

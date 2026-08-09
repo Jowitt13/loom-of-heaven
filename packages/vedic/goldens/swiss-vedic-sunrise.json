@@ -1,0 +1,160 @@
+{
+  "schemaVersion": "vedic-sunrise-golden/v1",
+  "status": "populated",
+  "source": {
+    "version": "Version: 2.10.03",
+    "captureDateUtc": "2026-08-09T08:58:59.058Z",
+    "swetestBinarySha256": "c44d29554927ad1ba44196b5b274904f012dacaa3b4797f7f4ae6a48618fc1c5",
+    "rawManifestSha256": "02241cb6d5e8908a633d342a090782f08d60974a61a3641e4fbb4e49f091f399",
+    "referenceInputTimeScale": "UTC",
+    "eventDefinition": "Swiss swetest -rise default: apparent upper-limb rise with standard refraction; -norefrac and -disccenter intentionally omitted",
+    "ephemerisMode": "-emos (Moshier; no ephemeris data files stored in this repository)"
+  },
+  "toleranceSeconds": 10,
+  "cases": [
+    {
+      "id": "sunrise-001",
+      "description": "Synthetic equatorial January reference",
+      "timezone": "Africa/Nairobi",
+      "latDeg": -1.3,
+      "lonEastDeg": 36.8,
+      "startUtcIso": "1901-01-03T00:00:00Z",
+      "sunriseUtcIso": "1901-01-03T03:31:20.600Z"
+    },
+    {
+      "id": "sunrise-002",
+      "description": "Synthetic southern-summer reference",
+      "timezone": "Pacific/Auckland",
+      "latDeg": -36.9,
+      "lonEastDeg": 174.8,
+      "startUtcIso": "1914-12-19T00:00:00Z",
+      "sunriseUtcIso": "1914-12-19T16:57:06.300Z"
+    },
+    {
+      "id": "sunrise-003",
+      "description": "Synthetic southern-winter reference",
+      "timezone": "Australia/Sydney",
+      "latDeg": -33.8,
+      "lonEastDeg": 151.3,
+      "startUtcIso": "1927-06-21T00:00:00Z",
+      "sunriseUtcIso": "1927-06-21T20:59:17.600Z"
+    },
+    {
+      "id": "sunrise-004",
+      "description": "Synthetic northern-spring reference",
+      "timezone": "Asia/Tokyo",
+      "latDeg": 35.7,
+      "lonEastDeg": 139.7,
+      "startUtcIso": "1940-03-20T00:00:00Z",
+      "sunriseUtcIso": "1940-03-20T20:44:28.800Z"
+    },
+    {
+      "id": "sunrise-005",
+      "description": "Synthetic northern-autumn reference",
+      "timezone": "Europe/London",
+      "latDeg": 51.5,
+      "lonEastDeg": -0.1,
+      "startUtcIso": "1953-09-23T00:00:00Z",
+      "sunriseUtcIso": "1953-09-23T05:47:26.600Z"
+    },
+    {
+      "id": "sunrise-006",
+      "description": "Synthetic high-northern summer reference",
+      "timezone": "Europe/Oslo",
+      "latDeg": 59.9,
+      "lonEastDeg": 10.7,
+      "startUtcIso": "1966-07-07T00:00:00Z",
+      "sunriseUtcIso": "1966-07-07T02:07:12.800Z"
+    },
+    {
+      "id": "sunrise-007",
+      "description": "Synthetic high-northern winter reference",
+      "timezone": "America/Anchorage",
+      "latDeg": 61.2,
+      "lonEastDeg": -149.9,
+      "startUtcIso": "1979-01-14T00:00:00Z",
+      "sunriseUtcIso": "1979-01-14T18:59:08.100Z"
+    },
+    {
+      "id": "sunrise-008",
+      "description": "Synthetic North American spring reference",
+      "timezone": "America/New_York",
+      "latDeg": 40.7,
+      "lonEastDeg": -74,
+      "startUtcIso": "1992-04-09T00:00:00Z",
+      "sunriseUtcIso": "1992-04-09T10:26:12.600Z"
+    },
+    {
+      "id": "sunrise-009",
+      "description": "Synthetic North American summer reference",
+      "timezone": "America/Vancouver",
+      "latDeg": 49.3,
+      "lonEastDeg": -123.1,
+      "startUtcIso": "2005-08-16T00:00:00Z",
+      "sunriseUtcIso": "2005-08-16T13:05:51.300Z"
+    },
+    {
+      "id": "sunrise-010",
+      "description": "Synthetic Mexican autumn reference",
+      "timezone": "America/Mexico_City",
+      "latDeg": 19.4,
+      "lonEastDeg": -99.1,
+      "startUtcIso": "2018-10-02T00:00:00Z",
+      "sunriseUtcIso": "2018-10-02T12:27:24.300Z"
+    },
+    {
+      "id": "sunrise-011",
+      "description": "Synthetic Gulf winter reference",
+      "timezone": "Asia/Dubai",
+      "latDeg": 25.2,
+      "lonEastDeg": 55.3,
+      "startUtcIso": "2031-02-26T00:00:00Z",
+      "sunriseUtcIso": "2031-02-26T02:44:48.400Z"
+    },
+    {
+      "id": "sunrise-012",
+      "description": "Synthetic date-line autumn reference",
+      "timezone": "Etc/GMT+12",
+      "latDeg": -54.2,
+      "lonEastDeg": -170.3,
+      "startUtcIso": "2044-11-05T00:00:00Z",
+      "sunriseUtcIso": "2044-11-05T15:24:39.400Z"
+    },
+    {
+      "id": "sunrise-013",
+      "description": "Synthetic equatorial late-century reference",
+      "timezone": "Africa/Nairobi",
+      "latDeg": -1.3,
+      "lonEastDeg": 36.8,
+      "startUtcIso": "2057-05-30T00:00:00Z",
+      "sunriseUtcIso": "2057-05-30T03:28:59.400Z"
+    },
+    {
+      "id": "sunrise-014",
+      "description": "Synthetic Pacific summer reference",
+      "timezone": "Pacific/Auckland",
+      "latDeg": -36.9,
+      "lonEastDeg": 174.8,
+      "startUtcIso": "2070-12-12T00:00:00Z",
+      "sunriseUtcIso": "2070-12-12T16:55:04.800Z"
+    },
+    {
+      "id": "sunrise-015",
+      "description": "Synthetic European spring reference",
+      "timezone": "Europe/Oslo",
+      "latDeg": 59.9,
+      "lonEastDeg": 10.7,
+      "startUtcIso": "2083-03-28T00:00:00Z",
+      "sunriseUtcIso": "2083-03-28T04:54:27.900Z"
+    },
+    {
+      "id": "sunrise-016",
+      "description": "Synthetic North American autumn reference",
+      "timezone": "America/New_York",
+      "latDeg": 40.7,
+      "lonEastDeg": -74,
+      "startUtcIso": "2096-09-17T00:00:00Z",
+      "sunriseUtcIso": "2096-09-17T10:39:48.600Z"
+    }
+  ]
+}
