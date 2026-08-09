@@ -13,6 +13,13 @@ never computes a chart itself.**
 
 ## Golden rules (do not break)
 
+- **P5 Vedic boundary.** `calculate --systems all` explicitly requests Vedic alongside the three
+  legacy systems, but an omitted `settings.systems` keeps its three-system compatibility default.
+  The Vedic chart returns both node modes without a product default and suppresses time-of-day
+  values with `VEDIC_TIME_REQUIRED` when the birth time is unknown. Its high-precision wording is
+  limited to the recorded Swiss-only external numeric-reference fixture; Swiss never runs in the
+  bundle or runtime.
+
 - **Never** compute or guess planet positions, houses, aspects, solar terms, 干支, 十神, 起运,
   星曜 or 四化 yourself. If the CLI does not return a value, say so — never backfill.
 - **Offline only.** No network calls, AI model-provider SDKs, or prompt modules in the calculation

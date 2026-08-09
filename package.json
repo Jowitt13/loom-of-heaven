@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Deterministic three-system birth-chart engine (Western natal, BaZi, Zi Wei Dou Shu) shipped as a self-contained, script-executing Skill for Codex / Qoder / WorkBuddy / Doubao.",
+  "description": "Deterministic four-system birth-chart engine (Western natal, BaZi, Zi Wei Dou Shu, bounded Vedic/Jyotish) shipped as a self-contained, script-executing Skill for Codex / Qoder / WorkBuddy / Doubao.",
   "license": "MIT",
   "packageManager": "pnpm@11.7.0",
   "engines": {

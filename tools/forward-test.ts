@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
  * honestly. Every input is fictional (handoff §10: no real birth data in tests).
  *
  * Requests covered (≥ the "three real requests" the Phase 3 bar asks for):
- *   A. Full three-system chart, exact time, gender known  (happy path + Western gate)
+ *   A. Full four-system chart, exact time, gender known   (happy path + Western/Vedic gates)
  *   B. Unknown birth time                                  (time-gated degradation)
  *   C. Lunar-calendar input                                (LUNAR_CONVERTED)
  *   D. Approximate birth time                              (TIME_ACCURACY_APPROXIMATE)
@@ -151,7 +151,7 @@ try {
   const verify = runNode(tempSkill, ['scripts/ming-chart.mjs', 'verify']);
   record('verify passes in clean dir', verify.code === 0);
 
-  // --- Request A: full three-system chart, exact time, gender known. -----------
+  // --- Request A: full four-system chart, exact time, gender known. ------------
   const aInput = writeInput('a-input.json', exactMale);
 
   const aNormalize = runNode(tempSkill, [
@@ -197,7 +197,14 @@ try {
     'A: BaZi luck cycle computed (gender known)',
     aBazi?.luckCycle !== null && aBazi?.luckCycle !== undefined,
   );
-  record('A: Zi Wei chart computed (time + gender known)', aBundle?.ziwei !== undefined);
+  const aVedic = aBundle?.vedic as Json | undefined;
+  record(
+    'A: Zi Wei and Vedic charts computed (time + gender known; both node modes retained)',
+    aBundle?.ziwei !== undefined &&
+      aVedic !== undefined &&
+      ((aVedic.nodes as Json | undefined)?.mean as Json | undefined) !== undefined &&
+      ((aVedic.nodes as Json | undefined)?.true as Json | undefined) !== undefined,
+  );
   const aWestern = aBundle?.western as Json | undefined;
   record(
     'A: Western natal chart computed (astronomy-engine; planets + houses present)',
@@ -208,10 +215,11 @@ try {
   );
   const aProviders = ((aBundle?.provenance as Json)?.providers ?? []) as Array<{ id: string }>;
   record(
-    'A: provenance lists tyme4ts + iztro + astronomy-engine providers',
+    'A: provenance lists tyme4ts + iztro + astronomy-engine + caelus providers',
     aProviders.some((p) => p.id === 'tyme4ts') &&
       aProviders.some((p) => p.id === 'iztro') &&
-      aProviders.some((p) => p.id === 'astronomy-engine'),
+      aProviders.some((p) => p.id === 'astronomy-engine') &&
+      aProviders.some((p) => p.id === 'caelus'),
   );
 
   // render is temporarily disabled: it emits a stable disabled notice (exit 3) and
@@ -238,8 +246,12 @@ try {
   record('B: calculate (unknown time) runs (exit 0)', bCalc.code === 0);
   record('B: TIME_UNKNOWN warning surfaced', hasWarning(bBundle, 'TIME_UNKNOWN'));
   record(
-    'B: Zi Wei omitted with ZIWEI_INPUT_REQUIRED (not fabricated)',
-    bBundle?.ziwei === undefined && hasWarning(bBundle, 'ZIWEI_INPUT_REQUIRED'),
+    'B: Zi Wei omitted and Vedic time-of-day fields suppressed (not fabricated)',
+    bBundle?.ziwei === undefined &&
+      hasWarning(bBundle, 'ZIWEI_INPUT_REQUIRED') &&
+      (bBundle?.vedic as Json | undefined)?.lagnaLongitudeDeg === null &&
+      (bBundle?.vedic as Json | undefined)?.derived === null &&
+      hasWarning(bBundle, 'VEDIC_TIME_REQUIRED'),
   );
   const bBazi = bBundle?.bazi as Json | undefined;
   const bPillars = (bBazi?.pillars as Json | undefined) ?? {};
@@ -274,8 +286,8 @@ try {
     cLocalCivil,
   );
   record(
-    'C: BaZi + Zi Wei still computed after conversion',
-    cBundle?.bazi !== undefined && cBundle?.ziwei !== undefined,
+    'C: BaZi + Zi Wei + Vedic still computed after conversion',
+    cBundle?.bazi !== undefined && cBundle?.ziwei !== undefined && cBundle?.vedic !== undefined,
   );
 
   // --- Request D: approximate birth time → flagged, still computed. ------------
@@ -288,8 +300,8 @@ try {
     hasWarning(dBundle, 'TIME_ACCURACY_APPROXIMATE'),
   );
   record(
-    'D: BaZi + Zi Wei still computed for approximate time',
-    dBundle?.bazi !== undefined && dBundle?.ziwei !== undefined,
+    'D: BaZi + Zi Wei + Vedic still computed for approximate time',
+    dBundle?.bazi !== undefined && dBundle?.ziwei !== undefined && dBundle?.vedic !== undefined,
   );
 
   // --- Request E: school / true-solar-time comparison (compare subcommand). ----

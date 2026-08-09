@@ -127,7 +127,23 @@ EngineError envelope). Use the `calculate` / `interpret` JSON instead. See
 
 Codes: `TIME_ACCURACY_APPROXIMATE`, `TIME_UNKNOWN`, `DST_AMBIGUOUS_RESOLVED`,
 `SOLAR_TIME_APPROXIMATE`, `SYSTEM_NOT_YET_IMPLEMENTED`, `NEAR_BOUNDARY`,
-`HIGH_LATITUDE_HOUSE_RISK`. `system` is one of `time | western | bazi | ziwei | engine`.
+`HIGH_LATITUDE_HOUSE_RISK`, `VEDIC_SUNRISE_UNAVAILABLE`,
+`VEDIC_DASHA_YEAR_UNSUPPORTED`, `VEDIC_TIME_REQUIRED`. `system` is one of
+`time | western | bazi | ziwei | vedic | engine`.
+
+## Vedic / Jyotish `ChartBundle.vedic`
+
+When Vedic is requested, `bundle.vedic` records `rulesetId`, the MIT `caelus` provider, Lahiri
+IAE-1985 (`SE_SIDM_LAHIRI` reference mode), seven grahas, and **both** `nodes.mean` and
+`nodes.true`. Ketu is exactly opposite the corresponding Rahu. `lagnaLongitudeDeg`, `derived`
+and time-of-day classifications are nullable: for `timeAccuracy: "unknown"`, the engine emits
+`VEDIC_TIME_REQUIRED`, returns only `unknownTimeStable` values that remain stable all local day,
+and never treats the noon normalization anchor as a natal time.
+
+`precision: "high"` means only that covered fields satisfy the recorded Swiss-only external
+numeric-reference fixture at <=1 arc-minute. It does not make a general accuracy claim and Swiss
+Ephemeris is not a runtime, bundle or CI dependency. `vedic.nodes` is optional input: both node
+modes remain in output until an owner confirms a product default.
 
 ## Error envelope and exit codes
 

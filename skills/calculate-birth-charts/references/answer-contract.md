@@ -1,7 +1,11 @@
 # Public result and answer-plan contract
 
-`answer-plan` is the default command for an ordinary question. It calculates all three supported
+`answer-plan` is the default command for an ordinary question. It calculates all four supported
 systems internally, but does not expose the private technical calculation record.
+
+This is a **v2 hard cut**: it emits `public-result/v2` and `answer-plan/v2`; v1 contracts are
+neither emitted nor accepted. The Vedic evidence remains bounded by returned facts and warnings,
+including `VEDIC_TIME_REQUIRED` whenever a missing birth time suppresses values.
 
 ```text
 node scripts/ming-chart.mjs answer-plan \

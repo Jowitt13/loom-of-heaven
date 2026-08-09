@@ -5,7 +5,7 @@
     "url": "https://github.com/Jowitt13"
   },
   "metadata": {
-    "description": "Deterministic three-system birth-chart Skill: Western natal, BaZi (四柱八字) and Zi Wei Dou Shu (紫微斗数).",
+    "description": "Deterministic four-system birth-chart Skill: Western natal, BaZi, Zi Wei Dou Shu, and bounded Vedic/Jyotish.",
     "version": "0.1.0"
   },
   "plugins": [
