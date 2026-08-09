@@ -68,9 +68,10 @@ export function runInterpret(
 }
 
 /**
- * The safe default for ordinary questions. It always computes all three systems
- * internally, but returns only the de-identified PublicResult and bounded
- * AnswerPlan. Existing `calculate` and `interpret` contracts remain unchanged.
+ * The safe default for ordinary questions. P4's v2 hard cut computes all four
+ * systems internally, then returns only the de-identified PublicResult and
+ * bounded AnswerPlan. `calculate` remains caller-selected and its default
+ * systems array stays at three until the separately authorized P5 product cut.
  */
 export function runAnswerPlan(
   input: BirthInput,
@@ -80,7 +81,7 @@ export function runAnswerPlan(
     ...input,
     settings: {
       ...input.settings,
-      systems: ['western', 'bazi', 'ziwei'],
+      systems: ['western', 'bazi', 'ziwei', 'vedic'],
     },
   };
   const run = runInterpretation(allSystemsInput, options);

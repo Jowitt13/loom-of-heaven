@@ -8,6 +8,11 @@ outputs; all user-facing work remains unimplemented until P5.**
 
 Source classes are kept separate on purpose:
 
+**P4 update (2026-08-09).** The internal fact layer is implemented with sourced, structural
+findings only. `PublicResult` and `AnswerPlan` have a four-system **hard cut** to v2:
+`public-result/v1` and `answer-plan/v1` are not emitted or accepted. This does not alter the
+P5 boundary: no CLI, Skill or host-facing Vedic capability is shipped yet.
+
 - **Traditional rule sources**: public-domain classics — Brihat Parashara Hora Shastra (BPHS,
   Sanskrit original, public domain; cite chapter subject, never copy modern translations),
   Surya Siddhanta (public domain). Used for _rules_ (sequences, mappings, semantics).
@@ -81,6 +86,11 @@ Acceptable error | Unresolved questions**
 | Vimshottari Maha/Antar | Ketu7 Venus20 Sun6 Moon10 Mars7 Rahu18 Jupiter16 Saturn19 Mercury17 (120y); start = Moon-nakshatra lord; balance = remaining arc fraction × lord years; antar ∝ years/120 from Maha lord; [start,end) | BPHS Vimshottari dasha chapter                                      | NDAstro 0.28.1 (MIT; Skyfield/JPL), fixed source tag and wheel audited           | **Year length: Owner-confirmed (2026-07-31) `dashaYear: 'julian-365.25'`** (dasha year = 365.25 × 86400 SI seconds); savana-360 (≈630 days shorter per 120y) and sidereal year (≈+46 days per 120y vs julian) ship only as future new ruleset versions | Public domain rule | `packages/vedic/src/vimshottari.ts` | 12 synthetic same-model cases; raw capture manifest + offline checkpoints                   | ≤30 seconds; observed maximum 16.610 seconds due six-decimal Moon input bridge | No P2 ephemeris claim; alternatives remain future rulesets |
 
 ### Output / product layer
+
+P4 implements the first two rows below. The time-accuracy gate checks every local-civil minute
+for unknown-time inputs, emits only stable Moon nakshatra/pada and instantaneous Panchanga, and
+uses `VEDIC_TIME_REQUIRED` whenever a requested Vedic fact is suppressed. It never derives
+Lagna, bhava, D9, Vaara or Vimshottari endpoints from the normalizer's noon anchor.
 
 | Topic                        | Adopted definition                                                                                                 | Primary source                                                    | Secondary cross-source | School disagreement | License status | Future implementation file                                                           | External golden method          | Acceptable error | Unresolved questions                          |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | ---------------------- | ------------------- | -------------- | ------------------------------------------------------------------------------------ | ------------------------------- | ---------------- | --------------------------------------------- |

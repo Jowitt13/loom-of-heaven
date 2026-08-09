@@ -4050,18 +4050,18 @@ var require_moment_timezone = __commonJS({
       } else {
         factory(root.moment);
       }
-    })(exports, function(moment3) {
+    })(exports, function(moment4) {
       "use strict";
-      if (moment3.version === void 0 && moment3.default) {
-        moment3 = moment3.default;
+      if (moment4.version === void 0 && moment4.default) {
+        moment4 = moment4.default;
       }
       var VERSION = "0.6.3", zones = {}, links = {}, countries = {}, names = {}, guesses = {}, cachedGuess;
-      if (!moment3 || typeof moment3.version !== "string") {
+      if (!moment4 || typeof moment4.version !== "string") {
         logError("Moment Timezone requires Moment.js. See https://momentjs.com/timezone/docs/#/use-it/browser/");
       }
-      var momentVersion2 = moment3.version.split("."), major = +momentVersion2[0], minor = +momentVersion2[1];
+      var momentVersion2 = moment4.version.split("."), major = +momentVersion2[0], minor = +momentVersion2[1];
       if (major < 2 || major === 2 && minor < 6) {
-        logError("Moment Timezone requires Moment.js >= 2.6.0. You are using Moment.js " + moment3.version + ". See momentjs.com");
+        logError("Moment Timezone requires Moment.js >= 2.6.0. You are using Moment.js " + moment4.version + ". See momentjs.com");
       }
       function charCodeToInt(charCode) {
         if (charCode > 96) {
@@ -4450,8 +4450,8 @@ var require_moment_timezone = __commonJS({
         }
       }
       function tz(input) {
-        var args = Array.prototype.slice.call(arguments, 0, -1), name = arguments[arguments.length - 1], out = moment3.utc.apply(null, args), zone;
-        if (!moment3.isMoment(input) && needsOffset(out) && (zone = getZone(name))) {
+        var args = Array.prototype.slice.call(arguments, 0, -1), name = arguments[arguments.length - 1], out = moment4.utc.apply(null, args), zone;
+        if (!moment4.isMoment(input) && needsOffset(out) && (zone = getZone(name))) {
           out.add(zone.parse(out), "minutes");
         }
         out.tz(name);
@@ -4478,14 +4478,14 @@ var require_moment_timezone = __commonJS({
       tz.moveAmbiguousForward = false;
       tz.countries = getCountryNames;
       tz.zonesForCountry = zonesForCountry;
-      var fn = moment3.fn;
-      moment3.tz = tz;
-      moment3.defaultZone = null;
-      moment3.updateOffset = function(mom, keepTime) {
-        var zone = moment3.defaultZone, offset;
+      var fn = moment4.fn;
+      moment4.tz = tz;
+      moment4.defaultZone = null;
+      moment4.updateOffset = function(mom, keepTime) {
+        var zone = moment4.defaultZone, offset;
         if (mom._z === void 0) {
           if (zone && needsOffset(mom) && !mom._isUTC && mom.isValid()) {
-            mom._d = moment3.utc(mom._a)._d;
+            mom._d = moment4.utc(mom._a)._d;
             mom.utc().add(zone.parse(mom), "minutes");
           }
           mom._z = zone;
@@ -4511,7 +4511,7 @@ var require_moment_timezone = __commonJS({
           }
           this._z = getZone(name);
           if (this._z) {
-            moment3.updateOffset(this, keepTime);
+            moment4.updateOffset(this, keepTime);
           } else {
             logError("Moment Timezone has no data for " + name + ". See http://momentjs.com/timezone/docs/#/data-loading/.");
           }
@@ -4546,21 +4546,21 @@ var require_moment_timezone = __commonJS({
       fn.utc = resetZoneWrap(fn.utc);
       fn.local = resetZoneWrap(fn.local);
       fn.utcOffset = resetZoneWrap2(fn.utcOffset);
-      moment3.tz.setDefault = function(name) {
+      moment4.tz.setDefault = function(name) {
         if (major < 2 || major === 2 && minor < 9) {
-          logError("Moment Timezone setDefault() requires Moment.js >= 2.9.0. You are using Moment.js " + moment3.version + ".");
+          logError("Moment Timezone setDefault() requires Moment.js >= 2.9.0. You are using Moment.js " + moment4.version + ".");
         }
-        moment3.defaultZone = name ? getZone(name) : null;
-        return moment3;
+        moment4.defaultZone = name ? getZone(name) : null;
+        return moment4;
       };
-      var momentProperties = moment3.momentProperties;
+      var momentProperties = moment4.momentProperties;
       if (Object.prototype.toString.call(momentProperties) === "[object Array]") {
         momentProperties.push("_z");
         momentProperties.push("_a");
       } else if (momentProperties) {
         momentProperties._z = null;
       }
-      return moment3;
+      return moment4;
     });
   }
 });
@@ -5427,8 +5427,8 @@ var require_latest = __commonJS({
 // node_modules/.pnpm/moment-timezone@0.6.3/node_modules/moment-timezone/index.js
 var require_moment_timezone2 = __commonJS({
   "node_modules/.pnpm/moment-timezone@0.6.3/node_modules/moment-timezone/index.js"(exports, module) {
-    var moment3 = module.exports = require_moment_timezone();
-    moment3.tz.load(require_latest());
+    var moment4 = module.exports = require_moment_timezone();
+    moment4.tz.load(require_latest());
   }
 });
 
@@ -39872,7 +39872,9 @@ var WARNING_CODES = {
   /** A Vedic location has no sunrise in the bounded local search window. */
   VEDIC_SUNRISE_UNAVAILABLE: "VEDIC_SUNRISE_UNAVAILABLE",
   /** A reserved Vimshottari year model was requested but has no implementation. */
-  VEDIC_DASHA_YEAR_UNSUPPORTED: "VEDIC_DASHA_YEAR_UNSUPPORTED"
+  VEDIC_DASHA_YEAR_UNSUPPORTED: "VEDIC_DASHA_YEAR_UNSUPPORTED",
+  /** Unknown birth time prevents one or more Vedic facts from being truthfully emitted. */
+  VEDIC_TIME_REQUIRED: "VEDIC_TIME_REQUIRED"
 };
 var WarningSeverity = external_exports.enum(["info", "warning"]);
 var EngineSystem = external_exports.enum(["time", "western", "bazi", "ziwei", "vedic", "engine"]);
@@ -40088,6 +40090,10 @@ var VedicInstantaneousPanchanga = external_exports.strictObject({
     name: VedicKaranaName
   })
 });
+var VedicUnknownTimeStable = external_exports.strictObject({
+  moonNakshatra: VedicNakshatraPlacement.nullable(),
+  panchanga: VedicInstantaneousPanchanga.nullable()
+});
 var VedicVaara = external_exports.enum([
   "Ravivara",
   "Somavara",
@@ -40153,6 +40159,8 @@ var VedicChartResult = external_exports.strictObject({
   }),
   lagnaLongitudeDeg: VedicLongitude.nullable(),
   derived: VedicDerivedChart.nullable(),
+  /** P4's whole-local-day stability projection for a time-unknown input. */
+  unknownTimeStable: VedicUnknownTimeStable.nullable(),
   /** Granted only by the offline P2 Swiss fixture regression (≤1′ for every P2 field). */
   precision: external_exports.literal("high")
 });
@@ -40626,6 +40634,27 @@ var WesternChartResult = external_exports.object({
   aspects: external_exports.array(WesternAspect)
 });
 
+// packages/contracts/src/vedic-interpretation.ts
+var VedicRuleSource = external_exports.strictObject({
+  text: external_exports.string(),
+  chapter: external_exports.string()
+});
+var VedicRuleTopic = external_exports.enum(["nakshatra", "bhava", "panchanga", "vimshottari"]);
+var VedicRuleFinding = external_exports.strictObject({
+  ruleId: external_exports.string(),
+  topic: VedicRuleTopic,
+  matched: external_exports.boolean(),
+  claim: external_exports.string(),
+  source: VedicRuleSource,
+  reason: external_exports.string().optional(),
+  caveat: external_exports.string().optional()
+});
+var VedicInterpretation = external_exports.strictObject({
+  rulesetId: external_exports.string(),
+  provider: ProviderRef,
+  findings: external_exports.array(VedicRuleFinding)
+});
+
 // packages/contracts/src/interpretation.ts
 var InterpretationTopic = external_exports.enum([
   "character",
@@ -40650,7 +40679,7 @@ var EvidenceKind = external_exports.enum([
   "bazi-rule",
   "western-rule",
   "ziwei-rule",
-  // Reserved for the Vedic P4 slice (ADR 0013); no producer emits these yet.
+  // Produced by the sourced, structural Vedic P4 rules layer (ADR 0013).
   "vedic",
   "vedic-rule",
   "time"
@@ -40699,8 +40728,8 @@ var InterpretationFacts = external_exports.object({
 });
 
 // packages/contracts/src/answer-plan.ts
-var PUBLIC_RESULT_CONTRACT_VERSION = "public-result/v1";
-var ANSWER_PLAN_CONTRACT_VERSION = "answer-plan/v1";
+var PUBLIC_RESULT_CONTRACT_VERSION = "public-result/v2";
+var ANSWER_PLAN_CONTRACT_VERSION = "answer-plan/v2";
 var PublicWarning = EngineWarning.pick({
   code: true,
   severity: true,
@@ -40728,11 +40757,15 @@ var PublicSystemStatus = external_exports.strictObject({
   system: ChartSystem,
   status: external_exports.enum(["computed", "unavailable"])
 });
+var PublicSystemStatuses = external_exports.array(PublicSystemStatus).length(4).refine(
+  (systems) => new Set(systems.map((system) => system.system)).size === 4,
+  "systems must include every ChartSystem exactly once"
+);
 var PublicResult = external_exports.strictObject({
   contractVersion: external_exports.literal(PUBLIC_RESULT_CONTRACT_VERSION),
   engineVersion: external_exports.string(),
   sourceSchemaVersion: external_exports.string(),
-  systems: external_exports.array(PublicSystemStatus).length(3),
+  systems: PublicSystemStatuses,
   inputReliability: external_exports.strictObject({
     timeAccuracy: TimeAccuracy,
     birthTimeKnown: external_exports.boolean()
@@ -54498,10 +54531,12 @@ function vaaraAtInstant(input) {
 }
 
 // packages/vedic/src/vedic-provider.ts
+var import_moment_timezone3 = __toESM(require_moment_timezone2(), 1);
 var CAELUS_VERSION = "0.23.0";
 var PROVIDER4 = { id: "caelus", version: CAELUS_VERSION, license: "MIT" };
 var ENGINE = new Engine(embeddedData);
 var MS_PER_DAY3 = 864e5;
+var UNKNOWN_TIME_STABILITY_SAMPLE_MS = 6e4;
 var UNIX_EPOCH_JD = 24405875e-1;
 var GRAHAS2 = [
   ["Sun", "sun"],
@@ -54538,6 +54573,47 @@ function computeVedicP2Positions(input) {
     lagnaLongitudeDeg: round62(chart.angles.asc)
   };
 }
+function samePanchanga(a, b) {
+  return a.tithi.number === b.tithi.number && a.tithi.paksha === b.tithi.paksha && a.yoga.number === b.yoga.number && a.karana.slot === b.karana.slot && a.karana.name === b.karana.name;
+}
+function stableUnknownTimeVedicFacts(normalized) {
+  if (normalized.timeKnown) {
+    throw new Error("stableUnknownTimeVedicFacts requires normalized.timeKnown === false");
+  }
+  const localStart = import_moment_timezone3.default.tz(
+    `${normalized.localDate} 00:00:00`,
+    "YYYY-MM-DD HH:mm:ss",
+    normalized.timezone
+  );
+  const startUtcMs = localStart.valueOf();
+  const endUtcMs = localStart.clone().add(1, "day").valueOf();
+  let moonNakshatra = null;
+  let panchanga = null;
+  let moonStable = true;
+  let panchangaStable = true;
+  for (let utcMs = startUtcMs; utcMs <= endUtcMs; utcMs += UNKNOWN_TIME_STABILITY_SAMPLE_MS) {
+    const positions = computeVedicP2Positions({
+      utcInstantMs: Math.min(utcMs, endUtcMs),
+      latitudeDeg: normalized.location.latitude,
+      longitudeEastDeg: normalized.location.longitude
+    });
+    const candidateMoon = nakshatraOf(positions.grahas.Moon);
+    const candidatePanchanga = instantaneousPanchanga(positions.grahas.Sun, positions.grahas.Moon);
+    if (moonNakshatra === null) moonNakshatra = candidateMoon;
+    else if (moonNakshatra.index !== candidateMoon.index || moonNakshatra.pada !== candidateMoon.pada) {
+      moonStable = false;
+    }
+    if (panchanga === null) panchanga = candidatePanchanga;
+    else if (!samePanchanga(panchanga, candidatePanchanga)) {
+      panchangaStable = false;
+    }
+    if (!moonStable && !panchangaStable) break;
+  }
+  return {
+    moonNakshatra: moonStable ? moonNakshatra : null,
+    panchanga: panchangaStable ? panchanga : null
+  };
+}
 function computeVedic(normalized, settings) {
   const positions = computeVedicP2Positions({
     utcInstantMs: normalized.utcInstantMs,
@@ -54546,6 +54622,7 @@ function computeVedic(normalized, settings) {
   });
   const warnings = [];
   let derived = null;
+  let unknownTimeStable = null;
   if (normalized.timeKnown) {
     const vaara = vaaraAtInstant({
       utcMs: normalized.utcInstantMs,
@@ -54579,6 +54656,16 @@ function computeVedic(normalized, settings) {
       vaara,
       includeVimshottari
     });
+  } else {
+    unknownTimeStable = stableUnknownTimeVedicFacts(normalized);
+    warnings.push(
+      makeWarning(
+        WARNING_CODES.VEDIC_TIME_REQUIRED,
+        "vedic",
+        "Birth time is unknown: time-of-day Vedic results are omitted; only whole-local-day-stable facts may be emitted.",
+        { severity: "info" }
+      )
+    );
   }
   const result = {
     rulesetId: settings.rulesetId,
@@ -54601,6 +54688,7 @@ function computeVedic(normalized, settings) {
     // The same anchor must not leak as a derived natal classification. P4 owns the
     // finer day-stability and public warning policy for unknown birth times.
     derived,
+    unknownTimeStable,
     precision: "high"
   };
   return { result, warnings };
@@ -56270,6 +56358,194 @@ function interpretZiwei(chart) {
   };
 }
 
+// packages/vedic-rules/src/index.ts
+var VEDIC_RULES_VERSION = "0.1.0";
+var VEDIC_RULES_RULESET_ID = `vedic-rules-parashara@${VEDIC_RULES_VERSION}`;
+var PROVIDER8 = { id: "vedic-rules", version: VEDIC_RULES_VERSION, license: "MIT" };
+var BPHS_NAKSHATRA = {
+  text: "Brihat Parashara Hora Shastra",
+  chapter: "Nakshatra and lunar-mansion divisions"
+};
+var BPHS_BHAVA = {
+  text: "Brihat Parashara Hora Shastra",
+  chapter: "Rashi and Bhava divisions"
+};
+var SURYA_SIDDHANTA_PANCHANGA = {
+  text: "Surya Siddhanta",
+  chapter: "Tithi, Yoga and Karana definitions"
+};
+var BPHS_DASHA = {
+  text: "Brihat Parashara Hora Shastra",
+  chapter: "Vimshottari Dasha"
+};
+var HOUSE_TOPICS = [
+  ["character", 1],
+  ["wealth", 2],
+  ["studies", 4],
+  ["health", 6],
+  ["marriage", 7],
+  ["career", 10]
+];
+function norm3604(value) {
+  const out = value % 360;
+  return out < 0 ? out + 360 : out;
+}
+function distanceToBoundary(longitudeDeg, segmentDeg) {
+  const within = norm3604(longitudeDeg) % segmentDeg;
+  return Math.min(within, segmentDeg - within);
+}
+function nearBoundary(longitudeDeg, segments) {
+  return segments.some((segment) => distanceToBoundary(longitudeDeg, segment) <= 1 / 60);
+}
+function joinCaveats(...items) {
+  const unique = [...new Set(items.filter((item) => item !== void 0))];
+  return unique.length === 0 ? void 0 : unique.join(" ");
+}
+function timeCaveat(timeAccuracy, kind) {
+  if (timeAccuracy !== "approximate") return void 0;
+  return kind === "time-dependent" ? "Birth time is approximate; Lagna, whole-sign bhava, D9 and sunrise-based Vaara may change with a more precise recorded time." : "Birth time is approximate; this time-derived chart fact should be read with that uncertainty.";
+}
+function boundaryCaveat(longitudes) {
+  return longitudes.some((longitude) => nearBoundary(longitude, [30, 360 / 27, 360 / 108])) ? "One or more classifications are within 1 arcminute of a frozen segment boundary; a small verified-input change can change the label." : void 0;
+}
+function structuralCaveat() {
+  return "This is a sourced structural chart classification, not a deterministic prediction.";
+}
+function moonChangesNakshatraWithinTwoHours(options) {
+  if (options.timeAccuracy !== "approximate" || options.birth === void 0) return false;
+  const before = computeVedicP2Positions({
+    utcInstantMs: options.birth.utcInstantMs - 2 * 60 * 60 * 1e3,
+    latitudeDeg: options.birth.latitudeDeg,
+    longitudeEastDeg: options.birth.longitudeEastDeg
+  });
+  const after = computeVedicP2Positions({
+    utcInstantMs: options.birth.utcInstantMs + 2 * 60 * 60 * 1e3,
+    latitudeDeg: options.birth.latitudeDeg,
+    longitudeEastDeg: options.birth.longitudeEastDeg
+  });
+  return nakshatraOf(before.grahas.Moon).index !== nakshatraOf(after.grahas.Moon).index;
+}
+function moonFinding(chart, options) {
+  const moon = chart.derived?.grahas.find((placement) => placement.graha === "Moon");
+  if (moon === void 0) {
+    const stable = chart.unknownTimeStable?.moonNakshatra;
+    if (stable === null || stable === void 0) return null;
+    return {
+      ruleId: "nakshatra/moon-day-stable",
+      topic: "nakshatra",
+      matched: true,
+      claim: `The Moon remains in ${stable.name}, pada ${stable.pada}, throughout the local civil day.`,
+      source: BPHS_NAKSHATRA,
+      caveat: "Birth time is unknown. This fact is emitted only because the Moon nakshatra and pada were stable throughout the local civil day; time-of-day Vedic results are omitted."
+    };
+  }
+  return {
+    ruleId: "nakshatra/moon",
+    topic: "nakshatra",
+    matched: true,
+    claim: `The Moon is in ${moon.nakshatra.name}, pada ${moon.nakshatra.pada}, in ${moon.rashi}.`,
+    source: BPHS_NAKSHATRA,
+    caveat: joinCaveats(
+      structuralCaveat(),
+      timeCaveat(options.timeAccuracy, "structural"),
+      boundaryCaveat([moon.longitudeDeg])
+    )
+  };
+}
+function bhavaFindings(chart, options) {
+  const derived = chart.derived;
+  if (derived === null) return [];
+  return HOUSE_TOPICS.map(([topic, bhava]) => {
+    const placements = derived.grahas.filter((placement) => placement.bhava === bhava);
+    const placementText = placements.length === 0 ? "no classical graha" : placements.map((placement) => `${placement.graha} (${placement.rashi})`).join(", ");
+    const relevantLongitudes = [
+      derived.lagna.longitudeDeg,
+      ...placements.map((p) => p.longitudeDeg)
+    ];
+    return {
+      ruleId: `bhava/whole-sign-${bhava}`,
+      topic: "bhava",
+      matched: true,
+      claim: `Whole-sign bhava ${bhava} is ${rashiAtBhava(derived.lagna, bhava)}; placements: ${placementText}.`,
+      source: BPHS_BHAVA,
+      caveat: joinCaveats(
+        structuralCaveat(),
+        timeCaveat(options.timeAccuracy, "time-dependent"),
+        boundaryCaveat(relevantLongitudes)
+      ),
+      reason: `P4 maps this structural whole-sign bhava finding to the ${topic} answer topic without asserting an outcome.`
+    };
+  });
+}
+var RASHIS2 = [
+  "Mesha",
+  "Vrishabha",
+  "Mithuna",
+  "Karka",
+  "Simha",
+  "Kanya",
+  "Tula",
+  "Vrishchika",
+  "Dhanu",
+  "Makara",
+  "Kumbha",
+  "Meena"
+];
+function rashiAtBhava(lagna, bhava) {
+  const index = RASHIS2.indexOf(lagna.rashi);
+  return RASHIS2[(index + bhava - 1) % RASHIS2.length];
+}
+function panchangaFinding(chart, options) {
+  const derived = chart.derived;
+  const panchanga = derived?.panchanga ?? chart.unknownTimeStable?.panchanga;
+  if (panchanga === null || panchanga === void 0) return null;
+  const sun = chart.grahas.find((placement) => placement.graha === "Sun");
+  const moon = chart.grahas.find((placement) => placement.graha === "Moon");
+  const vaaraText = derived?.panchanga.vaara === null || derived === null ? "" : ` Vaara: ${derived.panchanga.vaara}.`;
+  const panchangaBoundary = nearBoundary(norm3604(moon.longitudeDeg - sun.longitudeDeg), [12, 6]) || nearBoundary(norm3604(moon.longitudeDeg + sun.longitudeDeg), [360 / 27]);
+  return {
+    ruleId: derived === null ? "panchanga/day-stable" : "panchanga/instantaneous",
+    topic: "panchanga",
+    matched: true,
+    claim: `Tithi ${panchanga.tithi.number} (${panchanga.tithi.paksha}), Yoga ${panchanga.yoga.number}, Karana ${panchanga.karana.name}.${vaaraText}`,
+    source: SURYA_SIDDHANTA_PANCHANGA,
+    caveat: joinCaveats(
+      structuralCaveat(),
+      derived === null ? "Birth time is unknown. These Panchanga members are emitted only because each was stable throughout the local civil day; Vaara is omitted." : timeCaveat(
+        options.timeAccuracy,
+        derived.panchanga.vaara === null ? "structural" : "time-dependent"
+      ),
+      panchangaBoundary ? "This Panchanga classification is within 1 arcminute of a frozen segment boundary; a small verified-input change can change the label." : void 0
+    )
+  };
+}
+function vimshottariFinding(chart, options) {
+  const vimshottari = chart.derived?.vimshottari;
+  if (vimshottari === null || vimshottari === void 0) return null;
+  const firstMaha = vimshottari.mahadashas[0];
+  return {
+    ruleId: "vimshottari/birth-balance",
+    topic: "vimshottari",
+    matched: true,
+    claim: `Vimshottari uses the ${vimshottari.dashaYear} model; the birth sequence begins in ${firstMaha.lord} Maha Dasha.`,
+    source: BPHS_DASHA,
+    caveat: joinCaveats(
+      "Vimshottari is a traditional timing framework, not a deterministic event prediction.",
+      boundaryCaveat([vimshottari.birthMoonLongitudeDeg]),
+      moonChangesNakshatraWithinTwoHours(options) ? "Birth time is approximate and the Moon changes nakshatra within plus or minus two hours, so the dasha balance is especially time-sensitive." : timeCaveat(options.timeAccuracy, "structural")
+    )
+  };
+}
+function interpretVedic(chart, options) {
+  const findings = [
+    moonFinding(chart, options),
+    ...bhavaFindings(chart, options),
+    panchangaFinding(chart, options),
+    vimshottariFinding(chart, options)
+  ].filter((finding2) => finding2 !== null);
+  return { rulesetId: VEDIC_RULES_RULESET_ID, provider: PROVIDER8, findings };
+}
+
 // packages/interpret/src/build.ts
 var DISCLAIMERS = [
   "\u4F20\u7EDF\u547D\u7406\u5206\u6790\uFF08\u516B\u5B57/\u7D2B\u5FAE/\u5360\u661F\uFF09\uFF0C\u4EC5\u4F9B\u4F20\u7EDF\u6587\u5316\u3001\u5A31\u4E50\u4E0E\u81EA\u6211\u53CD\u601D\uFF1B\u6587\u4E2D\u7684\u5409\u51F6\u503E\u5411\u3001\u8D8B\u52BF\u4E0E\u5E74\u4EFD\u7A97\u53E3\u5C5E\u4E8E\u547D\u7406\u6761\u4EF6\u8BC4\u4F30\uFF0C\u975E\u7EDF\u8BA1\u5B66\u3001\u975E\u79D1\u5B66\u9884\u6D4B\u3002",
@@ -56784,11 +57060,46 @@ function ziweiRuleFacts(rules) {
   }
   return out;
 }
+function vedicRuleFacts(rules) {
+  if (rules === null) return [];
+  return rules.findings.map((finding2) => {
+    let topic = "general";
+    if (finding2.topic === "nakshatra") topic = "character";
+    else if (finding2.topic === "bhava") {
+      const house = Number.parseInt(finding2.ruleId.split("-").at(-1) ?? "", 10);
+      topic = house === 2 ? "wealth" : house === 4 ? "studies" : house === 6 ? "health" : house === 7 ? "marriage" : house === 10 ? "career" : "character";
+    }
+    const directRef = finding2.ruleId.startsWith("nakshatra/") ? finding2.ruleId.endsWith("day-stable") ? "vedic.unknownTimeStable.moonNakshatra" : "vedic.derived.grahas[Moon].nakshatra" : finding2.ruleId.startsWith("bhava/") ? "vedic.derived.(lagna|grahas).bhava" : finding2.ruleId.startsWith("panchanga/") ? finding2.ruleId.endsWith("day-stable") ? "vedic.unknownTimeStable.panchanga" : "vedic.derived.panchanga" : "vedic.derived.vimshottari";
+    return fact(
+      topic,
+      finding2.claim,
+      [
+        ev("vedic", directRef, finding2.claim),
+        ev(
+          "vedic-rule",
+          `vedic-rule/${finding2.ruleId}`,
+          `${finding2.source.text}, ${finding2.source.chapter}`
+        )
+      ],
+      { caveat: finding2.caveat, reason: finding2.reason }
+    );
+  });
+}
 function buildInterpretationFacts(bundle, options = {}) {
   const focusYear = options.horoscope ? new Date(options.horoscope.targetSolarDate).getUTCFullYear() : new Date(bundle.calculatedAt).getUTCFullYear();
   const baziRules = bundle.bazi ? interpretBazi(bundle.bazi, { focusYear }) : null;
   const westernRules = bundle.western ? interpretWestern(bundle.western) : null;
   const ziweiRules = bundle.ziwei ? interpretZiwei(bundle.ziwei) : null;
+  const vedicRules = bundle.vedic ? interpretVedic(bundle.vedic, {
+    timeAccuracy: bundle.originalInput.timeAccuracy,
+    ...bundle.originalInput.timeAccuracy === "unknown" ? {} : {
+      birth: {
+        utcInstantMs: Date.parse(bundle.normalizedTime.utcInstant),
+        latitudeDeg: bundle.originalInput.location.latitude,
+        longitudeEastDeg: bundle.originalInput.location.longitude
+      }
+    }
+  }) : null;
   const facts = [
     ...characterFacts(bundle, baziRules),
     ...usefulGodFacts(baziRules),
@@ -56800,6 +57111,7 @@ function buildInterpretationFacts(bundle, options = {}) {
     ...fortuneFacts(baziRules),
     ...westernRuleFacts(westernRules),
     ...ziweiRuleFacts(ziweiRules),
+    ...vedicRuleFacts(vedicRules),
     ...followupFacts(bundle, focusYear)
   ];
   if (options.horoscope) {
@@ -56826,7 +57138,8 @@ function buildInterpretationFacts(bundle, options = {}) {
     rulesets: [
       ...bundle.provenance.rulesets,
       ...westernRules ? [{ id: westernRules.rulesetId, version: westernRules.provider.version }] : [],
-      ...ziweiRules ? [{ id: ziweiRules.rulesetId, version: ziweiRules.provider.version }] : []
+      ...ziweiRules ? [{ id: ziweiRules.rulesetId, version: ziweiRules.provider.version }] : [],
+      ...vedicRules ? [{ id: "vedic-rules-parashara", version: vedicRules.provider.version }] : []
     ],
     disclaimers: DISCLAIMERS,
     followupOffers: FOLLOWUP_OFFERS
@@ -56834,7 +57147,7 @@ function buildInterpretationFacts(bundle, options = {}) {
 }
 
 // packages/interpret/src/answer-plan.ts
-var SYSTEMS = ["western", "bazi", "ziwei"];
+var SYSTEMS = ["western", "bazi", "ziwei", "vedic"];
 var ANSWER_GUARDRAILS = [
   "traditional-culture-only",
   "evidence-only",
@@ -56897,6 +57210,10 @@ var PUBLIC_WARNING_COPY = {
   VEDIC_DASHA_YEAR_UNSUPPORTED: {
     impact: "The requested Vimshottari year model is not implemented by this ruleset.",
     nextStep: "Use the documented julian-365.25 model or select a future ruleset that implements the requested model."
+  },
+  VEDIC_TIME_REQUIRED: {
+    impact: "Birth time is unknown, so unstable Vedic day-level facts and all time-of-day Vedic results are omitted.",
+    nextStep: "Provide a documented birth time to calculate Lagna, whole-sign bhava, D9, Vaara and the Vimshottari balance."
   }
 };
 function sanitizePublicText(text) {
@@ -56978,7 +57295,10 @@ var LIMITING_WARNING_CODES = /* @__PURE__ */ new Set([
   "HIGH_LATITUDE_HOUSE_RISK",
   "BAZI_GENDER_REQUIRED",
   "ZIWEI_INPUT_REQUIRED",
-  "RULESET_VARIANT_DEFAULTED"
+  "RULESET_VARIANT_DEFAULTED",
+  "VEDIC_SUNRISE_UNAVAILABLE",
+  "VEDIC_DASHA_YEAR_UNSUPPORTED",
+  "VEDIC_TIME_REQUIRED"
 ]);
 function contentOrder(lens) {
   if (lens === "explain") {
@@ -58245,7 +58565,7 @@ function runAnswerPlan(input, options) {
     ...input,
     settings: {
       ...input.settings,
-      systems: ["western", "bazi", "ziwei"]
+      systems: ["western", "bazi", "ziwei", "vedic"]
     }
   };
   const run = runInterpretation(allSystemsInput, options);

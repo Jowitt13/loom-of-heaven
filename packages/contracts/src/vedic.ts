@@ -167,6 +167,18 @@ export const VedicInstantaneousPanchanga = z.strictObject({
 });
 export type VedicInstantaneousPanchanga = z.infer<typeof VedicInstantaneousPanchanga>;
 
+/**
+ * The only time-unknown Vedic values that may cross the fact boundary. Each
+ * member is present only when it remains unchanged throughout the subject's
+ * local civil day; time-of-day outputs (Lagna, bhava, D9, Vaara and dasha
+ * endpoints) are never inferred from the normalizer's noon anchor.
+ */
+export const VedicUnknownTimeStable = z.strictObject({
+  moonNakshatra: VedicNakshatraPlacement.nullable(),
+  panchanga: VedicInstantaneousPanchanga.nullable(),
+});
+export type VedicUnknownTimeStable = z.infer<typeof VedicUnknownTimeStable>;
+
 /** Traditional weekday names in the Sunday-to-Saturday order. */
 export const VedicVaara = z.enum([
   'Ravivara',
@@ -260,6 +272,8 @@ export const VedicChartResult = z.strictObject({
   }),
   lagnaLongitudeDeg: VedicLongitude.nullable(),
   derived: VedicDerivedChart.nullable(),
+  /** P4's whole-local-day stability projection for a time-unknown input. */
+  unknownTimeStable: VedicUnknownTimeStable.nullable(),
   /** Granted only by the offline P2 Swiss fixture regression (≤1′ for every P2 field). */
   precision: z.literal('high'),
 });

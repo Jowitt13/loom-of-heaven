@@ -32,6 +32,8 @@ export const WARNING_CODES = {
   VEDIC_SUNRISE_UNAVAILABLE: 'VEDIC_SUNRISE_UNAVAILABLE',
   /** A reserved Vimshottari year model was requested but has no implementation. */
   VEDIC_DASHA_YEAR_UNSUPPORTED: 'VEDIC_DASHA_YEAR_UNSUPPORTED',
+  /** Unknown birth time prevents one or more Vedic facts from being truthfully emitted. */
+  VEDIC_TIME_REQUIRED: 'VEDIC_TIME_REQUIRED',
 } as const;
 
 export type WarningCode = (typeof WARNING_CODES)[keyof typeof WARNING_CODES];

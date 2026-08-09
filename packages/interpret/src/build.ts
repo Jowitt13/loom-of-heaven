@@ -8,6 +8,7 @@ import {
 } from '@ming/bazi-rules';
 import { interpretWestern } from '@ming/western-rules';
 import { interpretZiwei as interpretZiweiRules } from '@ming/ziwei-rules';
+import { interpretVedic } from '@ming/vedic-rules';
 import type {
   BaziInterpretation,
   ChartBundle,
@@ -18,6 +19,7 @@ import type {
   InterpretationTopic,
   WesternChartResult,
   WesternInterpretation,
+  VedicInterpretation,
   ZiweiChartResult,
   ZiweiHoroscopeResult,
   ZiweiInterpretation,
@@ -634,6 +636,58 @@ function ziweiRuleFacts(rules: ZiweiInterpretation | null): InterpretationFact[]
   return out;
 }
 
+/**
+ * P4 Vedic findings stay deliberately structural. The rule layer provides the
+ * public-domain citation, while the direct Vedic evidence points back to the
+ * precision-gated envelope. It never chooses the still-unresolved node default.
+ */
+function vedicRuleFacts(rules: VedicInterpretation | null): InterpretationFact[] {
+  if (rules === null) return [];
+  return rules.findings.map((finding) => {
+    let topic: InterpretationTopic = 'general';
+    if (finding.topic === 'nakshatra') topic = 'character';
+    else if (finding.topic === 'bhava') {
+      const house = Number.parseInt(finding.ruleId.split('-').at(-1) ?? '', 10);
+      topic =
+        house === 2
+          ? 'wealth'
+          : house === 4
+            ? 'studies'
+            : house === 6
+              ? 'health'
+              : house === 7
+                ? 'marriage'
+                : house === 10
+                  ? 'career'
+                  : 'character';
+    }
+    const directRef = finding.ruleId.startsWith('nakshatra/')
+      ? finding.ruleId.endsWith('day-stable')
+        ? 'vedic.unknownTimeStable.moonNakshatra'
+        : 'vedic.derived.grahas[Moon].nakshatra'
+      : finding.ruleId.startsWith('bhava/')
+        ? 'vedic.derived.(lagna|grahas).bhava'
+        : finding.ruleId.startsWith('panchanga/')
+          ? finding.ruleId.endsWith('day-stable')
+            ? 'vedic.unknownTimeStable.panchanga'
+            : 'vedic.derived.panchanga'
+          : 'vedic.derived.vimshottari';
+    return fact(
+      topic,
+      finding.claim,
+      [
+        ev('vedic', directRef, finding.claim),
+        ev(
+          'vedic-rule',
+          `vedic-rule/${finding.ruleId}`,
+          `${finding.source.text}, ${finding.source.chapter}`,
+        ),
+      ],
+      { caveat: finding.caveat, reason: finding.reason },
+    );
+  });
+}
+
 /** Build the topic-organized, evidence-grounded interpretation facts for a chart. */
 export function buildInterpretationFacts(
   bundle: ChartBundle,
@@ -647,6 +701,20 @@ export function buildInterpretationFacts(
   const baziRules = bundle.bazi ? interpretBazi(bundle.bazi, { focusYear }) : null;
   const westernRules = bundle.western ? interpretWestern(bundle.western) : null;
   const ziweiRules = bundle.ziwei ? interpretZiweiRules(bundle.ziwei) : null;
+  const vedicRules = bundle.vedic
+    ? interpretVedic(bundle.vedic, {
+        timeAccuracy: bundle.originalInput.timeAccuracy,
+        ...(bundle.originalInput.timeAccuracy === 'unknown'
+          ? {}
+          : {
+              birth: {
+                utcInstantMs: Date.parse(bundle.normalizedTime.utcInstant),
+                latitudeDeg: bundle.originalInput.location.latitude,
+                longitudeEastDeg: bundle.originalInput.location.longitude,
+              },
+            }),
+      })
+    : null;
   const facts: InterpretationFact[] = [
     ...characterFacts(bundle, baziRules),
     ...usefulGodFacts(baziRules),
@@ -658,6 +726,7 @@ export function buildInterpretationFacts(
     ...fortuneFacts(baziRules),
     ...westernRuleFacts(westernRules),
     ...ziweiRuleFacts(ziweiRules),
+    ...vedicRuleFacts(vedicRules),
     ...followupFacts(bundle, focusYear),
   ];
 
@@ -690,6 +759,9 @@ export function buildInterpretationFacts(
         ? [{ id: westernRules.rulesetId, version: westernRules.provider.version }]
         : []),
       ...(ziweiRules ? [{ id: ziweiRules.rulesetId, version: ziweiRules.provider.version }] : []),
+      ...(vedicRules
+        ? [{ id: 'vedic-rules-parashara', version: vedicRules.provider.version }]
+        : []),
     ],
     disclaimers: DISCLAIMERS,
     followupOffers: FOLLOWUP_OFFERS,

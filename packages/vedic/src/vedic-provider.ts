@@ -8,15 +8,20 @@ import type {
   VedicChartResult,
   VedicGraha,
   VedicSettings,
+  VedicUnknownTimeStable,
 } from '@ming/contracts';
 import { deriveVedicClassifications } from './classifications.ts';
+import { nakshatraOf } from './nakshatra.ts';
+import { instantaneousPanchanga } from './panchanga.ts';
 import { vaaraAtInstant } from './sunrise.ts';
+import moment from 'moment-timezone';
 
 /** Pinned numerical provider; its package version is independently source-bound in ADR 0013. */
 export const CAELUS_VERSION = '0.23.0';
 const PROVIDER: ProviderRef = { id: 'caelus', version: CAELUS_VERSION, license: 'MIT' };
 const ENGINE = new Engine(embeddedData);
 const MS_PER_DAY = 86_400_000;
+const UNKNOWN_TIME_STABILITY_SAMPLE_MS = 60_000;
 const UNIX_EPOCH_JD = 2_440_587.5;
 
 const GRAHAS: readonly [VedicGraha, string][] = [
@@ -79,6 +84,72 @@ export function computeVedicP2Positions(input: VedicP2PositionInput): VedicP2Pos
   };
 }
 
+function samePanchanga(
+  a: NonNullable<VedicUnknownTimeStable['panchanga']>,
+  b: NonNullable<VedicUnknownTimeStable['panchanga']>,
+): boolean {
+  return (
+    a.tithi.number === b.tithi.number &&
+    a.tithi.paksha === b.tithi.paksha &&
+    a.yoga.number === b.yoga.number &&
+    a.karana.slot === b.karana.slot &&
+    a.karana.name === b.karana.name
+  );
+}
+
+/**
+ * For an unknown birth time, inspect every local-civil minute rather than trust
+ * the normalizer's noon anchor. A member may be emitted by P4 only if it is the
+ * same at every sampled instant, including both DST-aware day endpoints. Lagna,
+ * bhava, D9, Vaara and Vimshottari remain suppressed because they are intrinsically
+ * time-of-day dependent even when a discrete classification happens not to change.
+ */
+export function stableUnknownTimeVedicFacts(
+  normalized: NormalizedBirthData,
+): VedicUnknownTimeStable {
+  if (normalized.timeKnown) {
+    throw new Error('stableUnknownTimeVedicFacts requires normalized.timeKnown === false');
+  }
+  const localStart = moment.tz(
+    `${normalized.localDate} 00:00:00`,
+    'YYYY-MM-DD HH:mm:ss',
+    normalized.timezone,
+  );
+  const startUtcMs = localStart.valueOf();
+  const endUtcMs = localStart.clone().add(1, 'day').valueOf();
+  let moonNakshatra: VedicUnknownTimeStable['moonNakshatra'] = null;
+  let panchanga: VedicUnknownTimeStable['panchanga'] = null;
+  let moonStable = true;
+  let panchangaStable = true;
+
+  for (let utcMs = startUtcMs; utcMs <= endUtcMs; utcMs += UNKNOWN_TIME_STABILITY_SAMPLE_MS) {
+    const positions = computeVedicP2Positions({
+      utcInstantMs: Math.min(utcMs, endUtcMs),
+      latitudeDeg: normalized.location.latitude,
+      longitudeEastDeg: normalized.location.longitude,
+    });
+    const candidateMoon = nakshatraOf(positions.grahas.Moon);
+    const candidatePanchanga = instantaneousPanchanga(positions.grahas.Sun, positions.grahas.Moon);
+    if (moonNakshatra === null) moonNakshatra = candidateMoon;
+    else if (
+      moonNakshatra.index !== candidateMoon.index ||
+      moonNakshatra.pada !== candidateMoon.pada
+    ) {
+      moonStable = false;
+    }
+    if (panchanga === null) panchanga = candidatePanchanga;
+    else if (!samePanchanga(panchanga, candidatePanchanga)) {
+      panchangaStable = false;
+    }
+    if (!moonStable && !panchangaStable) break;
+  }
+
+  return {
+    moonNakshatra: moonStable ? moonNakshatra : null,
+    panchanga: panchangaStable ? panchanga : null,
+  };
+}
+
 /**
  * P2/P3 Vedic provider. Both node modes are emitted, so the unresolved Rahu
  * default cannot affect a chart silently. Vaara and the owner-confirmed
@@ -95,6 +166,7 @@ export function computeVedic(
   });
   const warnings: EngineWarning[] = [];
   let derived: VedicChartResult['derived'] = null;
+  let unknownTimeStable: VedicChartResult['unknownTimeStable'] = null;
   if (normalized.timeKnown) {
     const vaara = vaaraAtInstant({
       utcMs: normalized.utcInstantMs,
@@ -128,6 +200,16 @@ export function computeVedic(
       vaara,
       includeVimshottari,
     });
+  } else {
+    unknownTimeStable = stableUnknownTimeVedicFacts(normalized);
+    warnings.push(
+      makeWarning(
+        WARNING_CODES.VEDIC_TIME_REQUIRED,
+        'vedic',
+        'Birth time is unknown: time-of-day Vedic results are omitted; only whole-local-day-stable facts may be emitted.',
+        { severity: 'info' },
+      ),
+    );
   }
   const result: VedicChartResult = {
     rulesetId: settings.rulesetId,
@@ -150,6 +232,7 @@ export function computeVedic(
     // The same anchor must not leak as a derived natal classification. P4 owns the
     // finer day-stability and public warning policy for unknown birth times.
     derived,
+    unknownTimeStable,
     precision: 'high',
   };
   return { result, warnings };

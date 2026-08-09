@@ -62,5 +62,13 @@ live in [ADR 0013](adr/0013-vedic-architecture.md) and the per-topic source regi
 
 ## Solar-time rule (invariant)
 
+### P4 internal answer-contract update (2026-08-09)
+
+`vedic-parashara-lahiri@0.1.0` now contributes only sourced, structural internal facts to the
+four-system `PublicResult` / `AnswerPlan` v2 path. The owner selected a hard cut: no
+`public-result/v1` or `answer-plan/v1` output or compatibility emission remains. This is not a
+P5 product-surface change: default `systems`, the CLI, Skill and host packages still do not
+advertise or select Vedic.
+
 Mean/apparent solar time feed BaZi/Zi Wei only and never replace the Western UTC instant +
 coordinates. Mean solar time is longitude-driven; the 120°E/UTC+8 shortcut is never global.

@@ -426,8 +426,9 @@ export function validateAnswer(input: unknown): AnswerValidationResult {
   // Entire entry is wrapped so Proxy traps, getters and any other throws from
   // accessing unknown input properties yield a stable static result.
   try {
-    // -1. Contract-version gate (cheap peek before the full parse so version
-    // problems get a dedicated diagnostic; legacy v1 is rejected by design).
+    // -1. ReadingDraft contract-version gate (cheap peek before the full parse;
+    // the validator input intentionally carries only a bounded projection of an
+    // AnswerPlan, not the full public AnswerPlan envelope).
     const rawDraft =
       typeof input === 'object' && input !== null
         ? (input as { readingDraft?: unknown }).readingDraft

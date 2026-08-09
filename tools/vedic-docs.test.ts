@@ -113,6 +113,19 @@ describe('vedic docs gate: P0 conventions and P3B evidence', () => {
       );
     }
   });
+
+  it('locks P4 to a v2 hard cut while retaining the P5 user-surface boundary', () => {
+    const adr = read(ADR);
+    const matrix = read(MATRIX);
+    const rulesets = read('docs/RULESETS.md');
+    for (const text of [adr, matrix, rulesets]) {
+      expect(text).toMatch(/hard cut/i);
+      expect(text).toContain('answer-plan/v1');
+      expect(text).toContain('public-result/v1');
+    }
+    expect(adr).toContain('VEDIC_TIME_REQUIRED');
+    expect(adr).toMatch(/samples every civil minute/i);
+  });
 });
 
 describe('vedic docs gate: no premature capability claims on user-facing surfaces', () => {

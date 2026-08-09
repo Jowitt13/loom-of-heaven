@@ -13,8 +13,9 @@ import { EngineWarning } from './warnings.ts';
  * deliberately separate from ChartBundle: the latter is a private technical
  * record and can contain the original birth input and reproducibility metadata.
  */
-export const PUBLIC_RESULT_CONTRACT_VERSION = 'public-result/v1';
-export const ANSWER_PLAN_CONTRACT_VERSION = 'answer-plan/v1';
+/** P4 hard cut: Vedic is the fourth public system; v1 is not emitted or accepted. */
+export const PUBLIC_RESULT_CONTRACT_VERSION = 'public-result/v2';
+export const ANSWER_PLAN_CONTRACT_VERSION = 'answer-plan/v2';
 
 /**
  * A warning stripped of raw messages and arbitrary detail supplied by providers.
@@ -62,6 +63,15 @@ export const PublicSystemStatus = z.strictObject({
 });
 export type PublicSystemStatus = z.infer<typeof PublicSystemStatus>;
 
+/** P4 v2 requires each first-class chart system exactly once. */
+const PublicSystemStatuses = z
+  .array(PublicSystemStatus)
+  .length(4)
+  .refine(
+    (systems) => new Set(systems.map((system) => system.system)).size === 4,
+    'systems must include every ChartSystem exactly once',
+  );
+
 /**
  * Safe, topic-scoped default result for UI, web and host-model use. It intentionally omits
  * originalInput, requestId, calculatedAt, normalized timestamps, timezone,
@@ -71,7 +81,7 @@ export const PublicResult = z.strictObject({
   contractVersion: z.literal(PUBLIC_RESULT_CONTRACT_VERSION),
   engineVersion: z.string(),
   sourceSchemaVersion: z.string(),
-  systems: z.array(PublicSystemStatus).length(3),
+  systems: PublicSystemStatuses,
   inputReliability: z.strictObject({
     timeAccuracy: TimeAccuracy,
     birthTimeKnown: z.boolean(),

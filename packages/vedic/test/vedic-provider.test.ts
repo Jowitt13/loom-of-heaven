@@ -78,7 +78,7 @@ describe('computeVedic (P2 substrate + P3B classifications)', () => {
     );
   });
 
-  it('suppresses Lagna and the entire P3B overlay when the input has no birth time', () => {
+  it('suppresses time-of-day values and records only whole-day-stable facts when birth time is unknown', () => {
     const unknown = parseBirthInput({
       calendar: 'gregorian',
       localDate: '1984-11-05',
@@ -87,11 +87,31 @@ describe('computeVedic (P2 substrate + P3B classifications)', () => {
       location: { latitude: 19.07, longitude: 72.87, source: 'user' },
       settings: { systems: ['vedic'] },
     });
-    const result = computeVedic(normalizeBirthData(unknown), unknown.settings.vedic).result;
+    const { result, warnings } = computeVedic(normalizeBirthData(unknown), unknown.settings.vedic);
     expect(result.lagnaLongitudeDeg).toBeNull();
     expect(result.derived).toBeNull();
+    expect(result.unknownTimeStable).not.toBeNull();
     expect(result.grahas).toHaveLength(7);
     expect(result.nodes.mean.rahuLongitudeDeg).toBeGreaterThanOrEqual(0);
+    expect(warnings.some((warning) => warning.code === 'VEDIC_TIME_REQUIRED')).toBe(true);
+  });
+
+  it('applies the unknown-time gate over a DST-shortened local civil day', () => {
+    const dstUnknown = parseBirthInput({
+      calendar: 'gregorian',
+      localDate: '2024-03-10',
+      timeAccuracy: 'unknown',
+      timezone: 'America/New_York',
+      location: { latitude: 40.7128, longitude: -74.006, source: 'user' },
+      settings: { systems: ['vedic'] },
+    });
+    const { result, warnings } = computeVedic(
+      normalizeBirthData(dstUnknown),
+      dstUnknown.settings.vedic,
+    );
+    expect(result.derived).toBeNull();
+    expect(result.unknownTimeStable).not.toBeNull();
+    expect(warnings.some((warning) => warning.code === 'VEDIC_TIME_REQUIRED')).toBe(true);
   });
 
   it('keeps the internal P3B overlay for an approximate time; P4 owns its public caveat', () => {

@@ -8,6 +8,10 @@
   Vimshottari year model (§11) are owner-confirmed and their P3B verification gates are now
   satisfied. See "Open questions" for the remaining Rahu decision.
 - Date: 2026-07-29
+- P4 update (2026-08-09): internal sourced Vedic structural facts, the four-system
+  `PublicResult` / `AnswerPlan` v2, and the P4 warning table are implemented. The owner
+  selected a **hard cut**: `public-result/v1` and `answer-plan/v1` are neither emitted nor
+  accepted. P5 still exclusively owns all CLI, Skill and host-facing Vedic exposure.
 - Scope: adds the fourth first-class system `vedic` in staged slices. P0 froze definitions and
   boundaries; P1 reserved contracts; P2 implements the accepted numeric substrate. Companion
   source registry: [`docs/VEDIC_SOURCE_MATRIX.md`](../VEDIC_SOURCE_MATRIX.md).
@@ -235,6 +239,12 @@ support; suppress + warn instead.
 
 Exact warning codes and copy are fixed in P4 alongside the AnswerPlan public-warning table.
 
+**P4 implementation note (2026-08-09).** The whole-local-day check samples every civil minute,
+including DST-aware endpoints. `VedicUnknownTimeStable` can expose only unchanged Moon
+nakshatra/pada and instantaneous Tithi/Yoga/Karana. Vimshottari endpoints are always suppressed
+for unknown time because they vary continuously with the birth instant; Vaara is likewise always
+suppressed. Any omitted unstable member emits `VEDIC_TIME_REQUIRED` in the public warning table.
+
 ### 14. Not supported in v1 (structured, not silent)
 
 D10 and all other vargas beyond D1/D9, Shadbala, Ashtakavarga, the Yoga catalog (Raja/Dhana
@@ -382,7 +392,9 @@ Until a future independent source passes a field, user-facing and release docume
    golden is recorded in §9.
 4. Should v0.3.0 flip the default `systems` array to all four, or keep 3 and make `vedic`
    opt-in initially?
-5. Public-contract v2 rollout: hard cut in v0.3.0 (recommended) vs dual-emit v1+v2.
+5. **Resolved 2026-08-09 (P4): hard cut.** `public-result/v1` and `answer-plan/v1` are
+   rejected; v2 is the only public result and answer-plan contract. There is no dual-emission or
+   migration shim at runtime.
 
 ## Consequences
 

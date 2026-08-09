@@ -1,6 +1,6 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { ChartBundle, parseBirthInput } from '@ming/contracts';
+import { AnswerPlan, ChartBundle, PublicResult, parseBirthInput } from '@ming/contracts';
 import { calculate, runAnswerPlan } from '@ming/orchestrator';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
@@ -43,17 +43,51 @@ describe('calculate: explicit vedic dispatch (P2 numerical substrate)', () => {
   });
 });
 
-describe('public v1 contracts stay three-system (P4 owns the v2 break)', () => {
-  it('PublicResult.systems keeps exactly the three public systems', () => {
+describe('public v2 hard cut (P4)', () => {
+  it('PublicResult and AnswerPlan expose all four systems only as v2', () => {
     const input = parseBirthInput({
       ...raw,
       ruleGender: 'female',
       settings: { systems: ['vedic'] },
     });
     const { publicResult, answerPlan } = runAnswerPlan(input, { now: FIXED, topic: 'career' });
-    expect(publicResult.systems).toHaveLength(3);
-    expect(publicResult.systems.map((s) => s.system)).toEqual(['western', 'bazi', 'ziwei']);
-    expect(publicResult.contractVersion).toBe('public-result/v1');
-    expect(answerPlan.contractVersion).toBe('answer-plan/v1');
+    expect(publicResult.systems).toHaveLength(4);
+    expect(publicResult.systems.map((s) => s.system)).toEqual([
+      'western',
+      'bazi',
+      'ziwei',
+      'vedic',
+    ]);
+    expect(publicResult.systems.find((system) => system.system === 'vedic')).toEqual({
+      system: 'vedic',
+      status: 'computed',
+    });
+    expect(publicResult.contractVersion).toBe('public-result/v2');
+    expect(answerPlan.contractVersion).toBe('answer-plan/v2');
+    expect(publicResult.rulesets.some((ruleset) => ruleset.id === 'vedic-rules-parashara')).toBe(
+      true,
+    );
+    expect(
+      publicResult.facts.some((fact) =>
+        fact.evidence.some((evidence) => evidence.kind === 'vedic-rule'),
+      ),
+    ).toBe(true);
+    expect(
+      PublicResult.safeParse({ ...publicResult, contractVersion: 'public-result/v1' }).success,
+    ).toBe(false);
+    expect(
+      PublicResult.safeParse({
+        ...publicResult,
+        systems: [
+          { system: 'western', status: 'computed' },
+          { system: 'western', status: 'computed' },
+          { system: 'bazi', status: 'computed' },
+          { system: 'ziwei', status: 'computed' },
+        ],
+      }).success,
+    ).toBe(false);
+    expect(AnswerPlan.safeParse({ ...answerPlan, contractVersion: 'answer-plan/v1' }).success).toBe(
+      false,
+    );
   });
 });

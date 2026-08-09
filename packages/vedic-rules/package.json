@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Vedic (Jyotish) interpretation-rule skeleton (ADR 0013 P1). Contains NO rules yet; sourced findings (BPHS-cited, caveated) land in the P4 slice.",
+  "description": "Sourced, bounded Vedic (Jyotish) structural interpretation rules (ADR 0013 P4).",
   "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -11,6 +11,10 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ming/contracts": "workspace:*"
+    "@ming/contracts": "workspace:*",
+    "@ming/vedic": "workspace:*"
+  },
+  "devDependencies": {
+    "@ming/time-location": "workspace:*"
   }
 }

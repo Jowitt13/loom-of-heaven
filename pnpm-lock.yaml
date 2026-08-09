@@ -63,6 +63,9 @@ importers:
       '@ming/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@ming/vedic-rules':
+        specifier: workspace:*
+        version: link:../vedic-rules
       '@ming/western-rules':
         specifier: workspace:*
         version: link:../western-rules
@@ -165,6 +168,13 @@ importers:
       '@ming/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@ming/vedic':
+        specifier: workspace:*
+        version: link:../vedic
+    devDependencies:
+      '@ming/time-location':
+        specifier: workspace:*
+        version: link:../time-location
 
   packages/western:
     dependencies:
