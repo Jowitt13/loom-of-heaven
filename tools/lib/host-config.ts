@@ -5,7 +5,7 @@
  * hand-maintained SKILL.md — that would drift.
  *
  * Version model: PUBLISHED_* describes the live Release reflected by the committed root manifest.
- * It is currently `v0.1.5`. CANDIDATE_* describes the NEXT unpublished build produced by
+ * It is currently `v0.2.0`. CANDIDATE_* describes the NEXT unpublished build produced by
  * `package:hosts`.
  * When a published tag exists, it MUST differ from the candidate tag; `verify:install` fails hard
  * if they collide.
@@ -15,6 +15,8 @@
  * `install-manifest.json` / `SHA256SUMS.txt`. The root manifest is updated only by the explicit
  * `promote-release.ts` step, after a real Release is created + assets uploaded + re-verified.
  */
+
+import { ENGINE_VERSION } from '../../packages/contracts/src/version.ts';
 
 export type HostId = 'codex' | 'qoder' | 'workbuddy' | 'doubao';
 export type Capability = 'full' | 'reading-lite';
@@ -64,7 +66,7 @@ export const SKILL_NAME_LITE = 'calculate-birth-charts-doubao-lite';
 export const REPO_URL = 'https://github.com/Jowitt13/ming-engine';
 
 // --- ROOT / PUBLISHED: live public-release metadata. ---
-/** Engine semver in the committed, audited source root. */
+/** Engine semver in the committed root manifest (the last published source release). */
 export const ROOT_ENGINE_VERSION = '0.2.0';
 /** The published Release currently reflected by the root manifest. */
 export const PUBLISHED_RELEASE_VERSION: string | null = '0.2.0';
@@ -72,10 +74,10 @@ export const PUBLISHED_RELEASE_VERSION: string | null = '0.2.0';
 export const PUBLISHED_RELEASE_TAG: string | null = 'v0.2.0';
 
 // --- CANDIDATE: the next unpublished build produced by package:hosts. ---
-/** Engine semver of the candidate: same audited engine as the source root (no engine change pending). */
-export const CANDIDATE_ENGINE_VERSION = '0.2.0';
-/** Install-package release version of the candidate (next packaging release over the 0.2.0 engine). */
-export const CANDIDATE_RELEASE_VERSION = '0.2.1';
+/** Engine semver of the candidate: the audited source engine, not a second hand-maintained value. */
+export const CANDIDATE_ENGINE_VERSION = ENGINE_VERSION;
+/** Install-package release version of the P6 candidate; unpublished until explicit Release authorization. */
+export const CANDIDATE_RELEASE_VERSION = '0.3.0';
 /** Immutable tag the CANDIDATE build targets (never `latest/download`). */
 export const CANDIDATE_RELEASE_TAG = `v${CANDIDATE_RELEASE_VERSION}`;
 /** Sub-directory under `releases/` for the candidate build (gitignored). */

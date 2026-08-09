@@ -12,7 +12,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { buildHostZips } from './build-host-packages.ts';
-import { assertDistinctReleaseTags } from './lib/host-config.ts';
+import { assertDistinctReleaseTags, CANDIDATE_ENGINE_VERSION } from './lib/host-config.ts';
+import { ENGINE_VERSION } from '../packages/contracts/src/version.ts';
 import {
   assertSingleTopDir,
   isTextEntry,
@@ -40,6 +41,7 @@ function rewriteLineEndings(dir: string, eol: '\n' | '\r\n'): void {
 describe('release version model: published vs candidate tags', () => {
   it('accepts distinct published and candidate release tags', () => {
     expect(assertDistinctReleaseTags().ok).toBe(true);
+    expect(CANDIDATE_ENGINE_VERSION).toBe(ENGINE_VERSION);
   });
 
   it('rejects identical published and candidate tags (negative)', () => {

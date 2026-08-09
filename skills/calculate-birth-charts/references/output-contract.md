@@ -42,7 +42,7 @@
   "ok": true,
   "bundle": {
     "schemaVersion": "0.1.0",
-    "engineVersion": "0.1.0",
+    "engineVersion": "0.3.0",
     "requestId": "req_2d4063bfbba9ed69", // deterministic hash of canonical input + versions
     "calculatedAt": "2026-01-01T00:00:00.000Z",
     "originalInput": {/* the parsed BirthInput, defaults applied */},
@@ -60,7 +60,7 @@
     "ziwei": undefined,
     "warnings": [/* EngineWarning[] */],
     "provenance": {
-      "engine": { "name": "ming-engine", "version": "0.1.0", "schemaVersion": "0.1.0" },
+      "engine": { "name": "ming-engine", "version": "0.3.0", "schemaVersion": "0.1.0" },
       "tzdb": { "source": "moment-timezone", "version": "2026c" },
       "providers": [], // only what actually ran is listed
       "rulesets": [],
