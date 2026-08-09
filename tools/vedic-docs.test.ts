@@ -157,6 +157,15 @@ describe('vedic docs gate: P5 user-facing claims stay truthful', () => {
     expect(contracts).toContain("default(['western', 'bazi', 'ziwei', 'vedic'])");
   });
 
+  it('keeps agent instructions aligned with the owner-confirmed defaults', () => {
+    const agents = read('AGENTS.md');
+    expect(agents).toMatch(/deterministic\*\* four-system birth-chart engine/i);
+    expect(agents).toMatch(/omitted `settings\.systems`[\s\S]*all\s+four shipped systems/i);
+    expect(agents).toContain("`vedic.nodes: 'mean'`");
+    expect(agents).not.toMatch(/three-system compatibility default/i);
+    expect(agents).not.toMatch(/without a product default/i);
+  });
+
   it('keeps public wording within the precision and published-release boundary', () => {
     const readme = read('README.md');
     expect(readme).toMatch(/Vedic|Jyotish/i);

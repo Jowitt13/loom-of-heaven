@@ -6,19 +6,19 @@ repository. The user-facing capability is the **`calculate-birth-charts`** Skill
 
 ## What this project is
 
-A **deterministic** three-system birth-chart engine — Western natal astrology, Four Pillars / BaZi
-(四柱八字), and Zi Wei Dou Shu (紫微斗数) — packaged as a portable, offline Skill. All astronomy,
-calendar, ganzhi, star-placement and time math is done by a bundled deterministic CLI. **The model
-never computes a chart itself.**
+A **deterministic** four-system birth-chart engine — Western natal astrology, Four Pillars / BaZi
+(四柱八字), Zi Wei Dou Shu (紫微斗数), and Vedic/Jyotish — packaged as a portable, offline Skill.
+All astronomy, calendar, ganzhi, star-placement and time math is done by a bundled deterministic
+CLI. **The model never computes a chart itself.**
 
 ## Golden rules (do not break)
 
-- **P5 Vedic boundary.** `calculate --systems all` explicitly requests Vedic alongside the three
-  legacy systems, but an omitted `settings.systems` keeps its three-system compatibility default.
-  The Vedic chart returns both node modes without a product default and suppresses time-of-day
-  values with `VEDIC_TIME_REQUIRED` when the birth time is unknown. Its high-precision wording is
-  limited to the recorded Swiss-only external numeric-reference fixture; Swiss never runs in the
-  bundle or runtime.
+- **Vedic boundary.** `calculate --systems all` and an omitted `settings.systems` both request all
+  four shipped systems. The Vedic chart returns both node modes, with `vedic.nodes: 'mean'` as the
+  owner-confirmed product default and explicit `'true'` selection available. It suppresses
+  time-of-day values with `VEDIC_TIME_REQUIRED` when the birth time is unknown. Its
+  high-precision wording is limited to the recorded Swiss-only external numeric-reference fixture;
+  Swiss never runs in the bundle or runtime.
 
 - **Never** compute or guess planet positions, houses, aspects, solar terms, 干支, 十神, 起运,
   星曜 or 四化 yourself. If the CLI does not return a value, say so — never backfill.
