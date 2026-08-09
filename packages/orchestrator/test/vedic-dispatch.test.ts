@@ -3,12 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { ChartBundle, parseBirthInput } from '@ming/contracts';
 import { calculate, runAnswerPlan } from '@ming/orchestrator';
 
-/**
- * Vedic P1 dispatch tests (ADR 0013): explicit systems:['vedic'] routes through
- * computeVedic and yields an honest pending warning — never a fabricated result,
- * provider or ruleset. The default three-system behavior and the v1 public
- * contracts are byte-for-byte unaffected.
- */
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
 
 const raw = {
@@ -20,34 +14,27 @@ const raw = {
   location: { latitude: 30.5, longitude: 114.3, source: 'user' },
 };
 
-describe('calculate: explicit vedic dispatch (P1 skeleton)', () => {
-  it('returns no vedic result, one pending warning, and no vedic provenance', () => {
+describe('calculate: explicit vedic dispatch (P2 numerical substrate)', () => {
+  it('returns a Vedic result with provenance and no pending-provider warning', () => {
     const input = parseBirthInput({ ...raw, settings: { systems: ['vedic'] } });
     const bundle = calculate(input, { now: FIXED });
-    expect(bundle.vedic).toBeUndefined();
-    const pending = bundle.warnings.filter(
-      (w) => w.code === 'SYSTEM_NOT_YET_IMPLEMENTED' && w.system === 'vedic',
-    );
-    expect(pending).toHaveLength(1);
-    expect(bundle.provenance.providers.map((p) => p.id)).toEqual([]);
-    expect(bundle.provenance.rulesets.map((r) => r.id)).not.toContain('vedic-parashara-lahiri');
-    // The bundle (with the reserved slot absent) still validates against the schema.
+    expect(bundle.vedic).toBeDefined();
+    expect(bundle.vedic?.provider.id).toBe('caelus');
+    expect(bundle.warnings.some((w) => w.code === 'SYSTEM_NOT_YET_IMPLEMENTED')).toBe(false);
+    expect(bundle.provenance.providers.map((p) => p.id)).toEqual(['caelus']);
+    expect(bundle.provenance.rulesets.map((r) => r.id)).toContain('vedic-parashara-lahiri');
     expect(ChartBundle.safeParse(bundle).success).toBe(true);
   });
 
-  it('mixed request: real systems compute, vedic only warns', () => {
+  it('mixed request computes both real systems and records both providers', () => {
     const input = parseBirthInput({ ...raw, settings: { systems: ['western', 'vedic'] } });
     const bundle = calculate(input, { now: FIXED });
     expect(bundle.western).toBeDefined();
-    expect(bundle.vedic).toBeUndefined();
-    expect(
-      bundle.warnings.some((w) => w.code === 'SYSTEM_NOT_YET_IMPLEMENTED' && w.system === 'vedic'),
-    ).toBe(true);
-    // Only the real Western provider appears in provenance.
-    expect(bundle.provenance.providers.map((p) => p.id)).toEqual(['astronomy-engine']);
+    expect(bundle.vedic).toBeDefined();
+    expect(bundle.provenance.providers.map((p) => p.id)).toEqual(['astronomy-engine', 'caelus']);
   });
 
-  it('default input behavior is unchanged: no vedic slot, no vedic warnings', () => {
+  it('default input behavior is unchanged: Vedic remains opt-in until P5', () => {
     const bundle = calculate(parseBirthInput(raw), { now: FIXED });
     expect(bundle.vedic).toBeUndefined();
     expect(bundle.warnings.some((w) => w.system === 'vedic')).toBe(false);
@@ -57,7 +44,7 @@ describe('calculate: explicit vedic dispatch (P1 skeleton)', () => {
 });
 
 describe('public v1 contracts stay three-system (P4 owns the v2 break)', () => {
-  it('PublicResult.systems keeps exactly the three implemented systems', () => {
+  it('PublicResult.systems keeps exactly the three public systems', () => {
     const input = parseBirthInput({
       ...raw,
       ruleGender: 'female',

@@ -1,5 +1,2 @@
-/**
- * @ming/vedic — Vedic (Jyotish) provider skeleton (ADR 0013 P1).
- * No calculation is implemented; see ./vedic-provider.ts.
- */
-export { computeVedic } from './vedic-provider.ts';
+/** @ming/vedic — P2 precision-gated Vedic numeric provider (ADR 0013). */
+export { computeVedic, computeVedicP2Positions } from './vedic-provider.ts';

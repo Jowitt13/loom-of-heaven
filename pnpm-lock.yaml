@@ -146,6 +146,9 @@ importers:
       '@ming/contracts':
         specifier: workspace:*
         version: link:../contracts
+      caelus:
+        specifier: 0.23.0
+        version: 0.23.0
     devDependencies:
       '@ming/time-location':
         specifier: workspace:*
@@ -653,6 +656,9 @@ packages:
   brace-expansion@5.0.7:
     resolution: {integrity: sha512-7oFy703dxfY3/NLxC1fh2SUCQ0H9rmAY+5EpDVfXjUTTs+HEwR2nYaqLv+GWcTsumwxPfiz6CzCNkwXwBUwqCA==}
     engines: {node: 18 || 20 || >=22}
+
+  caelus@0.23.0:
+    resolution: {integrity: sha512-nHezRfVqV7tLwBB/TuhvuaNL+TtY4HTf//xrlI/E5g/lOz51xgaoCciBO7yX5eArFM2rDII97lk/rxXhHAiT4w==}
 
   callsites@3.1.0:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
@@ -1597,6 +1603,8 @@ snapshots:
   brace-expansion@5.0.7:
     dependencies:
       balanced-match: 4.0.4
+
+  caelus@0.23.0: {}
 
   callsites@3.1.0: {}
 

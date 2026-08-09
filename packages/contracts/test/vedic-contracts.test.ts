@@ -3,9 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { BirthInput, VedicSettings, parseBirthInput } from '@ming/contracts';
 
 /**
- * Vedic P1 contract tests (ADR 0013): the 'vedic' system id is reserved in the
- * contracts, old inputs stay valid, and the two unresolved owner decisions
- * (nodes, dashaYear) have NO hidden defaults anywhere in the schema.
+ * Vedic P1/P2 contract tests (ADR 0013): the 'vedic' system id is reserved in
+ * the contracts, old inputs stay valid, and the Rahu node default remains absent.
  */
 const base = {
   calendar: 'gregorian',
@@ -16,7 +15,7 @@ const base = {
   location: { latitude: 31.23, longitude: 121.47, source: 'user' },
 };
 
-describe('vedic contracts (P1 skeleton)', () => {
+describe('vedic contracts (P1/P2)', () => {
   it('legacy input without any vedic key still parses; default systems stay three', () => {
     const parsed = parseBirthInput(base);
     expect(parsed.settings.systems).toEqual(['western', 'bazi', 'ziwei']);
@@ -30,7 +29,7 @@ describe('vedic contracts (P1 skeleton)', () => {
     expect(parsed.settings.systems).toEqual(['vedic']);
   });
 
-  it('nodes and dashaYear have NO defaults (unresolved owner decisions)', () => {
+  it('nodes and dashaYear have no schema defaults before their respective product slices wire them', () => {
     const settings = VedicSettings.parse({});
     expect(settings.nodes).toBeUndefined();
     expect(settings.dashaYear).toBeUndefined();

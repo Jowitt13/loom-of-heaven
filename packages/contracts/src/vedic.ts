@@ -2,45 +2,74 @@ import { z } from 'zod';
 import { ProviderRef } from './provenance.ts';
 
 /**
- * Vedic (Jyotish) domain contracts — P1 skeleton (ADR 0013, Status: Proposed).
- *
- * IMPORTANT: no Vedic calculation exists yet. The provider (`@ming/vedic`) returns
- * null + SYSTEM_NOT_YET_IMPLEMENTED for every request; graha placements, Lagna,
- * nakshatra, panchanga, vargas and dashas land in P2/P3 behind their own goldens.
- * Nothing in this file may be read as a shipped capability.
+ * Vedic (Jyotish) domain contracts. P2 provides only the precision-gated numeric
+ * substrate: seven graha longitudes, both node modes and (when a time is known)
+ * Lagna. Nakshatra, panchanga, bhava, vargas and dashas remain P3 work.
  */
 
 /**
- * Vedic settings. Two conventions are deliberately OPTIONAL WITHOUT DEFAULTS —
- * they are unresolved owner decisions (ADR 0013 "Open questions" 1 and 2) and no
- * layer (schema, docs, runtime) may quietly harden a value before those land:
+ * Vedic settings. The Rahu convention stays OPTIONAL WITHOUT A DEFAULT because its
+ * owner decision is still open (ADR 0013, Open question 1). `dashaYear` is also
+ * intentionally not wired in P2: the owner-confirmed model lands with P3 dasha
+ * calculations and their same-model cross-check.
  *
  * - `nodes`: mean vs true Rahu (proposed default 'mean', NOT confirmed).
- * - `dashaYear`: the Vimshottari year model. Candidate 'julian-365.25'; the P3
- *   dasha implementation is BLOCKED on the owner decision plus a same-model
- *   dual-implementation cross-check. The enum is reserved here so the contract
- *   surface is stable, but no value is wired anywhere.
+ * - `dashaYear`: owner-confirmed as 'julian-365.25', but P3 remains blocked on a
+ *   same-model dual-implementation cross-check. The enum is reserved here so the
+ *   contract surface is stable, but no value is wired into P2.
  *
- * The sunrise model for Vaara (ADR 0013 §9) is likewise undecided and therefore
- * has NO field at all until its P2 backend-mapping verification is done.
+ * The owner-confirmed Vaara sunrise model has NO field until its P2 backend-mapping
+ * verification is done.
  */
 export const VedicSettings = z.strictObject({
   rulesetId: z.string().default('vedic-parashara-lahiri@0.1.0'),
   /** Rahu node model. No default: owner decision pending (ADR 0013 Open question 1). */
   nodes: z.enum(['mean', 'true']).optional(),
-  /** Vimshottari year model. No default: BLOCKED owner decision (ADR 0013 Open question 2). */
+  /** Vimshottari year model. No default until P3 wires the confirmed model. */
   dashaYear: z.enum(['julian-365.25', 'savana-360', 'sidereal']).optional(),
 });
 export type VedicSettings = z.infer<typeof VedicSettings>;
 
+/** P2's seven classical grahas with Swiss-fixture-gated sidereal longitudes. */
+export const VedicGraha = z.enum(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn']);
+export type VedicGraha = z.infer<typeof VedicGraha>;
+
+/** A normalized sidereal ecliptic longitude. P2 emits no derived classification. */
+export const VedicLongitude = z.number().min(0).lt(360);
+export type VedicLongitude = z.infer<typeof VedicLongitude>;
+
+export const VedicGrahaPlacement = z.strictObject({
+  graha: VedicGraha,
+  longitudeDeg: VedicLongitude,
+});
+export type VedicGrahaPlacement = z.infer<typeof VedicGrahaPlacement>;
+
+/** Ketu is derived exactly from Rahu and is never independently ephemeris-computed. */
+export const VedicNodePair = z.strictObject({
+  rahuLongitudeDeg: VedicLongitude,
+  ketuLongitudeDeg: VedicLongitude,
+});
+export type VedicNodePair = z.infer<typeof VedicNodePair>;
+
 /**
- * Vedic chart result envelope. P1 ships ZERO instances of this schema — the
- * provider always returns null. It exists so ChartBundle has a typed slot and the
- * P2/P3 slices can extend it (grahas, Lagna, bhavas, nakshatra, panchanga, D1/D9,
- * Vimshottari) without another bundle-shape change.
+ * Vedic P2 numeric result envelope. Both node modes are emitted until the owner
+ * selects a product default. Lagna is null when no birth time is known; the engine
+ * never treats its normalization anchor as a real birth time.
  */
-export const VedicChartResult = z.object({
+export const VedicChartResult = z.strictObject({
   rulesetId: z.string(),
   provider: ProviderRef,
+  ayanamsha: z.strictObject({
+    id: z.literal('lahiri-iae-1985'),
+    swissReferenceMode: z.literal('SE_SIDM_LAHIRI'),
+  }),
+  grahas: z.array(VedicGrahaPlacement).length(7),
+  nodes: z.strictObject({
+    mean: VedicNodePair,
+    true: VedicNodePair,
+  }),
+  lagnaLongitudeDeg: VedicLongitude.nullable(),
+  /** Granted only by the offline P2 Swiss fixture regression (≤1′ for every P2 field). */
+  precision: z.literal('high'),
 });
 export type VedicChartResult = z.infer<typeof VedicChartResult>;

@@ -38,13 +38,14 @@ interpretation rules that must carry an explicit source + version.
 One named ruleset first; schools via configuration. Records star-placement ruleset, 四化 table
 version, brightness table version, whether true solar time applies, and limit configuration.
 
-## Vedic (Jyotish) — `vedic-parashara-lahiri@0.1.0` (PLANNED, not implemented)
+## Vedic (Jyotish) — `vedic-parashara-lahiri@0.1.0` (P2 numeric substrate; not user-facing)
 
-Roadmap only — **no Vedic calculation exists in the engine today** and no user-facing surface may
-claim otherwise until the ADR 0013 P5 slice ships. P1 status: the contracts reserve the `vedic`
-system id (`VedicSettings`/`VedicChartResult`, opt-in only — the default `systems` array stays
-three-system) and `@ming/vedic` / `@ming/vedic-rules` exist as skeletons whose provider always
-returns `SYSTEM_NOT_YET_IMPLEMENTED`; the engine skeleton still computes no Vedic data at all.
+P2 computes a **numeric-only**, opt-in substrate: Lahiri Sun..Saturn, both Rahu modes with Ketu
+as exact opposition, and Lagna when a birth time is known. It is held to the reviewed offline
+Swiss mode-1 fixture at ≤1′ and uses the MIT `caelus@0.23.0` embedded-data provider. This is not
+a user-facing product system: the default `systems` array remains three-system and no Skill or
+host surface may claim Vedic capability until the ADR 0013 P5 slice ships. P3-only products
+(rashi/bhava/nakshatra/panchanga/D1/D9/Vimshottari/Vaara) are absent.
 Owner-confirmed defaults (2026-07-31): the Vimshottari year model is
 `dashaYear: 'julian-365.25'` (365.25 × 86400 SI seconds; savana-360/sidereal only as future new
 rulesets) and the Vaara sunrise rule is `upper-limb-standard-refraction` (upper limb + standard

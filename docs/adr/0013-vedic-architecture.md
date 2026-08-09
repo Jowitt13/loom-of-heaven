@@ -1,15 +1,16 @@
 # ADR 0013: Vedic (Jyotish) system architecture & rule-convention freeze (P0)
 
-- Status: Proposed — P0 architecture complete; only the Rahu node default (§5) still awaits
-  owner confirmation (**no Vedic code exists yet — nothing below is implemented**).
+- Status: Proposed — P2's precision-gated numeric substrate is implemented; only the Rahu node
+  default (§5) still awaits owner confirmation. P3 classifications, panchanga, bhava, vargas,
+  Vimshottari and Vaara remain unimplemented and must not be presented as shipped capability.
   Engineering boundaries in §§1–4, 6–10, 12–16 are frozen. The sunrise rule target (§9) and
   the Vimshottari year model (§11) are **owner-confirmed defaults (2026-07-31) with remaining
   verification gates**: each still carries an evidence gate (sunrise backend mapping; same-model
   dual-implementation cross-check) that blocks delivery, but neither is an owner-decision
   blocker anymore. See "Open questions".
 - Date: 2026-07-29
-- Scope: adds the fourth first-class system `vedic` as a plan. This ADR freezes definitions,
-  boundaries and the PR roadmap **before** any contracts or calculation code changes. Companion
+- Scope: adds the fourth first-class system `vedic` in staged slices. P0 froze definitions and
+  boundaries; P1 reserved contracts; P2 implements the accepted numeric substrate. Companion
   source registry: [`docs/VEDIC_SOURCE_MATRIX.md`](../VEDIC_SOURCE_MATRIX.md).
 
 ## Context
@@ -43,13 +44,15 @@ The next system is Indian sidereal astrology (Jyotish). Two hard constraints sha
 - Initial ruleset id: **`vedic-parashara-lahiri@0.1.0`** — Parashari framework, Lahiri
   ayanamsha, whole-sign bhava, Vimshottari. Every disputed convention below is carried by this
   versioned ruleset, not by scattered booleans (same policy as BaZi settings).
-- Astronomy base: the already-bundled **astronomy-engine 2.1.19 (MIT)**. No new runtime
-  dependency, no ephemeris data files.
+- P2 numerical base: **Caelus 0.23.0 (MIT)**, pinned as a runtime dependency and using only its
+  embedded static data. Its npm payload was rebuilt from the fixed `v0.23.0` source tag and
+  compared byte-for-byte during the P2 audit. No ephemeris data files are downloaded or loaded at
+  runtime. `astronomy-engine` remains the Western provider and the P3 sunrise backend.
 
 ### 2. Reference frame
 
-- **Geocentric, apparent** ecliptic-of-date positions (same pipeline as the Western provider:
-  `Ecliptic(GeoVector(body, date, true))` — includes light-time and aberration).
+- **Geocentric, apparent** ecliptic-of-date positions, evaluated by Caelus's P2 numeric
+  provider and accepted only through the recorded Swiss fixture regression.
 - Sidereal longitude = `norm360(tropical apparent longitude − ayanamsha(t))`.
 - Rationale: the Indian Astronomical Ephemeris and drik ("observation-based") panchanga practice
   compute true/apparent positions of date, then subtract the ayanamsha. This matches the Lahiri
@@ -60,7 +63,7 @@ The next system is Indian sidereal astrology (Jyotish). Two hard constraints sha
 - Input: the existing normalization layer's **UTC instant** (IANA zone via moment-timezone,
   ambiguity/DST handling unchanged). Solar-time modes (mean/apparent) do **not** apply to Vedic
   planetary positions — same invariant as Western (`docs/RULESETS.md`).
-- TT/ΔT: handled internally by astronomy-engine's built-in ΔT model; we do not implement our own
+- TT/ΔT: handled internally by Caelus for P2 numerical positions; we do not implement our own
   ΔT. The P2 golden comparison against Swiss (which has its own ΔT model) absorbs any small ΔT
   discrepancy into the measured tolerance; if it ever pushes a body over the ≤1′ gate, that is a
   finding, not something to hide.
@@ -90,10 +93,9 @@ properties frozen here:
 - All future Vedic goldens are captured with `swetest -sid1` (plus `-nonut`-free defaults so
   nutation is included), and the fixture must record the sidereal mode id, exactly like the
   house golden records the house-system letter.
-- Our own implementation (P2) computes ayanamsha from the frozen reference epoch + the precession
-  model already inside astronomy-engine, then validates against the Swiss golden at ≤1′ over the
-  whole support window (1900–2100). The implementation formula is chosen in P2; this ADR freezes
-  the _target definition_ and the _gate_, not the polynomial.
+- P2 uses Caelus's `sidereal:lahiri` implementation and validates every returned field against
+  the Swiss golden at ≤1′ over the whole support window (1900–2100). This ADR freezes the target
+  definition and the gate, not a copied polynomial.
 
 ### 5. Rahu: mean vs true
 
@@ -105,9 +107,8 @@ and pada — a genuine school split, so:
 
 - `settings.vedic.nodes: 'mean' | 'true'`, proposed default `'mean'`, recorded in provenance.
 - The P2 golden covers **both** modes against Swiss (`swetest -p` true node `t` / mean node `m`).
-- The existing Western node implementations are not reused as-is: the Vedic mean node must pass
-  its own ≤1′ Swiss golden (the Meeus series is expected to pass; if it does, it is promoted to
-  shared code — verified, not assumed).
+- The existing Western node implementations are not reused. Caelus supplies both P2 modes and
+  each is held to its own ≤1′ Swiss fixture rows; neither is promoted to shared code by assumption.
 
 ### 6. Ketu
 
@@ -121,9 +122,8 @@ independently; the golden asserts the opposition property on every sample.
 - **Bhava Chalit / Sripati / equal-from-Lagna-degree are out of scope for v1.** Requesting them
   yields a structured warning (`VEDIC_BHAVA_SYSTEM_UNSUPPORTED`, final code name fixed in P4) —
   never a silent fallback (same policy as `HOUSE_SYSTEM_UNAVAILABLE` in Western).
-- Lagna = sidereal ascendant = `norm360(tropical ascendant − ayanamsha)`, with the tropical
-  ascendant from the existing Western angles code path (already Swiss-golden-verified for
-  ASC/MC in v0.2.0).
+- Lagna = sidereal ascendant = `norm360(tropical ascendant − ayanamsha)`. P2 obtains it from the
+  same Caelus sidereal chart as its grahas and holds it to the dedicated Swiss fixture gate.
 
 ### 8. Nakshatra and Pada
 
@@ -242,13 +242,15 @@ order, each requiring its own sourced convention freeze first.
 
 ### 15. Ruleset / provider / provenance / precision plan
 
-- `ProviderRef`: `{ id: 'astronomy-engine', version: '2.1.19', license: 'MIT' }` (same instance
-  as Western).
+- `ProviderRef`: `{ id: 'caelus', version: '0.23.0', license: 'MIT' }`. It is a clean-room,
+  embedded-data numerical provider; Swiss remains external-only and is never a runtime dependency.
 - `RulesetRef`: `vedic-parashara-lahiri@0.1.0`, carrying: ayanamsha id (`lahiri-iae-1985`,
   Swiss mode 1 equivalent), nodes default, bhava system, dasha year model, sunrise model,
   panchanga formulas version.
-- Precision labels: the nine grahas + Lagna target `precision: 'high'` **only after** the P2
-  Swiss golden holds ≤1′; until then nothing ships. Derived integer classifications
+- Precision labels: P2's seven grahas, both node modes and Lagna are `precision: 'high'` because
+  the offline 100-case Swiss golden holds ≤1′ for every returned numeric field. This means only
+  “matches the recorded Swiss fixtures within ≤1′”, not a general astrometric accuracy claim.
+  Derived integer classifications
   (rashi/nakshatra/pada/tithi/yoga/karana/vargas) carry no separate precision number but inherit
   boundary-distance caveats: any classification within 1′ of a segment boundary gets an explicit
   `near-boundary` caveat in facts (P4).
@@ -283,15 +285,16 @@ decision (§Open questions); the engine capability does not depend on it.
   pending warnings; no numbers computed. Contract version bumps prepared. The versioned
   `dashaYear` enum was reserved with no default wired; wiring the owner-confirmed
   `julian-365.25` default (§11) is P3 work, gated on its cross-check.
-- **P2 — precise ayanamsha, nine grahas, nodes, Lagna + Swiss golden**: Lahiri (§4)
-  implementation; Sun..Saturn sidereal positions; mean+true Rahu, Ketu opposition; sidereal
-  Lagna. Golden: ≥50 synthetic cases (multi-decade 1900–2100, N/S latitudes, multiple
+- **P2 — precise ayanamsha, nine grahas, nodes, Lagna + Swiss golden (implemented)**: Caelus
+  0.23.0 computes Lahiri Sun..Saturn sidereal positions, mean+true Rahu, derived Ketu opposition
+  and sidereal Lagna. The checked-in golden has 100 synthetic cases (multi-decade 1900–2100,
+  N/S latitudes, multiple
   timezones, cases straddling rashi/nakshatra/pada/tithi/D9/dasha-lord boundaries), captured via
   the isolated two-phase `swetest -sid1` workflow (staging dir → SHA-256 manifest → reviewed
   transcription; binaries/ephemeris files never enter the repo), gate ≤1′ for grahas, nodes and
-  Lagna; Rahu/Ketu opposition asserted; cross-checked against at least one independent MIT
-  implementation where one is available — discrepancies are **recorded per-source in the fixture,
-  never majority-voted away**. The field-scoped evidence policy below is binding. All inputs marked
+  Lagna; Rahu/Ketu opposition asserted. Supplementary independent-MIT evidence is recorded only
+  where it passes; discrepancies are **recorded per-source in the fixture, never majority-voted
+  away**. The field-scoped evidence policy below is binding. All inputs marked
   synthetic. **Blocker carried into P2/P3**: pin the sunrise backend parameter mapping (§9) with
   sunrise spot-check goldens before any Vaara output.
 
@@ -299,6 +302,13 @@ decision (§Open questions); the engine capability does not depend on it.
 
 This amendment supersedes the generic all-fields independent-MIT wording in the P2 bullet above.
 It does **not** lower any numerical acceptance threshold.
+
+**P2 implementation record (2026-08-09).** The runtime uses `caelus@0.23.0` and only its
+embedded static dataset. The npm tarball was source-bound by rebuilding the immutable Git tag
+`v0.23.0` and comparing all published files byte-for-byte; the tag's root `LICENSE` is MIT and
+the audited runtime has no Swiss import, executable or data file. The committed offline 100-case
+regression verifies every P2 graha, both Rahu modes and Lagna at ≤1′. This is an implementation
+and acceptance record, not a second-reference claim; Swiss remains external-only.
 
 1. **Swiss remains the hard acceptance oracle for every P2 numeric field.** The implementation
    must match reviewed, isolated `swetest -sid1 -utc -emos` fixtures within ≤1′ for every graha,
@@ -344,13 +354,14 @@ Until a future independent source passes a field, user-facing and release docume
 
 ## License boundary (restated, binding)
 
-| Project         | License                | Allowed use                                                                                                 |
-| --------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Swiss Ephemeris | AGPL / commercial dual | External golden generator only, isolated capture; never in runtime/ZIP/deps/SBOM/repo/CI.                   |
-| PyJHora         | AGPL (+ Swiss, Python) | Feature-checklist research only; no code copying/porting; any automated use needs a fresh license decision. |
-| node-jhora      | Custom proprietary     | **Fully excluded.** No use, no derivation.                                                                  |
-| jyotishganit    | MIT (Python/Skyfield)  | Independent cross-check candidate for goldens; not a runtime dependency in this phase.                      |
-| VedAstro        | MIT (C#/.NET/API)      | Public-contract reference and independent result comparison; never embedded in the Node Skill.              |
+| Project         | License                | Allowed use                                                                                                  |
+| --------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Caelus          | MIT                    | P2 runtime numerical provider only, pinned to `0.23.0`; static embedded data only, with Swiss kept external. |
+| Swiss Ephemeris | AGPL / commercial dual | External golden generator only, isolated capture; never in runtime/ZIP/deps/SBOM/repo/CI.                    |
+| PyJHora         | AGPL (+ Swiss, Python) | Feature-checklist research only; no code copying/porting; any automated use needs a fresh license decision.  |
+| node-jhora      | Custom proprietary     | **Fully excluded.** No use, no derivation.                                                                   |
+| jyotishganit    | MIT (Python/Skyfield)  | Independent cross-check candidate for goldens; not a runtime dependency in this phase.                       |
+| VedAstro        | MIT (C#/.NET/API)      | Public-contract reference and independent result comparison; never embedded in the Node Skill.               |
 
 ## Open questions (owner decisions pending)
 
@@ -379,11 +390,11 @@ Until a future independent source passes a field, user-facing and release docume
   be conflated: the **frozen owner defaults** (`dashaYear: 'julian-365.25'`; sunrise
   `upper-limb-standard-refraction` — both confirmed 2026-07-31) are decided and no longer
   reopenable without a new owner decision, while the **verification gates** (same-model
-  dual-implementation cross-check for Vimshottari; sunrise backend-mapping goldens for Vaara;
-  the P2 ≤1′ Swiss golden for grahas/nodes/Lagna) still block delivery until their evidence
-  actually exists. The one remaining **undecided** semantic default is the Rahu node model
+  dual-implementation cross-check for Vimshottari; sunrise backend-mapping goldens for Vaara)
+  still block their P3 delivery. The P2 ≤1′ Swiss golden now holds for grahas/nodes/Lagna. The
+  one remaining **undecided** semantic default is the Rahu node model
   (§5), which must not be treated as decided until the owner confirms.
 - The engine keeps its golden rules: the model never computes charts; missing values are
   reported, never backfilled; Vedic capability must not be claimed anywhere user-facing until P5
-  ships (guarded by `tools/vedic-docs.test.ts`). No precision (≤1′ or otherwise) may be claimed
-  for any Vedic quantity before the P2 golden actually holds it.
+  ships (guarded by `tools/vedic-docs.test.ts`). Any P2 precision statement is limited to the
+  recorded Swiss fixtures; no broader astrometric accuracy claim is made.

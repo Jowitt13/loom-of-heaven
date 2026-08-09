@@ -2,7 +2,8 @@
 
 Companion to [ADR 0013](adr/0013-vedic-architecture.md). One row per calculation topic. Every
 implementation PR (P1–P5) must trace its behavior back to a row here; changing a row means
-changing ADR 0013 first. **Nothing in this file is implemented yet.**
+changing ADR 0013 first. **P2 implements only the precision-gated numeric substrate; all P3
+classification, panchanga, dasha and user-facing work remains unimplemented.**
 
 Source classes are kept separate on purpose:
 
@@ -11,11 +12,23 @@ Source classes are kept separate on purpose:
   Surya Siddhanta (public domain). Used for _rules_ (sequences, mappings, semantics).
 - **Modern astronomical sources**: Indian Astronomical Ephemeris (IAE, Positional Astronomy
   Centre, Govt. of India), the Swiss Ephemeris documentation (astro.com/swisseph, used as a
-  technical reference document — reading documentation is not code use), astronomy-engine
-  (MIT, bundled), Meeus _Astronomical Algorithms_. Used for _numbers_ (frames, precession,
-  nutation, rise/set).
+  technical reference document — reading documentation is not code use), Caelus 0.23.0
+  (MIT, bundled for P2), astronomy-engine (MIT, bundled for Western and P3 sunrise), Meeus
+  _Astronomical Algorithms_. Used for _numbers_ (frames, precession, nutation, rise/set).
 
 Blog aggregations or unsourced web pages are never the sole basis for a row.
+
+## P2 implementation record (2026-08-09)
+
+- Runtime file: `packages/vedic/src/vedic-provider.ts`; it uses only
+  `caelus@0.23.0` and the package's static `data-embedded` export. No Swiss code, binary or data
+  file is present in the runtime dependency closure.
+- Contract scope: `packages/contracts/src/vedic.ts` exports seven grahas, both Rahu/Ketu modes,
+  and nullable Lagna. It deliberately exports no rashi, nakshatra, bhava, panchanga, D1/D9,
+  Vimshottari or Vaara value.
+- Acceptance: `packages/vedic/test/vedic-swiss-golden-fixture.test.ts` evaluates every runtime
+  field against all 100 reviewed synthetic `swetest -sid1 -utc -emos` records at ≤1′ and asserts
+  exact Ketu opposition. It is an offline regression, not a Swiss runtime integration.
 
 ## License boundary for external tools (binding)
 
@@ -89,9 +102,10 @@ Acceptable error | Unresolved questions**
 The following audit record narrows the meaning of “second source” without lowering the Swiss
 numeric gate. It is a source-audit record only: it adds no Vedic code, fixture or precision claim.
 
-| Candidate                          | Audit outcome                                                                                                                                                                                       | Fields usable as supplementary evidence              | Fields explicitly not covered                   | Binding consequence                                                                                                                                                                                |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| NDAstro 0.28.1 (MIT; Skyfield/JPL) | Wheel and fixed `v0.28.1` tag sources matched byte-for-byte; no Swiss runtime import; ordinary `lahiri` pre-screened against `swetest -sid1 -utc -emos` across 11 synthetic cases / 110 comparisons | Sun..Saturn (worst 0.710′); mean Rahu (worst 0.046′) | true Rahu (worst 7.633′); Lagna (worst 10.286′) | **REJECTED_FOR_MODE1_REFERENCE** as a full oracle. It may be recorded only for passing fields; true Rahu and Lagna remain Swiss-only external numeric references until another source passes them. |
+| Candidate                          | Audit outcome                                                                                                                                                                                       | Fields usable as supplementary evidence                                 | Fields explicitly not covered                                 | Binding consequence                                                                                                                                                                                |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NDAstro 0.28.1 (MIT; Skyfield/JPL) | Wheel and fixed `v0.28.1` tag sources matched byte-for-byte; no Swiss runtime import; ordinary `lahiri` pre-screened against `swetest -sid1 -utc -emos` across 11 synthetic cases / 110 comparisons | Sun..Saturn (worst 0.710′); mean Rahu (worst 0.046′)                    | true Rahu (worst 7.633′); Lagna (worst 10.286′)               | **REJECTED_FOR_MODE1_REFERENCE** as a full oracle. It may be recorded only for passing fields; true Rahu and Lagna remain Swiss-only external numeric references until another source passes them. |
+| Caelus 0.23.0 (MIT; embedded data) | Fixed source tag `v0.23.0` rebuilt and matched byte-for-byte to its npm payload; no Swiss runtime import. It is the P2 implementation, not an independent oracle.                                   | Runtime values are held directly to all 100 Swiss fixture cases at ≤1′. | No P3 classifications, dasha or Vaara value is taken from it. | Accepted as the MIT P2 runtime provider; **Swiss remains the hard external acceptance oracle**, so this does not create a two-source validation claim.                                             |
 
 For every Swiss-only field, the P2 fixture must carry the raw-capture argv, `swetest` version,
 stdout/stderr SHA-256 manifest and reviewed transcription trail. P2 adds Ketu opposition,

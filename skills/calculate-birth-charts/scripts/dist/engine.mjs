@@ -10,11 +10,11 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
-var __commonJS = (cb, mod) => function __require2() {
+var __commonJS = (cb, mod2) => function __require2() {
   try {
-    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+    return mod2 || (0, cb[__getOwnPropNames(cb)[0]])((mod2 = { exports: {} }).exports, mod2), mod2.exports;
   } catch (e) {
-    throw mod = 0, e;
+    throw mod2 = 0, e;
   }
 };
 var __export = (target, all) => {
@@ -29,13 +29,13 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+var __toESM = (mod2, isNodeMode, target) => (target = mod2 != null ? __create(__getProtoOf(mod2)) : {}, __copyProps(
   // If the importer is in node compatibility mode or this is not an ESM
   // file that has been converted to a CommonJS file using a Babel-
   // compatible transform (i.e. "__esModule" has not been set), then set
   // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
+  isNodeMode || !mod2 || !mod2.__esModule ? __defProp(target, "default", { value: mod2, enumerable: true }) : target,
+  mod2
 ));
 
 // node_modules/.pnpm/moment@2.30.1/node_modules/moment/moment.js
@@ -780,7 +780,7 @@ var require_moment = __commonJS({
         }
         return this;
       }
-      function mod(n, x) {
+      function mod2(n, x) {
         return (n % x + x) % x;
       }
       var indexOf;
@@ -801,7 +801,7 @@ var require_moment = __commonJS({
         if (isNaN(year) || isNaN(month)) {
           return NaN;
         }
-        var modMonth = mod(month, 12);
+        var modMonth = mod2(month, 12);
         year += (month - modMonth) / 12;
         return modMonth === 1 ? isLeapYear(year) ? 29 : 28 : 31 - modMonth % 7 % 2;
       }
@@ -16665,9 +16665,9 @@ var require_dist = __commonJS({
       static fromDate(date5) {
         return _Solar.fromYmdHms(date5.getFullYear(), date5.getMonth() + 1, date5.getDate(), date5.getHours(), date5.getMinutes(), date5.getSeconds());
       }
-      static fromJulianDay(julianDay) {
-        let d = Math.floor(julianDay + 0.5);
-        let f = julianDay + 0.5 - d;
+      static fromJulianDay(julianDay2) {
+        let d = Math.floor(julianDay2 + 0.5);
+        let f = julianDay2 + 0.5 - d;
         if (d >= 2299161) {
           const c = Math.floor((d - 186721625e-2) / 36524.25);
           d += 1 + c - Math.floor(c / 4);
@@ -20342,8 +20342,8 @@ var require_zh_CN = __commonJS({
       };
       return __assign.apply(this, arguments);
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var common_json_1 = __importDefault(require_common());
@@ -20722,8 +20722,8 @@ var require_zh_TW = __commonJS({
       };
       return __assign.apply(this, arguments);
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var common_json_1 = __importDefault(require_common2());
@@ -21102,8 +21102,8 @@ var require_ko_KR = __commonJS({
       };
       return __assign.apply(this, arguments);
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var common_json_1 = __importDefault(require_common3());
@@ -21482,8 +21482,8 @@ var require_ja_JP = __commonJS({
       };
       return __assign.apply(this, arguments);
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var common_json_1 = __importDefault(require_common4());
@@ -21861,8 +21861,8 @@ var require_en_US = __commonJS({
       };
       return __assign.apply(this, arguments);
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var common_json_1 = __importDefault(require_common5());
@@ -22241,8 +22241,8 @@ var require_vi_VN = __commonJS({
       };
       return __assign.apply(this, arguments);
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var common_json_1 = __importDefault(require_common6());
@@ -22374,8 +22374,8 @@ var require_i18n = __commonJS({
     var __exportStar = exports && exports.__exportStar || function(m, exports2) {
       for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p)) __createBinding(exports2, m, p);
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.kot = exports.t = exports.setLanguage = void 0;
@@ -23218,8 +23218,8 @@ var require_FunctionalAstrolabe = __commonJS({
       }
       return to.concat(ar || Array.prototype.slice.call(from));
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var dayjs_1 = __importDefault(require_dayjs_min());
@@ -23642,8 +23642,8 @@ var require_FunctionalStar = __commonJS({
 var require_astro = __commonJS({
   "node_modules/.pnpm/iztro@2.5.8/node_modules/iztro/lib/astro/astro.js"(exports) {
     "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getMajorStarByLunarDate = exports.getMajorStarBySolarDate = exports.getSignByLunarDate = exports.getSignBySolarDate = exports.getZodiacBySolarDate = exports.withOptions = exports.rearrangeAstrolable = exports.byLunar = exports.astrolabeByLunarDate = exports.bySolar = exports.astrolabeBySolarDate = exports.getConfig = exports.config = exports.loadPlugin = exports.loadPlugins = void 0;
@@ -24630,8 +24630,8 @@ var require_location = __commonJS({
 var require_majorStar = __commonJS({
   "node_modules/.pnpm/iztro@2.5.8/node_modules/iztro/lib/star/majorStar.js"(exports) {
     "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getMajorStar = void 0;
@@ -24705,8 +24705,8 @@ var require_majorStar = __commonJS({
 var require_minorStar = __commonJS({
   "node_modules/.pnpm/iztro@2.5.8/node_modules/iztro/lib/star/minorStar.js"(exports) {
     "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getMinorStar = void 0;
@@ -24827,8 +24827,8 @@ var require_minorStar = __commonJS({
 var require_adjectiveStar = __commonJS({
   "node_modules/.pnpm/iztro@2.5.8/node_modules/iztro/lib/star/adjectiveStar.js"(exports) {
     "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getAdjectiveStar = void 0;
@@ -25093,8 +25093,8 @@ var require_decorativeStar = __commonJS({
 var require_horoscopeStar = __commonJS({
   "node_modules/.pnpm/iztro@2.5.8/node_modules/iztro/lib/star/horoscopeStar.js"(exports) {
     "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getHoroscopeStar = void 0;
@@ -25259,13 +25259,13 @@ var require_lib2 = __commonJS({
     }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result = {};
-      if (mod != null) {
-        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+      if (mod2 != null) {
+        for (var k in mod2) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod2, k)) __createBinding(result, mod2, k);
       }
-      __setModuleDefault(result, mod);
+      __setModuleDefault(result, mod2);
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -39979,12 +39979,34 @@ var VedicSettings = external_exports.strictObject({
   rulesetId: external_exports.string().default("vedic-parashara-lahiri@0.1.0"),
   /** Rahu node model. No default: owner decision pending (ADR 0013 Open question 1). */
   nodes: external_exports.enum(["mean", "true"]).optional(),
-  /** Vimshottari year model. No default: BLOCKED owner decision (ADR 0013 Open question 2). */
+  /** Vimshottari year model. No default until P3 wires the confirmed model. */
   dashaYear: external_exports.enum(["julian-365.25", "savana-360", "sidereal"]).optional()
 });
-var VedicChartResult = external_exports.object({
+var VedicGraha = external_exports.enum(["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"]);
+var VedicLongitude = external_exports.number().min(0).lt(360);
+var VedicGrahaPlacement = external_exports.strictObject({
+  graha: VedicGraha,
+  longitudeDeg: VedicLongitude
+});
+var VedicNodePair = external_exports.strictObject({
+  rahuLongitudeDeg: VedicLongitude,
+  ketuLongitudeDeg: VedicLongitude
+});
+var VedicChartResult = external_exports.strictObject({
   rulesetId: external_exports.string(),
-  provider: ProviderRef
+  provider: ProviderRef,
+  ayanamsha: external_exports.strictObject({
+    id: external_exports.literal("lahiri-iae-1985"),
+    swissReferenceMode: external_exports.literal("SE_SIDM_LAHIRI")
+  }),
+  grahas: external_exports.array(VedicGrahaPlacement).length(7),
+  nodes: external_exports.strictObject({
+    mean: VedicNodePair,
+    true: VedicNodePair
+  }),
+  lagnaLongitudeDeg: VedicLongitude.nullable(),
+  /** Granted only by the offline P2 Swiss fixture regression (≤1′ for every P2 field). */
+  precision: external_exports.literal("high")
 });
 
 // packages/contracts/src/birth-input.ts
@@ -50174,14 +50196,14 @@ function MakeTime(date5) {
   return new AstroTime(date5);
 }
 function iau2000b(time3) {
-  function mod(x) {
+  function mod2(x) {
     return x % ASEC360 * ASEC2RAD;
   }
   const t = time3.tt / 36525;
-  const elp = mod(128710479305e-5 + t * 1295965810481e-4);
-  const f = mod(335779.526232 + t * 17395272628478e-4);
-  const d = mod(107226070369e-5 + t * 1602961601209e-3);
-  const om = mod(450160.398036 - t * 69628905431e-4);
+  const elp = mod2(128710479305e-5 + t * 1295965810481e-4);
+  const f = mod2(335779.526232 + t * 17395272628478e-4);
+  const d = mod2(107226070369e-5 + t * 1602961601209e-3);
+  const om = mod2(450160.398036 - t * 69628905431e-4);
   let sarg = Math.sin(om);
   let carg = Math.cos(om);
   let dp = (-172064161 - 174666 * t) * sarg + 33386 * carg;
@@ -51668,11 +51690,11 @@ function computeWestern(normalized, settings) {
     return { longitudeDeg: round6(lon), sign: signFromLongitude(lon).sign };
   };
   let cusps = null;
-  let angles = null;
+  let angles2 = null;
   if (normalized.timeKnown) {
     const house = computeHouseCusps(settings.houseSystem, dateMs, latitude, longitudeEast);
     cusps = house.cusps;
-    angles = {
+    angles2 = {
       ascendant: angleFrom(house.ascendant),
       mc: angleFrom(house.mc),
       descendant: angleFrom(house.descendant),
@@ -51694,7 +51716,7 @@ function computeWestern(normalized, settings) {
   const makePlanet = (body, p, precision, source, forAspects) => {
     const displayLon = proj(p.longitudeDeg);
     const { sign, signDeg } = signFromLongitude(displayLon);
-    const houseIndex = cusps ? houseOfLongitude(cusps, p.longitudeDeg) : null;
+    const houseIndex2 = cusps ? houseOfLongitude(cusps, p.longitudeDeg) : null;
     const dignity = dignityOf(body, sign);
     const planet = {
       body,
@@ -51704,7 +51726,7 @@ function computeWestern(normalized, settings) {
       retrograde: p.retrograde,
       sign,
       signDeg: round6(signDeg),
-      house: houseIndex,
+      house: houseIndex2,
       precision,
       source
     };
@@ -51785,25 +51807,1862 @@ function computeWestern(normalized, settings) {
     nodes: settings.nodes,
     planets,
     houses,
-    angles,
+    angles: angles2,
     aspects
   };
   return { result, warnings };
 }
 
-// packages/vedic/src/vedic-provider.ts
-function computeVedic(_normalized, _settings) {
-  return {
-    result: null,
-    warnings: [
-      makeWarning(
-        WARNING_CODES.SYSTEM_NOT_YET_IMPLEMENTED,
-        "vedic",
-        "The vedic provider is a P1 skeleton (ADR 0013): contracts are reserved, but no calculation exists yet. Nothing is fabricated; graha/Lagna/panchanga/dasha values arrive only after the P2/P3 slices pass their independent goldens.",
-        { severity: "info" }
-      )
-    ]
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/src/core.js
+var DEG3 = Math.PI / 180;
+var ARCSEC = DEG3 / 3600;
+var J20002 = 2451545;
+var LIGHT_TIME_AU = 0.0057755183;
+var TWO_PI = 2 * Math.PI;
+var C_KM_PER_DAY = 299792.458 * 86400;
+function mod(a, b) {
+  const r = a % b;
+  return r !== 0 && r < 0 !== b < 0 ? r + b : r;
+}
+function julianDay(y, mo, d, h = 0, mi = 0, s = 0) {
+  const frac = (h + mi / 60 + s / 3600) / 24;
+  if (mo <= 2) {
+    y -= 1;
+    mo += 12;
+  }
+  const a = Math.floor(y / 100);
+  const b = 2 - a + Math.floor(a / 4);
+  return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (mo + 1)) + d + b - 1524.5 + frac;
+}
+var DT_OBS = [
+  [1955, 31.1],
+  [1960, 33.2],
+  [1965, 35.7],
+  [1970, 40.2],
+  [1975, 45.5],
+  [1980, 50.5],
+  [1985, 54.3],
+  [1990, 56.9],
+  [1995, 60.8],
+  [2e3, 63.8],
+  [2005, 64.7],
+  [2010, 66.1],
+  [2015, 67.6],
+  [2020, 69.4],
+  [2025, 69.2]
+];
+function deltaT(jdUt) {
+  const y = 2e3 + (jdUt - J20002) / 365.25;
+  if (y >= 1955 && y <= 2025) {
+    for (let i = 0; i < DT_OBS.length - 1; i++) {
+      const [y0, d0] = DT_OBS[i];
+      const [y1, d1] = DT_OBS[i + 1];
+      if (y >= y0 && y <= y1)
+        return d0 + (d1 - d0) * (y - y0) / (y1 - y0);
+    }
+  }
+  if (y > 2025) {
+    const dy = y - 2025;
+    return 69.2 - 0.04 * dy + 32 * (dy / 100) ** 2;
+  }
+  let t;
+  if (y >= 1941 && y < 1955) {
+    t = y - 1950;
+    return 29.07 + 0.407 * t - t * t / 233 + t ** 3 / 2547;
+  }
+  if (y >= 1920 && y < 1941) {
+    t = y - 1920;
+    return 21.2 + 0.84493 * t - 0.0761 * t * t + 20936e-7 * t ** 3;
+  }
+  if (y >= 1900 && y < 1920) {
+    t = y - 1900;
+    return -2.79 + 1.494119 * t - 0.0598939 * t * t + 61966e-7 * t ** 3 - 197e-6 * t ** 4;
+  }
+  if (y >= 1860 && y < 1900) {
+    t = y - 1860;
+    return 7.62 + 0.5737 * t - 0.251754 * t * t + 0.01680668 * t ** 3 - 4473624e-10 * t ** 4 + t ** 5 / 233174;
+  }
+  if (y >= 1800 && y < 1860) {
+    t = y - 1800;
+    return 13.72 - 0.332447 * t + 68612e-7 * t * t + 41116e-7 * t ** 3 - 37436e-8 * t ** 4 + 121272e-10 * t ** 5 - 1699e-10 * t ** 6 + 875e-12 * t ** 7;
+  }
+  const u = (y - 1820) / 100;
+  return -20 + 32 * u * u;
+}
+function jdTT(jdUt) {
+  return jdUt + deltaT(jdUt) / 86400;
+}
+function vsopHeliocentric(series, jde) {
+  const t = (jde - J20002) / 365250;
+  const out = [];
+  for (const v of [series.L, series.B, series.R]) {
+    let total = 0;
+    let tn = 1;
+    for (const orderTerms of v) {
+      let acc = 0;
+      for (const [A, B, C] of orderTerms)
+        acc += A * Math.cos(B + C * t);
+      total += acc * tn;
+      tn *= t;
+    }
+    out.push(total);
+  }
+  return [mod(out[0], TWO_PI), out[1], out[2]];
+}
+function nutation2(data, jde) {
+  const T = (jde - J20002) / 36525;
+  const D = (297.85036 + 445267.11148 * T - 19142e-7 * T * T + T ** 3 / 189474) * DEG3;
+  const M = (357.52772 + 35999.05034 * T - 1603e-7 * T * T - T ** 3 / 3e5) * DEG3;
+  const N = (134.96298 + 477198.867398 * T + 86972e-7 * T * T + T ** 3 / 5620) * DEG3;
+  const F = (93.27191 + 483202.017538 * T - 36825e-7 * T * T + T ** 3 / 327270) * DEG3;
+  const Om = (125.04452 - 1934.136261 * T + 20708e-7 * T * T + T ** 3 / 45e4) * DEG3;
+  let dpsi = 0;
+  let deps = 0;
+  const tbl = data.nutation;
+  for (let i = tbl.length - 1; i >= 0; i--) {
+    const [d, m, n, f, om, s0, s1, c0, c1] = tbl[i];
+    const arg = d * D + m * M + n * N + f * F + om * Om;
+    dpsi += Math.sin(arg) * (s0 + s1 * T);
+    deps += Math.cos(arg) * (c0 + c1 * T);
+  }
+  return [dpsi * 1e-4 * ARCSEC, deps * 1e-4 * ARCSEC];
+}
+function meanObliquity(jde) {
+  const T = (jde - J20002) / 36525;
+  return (84381.448 - 46.815 * T - 59e-5 * T * T + 1813e-6 * T ** 3) * ARCSEC;
+}
+function trueObliquity(data, jde) {
+  return meanObliquity(jde) + nutation2(data, jde)[1];
+}
+function fk5Correction(L, B, jde) {
+  const T = (jde - J20002) / 36525;
+  const Lp = L - (1.397 + 31e-5 * T) * T * DEG3;
+  const dL = -0.09033 * ARCSEC + 0.03916 * ARCSEC * (Math.cos(Lp) + Math.sin(Lp)) * Math.tan(B);
+  const dB = 0.03916 * ARCSEC * (Math.cos(Lp) - Math.sin(Lp));
+  return [L + dL, B + dB];
+}
+var PQ_POL = [
+  [5851.607687, -0.1189, -28913e-8, 101e-9],
+  [-1600.8863, 1.1689818, -2e-7, -437e-9]
+];
+var PQ_PER = [
+  [708.15, -5486.751211, -684.66156, 667.66673, -5523.863691],
+  [2309, -17.127623, 2446.28388, -2354.886252, -549.74745],
+  [1620, -617.517403, 399.671049, -428.152441, -310.998056],
+  [492.2, 413.44294, -356.652376, 376.202861, 421.535876],
+  [1183, 78.614193, -186.387003, 184.778874, -36.776172],
+  [622, -180.732815, -316.80007, 335.321713, -145.278396],
+  [882, -87.676083, 198.296701, -185.138669, -34.74445],
+  [547, 46.140315, 101.135679, -120.97283, 22.885731]
+];
+var XY_POL = [
+  [5453.282155, 0.4252841, -37173e-8, -152e-9],
+  [-73750.93035, -0.7675452, -18725e-8, 231e-9]
+];
+var XY_PER = [
+  [256.75, -819.940624, 75004.344875, 81491.287984, 1558.515853],
+  [708.15, -8444.676815, 624.033993, 787.163481, 7774.939698],
+  [274.2, 2600.009459, 1251.136893, 1251.296102, -2219.534038],
+  [241.45, 2755.17563, -1102.212834, -1257.950837, -2523.969396],
+  [2309, -167.659835, -2660.66498, -2966.79973, 247.850422],
+  [492.2, 871.855056, 699.291817, 639.744522, -846.485643],
+  [396.1, 44.769698, 153.16722, 131.600209, -1393.124055],
+  [288.9, -512.313065, -950.865637, -445.040117, 368.526116],
+  [231.1, -819.415595, 499.754645, 584.522874, 749.045012],
+  [1610, -538.071099, -145.18821, -89.756563, 444.704518],
+  [620, -189.793622, 558.116553, 524.42963, 235.934465],
+  [157.87, -402.922932, -23.923029, -13.549067, 374.049623],
+  [220.3, 179.516345, -165.405086, -210.157124, -171.33018],
+  [1200, -9.814756, 9.344131, -44.919798, -22.899655]
+];
+var EPS0_V = 84381.406 * ARCSEC;
+var EPS0_FRAME = 84381.448 * ARCSEC;
+function ltpPecl(jde) {
+  const t = (jde - J20002) / 36525;
+  let p = 0;
+  let q = 0;
+  const w = 2 * Math.PI * t;
+  for (const [per, c1, c2, s1, s2] of PQ_PER) {
+    const a = w / per;
+    const ca = Math.cos(a);
+    const sa = Math.sin(a);
+    p += ca * c1 + sa * s1;
+    q += ca * c2 + sa * s2;
+  }
+  let tn = 1;
+  for (let i = 0; i < 4; i++) {
+    p += PQ_POL[0][i] * tn;
+    q += PQ_POL[1][i] * tn;
+    tn *= t;
+  }
+  p *= ARCSEC;
+  q *= ARCSEC;
+  const z2 = Math.sqrt(Math.max(1 - p * p - q * q, 0));
+  const s = Math.sin(EPS0_V);
+  const c = Math.cos(EPS0_V);
+  return [p, -q * c - z2 * s, -q * s + z2 * c];
+}
+function ltpPequ(jde) {
+  const t = (jde - J20002) / 36525;
+  let x = 0;
+  let y = 0;
+  const w = 2 * Math.PI * t;
+  for (const [per, c1, c2, s1, s2] of XY_PER) {
+    const a = w / per;
+    const ca = Math.cos(a);
+    const sa = Math.sin(a);
+    x += ca * c1 + sa * s1;
+    y += ca * c2 + sa * s2;
+  }
+  let tn = 1;
+  for (let i = 0; i < 4; i++) {
+    x += XY_POL[0][i] * tn;
+    y += XY_POL[1][i] * tn;
+    tn *= t;
+  }
+  x *= ARCSEC;
+  y *= ARCSEC;
+  return [x, y, Math.sqrt(Math.max(1 - x * x - y * y, 0))];
+}
+function ltpEclMatrix(jde) {
+  const p = ltpPequ(jde);
+  const z2 = ltpPecl(jde);
+  const wx = [
+    p[1] * z2[2] - p[2] * z2[1],
+    p[2] * z2[0] - p[0] * z2[2],
+    p[0] * z2[1] - p[1] * z2[0]
+  ];
+  const n = Math.sqrt(wx[0] ** 2 + wx[1] ** 2 + wx[2] ** 2);
+  const x = [wx[0] / n, wx[1] / n, wx[2] / n];
+  const y = [
+    z2[1] * x[2] - z2[2] * x[1],
+    z2[2] * x[0] - z2[0] * x[2],
+    z2[0] * x[1] - z2[1] * x[0]
+  ];
+  return [x, y, z2];
+}
+function precessEcliptic(lon, lat, jdeFrom, jdeTo) {
+  const cb = Math.cos(lat);
+  const v = [cb * Math.cos(lon), cb * Math.sin(lon), Math.sin(lat)];
+  const [xf, yf, zf] = ltpEclMatrix(jdeFrom);
+  const e = [0, 1, 2].map((i) => xf[i] * v[0] + yf[i] * v[1] + zf[i] * v[2]);
+  const [xt, yt, zt] = ltpEclMatrix(jdeTo);
+  const u = [
+    xt[0] * e[0] + xt[1] * e[1] + xt[2] * e[2],
+    yt[0] * e[0] + yt[1] * e[1] + yt[2] * e[2],
+    zt[0] * e[0] + zt[1] * e[1] + zt[2] * e[2]
+  ];
+  return [
+    mod(Math.atan2(u[1], u[0]), TWO_PI),
+    Math.asin(Math.max(-1, Math.min(1, u[2])))
+  ];
+}
+function eclJ2000ToEclDate(v, jde) {
+  const [x, y, z2] = v;
+  const s = Math.sin(EPS0_FRAME);
+  const c = Math.cos(EPS0_FRAME);
+  const e = [x, y * c - z2 * s, y * s + z2 * c];
+  const [xt, yt, zt] = ltpEclMatrix(jde);
+  return [
+    xt[0] * e[0] + xt[1] * e[1] + xt[2] * e[2],
+    yt[0] * e[0] + yt[1] * e[1] + yt[2] * e[2],
+    zt[0] * e[0] + zt[1] * e[1] + zt[2] * e[2]
+  ];
+}
+function geoVector(data, name, jde) {
+  const [L0, B0, R0] = vsopHeliocentric(data.vsop.earth, jde);
+  const [L, B, R] = vsopHeliocentric(data.vsop[name], jde);
+  return [
+    R * Math.cos(B) * Math.cos(L) - R0 * Math.cos(B0) * Math.cos(L0),
+    R * Math.cos(B) * Math.sin(L) - R0 * Math.cos(B0) * Math.sin(L0),
+    R * Math.sin(B) - R0 * Math.sin(B0)
+  ];
+}
+function planetApparent(data, name, jde) {
+  let [x, y, z2] = geoVector(data, name, jde);
+  let delta = Math.sqrt(x * x + y * y + z2 * z2);
+  for (let i = 0; i < 2; i++) {
+    const tau = LIGHT_TIME_AU * delta;
+    [x, y, z2] = geoVector(data, name, jde - tau);
+    delta = Math.sqrt(x * x + y * y + z2 * z2);
+  }
+  let lon = mod(Math.atan2(y, x), TWO_PI);
+  let lat = Math.atan2(z2, Math.sqrt(x * x + y * y));
+  [lon, lat] = fk5Correction(lon, lat, jde);
+  lon = mod(lon + nutation2(data, jde)[0], TWO_PI);
+  return [lon, lat, delta];
+}
+function sunApparent(data, jde) {
+  const [L0, B0, R0] = vsopHeliocentric(data.vsop.earth, jde);
+  let lon = mod(L0 + Math.PI, TWO_PI);
+  let lat = -B0;
+  [lon, lat] = fk5Correction(lon, lat, jde);
+  lon -= 20.4898 * ARCSEC / R0;
+  lon = mod(lon + nutation2(data, jde)[0], TWO_PI);
+  return [lon, lat, R0];
+}
+function moonFundamental(T) {
+  const Lp = (218.3164477 + 481267.88123421 * T - 15786e-7 * T * T + T ** 3 / 538841 - T ** 4 / 65194e3) * DEG3;
+  const D = (297.8501921 + 445267.1114034 * T - 18819e-7 * T * T + T ** 3 / 545868 - T ** 4 / 113065e3) * DEG3;
+  const M = (357.5291092 + 35999.0502909 * T - 1535e-7 * T * T + T ** 3 / 2449e4) * DEG3;
+  const Mp = (134.9633964 + 477198.8675055 * T + 87414e-7 * T * T + T ** 3 / 69699 - T ** 4 / 14712e3) * DEG3;
+  const F = (93.272095 + 483202.0175233 * T - 36539e-7 * T * T - T ** 3 / 3526e3 + T ** 4 / 86331e4) * DEG3;
+  return [Lp, D, M, Mp, F];
+}
+function moonGeometric(data, jde) {
+  const T = (jde - J20002) / 36525;
+  const [Lp, D, M, Mp, F] = moonFundamental(T);
+  const A1 = (119.75 + 131.849 * T) * DEG3;
+  const A2 = (53.09 + 479264.29 * T) * DEG3;
+  const A3 = (313.45 + 481266.484 * T) * DEG3;
+  const E = 1 - 2516e-6 * T - 74e-7 * T * T;
+  const E2 = E * E;
+  let sl = 3958 * Math.sin(A1) + 1962 * Math.sin(Lp - F) + 318 * Math.sin(A2);
+  let sr = 0;
+  let sb = -2235 * Math.sin(Lp) + 382 * Math.sin(A3) + 175 * Math.sin(A1 - F) + 175 * Math.sin(A1 + F) + 127 * Math.sin(Lp - Mp) - 115 * Math.sin(Lp + Mp);
+  for (const [d, m, mp, f, lC, rC] of data.moonMeeus.ta) {
+    const arg = d * D + m * M + mp * Mp + f * F;
+    const e = Math.abs(m) === 1 ? E : Math.abs(m) === 2 ? E2 : 1;
+    sl += lC * Math.sin(arg) * e;
+    sr += rC * Math.cos(arg) * e;
+  }
+  for (const [d, m, mp, f, bC] of data.moonMeeus.tb) {
+    const arg = d * D + m * M + mp * Mp + f * F;
+    const e = Math.abs(m) === 1 ? E : Math.abs(m) === 2 ? E2 : 1;
+    sb += bC * Math.sin(arg) * e;
+  }
+  return [
+    mod(Lp + sl * 1e-6 * DEG3, TWO_PI),
+    sb * 1e-6 * DEG3,
+    385000.56 + sr * 1e-3
+  ];
+}
+function moonApparentSeries(data, jde) {
+  const [lon, lat, dist] = moonGeometric(data, jde);
+  return [mod(lon + nutation2(data, jde)[0], TWO_PI), lat, dist];
+}
+function clenshaw(coeffs, x) {
+  let b0 = 0;
+  let b1 = 0;
+  for (let i = coeffs.length - 1; i >= 1; i--) {
+    [b0, b1] = [2 * x * b0 - b1 + coeffs[i], b0];
+  }
+  return x * b0 - b1 + coeffs[0];
+}
+function clenshawDeriv(coeffs, x, halfSpanDays) {
+  const n = coeffs.length;
+  const d = new Array(n).fill(0);
+  for (let k = n - 1; k >= 1; k--) {
+    d[k - 1] = (k + 1 < n ? d[k + 1] : 0) + 2 * k * coeffs[k];
+  }
+  d[0] *= 0.5;
+  return [clenshaw(coeffs, x), clenshaw(d.slice(0, Math.max(n - 1, 1)), x) / halfSpanDays];
+}
+var ChebSeries = class {
+  jd0;
+  seg;
+  segments;
+  jd1;
+  scale;
+  constructor(data) {
+    this.jd0 = data.jd0;
+    this.seg = data.seg_days;
+    this.segments = data.segments;
+    this.jd1 = this.jd0 + this.seg * this.segments.length;
+    this.scale = data.scale ?? 1;
+  }
+  locate(jd) {
+    if (jd < this.jd0 || jd > this.jd1) {
+      throw new RangeError(`jd ${jd} outside fitted range ${this.jd0}-${this.jd1}`);
+    }
+    const i = Math.min(Math.floor((jd - this.jd0) / this.seg), this.segments.length - 1);
+    const x = 2 * (jd - (this.jd0 + i * this.seg)) / this.seg - 1;
+    return [i, x];
+  }
+  xyz(jd) {
+    const [i, x] = this.locate(jd);
+    const s = this.segments[i];
+    return [
+      clenshaw(s[0], x) * this.scale,
+      clenshaw(s[1], x) * this.scale,
+      clenshaw(s[2], x) * this.scale
+    ];
+  }
+  xyzVel(jd) {
+    const [i, x] = this.locate(jd);
+    const s = this.segments[i];
+    const half = this.seg / 2;
+    const pos = [];
+    const vel = [];
+    for (const c of s) {
+      const [p, v] = clenshawDeriv(c, x, half);
+      pos.push(p * this.scale);
+      vel.push(v * this.scale);
+    }
+    return [pos, vel];
+  }
+};
+function moonApparentPrecise(data, cheb, jde) {
+  let [x, y, z2] = cheb.xyz(jde);
+  const dist = Math.sqrt(x * x + y * y + z2 * z2);
+  const tau = dist / C_KM_PER_DAY;
+  [x, y, z2] = cheb.xyz(jde - tau);
+  let lon = mod(Math.atan2(y, x), TWO_PI);
+  let lat = Math.atan2(z2, Math.sqrt(x * x + y * y));
+  [lon, lat] = precessEcliptic(lon, lat, J20002, jde);
+  lon = mod(lon + nutation2(data, jde)[0], TWO_PI);
+  return [lon, lat, dist];
+}
+function trueNodePrecise(data, cheb, jde) {
+  const [[x, y, z2], [vx, vy, vz]] = cheb.xyzVel(jde);
+  const h = [
+    y * vz - z2 * vy,
+    z2 * vx - x * vz,
+    x * vy - y * vx
+  ];
+  const [hx, hy] = eclJ2000ToEclDate(h, jde);
+  const node = mod(Math.atan2(hx, -hy), TWO_PI);
+  return mod(node + nutation2(data, jde)[0], TWO_PI);
+}
+function meanNode(data, jde) {
+  const T = (jde - J20002) / 36525;
+  const om = (125.0445479 - 1934.1362891 * T + 20754e-7 * T * T + T ** 3 / 467441 - T ** 4 / 60616e3) * DEG3;
+  return mod(om + nutation2(data, jde)[0], TWO_PI);
+}
+function trueNodeSeries(data, jde) {
+  const h = 0.01;
+  const xyz = (t) => {
+    const [lon, lat, dist] = moonGeometric(data, t);
+    return [
+      dist * Math.cos(lat) * Math.cos(lon),
+      dist * Math.cos(lat) * Math.sin(lon),
+      dist * Math.sin(lat)
+    ];
   };
+  const [x0, y0, z0] = xyz(jde - h);
+  const [x1, y1, z1] = xyz(jde + h);
+  const [x, y, z2] = xyz(jde);
+  const vx = (x1 - x0) / (2 * h);
+  const vy = (y1 - y0) / (2 * h);
+  const vz = (z1 - z0) / (2 * h);
+  const hx = y * vz - z2 * vy;
+  const hy = z2 * vx - x * vz;
+  const node = mod(Math.atan2(hx, -hy), TWO_PI);
+  return mod(node + nutation2(data, jde)[0], TWO_PI);
+}
+function equatorial(lon, lat, eps) {
+  const ra = mod(Math.atan2(Math.sin(lon) * Math.cos(eps) - Math.tan(lat) * Math.sin(eps), Math.cos(lon)), TWO_PI);
+  const dec = Math.asin(Math.sin(lat) * Math.cos(eps) + Math.cos(lat) * Math.sin(eps) * Math.sin(lon));
+  return [ra, dec];
+}
+var AYANAMSA_J2000 = {
+  lahiri: 23.857092325,
+  fagan_bradley: 24.740299966,
+  krishnamurti: 23.760240012,
+  raman: 22.410791012,
+  yukteshwar: 22.478803
+};
+function ayanamsa(jde, mode) {
+  const a0 = AYANAMSA_J2000[mode];
+  if (a0 === void 0)
+    throw new Error(`unknown ayanamsa ${mode}`);
+  const [lon] = precessEcliptic(a0 * DEG3, 0, J20002, jde);
+  return lon / DEG3;
+}
+function meanLilith(data, jde) {
+  const T = (jde - J20002) / 36525;
+  const [Lp, , , Mp] = moonFundamental(T);
+  const apog = Lp - Mp + Math.PI;
+  const om = (125.0445479 - 1934.1362891 * T + 20754e-7 * T * T + T ** 3 / 467441 - T ** 4 / 60616e3) * DEG3;
+  const inc = 5.145396374 * DEG3;
+  const u = apog - om;
+  const lat = Math.asin(Math.sin(inc) * Math.sin(u));
+  let lon = om + Math.atan2(Math.cos(inc) * Math.sin(u), Math.cos(u));
+  lon = mod(lon + nutation2(data, jde)[0], TWO_PI);
+  return [lon, lat];
+}
+var GM_EARTH_MOON = 403503.2356 * 86400 ** 2;
+function oscApogeeFromState(data, x, y, z2, vx, vy, vz, jde, frameJ2000) {
+  const mu = GM_EARTH_MOON;
+  const r = Math.sqrt(x * x + y * y + z2 * z2);
+  const v2 = vx * vx + vy * vy + vz * vz;
+  const rv = x * vx + y * vy + z2 * vz;
+  const ex = (v2 * x - rv * vx) / mu - x / r;
+  const ey = (v2 * y - rv * vy) / mu - y / r;
+  const ez = (v2 * z2 - rv * vz) / mu - z2 / r;
+  const e = Math.sqrt(ex * ex + ey * ey + ez * ez);
+  const a = 1 / (2 / r - v2 / mu);
+  const s = a * (1 + e) / e;
+  let px = -ex * s;
+  let py = -ey * s;
+  let pz = -ez * s;
+  if (frameJ2000)
+    [px, py, pz] = eclJ2000ToEclDate([px, py, pz], jde);
+  const lon = mod(Math.atan2(py, px) + nutation2(data, jde)[0], TWO_PI);
+  const lat = Math.atan2(pz, Math.hypot(px, py));
+  return [lon, lat, Math.sqrt(px * px + py * py + pz * pz)];
+}
+function oscApogeePrecise(data, cheb, jde) {
+  const [[x, y, z2], [vx, vy, vz]] = cheb.xyzVel(jde);
+  return oscApogeeFromState(data, x, y, z2, vx, vy, vz, jde, true);
+}
+function oscApogeeSeries(data, jde) {
+  const h = 0.01;
+  const xyz = (t) => {
+    const [lon, lat, dist] = moonGeometric(data, t);
+    return [
+      dist * Math.cos(lat) * Math.cos(lon),
+      dist * Math.cos(lat) * Math.sin(lon),
+      dist * Math.sin(lat)
+    ];
+  };
+  const [x0, y0, z0] = xyz(jde - h);
+  const [x1, y1, z1] = xyz(jde + h);
+  const [x, y, z2] = xyz(jde);
+  return oscApogeeFromState(data, x, y, z2, (x1 - x0) / (2 * h), (y1 - y0) / (2 * h), (z1 - z0) / (2 * h), jde, false);
+}
+var KeplerOrbit = class {
+  els;
+  epoch;
+  constructor(els, epoch) {
+    this.els = els;
+    this.epoch = epoch;
+  }
+  xyz(jde) {
+    const { a, e, i, node, peri: w, M0, n } = this.els;
+    const M = M0 + n * (jde - this.epoch);
+    let E = M;
+    for (let k = 0; k < 30; k++) {
+      E = E - (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+    }
+    const xv = a * (Math.cos(E) - e);
+    const yv = a * Math.sqrt(1 - e * e) * Math.sin(E);
+    const cw = Math.cos(w);
+    const sw = Math.sin(w);
+    const cn = Math.cos(node);
+    const sn = Math.sin(node);
+    const ci = Math.cos(i);
+    const si = Math.sin(i);
+    const xp = xv * cw - yv * sw;
+    const yp = xv * sw + yv * cw;
+    return [xp * cn - yp * sn * ci, xp * sn + yp * cn * ci, yp * si];
+  }
+};
+var EARTH_RADIUS_AU = 6378.14 / 1495978707e-1;
+var EARTH_FLAT = 0.99664719;
+function topocentricEcl(lon, lat, distAu, lst, obsLat, altM, eps) {
+  const u = Math.atan(EARTH_FLAT * Math.tan(obsLat));
+  const rs = EARTH_FLAT * Math.sin(u) + altM / 6378140 * Math.sin(obsLat);
+  const rc = Math.cos(u) + altM / 6378140 * Math.cos(obsLat);
+  const ox = EARTH_RADIUS_AU * rc * Math.cos(lst);
+  const oy = EARTH_RADIUS_AU * rc * Math.sin(lst);
+  const oz = EARTH_RADIUS_AU * rs;
+  const [ra, dec] = equatorial(lon, lat, eps);
+  const bx = distAu * Math.cos(dec) * Math.cos(ra);
+  const by = distAu * Math.cos(dec) * Math.sin(ra);
+  const bz = distAu * Math.sin(dec);
+  const tx = bx - ox;
+  const ty = by - oy;
+  const tz = bz - oz;
+  const ra2 = Math.atan2(ty, tx);
+  const dec2 = Math.atan2(tz, Math.hypot(tx, ty));
+  const lon2 = mod(Math.atan2(Math.sin(ra2) * Math.cos(eps) + Math.tan(dec2) * Math.sin(eps), Math.cos(ra2)), TWO_PI);
+  const lat2 = Math.asin(Math.sin(dec2) * Math.cos(eps) - Math.cos(dec2) * Math.sin(eps) * Math.sin(ra2));
+  return [lon2, lat2, Math.sqrt(tx * tx + ty * ty + tz * tz)];
+}
+function plutoHeliocentric(data, jde) {
+  const T = (jde - J20002) / 36525;
+  const J = (34.35 + 3034.9057 * T) * DEG3;
+  const S = (50.08 + 1222.1138 * T) * DEG3;
+  const P = (238.96 + 144.96 * T) * DEG3;
+  let l = 0;
+  let b = 0;
+  let r = 0;
+  for (const [i, j, k, lA, lB, bA, bB, rA, rB] of data.pluto) {
+    const a = i * J + j * S + k * P;
+    const sa = Math.sin(a);
+    const ca = Math.cos(a);
+    l += lA * sa + lB * ca;
+    b += bA * sa + bB * ca;
+    r += rA * sa + rB * ca;
+  }
+  return [
+    (l + 238.958116 + 144.96 * T) * DEG3,
+    (b - 3.908239) * DEG3,
+    r + 40.7241346
+  ];
+}
+function plutoApparent(data, jde) {
+  const helioJ2000 = (tJde) => plutoHeliocentric(data, tJde);
+  const [L0d, B0d, R0d] = vsopHeliocentric(data.vsop.earth, jde);
+  const [Lj, Bj] = precessEcliptic(L0d, B0d, jde, J20002);
+  const ex = R0d * Math.cos(Bj) * Math.cos(Lj);
+  const ey = R0d * Math.cos(Bj) * Math.sin(Lj);
+  const ez = R0d * Math.sin(Bj);
+  const geo = (t) => {
+    const [l, b, r] = helioJ2000(t);
+    return [
+      r * Math.cos(b) * Math.cos(l) - ex,
+      r * Math.cos(b) * Math.sin(l) - ey,
+      r * Math.sin(b) - ez
+    ];
+  };
+  let [x, y, z2] = geo(jde);
+  let delta = Math.sqrt(x * x + y * y + z2 * z2);
+  for (let i = 0; i < 2; i++) {
+    [x, y, z2] = geo(jde - LIGHT_TIME_AU * delta);
+    delta = Math.sqrt(x * x + y * y + z2 * z2);
+  }
+  let lon = mod(Math.atan2(y, x), TWO_PI);
+  let lat = Math.atan2(z2, Math.sqrt(x * x + y * y));
+  const T = (jde - J20002) / 36525;
+  const sunLon = mod(L0d + Math.PI, TWO_PI);
+  const k = 20.4898 * ARCSEC;
+  const e = 0.016708634 - 42037e-9 * T;
+  const piPer = (102.93735 + 1.71946 * T) * DEG3;
+  lon += (-k * Math.cos(sunLon - lon) + e * k * Math.cos(piPer - lon)) / Math.cos(lat);
+  [lon, lat] = precessEcliptic(lon, lat, J20002, jde);
+  lon = mod(lon + nutation2(data, jde)[0], TWO_PI);
+  return [lon, lat, delta];
+}
+function chironApparent(data, cheb, jde) {
+  const [L0, B0, R0] = vsopHeliocentric(data.vsop.earth, jde);
+  const [Lj, Bj] = precessEcliptic(L0, B0, jde, J20002);
+  const ex = R0 * Math.cos(Bj) * Math.cos(Lj);
+  const ey = R0 * Math.cos(Bj) * Math.sin(Lj);
+  const ez = R0 * Math.sin(Bj);
+  const geo = (t) => {
+    const [cx, cy, cz] = cheb.xyz(t);
+    return [cx - ex, cy - ey, cz - ez];
+  };
+  let [x, y, z2] = geo(jde);
+  let delta = Math.sqrt(x * x + y * y + z2 * z2);
+  for (let i = 0; i < 2; i++) {
+    [x, y, z2] = geo(jde - LIGHT_TIME_AU * delta);
+    delta = Math.sqrt(x * x + y * y + z2 * z2);
+  }
+  let lon = mod(Math.atan2(y, x), TWO_PI);
+  let lat = Math.atan2(z2, Math.sqrt(x * x + y * y));
+  const T = (jde - J20002) / 36525;
+  const sunLon = mod(L0 + Math.PI, TWO_PI);
+  const k = 20.4898 * ARCSEC;
+  const e = 0.016708634 - 42037e-9 * T;
+  const piPer = (102.93735 + 1.71946 * T) * DEG3;
+  lon += (-k * Math.cos(sunLon - lon) + e * k * Math.cos(piPer - lon)) / Math.cos(lat);
+  [lon, lat] = precessEcliptic(lon, lat, J20002, jde);
+  lon = mod(lon + nutation2(data, jde)[0], TWO_PI);
+  return [lon, lat, delta];
+}
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/src/houses.js
+var TWO_PI2 = 2 * Math.PI;
+function gmst(jdUt) {
+  const T = (jdUt - J20002) / 36525;
+  const deg = 280.46061837 + 360.98564736629 * (jdUt - J20002) + 387933e-9 * T * T - T ** 3 / 3871e4;
+  return mod(deg, 360) * DEG3;
+}
+function gast(data, jdUt) {
+  const jde = jdTT(jdUt);
+  const [dpsi] = nutation2(data, jde);
+  const eps = trueObliquity(data, jde);
+  return mod(gmst(jdUt) + dpsi * Math.cos(eps), TWO_PI2);
+}
+function houseCusp(ra, pole, eps) {
+  return mod(Math.atan2(Math.sin(ra), Math.cos(ra) * Math.cos(eps) - Math.sin(eps) * Math.tan(pole)), TWO_PI2);
+}
+function mcOf(armc, eps) {
+  return mod(Math.atan2(Math.sin(armc), Math.cos(armc) * Math.cos(eps)), TWO_PI2);
+}
+function ascOf(armc, phi, eps) {
+  let asc = houseCusp(armc + Math.PI / 2, phi, eps);
+  if (mod(asc - mcOf(armc, eps), TWO_PI2) >= Math.PI) {
+    asc = mod(asc + Math.PI, TWO_PI2);
+  }
+  return asc;
+}
+function angles(data, jdUt, latDeg, lonDeg) {
+  const jde = jdTT(jdUt);
+  const eps = trueObliquity(data, jde);
+  const armc = mod(gast(data, jdUt) + lonDeg * DEG3, TWO_PI2);
+  const phi = latDeg * DEG3;
+  const mc = mcOf(armc, eps);
+  const asc = ascOf(armc, phi, eps);
+  return [asc, mc, armc, eps];
+}
+function vertexEastPoint(armc, phi, eps) {
+  const colat = phi >= 0 ? Math.PI / 2 - phi : -Math.PI / 2 - phi;
+  let vtx = houseCusp(armc + 3 * Math.PI / 2, colat, eps);
+  const dx = Math.cos(vtx);
+  const dy = Math.sin(vtx) * Math.cos(eps);
+  if (dx * -Math.sin(armc) + dy * Math.cos(armc) > 0) {
+    vtx = mod(vtx + Math.PI, TWO_PI2);
+  }
+  const east = houseCusp(armc + Math.PI / 2, 0, eps);
+  return [vtx, east];
+}
+function housesWholeSign(asc) {
+  const first = Math.floor(asc / (30 * DEG3)) * 30 * DEG3;
+  return Array.from({ length: 12 }, (_, i) => mod(first + i * 30 * DEG3, TWO_PI2));
+}
+function housesEqual(asc) {
+  return Array.from({ length: 12 }, (_, i) => mod(asc + i * 30 * DEG3, TWO_PI2));
+}
+function housesPorphyry(asc, mc) {
+  const ic = mod(mc + Math.PI, TWO_PI2);
+  const dsc = mod(asc + Math.PI, TWO_PI2);
+  const span = (a, b) => mod(b - a, TWO_PI2);
+  const cusps = new Array(12).fill(0);
+  cusps[0] = asc;
+  cusps[9] = mc;
+  let s = span(mc, asc) / 3;
+  cusps[10] = mod(mc + s, TWO_PI2);
+  cusps[11] = mod(mc + 2 * s, TWO_PI2);
+  s = span(asc, ic) / 3;
+  cusps[1] = mod(asc + s, TWO_PI2);
+  cusps[2] = mod(asc + 2 * s, TWO_PI2);
+  cusps[3] = ic;
+  cusps[6] = dsc;
+  cusps[4] = mod(cusps[10] + Math.PI, TWO_PI2);
+  cusps[5] = mod(cusps[11] + Math.PI, TWO_PI2);
+  cusps[7] = mod(cusps[1] + Math.PI, TWO_PI2);
+  cusps[8] = mod(cusps[2] + Math.PI, TWO_PI2);
+  return cusps;
+}
+function signed(x) {
+  return mod(x + Math.PI, TWO_PI2) - Math.PI;
+}
+function fillOpposites(out) {
+  for (const k of [3, 4, 5])
+    out[k] = mod(out[k + 6] + Math.PI, TWO_PI2);
+  for (const k of [6, 7, 8])
+    out[k] = mod(out[k - 6] + Math.PI, TWO_PI2);
+  return out;
+}
+function quadrantFrame(armc, phi, eps, flipMc) {
+  const out = new Array(12).fill(0);
+  let mc = mcOf(armc, eps);
+  let asc = houseCusp(armc + Math.PI / 2, phi, eps);
+  if (mod(asc - mc, TWO_PI2) >= Math.PI) {
+    asc = mod(asc + Math.PI, TWO_PI2);
+    if (flipMc)
+      mc = mod(mc + Math.PI, TWO_PI2);
+  }
+  out[0] = asc;
+  out[9] = mc;
+  return out;
+}
+function eastOfMeridian(lon, armc, eps) {
+  const ra = Math.atan2(Math.sin(lon) * Math.cos(eps), Math.cos(lon));
+  if (Math.sin(armc - ra) > 0)
+    return mod(lon + Math.PI, TWO_PI2);
+  return lon;
+}
+function normArc(lon, lo, d) {
+  const off = signed(lon - lo);
+  const inside = d >= 0 ? off >= 0 && off <= d : off >= d && off <= 0;
+  return inside ? lon : mod(lon + Math.PI, TWO_PI2);
+}
+function housesKoch(armc, phi, eps) {
+  if (Math.abs(phi) >= Math.PI / 2 - eps) {
+    throw new RangeError("koch undefined at polar latitudes");
+  }
+  const out = quadrantFrame(armc, phi, eps, false);
+  const decMc = Math.asin(Math.sin(eps) * Math.sin(out[9]));
+  const x = Math.tan(phi) * Math.tan(decMc);
+  if (Math.abs(x) > 1) {
+    throw new RangeError("koch undefined: MC degree circumpolar");
+  }
+  const sa = Math.PI / 2 + Math.asin(x);
+  out[10] = ascOf(armc - 2 * sa / 3, phi, eps);
+  out[11] = ascOf(armc - sa / 3, phi, eps);
+  out[1] = ascOf(armc + sa / 3, phi, eps);
+  out[2] = ascOf(armc + 2 * sa / 3, phi, eps);
+  return fillOpposites(out);
+}
+function housesRegiomontanus(armc, phi, eps) {
+  const out = quadrantFrame(armc, phi, eps, true);
+  for (const [k, h] of [[10, 30], [11, 60], [1, 120], [2, 150]]) {
+    const pole = Math.atan(Math.tan(phi) * Math.sin(h * DEG3));
+    out[k] = eastOfMeridian(houseCusp(armc + h * DEG3, pole, eps), armc, eps);
+  }
+  return fillOpposites(out);
+}
+function housesCampanus(armc, phi, eps) {
+  const out = quadrantFrame(armc, phi, eps, true);
+  const n = [
+    -Math.sin(phi) * Math.cos(armc),
+    -Math.sin(phi) * Math.sin(armc),
+    Math.cos(phi)
+  ];
+  const zen = [
+    Math.cos(phi) * Math.cos(armc),
+    Math.cos(phi) * Math.sin(armc),
+    Math.sin(phi)
+  ];
+  const east = [-Math.sin(armc), Math.cos(armc), 0];
+  const pole = [0, -Math.sin(eps), Math.cos(eps)];
+  const cusp = (theta) => {
+    const t = theta * DEG3;
+    const v = [
+      east[0] * Math.cos(t) + zen[0] * Math.sin(t),
+      east[1] * Math.cos(t) + zen[1] * Math.sin(t),
+      east[2] * Math.cos(t) + zen[2] * Math.sin(t)
+    ];
+    const m = [
+      n[1] * v[2] - n[2] * v[1],
+      n[2] * v[0] - n[0] * v[2],
+      n[0] * v[1] - n[1] * v[0]
+    ];
+    const d = [
+      m[1] * pole[2] - m[2] * pole[1],
+      m[2] * pole[0] - m[0] * pole[2],
+      m[0] * pole[1] - m[1] * pole[0]
+    ];
+    return mod(Math.atan2(d[1] * Math.cos(eps) + d[2] * Math.sin(eps), d[0]), TWO_PI2);
+  };
+  for (const [k, theta] of [[10, 30], [11, 60], [1, 120], [2, 150]]) {
+    out[k] = cusp(theta);
+  }
+  const mc = out[9];
+  const asc = out[0];
+  const dUp = signed(asc - mc);
+  const dDn = signed(mod(mc + Math.PI, TWO_PI2) - asc);
+  for (const k of [10, 11])
+    out[k] = normArc(out[k], mc, dUp);
+  for (const k of [1, 2])
+    out[k] = normArc(out[k], asc, dDn);
+  if (Math.abs(signed(out[10] - mc)) > Math.abs(signed(out[11] - mc))) {
+    [out[10], out[11]] = [out[11], out[10]];
+  }
+  if (Math.abs(signed(out[1] - asc)) > Math.abs(signed(out[2] - asc))) {
+    [out[1], out[2]] = [out[2], out[1]];
+  }
+  return fillOpposites(out);
+}
+function housesAlcabitius(armc, phi, eps) {
+  const out = quadrantFrame(armc, phi, eps, false);
+  const dec = Math.asin(Math.sin(eps) * Math.sin(out[0]));
+  const x = Math.max(-1, Math.min(1, Math.tan(phi) * Math.tan(dec)));
+  const ad = Math.asin(x);
+  const sda = Math.PI / 2 + ad;
+  const sna = Math.PI / 2 - ad;
+  const ras = [
+    [10, armc + sda / 3],
+    [11, armc + 2 * sda / 3],
+    [1, armc + Math.PI - 2 * sna / 3],
+    [2, armc + Math.PI - sna / 3]
+  ];
+  for (const [k, ra] of ras) {
+    out[k] = mod(Math.atan2(Math.sin(ra), Math.cos(ra) * Math.cos(eps)), TWO_PI2);
+  }
+  return fillOpposites(out);
+}
+function housesMorinus(armc, _phi, eps) {
+  return Array.from({ length: 12 }, (_, i) => mod(Math.atan2(Math.sin(armc + (i + 3) * 30 * DEG3) * Math.cos(eps), Math.cos(armc + (i + 3) * 30 * DEG3)), TWO_PI2));
+}
+function housesMeridian(armc, _phi, eps) {
+  return Array.from({ length: 12 }, (_, i) => mod(Math.atan2(Math.sin(armc + (i + 3) * 30 * DEG3), Math.cos(armc + (i + 3) * 30 * DEG3) * Math.cos(eps)), TWO_PI2));
+}
+function housesPolichPage(armc, phi, eps) {
+  const out = quadrantFrame(armc, phi, eps, true);
+  const spec = [
+    [10, 30, 1],
+    [11, 60, 2],
+    [1, 120, 2],
+    [2, 150, 1]
+  ];
+  for (const [k, h, w] of spec) {
+    const pole = Math.atan(Math.tan(phi) * w / 3);
+    out[k] = eastOfMeridian(houseCusp(armc + h * DEG3, pole, eps), armc, eps);
+  }
+  return fillOpposites(out);
+}
+function housesVehlow(armc, phi, eps) {
+  const asc = ascOf(armc, phi, eps);
+  return Array.from({ length: 12 }, (_, i) => mod(asc - 15 * DEG3 + i * 30 * DEG3, TWO_PI2));
+}
+function housesPlacidus(armc, phi, eps) {
+  const cusp = (offsetDeg, f) => {
+    let lam = mod(armc + offsetDeg * DEG3, TWO_PI2);
+    for (let i = 0; i < 50; i++) {
+      const dec = Math.asin(Math.sin(eps) * Math.sin(lam));
+      let x = Math.tan(phi) * Math.tan(dec);
+      x = Math.max(-1, Math.min(1, x));
+      const ad = Math.asin(x);
+      const raI = mod(armc + offsetDeg * DEG3 + f * ad, TWO_PI2);
+      const lamNew = mod(Math.atan2(Math.sin(raI), Math.cos(raI) * Math.cos(eps)), TWO_PI2);
+      if (Math.abs(mod(lamNew - lam + Math.PI, TWO_PI2) - Math.PI) < 1e-10) {
+        lam = lamNew;
+        break;
+      }
+      lam = lamNew;
+    }
+    return lam;
+  };
+  const mc = mod(Math.atan2(Math.sin(armc), Math.cos(armc) * Math.cos(eps)), TWO_PI2);
+  const asc = mod(Math.atan2(Math.cos(armc), -(Math.sin(armc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))), TWO_PI2);
+  const cusps = new Array(12).fill(0);
+  cusps[0] = asc;
+  cusps[9] = mc;
+  cusps[10] = cusp(30, 1 / 3);
+  cusps[11] = cusp(60, 2 / 3);
+  cusps[1] = cusp(120, 2 / 3);
+  cusps[2] = cusp(150, 1 / 3);
+  cusps[3] = mod(mc + Math.PI, TWO_PI2);
+  cusps[6] = mod(asc + Math.PI, TWO_PI2);
+  cusps[4] = mod(cusps[10] + Math.PI, TWO_PI2);
+  cusps[5] = mod(cusps[11] + Math.PI, TWO_PI2);
+  cusps[7] = mod(cusps[1] + Math.PI, TWO_PI2);
+  cusps[8] = mod(cusps[2] + Math.PI, TWO_PI2);
+  return cusps;
+}
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/src/stars.js
+var TWO_PI3 = 2 * Math.PI;
+var KM_PER_AU2 = 1495978707e-1;
+var AU_PER_PC = 206264.806;
+function starApparent(data, s, jde) {
+  const t = (jde - J20002) / 365.25;
+  const ra = s.ra * DEG3;
+  const dec = s.dec * DEG3;
+  const rAu = s.plx > 0 ? AU_PER_PC / (s.plx * 1e-3) : 1e9 * AU_PER_PC;
+  const cd = Math.cos(dec);
+  const sd = Math.sin(dec);
+  const cr = Math.cos(ra);
+  const sr = Math.sin(ra);
+  const p = [cd * cr, cd * sr, sd];
+  const east = [-sr, cr, 0];
+  const north = [-sd * cr, -sd * sr, cd];
+  const pmra = s.pmra * 1e-3 * ARCSEC;
+  const pmdec = s.pmdec * 1e-3 * ARCSEC;
+  const rv = s.rv * 86400 * 365.25 / KM_PER_AU2;
+  const pos = [0, 1, 2].map((i) => p[i] * rAu + (east[i] * pmra * rAu + north[i] * pmdec * rAu + p[i] * rv) * t);
+  const rn = Math.sqrt(pos[0] ** 2 + pos[1] ** 2 + pos[2] ** 2);
+  const x = pos[0] / rn;
+  const y = pos[1] / rn;
+  const z2 = pos[2] / rn;
+  const ra2 = Math.atan2(y, x);
+  const dec2 = Math.asin(z2);
+  const e0 = 84381.448 * ARCSEC;
+  let lat = Math.asin(Math.sin(dec2) * Math.cos(e0) - Math.cos(dec2) * Math.sin(e0) * Math.sin(ra2));
+  let lon = mod(Math.atan2(Math.sin(ra2) * Math.cos(e0) + Math.tan(dec2) * Math.sin(e0), Math.cos(ra2)), TWO_PI3);
+  [lon, lat] = precessEcliptic(lon, lat, J20002, jde);
+  const [L0] = vsopHeliocentric(data.vsop.earth, jde);
+  const sunLon = mod(L0 + Math.PI, TWO_PI3);
+  const T = (jde - J20002) / 36525;
+  const k = 20.4898 * ARCSEC;
+  const e = 0.016708634 - 42037e-9 * T;
+  const piPer = (102.93735 + 1.71946 * T) * DEG3;
+  lon += (-k * Math.cos(sunLon - lon) + e * k * Math.cos(piPer - lon)) / Math.cos(lat);
+  lat += -k * Math.sin(lat) * (Math.sin(sunLon - lon) - e * Math.sin(piPer - lon));
+  lon = mod(lon + nutation2(data, jde)[0], TWO_PI3);
+  return [lon, lat];
+}
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/src/lots.js
+var HERMETIC_LOTS = [
+  "fortune",
+  "spirit",
+  "eros",
+  "necessity",
+  "courage",
+  "victory",
+  "nemesis"
+];
+function lot(asc, a, b, day) {
+  return mod(asc + (day ? a - b : b - a), 360);
+}
+function lotFortune(asc, sun, moon, day) {
+  return lot(asc, moon, sun, day);
+}
+function lotSpirit(asc, sun, moon, day) {
+  return lot(asc, sun, moon, day);
+}
+function hermeticLots(asc, day, sun, moon, mercury, venus, mars, jupiter, saturn) {
+  const fortune = lotFortune(asc, sun, moon, day);
+  const spirit = lotSpirit(asc, sun, moon, day);
+  return {
+    fortune,
+    spirit,
+    eros: lot(asc, venus, spirit, day),
+    necessity: lot(asc, fortune, mercury, day),
+    courage: lot(asc, fortune, mars, day),
+    victory: lot(asc, jupiter, spirit, day),
+    nemesis: lot(asc, fortune, saturn, day)
+  };
+}
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/src/chart.js
+var TWO_PI4 = 2 * Math.PI;
+var BODIES = [
+  "sun",
+  "moon",
+  "mercury",
+  "venus",
+  "mars",
+  "jupiter",
+  "saturn",
+  "uranus",
+  "neptune",
+  "pluto",
+  "chiron",
+  "mean_node",
+  "true_node"
+];
+var EXTRA_BODIES = ["mean_lilith", "true_lilith"];
+var NOT_ASPECTABLE = /* @__PURE__ */ new Set([
+  "mean_node",
+  "true_node",
+  "mean_lilith",
+  "true_lilith"
+]);
+var SIGNS2 = [
+  "Aries",
+  "Taurus",
+  "Gemini",
+  "Cancer",
+  "Leo",
+  "Virgo",
+  "Libra",
+  "Scorpio",
+  "Sagittarius",
+  "Capricorn",
+  "Aquarius",
+  "Pisces"
+];
+var ASPECTS = {
+  conjunction: 0,
+  sextile: 60,
+  square: 90,
+  trine: 120,
+  opposition: 180
+};
+var DEFAULT_ORBS = {
+  conjunction: 8,
+  sextile: 4,
+  square: 7,
+  trine: 7,
+  opposition: 8
+};
+var HOUSE_SYSTEMS = [
+  "placidus",
+  "porphyry",
+  "equal",
+  "whole_sign",
+  "koch",
+  "regiomontanus",
+  "campanus",
+  "alcabitius",
+  "morinus",
+  "meridian",
+  "polich_page",
+  "vehlow"
+];
+var HOUSE_ALIASES = {
+  whole: "whole_sign",
+  signs: "whole_sign",
+  wholesign: "whole_sign",
+  equal_house: "equal",
+  porphyrius: "porphyry",
+  placidean: "placidus"
+};
+function normalizeHouseSystem(raw) {
+  const key = raw.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (HOUSE_SYSTEMS.includes(key))
+    return key;
+  const alias = HOUSE_ALIASES[key];
+  if (alias)
+    return alias;
+  throw new Error(`unknown house system '${raw}' (valid: ${HOUSE_SYSTEMS.join(", ")})`);
+}
+function signIndex(sign) {
+  return typeof sign === "number" ? mod(Math.floor(sign), 12) : SIGNS2.indexOf(sign);
+}
+var DOMICILE2 = {
+  sun: [4],
+  moon: [3],
+  mercury: [2, 5],
+  venus: [1, 6],
+  mars: [0, 7],
+  jupiter: [8, 11],
+  saturn: [9, 10]
+};
+var EXALTATION2 = {
+  sun: 0,
+  moon: 1,
+  mercury: 5,
+  venus: 11,
+  mars: 9,
+  jupiter: 3,
+  saturn: 6
+};
+function dignities(body, sign) {
+  const idx = signIndex(sign);
+  const dom = DOMICILE2[body] ?? [];
+  const out = [];
+  if (dom.includes(idx))
+    out.push("domicile");
+  if (EXALTATION2[body] === idx)
+    out.push("exaltation");
+  if (dom.map((d) => mod(d + 6, 12)).includes(idx))
+    out.push("detriment");
+  if (body in EXALTATION2 && mod(EXALTATION2[body] + 6, 12) === idx)
+    out.push("fall");
+  return out;
+}
+var KM_PER_AU3 = 1495978707e-1;
+var JD_SANE_MIN = -2e6;
+var JD_SANE_MAX = 9e6;
+function parseZodiac(zodiac) {
+  if (zodiac === "tropical")
+    return null;
+  if (zodiac.startsWith("sidereal:")) {
+    const mode = zodiac.slice("sidereal:".length);
+    if (AYANAMSA_J2000[mode] !== void 0 || STAR_AYANAMSAS[mode])
+      return mode;
+  }
+  throw new Error(`unknown zodiac ${JSON.stringify(zodiac)}`);
+}
+var STAR_AYANAMSAS = {
+  galcent_0sag: ["Galactic Center", 240],
+  true_citra: ["Spica", 180]
+};
+var VSOP_BODIES = /* @__PURE__ */ new Set([
+  "mercury",
+  "venus",
+  "earth",
+  "mars",
+  "jupiter",
+  "saturn",
+  "uranus",
+  "neptune"
+]);
+var Engine = class {
+  data;
+  moonCheb;
+  chironCheb;
+  packs = /* @__PURE__ */ new Map();
+  runtimeSources = /* @__PURE__ */ new Map();
+  renderAttrs = /* @__PURE__ */ new Map();
+  constructor(data) {
+    this.data = data;
+    this.moonCheb = data.moonCheb ? new ChebSeries(data.moonCheb) : null;
+    this.chironCheb = data.chiron ? new ChebSeries(data.chiron) : null;
+  }
+  /**
+   * Register a runtime {@link XyzSource} under a body id, so it resolves through
+   * {@link Engine.position}, {@link Engine.longitude}, {@link Engine.chartAt},
+   * and everything built on them (transits, returns, retrograde, SkyView) with
+   * no special-casing — exactly like a baked-in Chebyshev or Kepler pack. The
+   * source yields heliocentric ecliptic-J2000 xyz in AU at a **TT** Julian Day,
+   * the same contract Chiron and the Uranian bodies satisfy; the engine applies
+   * light-time, aberration, precession and nutation to it like any real body.
+   *
+   * This is the seam the `synthetic` module plugs imaginary bodies into (see
+   * {@link registerSyntheticSystem}). A registered id shadows a baked-in pack of
+   * the same name and persists for the engine's lifetime.
+   *
+   * @param id The body id to register (any string).
+   * @param source A heliocentric xyz source; see {@link XyzSource}.
+   * @returns This engine, for chaining.
+   */
+  registerSource(id, source) {
+    this.runtimeSources.set(id, source);
+    this.packs.set(id, source);
+    return this;
+  }
+  /** Author how a runtime body should look in SkyView (size, magnitude, colour).
+   *  Position still comes from {@link registerSource}; this owns appearance only. */
+  registerRender(id, render) {
+    this.renderAttrs.set(id, render);
+    return this;
+  }
+  /** SkyView appearance for a registered body, if any. */
+  renderFor(id) {
+    return this.renderAttrs.get(id);
+  }
+  /** Whether `body` resolves through the generic packed-source path: a baked-in
+   *  Chebyshev/Kepler pack or a runtime source from {@link registerSource}. */
+  hasPack(body) {
+    return !!(this.data.chebPacks?.[body] || this.data.keplerPack?.bodies[body]) || this.runtimeSources.has(body);
+  }
+  pack(body) {
+    let s = this.packs.get(body);
+    if (!s) {
+      const raw = this.data.chebPacks?.[body];
+      const kp = this.data.keplerPack;
+      if (raw)
+        s = new ChebSeries(raw);
+      else if (kp?.bodies[body])
+        s = new KeplerOrbit(kp.bodies[body], kp.epoch);
+      else
+        throw new Error(`no data loaded for body '${body}'`);
+      this.packs.set(body, s);
+    }
+    return s;
+  }
+  moonInRange(jde) {
+    return !!this.moonCheb && this.moonCheb.jd0 <= jde - 0.1 && jde + 0.1 <= this.moonCheb.jd1;
+  }
+  /**
+   * The body ids this engine can compute, given the data pack it was
+   * constructed with. The core set is always present; extra asteroids and
+   * hypotheticals appear only when their Chebyshev or Kepler packs are loaded.
+   *
+   * @returns Body ids accepted by {@link Engine.position},
+   *   {@link Engine.longitude}, and {@link Engine.chart}.
+   * @example
+   * ```ts
+   * engine.bodies().includes("ceres"); // true only if the Ceres pack is loaded
+   * ```
+   */
+  bodies() {
+    return [
+      ...[...BODIES, ...EXTRA_BODIES].filter((b) => b !== "chiron" || this.chironCheb),
+      ...Object.keys(this.data.chebPacks ?? {}),
+      ...Object.keys(this.data.keplerPack?.bodies ?? {}),
+      ...this.runtimeSources.keys()
+    ];
+  }
+  /**
+   * Low-level apparent geocentric ecliptic coordinates at a **TT** Julian Day,
+   * in **radians**. This is the engine's internal building block for the events
+   * module; it takes TT (not UT) and does no zodiac shift. Most callers want
+   * {@link Engine.position} (full Position in degrees) or
+   * {@link Engine.longitude} (longitude in degrees) instead.
+   *
+   * @param body A body id from {@link Engine.bodies}.
+   * @param jde Julian Day in **TT** (Terrestrial Time), e.g. `jdTT(jdUt)`.
+   * @returns `[lon, lat, dist]` — longitude and latitude in **radians** (true
+   *   equinox of date), distance in AU, or `null` distance for nodes and
+   *   Lilith points.
+   * @throws Error if no data is loaded for `body`.
+   */
+  ecliptic(body, jde) {
+    if (body === "sun")
+      return sunApparent(this.data, jde);
+    if (body === "moon") {
+      const [lon, lat, km] = this.moonInRange(jde) ? moonApparentPrecise(this.data, this.moonCheb, jde) : moonApparentSeries(this.data, jde);
+      return [lon, lat, km / KM_PER_AU3];
+    }
+    if (body === "pluto" && !this.data.chebPacks?.pluto)
+      return plutoApparent(this.data, jde);
+    if (body === "chiron") {
+      if (!this.chironCheb)
+        throw new Error("chiron data not loaded");
+      return chironApparent(this.data, this.chironCheb, jde);
+    }
+    if (body === "mean_node")
+      return [meanNode(this.data, jde), 0, null];
+    if (body === "true_node") {
+      return [
+        this.moonInRange(jde) ? trueNodePrecise(this.data, this.moonCheb, jde) : trueNodeSeries(this.data, jde),
+        0,
+        null
+      ];
+    }
+    if (body === "mean_lilith") {
+      const [lon, lat] = meanLilith(this.data, jde);
+      return [lon, lat, null];
+    }
+    if (body === "true_lilith") {
+      const [lon, lat, km] = this.moonInRange(jde) ? oscApogeePrecise(this.data, this.moonCheb, jde) : oscApogeeSeries(this.data, jde);
+      return [lon, lat, km / KM_PER_AU3];
+    }
+    if (this.hasPack(body)) {
+      return chironApparent(this.data, this.pack(body), jde);
+    }
+    if (this.data.vsop[body])
+      return planetApparent(this.data, body, jde);
+    throw new Error(`no data loaded for body '${body}'`);
+  }
+  /** Degrees to subtract from a true-equinox tropical longitude. */
+  ayanShift(jde, mode) {
+    const star2 = STAR_AYANAMSAS[mode];
+    if (star2) {
+      const s = this.data.fixedStars?.stars[star2[0]];
+      if (!s)
+        throw new Error(`zodiac 'sidereal:${mode}' needs the fixed-star catalog loaded`);
+      const [lon] = starApparent(this.data, s, jde);
+      return mod(lon / DEG3 - star2[1], 360);
+    }
+    return mod(nutation2(this.data, jde)[0] / DEG3 + ayanamsa(jde, mode), 360);
+  }
+  /**
+   * Apparent place of a catalog fixed star at a Julian Day (UT). Requires the
+   * fixed-star catalog to be present in the data pack; see
+   * {@link Engine.starNames} for the available names.
+   *
+   * @param name Catalog star name, e.g. `"Regulus"` (see
+   *   {@link Engine.starNames}).
+   * @param jdUt Julian Day in UT.
+   * @param opts Calculation options; only `zodiac` is meaningful here (tropical
+   *   by default, or a sidereal ayanamsa).
+   * @returns Ecliptic `lon`/`lat`, equatorial `ra`/`dec` (all degrees), the
+   *   zodiac `sign` and `signDeg`, and the star's visual magnitude `mag`.
+   * @throws Error if `name` is not in the loaded catalog.
+   * @example
+   * ```ts
+   * const regulus = engine.fixedStar("Regulus", julianDay(2025, 1, 1));
+   * regulus.sign;  // e.g. "Leo"
+   * regulus.mag;   // apparent magnitude
+   * ```
+   */
+  fixedStar(name, jdUt, opts = {}) {
+    const s = this.data.fixedStars?.stars[name];
+    if (!s)
+      throw new Error(`no fixed-star catalog entry for '${name}'`);
+    const mode = parseZodiac(opts.zodiac ?? "tropical");
+    const jde = jdTT(jdUt);
+    const [lonR, latR] = starApparent(this.data, s, jde);
+    const [ra, dec] = equatorial(lonR, latR, trueObliquity(this.data, jde));
+    let lon = lonR / DEG3;
+    if (mode !== null)
+      lon = mod(lon - this.ayanShift(jde, mode), 360);
+    return {
+      lon,
+      lat: latR / DEG3,
+      ra: ra / DEG3,
+      dec: dec / DEG3,
+      mag: s.mag,
+      sign: SIGNS2[Math.floor(lon / 30)],
+      signDeg: mod(lon, 30)
+    };
+  }
+  /**
+   * The names in the loaded fixed-star catalog, sorted. Empty if no catalog is
+   * present in the data pack. Pass any of these to {@link Engine.fixedStar}.
+   *
+   * @returns Sorted catalog star names.
+   */
+  starNames() {
+    return Object.keys(this.data.fixedStars?.stars ?? {}).sort();
+  }
+  /**
+   * Fixed-star conjunctions in a chart: each body within `orb` of a catalog
+   * star, in the chart's own zodiac. Feed the result to
+   * {@link interpretationContext} as `stars` to project `star` fact atoms (the
+   * Chart itself carries no star catalog).
+   *
+   * @param chart A chart from {@link Engine.chart} / {@link Engine.chartAt}.
+   * @param opts `orb` (default 1°); `stars` to restrict to named stars (then no
+   *   magnitude filter); else `maxMag` keeps only stars brighter than it
+   *   (default 2.5) so obscure catalog entries do not flood the result.
+   * @returns Conjunctions sorted by increasing orb.
+   */
+  starConjunctions(chart, opts = {}) {
+    const catalog = this.data.fixedStars?.stars;
+    if (!catalog)
+      return [];
+    const orbLimit = opts.orb ?? 1;
+    const names = opts.stars ?? Object.keys(catalog);
+    const useMag = opts.stars === void 0;
+    const maxMag = opts.maxMag ?? 2.5;
+    const out = [];
+    for (const name of names) {
+      const s = catalog[name];
+      if (!s || useMag && s.mag > maxMag)
+        continue;
+      const starLon = this.fixedStar(name, chart.jdUt, { zodiac: chart.zodiac }).lon;
+      for (const [body, p] of Object.entries(chart.bodies)) {
+        if (!p)
+          continue;
+        const sep = Math.abs(mod(p.lon - starLon + 180, 360) - 180);
+        if (sep <= orbLimit)
+          out.push({ body, star: name, orb: sep });
+      }
+    }
+    out.sort((a, b) => a.orb - b.orb);
+    return out;
+  }
+  /**
+   * The seven Hermetic lots of a chart, each placed by sign and house. Sect is
+   * read from the Sun (above the horizon -> a day chart). Feed the result to
+   * {@link interpretationContext} as `lots` to project `lot` fact atoms.
+   *
+   * @param chart A chart from {@link Engine.chart} / {@link Engine.chartAt}; it
+   *   must carry the seven classical planets.
+   * @returns One entry per lot with its longitude, sign, `signDeg`, and house,
+   *   or an empty array if a required planet is absent.
+   */
+  lots(chart) {
+    const b = chart.bodies;
+    const need = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"];
+    if (need.some((k) => !b[k]))
+      return [];
+    const day = b.sun.house >= 7;
+    const h = hermeticLots(chart.angles.asc, day, b.sun.lon, b.moon.lon, b.mercury.lon, b.venus.lon, b.mars.lon, b.jupiter.lon, b.saturn.lon);
+    return HERMETIC_LOTS.map((lot2) => {
+      const lon = mod(h[lot2], 360);
+      return {
+        lot: lot2,
+        lon,
+        sign: SIGNS2[Math.floor(lon / 30)],
+        signDeg: mod(lon, 30),
+        house: houseIndex(lon, chart.cusps)
+      };
+    });
+  }
+  lonOnly(body, jdUt, mode, topo) {
+    const jde = jdTT(jdUt);
+    let [lon, lat, dist] = this.ecliptic(body, jde);
+    if (topo !== null && dist !== null) {
+      const lst = mod(gast(this.data, jdUt) + topo.lonEast * DEG3, TWO_PI4);
+      [lon, lat, dist] = topocentricEcl(lon, lat, dist, lst, topo.lat * DEG3, topo.altM ?? 0, trueObliquity(this.data, jde));
+    }
+    let lonDeg = lon / DEG3;
+    if (mode !== null)
+      lonDeg = mod(lonDeg - this.ayanShift(jde, mode), 360);
+    return lonDeg;
+  }
+  /**
+   * Apparent geocentric ecliptic longitude of a body, in degrees `[0, 360)`,
+   * at a Julian Day (UT). The fast path when you need only a longitude — a
+   * transit position, an aspect angle, a sign — without the full
+   * {@link Position}. In the tropical zodiac this is referred to the true
+   * equinox of date; sidereal subtracts the ayanamsa.
+   *
+   * @param body A body id from {@link Engine.bodies}.
+   * @param jdUt Julian Day in UT.
+   * @param opts Calculation options: `zodiac` (tropical or a sidereal
+   *   ayanamsa), and `topocentric` with an `observer` for a parallax-corrected
+   *   place.
+   * @returns Ecliptic longitude in degrees, `[0, 360)`.
+   * @example
+   * ```ts
+   * engine.longitude("mars", julianDay(2025, 6, 1));               // tropical
+   * engine.longitude("mars", julianDay(2025, 6, 1), { zodiac: "sidereal:lahiri" });
+   * ```
+   * @see {@link Engine.position} for speed, retrograde, latitude, and distance.
+   */
+  longitude(body, jdUt, opts = {}) {
+    const mode = parseZodiac(opts.zodiac ?? "tropical");
+    const topo = opts.topocentric ? opts.observer ?? null : null;
+    return this.lonOnly(body, jdUt, mode, topo);
+  }
+  /**
+   * Geometric heliocentric ecliptic position (Sun-centred) at a Julian Day
+   * (UT), referred to the ecliptic of date. Unlike {@link Engine.position},
+   * this is a geometric place — no light-time, aberration, or nutation — and is
+   * undefined for the Sun, the Moon, and the lunar nodes.
+   *
+   * @param body A Sun-orbiting body (planet or asteroid) from
+   *   {@link Engine.bodies}.
+   * @param jdUt Julian Day in UT.
+   * @returns Heliocentric `lon`/`lat` in degrees and `dist` in AU.
+   * @throws Error if `body` has no heliocentric solution (e.g. the Moon).
+   */
+  heliocentric(body, jdUt) {
+    const jde = jdTT(jdUt);
+    let l;
+    let b;
+    let r;
+    if (body === "pluto" && !this.data.chebPacks?.pluto) {
+      [l, b, r] = plutoHeliocentric(this.data, jde);
+      [l, b] = precessEcliptic(l, b, J20002, jde);
+    } else if (body === "chiron") {
+      if (!this.chironCheb)
+        throw new Error("chiron data not loaded");
+      const [x, y, z2] = this.chironCheb.xyz(jde);
+      r = Math.sqrt(x * x + y * y + z2 * z2);
+      l = mod(Math.atan2(y, x), TWO_PI4);
+      b = Math.atan2(z2, Math.hypot(x, y));
+      [l, b] = precessEcliptic(l, b, J20002, jde);
+    } else if (this.hasPack(body)) {
+      const [x, y, z2] = this.pack(body).xyz(jde);
+      r = Math.sqrt(x * x + y * y + z2 * z2);
+      l = mod(Math.atan2(y, x), TWO_PI4);
+      b = Math.atan2(z2, Math.hypot(x, y));
+      [l, b] = precessEcliptic(l, b, J20002, jde);
+    } else if (VSOP_BODIES.has(body) && this.data.vsop[body]) {
+      [l, b, r] = vsopHeliocentric(this.data.vsop[body], jde);
+    } else {
+      throw new Error(`no heliocentric position for '${body}'`);
+    }
+    return { lon: l / DEG3, lat: b / DEG3, dist: r };
+  }
+  /**
+   * Full apparent position of a body at a Julian Day (UT): ecliptic longitude
+   * and daily speed (with a retrograde flag), the zodiac sign, ecliptic
+   * latitude, geocentric distance, and equatorial right ascension and
+   * declination. The general-purpose single-body call; use
+   * {@link Engine.longitude} when you need only the longitude.
+   *
+   * @param body A body id from {@link Engine.bodies}.
+   * @param jdUt Julian Day in UT.
+   * @param opts Calculation options: `zodiac` (tropical or a sidereal
+   *   ayanamsa), and `topocentric` with an `observer` for a parallax-corrected
+   *   place.
+   * @returns A {@link Position}: `lon`, `speed`, `retrograde`, `sign`,
+   *   `signDeg`, `lat`, `dist` (AU; `null` for nodes and Lilith), `ra`, `dec`.
+   * @example
+   * ```ts
+   * const mars = engine.position("mars", julianDay(2025, 6, 1));
+   * mars.retrograde; // boolean
+   * mars.speed;      // degrees/day (negative when retrograde)
+   * ```
+   */
+  position(body, jdUt, opts = {}) {
+    const mode = parseZodiac(opts.zodiac ?? "tropical");
+    const topo = opts.topocentric ? opts.observer ?? null : null;
+    const jde = jdTT(jdUt);
+    let [lonR, latR, dist] = this.ecliptic(body, jde);
+    if (topo !== null && dist !== null) {
+      const lst = mod(gast(this.data, jdUt) + topo.lonEast * DEG3, TWO_PI4);
+      [lonR, latR, dist] = topocentricEcl(lonR, latR, dist, lst, topo.lat * DEG3, topo.altM ?? 0, trueObliquity(this.data, jde));
+    }
+    const [ra, dec] = equatorial(lonR, latR, trueObliquity(this.data, jde));
+    let lon = lonR / DEG3;
+    if (mode !== null)
+      lon = mod(lon - this.ayanShift(jde, mode), 360);
+    const h = 0.25;
+    const l0 = this.lonOnly(body, jdUt - h, mode, topo);
+    const l1 = this.lonOnly(body, jdUt + h, mode, topo);
+    const speed = (mod(l1 - l0 + 540, 360) - 180) / (2 * h);
+    return {
+      lon,
+      speed,
+      retrograde: speed < 0,
+      sign: SIGNS2[Math.floor(lon / 30)],
+      signDeg: mod(lon, 30),
+      lat: latR / DEG3,
+      dist,
+      ra: ra / DEG3,
+      dec: dec / DEG3
+    };
+  }
+  /**
+   * Full natal chart: body positions, house cusps, angles, and aspects for one
+   * instant and place.
+   *
+   * The first six arguments are calendar fields in **UT** — not local civil
+   * time, and not a Julian Day. Passing a JD in `y` builds an absurd instant and
+   * throws `RangeError`; use {@link Engine.chartAt} for a chart from a JD. For a
+   * birth time given in a local time zone, resolve it to UT first (see the
+   * `caelus-birth` package).
+   *
+   * @param y Year in UT, e.g. `1990` — a calendar year, not a Julian Day.
+   * @param mo Month, `1`–`12`.
+   * @param d Day of month, `1`–`31`.
+   * @param h Hour in UT, `0`–`23`.
+   * @param mi Minute, `0`–`59`.
+   * @param s Second, `0`–`59`.
+   * @param lat Geographic latitude in degrees, north positive.
+   * @param lonEast Geographic longitude in degrees, **east positive** (so
+   *   82.46° W is `-82.46`).
+   * @param opts A house-system name (e.g. `"placidus"`) or a
+   *   {@link ChartOptions} bag for zodiac, topocentric mode, extra bodies, and
+   *   custom orbs. Defaults to Placidus houses in the tropical zodiac.
+   * @returns A {@link Chart}: `bodies`, `cusps`, `angles`, and `aspects`, plus
+   *   `jdUt` and the house system actually used (Placidus and Koch fall back to
+   *   whole-sign above the polar circles). A body outside its fitted range
+   *   (e.g. Chiron before ~1850) is omitted from `bodies` and listed in
+   *   `unavailable` rather than failing the whole chart.
+   * @throws RangeError only if the instant itself is absurd — far outside any
+   *   supported epoch — which almost always means a Julian Day was passed where
+   *   calendar fields belong.
+   * @example
+   * ```ts
+   * // 1990-06-10 14:30 UT at Tampa, FL (27.95° N, 82.46° W), Placidus houses
+   * const chart = engine.chart(1990, 6, 10, 14, 30, 0, 27.95, -82.46, "placidus");
+   * chart.bodies.sun.lon; // Sun's ecliptic longitude, degrees
+   * chart.angles.asc;     // Ascendant, degrees
+   * ```
+   * @see {@link Engine.chartAt} to build the same chart from a Julian Day.
+   */
+  chart(y, mo, d, h, mi, s, lat, lonEast, opts = "placidus") {
+    return this.chartAt(julianDay(y, mo, d, h, mi, s), lat, lonEast, opts);
+  }
+  /**
+   * Full natal chart from a Julian Day (UT) — identical output to
+   * {@link Engine.chart}, without the calendar round-trip. Reach for this when
+   * you already hold a JD: transit and event scans, `rankMoments` winners, or
+   * `position`/`longitude` workflows.
+   *
+   * @param jdUt Julian Day in UT, e.g. from {@link julianDay} or a scan.
+   * @param lat Geographic latitude in degrees, north positive.
+   * @param lonEast Geographic longitude in degrees, east positive.
+   * @param opts A house-system name or a {@link ChartOptions} bag. Defaults to
+   *   Placidus houses in the tropical zodiac.
+   * @returns The same {@link Chart} shape returned by {@link Engine.chart}.
+   * @example
+   * ```ts
+   * const jd = julianDay(1990, 6, 10, 14, 30, 0);
+   * const chart = engine.chartAt(jd, 27.95, -82.46, "placidus");
+   * ```
+   * @see {@link Engine.chart} for the calendar-field entry point.
+   */
+  chartAt(jdUt, lat, lonEast, opts = "placidus") {
+    if (!Number.isFinite(jdUt) || jdUt < JD_SANE_MIN || jdUt > JD_SANE_MAX) {
+      throw new RangeError(`chart instant (jd ${jdUt}) is far outside the supported range; if you meant a calendar date, pass year/month/day to chart() rather than a Julian Day.`);
+    }
+    const o = typeof opts === "string" ? { houseSystem: opts } : opts;
+    const houseSystem = normalizeHouseSystem(o.houseSystem ?? "placidus");
+    const zodiac = o.zodiac ?? "tropical";
+    const mode = parseZodiac(zodiac);
+    const calc = {
+      zodiac,
+      topocentric: o.topocentric,
+      observer: o.topocentric ? o.observer ?? { lat, lonEast, altM: 0 } : void 0
+    };
+    const names = [
+      ...BODIES,
+      ...(o.bodies ?? []).filter((b) => !BODIES.includes(b))
+    ];
+    const bodies = {};
+    const unavailable = [];
+    for (const b of names) {
+      try {
+        bodies[b] = this.position(b, jdUt, calc);
+      } catch (e) {
+        if (e instanceof RangeError)
+          unavailable.push(b);
+        else
+          throw e;
+      }
+    }
+    const [asc, mc, armc, eps] = angles(this.data, jdUt, lat, lonEast);
+    const [vtx, east] = vertexEastPoint(armc, lat * DEG3, eps);
+    const phi = lat * DEG3;
+    let used = houseSystem;
+    let cusps;
+    try {
+      if (houseSystem === "placidus") {
+        if (Math.abs(lat) >= 66) {
+          throw new RangeError("placidus undefined above polar circles");
+        }
+        cusps = housesPlacidus(armc, phi, eps);
+      } else if (houseSystem === "porphyry") {
+        cusps = housesPorphyry(asc, mc);
+      } else if (houseSystem === "equal") {
+        cusps = housesEqual(asc);
+      } else if (houseSystem === "whole_sign") {
+        cusps = housesWholeSign(asc);
+      } else if (houseSystem === "koch") {
+        cusps = housesKoch(armc, phi, eps);
+      } else if (houseSystem === "regiomontanus") {
+        cusps = housesRegiomontanus(armc, phi, eps);
+      } else if (houseSystem === "campanus") {
+        cusps = housesCampanus(armc, phi, eps);
+      } else if (houseSystem === "alcabitius") {
+        cusps = housesAlcabitius(armc, phi, eps);
+      } else if (houseSystem === "morinus") {
+        cusps = housesMorinus(armc, phi, eps);
+      } else if (houseSystem === "meridian") {
+        cusps = housesMeridian(armc, phi, eps);
+      } else if (houseSystem === "polich_page") {
+        cusps = housesPolichPage(armc, phi, eps);
+      } else if (houseSystem === "vehlow") {
+        cusps = housesVehlow(armc, phi, eps);
+      } else {
+        throw new Error(`unknown house system '${houseSystem}' (valid: ${HOUSE_SYSTEMS.join(", ")})`);
+      }
+    } catch (err) {
+      if (!(err instanceof RangeError))
+        throw err;
+      used = "whole_sign";
+      cusps = housesWholeSign(asc);
+    }
+    const jde = jdTT(jdUt);
+    let shift = 0;
+    if (mode !== null)
+      shift = this.ayanShift(jde, mode);
+    const outDeg = (rad) => mod(rad / DEG3 - shift, 360);
+    let cuspsDeg;
+    if (mode !== null && used === "whole_sign") {
+      const first = Math.floor(outDeg(asc) / 30) * 30;
+      cuspsDeg = Array.from({ length: 12 }, (_, i) => mod(first + i * 30, 360));
+    } else {
+      cuspsDeg = cusps.map(outDeg);
+    }
+    const chartBodies = {};
+    for (const b of names) {
+      const p = bodies[b];
+      if (!p)
+        continue;
+      chartBodies[b] = {
+        ...p,
+        house: houseIndex(p.lon, cuspsDeg),
+        dignities: dignities(b, Math.floor(mod(p.lon, 360) / 30))
+      };
+    }
+    return {
+      jdUt,
+      zodiac,
+      houseSystem: used,
+      houseSystemRequested: houseSystem,
+      bodies: chartBodies,
+      unavailable,
+      angles: {
+        asc: outDeg(asc),
+        mc: outDeg(mc),
+        vertex: outDeg(vtx),
+        eastPoint: outDeg(east)
+      },
+      cusps: cuspsDeg,
+      aspects: findAspects(chartBodies, o.orbs ?? DEFAULT_ORBS)
+    };
+  }
+};
+function houseIndex(lon, cusps) {
+  for (let i = 0; i < 12; i++) {
+    if (mod(lon - cusps[i], 360) < mod(cusps[(i + 1) % 12] - cusps[i], 360))
+      return i + 1;
+  }
+  return 12;
+}
+function findAspects(bodies, orbs = DEFAULT_ORBS) {
+  const out = [];
+  const names = Object.keys(bodies).filter((b) => !NOT_ASPECTABLE.has(b));
+  for (let i = 0; i < names.length; i++) {
+    for (let j = i + 1; j < names.length; j++) {
+      const a = names[i];
+      const b = names[j];
+      const e = mod(bodies[a].lon - bodies[b].lon + 180, 360) - 180;
+      const sep = Math.abs(e);
+      for (const [asp, angle] of Object.entries(ASPECTS)) {
+        const orb = Math.abs(sep - angle);
+        if (orb <= orbs[asp]) {
+          const orbRounded = Math.round(orb * 100) / 100;
+          const signedOrb = sep - angle;
+          const dAbsOrbDt = (signedOrb >= 0 ? 1 : -1) * (e >= 0 ? 1 : -1) * (bodies[a].speed - bodies[b].speed);
+          const phase = Math.abs(signedOrb) < 1e-9 ? "exact" : dAbsOrbDt < 0 ? "applying" : "separating";
+          out.push({
+            a,
+            b,
+            aspect: asp,
+            orb: orbRounded,
+            phase,
+            strength: Math.max(0, 1 - orbRounded / orbs[asp])
+          });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/vsop87d_mercury.embedded.json
+var vsop87d_mercury_embedded_default = { L: [[[4.40250710144, 0, 0], [0.40989414976, 1.48302034194, 26087.9031415742], [0.05046294199, 4.4778548954, 52175.8062831484], [0.00855346843, 1.16520322351, 78263.70942472259], [0.00165590362, 4.11969163181, 104351.61256629678], [34561897e-11, 0.77930765817, 130439.51570787099], [7583476e-11, 3.7134840051, 156527.41884944518], [355974e-10, 1.51202669419, 1109.3785520934], [1726012e-11, 0.35832239908, 182615.3219910194], [1803463e-11, 4.1033317841, 5661.3320491522], [1364682e-11, 4.59918318745, 27197.2816936676], [1589923e-11, 2.99510417815, 25028.521211385], [1017332e-11, 0.8803143904, 31749.2351907264], [714182e-11, 1.54144865265, 24978.5245894808], [643759e-11, 5.30266110787, 21535.9496445154], [4042e-9, 3.28228847025, 208703.2251325936], [352441e-11, 5.24156297101, 20426.571092422], [343313e-11, 5.76531885335, 955.5997416086], [339214e-11, 5.86327765, 25558.2121764796], [451137e-11, 6.04989275289, 51116.4243529592], [325335e-11, 1.3367433478, 53285.1848352418], [259587e-11, 0.98732428184, 4551.9534970588], [345212e-11, 2.79211901539, 15874.6175953632], [272947e-11, 2.49451163975, 529.6909650946], [23483e-10, 0.266721189, 11322.6640983044], [238793e-11, 0.11343953378, 1059.3819301892], [264336e-11, 3.91705094013, 57837.1383323006], [216645e-11, 0.65987207348, 13521.7514415914], [183359e-11, 2.62878670784, 27043.5028831828], [175965e-11, 4.53636829858, 51066.427731055], [181629e-11, 2.43413502466, 25661.3049506982], [208995e-11, 2.09178234008, 47623.8527860896], [172643e-11, 2.45200164173, 24498.8302462904], [142316e-11, 3.36003948842, 37410.5672398786], [137942e-11, 0.29098447849, 10213.285546211], [118233e-11, 2.78149786369, 77204.32749453338], [9686e-10, 6.2039820274, 234791.12827416777], [125219e-11, 3.72079804425, 39609.6545831656], [86819e-11, 2.64219349385, 51646.11531805379], [86723e-11, 1.9595304265, 46514.4742339962], [88329e-11, 5.41338795963, 26617.5941066688], [106422e-11, 4.20572116254, 19804.8272915828], [89987e-11, 5.85243631094, 41962.5207369374], [84971e-11, 4.33100364958, 79373.087976816], [69247e-11, 4.19446437496, 19.66976089979], [63463e-11, 3.14700877722, 7238.6755916], [68493e-11, 0.63424819267, 83925.0414738748], [69729e-11, 3.57201709671, 25132.3033999656], [59481e-11, 2.74692752, 16983.9961474566], [6483e-10, 0.0476292581, 33326.5787331742], [55376e-11, 4.05312663019, 30639.856638633], [54442e-11, 3.14331542453, 27147.28507176339], [4756e-10, 5.49722099211, 3.881335358], [49567e-11, 3.98985863874, 6770.7106012456], [56531e-11, 5.11920557675, 73711.75592766379], [41764e-11, 5.64185159566, 53131.406024757], [51458e-11, 5.47786463494, 50586.73338786459], [44744e-11, 1.22366857463, 77154.33087262919], [41882e-11, 5.19309298528, 6283.0758499914], [38045e-11, 2.43117327523, 12566.1516999828], [35627e-11, 0.81390126585, 32858.61374281979], [48007e-11, 5.49260554912, 51749.20809227239], [35392e-11, 3.36964859355, 36301.18868778519], [33951e-11, 2.78618091049, 14765.2390432698], [3056e-10, 5.84045074182, 43071.8992890308], [35964e-11, 1.4238083863, 2218.7571041868], [34044e-11, 0.47470299167, 65697.55772473979], [308e-9, 5.77017310191, 103292.23063610759], [28496e-11, 0.65048992658, 426.598190876], [26215e-11, 5.24158618719, 22645.32819660879], [26253e-11, 0.64807043102, 1589.0728952838], [29538e-11, 0.69771244088, 213.299095438], [27504e-11, 0.98010127839, 45892.73043315699], [22347e-11, 5.65335125838, 77734.01845962799], [22047e-11, 4.93398225193, 72602.37737557039], [22275e-11, 2.17909842576, 52705.49724824299], [24252e-11, 4.39994170609, 7.1135470008], [26751e-11, 1.06145361792, 3442.5749449654], [23656e-11, 2.84168536986, 260879.03141574195], [22908e-11, 2.58462026514, 68050.42387851159], [27086e-11, 0.08501738669, 63498.47038145279], [22247e-11, 3.22418265191, 25448.00585526019], [17803e-11, 3.61202297483, 110012.94461544899], [22407e-11, 1.02520094825, 105460.99111839019], [17576e-11, 4.71742326981, 25874.6040461362], [18586e-11, 4.52709871258, 28306.66024576099], [14176e-11, 6.12394176563, 53235.18821333759], [14186e-11, 5.14246797066, 26068.2333806744], [17244e-11, 0.28394746813, 51220.20654153979], [17176e-11, 3.26084092971, 153.7788104848], [14938e-11, 1.83542009339, 99799.65906923798], [13387e-11, 0.76564655407, 56727.7597802072], [13978e-11, 2.30193139916, 76674.63652943878], [14428e-11, 0.96646356501, 26107.57290247399], [1199e-10, 6.20492907598, 18849.2275499742], [14381e-11, 1.90956715654, 23969.1392811958], [11233e-11, 2.04817126136, 32370.9789915656], [13392e-11, 4.51750784605, 26080.78959457339], [11632e-11, 2.3849686026, 79219.3091663312], [12412e-11, 2.22280944169, 77837.11123384659], [11543e-11, 4.17789167759, 103242.2340142034], [11146e-11, 3.78292300417, 26301.2022370122]], [[26088.14706222746, 0, 0], [0.01126007832, 6.21703970996, 26087.9031415742], [0.00303471395, 3.05565472363, 52175.8062831484], [80538452e-11, 6.10454743366, 78263.70942472259], [21245035e-11, 2.83531934452, 104351.61256629678], [5592094e-11, 5.82675673328, 130439.51570787099], [1472233e-11, 2.51845458395, 156527.41884944518], [352244e-11, 3.05238094403, 1109.3785520934], [388318e-11, 5.48039225891, 182615.3219910194], [9354e-10, 6.11791163931, 27197.2816936676], [90579e-11, 45481669e-11, 24978.5245894808], [102743e-11, 2.14879173777, 208703.2251325936], [51941e-11, 5.62107554052, 5661.3320491522], [4437e-10, 4.57348500464, 25028.521211385]], [[53049845e-11, 0, 0], [16903658e-11, 4.69072300649, 26087.9031415742], [7396711e-11, 1.34735624669, 52175.8062831484], [3018297e-11, 4.45643539705, 78263.70942472259], [1107419e-11, 1.26226537554, 104351.61256629678], [378173e-11, 4.319980559, 130439.51570787099]], [], [], []], B: [[[0.11737528962, 1.98357498767, 26087.9031415742], [0.02388076996, 5.03738959685, 52175.8062831484], [0.01222839532, 3.14159265359, 0], [0.0054325181, 1.79644363963, 78263.70942472259], [0.0012977877, 4.83232503961, 104351.61256629678], [31866927e-11, 1.58088495667, 130439.51570787099], [7963301e-11, 4.60972126348, 156527.41884944518], [2014189e-11, 1.35324164694, 182615.3219910194], [513953e-11, 4.37835409309, 208703.2251325936], [207674e-11, 4.91772564073, 27197.2816936676], [208584e-11, 2.02020294153, 24978.5245894808], [132013e-11, 1.11908492283, 234791.12827416777], [100454e-11, 5.65684734206, 20426.571092422], [121395e-11, 1.81271752059, 53285.1848352418], [91566e-11, 2.28163128692, 25028.521211385], [99214e-11, 0.09391887097, 51116.4243529592], [94574e-11, 1.24184909234, 31749.2351907264], [78785e-11, 4.4072588, 57837.1383323006], [77747e-11, 0.52557061749, 1059.3819301892], [84264e-11, 5.08510388314, 51066.427731055], [49948e-11, 3.49752993688, 5661.3320491522], [46454e-11, 3.23739270829, 77204.32749453338], [44767e-11, 4.87849816734, 79373.087976816], [40766e-11, 2.46558332165, 46514.4742339962], [37378e-11, 4.45768797944, 4551.9534970588], [34082e-11, 4.14209210575, 260879.03141574195], [35911e-11, 1.09057317869, 1109.3785520934], [31953e-11, 1.18516389747, 83925.0414738748], [30954e-11, 3.5032802721, 21535.9496445154], [31808e-11, 2.41474588439, 47623.8527860896], [28691e-11, 1.84828614269, 77154.33087262919], [25765e-11, 2.77593370583, 27043.5028831828], [25199e-11, 3.5906226646, 27147.28507176339], [20244e-11, 3.06833797229, 51646.11531805379], [18591e-11, 5.5842727444, 73711.75592766379], [16971e-11, 0.02791276551, 103292.23063610759], [20099e-11, 4.06593040301, 25132.3033999656], [17002e-11, 6.13739392193, 41962.5207369374], [14984e-11, 1.64717994813, 105460.99111839019], [14186e-11, 0.33074185469, 10213.285546211], [15577e-11, 6.07693643204, 53131.406024757], [15795e-11, 3.79629547258, 529.6909650946], [14011e-11, 5.52786452723, 72602.37737557039], [12309e-11, 3.16626298867, 14765.2390432698], [11261e-11, 0.11326534696, 13521.7514415914], [12448e-11, 4.05109331029, 39609.6545831656], [13044e-11, 3.48016433624, 37410.5672398786], [11042e-11, 4.23192662377, 110012.94461544899], [11152e-11, 0.5565846182, 63498.47038145279], [10717e-11, 1.53686240986, 25661.3049506982], [10213e-11, 2.87881017166, 12566.1516999828], [11047e-11, 5.79741510309, 51749.20809227239], [1046e-10, 5.82962163777, 50586.73338786459], [12866e-11, 4.81650804018, 30639.856638633]], [[0.00429151362, 3.50169780393, 26087.9031415742], [0.00146233668, 3.14159265359, 0], [22675295e-11, 0.0151536688, 52175.8062831484], [10894981e-11, 0.48540174006, 78263.70942472259], [6353462e-11, 3.42943919982, 104351.61256629678], [2495743e-11, 0.16051210665, 130439.51570787099], [859585e-11, 3.18452433647, 156527.41884944518], [277503e-11, 6.21020774184, 182615.3219910194], [86233e-11, 2.95244391822, 208703.2251325936]], [[11830934e-11, 4.79065585784, 26087.9031415742], [1913516e-11, 0, 0], [1044801e-11, 1.21216540536, 52175.8062831484], [266213e-11, 4.43418336532, 78263.70942472259], [17028e-10, 1.62255638714, 104351.61256629678]], [], [], []], R: [[[0.39528271652, 0, 0], [0.07834131817, 6.19233722599, 26087.9031415742], [0.00795525557, 2.95989690096, 52175.8062831484], [0.00121281763, 6.01064153805, 78263.70942472259], [21921969e-11, 2.77820093975, 104351.61256629678], [4354065e-11, 5.82894543257, 130439.51570787099], [918228e-11, 2.59650562598, 156527.41884944518], [260033e-11, 3.02817753482, 27197.2816936676], [289955e-11, 1.42441936951, 25028.521211385], [201855e-11, 5.6472504035, 182615.3219910194], [201499e-11, 5.59227724202, 31749.2351907264], [14198e-10, 6.25264202645, 24978.5245894808], [100144e-11, 3.73435608689, 21535.9496445154], [77561e-11, 3.66972526976, 20426.571092422], [63277e-11, 4.29905918105, 25558.2121764796], [62951e-11, 4.76588899933, 1059.3819301892], [66754e-11, 2.52520309182, 5661.3320491522], [755e-9, 4.47428642962, 51116.4243529592], [48266e-11, 6.06824478778, 53285.1848352418], [45748e-11, 2.41480951648, 208703.2251325936], [35224e-11, 1.05917802674, 27043.5028831828], [40815e-11, 2.35882016415, 57837.1383323006], [44234e-11, 1.21957314874, 15874.6175953632], [33873e-11, 0.86381554651, 25661.3049506982], [37203e-11, 0.5173382147, 47623.8527860896], [30092e-11, 1.79500530627, 37410.5672398786], [28417e-11, 3.02063625668, 51066.427731055], [30903e-11, 0.88366335532, 24498.8302462904], [26105e-11, 2.15021963174, 39609.6545831656], [18699e-11, 4.96496008403, 11322.6640983044], [2127e-10, 5.36857139841, 13521.7514415914], [19422e-11, 4.98378647655, 10213.285546211], [16941e-11, 3.88765393402, 26617.5941066688], [15109e-11, 0.44510589948, 46514.4742339962], [17087e-11, 1.24077764194, 77204.32749453338], [1394e-10, 1.62573946865, 27147.28507176339], [13382e-11, 1.07657890477, 51646.11531805379], [15012e-11, 4.28173463507, 41962.5207369374], [13977e-11, 4.77056848793, 33326.5787331742], [12794e-11, 6.06437138766, 1109.3785520934], [13938e-11, 1.99984876578, 25132.3033999656], [16297e-11, 2.63293587817, 19804.8272915828], [11933e-11, 2.36500939134, 4551.9534970588], [10612e-11, 5.46555460932, 234791.12827416777], [12754e-11, 2.07613721222, 529.6909650946], [12069e-11, 2.84997619452, 79373.087976816]], [[0.00217347739, 4.65617158663, 26087.9031415742], [44141826e-11, 1.42385543975, 52175.8062831484], [10094479e-11, 4.47466326316, 78263.70942472259], [2432804e-11, 1.24226083435, 104351.61256629678], [1624367e-11, 0, 0], [603996e-11, 4.29303116561, 130439.51570787099], [152851e-11, 1.0606077981, 156527.41884944518]], [[3117867e-11, 3.08231840296, 26087.9031415742], [1245396e-11, 6.15183317423, 52175.8062831484], [424822e-11, 2.9258335296, 78263.70942472259]], [], [], []] };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/vsop87d_venus.embedded.json
+var vsop87d_venus_embedded_default = { L: [[[3.17614666774, 0, 0], [0.01353968419, 5.59313319619, 10213.285546211], [89891645e-11, 5.30650048468, 20426.571092422], [5477201e-11, 4.41630652531, 7860.4193924392], [3455732e-11, 2.69964470778, 11790.6290886588], [2372061e-11, 2.99377539568, 3930.2096962196], [1317108e-11, 5.18668219093, 26.2983197998], [1664069e-11, 4.2501893503, 1577.3435424478], [1438322e-11, 4.15745043958, 9683.5945811164], [1200521e-11, 6.15357115319, 30639.856638633], [76138e-10, 1.9501470212, 529.6909650946], [707676e-11, 1.06466707214, 775.522611324], [584836e-11, 3.99839884762, 191.4482661116], [769314e-11, 0.81629615911, 9437.762934887], [499915e-11, 4.12340210074, 15720.8387848784], [326221e-11, 4.59056473097, 10404.7338123226], [429498e-11, 3.58642859752, 19367.1891622328], [326967e-11, 5.67736583705, 5507.5532386674], [231937e-11, 3.16251057072, 9153.9036160218], [179695e-11, 4.65337915578, 1109.3785520934], [128263e-11, 4.22604493736, 20.7753954924], [155464e-11, 5.57043888948, 19651.048481098], [127907e-11, 0.96209822685, 5661.3320491522], [105547e-11, 1.53721191253, 801.8209311238], [85722e-11, 0.35589249966, 3154.6870848956], [99121e-11, 0.83288185132, 213.299095438], [98804e-11, 5.39389655503, 13367.9726311066], [82094e-11, 3.21596990826, 18837.49819713819], [88031e-11, 3.88868860307, 9999.986450773], [71577e-11, 0.11145739345, 11015.1064773348], [56122e-11, 4.24039855475, 7.1135470008], [70239e-11, 0.67458813282, 23581.2581773176], [50796e-11, 0.24531603049, 11322.6640983044], [46111e-11, 5.31576465717, 18073.7049386502], [44574e-11, 6.06282201966, 40853.142184844], [42594e-11, 5.3287333721, 2352.8661537718], [42635e-11, 1.7995542168, 7084.8967811152], [41177e-11, 0.36240972161, 382.8965322232], [35749e-11, 2.70448479296, 10206.1719992102], [33893e-11, 2.02347322198, 6283.0758499914], [29138e-11, 3.59230925768, 22003.9146348698], [28479e-11, 2.22375414002, 1059.3819301892], [2985e-10, 4.02176977477, 10239.5838660108], [33252e-11, 2.10025596509, 27511.4678735372], [30172e-11, 4.9419191989, 13745.3462390224], [29252e-11, 3.51392387787, 283.8593188652], [24424e-11, 2.70177493852, 8624.2126509272], [20274e-11, 3.79493637509, 14143.4952424306], [24322e-11, 4.27814493315, 5.5229243074], [2626e-10, 0.54067587552, 17298.1823273262], [20492e-11, 0.58547075036, 38.0276726358], [18988e-11, 4.13811500642, 4551.9534970588], [23739e-11, 4.82870797552, 6872.6731195112], [15885e-11, 1.50067222283, 8635.9420037632], [19069e-11, 6.12025580313, 29050.7837433492], [18269e-11, 3.04740408477, 19999.97290154599], [13656e-11, 4.41336292334, 3532.0606928114], [17094e-11, 3.5216152643, 31441.6775697568], [10955e-11, 2.84562790076, 18307.8072320436], [11048e-11, 2.58361219075, 9786.687355335], [10576e-11, 0.85419784436, 10596.1820784342], [11599e-11, 5.81007422699, 19896.8801273274], [11807e-11, 1.91250672543, 21228.3920235458], [10105e-11, 2.34270786693, 10742.9765113056]], [[10213.52943052898, 0, 0], [95707712e-11, 2.46424448979, 10213.285546211], [14444977e-11, 0.51624564679, 20426.571092422], [213374e-11, 1.79547929368, 30639.856638633], [151669e-11, 6.10635282369, 1577.3435424478], [173904e-11, 2.65535879443, 26.2983197998], [82233e-11, 5.7023413373, 191.4482661116], [69734e-11, 2.68136034979, 9437.762934887], [52408e-11, 3.60013087656, 775.522611324]], [[54127076e-11, 0, 0], [389146e-10, 0.34514360047, 10213.285546211], [133788e-10, 2.02011286082, 20426.571092422]], [], [], []], B: [[[0.05923638472, 0.26702775813, 10213.285546211], [40107978e-11, 1.14737178106, 20426.571092422], [32814918e-11, 3.14159265359, 0], [1011392e-11, 1.08946123021, 30639.856638633], [149458e-11, 6.25390296069, 18073.7049386502], [137788e-11, 0.86020146523, 1577.3435424478], [129973e-11, 3.67152483651, 9437.762934887], [119507e-11, 3.70468812804, 2352.8661537718], [107971e-11, 4.53903677647, 22003.9146348698], [92029e-11, 1.53954562706, 9153.9036160218], [52982e-11, 2.28138172277, 5507.5532386674], [45617e-11, 0.72319641722, 10239.5838660108], [38855e-11, 2.93437865147, 10186.9872264112], [43491e-11, 6.14015776699, 11790.6290886588], [417e-9, 5.99126845246, 19896.8801273274], [39644e-11, 3.86842095901, 8635.9420037632], [39175e-11, 3.94960351174, 529.6909650946], [3332e-10, 4.83194909595, 14143.4952424306], [23711e-11, 2.90646621218, 10988.808157535], [235e-9, 2.00770618322, 13367.9726311066], [21809e-11, 2.69701424951, 19651.048481098], [20653e-11, 0.98666685459, 775.522611324], [16976e-11, 4.13711782135, 10021.8372800994], [17835e-11, 5.96268643102, 25934.1243310894], [14949e-11, 5.61075168206, 10404.7338123226], [18579e-11, 1.80529277514, 40853.142184844], [15407e-11, 3.29563855296, 11015.1064773348], [12936e-11, 5.42651448496, 29580.4747084438], [11962e-11, 3.57604253827, 10742.9765113056], [11827e-11, 1.190709196, 8624.2126509272], [11466e-11, 5.12780364967, 6283.0758499914], [13129e-11, 5.70735942511, 9683.5945811164]], [[0.00513347602, 1.80364310797, 10213.285546211], [43801e-9, 3.38615711591, 20426.571092422], [196586e-11, 2.53001197486, 30639.856638633], [199162e-11, 0, 0]], [[22377665e-11, 3.38509143877, 10213.285546211], [281739e-11, 0, 0], [173164e-11, 5.25563766915, 20426.571092422]], [[646671e-11, 4.99166565277, 10213.285546211]], [], []], R: [[[0.72334820905, 0, 0], [0.00489824185, 4.02151832268, 10213.285546211], [1658058e-11, 4.90206728012, 20426.571092422], [1632093e-11, 2.84548851892, 7860.4193924392], [1378048e-11, 1.128465906, 11790.6290886588], [498399e-11, 2.58682187717, 9683.5945811164], [373958e-11, 1.42314837063, 3930.2096962196], [263616e-11, 5.5293818592, 9437.762934887], [237455e-11, 2.55135903978, 15720.8387848784], [221983e-11, 2.01346776772, 19367.1891622328], [119467e-11, 3.01975365264, 10404.7338123226], [125896e-11, 2.72769833559, 1577.3435424478], [76178e-11, 1.59577224486, 9153.9036160218], [85336e-11, 3.98607953754, 19651.048481098], [74347e-11, 4.11957854039, 5507.5532386674], [41904e-11, 1.64273363458, 18837.49819713819], [42493e-11, 3.81864530735, 13367.9726311066], [3943e-10, 5.39019422358, 23581.2581773176], [29042e-11, 5.67739528728, 5661.3320491522], [27555e-11, 5.72392407794, 775.522611324], [27283e-11, 4.82151812709, 11015.1064773348], [31274e-11, 2.31806719544, 9999.986450773], [197e-9, 4.96157560245, 11322.6640983044], [19809e-11, 0.53189326492, 27511.4678735372], [13567e-11, 3.75530870628, 18073.7049386502], [12921e-11, 1.13381083556, 10206.1719992102], [16215e-11, 0.5645383429, 529.6909650946], [11821e-11, 5.09025877427, 3154.6870848956], [11728e-11, 0.23432298744, 7084.8967811152], [13079e-11, 5.24353197586, 17298.1823273262], [1318e-10, 3.37207825651, 13745.3462390224], [10818e-11, 2.45024712908, 10239.5838660108], [11438e-11, 4.56838894696, 29050.7837433492], [10652e-11, 1.9552839614, 31441.6775697568], [10357e-11, 1.20234990061, 15874.6175953632]], [[34551039e-11, 0.89198710598, 10213.285546211], [234203e-11, 1.77224942714, 20426.571092422], [233998e-11, 3.14159265359, 0]], [[1406587e-11, 5.0636639519, 10213.285546211]], [], [], []] };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/vsop87d_earth.embedded.json
+var vsop87d_earth_embedded_default = { L: [[[1.75347045673, 0, 0], [0.03341656456, 4.66925680417, 6283.0758499914], [34894275e-11, 4.62610241759, 12566.1516999828], [3417571e-11, 2.82886579606, 3.523118349], [3497056e-11, 2.74411800971, 5753.3848848968], [3135896e-11, 3.62767041758, 77713.7714681205], [2676218e-11, 4.41808351397, 7860.4193924392], [2342687e-11, 6.13516237631, 3930.2096962196], [1273166e-11, 2.03709655772, 529.6909650946], [1324292e-11, 0.74246356352, 11506.7697697936], [901855e-11, 2.04505443513, 26.2983197998], [1199167e-11, 1.10962944315, 1577.3435424478], [857223e-11, 3.50849156957, 398.1490034082], [779786e-11, 1.17882652114, 5223.6939198022], [99025e-10, 5.23268129594, 5884.9268465832], [753141e-11, 2.53339053818, 5507.5532386674], [505264e-11, 4.58292563052, 18849.2275499742], [492379e-11, 4.20506639861, 775.522611324], [356655e-11, 2.91954116867, 0.0673103028], [284125e-11, 1.89869034186, 796.2980068164], [24281e-10, 0.34481140906, 5486.777843175], [317087e-11, 5.84901952218, 11790.6290886588], [271039e-11, 0.31488607649, 10977.078804699], [20616e-10, 4.80646606059, 2544.3144198834], [205385e-11, 1.86947813692, 5573.1428014331], [202261e-11, 2.45767795458, 6069.7767545534], [126184e-11, 1.0830263021, 20.7753954924], [155516e-11, 0.83306073807, 213.299095438], [115132e-11, 0.64544911683, 0.9803210682], [102851e-11, 0.63599846727, 4694.0029547076], [101724e-11, 4.26679821365, 7.1135470008], [99206e-11, 6.20992940258, 2146.1654164752], [132212e-11, 3.41118275555, 2942.4634232916], [97607e-11, 0.6810127227, 155.4203994342], [85128e-11, 1.29870743025, 6275.9623029906], [74651e-11, 1.75508916159, 5088.6288397668], [101895e-11, 0.97569221824, 15720.8387848784], [84711e-11, 3.67080093025, 71430.69561812909], [73547e-11, 4.67926565481, 801.8209311238], [73874e-11, 3.50319443167, 3154.6870848956], [78756e-11, 3.03698313141, 12036.4607348882], [79637e-11, 1.807913307, 17260.1546546904], [85803e-11, 5.98322631256, 161000.6857376741], [56963e-11, 2.78430398043, 6286.5989683404], [61148e-11, 1.81839811024, 7084.8967811152], [69627e-11, 0.83297596966, 9437.762934887], [56116e-11, 4.38694880779, 14143.4952424306], [62449e-11, 3.97763880587, 8827.3902698748], [51145e-11, 0.28306864501, 5856.4776591154], [55577e-11, 3.47006009062, 6279.5527316424], [41036e-11, 5.36817351402, 8429.2412664666], [51605e-11, 1.33282746983, 1748.016413067], [51992e-11, 0.18914945834, 12139.5535091068], [49e-8, 0.48735065033, 1194.4470102246], [392e-9, 6.16832995016, 10447.3878396044], [35566e-11, 1.77597314691, 6812.766815086], [3677e-10, 6.04133859347, 10213.285546211], [36596e-11, 2.56955238628, 1059.3819301892], [33291e-11, 0.59309499459, 17789.845619785], [35954e-11, 1.70876111898, 2352.8661537718], [40938e-11, 2.39850881707, 19651.048481098], [30047e-11, 2.73975123935, 1349.8674096588], [30412e-11, 0.44294464135, 83996.84731811189], [23663e-11, 0.48473567763, 8031.0922630584], [23574e-11, 2.06527720049, 3340.6124266998], [21089e-11, 4.14825464101, 951.7184062506], [24738e-11, 0.21484762138, 3.5904286518], [25352e-11, 3.16470953405, 4690.4798363586], [2282e-10, 5.22197888032, 4705.7323075436], [21419e-11, 1.42563735525, 16730.4636895958], [21891e-11, 5.55594302562, 553.5694028424], [17481e-11, 4.56052900359, 135.0650800354], [19925e-11, 5.22208471269, 12168.0026965746], [1986e-10, 5.77470167653, 6309.3741697912], [203e-9, 0.37133792946, 283.8593188652], [14421e-11, 4.19315332546, 242.728603974], [16225e-11, 5.98837722564, 11769.8536931664], [15077e-11, 4.19567181073, 6256.7775301916], [19124e-11, 3.82219996949, 23581.2581773176], [18888e-11, 5.38626880969, 149854.4001348079], [14346e-11, 3.72355084422, 38.0276726358], [17898e-11, 2.21490735647, 13367.9726311066], [12054e-11, 2.62229588349, 955.5997416086], [11287e-11, 0.17739328092, 4164.311989613], [13971e-11, 4.40138139996, 6681.2248533996], [13621e-11, 1.88934471407, 7632.9432596502], [12503e-11, 1.13052412208, 5.5229243074], [10498e-11, 5.35909518669, 1592.5960136328], [10327e-11, 6.19982566125, 6438.4962494256], [12003e-11, 1.003514567, 632.7837393132], [10827e-11, 0.32734520222, 103.0927742186], [10005e-11, 6.0291496328, 5746.271337896], [10523e-11, 0.93871805506, 11926.2544136688]], [[6283.31966747491, 0, 0], [0.00206058863, 2.67823455584, 6283.0758499914], [430343e-10, 2.63512650414, 12566.1516999828], [425264e-11, 1.59046980729, 3.523118349], [108977e-11, 2.96618001993, 1577.3435424478], [93478e-11, 2.59212835365, 18849.2275499742], [119261e-11, 5.79557487799, 26.2983197998], [72122e-11, 1.13846158196, 529.6909650946], [67768e-11, 1.87472304791, 398.1490034082], [67327e-11, 4.40918235168, 5507.5532386674], [59027e-11, 2.8879703846, 5223.6939198022], [55976e-11, 2.17471680261, 155.4203994342], [45407e-11, 0.39803079805, 796.2980068164]], [[5291887e-10, 0, 0], [8719837e-11, 1.07209665242, 6283.0758499914], [309125e-11, 0.86728818832, 12566.1516999828]], [], [], []], B: [[[27962e-10, 3.19870156017, 84334.66158130829], [101643e-11, 5.42248619256, 5507.5532386674], [80445e-11, 3.88013204458, 5223.6939198022], [43806e-11, 3.70444689758, 2352.8661537718], [31933e-11, 4.00026369781, 1577.3435424478], [22724e-11, 3.9847383156, 1047.7473117547], [16392e-11, 3.56456119782, 5856.4776591154], [18141e-11, 4.98367470263, 6283.0758499914], [14443e-11, 3.70275614914, 9437.762934887], [14304e-11, 3.41117857525, 10213.285546211], [11246e-11, 4.8282069053, 14143.4952424306], [109e-9, 2.08574562327, 6812.766815086], [10367e-11, 4.05663927946, 71092.88135493269]], [], [], [], []], R: [[[1.00013988799, 0, 0], [0.01670699626, 3.09846350771, 6283.0758499914], [13956023e-11, 3.0552460962, 12566.1516999828], [308372e-10, 5.19846674381, 77713.7714681205], [1628461e-11, 1.17387749012, 5753.3848848968], [1575568e-11, 2.84685245825, 7860.4193924392], [924799e-11, 5.45292234084, 11506.7697697936], [542444e-11, 4.56409149777, 3930.2096962196], [47211e-10, 3.66100022149, 5884.9268465832], [32878e-10, 5.89983646482, 5223.6939198022], [345983e-11, 0.96368617687, 5507.5532386674], [306784e-11, 0.29867139512, 5573.1428014331], [174844e-11, 3.01193636534, 18849.2275499742], [243189e-11, 4.27349536153, 11790.6290886588], [211829e-11, 5.84714540314, 1577.3435424478], [185752e-11, 5.02194447178, 10977.078804699], [109835e-11, 5.05510636285, 5486.777843175], [98316e-11, 0.88681311277, 6069.7767545534], [86499e-11, 5.68959778254, 15720.8387848784], [85825e-11, 1.27083733351, 161000.6857376741], [62916e-11, 0.92177108832, 529.6909650946], [57056e-11, 2.01374292014, 83996.84731811189], [64903e-11, 0.27250613787, 17260.1546546904], [49384e-11, 3.24501240359, 2544.3144198834], [55736e-11, 5.24159798933, 71430.69561812909], [42515e-11, 6.01110242003, 6275.9623029906], [46963e-11, 2.57805070386, 775.522611324], [38968e-11, 5.36071738169, 4694.0029547076], [44661e-11, 5.53715807302, 9437.762934887], [3566e-10, 1.67468058995, 12036.4607348882], [31921e-11, 0.18368229781, 5088.6288397668], [31846e-11, 1.77775642085, 398.1490034082], [33193e-11, 0.24370300098, 7084.8967811152], [38245e-11, 2.39255343974, 8827.3902698748], [28464e-11, 1.21344868176, 6286.5989683404], [3749e-10, 0.82952922332, 19651.048481098], [36957e-11, 4.90107591914, 12139.5535091068], [34537e-11, 1.84270693282, 2942.4634232916], [26275e-11, 4.58896850401, 10447.3878396044], [24596e-11, 3.78660875483, 8429.2412664666], [23587e-11, 0.26866117066, 796.2980068164], [27793e-11, 1.89934330904, 6279.5527316424], [23927e-11, 4.99598548138, 5856.4776591154], [20349e-11, 4.65267995431, 2146.1654164752], [23287e-11, 2.80783650928, 14143.4952424306], [22103e-11, 1.95004702988, 3154.6870848956], [19506e-11, 5.38227371393, 2352.8661537718], [17958e-11, 0.19871379385, 6812.766815086], [17174e-11, 4.43315560735, 10213.285546211], [1619e-10, 5.23160507859, 17789.845619785], [17314e-11, 6.15200787916, 16730.4636895958], [13814e-11, 5.18962074032, 8031.0922630584], [18833e-11, 0.67306674027, 149854.4001348079], [18331e-11, 2.25348733734, 23581.2581773176], [13641e-11, 3.68516118804, 4705.7323075436], [13139e-11, 0.65289581324, 13367.9726311066], [10414e-11, 4.33285688538, 11769.8536931664], [10169e-11, 1.59390681369, 4690.4798363586]], [[0.00103018608, 1.10748969588, 6283.0758499914], [1721238e-11, 1.06442301418, 12566.1516999828], [702215e-11, 3.14159265359, 0]], [[4359385e-11, 5.78455133738, 6283.0758499914]], [], [], []] };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/vsop87d_mars.embedded.json
+var vsop87d_mars_embedded_default = { L: [[[6.20347711583, 0, 0], [0.186563681, 5.05037100303, 3340.6124266998], [0.01108216792, 5.40099836958, 6681.2248533996], [91798394e-11, 5.75478745111, 10021.8372800994], [27744987e-11, 5.97049512942, 3.523118349], [1061023e-10, 2.93958524973, 2281.2304965106], [12315897e-11, 0.84956081238, 2810.9214616052], [8926772e-11, 4.15697845939, 0.0172536522], [8715688e-11, 6.11005159792, 13362.4497067992], [6797552e-11, 0.36462243626, 398.1490034082], [7774867e-11, 3.33968655074, 5621.8429232104], [3575079e-11, 1.66186540141, 2544.3144198834], [4161101e-11, 0.2281497533, 2942.4634232916], [307525e-10, 0.85696597082, 191.4482661116], [2628122e-11, 0.6480614357, 3337.0893083508], [2937543e-11, 6.07893711408, 0.0673103028], [238942e-10, 5.03896401349, 796.2980068164], [2579842e-11, 0.02996706197, 3344.1355450488], [152814e-10, 1.14979306228, 6151.533888305], [1798808e-11, 0.65634026844, 529.6909650946], [1264356e-11, 3.62275092231, 5092.1519581158], [1286232e-11, 3.06795924626, 2146.1654164752], [1546408e-11, 2.91579633392, 1751.539531416], [1024907e-11, 3.69334293555, 8962.4553499102], [891567e-11, 0.1829389909, 16703.062133499], [85876e-10, 2.40093704204, 2914.0142358238], [832718e-11, 2.46418591282, 3340.5951730476], [832724e-11, 4.49495753458, 3340.629680352], [712899e-11, 3.66336014788, 1059.3819301892], [748724e-11, 3.82248399468, 155.4203994342], [723863e-11, 0.67497565801, 3738.761430108], [635557e-11, 2.92182704275, 8432.7643848156], [655163e-11, 0.48864075176, 3127.3133312618], [550472e-11, 3.81001205408, 0.9803210682], [552746e-11, 4.47478863016, 1748.016413067], [425972e-11, 0.55365138172, 6283.0758499914], [415132e-11, 0.49662314774, 213.299095438], [472164e-11, 3.6254781941, 1194.4470102246], [306552e-11, 0.38052862973, 6684.7479717486], [312141e-11, 0.99853322843, 6677.7017350506], [293199e-11, 4.22131277914, 20.7753954924], [302377e-11, 4.48618150321, 3532.0606928114], [274028e-11, 0.54222141841, 3340.545116397], [281073e-11, 5.88163372945, 1349.8674096588], [231185e-11, 1.28240685294, 3870.3033917944], [2836e-9, 5.76885494123, 3149.1641605882], [236114e-11, 5.75504515576, 3333.498879699], [274035e-11, 0.13372501211, 3340.6797370026], [299396e-11, 2.78323705697, 6254.6266625236], [204161e-11, 2.82133266185, 1221.8485663214], [238857e-11, 5.37155471672, 4136.9104335162], [188639e-11, 1.49103016486, 9492.1463150048], [221225e-11, 3.50466672203, 382.8965322232], [179196e-11, 1.00561112574, 951.7184062506], [17211e-10, 0.43943041719, 5486.777843175], [193126e-11, 3.35715137745, 3.5904286518], [144305e-11, 1.41874193418, 135.0650800354], [160011e-11, 3.94854735192, 4562.4609930212], [174068e-11, 2.41360332576, 553.5694028424], [130993e-11, 4.04491720264, 12303.06777661], [138245e-11, 4.30145176915, 7.1135470008], [128062e-11, 1.80665643332, 5088.6288397668], [139897e-11, 3.32592516164, 2700.7151403858], [128102e-11, 2.20806651008, 1592.5960136328], [116945e-11, 3.12805282207, 7903.073419721], [110375e-11, 1.05195079687, 242.728603974], [113486e-11, 3.70070798123, 1589.0728952838], [10009e-10, 3.24343740861, 11773.3768115154], [95592e-11, 0.53954181149, 20043.6745601988], [98947e-11, 4.8455829474, 6681.2421070518], [104541e-11, 0.78535382076, 8827.3902698748], [84187e-11, 3.9897072073, 4399.994356889], [86931e-11, 2.20186740523, 11243.6858464208], [71437e-11, 2.80307550016, 3185.1920272656], [72091e-11, 5.84672102525, 5884.9268465832], [73476e-11, 2.18428012567, 8429.2412664666], [98946e-11, 2.81481140371, 6681.2075997474], [68414e-11, 2.73834914412, 2288.3440435114], [86751e-11, 1.02092221563, 7079.3738568078], [6532e-10, 2.68118597578, 28.4491874678], [83749e-11, 3.2025613099, 4690.4798363586], [75034e-11, 0.76643418252, 6467.9257579616], [68984e-11, 3.76399731788, 6041.3275670856], [66706e-11, 0.73630620766, 3723.508958923], [63314e-11, 4.5277147047, 426.598190876], [61683e-11, 6.16831509419, 2274.1169495098], [52256e-11, 0.89941531307, 9623.6882766912], [55488e-11, 4.6062546702, 4292.3308329504], [51332e-11, 4.14823636534, 3341.592747768], [56629e-11, 5.06250410206, 15.252471185], [63376e-11, 0.91296240798, 3553.9115221378], [45829e-11, 0.78784235062, 1990.745017041], [48542e-11, 3.95670418719, 4535.0594369244], [41223e-11, 6.02019329922, 3894.1818295422], [41939e-11, 3.58326425115, 8031.0922630584], [56396e-11, 1.68727150304, 6872.6731195112], [55909e-11, 3.46260833495, 263.0839233728], [51678e-11, 2.81307492682, 3339.6321056316], [40671e-11, 3.13832621829, 9595.2390892234], [38107e-11, 0.7340194632, 10025.3603984484], [39495e-11, 5.6322539216, 3097.88382272579], [44174e-11, 3.19529736702, 5628.9564702112], [36716e-11, 2.63720775102, 692.1576012268], [45905e-11, 0.28718981497, 5614.7293762096], [38352e-11, 5.82880707426, 3191.0492295652], [38206e-11, 2.34835984063, 162.4666361322], [32562e-11, 0.48400659333, 6681.2921637024], [37135e-11, 0.68508150774, 2818.035008606], [31168e-11, 3.98160912982, 20.3553193988], [32561e-11, 0.89250316888, 6681.1575430968], [37752e-11, 4.15482955299, 2803.8079146044], [33626e-11, 6.11992401052, 6489.776587288], [29007e-11, 2.42707385674, 3319.8370312074], [3879e-10, 1.35198498795, 10018.3141617504], [33148e-11, 1.14023770004, 5.5229243074], [27584e-11, 1.59691203058, 7210.9158184942], [28686e-11, 5.72055456734, 7477.522860216], [34031e-11, 2.59544082509, 11769.8536931664], [2538e-10, 0.52093116112, 10.6366653498], [26357e-11, 1.34532646574, 3496.032826134], [24554e-11, 4.00323183088, 11371.7046897582], [25637e-11, 0.2496352342, 522.5774180938], [27278e-11, 4.55645328122, 3361.3878221922], [23764e-11, 1.84058377256, 12832.7587417046], [22816e-11, 3.52628212106, 1648.4467571974], [22274e-11, 0.72106133721, 266.6070417218], [21202e-11, 3.11824472284, 2957.7158944766], [20158e-11, 3.67131504946, 1758.6530784168], [2153e-10, 6.15388757177, 3264.3463554242], [20093e-11, 1.08247416065, 7064.1213856228], [21343e-11, 4.28218757863, 4032.7700279266], [2754e-10, 6.08389942337, 6674.1113063988], [19849e-11, 2.37668920745, 10713.9948813262], [25512e-11, 3.43242352804, 3443.7052009184], [22542e-11, 5.64861703438, 2388.8940204492], [24378e-11, 0.96994696413, 632.7837393132], [23079e-11, 4.74990214223, 3347.7259737006], [17709e-11, 3.69742343974, 3344.2028553516], [22662e-11, 3.95446324417, 4989.0591838972], [22604e-11, 5.24082917494, 3205.5473466644], [16811e-11, 5.48619684111, 3.881335358], [18422e-11, 4.22535881468, 2787.0430238574], [22737e-11, 4.98520896596, 7632.9432596502], [16648e-11, 2.52823633184, 14584.2982731206], [20963e-11, 4.27878216453, 5099.2655051166], [16042e-11, 1.76786752521, 3475.6775067352], [15816e-11, 3.13240869691, 59.3738619136], [18113e-11, 3.25756020453, 3337.021998048], [19295e-11, 3.23911854642, 7.046236698], [16772e-11, 4.3973150711, 15643.6802033098], [17555e-11, 4.09197396097, 74.7815985673], [13704e-11, 2.5411701816, 4933.2084403326], [16011e-11, 1.54669633224, 14054.607308026], [13547e-11, 4.04152185347, 4929.6853219836], [14566e-11, 3.45210993051, 7373.3824546264], [13926e-11, 5.40797129468, 10973.55568635], [14246e-11, 0.59808746067, 23.8784377478], [14023e-11, 1.44218648988, 10404.7338123226], [16051e-11, 3.79409950488, 2118.7638603784], [13714e-11, 3.59050634457, 15113.9892382152], [18038e-11, 4.25391532, 2487.4160449478], [15846e-11, 0.56901288692, 103.0927742186], [13403e-11, 5.16920432994, 10213.285546211], [16069e-11, 2.36895958451, 3265.8308281325], [12773e-11, 0.10483085657, 7234.794256242], [12199e-11, 1.73079687044, 36.0278666774], [12283e-11, 5.19940030635, 10021.8545337516], [11945e-11, 5.47997890162, 2921.1277828246], [1189e-10, 4.76593905835, 5828.0284716476], [12283e-11, 3.16862882612, 10021.8200264472], [13274e-11, 6.1780690534, 1744.4259844152], [11777e-11, 5.727315509, 0.42007609361], [1234e-10, 2.52146766331, 2906.900688823], [14458e-11, 4.38010658432, 316.3918696566], [10639e-11, 3.45016942919, 639.897286314], [10925e-11, 0.60397688999, 5085.038411115], [10645e-11, 5.47696728127, 419.4846438752], [10797e-11, 1.37191539718, 10419.9862835076], [10565e-11, 1.09061610786, 12168.0026965746], [12733e-11, 1.79883375851, 13745.3462390224], [12156e-11, 4.42295240981, 14712.317116458], [10685e-11, 4.33894776374, 7740.6067835888], [10041e-11, 1.3829466683, 3583.3410306738], [10585e-11, 0.89641284928, 23384.2869868986]], [[3340.85627474342, 0, 0], [0.01458227051, 3.60426053609, 3340.6124266998], [0.00164901343, 3.92631250962, 6681.2248533996], [19963338e-11, 4.2659406103, 10021.8372800994], [3452399e-11, 4.73210386365, 3.523118349], [248548e-10, 4.61277567318, 13362.4497067992], [841551e-11, 4.45858256765, 2281.2304965106], [537566e-11, 5.01589727492, 398.1490034082], [521041e-11, 4.99422678175, 3344.1355450488], [432614e-11, 2.5606640286, 191.4482661116], [429656e-11, 5.31646162367, 155.4203994342], [381747e-11, 3.53881289437, 796.2980068164], [314129e-11, 4.96335266049, 16703.062133499], [282804e-11, 3.15967518204, 2544.3144198834], [205664e-11, 4.5689145566, 2146.1654164752], [168805e-11, 1.32894813366, 3337.0893083508], [157587e-11, 4.18501035954, 1751.539531416], [133686e-11, 2.23325104196, 0.9803210682], [116561e-11, 2.21347652545, 1059.3819301892], [117591e-11, 6.02407213861, 6151.533888305], [113595e-11, 5.42803224317, 3738.761430108], [133563e-11, 5.97421903927, 1748.016413067], [91098e-11, 1.09627836591, 1349.8674096588], [83301e-11, 5.29636626272, 6684.7479717486], [113876e-11, 2.12869455089, 1194.4470102246], [80776e-11, 4.42813405865, 529.6909650946], [79531e-11, 2.2486426633, 8962.4553499102], [72505e-11, 5.8420816324, 242.728603974], [72946e-11, 2.50189460554, 951.7184062506], [71487e-11, 3.85636094435, 2914.0142358238], [85342e-11, 3.90854841008, 553.5694028424], [67582e-11, 5.02327686473, 382.8965322232], [65089e-11, 1.01802439311, 3340.5951730476], [65089e-11, 3.04879603978, 3340.629680352], [61508e-11, 4.151831598, 3149.1641605882], [48477e-11, 4.87362121538, 213.299095438], [46584e-11, 1.31452419914, 3185.1920272656], [5652e-10, 3.8881369932, 4136.9104335162], [47613e-11, 1.18238046057, 3333.498879699], [41343e-11, 0.71385375517, 1592.5960136328], [40055e-11, 5.31611875491, 20043.6745601988], [40272e-11, 2.72542480614, 7.1135470008]], [[58015791e-11, 2.04979463279, 3340.6124266998], [54187645e-11, 0, 0], [13908426e-11, 2.45742359888, 6681.2248533996], [2465104e-11, 2.80000020929, 10021.8372800994], [398379e-11, 3.14118428289, 13362.4497067992], [222022e-11, 3.19436080019, 3.523118349]], [[1482423e-11, 0.44434694876, 3340.6124266998], [662095e-11, 0.88469178686, 6681.2248533996]], [], []], B: [[[0.03197134986, 3.76832042432, 3340.6124266998], [0.00298033234, 4.10616996243, 6681.2248533996], [0.00289104742, 0, 0], [31365538e-11, 4.44651052853, 10021.8372800994], [34841e-9, 4.78812547889, 13362.4497067992], [442999e-11, 5.65233015876, 3337.0893083508], [443401e-11, 5.02642620491, 3344.1355450488], [399109e-11, 5.130568147, 16703.062133499], [292506e-11, 3.79290644595, 2281.2304965106], [181982e-11, 6.13648011704, 6151.533888305], [163159e-11, 4.26399626634, 529.6909650946], [159678e-11, 2.23194610246, 1059.3819301892], [139323e-11, 2.41796344238, 8962.4553499102], [149297e-11, 2.16501209917, 5621.8429232104], [142686e-11, 1.1821501611, 3340.5951730476], [142685e-11, 3.2129218082, 3340.629680352], [82544e-11, 5.36667872319, 6684.7479717486], [7364e-10, 5.09187524843, 398.1490034082], [7266e-10, 5.53775710437, 6283.0758499914], [86377e-11, 5.74429648412, 3738.761430108], [83276e-11, 5.98866315739, 6677.7017350506], [60116e-11, 3.67960808826, 796.2980068164], [63111e-11, 0.73049113369, 5884.9268465832], [62338e-11, 4.85071999184, 2942.4634232916], [46951e-11, 5.54339723804, 3340.545116397], [46953e-11, 5.13486627234, 3340.6797370026], [4663e-10, 5.47361665459, 20043.6745601988], [45588e-11, 2.13262507507, 2810.9214616052], [41269e-11, 0.20003189001, 9492.1463150048], [47199e-11, 4.52184736343, 3149.1641605882], [3854e-10, 4.08008443274, 4136.9104335162], [33069e-11, 4.06581918329, 1751.539531416], [29694e-11, 5.92218297386, 3532.0606928114], [32736e-11, 2.62071056958, 2914.0142358238], [29521e-11, 2.75342566734, 12303.06777661], [28169e-11, 2.06282533993, 5486.777843175], [28618e-11, 4.94710527914, 3870.3033917944], [26603e-11, 3.5508584402, 6681.2421070518], [26603e-11, 1.52008675291, 6681.2075997474], [23336e-11, 2.27624532707, 1589.0728952838], [26052e-11, 2.60064548916, 4399.994356889], [22637e-11, 2.27507466406, 1194.4470102246], [18887e-11, 6.04416196149, 7079.3738568078], [14846e-11, 3.41358603159, 5088.6288397668], [19947e-11, 2.67365368471, 8432.7643848156], [14682e-11, 5.89211938785, 9623.6882766912], [14152e-11, 2.42512744356, 3333.498879699], [1331e-10, 2.62839773036, 426.598190876], [14008e-11, 1.67425558329, 6254.6266625236], [15104e-11, 2.81013535571, 3496.032826134], [13011e-11, 5.70759434129, 10025.3603984484], [1208e-10, 1.51804981987, 3185.1920272656], [13183e-11, 0.04521207632, 10018.3141617504], [11554e-11, 5.5741897182, 191.4482661116], [11196e-11, 0.55829576311, 5092.1519581158], [1153e-10, 2.13314819584, 11773.3768115154], [10435e-11, 5.72414012635, 6467.9257579616]], [[0.00350068845, 5.36847836211, 3340.6124266998], [1411603e-10, 3.14159265359, 0], [9670755e-11, 5.47877786506, 6681.2248533996], [1471918e-11, 3.20205766795, 10021.8372800994], [425864e-11, 3.40843812875, 13362.4497067992], [102039e-11, 0.77617286189, 3337.0893083508], [78848e-11, 3.71768293865, 16703.062133499]], [[1672669e-10, 0.60221392419, 3340.6124266998], [4986799e-11, 3.14159265359, 0], [302141e-11, 5.55871276021, 6681.2248533996]], [], [], []], R: [[[1.53033488276, 0, 0], [0.14184953153, 3.47971283519, 3340.6124266998], [0.00660776357, 3.81783442097, 6681.2248533996], [46179117e-11, 4.15595316284, 10021.8372800994], [8109738e-11, 5.55958460165, 2810.9214616052], [7485315e-11, 1.77238998069, 5621.8429232104], [5523193e-11, 1.3643631888, 2281.2304965106], [382516e-10, 4.49407182408, 13362.4497067992], [2306539e-11, 0.09081742493, 2544.3144198834], [1999399e-11, 5.36059605227, 3337.0893083508], [2484385e-11, 4.92545577893, 2942.4634232916], [1960198e-11, 4.74249386323, 3344.1355450488], [1167115e-11, 2.11261501155, 5092.1519581158], [1102828e-11, 5.0090826416, 398.1490034082], [899077e-11, 4.40790433994, 529.6909650946], [992252e-11, 5.83862401067, 6151.533888305], [807348e-11, 2.10216647104, 1059.3819301892], [79791e-10, 3.44839026172, 796.2980068164], [74098e-10, 1.49906336892, 2146.1654164752], [69234e-10, 2.13378814785, 8962.4553499102], [633144e-11, 0.89353285018, 3340.5951730476], [725583e-11, 1.24516913473, 8432.7643848156], [63314e-10, 2.92430448169, 3340.629680352], [574352e-11, 0.82896196337, 2914.0142358238], [526187e-11, 5.38292276228, 3738.761430108], [629976e-11, 1.28738135858, 1751.539531416], [472776e-11, 5.19850457873, 3127.3133312618], [348095e-11, 4.83219198908, 16703.062133499], [283702e-11, 2.90692294913, 3532.0606928114], [279552e-11, 5.25749247548, 6283.0758499914], [233827e-11, 5.10546492529, 5486.777843175], [219428e-11, 5.58340248784, 191.4482661116], [269891e-11, 3.76394728622, 5884.9268465832], [208333e-11, 5.25476080773, 3340.545116397], [275224e-11, 2.90818883832, 1748.016413067], [275501e-11, 1.21767967781, 6254.6266625236], [239133e-11, 2.03669896238, 1194.4470102246], [22319e-10, 4.19861593779, 3149.1641605882], [182686e-11, 5.08062683355, 6684.7479717486], [186213e-11, 5.69871555748, 6677.7017350506], [175995e-11, 5.95341786369, 3870.3033917944], [178613e-11, 4.18423025538, 3333.498879699], [208336e-11, 4.84626442122, 3340.6797370026], [228128e-11, 3.2552902062, 6872.6731195112], [144286e-11, 0.21296012258, 5088.6288397668], [163534e-11, 3.79889068111, 4136.9104335162], [13312e-10, 1.5391010671, 7903.073419721], [141759e-11, 2.47790321309, 4562.4609930212], [114941e-11, 4.31745088059, 1349.8674096588], [118781e-11, 2.12178071222, 1589.0728952838], [102096e-11, 6.18138550087, 9492.1463150048], [128555e-11, 5.49883294915, 8827.3902698748], [111538e-11, 0.55339169625, 11243.6858464208], [82498e-11, 1.6222704459, 11773.3768115154], [83212e-11, 0.61553380568, 8429.2412664666], [8447e-10, 0.6227459311, 1592.5960136328], [86659e-11, 1.74988330093, 2700.7151403858], [71826e-11, 2.47489899385, 12303.06777661], [85312e-11, 1.61621097912, 4690.4798363586], [63641e-11, 2.67334126661, 426.598190876], [68599e-11, 2.40197828418, 4399.994356889], [58559e-11, 4.72052787516, 213.299095438], [62015e-11, 1.10065866221, 1221.8485663214], [66509e-11, 2.21307705185, 6041.3275670856], [55811e-11, 1.23288325946, 3185.1920272656], [54989e-11, 5.72691385306, 951.7184062506], [52418e-11, 3.02366828926, 4292.3308329504], [55686e-11, 5.44686699242, 3723.508958923], [58959e-11, 3.26242666052, 6681.2421070518], [44629e-11, 2.0147364039, 8031.0922630584], [58959e-11, 1.23165502899, 6681.2075997474], [42444e-11, 2.26551590902, 155.4203994342], [38956e-11, 2.57760416009, 3341.592747768], [51561e-11, 5.72326937712, 7079.3738568078], [48939e-11, 5.61614696751, 3553.9115221378], [45414e-11, 5.43290921705, 6467.9257579616], [36435e-11, 4.43921812388, 3894.1818295422], [3598e-10, 1.15966567007, 2288.3440435114], [35265e-11, 5.49029710802, 1990.745017041], [42191e-11, 1.6325374276, 5628.9564702112], [44292e-11, 5.0034136685, 5614.7293762096], [33623e-11, 5.17029029766, 20043.6745601988], [43256e-11, 1.03732072925, 11769.8536931664], [39237e-11, 1.24237122859, 3339.6321056316], [31943e-11, 4.59258406791, 2274.1169495098], [30345e-11, 2.4417767013, 11371.7046897582], [32259e-11, 2.38215172582, 4535.0594369244], [3187e-10, 4.37521442752, 3.523118349], [2935e-10, 4.06034813442, 3097.88382272579], [31972e-11, 1.93970478412, 382.8965322232], [26166e-11, 5.58466944895, 9623.6882766912], [27904e-11, 4.25805969214, 3191.0492295652], [33065e-11, 0.85467740581, 553.5694028424], [27543e-11, 1.57668567401, 9595.2390892234], [25159e-11, 0.81355213242, 10713.9948813262], [2207e-10, 0.85747723964, 3319.8370312074], [24772e-11, 5.38970742761, 2818.035008606], [23359e-11, 6.01453778225, 3496.032826134], [24732e-11, 2.58034797703, 2803.8079146044], [19365e-11, 5.18528750472, 6681.2921637024], [19122e-11, 5.41968559451, 10025.3603984484], [19364e-11, 5.59378382138, 6681.1575430968], [1833e-10, 5.7956732424, 7064.1213856228], [18193e-11, 5.61307426173, 7.1135470008], [20392e-11, 4.53637816869, 6489.776587288], [2126e-10, 6.19160142215, 14054.607308026], [17094e-11, 1.55004739305, 2957.7158944766], [22791e-11, 3.41709388606, 7632.9432596502], [20585e-11, 2.98697279083, 3361.3878221922], [18005e-11, 2.81431094394, 4032.7700279266], [17049e-11, 6.15528099726, 10404.7338123226], [16488e-11, 3.84534700818, 10973.55568635], [16052e-11, 0.92823508003, 14584.2982731206], [21027e-11, 2.38474290907, 4989.0591838972], [16267e-11, 1.92321585819, 7373.3824546264], [16291e-11, 6.28233085307, 7210.9158184942], [18585e-11, 4.07325116588, 2388.8940204492], [15977e-11, 4.58368417141, 3264.3463554242], [19913e-11, 2.7351844595, 5099.2655051166], [19661e-11, 1.86285979, 3443.7052009184], [165e-9, 4.14061745086, 7477.522860216], [19495e-11, 6.03778234182, 10018.3141617504], [15104e-11, 2.65433427561, 2787.0430238574], [19099e-11, 0.22623441108, 13745.3462390224], [17163e-11, 3.18825562972, 3347.7259737006], [13423e-11, 2.12818658793, 3344.2028553516], [1541e-10, 2.2077350796, 2118.7638603784], [17238e-11, 3.67067776368, 3205.5473466644], [13113e-11, 4.27490214998, 14314.1681130498], [16451e-11, 2.86641622696, 14712.317116458], [13734e-11, 1.68629769646, 3337.021998048], [16659e-11, 4.52130808861, 6674.1113063988], [1183e-10, 0.19684525299, 3475.6775067352], [11767e-11, 3.22897247987, 5828.0284716476], [11886e-11, 4.82057654742, 7234.794256242], [10609e-11, 1.73997337551, 639.897286314], [11154e-11, 0.23859830185, 12832.7587417046], [1103e-10, 0.4454170644, 10213.285546211], [1024e-10, 5.74758340632, 242.728603974], [10051e-11, 2.45102946726, 4929.6853219836], [10061e-11, 0.78907665448, 9381.9399937854], [10065e-11, 5.37506605762, 5085.038411115], [11902e-11, 0.79897698904, 3265.8308281325], [10224e-11, 2.66497189021, 2487.4160449478]], [[0.0110743334, 2.0325052495, 3340.6124266998], [0.00103175886, 2.37071845682, 6681.2248533996], [128772e-9, 0, 0], [1081588e-10, 2.70888093803, 10021.8372800994], [119455e-10, 3.04702182503, 13362.4497067992], [438579e-11, 2.88835072628, 2281.2304965106], [395698e-11, 3.42324611291, 3344.1355450488], [182572e-11, 1.58428644001, 2544.3144198834], [13585e-10, 3.38507017993, 16703.062133499], [128204e-11, 0.6299122057, 1059.3819301892], [127068e-11, 1.9538977574, 796.2980068164], [118443e-11, 2.99761345074, 2146.1654164752], [128362e-11, 6.04343360441, 3337.0893083508], [87537e-11, 3.42052758979, 398.1490034082], [83026e-11, 3.85574986653, 3738.761430108], [75598e-11, 4.45101839349, 6151.533888305], [71999e-11, 2.7644218068, 529.6909650946], [66542e-11, 2.54892602695, 1751.539531416], [54314e-11, 0.67750943459, 8962.4553499102], [51035e-11, 3.72585409207, 6684.7479717486], [6643e-10, 4.40597549957, 1748.016413067], [47863e-11, 2.28527896843, 2914.0142358238], [49428e-11, 5.72959428364, 3340.5951730476], [49424e-11, 1.47717922226, 3340.629680352], [57518e-11, 0.54354327916, 1194.4470102246], [48318e-11, 2.58061691301, 3149.1641605882]], [[44242247e-11, 0.47930603943, 3340.6124266998], [8138042e-11, 0.86998398093, 6681.2248533996], [1274915e-11, 1.22594050809, 10021.8372800994], [187387e-11, 1.57298991982, 13362.4497067992]], [[1113107e-11, 5.14987350142, 3340.6124266998]], [], []] };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/vsop87d_jupiter.embedded.json
+var vsop87d_jupiter_embedded_default = { L: [[[0.59954691495, 0, 0], [0.09695898711, 5.06191793105, 529.6909650946], [0.00573610145, 1.44406205976, 7.1135470008], [0.0030638918, 5.41734729976, 1059.3819301892], [9717828e-10, 4.14264708819, 632.7837393132], [72903096e-11, 3.64042909255, 522.5774180938], [64263986e-11, 3.41145185203, 103.0927742186], [39806051e-11, 2.29376744855, 419.4846438752], [3885778e-10, 1.2723172486, 316.3918696566], [27964622e-11, 1.78454589485, 536.8045120954], [13589738e-11, 5.7748103159, 1589.0728952838], [8246362e-11, 3.58227961655, 206.1855484372], [8768686e-11, 3.63000324417, 949.1756089698], [7368057e-11, 5.08101125612, 735.8765135318], [6263171e-11, 0.02497643742, 213.299095438], [611405e-10, 4.51319531666, 1162.4747044078], [4905419e-11, 1.32084631684, 110.2063212194], [5305283e-11, 1.30671236848, 14.2270940016], [5305457e-11, 4.18625053495, 1052.2683831884], [4647249e-11, 4.69958109497, 3.9321532631], [3045009e-11, 4.31675960318, 426.598190876], [2610001e-11, 1.5666759485, 846.0828347512], [2028191e-11, 1.06376547379, 3.1813937377], [1764768e-11, 2.14148077766, 1066.49547719], [1722983e-11, 3.88036008872, 1265.5674786264], [1920959e-11, 0.97168928755, 639.897286314], [1633217e-11, 3.58201089758, 515.463871093], [1431997e-11, 4.29683690269, 625.6701923124], [973278e-11, 4.09764957065, 95.9792272178], [884439e-11, 2.43701426123, 412.3710968744], [732875e-11, 6.08534113239, 838.9692877504], [731072e-11, 3.80591233956, 1581.959348283], [691928e-11, 6.13368222939, 2118.7638603784], [70919e-10, 1.29272573658, 742.9900605326], [614464e-11, 4.10853496756, 1478.8665740644], [495224e-11, 3.75567461379, 323.5054166574], [581902e-11, 4.53967717552, 309.2783226558], [375657e-11, 4.70299124833, 1368.660252845], [389864e-11, 4.89716105852, 1692.1656695024], [341006e-11, 5.71452525783, 533.6231183577], [330458e-11, 4.74049819491, 0.0481841098], [440854e-11, 2.95818460943, 454.9093665273], [417266e-11, 1.03554430161, 2.4476805548], [24417e-10, 5.220208789, 728.762966531], [26154e-10, 1.87652461032, 0.9632078465], [256568e-11, 3.72410724159, 199.0720014364], [261009e-11, 0.82047246448, 380.12776796], [220382e-11, 1.65115015995, 543.9180590962], [201996e-11, 1.80684574186, 1375.7737998458], [207327e-11, 1.85461666594, 525.7588118315], [197046e-11, 5.29252149016, 1155.361157407], [235141e-11, 1.22693908124, 909.8187330546], [174809e-11, 5.90973505276, 956.2891559706], [149368e-11, 4.37745104275, 1685.0521225016], [175184e-11, 3.22634903433, 1898.3512179396], [175191e-11, 3.72966554761, 942.062061969], [157909e-11, 4.36483921766, 1795.258443721], [137871e-11, 1.31797920785, 1169.5882514086], [117495e-11, 2.5002214089, 1596.1864422846], [150502e-11, 3.90625022622, 74.7815985673], [116757e-11, 3.38920921041, 0.5212648618], [105895e-11, 4.55439798236, 526.5095713569], [130531e-11, 4.16867945489, 1045.1548361876], [141445e-11, 3.13568357861, 491.5579294568], [99511e-11, 1.42117395747, 532.8723588323], [96137e-11, 1.18156870005, 117.3198682202], [91758e-11, 0.85756633461, 1272.6810256272], [87695e-11, 1.21738140813, 453.424893819], [68507e-11, 2.35242959478, 2.9207613068], [66098e-11, 5.34386149468, 1471.7530270636], [77401e-11, 4.42676337124, 39.3568759152], [72006e-11, 4.23834923691, 2111.6503133776], [63406e-11, 4.97665525033, 0.7507595254], [59427e-11, 4.11130498612, 2001.4439921582], [62481e-11, 0.51211384012, 220.4126424388], [66532e-11, 2.98864358135, 2214.7430875962], [60194e-11, 4.12628179571, 4.192785694], [56012e-11, 1.15493222602, 21.3406410024], [52854e-11, 0.91207215543, 10.2949407385], [70297e-11, 5.14180555282, 835.0371344873], [51916e-11, 4.1004818002, 1258.4539316256], [46442e-11, 4.66531163524, 5.6290742925], [5819e-10, 5.86646380344, 5753.3848848968], [40103e-11, 4.68801114087, 0.1600586944], [46654e-11, 4.79394835282, 305.3461693927], [39298e-11, 4.25448423697, 853.196381752], [46042e-11, 5.1098351515, 4.665866446], [54459e-11, 1.57072704127, 983.1158589136], [3892e-10, 6.0759290558, 518.6452648307], [3845e-10, 2.43836870888, 433.7117378768], [468e-9, 3.54640538283, 5.4166259714], [4183e-10, 4.67982493646, 302.164775655], [3592e-10, 2.45088036239, 430.5303441391], [37888e-11, 0.21127448431, 2648.454825473], [3919e-10, 1.71835571629, 11.0457002639], [37567e-11, 6.19481310233, 831.8557407496], [35828e-11, 4.61459907698, 2008.557539159], [43402e-11, 0.14992289081, 528.2064923863], [31598e-11, 5.14073450755, 1788.1448967202], [29849e-11, 5.34441117167, 2221.856634597], [32811e-11, 5.28907118836, 88.865680217], [27686e-11, 1.85227036207, 0.2124483211], [2582e-10, 3.85920882494, 2317.8358618148], [24705e-11, 2.63495214991, 114.1384744825], [33844e-11, 1.00563073268, 9683.5945811164], [24266e-11, 3.82355417268, 1574.8458012822], [27111e-11, 2.80845435102, 18.1592472647], [26837e-11, 1.77586123775, 532.1386456494], [26064e-11, 2.74361318804, 2531.1349572528], [30765e-11, 0.42330537728, 1.4844727083], [30476e-11, 3.66677894407, 508.3503240922], [23282e-11, 3.24372142416, 984.6003316219], [19445e-11, 0.52370214471, 14.977853527], [19332e-11, 4.86314494382, 1361.5467058442], [2291e-10, 3.84914895064, 2428.0421830342], [21617e-11, 6.01696940024, 1063.3140834523], [20155e-11, 5.59582008789, 527.2432845398], [23732e-11, 2.52766031921, 494.2662424425], [20189e-11, 1.01560227681, 628.8515860501], [15994e-11, 5.09003530653, 529.7391492044], [16134e-11, 5.27095037302, 142.4496501338], [20697e-11, 4.03443281612, 355.7487455718], [21479e-11, 1.28668134295, 35.4247226521], [14964e-11, 4.8603968439, 2104.5367663768], [17242e-11, 1.59187913206, 1439.5096981492], [15994e-11, 1.89222417794, 529.6427809848], [17958e-11, 4.30178016003, 6.1503391543], [13279e-11, 2.18943981644, 1055.4497769261], [14148e-11, 2.71597731671, 0.2606324309], [14689e-11, 0.87944553412, 99.1606209555], [14202e-11, 2.41335693735, 530.6541729411], [1532e-10, 6.07703092728, 149.5631971346], [15832e-11, 4.11682440678, 636.7158925763], [12398e-11, 2.61042299578, 405.2575498736], [16199e-11, 2.77035044582, 760.25553592], [13665e-11, 3.5603967831, 217.2312487011], [15261e-11, 2.81824770887, 621.7380390493], [14681e-11, 6.26423732742, 569.0478410098], [12529e-11, 1.39077179081, 7.065362891], [11677e-11, 3.60447374272, 2634.2277314714], [11603e-11, 4.60461756191, 7.1617311106], [12152e-11, 0.24540531919, 1485.9801210652], [11347e-11, 2.00818458261, 1073.6090241908], [11242e-11, 2.4800094787, 423.4167971383], [10942e-11, 5.03602448252, 458.8415197904], [11117e-11, 4.04973271023, 519.3960243561], [12256e-11, 4.30153222783, 604.4725636619], [13149e-11, 2.72189077702, 1364.7280995819], [10604e-11, 3.11518747072, 1.2720243872], [10851e-11, 5.08554552028, 2324.9494088156], [10692e-11, 2.51401681528, 2847.5268269094], [1264e-10, 4.75572797691, 528.7277572481], [10084e-11, 4.05599810206, 38.1330356378], [11536e-11, 2.35034215745, 643.8294395771], [10247e-11, 3.63479911496, 2744.4340526908], [10105e-11, 3.65845333837, 107.0249274817], [10121e-11, 1.31482648275, 1905.4647649404], [10128e-11, 2.09034472544, 511.5317178299], [1063e-10, 2.07777800288, 92.0470739547]], [[529.93480757497, 0, 0], [0.00489741194, 4.22066689928, 529.6909650946], [0.00228918538, 6.02647464016, 7.1135470008], [2765538e-10, 4.57265956824, 1059.3819301892], [20720943e-11, 5.45938936295, 522.5774180938], [12105732e-11, 0.16985765041, 536.8045120954], [6068051e-11, 4.42419502005, 103.0927742186], [5433924e-11, 3.98478382565, 419.4846438752], [4237795e-11, 5.89009351271, 14.2270940016], [2211854e-11, 5.26771446618, 206.1855484372], [1295769e-11, 5.55132765087, 3.1813937377], [1745919e-11, 4.92669378486, 1589.0728952838], [1163411e-11, 0.51450895328, 3.9321532631], [1007216e-11, 0.46478398551, 735.8765135318], [1173129e-11, 5.8564730435, 1052.2683831884], [847678e-11, 5.7580585045, 110.2063212194], [827329e-11, 4.80312015734, 213.299095438], [1003574e-11, 3.15040301822, 426.598190876], [1098735e-11, 5.30704981594, 515.463871093], [816397e-11, 0.58643054886, 1066.49547719], [725447e-11, 5.51827471473, 639.897286314], [567845e-11, 5.98867049451, 625.6701923124], [474181e-11, 4.13245269168, 412.3710968744], [41293e-10, 5.73652891261, 95.9792272178], [335817e-11, 3.73248749046, 1162.4747044078], [345249e-11, 4.2415956541, 632.7837393132], [234066e-11, 6.24302226646, 309.2783226558], [194784e-11, 2.21879010911, 323.5054166574], [23434e-10, 4.03469970332, 949.1756089698], [183938e-11, 6.27963588822, 543.9180590962], [198525e-11, 1.50458442825, 838.9692877504], [186899e-11, 6.08620565908, 742.9900605326], [17138e-10, 5.41655983845, 199.0720014364], [130771e-11, 0.62643377351, 728.762966531], [107575e-11, 4.49282760117, 956.2891559706], [115393e-11, 0.68019050174, 846.0828347512], [115047e-11, 5.28641699144, 2118.7638603784], [66824e-11, 5.73365126533, 21.3406410024], [69618e-11, 5.97263450278, 532.8723588323], [6485e-10, 6.08803490288, 1581.959348283], [79686e-11, 5.82412400273, 1045.1548361876], [57939e-11, 0.99453087342, 1596.1864422846], [65635e-11, 0.1292419143, 526.5095713569], [58509e-11, 0.58626971028, 1155.361157407], [566e-9, 1.41198438841, 533.6231183577], [71643e-11, 5.34162650321, 942.062061969], [57368e-11, 5.96851304799, 1169.5882514086], [54935e-11, 5.42806383723, 10.2949407385], [52016e-11, 0.22981299129, 1368.660252845], [52309e-11, 5.72661448388, 117.3198682202], [50418e-11, 6.08075147811, 525.7588118315], [47418e-11, 3.62611843241, 1478.8665740644], [46678e-11, 0.51144073175, 1265.5674786264]], [[47233598e-11, 4.32148323554, 7.1135470008], [30629053e-11, 2.93021440216, 529.6909650946], [3896555e-10, 0, 0], [3189317e-11, 1.05504615595, 522.5774180938], [2723358e-11, 3.41411526638, 1059.3819301892], [2729292e-11, 4.84545481351, 536.8045120954], [1721069e-11, 4.18734385158, 14.2270940016], [383258e-11, 5.76790714387, 419.4846438752], [367498e-11, 6.05509120409, 103.0927742186], [377524e-11, 0.76048964872, 515.463871093], [337386e-11, 3.78644384244, 3.1813937377], [3082e-9, 0.69356654052, 206.1855484372], [218408e-11, 3.81389191353, 1589.0728952838], [198883e-11, 5.33996443444, 1066.49547719], [197445e-11, 2.48356402053, 3.9321532631]], [[6501665e-11, 2.59862880482, 7.1135470008], [1356524e-11, 1.34635886411, 529.6909650946]], [], []], B: [[[0.02268615703, 3.55852606718, 529.6909650946], [0.00109971634, 3.90809347389, 1059.3819301892], [0.00110090358, 0, 0], [8101427e-11, 3.60509573368, 522.5774180938], [6043996e-11, 4.25883108794, 1589.0728952838], [6437782e-11, 0.30627121409, 536.8045120954], [110688e-10, 2.98534421928, 1162.4747044078], [941651e-11, 2.93619072405, 1052.2683831884], [894088e-11, 1.75447429921, 7.1135470008], [76728e-10, 2.1547359406, 632.7837393132], [944328e-11, 1.67522288396, 426.598190876], [68422e-10, 3.67808770098, 213.299095438], [629223e-11, 0.64343282328, 1066.49547719], [835861e-11, 5.17881973234, 103.0927742186], [53167e-10, 2.70305954352, 110.2063212194], [558524e-11, 0.01354830508, 846.0828347512], [464449e-11, 1.17337249185, 949.1756089698], [431072e-11, 2.60825000494, 419.4846438752], [351433e-11, 4.61062990714, 2118.7638603784], [123148e-11, 3.34968181384, 1692.1656695024], [115038e-11, 5.04892295442, 316.3918696566], [13216e-10, 4.7781699067, 742.9900605326], [103402e-11, 2.31878999565, 1478.8665740644], [116379e-11, 1.38688232033, 323.5054166574], [10242e-10, 3.15293785436, 1581.959348283], [103762e-11, 3.7010383811, 515.463871093], [7865e-10, 3.98318653238, 1265.5674786264], [69935e-11, 2.56006216424, 956.2891559706], [55597e-11, 0.37500753017, 1375.7737998458], [51986e-11, 0.99007119033, 1596.1864422846], [55194e-11, 0.40176412035, 525.7588118315], [63456e-11, 4.50073574333, 735.8765135318], [49691e-11, 0.18649893085, 543.9180590962], [48831e-11, 3.57260550671, 533.6231183577], [28353e-11, 1.53532744749, 625.6701923124], [29209e-11, 5.43145863011, 206.1855484372], [23255e-11, 5.95197992848, 838.9692877504], [22841e-11, 6.19262787685, 532.8723588323], [23202e-11, 4.06473368575, 526.5095713569], [24436e-11, 6.10947656959, 1169.5882514086], [21116e-11, 4.96322972735, 2648.454825473], [17879e-11, 3.08704395969, 1795.258443721], [16234e-11, 4.83515727869, 1368.660252845], [21314e-11, 2.69476951059, 1045.1548361876], [1574e-10, 1.15130330106, 942.062061969], [17325e-11, 1.61550009206, 14.2270940016], [13396e-11, 2.30539585502, 853.196381752], [11904e-11, 3.09811974536, 2111.6503133776], [11734e-11, 2.83006431723, 2008.557539159], [11291e-11, 0.98957560201, 433.7117378768], [1183e-10, 4.76527836803, 309.2783226558], [10702e-11, 3.70181397065, 2221.856634597], [10815e-11, 5.81958878617, 1272.6810256272], [13505e-11, 3.2812697576, 1155.361157407], [10179e-11, 2.58691128827, 117.3198682202], [10632e-11, 5.23487936086, 95.9792272178]], [[0.00177351787, 5.70166488486, 529.6909650946], [3230171e-11, 5.7794161934, 1059.3819301892], [3081364e-11, 5.47464296527, 522.5774180938], [2211914e-11, 4.73477480209, 536.8045120954], [1694232e-11, 3.14159265359, 0], [346445e-11, 4.74595174109, 1052.2683831884], [234264e-11, 5.18856099929, 1066.49547719], [196154e-11, 6.18554286642, 7.1135470008], [150468e-11, 3.92721226087, 1589.0728952838], [114128e-11, 3.4389727183, 632.7837393132], [96667e-11, 2.9142630409, 949.1756089698], [76599e-11, 2.50522188662, 103.0927742186], [81671e-11, 5.07666097497, 1162.4747044078], [76572e-11, 0.61288981445, 419.4846438752], [73875e-11, 5.49958292155, 515.463871093], [49915e-11, 3.94799616572, 735.8765135318], [60544e-11, 5.44740084359, 213.299095438], [46032e-11, 0.53850360901, 110.2063212194], [45123e-11, 1.89516645239, 846.0828347512]], [[8094051e-11, 1.46322843658, 529.6909650946], [742415e-11, 0.95691639003, 522.5774180938], [813244e-11, 3.14159265359, 0], [398951e-11, 2.89888666447, 536.8045120954], [342226e-11, 1.44683789727, 1059.3819301892]], [], [], []], R: [[[5.20887429471, 0, 0], [0.2520932702, 3.49108640015, 529.6909650946], [0.00610599902, 3.84115365602, 1059.3819301892], [0.00282029465, 2.57419879933, 632.7837393132], [0.00187647391, 2.07590380082, 522.5774180938], [86792941e-11, 0.71001090609, 419.4846438752], [72062869e-11, 0.21465694745, 536.8045120954], [65517227e-11, 5.97995850843, 316.3918696566], [2913462e-10, 1.6775924371, 103.0927742186], [30135275e-11, 2.16132058449, 949.1756089698], [23453209e-11, 3.54023147303, 735.8765135318], [2228371e-10, 4.19362773546, 1589.0728952838], [2394734e-10, 0.27457854894, 7.1135470008], [130326e-9, 2.96043055741, 1162.4747044078], [9703346e-11, 1.90669572402, 206.1855484372], [12749004e-11, 2.71550102862, 1052.2683831884], [9161431e-11, 4.41352618935, 213.299095438], [7894539e-11, 2.47907551404, 426.598190876], [7057978e-11, 2.18184753111, 1265.5674786264], [6137755e-11, 6.26417542514, 846.0828347512], [5477093e-11, 5.65729325169, 639.897286314], [3502519e-11, 0.56531297394, 1066.49547719], [413689e-10, 2.72219979684, 625.6701923124], [4170012e-11, 2.01605033912, 515.463871093], [2499966e-11, 4.55182055941, 838.9692877504], [2616955e-11, 2.00993967129, 1581.959348283], [1911876e-11, 0.85621927419, 412.3710968744], [2127644e-11, 6.1275146175, 742.9900605326], [1610549e-11, 3.08867789275, 1368.660252845], [1479484e-11, 2.68026191372, 1478.8665740644], [1230708e-11, 1.89042979701, 323.5054166574], [121681e-10, 1.80171561024, 110.2063212194], [961072e-11, 4.54876989805, 2118.7638603784], [885708e-11, 4.14785948471, 533.6231183577], [7767e-9, 3.6769695469, 728.762966531], [998579e-11, 2.8720894011, 309.2783226558], [1014959e-11, 1.38673237666, 454.9093665273], [727162e-11, 3.98824686402, 1155.361157407], [655289e-11, 2.79065604219, 1685.0521225016], [821465e-11, 1.59342534396, 1898.3512179396], [620798e-11, 4.82284338962, 956.2891559706], [653981e-11, 3.38150775269, 1692.1656695024], [812036e-11, 5.94091899141, 909.8187330546], [56212e-10, 0.08095987241, 543.9180590962], [542221e-11, 0.28360266386, 525.7588118315], [457859e-11, 0.1272269451, 1375.7737998458], [614784e-11, 2.27624915604, 942.062061969], [435805e-11, 2.60272129748, 95.9792272178], [496066e-11, 5.53005947761, 380.12776796], [469965e-11, 2.81896276101, 1795.258443721], [445003e-11, 0.14623567024, 14.2270940016], [290869e-11, 3.89339143564, 1471.7530270636], [276627e-11, 2.52238450687, 2001.4439921582], [275084e-11, 2.98863518924, 526.5095713569], [293875e-11, 2.04938438861, 199.0720014364], [290985e-11, 6.03131226226, 1169.5882514086], [338342e-11, 2.79873192583, 1045.1548361876], [257482e-11, 6.13395478303, 532.8723588323], [319013e-11, 1.34803130803, 2214.7430875962], [309352e-11, 5.36855804945, 1272.6810256272], [345804e-11, 1.56404293688, 491.5579294568], [303364e-11, 1.15407454372, 5753.3848848968], [192325e-11, 0.91996333387, 1596.1864422846], [215398e-11, 2.63572815848, 2111.6503133776], [200738e-11, 2.37259566683, 1258.4539316256], [239036e-11, 3.57397189838, 835.0371344873], [197073e-11, 5.92859096863, 453.424893819], [13944e-10, 3.63960322318, 1788.1448967202], [191373e-11, 6.2825131187, 983.1158589136], [176551e-11, 2.57669991654, 9683.5945811164], [123567e-11, 2.26158186345, 2317.8358618148], [128176e-11, 4.6658590767, 831.8557407496], [11243e-10, 0.85604150812, 433.7117378768], [128817e-11, 1.10567106595, 2531.1349572528], [9939e-10, 4.50312054049, 518.6452648307], [9387e-10, 2.7255387999, 853.196381752], [106481e-11, 5.8146222229, 220.4126424388], [120188e-11, 2.95156363556, 3.9321532631], [104002e-11, 2.22221906187, 74.7815985673], [81655e-11, 3.23481337678, 1361.5467058442], [112513e-11, 4.86216964016, 528.2064923863], [79539e-11, 0.8854224683, 430.5303441391], [85801e-11, 2.11458386763, 1574.8458012822], [85685e-11, 2.33823884827, 2428.0421830342], [68311e-11, 3.35727048905, 2104.5367663768], [6957e-10, 3.04164697156, 302.164775655], [69775e-11, 3.22402404312, 305.3461693927], [6957e-10, 0.20494979941, 532.1386456494], [56991e-11, 2.00204191909, 2634.2277314714], [77062e-11, 2.09816000231, 508.3503240922], [56716e-11, 3.91743976711, 2221.856634597], [58325e-11, 5.72360355252, 628.8515860501], [52485e-11, 4.02485010492, 527.2432845398], [63645e-11, 1.09973563964, 1364.7280995819], [53607e-11, 0.87425992614, 2847.5268269094], [59598e-11, 0.95822471775, 494.2662424425], [5796e-10, 3.45779497978, 2008.557539159], [41512e-11, 3.51955526735, 529.7391492044], [44666e-11, 1.62313786651, 984.6003316219], [44883e-11, 4.90091959557, 2648.454825473], [53206e-11, 1.19800364308, 760.25553592], [44393e-11, 4.42623747662, 1063.3140834523], [37566e-11, 2.93021095213, 1677.9385755008], [41516e-11, 0.32174409278, 529.6427809848], [42855e-11, 0.03093594081, 1439.5096981492], [45963e-11, 2.54342106514, 636.7158925763], [40181e-11, 4.39381642864, 1148.2476104062], [3877e-10, 4.31675565025, 149.5631971346], [40348e-11, 2.10140891053, 2744.4340526908], [48851e-11, 5.60297777544, 2810.9214616052], [37085e-11, 5.07828164301, 1905.4647649404], [43875e-11, 1.24536971083, 621.7380390493], [34005e-11, 3.09360167248, 2420.9286360334], [36782e-11, 0.84232174637, 530.6541729411], [31139e-11, 5.35811251334, 1485.9801210652], [39295e-11, 4.70800489067, 569.0478410098], [397e-9, 2.46163878814, 355.7487455718], [31527e-11, 6.19284070863, 3.1813937377], [28399e-11, 2.48456666067, 519.3960243561], [32432e-11, 2.73281750275, 604.4725636619], [27119e-11, 3.92341697086, 2324.9494088156], [26753e-11, 1.74975198417, 2950.619601128], [28986e-11, 1.83535862643, 1891.2376709388], [26493e-11, 0.60380196895, 1055.4497769261], [33525e-11, 0.76068430639, 643.8294395771], [26568e-11, 1.03594610835, 405.2575498736], [25534e-11, 3.46320665375, 458.8415197904], [24421e-11, 0.8818183693, 423.4167971383], [32949e-11, 3.18597137308, 528.7277572481], [22456e-11, 0.43129919683, 1073.6090241908], [21599e-11, 1.41820425091, 540.7366653585], [25673e-11, 0.5235819476, 511.5317178299], [21115e-11, 3.08023522766, 629.6023455755], [22713e-11, 0.65234613144, 3163.918696566], [19189e-11, 5.16589014963, 635.9651330509], [26042e-11, 1.33629471285, 330.6189636582], [18263e-11, 3.59973446951, 746.9222137957], [1821e-10, 2.66819439927, 1994.3304451574], [19724e-11, 4.13552133321, 1464.6394800628], [1948e-10, 1.85656428109, 3060.8259223474], [23927e-11, 4.99826361784, 1289.9465010146], [21886e-11, 5.91718683551, 1802.3719907218], [17482e-11, 2.82161612542, 2737.32050569], [16608e-11, 5.67394889755, 408.4389436113], [22892e-11, 5.26731352093, 672.1406152284], [18349e-11, 1.89869734949, 1021.2488945514], [19123e-11, 3.65882402977, 415.5524906121], [15735e-11, 3.34772676006, 1056.2005364515], [16373e-11, 0.18094878053, 1699.2792165032], [18899e-11, 3.69120638874, 88.865680217], [18655e-11, 1.97327300097, 38.1330356378], [15542e-11, 3.8220488101, 721.6494195302], [1678e-10, 1.90976657921, 217.2312487011], [15313e-11, 1.05907174619, 114.1384744825], [1519e-10, 1.32317039042, 117.3198682202], [1508e-10, 3.74469077216, 2641.3412784722], [19836e-11, 2.73184571324, 39.3568759152], [14708e-11, 1.67270454473, 529.1697002328], [14036e-11, 3.54305270022, 142.4496501338], [12931e-11, 1.48829749349, 3267.0114707846], [14924e-11, 1.3254608594, 490.3340891794], [14753e-11, 4.64530618027, 6283.0758499914], [14672e-11, 0.80451954754, 5223.6939198022], [12085e-11, 3.67072510553, 750.1036075334], [11954e-11, 2.97127390765, 505.3119427064], [1465e-10, 2.1679293025, 530.2122299564], [11869e-11, 1.66551754962, 2207.6295405954], [12273e-11, 0.20690014405, 1062.5633239269], [1146e-10, 1.11906683214, 561.934294009], [11083e-11, 3.22049096074, 535.107591066], [11567e-11, 5.22625628971, 524.0618908021], [11161e-11, 3.82945634036, 76.2660712756], [10918e-11, 1.27796962818, 2125.8774073792], [12685e-11, 3.96848605476, 2538.2485042536], [1123e-10, 3.23092119889, 422.6660376129], [12645e-11, 0.7367042858, 908.3342603463], [1133e-10, 5.56127247007, 531.1754378029], [10291e-11, 3.84159025239, 1781.0313497194], [10762e-11, 4.91380719453, 525.0250986486], [11786e-11, 5.11863653538, 685.4739373527], [1198e-10, 1.72470898635, 911.3032057629], [1154e-10, 1.59520481029, 1474.6737883704], [10198e-11, 2.48743123636, 1819.6374661092]], [[0.01271801596, 2.64937511122, 529.6909650946], [61661771e-11, 3.00076251018, 1059.3819301892], [53443592e-11, 3.89717644226, 522.5774180938], [31185167e-11, 4.88276663526, 536.8045120954], [41390257e-11, 0, 0], [1184719e-10, 2.41329588176, 419.4846438752], [916636e-10, 4.75979408587, 7.1135470008], [3175763e-11, 2.79297987071, 103.0927742186], [3203446e-11, 5.21083285476, 735.8765135318], [3403605e-11, 3.34688537997, 1589.0728952838], [2600003e-11, 3.63435101622, 206.1855484372], [2412207e-11, 1.46947308304, 426.598190876], [2806064e-11, 3.7422369358, 515.463871093], [2676575e-11, 4.33052878699, 1052.2683831884], [2100507e-11, 3.92762682306, 639.897286314], [1646182e-11, 5.30953510947, 1066.49547719], [1641257e-11, 4.41628669824, 625.6701923124], [1049866e-11, 3.16113622955, 213.299095438], [1024802e-11, 2.55432643018, 412.3710968744], [740996e-11, 2.17094630558, 1162.4747044078], [806404e-11, 2.6775080138, 632.7837393132], [676928e-11, 6.2495347979, 838.9692877504], [468895e-11, 4.70973463481, 543.9180590962], [444683e-11, 0.40281181402, 323.5054166574], [567076e-11, 4.57655414712, 742.9900605326], [415894e-11, 5.36836018215, 728.762966531], [484689e-11, 2.46882793186, 949.1756089698], [337555e-11, 3.1678195112, 956.2891559706], [401738e-11, 4.60528841541, 309.2783226558], [347378e-11, 4.68148808722, 14.2270940016], [260753e-11, 5.34290306101, 846.0828347512], [220084e-11, 4.84210964963, 1368.660252845], [203217e-11, 5.59995425432, 1155.361157407], [246603e-11, 3.92313823537, 942.062061969], [183504e-11, 4.26526769703, 95.9792272178], [180134e-11, 4.40165491159, 532.8723588323], [197134e-11, 3.70551461394, 2118.7638603784], [196005e-11, 3.75877587139, 199.0720014364], [20019e-10, 4.43888814441, 1045.1548361876], [170225e-11, 4.84647488867, 526.5095713569], [146335e-11, 6.12958365535, 533.6231183577], [133483e-11, 1.32245735855, 110.2063212194], [132076e-11, 4.51187950811, 525.7588118315], [123851e-11, 2.04290370696, 1478.8665740644], [121861e-11, 4.40581788491, 1169.5882514086], [115313e-11, 4.46741278152, 1581.959348283], [98527e-11, 5.72833991647, 1596.1864422846], [91608e-11, 4.52965592121, 1685.0521225016], [110638e-11, 3.62504147403, 1272.6810256272], [80536e-11, 4.11311699583, 1258.4539316256], [79552e-11, 2.71898473954, 1692.1656695024], [100164e-11, 5.24693885858, 1265.5674786264], [77854e-11, 5.56722651753, 1471.7530270636], [85766e-11, 0.07906707372, 831.8557407496], [82132e-11, 3.80763015979, 508.3503240922], [55319e-11, 0.35180851191, 316.3918696566], [52338e-11, 5.53074272117, 433.7117378768], [55769e-11, 4.75141241141, 302.164775655], [50597e-11, 4.8560316177, 1375.7737998458], [43554e-11, 4.94441642712, 1361.5467058442], [42172e-11, 1.22404278447, 853.196381752], [49395e-11, 4.01422828967, 220.4126424388]], [[79644833e-11, 1.35865896596, 529.6909650946], [8251618e-11, 5.77773935444, 522.5774180938], [7029864e-11, 3.27476965833, 536.8045120954], [5314006e-11, 1.83835109712, 1059.3819301892], [1860833e-11, 2.97682139367, 7.1135470008], [836267e-11, 4.19889881718, 419.4846438752], [964466e-11, 5.48031822015, 515.463871093], [406453e-11, 3.78250730354, 1066.49547719], [42657e-10, 2.22753101795, 639.897286314], [377316e-11, 2.24248352873, 1589.0728952838], [49792e-10, 3.14159265359, 0], [339043e-11, 6.12690864038, 625.6701923124], [362943e-11, 5.36761847267, 206.1855484372], [342048e-11, 6.09922969324, 1052.2683831884], [27992e-10, 4.26162555827, 412.3710968744], [332578e-11, 0.00328961161, 426.598190876], [229777e-11, 0.70530766213, 735.8765135318], [200783e-11, 3.06850623368, 543.9180590962], [199807e-11, 4.42884165317, 103.0927742186], [25729e-10, 0.96295364983, 632.7837393132]], [[3519257e-11, 6.05800633846, 529.6909650946], [1073239e-11, 1.6732134576, 536.8045120954], [915666e-11, 1.41329676116, 522.5774180938]], [], []] };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/vsop87d_saturn.embedded.json
+var vsop87d_saturn_embedded_default = { L: [[[0.87401354029, 0, 0], [0.1110765978, 3.96205090194, 213.299095438], [0.01414150958, 4.58581515873, 7.1135470008], [0.00398379386, 0.52112025957, 206.1855484372], [0.00350769223, 3.30329903015, 426.598190876], [0.00206816296, 0.24658366938, 103.0927742186], [79271288e-11, 3.8400707853, 220.4126424388], [23990338e-11, 4.6697693486, 110.2063212194], [16573583e-11, 0.43719123541, 419.4846438752], [14906995e-11, 5.76903283845, 316.3918696566], [158203e-9, 0.9380895376, 632.7837393132], [14609562e-11, 1.56518573691, 3.9321532631], [13160308e-11, 4.44891180176, 14.2270940016], [15053509e-11, 2.71670027883, 639.897286314], [13005305e-11, 5.98119067061, 11.0457002639], [10725066e-11, 3.12939596466, 202.2533951741], [5863207e-11, 0.23657028777, 529.6909650946], [5227771e-11, 4.2078316238, 3.1813937377], [6126308e-11, 1.76328499656, 277.0349937414], [5019658e-11, 3.17787919533, 433.7117378768], [4592541e-11, 0.61976424374, 199.0720014364], [4005862e-11, 2.24479893937, 63.7358983034], [2953815e-11, 0.98280385206, 95.9792272178], [3873696e-11, 3.22282692566, 138.5174968707], [2461172e-11, 2.03163631205, 735.8765135318], [326949e-10, 0.77491895787, 949.1756089698], [1758143e-11, 3.26580514774, 522.5774180938], [1640183e-11, 5.50504966218, 846.0828347512], [1391336e-11, 4.02331978116, 323.5054166574], [1580641e-11, 4.3726631412, 309.2783226558], [1123515e-11, 2.83726793572, 415.5524906121], [1017258e-11, 3.71698151814, 227.5261894396], [848643e-11, 3.19149825839, 209.3669421749], [1087237e-11, 4.18343232481, 2.4476805548], [956752e-11, 0.50740889886, 1265.5674786264], [789205e-11, 5.00745123149, 0.9632078465], [686965e-11, 1.74714407827, 1052.2683831884], [65447e-10, 1.59889331515, 0.0481841098], [748811e-11, 2.14398149298, 853.196381752], [63398e-10, 2.29889903023, 412.3710968744], [743584e-11, 5.25276954625, 224.3447957019], [852677e-11, 3.42141350697, 175.1660598002], [579857e-11, 3.09259007048, 74.7815985673], [624904e-11, 0.97046831256, 210.1177017003], [529861e-11, 4.44938897119, 117.3198682202], [542643e-11, 1.51824320514, 9.5612275556], [474279e-11, 5.47527185987, 742.9900605326], [448542e-11, 1.28990416161, 127.4717966068], [546358e-11, 2.12678554211, 350.3321196004], [478054e-11, 2.96488054338, 137.0330241624], [354944e-11, 3.0128648303, 838.9692877504], [451827e-11, 1.04436664241, 490.3340891794], [347413e-11, 1.53928227764, 340.7708920448], [343475e-11, 0.24604039134, 0.5212648618], [309001e-11, 3.49486734909, 216.4804891757], [322185e-11, 0.96137456104, 203.7378678824], [372308e-11, 2.27819108625, 217.2312487011], [321543e-11, 2.57182354537, 647.0108333148], [330196e-11, 0.24715617844, 1581.959348283], [249116e-11, 1.47010534421, 1368.660252845], [286688e-11, 2.37043745859, 351.8165923087], [220225e-11, 4.20422424873, 200.7689224658], [277775e-11, 0.40020408926, 211.8146227297], [2045e-9, 6.010822066, 265.9892934775], [207663e-11, 0.48349820488, 1162.4747044078], [208655e-11, 1.34516255304, 625.6701923124], [182454e-11, 5.49122292426, 2.9207613068], [226609e-11, 4.91003163138, 12.5301729722], [207659e-11, 1.283022189, 39.3568759152], [173914e-11, 1.86305806814, 0.7507595254], [18469e-10, 3.50344404958, 149.5631971346], [183511e-11, 0.97254952728, 4.192785694], [146068e-11, 6.23102544071, 195.1398481733], [164541e-11, 0.4400551752, 5.4166259714], [147526e-11, 1.53529320509, 5.6290742925], [139666e-11, 4.29450260069, 21.3406410024], [131283e-11, 4.06828961903, 10.2949407385], [117283e-11, 2.67920400584, 1155.361157407], [149299e-11, 5.73594349789, 52.6901980395], [122373e-11, 1.97588777199, 4.665866446], [113747e-11, 5.59427544714, 1059.3819301892], [102702e-11, 1.19748124058, 1685.0521225016], [118156e-11, 5.340729339, 554.0699874828], [109275e-11, 3.43812715686, 536.8045120954], [110399e-11, 0.1660402409, 1.4844727083], [124969e-11, 6.27737805832, 1898.3512179396], [89949e-11, 5.80392934702, 114.1384744825], [103956e-11, 2.19210363069, 88.865680217], [112437e-11, 1.10502663534, 191.2076949102], [10657e-10, 4.01156608514, 956.2891559706], [9143e-10, 1.8752157751, 38.1330356378], [83791e-11, 5.48810655641, 0.1118745846], [83461e-11, 2.28972767279, 628.8515860501], [96987e-11, 4.53666595763, 302.164775655], [100631e-11, 4.96513666539, 269.9214467406], [75491e-11, 2.18045274099, 728.762966531], [9633e-10, 2.8331918921, 275.5505210331], [82363e-11, 3.05469876064, 440.8252848776], [73888e-11, 5.08914205084, 1375.7737998458], [71633e-11, 5.1094074343, 65.2203710117], [70409e-11, 4.86846451411, 0.2124483211], [6976e-10, 3.71029022489, 14.977853527], [88772e-11, 3.86334563977, 278.5194664497], [6809e-10, 0.7341546099, 1478.8665740644], [66501e-11, 0.02677580336, 70.8494453042], [65682e-11, 2.02165559602, 142.4496501338], [75765e-11, 1.61410487792, 284.1485407422], [63153e-11, 3.49493353034, 479.2883889155], [62539e-11, 2.58713611532, 422.6660376129], [69313e-11, 3.43979731402, 515.463871093], [79021e-11, 4.45154941586, 35.4247226521], [63664e-11, 3.31749528708, 62.2514255951], [52939e-11, 5.51392725227, 0.2606324309], [53011e-11, 3.18480701697, 8.0767548473], [54492e-11, 2.45674090515, 22.0914005278], [50514e-11, 4.26749346978, 99.1606209555], [5517e-10, 0.9679744615, 942.062061969], [49288e-11, 2.38641424063, 1471.7530270636], [47199e-11, 2.02515248245, 312.1990839626], [6108e-10, 1.50295092063, 210.8514148832], [45126e-11, 0.93109376473, 2001.4439921582], [60556e-11, 2.68715551585, 388.4651552382], [43452e-11, 2.52602011714, 288.0806940053], [42544e-11, 3.81793980322, 330.6189636582], [39915e-11, 5.713786529, 408.4389436113], [50145e-11, 6.03164759907, 2214.7430875962], [4586e-10, 0.54229721801, 212.3358875915], [54165e-11, 0.78154835399, 191.9584544356], [47016e-11, 4.59934671151, 437.6438911399], [42362e-11, 1.90070070955, 430.5303441391], [39722e-11, 1.63259419913, 1066.49547719], [36345e-11, 0.84756992711, 213.3472795478], [35468e-11, 4.18603772925, 215.7467759928], [36344e-11, 3.93295730315, 213.2509113282], [38005e-11, 0.31313803095, 423.4167971383], [44746e-11, 1.12488341174, 6.1503391543], [37902e-11, 1.19795851115, 2.7083129857], [43402e-11, 1.37363944007, 563.6312150384], [43764e-11, 3.93043802956, 525.4981794006], [34825e-11, 1.01566605408, 203.0041546995], [31755e-11, 1.69273634405, 0.1600586944], [3088e-10, 6.13525703832, 417.0369633204], [36388e-11, 6.00586032647, 18.1592472647], [29032e-11, 1.19660544505, 404.5067903482], [32812e-11, 0.53649479713, 107.0249274817], [30433e-11, 0.72335287989, 222.8603229936], [32644e-11, 0.81204701486, 1795.258443721], [37769e-11, 3.69666903716, 1272.6810256272], [27679e-11, 1.45663979401, 7.1617311106], [27187e-11, 1.89731951902, 1045.1548361876], [37699e-11, 4.51997049537, 24.3790223882], [34885e-11, 4.46095761791, 214.2623032845], [3265e-10, 0.66372395761, 692.5874843535], [30324e-11, 5.30369950147, 33.9402499438], [2748e-10, 6.22702216249, 1.2720243872], [26657e-11, 4.56713198392, 7.065362891], [31745e-11, 5.49798599565, 56.6223513026], [2805e-10, 5.64447420566, 128.9562693151], [24277e-11, 3.93966553574, 414.0680179038], [32017e-11, 5.22260660455, 92.0470739547], [26976e-11, 0.06705123981, 205.2223405907], [22974e-11, 3.6581775177, 207.6700211455], [31775e-11, 5.59198119173, 6069.7767545534], [23153e-11, 2.10054506119, 1788.1448967202], [31025e-11, 0.37190053329, 703.6331846174], [29376e-11, 0.14742155778, 131.4039498699], [22562e-11, 5.24009182383, 212.7778305762], [26185e-11, 5.41311252822, 140.001969579], [25673e-11, 4.36038885283, 32.2433289144], [20392e-11, 2.8241390926, 429.7795846137], [20659e-11, 0.67091805084, 2317.8358618148], [24397e-11, 3.08740396398, 145.6310438715], [23735e-11, 2.54365387567, 76.2660712756], [20157e-11, 5.06708675157, 617.8058857862], [23307e-11, 3.97357729211, 483.2205421786], [22878e-11, 6.10452832642, 177.8743727859], [22978e-11, 3.20140795404, 208.633228992], [20638e-11, 5.22128727027, 6.592282139], [21446e-11, 0.72034565528, 1258.4539316256], [18034e-11, 6.11382719947, 210.3783341312], [2238e-10, 5.92299908546, 173.9422195228], [19128e-11, 5.77772013766, 213.8203602998], [20871e-11, 5.79126331864, 2531.1349572528], [19327e-11, 1.64147367403, 565.1156877467], [16806e-11, 3.27953583323, 98.8999885246], [20833e-11, 2.01655935909, 860.3099287528], [17939e-11, 3.14329498012, 831.8557407496], [15653e-11, 3.10137669623, 106.2741679563], [18235e-11, 5.22595172482, 73.297125859], [19302e-11, 5.9394711405, 425.1137181677], [14514e-11, 2.75049388379, 1.2238402774], [14562e-11, 5.18795088579, 305.3461693927], [14254e-11, 3.88079504939, 54.1746707478], [14594e-11, 3.25016810034, 78.7137518304], [13637e-11, 2.55486219141, 405.2575498736], [13914e-11, 1.72356993808, 69.1525242748], [13689e-11, 2.37430586272, 125.9873238985], [13496e-11, 0.82683590985, 99.9113804809], [18483e-11, 0.73171264866, 9999.986450773], [13542e-11, 3.58584380924, 234.6397364404], [13741e-11, 6.18458356845, 245.5424243524], [16944e-11, 0.72200792996, 2111.6503133776], [17441e-11, 0.23803796878, 134.5853436076], [14181e-11, 4.51963935804, 59.8037450403], [13598e-11, 2.53776983965, 1.6969210294], [1224e-10, 2.11973445754, 28.3111756513], [11988e-11, 1.62114832786, 1361.5467058442], [11974e-11, 4.0737873512, 280.9671470045], [12758e-11, 5.31146919749, 344.7030453079], [16051e-11, 3.97093160336, 355.7487455718], [11427e-11, 5.51123470805, 192.6921676185], [13133e-11, 4.69168003518, 767.3690829208], [14746e-11, 3.28998910617, 1589.0728952838], [11417e-11, 1.81615681635, 2104.5367663768], [11626e-11, 2.79410384978, 362.8622925726], [13234e-11, 4.16642914717, 225.8292684102], [10599e-11, 5.50554288376, 199.2844497575], [10558e-11, 3.57501718639, 1.4362885985], [10485e-11, 2.84462532686, 85.8272988312], [10296e-11, 0.22225264071, 198.321241911], [10552e-11, 0.18716643576, 217.491881132], [11853e-11, 0.11584857323, 7.6348118626], [10248e-11, 0.2190415417, 144.1465711632], [10403e-11, 1.68776321208, 31.019488637], [10313e-11, 4.72132701805, 216.2198567448], [10719e-11, 2.60869377832, 339.2864193365], [13212e-11, 6.00683506785, 214.7835681463], [11346e-11, 2.61898383052, 7.8643065262], [11882e-11, 4.00188476744, 267.4737661858], [12054e-11, 3.59904816676, 124.433415221], [10142e-11, 3.60807025662, 14.0146456805], [10529e-11, 2.36779614951, 831.1049812242], [10142e-11, 3.93620624488, 207.8824694666]], [[213.54295595986, 0, 0], [0.01296855005, 1.82820544701, 213.299095438], [0.00564347566, 2.88500136429, 7.1135470008], [9832303e-10, 1.08070061328, 426.598190876], [0.0010767877, 2.27769911872, 206.1855484372], [40254586e-11, 2.0412825709, 220.4126424388], [19941734e-11, 1.27954662736, 103.0927742186], [10511706e-11, 2.748803928, 14.2270940016], [6939233e-11, 0.40493079985, 639.897286314], [4803325e-11, 2.44194097666, 419.4846438752], [4056325e-11, 2.92166618776, 110.2063212194], [376863e-10, 3.6496563146, 3.9321532631], [3384684e-11, 2.41694251653, 3.1813937377], [33022e-9, 1.26256486715, 433.7117378768], [3071382e-11, 2.3273931775, 199.0720014364], [1953036e-11, 3.563946833, 11.0457002639], [1249348e-11, 2.62803737519, 95.9792272178], [921683e-11, 1.9608983425, 227.5261894396], [705587e-11, 4.4168924933, 529.6909650946], [649654e-11, 6.17418093659, 202.2533951741], [627603e-11, 6.11088227167, 309.2783226558], [486843e-11, 6.03998200305, 853.196381752], [468377e-11, 4.61707843907, 63.7358983034], [478501e-11, 4.98776987984, 522.5774180938], [41701e-10, 2.11708169277, 323.5054166574], [40763e-10, 1.29949556676, 209.3669421749], [343826e-11, 3.95854178574, 412.3710968744], [339724e-11, 3.63396398752, 316.3918696566], [335936e-11, 3.77173072712, 735.8765135318], [331933e-11, 2.86077699882, 210.1177017003], [352489e-11, 2.31707079463, 632.7837393132], [289429e-11, 2.73263080235, 117.3198682202], [265801e-11, 0.54344631312, 647.0108333148], [230493e-11, 1.64428879621, 216.4804891757], [280911e-11, 5.74398845416, 2.4476805548], [191667e-11, 2.96512946582, 224.3447957019], [172891e-11, 4.07695221044, 846.0828347512], [167131e-11, 2.59745202658, 21.3406410024], [136328e-11, 2.28580246629, 10.2949407385], [131364e-11, 3.44108355646, 742.9900605326], [127838e-11, 4.09533471247, 217.2312487011], [108862e-11, 6.16141072262, 415.5524906121], [93909e-11, 3.48397279899, 1052.2683831884], [92482e-11, 3.94755499926, 88.865680217], [97584e-11, 4.72845436677, 838.9692877504], [866e-9, 1.21951325061, 440.8252848776], [83463e-11, 3.11269504725, 625.6701923124], [77588e-11, 6.24408938835, 302.164775655], [61557e-11, 1.82789612597, 195.1398481733], [619e-9, 4.29344363385, 127.4717966068], [67106e-11, 0.28961738595, 4.665866446], [56919e-11, 5.01889578112, 137.0330241624], [5416e-10, 5.12628572382, 490.3340891794], [54585e-11, 0.28356341456, 74.7815985673], [51425e-11, 1.45766406064, 536.8045120954], [65843e-11, 5.64757042732, 9.5612275556], [5778e-10, 2.47630552035, 191.9584544356], [44444e-11, 2.70873627665, 5.4166259714], [46799e-11, 1.1772121105, 149.5631971346], [4038e-10, 3.88870105683, 728.762966531], [46649e-11, 5.14818326902, 515.463871093], [45891e-11, 2.23198878761, 956.2891559706], [404e-9, 0.4128152044, 269.9214467406]], [[0.00116441181, 1.17987850633, 7.1135470008], [91920844e-11, 0.07425261094, 213.299095438], [90592251e-11, 0, 0], [15276909e-11, 4.06492007503, 206.1855484372], [10631396e-11, 0.25778277414, 220.4126424388], [10604979e-11, 5.40963595885, 426.598190876], [4265368e-11, 1.0459555663, 14.2270940016], [1215527e-11, 2.91860042123, 103.0927742186], [1164684e-11, 4.60942128971, 639.897286314], [1081967e-11, 5.6913035167, 433.7117378768], [1020079e-11, 0.63369182642, 3.1813937377], [1044754e-11, 4.04206453611, 199.0720014364], [633582e-11, 4.38825410036, 419.4846438752], [549329e-11, 5.57303134242, 3.9321532631], [456914e-11, 1.26840971349, 110.2063212194], [4251e-9, 0.20935499279, 227.5261894396], [273739e-11, 4.28841011784, 95.9792272178], [161571e-11, 1.3813914942, 11.0457002639]], [[16038734e-11, 5.73945377424, 7.1135470008], [4249793e-11, 4.58539675603, 213.299095438], [1906524e-11, 4.76082050205, 220.4126424388], [1465687e-11, 5.91326678323, 206.1855484372], [1162041e-11, 5.61973132428, 14.2270940016], [1066581e-11, 3.60816533142, 426.598190876]], [], []], B: [[[0.0433067804, 3.60284428399, 213.299095438], [0.00240348303, 2.8523848939, 426.598190876], [84745939e-11, 0, 0], [30863357e-11, 3.48441504465, 220.4126424388], [34116063e-11, 0.57297307844, 206.1855484372], [1473407e-10, 2.1184659787, 639.897286314], [9916668e-11, 5.79003189405, 419.4846438752], [6993564e-11, 4.73604689179, 7.1135470008], [4807587e-11, 5.43305315602, 316.3918696566], [4788392e-11, 4.9651292742, 110.2063212194], [3432125e-11, 2.73255752123, 433.7117378768], [1506129e-11, 6.01304536144, 103.0927742186], [1060298e-11, 5.63099292414, 529.6909650946], [969071e-11, 5.20434966103, 632.7837393132], [94205e-10, 1.39646678088, 853.196381752], [707645e-11, 3.80302329547, 323.5054166574], [552313e-11, 5.13149109045, 202.2533951741], [399675e-11, 3.35891413961, 227.5261894396], [316063e-11, 1.99716764199, 647.0108333148], [31938e-10, 3.6257155098, 209.3669421749], [284494e-11, 4.88648481625, 224.3447957019], [314225e-11, 0.4651027241, 217.2312487011], [236442e-11, 2.13887472281, 11.0457002639], [215354e-11, 5.94982610103, 846.0828347512], [208522e-11, 2.12003893769, 415.5524906121], [178958e-11, 2.95361514672, 63.7358983034], [207213e-11, 0.73021462851, 199.0720014364], [13914e-10, 1.9982199094, 735.8765135318], [134884e-11, 5.24500819605, 742.9900605326], [140585e-11, 0.64417620299, 490.3340891794], [121669e-11, 3.11537140876, 522.5774180938], [13924e-10, 4.59535168021, 14.2270940016], [115524e-11, 3.10891547171, 216.4804891757], [114218e-11, 0.96261442133, 210.1177017003], [96376e-11, 4.48164339766, 117.3198682202], [80593e-11, 1.3169275015, 277.0349937414], [72952e-11, 3.0598848237, 536.8045120954], [69261e-11, 4.92378633635, 309.2783226558], [74302e-11, 2.8937653962, 149.5631971346], [6804e-10, 2.18002263974, 351.8165923087], [61734e-11, 0.67728106562, 1066.49547719], [56598e-11, 2.60963391288, 440.8252848776], [48864e-11, 5.78725874107, 95.9792272178], [48243e-11, 2.1821183743, 74.7815985673], [38304e-11, 5.29151303843, 1059.3819301892], [36323e-11, 1.63348365121, 628.8515860501], [35055e-11, 1.71279210041, 1052.2683831884], [3427e-10, 2.45740470599, 422.6660376129], [34313e-11, 5.97994514798, 412.3710968744], [33787e-11, 1.14073392951, 949.1756089698], [31633e-11, 4.14722153007, 437.6438911399], [36833e-11, 6.27769966148, 1162.4747044078], [2698e-10, 1.2715481681, 860.3099287528], [23516e-11, 2.74936525342, 838.9692877504], [2346e-10, 0.98962849901, 210.8514148832], [236e-9, 4.11386961467, 3.9321532631], [23631e-11, 3.07427204313, 215.7467759928], [20813e-11, 3.51084686918, 330.6189636582], [19509e-11, 2.81857577372, 127.4717966068], [17103e-11, 3.89784279922, 214.2623032845], [17635e-11, 6.19715516746, 703.6331846174], [17824e-11, 2.28524493886, 388.4651552382], [20935e-11, 0.14356167048, 430.5303441391], [16551e-11, 1.66649120724, 38.1330356378], [191e-9, 2.97699096081, 137.0330241624], [15517e-11, 4.54798410406, 956.2891559706], [17065e-11, 0.16611115812, 212.3358875915], [14169e-11, 0.48937283445, 213.3472795478], [19027e-11, 6.27326062836, 423.4167971383], [13344e-11, 2.37136126257, 429.7795846137], [12565e-11, 1.03178071173, 563.6312150384], [14173e-11, 3.57477564831, 213.2509113282], [11374e-11, 1.45300927024, 1368.660252845], [10585e-11, 6.1763342593, 200.7689224658], [106e-9, 3.84358958373, 138.5174968707], [10263e-11, 2.17423692422, 76.2660712756], [10072e-11, 1.33197220789, 565.1156877467], [12058e-11, 0.441492427, 222.8603229936], [10367e-11, 1.85278552549, 350.3321196004]], [[0.00397554998, 5.33289992556, 213.299095438], [49478641e-11, 3.14159265359, 0], [18571607e-11, 6.09919206378, 426.598190876], [14800587e-11, 2.3058606052, 206.1855484372], [9643981e-11, 1.6967466012, 220.4126424388], [3757161e-11, 1.25429514018, 419.4846438752], [2716647e-11, 5.91166664787, 639.897286314], [1455309e-11, 0.85161616532, 433.7117378768], [1290595e-11, 2.9177085709, 7.1135470008], [85263e-10, 0.43572078997, 316.3918696566], [284386e-11, 1.61881754773, 227.5261894396], [292185e-11, 5.3157425127, 853.196381752], [27509e-10, 3.88864137336, 103.0927742186], [297726e-11, 0.91909206723, 632.7837393132], [172359e-11, 0.05215146556, 647.0108333148], [127731e-11, 1.20711452525, 529.6909650946], [166237e-11, 2.44351613165, 199.0720014364], [15822e-10, 5.20850125766, 110.2063212194], [109839e-11, 2.45695551627, 217.2312487011], [81759e-11, 2.75839171353, 210.1177017003], [8101e-10, 2.86038377187, 14.2270940016], [68658e-11, 1.65537623146, 202.2533951741], [59281e-11, 1.82410768234, 323.5054166574], [65161e-11, 1.25527521313, 216.4804891757], [61024e-11, 1.25273412095, 209.3669421749], [46386e-11, 0.81534705304, 440.8252848776]], [[20629977e-11, 0.50482422817, 213.299095438], [3719555e-11, 3.99833475829, 206.1855484372], [1627158e-11, 6.181899395, 220.4126424388], [1346067e-11, 0, 0], [705842e-11, 3.03914308836, 419.4846438752], [365042e-11, 5.09928680706, 426.598190876], [329632e-11, 5.27899210039, 433.7117378768], [219335e-11, 3.82841533795, 639.897286314]], [[666252e-11, 1.99006340181, 213.299095438]], [], []], R: [[[9.55758135801, 0, 0], [0.52921382465, 2.39226219733, 213.299095438], [0.01873679934, 5.23549605091, 206.1855484372], [0.01464663959, 1.64763045468, 426.598190876], [0.00821891059, 5.93520025371, 316.3918696566], [0.00547506899, 5.01532628454, 103.0927742186], [0.00371684449, 2.27114833428, 220.4126424388], [0.00361778433, 3.13904303264, 7.1135470008], [0.00140617548, 5.70406652991, 632.7837393132], [0.00108974737, 3.29313595577, 110.2063212194], [69007015e-11, 5.94099622447, 419.4846438752], [6105335e-10, 0.94037761156, 639.897286314], [48913044e-11, 1.55733388472, 202.2533951741], [34143794e-11, 0.19518550682, 277.0349937414], [32401718e-11, 5.47084606947, 949.1756089698], [20936573e-11, 0.46349163993, 735.8765135318], [20839118e-11, 1.5210259064, 433.7117378768], [20746678e-11, 5.33255667599, 199.0720014364], [15298457e-11, 3.05943652881, 529.6909650946], [14296479e-11, 2.60433537909, 323.5054166574], [11993314e-11, 5.98051421881, 846.0828347512], [11380261e-11, 1.73105746566, 522.5774180938], [12884128e-11, 1.64892310393, 138.5174968707], [7752769e-11, 5.85191318903, 95.9792272178], [9796061e-11, 5.20475863996, 1265.5674786264], [6465967e-11, 0.17733160145, 1052.2683831884], [6770621e-11, 3.00433479284, 14.2270940016], [5850443e-11, 1.45519636076, 415.5524906121], [5307481e-11, 0.5973753405, 63.7358983034], [4695746e-11, 2.14919036956, 227.5261894396], [4043988e-11, 1.64010323863, 209.3669421749], [3688132e-11, 0.7801613317, 412.3710968744], [3376457e-11, 3.69528478828, 224.3447957019], [2885348e-11, 1.38764077631, 838.9692877504], [2976033e-11, 5.68467931117, 210.1177017003], [3419551e-11, 4.94549148887, 1581.959348283], [3460943e-11, 1.85088802878, 175.1660598002], [3400616e-11, 0.55386747515, 350.3321196004], [250763e-10, 3.53851863255, 742.9900605326], [2448325e-11, 6.18412386316, 1368.660252845], [2406138e-11, 2.96559220267, 117.3198682202], [2881181e-11, 0.17960757891, 853.196381752], [2173959e-11, 0.01508587396, 340.7708920448], [2024483e-11, 5.05411271271, 11.0457002639], [1740254e-11, 2.34657043464, 309.2783226558], [1861397e-11, 5.93361638244, 625.6701923124], [1888436e-11, 0.02968443389, 3.9321532631], [1610859e-11, 1.17302463549, 74.7815985673], [1462631e-11, 1.92588134017, 216.4804891757], [1474547e-11, 5.6767046113, 203.7378678824], [1395109e-11, 5.93669404929, 127.4717966068], [1781165e-11, 0.76314388077, 217.2312487011], [1817186e-11, 5.77713225779, 490.3340891794], [1472392e-11, 1.40064915651, 137.0330241624], [1304089e-11, 0.77235613966, 647.0108333148], [1149773e-11, 5.74021249703, 1162.4747044078], [1126667e-11, 4.46707803791, 265.9892934775], [1277489e-11, 2.98412586423, 1059.3819301892], [1207053e-11, 0.7528593316, 351.8165923087], [1071399e-11, 1.13567265104, 1155.361157407], [1020922e-11, 5.91233512844, 1685.0521225016], [1315042e-11, 5.11202572637, 211.8146227297], [1295553e-11, 4.69184139933, 1898.3512179396], [1099037e-11, 1.81765118601, 149.5631971346], [998462e-11, 2.63131596867, 200.7689224658], [985869e-11, 2.25992849742, 956.2891559706], [932434e-11, 3.66980793184, 554.0699874828], [664481e-11, 0.60297724821, 728.762966531], [65985e-10, 4.66635439533, 195.1398481733], [61774e-10, 5.62092000007, 942.062061969], [626382e-11, 5.9420823259, 1478.8665740644], [48223e-10, 1.84070179496, 479.2883889155], [487689e-11, 2.79373616806, 3.1813937377], [470086e-11, 0.8384775504, 1471.7530270636], [451817e-11, 5.64468459871, 2001.4439921582], [553128e-11, 3.41088600844, 269.9214467406], [534397e-11, 1.26443331367, 275.5505210331], [472572e-11, 1.8819858466, 515.463871093], [405434e-11, 1.64001413521, 536.8045120954], [517196e-11, 4.44310450526, 2214.7430875962], [452848e-11, 3.00349117198, 302.164775655], [49434e-10, 2.28626675074, 278.5194664497], [489825e-11, 5.80631420383, 191.2076949102], [427459e-11, 0.05741344372, 284.1485407422], [339763e-11, 1.40198657693, 440.8252848776], [340627e-11, 0.89091104306, 628.8515860501], [385974e-11, 1.99700402508, 1272.6810256272], [288298e-11, 1.12160250272, 422.6660376129], [294444e-11, 0.42577061903, 312.1990839626], [26249e-10, 0.31753439818, 1045.1548361876], [295331e-11, 0.67144493789, 88.865680217], [342968e-11, 5.85600322299, 1795.258443721], [341117e-11, 2.3758524725, 525.4981794006], [234018e-11, 4.22756813216, 114.1384744825], [223729e-11, 2.28129446763, 330.6189636582], [275814e-11, 0.47832439352, 38.1330356378], [224592e-11, 0.54754005675, 1788.1448967202], [3033e-9, 0.87946670205, 6069.7767545534], [292103e-11, 6.2142061192, 210.8514148832], [226121e-11, 0.37495223398, 142.4496501338], [277257e-11, 5.31917702012, 692.5874843535], [242911e-11, 5.37187983246, 1258.4539316256], [205571e-11, 0.95755250527, 288.0806940053], [207567e-11, 5.38126259725, 2317.8358618148], [186835e-11, 6.03591766061, 404.5067903482], [218536e-11, 5.25607043545, 212.3358875915], [222155e-11, 5.94588016768, 39.3568759152], [179673e-11, 4.41045924362, 408.4389436113], [24144e-10, 1.1252586811, 388.4651552382], [197093e-11, 3.9014194285, 52.6901980395], [236639e-11, 0.90802744873, 1375.7737998458], [171915e-11, 5.56318632797, 213.3472795478], [169865e-11, 2.8566755401, 99.1606209555], [214398e-11, 4.20253525974, 2531.1349572528], [17201e-10, 2.36537801012, 213.2509113282], [165707e-11, 2.63679789706, 215.7467759928], [230892e-11, 5.49463421262, 191.9584544356], [177585e-11, 0.38155817719, 430.5303441391], [191514e-11, 2.95906900704, 437.6438911399], [16325e-10, 3.4583251728, 617.8058857862], [162305e-11, 5.73050678664, 203.0041546995], [175108e-11, 5.71404465044, 1066.49547719], [183041e-11, 5.66851947172, 2111.6503133776], [150077e-11, 4.40663921925, 417.0369633204], [187935e-11, 6.07916265661, 563.6312150384], [145127e-11, 5.08176368814, 423.4167971383], [137491e-11, 5.43912787991, 222.8603229936], [172824e-11, 1.8492099409, 1589.0728952838], [165478e-11, 2.89132196119, 214.2623032845], [145727e-11, 1.56565192483, 831.8557407496], [176864e-11, 2.30323752987, 9999.986450773], [128877e-11, 2.55338644107, 414.0680179038], [120093e-11, 0.04329750542, 1361.5467058442], [143441e-11, 0.9981735772, 76.2660712756], [108747e-11, 2.09282278191, 207.6700211455], [132106e-11, 2.85902597898, 312.4597163935], [112238e-11, 0.26221759151, 2104.5367663768], [125186e-11, 4.78354048063, 205.2223405907], [104427e-11, 3.63671899047, 65.2203710117], [107447e-11, 3.67064138701, 212.7778305762], [108642e-11, 2.85492389024, 21.3406410024], [97743e-11, 5.12231845599, 2634.2277314714], [109097e-11, 1.63231061493, 208.633228992], [96852e-11, 4.19928280035, 305.3461693927], [96507e-11, 2.56002066845, 1692.1656695024], [85829e-11, 4.54545085982, 210.3783341312], [99249e-11, 5.13816222131, 1574.8458012822], [112532e-11, 5.03109281265, 703.6331846174], [84023e-11, 1.18337717265, 429.7795846137], [89021e-11, 5.38791571457, 107.0249274817], [110191e-11, 2.43656081234, 355.7487455718], [90659e-11, 4.20908809746, 213.8203602998], [95885e-11, 5.44594259071, 2428.0421830342], [94109e-11, 2.39786381418, 483.2205421786], [85609e-11, 0.03354346966, 860.3099287528], [88796e-11, 4.0576630675, 128.9562693151], [81951e-11, 1.66499731549, 62.2514255951], [9124e-10, 3.96942332591, 2847.5268269094], [83961e-11, 4.60845858022, 177.8743727859], [88376e-11, 3.86800515885, 140.001969579], [93308e-11, 0.73846639887, 831.1049812242], [91872e-11, 2.9497760532, 35.4247226521], [87077e-11, 1.33390590052, 1905.4647649404], [96584e-11, 4.84438390997, 131.4039498699], [7101e-10, 0.99334817658, 405.2575498736], [95266e-11, 2.51506908152, 2.4476805548], [72514e-11, 4.63213873657, 245.5424243524], [8258e-10, 1.52823217919, 145.6310438715], [76693e-11, 3.15240783008, 767.3690829208], [70317e-11, 4.0425370727, 173.9422195228], [86015e-11, 2.3010372727, 85.8272988312], [66529e-11, 4.75053522835, 70.8494453042], [65835e-11, 2.46869725001, 280.9671470045], [64824e-11, 0.09343869325, 9.5612275556], [71557e-11, 0.01212415296, 565.1156877467], [66533e-11, 1.08034871114, 339.2864193365], [63488e-11, 2.01740971153, 234.6397364404], [60786e-11, 5.12026947473, 756.3233826569], [58123e-11, 6.05732868566, 1677.9385755008], [64236e-11, 1.28586474622, 1148.2476104062], [73124e-11, 4.37810889148, 425.1137181677], [55012e-11, 3.85865703217, 342.2553647531], [57101e-11, 6.26689214029, 2420.9286360334], [6409e-10, 4.09854757476, 327.4375699205], [55306e-11, 1.60456896521, 543.0242872189], [57987e-11, 5.4726912434, 347.8844390456], [73581e-11, 3.72292337326, 92.0470739547], [7376e-10, 3.57045342615, 1.4844727083], [6494e-10, 2.44739629174, 267.4737661858], [54414e-11, 3.71479080197, 344.7030453079], [49783e-11, 3.93453970179, 192.6921676185], [49537e-11, 3.22831070579, 333.657345044], [47539e-11, 3.92925402178, 199.2844497575], [49368e-11, 4.90341763553, 217.491881132], [62711e-11, 4.40120079629, 214.7835681463], [46359e-11, 2.09430260266, 212.5483359126], [46289e-11, 2.6403845348, 10.2949407385], [54335e-11, 1.07179534996, 362.8622925726], [58742e-11, 2.62270940799, 225.8292684102], [48457e-11, 3.15166418511, 216.2198567448], [46316e-11, 4.8622664277, 2950.619601128], [4597e-10, 4.97297391881, 198.321241911], [46678e-11, 2.44960215701, 207.1487562837], [44905e-11, 1.77616995803, 223.5940361765], [44521e-11, 5.55987055442, 264.5048207692], [55914e-11, 4.29520232351, 329.7251917809], [49643e-11, 5.20789299388, 2744.4340526908], [58829e-11, 4.23073947869, 700.6642392008], [52629e-11, 3.7923062907, 343.2185725996], [41532e-11, 0.74488808688, 125.9873238985], [47767e-11, 2.39260015876, 207.8824694666], [56157e-11, 2.07214273531, 124.433415221], [43345e-11, 1.83707598036, 106.2741679563], [39793e-11, 4.00870764324, 12.5301729722], [53882e-11, 4.97905460628, 134.5853436076], [50135e-11, 5.75914508514, 320.3240229197], [4496e-10, 5.35721924134, 218.9281697305], [41089e-11, 4.92252591399, 1891.2376709388], [46509e-11, 2.06623129884, 2008.557539159], [42949e-11, 0.39856812529, 357.4456666012], [37992e-11, 2.06495914285, 247.2393453818], [48733e-11, 5.32762223699, 3127.3133312618], [34583e-11, 5.62555932761, 99.9113804809], [41092e-11, 2.4726489737, 237.6781178262], [40763e-11, 4.08408559215, 621.7380390493], [34213e-11, 0.73077393007, 750.1036075334], [33967e-11, 5.31264617621, 206.233732547], [36509e-11, 1.6882677575, 22.0914005278], [39361e-11, 3.4573071999, 241.6102710893], [34796e-11, 2.24780137629, 487.3651437628], [33049e-11, 4.86593901955, 209.106309744], [32584e-11, 2.22713131846, 319.5732633943], [39035e-11, 3.73870591196, 3163.918696566], [32722e-11, 1.06640549236, 252.6559713532], [38671e-11, 4.39617126814, 18.1592472647], [34514e-11, 1.8260750069, 380.12776796], [41539e-11, 0.08136234251, 210.3301500214], [33527e-11, 5.80475568528, 251.4321310758], [31221e-11, 1.96489151107, 244.318584075], [30521e-11, 2.26854188579, 1169.5882514086], [34828e-11, 5.96324553131, 217.964961884], [38481e-11, 4.43707551964, 160.6088973985], [35998e-11, 3.83262381556, 56.6223513026], [31041e-11, 4.89914223233, 144.1465711632], [32342e-11, 3.58191018804, 231.4583427027], [28838e-11, 5.80081031514, 1994.3304451574], [32175e-11, 2.13166877923, 206.1373643274], [32643e-11, 1.93131580544, 98.8999885246], [34917e-11, 5.65276617691, 497.4476361802], [28928e-11, 2.2165328892, 14.977853527], [31569e-11, 3.81846560564, 73.297125859], [32199e-11, 0.9981184629, 1464.6394800628], [29153e-11, 5.98414099408, 2737.32050569], [36706e-11, 4.75493516597, 348.8476468921], [28665e-11, 1.68732054583, 78.7137518304], [27501e-11, 6.12086395418, 214.0498549634], [28795e-11, 0.04448605904, 5.6290742925], [27205e-11, 0.24587543816, 313.2104759189], [32441e-11, 3.77921585847, 33.9402499438], [27088e-11, 5.2031009802, 148.0787244263], [34956e-11, 3.43886187587, 273.1028404783], [33076e-11, 2.44662095168, 969.6224780949], [27745e-11, 1.44598606685, 258.8757464767], [27178e-11, 4.2591859622, 179.3588454942], [27872e-11, 0.78772093522, 546.956440482], [29106e-11, 4.83947711462, 905.8865797915], [27417e-11, 2.44930366818, 254.9435932136], [34296e-11, 6.00920969644, 166.828672522], [28859e-11, 6.0291724991, 188.9200730498], [26001e-11, 0.65046992484, 654.1243803156], [3356e-10, 1.23732329127, 2221.856634597], [24356e-11, 0.5224875133, 894.8408795276], [27767e-11, 5.17820678484, 5.4166259714], [25568e-11, 3.35897159622, 0.9632078465], [22879e-11, 3.5129348069, 458.8415197904], [24496e-11, 0.00976884124, 69.1525242748], [28794e-11, 0.75545700854, 488.8496164711], [31228e-11, 2.05299907796, 282.4516197128], [25438e-11, 5.2903772925, 636.7158925763], [25332e-11, 4.9700796945, 3060.8259223474], [23596e-11, 2.54766434769, 196.6243208816], [29602e-11, 3.92688207792, 206.706813299], [28255e-11, 2.72125009693, 32.2433289144], [22115e-11, 4.75775237642, 213.1872208534], [2213e-10, 3.25436709191, 681.5417840896], [21675e-11, 4.61403328597, 3267.0114707846], [22115e-11, 3.16759500067, 213.4109700226], [26912e-11, 2.86269769133, 24.3790223882], [20737e-11, 1.66895754198, 274.0660483248], [28309e-11, 4.73122154345, 552.5855147745], [25252e-11, 5.11986371899, 168.0525127994], [26364e-11, 1.59272536419, 491.8185618877], [21995e-11, 0.8807900928, 635.9651330509], [27076e-11, 5.53694832022, 555.5544601911], [19683e-11, 2.14388519695, 54.1746707478], [27266e-11, 3.57891326986, 561.1835344836], [25162e-11, 1.78070903718, 182.279606801], [21386e-11, 3.86030772476, 116.4260963429], [25572e-11, 1.62093861709, 2324.9494088156], [20025e-11, 2.90618582553, 120.358249606], [19882e-11, 5.59203696008, 4.192785694], [19454e-11, 0.10623632006, 218.7157214094], [25617e-11, 2.09931460158, 248.7238180901], [19804e-11, 2.52180124343, 1485.9801210652], [18516e-11, 2.54810951896, 213.5115437591], [19831e-11, 0.07955320843, 842.1506814881], [18516e-11, 5.3775511051, 213.0866471169], [23655e-11, 1.59974907716, 738.7972748386], [20375e-11, 2.94653107321, 59.8037450403], [24247e-11, 3.15387696867, 240.3864308119], [18294e-11, 3.18715992969, 295.0512286542], [17464e-11, 2.90471803626, 477.8039162072], [20698e-11, 1.07232100334, 494.2662424425], [204e-9, 1.83665590916, 533.6231183577], [21285e-11, 0.63341794388, 189.7232222019], [16116e-11, 0.60069688498, 746.9222137957], [16297e-11, 3.98317294128, 2.9207613068], [16922e-11, 4.74266972033, 2207.6295405954], [20479e-11, 6.05098286202, 173.6815870919], [15447e-11, 1.49120311247, 543.9180590962], [19944e-11, 4.9408663275, 121.2520214833], [17127e-11, 0.71458025372, 1781.0313497194], [1724e-10, 0.67749766724, 151.0476698429], [15574e-11, 5.70296527381, 3053.7123753466], [15036e-11, 5.52770334605, 2310.722314814], [15928e-11, 4.45642717299, 643.8294395771], [16165e-11, 0.63286131026, 358.9301393095], [14589e-11, 5.26158292613, 472.1748419147], [16545e-11, 3.52813228069, 3480.3105662226], [18912e-11, 0.55218675639, 4.665866446], [17595e-11, 2.26495491189, 672.1406152284], [18104e-11, 2.71285673689, 181.806526049], [15918e-11, 5.23446779429, 135.5485514541], [13931e-11, 3.19357128657, 213.5597278689], [14058e-11, 0.82375896652, 221.3758502853], [13931e-11, 4.73208739639, 213.0384630071], [1469e-10, 2.65882838685, 292.0128472684], [14454e-11, 0.21819892811, 235.3904959658], [16168e-11, 0.91025406068, 280.003939158], [13327e-11, 3.54947442109, 205.6642835754], [16104e-11, 0.82547975762, 176.6505325085], [16441e-11, 5.39398801335, 424.1505103212], [12747e-11, 0.75780958758, 721.6494195302], [12754e-11, 3.55466871752, 153.4953503977], [14448e-11, 0.12049617049, 313.6835566709], [16499e-11, 3.26383140489, 6283.0758499914], [16564e-11, 1.62649604519, 5856.4776591154], [1495e-10, 1.23923264394, 2641.3412784722], [15724e-11, 1.18874754834, 486.4019359163], [11893e-11, 0.91693668558, 416.3032501375], [11684e-11, 1.11385455828, 81.7521332162], [12985e-11, 4.74373293725, 3377.217792004], [11864e-11, 0.64411806416, 28.3111756513], [13216e-11, 4.9590402443, 1279.794572628], [16121e-11, 0.98185208328, 2538.2485042536], [149e-9, 1.76649832526, 569.0478410098], [11337e-11, 4.36555105334, 3583.4033404412], [11253e-11, 5.98638731448, 193.655375465], [14753e-11, 2.92291248767, 167.0893049529], [13774e-11, 2.50808183571, 1802.3719907218], [11068e-11, 0.00471764868, 629.6023455755], [12781e-11, 3.62178749219, 67.6680515665], [12238e-11, 0.27163151602, 1044.4040766622], [11021e-11, 0.15223056578, 501.3797894433], [14206e-11, 2.63254885854, 618.5566453116], [14365e-11, 0.37819794671, 601.7642506762], [15034e-11, 2.67095006272, 46.470422916], [12248e-11, 2.19751851112, 650.9429865779], [10783e-11, 2.86375137884, 113.3877149571], [11418e-11, 1.20874560246, 172.2452984934], [14613e-11, 6.05645353059, 468.2426886516], [1058e-10, 2.05903854864, 429.0458714308], [13721e-11, 2.20936291526, 228.276948965], [1218e-10, 1.82585577726, 241.8709035202], [10787e-11, 5.06924118186, 162.8965192589], [12056e-11, 3.20018724042, 72.0732855816], [12233e-11, 4.5074193097, 425.6349830295], [12101e-11, 4.14977794161, 1108.1399749656], [10287e-11, 2.10680007784, 1033.3583763983], [10746e-11, 4.66838299108, 129.9194771616], [12961e-11, 5.11568581806, 219.4494345923], [12302e-11, 5.335685477, 776.9303104764], [11441e-11, 3.85769732764, 405.9912630565], [10112e-11, 2.7648687563, 210.5907824523], [10816e-11, 1.36864298163, 170.7608257851], [10187e-11, 2.36063948382, 685.4739373527], [12397e-11, 6.06349943525, 875.830299001], [12146e-11, 2.04060386262, 508.3503240922], [10193e-11, 4.01123146905, 381.3516082374], [10052e-11, 5.1610725104, 216.0074084237], [10033e-11, 5.97497644283, 6.1503391543], [11661e-11, 0.95163302252, 694.0719570618], [10763e-11, 0.05616402982, 691.1030116452]], [[0.06182981282, 0.25843515034, 213.299095438], [0.00506577574, 0.71114650941, 206.1855484372], [0.00341394136, 5.7963577396, 426.598190876], [0.00188491375, 0.47215719444, 220.4126424388], [0.0018626154, 3.14159265359, 0], [0.00143891176, 1.40744864239, 7.1135470008], [49621111e-11, 6.0174446958, 103.0927742186], [20928189e-11, 5.0924565447, 639.897286314], [19952612e-11, 1.17560125007, 419.4846438752], [18839639e-11, 1.60819563173, 110.2063212194], [12892827e-11, 5.94330258435, 433.7117378768], [13876565e-11, 0.75886204364, 199.0720014364], [5396699e-11, 1.28852405908, 14.2270940016], [4869308e-11, 0.86793894213, 323.5054166574], [4247455e-11, 0.39299384543, 227.5261894396], [3252084e-11, 1.25853470491, 95.9792272178], [2856006e-11, 2.16731405366, 735.8765135318], [2909411e-11, 4.60679154788, 202.2533951741], [3081408e-11, 3.43662557418, 522.5774180938], [1987689e-11, 2.45054204795, 412.3710968744], [1941309e-11, 6.02393385142, 209.3669421749], [1581446e-11, 1.29191789712, 210.1177017003], [1339511e-11, 4.30801821806, 853.196381752], [131559e-10, 1.25296446023, 117.3198682202], [1203085e-11, 1.86654673794, 316.3918696566], [1091088e-11, 0.07527246854, 216.4804891757], [954403e-11, 5.15173410519, 647.0108333148], [966012e-11, 0.47991379141, 632.7837393132], [881827e-11, 1.88471724478, 1052.2683831884], [874215e-11, 1.40224683864, 224.3447957019], [897512e-11, 0.98343776092, 529.6909650946], [784866e-11, 3.06377517461, 838.9692877504], [739892e-11, 1.38225356694, 625.6701923124], [612961e-11, 3.03307306767, 63.7358983034], [65821e-10, 4.1436293098, 309.2783226558], [6496e-9, 1.7248948616, 742.9900605326], [599236e-11, 2.54924174765, 217.2312487011], [502886e-11, 2.12958819475, 3.9321532631], [413017e-11, 4.59334402271, 415.5524906121], [356117e-11, 2.30312127651, 728.762966531], [344777e-11, 5.88787577835, 440.8252848776], [395004e-11, 0.53349091102, 956.2891559706], [335526e-11, 1.61614647174, 1368.660252845], [362772e-11, 4.70691652867, 302.164775655], [321611e-11, 0.97931764923, 3.1813937377], [277783e-11, 0.26007031431, 195.1398481733], [291173e-11, 2.83129427918, 1155.361157407], [264971e-11, 2.42670902733, 88.865680217], [264864e-11, 5.82860588985, 149.5631971346], [316777e-11, 3.58395655749, 515.463871093], [294324e-11, 2.81632778983, 11.0457002639], [244864e-11, 1.04493438899, 942.062061969], [215368e-11, 3.56535574833, 490.3340891794], [264047e-11, 1.28547685567, 1059.3819301892], [246245e-11, 0.90730313861, 191.9584544356], [222077e-11, 5.1319321205, 269.9214467406], [194973e-11, 4.56665009915, 846.0828347512], [182802e-11, 2.67913220473, 127.4717966068], [181645e-11, 4.93431600689, 74.7815985673], [174651e-11, 3.44560172182, 137.0330241624], [165515e-11, 5.99775895715, 536.8045120954], [154809e-11, 1.19720845085, 265.9892934775], [169743e-11, 4.63464467495, 284.1485407422], [151526e-11, 0.52928231044, 330.6189636582], [152461e-11, 5.43886711695, 422.6660376129], [157687e-11, 2.99559914619, 340.7708920448], [14063e-10, 2.02069760726, 1045.1548361876], [139834e-11, 1.3528295939, 1685.0521225016], [140977e-11, 1.27099900689, 203.0041546995], [136013e-11, 5.01678984678, 351.8165923087], [153391e-11, 0.26968607873, 1272.6810256272], [129476e-11, 1.14344730612, 21.3406410024], [127831e-11, 2.53876158952, 1471.7530270636], [126538e-11, 3.00310970076, 277.0349937414], [100277e-11, 3.61360169153, 1066.49547719], [103169e-11, 0.38175114761, 203.7378678824], [107527e-11, 4.31870663477, 210.8514148832], [95934e-11, 0.79463744168, 1258.4539316256], [82663e-11, 0.28181414606, 234.6397364404], [97986e-11, 2.56085956186, 191.2076949102], [97389e-11, 3.26245865063, 831.8557407496], [72227e-11, 4.3798463038, 860.3099287528], [70639e-11, 0.7319151392, 437.6438911399], [70447e-11, 0.87698401733, 423.4167971383], [72057e-11, 5.58013290518, 429.7795846137], [73332e-11, 0.62505906432, 1375.7737998458], [66433e-11, 2.68414462465, 405.2575498736], [63812e-11, 1.7505149818, 1361.5467058442], [61601e-11, 1.09332288242, 2001.4439921582], [67006e-11, 0.06872766216, 408.4389436113], [68945e-11, 2.47127505057, 949.1756089698], [60456e-11, 2.25094790113, 1788.1448967202], [67074e-11, 5.45365870159, 200.7689224658], [65579e-11, 0.05539079332, 1589.0728952838], [4932e-10, 4.17243429807, 138.5174968707], [50648e-11, 6.26867505289, 223.5940361765], [55166e-11, 4.59491533823, 628.8515860501], [47916e-11, 0.83929741626, 10.2949407385], [46691e-11, 2.17322569098, 312.1990839626], [54179e-11, 0.28360076018, 124.433415221], [49511e-11, 3.79960349195, 215.7467759928], [40136e-11, 5.18161452756, 1478.8665740644], [4277e-10, 2.98582069454, 1148.2476104062], [42053e-11, 4.830179518, 288.0806940053], [42829e-11, 3.38225543528, 208.633228992]], [[0.00436902464, 4.78671673044, 213.299095438], [7192276e-10, 2.50069994874, 206.1855484372], [49766792e-11, 4.9716815087, 220.4126424388], [43220894e-11, 3.86940443794, 426.598190876], [29645554e-11, 5.96310264282, 7.1135470008], [414165e-10, 4.10670940823, 433.7117378768], [4720909e-11, 2.47527992423, 199.0720014364], [378937e-10, 3.09771025067, 639.897286314], [296399e-10, 1.37206248846, 103.0927742186], [2556363e-11, 2.85065721526, 419.4846438752], [2208457e-11, 6.27588858707, 110.2063212194], [2187621e-11, 5.85545832218, 14.2270940016], [1956896e-11, 4.92448618045, 227.5261894396], [2326801e-11, 0, 0], [92384e-10, 5.46392422737, 323.5054166574], [705936e-11, 2.97081280098, 95.9792272178], [546115e-11, 4.12854181522, 412.3710968744], [373838e-11, 5.83435991809, 117.3198682202], [360882e-11, 3.27703082368, 647.0108333148], [35635e-10, 3.19152043942, 210.1177017003], [390627e-11, 4.48106176893, 216.4804891757], [431485e-11, 5.17825414612, 522.5774180938], [325598e-11, 2.26867601656, 853.196381752], [405018e-11, 4.17294157872, 209.3669421749], [204494e-11, 0.0877484859, 202.2533951741], [206854e-11, 4.02188336738, 735.8765135318], [178474e-11, 4.09716541453, 440.8252848776], [180143e-11, 3.59704903955, 632.7837393132]], [[20315005e-11, 3.02186626038, 213.299095438], [8923581e-11, 3.19144205755, 220.4126424388], [6908677e-11, 4.35174889353, 206.1855484372], [4087129e-11, 4.22406927376, 7.1135470008], [3879041e-11, 2.01056445995, 426.598190876], [1070788e-11, 4.20360341236, 199.0720014364], [907332e-11, 2.28344368029, 433.7117378768]], [], []] };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/vsop87d_uranus.embedded.json
+var vsop87d_uranus_embedded_default = { L: [[[5.48129294299, 0, 0], [0.09260408252, 0.8910642153, 74.7815985673], [0.01504247826, 3.62719262195, 1.4844727083], [0.00365981718, 1.89962189068, 73.297125859], [0.00272328132, 3.35823710524, 149.5631971346], [70328499e-11, 5.39254431993, 63.7358983034], [68892609e-11, 6.09292489045, 76.2660712756], [61998592e-11, 2.26952040469, 2.9689454166], [61950714e-11, 2.85098907565, 11.0457002639], [26468869e-11, 3.14152087888, 71.8126531507], [25710505e-11, 6.11379842935, 454.9093665273], [21078897e-11, 4.36059465144, 148.0787244263], [17818665e-11, 1.74436982544, 36.6485629295], [14613471e-11, 4.73732047977, 3.9321532631], [11162535e-11, 5.82681993692, 224.3447957019], [10997934e-11, 0.48865493179, 138.5174968707], [9527487e-11, 2.95516893093, 35.1640902212], [7545543e-11, 5.23626440666, 109.9456887885], [422017e-10, 3.23328535514, 70.8494453042], [405185e-10, 2.27754158724, 151.0476698429], [3354607e-11, 1.06549008887, 4.4534181249], [2926671e-11, 4.62903695486, 9.5612275556], [3490352e-11, 5.48305567292, 146.594251718], [3144093e-11, 4.75199307603, 77.7505439839], [292241e-10, 5.3523674338, 85.8272988312], [227279e-10, 4.36600802756, 70.3281804424], [2051209e-11, 1.51773563459, 0.1118745846], [2148599e-11, 0.60745800902, 38.1330356378], [1991726e-11, 4.92437290826, 277.0349937414], [1376208e-11, 2.04281409054, 65.2203710117], [166691e-10, 3.62744580852, 380.12776796], [1284183e-11, 3.11346336879, 202.2533951741], [1150416e-11, 0.93344454002, 3.1813937377], [1533223e-11, 2.58593414266, 52.6901980395], [1281641e-11, 0.54269869505, 222.8603229936], [13721e-9, 4.19641615561, 111.4301614968], [1220998e-11, 0.19901396193, 108.4612160802], [946195e-11, 1.19249463066, 127.4717966068], [1150993e-11, 4.17898207045, 33.6796175129], [1244342e-11, 0.91612680579, 2.4476805548], [1072008e-11, 0.23564502877, 62.2514255951], [1090461e-11, 1.77501638912, 12.5301729722], [707875e-11, 5.18285226584, 213.299095438], [653401e-11, 0.96586909116, 78.7137518304], [627562e-11, 0.18210181975, 984.6003316219], [524495e-11, 2.01276706996, 299.1263942692], [55937e-10, 3.35776737704, 0.5212648618], [606827e-11, 5.43209728952, 529.6909650946], [404891e-11, 5.98689011389, 8.0767548473], [467211e-11, 0.41484068933, 145.1097790097], [471288e-11, 1.40664336447, 184.7272873558], [483219e-11, 2.10553990154, 0.9632078465], [395614e-11, 5.87039580949, 351.8165923087], [433532e-11, 5.52142978255, 183.2428146475], [309885e-11, 5.83301304674, 145.6310438715], [378609e-11, 2.34975805006, 56.6223513026], [398996e-11, 0.33810765436, 415.5524906121], [300379e-11, 5.64353974146, 22.0914005278], [249229e-11, 4.74617120584, 225.8292684102], [239334e-11, 2.35045874708, 137.0330241624], [294172e-11, 5.83916826225, 39.6175083461], [21648e-10, 4.77847481363, 340.7708920448], [251792e-11, 1.63696775578, 221.3758502853], [219621e-11, 1.92212987979, 67.6680515665], [201963e-11, 1.29693040865, 0.0481841098], [224097e-11, 0.51574863468, 84.3428261229], [216549e-11, 6.14211862702, 5.9378908332], [222588e-11, 2.84309380331, 0.2606324309], [207828e-11, 5.5802057004, 68.8437077341], [187474e-11, 1.31924326253, 0.1600586944], [158028e-11, 0.73811997211, 54.1746707478], [199146e-11, 0.9563415501, 152.5321425512], [168648e-11, 5.87874000882, 18.1592472647], [1703e-9, 3.67717520688, 5.4166259714], [193652e-11, 1.88800122606, 456.3938392356], [192998e-11, 0.91616058506, 453.424893819], [181934e-11, 3.53624029238, 79.2350166922], [173145e-11, 1.53860728054, 160.6088973985], [164588e-11, 1.42379714838, 106.9767433719], [171968e-11, 5.67952685533, 219.891377577], [162792e-11, 3.05029377666, 112.9146342051], [146653e-11, 1.26300172265, 59.8037450403], [139453e-11, 5.385977234, 32.1951448046], [138585e-11, 4.25994786673, 909.8187330546], [143058e-11, 1.29995487555, 35.4247226521], [12384e-10, 1.37359990336, 7.1135470008], [104414e-11, 5.02820888813, 0.7507595254], [103277e-11, 0.68095301267, 14.977853527], [94741e-11, 0.90674090409, 74.6697239827], [82978e-11, 2.92828718445, 265.9892934775], [110163e-11, 2.02685778976, 554.0699874828], [94226e-11, 3.9426632826, 74.8934731519], [79858e-11, 1.0144682918, 6.592282139], [109376e-11, 5.70581833286, 77.962992305], [85876e-11, 1.70649435603, 82.8583534146], [103562e-11, 1.45770270246, 24.3790223882], [74667e-11, 4.63177552576, 69.3649725959], [79919e-11, 3.00974084247, 297.6419215609], [84502e-11, 0.36887189574, 186.2117600641], [8881e-10, 0.52481330563, 181.7583419392], [70303e-11, 1.18986880009, 66.70484372], [69965e-11, 0.87476081875, 305.3461693927], [69927e-11, 3.76102749315, 131.4039498699], [84604e-11, 5.88725183325, 256.5399405065], [74341e-11, 6.24271323846, 447.7958195265], [6231e-10, 0.16901376623, 479.2883889155], [72726e-11, 2.84892775693, 462.0229135281], [6906e-10, 4.43934854374, 39.3568759152], [76568e-11, 4.5872111034, 6.2197751235], [73387e-11, 4.27603448634, 87.3117715395], [55307e-11, 1.49636544147, 71.6002048296], [57291e-11, 1.63015165542, 143.6253063014], [61661e-11, 3.18604743524, 77.2292791221], [57634e-11, 3.67180685401, 51.2057253312], [50289e-11, 1.12279384633, 20.6069278195], [53744e-11, 5.51890986247, 128.9562693151], [57894e-11, 2.66877593418, 381.6122406683], [58112e-11, 1.58629352171, 60.7669528868], [45382e-11, 0.48053933052, 14.0146456805], [37581e-11, 6.06822931932, 211.8146227297], [3864e-10, 3.43597050177, 153.4953503977], [46087e-11, 4.36201639577, 75.7448064138], [40088e-11, 4.57333927519, 46.2097904851], [34229e-11, 2.93967782207, 140.001969579], [38669e-11, 5.58941074168, 99.1606209555], [34827e-11, 1.02792863024, 203.7378678824], [40024e-11, 0.69889667397, 218.4069048687], [32538e-11, 4.21625657443, 200.7689224658], [31865e-11, 5.50961503408, 72.3339180125], [41695e-11, 3.82438031124, 81.0013736908], [34795e-11, 0.39363490236, 1.3725981237], [39775e-11, 6.05600836903, 293.188503436], [27577e-11, 2.18261286374, 125.9873238985], [36279e-11, 1.66586085405, 258.0244132148], [35442e-11, 1.96652806541, 835.0371344873], [35361e-11, 3.7225869003, 692.5874843535], [27323e-11, 2.10164372072, 209.3669421749], [2653e-10, 4.48265986115, 373.9079928365], [34472e-11, 1.07907945481, 191.2076949102], [29915e-11, 3.87358632506, 259.5088859231], [26233e-11, 3.63172504384, 490.3340891794], [25848e-11, 0.54461409359, 41.6444977756], [26989e-11, 6.27711247734, 28.5718080822], [26391e-11, 5.81110061049, 75.3028634291], [34227e-11, 6.05617272657, 275.5505210331], [24279e-11, 3.18776564878, 81.3738807063], [29937e-11, 1.88789751816, 269.9214467406], [26235e-11, 6.20105251336, 134.5853436076], [22754e-11, 0.92919725789, 288.0806940053], [2518e-10, 5.42547381962, 116.4260963429], [22715e-11, 0.53098783687, 1514.2912967165], [26485e-11, 4.77176167929, 284.1485407422], [27008e-11, 4.75281624832, 41.1019810544], [21972e-11, 4.58613057386, 404.5067903482], [22012e-11, 1.84389287183, 617.8058857862], [24694e-11, 4.7087519549, 378.6432952517], [28949e-11, 0.17127584792, 528.2064923863], [20492e-11, 0.10285646641, 195.1398481733], [20696e-11, 5.62143477633, 55.6591434561], [25843e-11, 0.74627159338, 278.5194664497], [2299e-10, 3.58378694661, 1.5963472929], [21843e-11, 0.05733533568, 173.9422195228], [1905e-10, 2.30351091243, 5.1078094307], [20675e-11, 2.64113858585, 105.4922706636], [21856e-11, 5.87352402691, 45.5766510387], [2112e-10, 1.98081790016, 114.3991069134], [19279e-11, 2.84304025179, 159.1244246902], [19061e-11, 0.50598371738, 67.3592350258], [20434e-11, 3.77601951414, 135.5485514541], [17326e-11, 4.47793157645, 120.358249606], [20547e-11, 0.88695598555, 255.0554677982], [1932e-10, 1.48569290504, 0.8937718773], [21331e-11, 2.7447002306, 28.3111756513], [17582e-11, 4.091396367, 296.1574488526], [15918e-11, 3.94525074972, 17.5261078183], [15562e-11, 0.92748407689, 300.6108669775], [16439e-11, 0.30868798605, 30.7106720963], [15237e-11, 4.93048601827, 7.4223635415], [19284e-11, 6.21950083268, 329.8370663655], [1386e-10, 0.56255266406, 144.1465711632], [16206e-11, 2.30292598693, 344.7030453079], [16041e-11, 0.19723295436, 103.0927742186], [14414e-11, 2.57606243208, 230.5645708254], [16789e-11, 4.93540052916, 565.1156877467], [17052e-11, 1.81844925116, 294.6729761443], [16766e-11, 0.2754218633, 73.8183907208], [15428e-11, 1.91577056305, 96.8729990951], [15718e-11, 3.87095025861, 98.8999885246], [11923e-11, 6.17545505441, 44.7253177768], [12407e-11, 6.22419970167, 80.1982245387], [1304e-10, 1.99652993223, 27.0873353739], [13229e-11, 3.43782440072, 227.3137411185], [11669e-11, 4.31526860843, 426.598190876], [14378e-11, 5.78353646474, 1059.3819301892], [15879e-11, 0.98454960055, 6208.2942514241], [11158e-11, 1.7441743069, 220.4126424388], [11989e-11, 5.8438865795, 13.3333221243], [11386e-11, 2.55925734515, 19.1224551112], [13281e-11, 5.39472153462, 391.1734682239], [12295e-11, 4.57340278496, 23.5758732361], [12827e-11, 1.7741026907, 180.2738692309], [11651e-11, 4.29138607818, 142.4496501338], [12248e-11, 2.44241346243, 100.3844612329], [12421e-11, 2.32591770919, 80.7194894005], [13172e-11, 2.74099358938, 177.8743727859], [12262e-11, 5.42795591646, 831.1049812242], [10272e-11, 5.90194483926, 74.5209661364], [10701e-11, 4.00709797731, 235.3904959658], [12066e-11, 5.5216310022, 74.2603337055], [10836e-11, 1.88393779293, 241.6102710893], [10718e-11, 5.50310449842, 187.6962327724], [12057e-11, 6.0212005039, 154.0166152595], [11526e-11, 6.26425302826, 155.7829722581], [122e-9, 5.79400179483, 1364.7280995819], [10979e-11, 5.76614513865, 628.8515860501], [11227e-11, 1.30788626675, 604.4725636619], [10531e-11, 1.05867421534, 291.7040307277], [10291e-11, 5.30493908317, 75.0422309982]], [[75.02543121646, 0, 0], [0.00154458244, 5.24201658072, 74.7815985673], [24456413e-11, 1.71255705309, 1.4844727083], [9257828e-11, 0.42844639064, 11.0457002639], [8265977e-11, 1.5022003511, 63.7358983034], [7841715e-11, 1.31983607251, 149.5631971346], [3899105e-11, 0.46483574024, 3.9321532631], [2283777e-11, 4.17367533997, 76.2660712756], [19266e-9, 0.53013080152, 2.9689454166], [1232727e-11, 1.58634458237, 70.8494453042], [791206e-11, 5.43641224143, 3.1813937377], [766954e-11, 1.99555409575, 73.297125859], [481671e-11, 2.98401996914, 85.8272988312], [449798e-11, 4.13826237508, 138.5174968707], [4456e-9, 3.72300400331, 224.3447957019], [426554e-11, 4.73126059388, 71.8126531507], [347735e-11, 2.45372261286, 9.5612275556], [353752e-11, 2.58324496886, 148.0787244263], [317084e-11, 5.57855232072, 52.6901980395], [17992e-10, 5.68367730922, 12.5301729722], [171084e-11, 3.00060075287, 78.7137518304], [205585e-11, 2.36263144251, 2.4476805548], [158029e-11, 2.90931969498, 0.9632078465], [189068e-11, 4.20242881378, 56.6223513026], [15467e-10, 5.59083925605, 4.4534181249], [183762e-11, 0.28371004654, 151.0476698429], [143464e-11, 2.59049246726, 62.2514255951], [151984e-11, 2.9421732689, 77.7505439839], [153515e-11, 4.65186885939, 35.1640902212], [121452e-11, 4.1483920492, 127.4717966068], [115546e-11, 3.73224603791, 65.2203710117], [102022e-11, 4.18754517993, 145.6310438715], [101718e-11, 6.03385875009, 0.1118745846], [88202e-11, 3.99035787994, 18.1592472647], [87549e-11, 6.15520787584, 202.2533951741], [8053e-10, 2.64124743934, 22.0914005278], [72047e-11, 6.04545933578, 70.3281804424], [6857e-10, 4.05071895264, 77.962992305], [59173e-11, 3.70413919082, 67.6680515665], [47267e-11, 3.54312460519, 351.8165923087], [42534e-11, 5.72357370899, 5.4166259714], [44339e-11, 5.90865821911, 7.1135470008]], [[53033277e-11, 0, 0], [2357636e-11, 2.26014661705, 74.7815985673], [769129e-11, 4.52561041823, 11.0457002639], [551533e-11, 3.25814281023, 63.7358983034], [541532e-11, 2.27573907424, 3.9321532631], [529473e-11, 4.92348433826, 1.4844727083], [257521e-11, 3.69059216858, 3.1813937377], [238835e-11, 5.85806638405, 149.5631971346], [181904e-11, 6.21763603405, 70.8494453042]], [], [], []], B: [[[0.01346277639, 2.61877810545, 74.7815985673], [62341405e-11, 5.08111175856, 149.5631971346], [61601203e-11, 3.14159265359, 0], [9963744e-11, 1.61603876357, 76.2660712756], [9926151e-11, 0.57630387917, 73.297125859], [3259455e-11, 1.2611938596, 224.3447957019], [2972318e-11, 2.24367035538, 1.4844727083], [2010257e-11, 6.05550401088, 148.0787244263], [1522172e-11, 0.27960386377, 63.7358983034], [924055e-11, 4.03822927853, 151.0476698429], [760624e-11, 6.14000431923, 71.8126531507], [420265e-11, 5.21279984788, 11.0457002639], [430668e-11, 3.55445034854, 213.299095438], [436843e-11, 3.38082524317, 529.6909650946], [522309e-11, 3.3208519477, 138.5174968707], [434625e-11, 0.34065281858, 77.7505439839], [46263e-10, 0.74256727574, 85.8272988312], [232649e-11, 2.25716421383, 222.8603229936], [215838e-11, 1.5912170494, 38.1330356378], [244698e-11, 0.78795150326, 2.9689454166], [179935e-11, 3.72487952673, 299.1263942692], [174895e-11, 1.23550262213, 146.594251718], [173667e-11, 1.93654269131, 380.12776796], [160368e-11, 5.33635436463, 111.4301614968], [144064e-11, 5.96239326415, 35.1640902212], [102049e-11, 2.61876256513, 78.7137518304], [116363e-11, 5.73877190007, 70.8494453042], [106441e-11, 0.94103112994, 70.3281804424], [86163e-11, 0.70262506622, 39.6175083461], [72617e-11, 0.20564696113, 225.8292684102], [71172e-11, 0.83343269975, 109.9456887885], [57502e-11, 2.67039425415, 108.4612160802], [54255e-11, 3.35166579613, 184.7272873558], [4447e-10, 2.74408231138, 152.5321425512], [38591e-11, 5.17394663303, 202.2533951741], [39157e-11, 2.17108251341, 351.8165923087], [41346e-11, 3.22134319551, 160.6088973985], [3514e-10, 4.00111634363, 112.9146342051], [33073e-11, 3.61378095742, 221.3758502853], [31315e-11, 2.71969470781, 145.1097790097], [37336e-11, 4.02053241202, 52.6901980395], [32028e-11, 1.29160071142, 145.6310438715], [27574e-11, 3.7006426696, 36.6485629295], [24277e-11, 2.84989187496, 127.4717966068], [24635e-11, 1.11645461259, 3.9321532631], [24315e-11, 5.48987913644, 79.2350166922], [21418e-11, 0.63722900407, 277.0349937414], [19826e-11, 2.5933418223, 84.3428261229], [22373e-11, 5.73687615457, 4.4534181249], [19137e-11, 1.30214105578, 62.2514255951], [19789e-11, 4.72260849557, 297.6419215609], [20299e-11, 1.06070151806, 454.9093665273], [19768e-11, 5.77906142568, 305.3461693927], [21348e-11, 1.01350946382, 33.6796175129], [15142e-11, 2.91786832554, 426.598190876], [16e-8, 1.95535748902, 186.2117600641], [13819e-11, 2.67163927171, 74.6697239827], [11463e-11, 5.73391138419, 41.1019810544], [10741e-11, 3.73401569675, 1059.3819301892], [1145e-10, 3.98177764866, 106.9767433719], [1036e-10, 4.75567608732, 183.2428146475], [10232e-11, 6.18772866993, 373.9079928365], [13803e-11, 5.70712120608, 74.8934731519], [10553e-11, 3.78602881738, 490.3340891794], [11838e-11, 5.96756415681, 87.3117715395], [1003e-10, 1.74828757238, 22.0914005278], [10107e-11, 0.92911975959, 65.2203710117], [12093e-11, 2.53736362742, 9.5612275556], [11352e-11, 2.12645777694, 68.8437077341]], [[0.00206366162, 4.12394311407, 74.7815985673], [856323e-10, 0.33819986165, 149.5631971346], [1725703e-11, 2.12193159895, 73.297125859], [136886e-10, 3.06861722047, 76.2660712756], [1374449e-11, 0, 0], [399847e-11, 2.84767037795, 224.3447957019], [450639e-11, 3.77656180977, 1.4844727083], [307214e-11, 1.25456766737, 148.0787244263], [154336e-11, 3.78575467747, 63.7358983034], [110888e-11, 5.32888676461, 138.5174968707], [112432e-11, 5.57299891505, 151.0476698429], [83493e-11, 3.59152795558, 71.8126531507], [55573e-11, 3.40135416354, 85.8272988312], [41377e-11, 4.45476669141, 78.7137518304], [5369e-10, 1.70455769943, 77.7505439839], [41912e-11, 1.21476607434, 11.0457002639]], [[9211656e-11, 5.80044305785, 74.7815985673], [556926e-11, 0, 0], [286265e-11, 2.17729776353, 149.5631971346]], [], []], R: [[[19.21264847881, 0, 0], [0.88784984055, 5.60377526994, 74.7815985673], [0.03440835545, 0.32836098991, 73.297125859], [0.02055653495, 1.78295170028, 149.5631971346], [0.00649321851, 4.52247298119, 76.2660712756], [0.00602248144, 3.86003820462, 63.7358983034], [0.00496404171, 1.40139934716, 454.9093665273], [0.00338525522, 1.58002682946, 138.5174968707], [0.00243508222, 1.57086595074, 71.8126531507], [0.00190521915, 1.99809364502, 1.4844727083], [0.00161858251, 2.79137863469, 148.0787244263], [0.00143705902, 1.38368574483, 11.0457002639], [93192359e-11, 0.17437193645, 36.6485629295], [71424265e-11, 4.24509327405, 224.3447957019], [89805842e-11, 3.66105366329, 109.9456887885], [39009624e-11, 1.66971128869, 70.8494453042], [46677322e-11, 1.39976563936, 35.1640902212], [39025681e-11, 3.36234710692, 277.0349937414], [3675516e-10, 3.88648934736, 146.594251718], [30348875e-11, 0.70100446346, 151.0476698429], [29156264e-11, 3.18056174556, 77.7505439839], [20471584e-11, 1.555889615, 202.2533951741], [2562036e-10, 5.25656292802, 380.12776796], [25785805e-11, 3.78537741503, 85.8272988312], [22637152e-11, 0.72519137745, 529.6909650946], [20473163e-11, 2.79639811626, 70.3281804424], [17900561e-11, 0.55455488605, 2.9689454166], [12328151e-11, 5.96039150918, 127.4717966068], [14701566e-11, 4.90434406648, 108.4612160802], [11494701e-11, 0.43774027872, 65.2203710117], [15502809e-11, 5.35405037603, 38.1330356378], [10792699e-11, 1.42104858472, 213.299095438], [11696085e-11, 3.29825599114, 3.9321532631], [11959355e-11, 1.75044072173, 984.6003316219], [12896507e-11, 2.62154018241, 111.4301614968], [11852996e-11, 0.99342814582, 52.6901980395], [9111446e-11, 4.99638600045, 62.2514255951], [842055e-10, 5.25350716616, 222.8603229936], [7449125e-11, 0.79491905956, 351.8165923087], [8402147e-11, 5.03877516489, 415.5524906121], [604637e-10, 5.67960948357, 78.7137518304], [5524133e-11, 3.11499484161, 9.5612275556], [7329454e-11, 3.9727752784, 183.2428146475], [5444878e-11, 5.10575635361, 145.1097790097], [5238103e-11, 2.62960141797, 33.6796175129], [4079167e-11, 3.22064788674, 340.7708920448], [3801606e-11, 6.10985558505, 184.7272873558], [3919476e-11, 4.25015288873, 39.6175083461], [2940492e-11, 2.14637460319, 137.0330241624], [3781219e-11, 3.45840272873, 456.3938392356], [2942239e-11, 0.42393808854, 299.1263942692], [3686787e-11, 2.48718116535, 453.424893819], [3101743e-11, 4.14031063896, 219.891377577], [2962641e-11, 0.82977991995, 56.6223513026], [2937799e-11, 3.6765745093, 140.001969579], [2865128e-11, 0.30996903761, 12.5301729722], [2538032e-11, 4.85457831993, 131.4039498699], [196251e-10, 5.24342224065, 84.3428261229], [236355e-10, 0.44253328372, 554.0699874828], [1979394e-11, 6.12836181686, 106.9767433719], [2182572e-11, 2.94040431638, 305.3461693927], [1962974e-11, 0.0411473912, 221.3758502853], [182956e-10, 4.01105771632, 68.8437077341], [164292e-10, 0.35564102554, 67.6680515665], [158485e-10, 3.16267171762, 225.8292684102], [1848655e-11, 2.91111759376, 909.8187330546], [163243e-10, 4.23061792837, 22.0914005278], [140139e-10, 1.39084023521, 265.9892934775], [1403717e-11, 5.63563637532, 4.4534181249], [1655866e-11, 1.96431297431, 79.2350166922], [1248978e-11, 5.44027380866, 54.1746707478], [1563447e-11, 1.47917835549, 112.9146342051], [1248054e-11, 4.88984353601, 479.2883889155], [1197439e-11, 2.52185744943, 145.6310438715], [1506952e-11, 5.24186185583, 181.7583419392], [1481746e-11, 5.66203046912, 152.5321425512], [1438838e-11, 1.53046287618, 447.7958195265], [1408514e-11, 4.41921749601, 462.0229135281], [1477112e-11, 4.32214690647, 256.5399405065], [1228314e-11, 5.9770333104, 59.8037450403], [1249958e-11, 6.24484546141, 160.6088973985], [906468e-11, 5.62025869483, 74.6697239827], [1090681e-11, 4.15393813845, 77.962992305], [844931e-11, 0.12943398585, 82.8583534146], [900363e-11, 2.37315925843, 74.8934731519], [1071957e-11, 1.74286714339, 528.2064923863], [689708e-11, 3.08097059985, 69.3649725959], [593798e-11, 4.50074517056, 8.0767548473], [718559e-11, 4.00047509264, 128.9562693151], [699574e-11, 0.03987168068, 143.6253063014], [575656e-11, 5.89552672641, 66.70484372], [759004e-11, 2.13700057433, 692.5874843535], [710449e-11, 5.41605755095, 218.4069048687], [548672e-11, 5.6281149697, 3.1813937377], [651632e-11, 4.42340061551, 18.1592472647], [539825e-11, 6.20788667166, 71.6002048296], [544539e-11, 5.69375108253, 203.7378678824], [710276e-11, 4.21967260022, 381.6122406683], [593819e-11, 3.83805798523, 32.1951448046], [710134e-11, 4.48972171999, 293.188503436], [705482e-11, 0.45521177725, 835.0371344873], [588e-8, 5.08252923316, 186.2117600641], [598231e-11, 0.35815291076, 269.9214467406], [641914e-11, 2.71127457036, 87.3117715395], [495621e-11, 2.65094755989, 200.7689224658], [630252e-11, 4.46146214548, 275.5505210331], [575195e-11, 5.57862480486, 2.4476805548], [56987e-10, 1.6393093274, 77.2292791221], [556672e-11, 1.07231961344, 1059.3819301892], [449439e-11, 0.27981733949, 617.8058857862], [463608e-11, 1.43448297993, 297.6419215609], [436547e-11, 0.52802035072, 209.3669421749], [463938e-11, 2.35443114417, 211.8146227297], [435943e-11, 2.10077211065, 1514.2912967165], [515534e-11, 3.23274579379, 284.1485407422], [454879e-11, 4.08364210459, 99.1606209555], [47743e-10, 2.89397217998, 39.3568759152], [542331e-11, 5.39481705077, 278.5194664497], [410087e-11, 3.04968860441, 404.5067903482], [367848e-11, 0.71159607058, 125.9873238985], [503096e-11, 5.83931251717, 191.2076949102], [487532e-11, 0.06402454583, 60.7669528868], [455043e-11, 2.59321186669, 490.3340891794], [436291e-11, 2.08183813746, 51.2057253312], [435803e-11, 2.79445203085, 75.7448064138], [323546e-11, 4.82899980859, 195.1398481733], [359363e-11, 0.00868012078, 35.4247226521], [429314e-11, 3.08031550488, 41.1019810544], [320021e-11, 5.48625497747, 14.977853527], [414331e-11, 0.09012800478, 258.0244132148], [379715e-11, 0.05832815311, 378.6432952517], [420062e-11, 2.25393983318, 81.0013736908], [357721e-11, 4.71414305625, 173.9422195228], [358922e-11, 0.35213227553, 426.598190876], [40541e-10, 6.12263257999, 24.3790223882], [365158e-11, 5.59483211224, 255.0554677982], [308102e-11, 3.92355394354, 116.4260963429], [32566e-10, 4.71996698332, 134.5853436076], [292781e-11, 3.9952119483, 72.3339180125], [386543e-11, 0.68619006966, 230.5645708254], [305686e-11, 3.76108783519, 344.7030453079], [286972e-11, 1.8499033531, 153.4953503977], [35364e-10, 4.65717995107, 329.8370663655], [302051e-11, 0.13190003806, 565.1156877467], [241128e-11, 1.60454142389, 81.3738807063], [249829e-11, 4.24205256241, 75.3028634291], [245063e-11, 5.94905404273, 20.6069278195], [248277e-11, 1.06282887181, 105.4922706636], [305353e-11, 2.55534744586, 6208.2942514241], [296328e-11, 4.21100245276, 1364.7280995819], [219938e-11, 2.96119055727, 120.358249606], [233564e-11, 2.97074409938, 46.2097904851], [262422e-11, 3.83652250971, 831.1049812242], [233546e-11, 4.4811700614, 628.8515860501], [187432e-11, 3.03529190348, 135.5485514541], [216776e-11, 3.42907414802, 241.6102710893], [25576e-10, 1.1670789346, 177.8743727859], [220458e-11, 0.1963349229, 180.2738692309], [224519e-11, 0.40677777819, 114.3991069134], [205398e-11, 2.30380942634, 259.5088859231], [211106e-11, 4.93079982424, 103.0927742186], [175758e-11, 5.50822822216, 7.1135470008], [188512e-11, 2.23588941288, 5.4166259714], [171718e-11, 5.21730232334, 41.6444977756], [176136e-11, 1.95958319897, 756.3233826569], [170447e-11, 4.94978757413, 206.1855484372], [169454e-11, 4.04319823722, 55.6591434561], [219015e-11, 0.24790282027, 294.6729761443], [187768e-11, 2.04538775456, 408.4389436113], [182258e-11, 0.70728384467, 391.1734682239], [192095e-11, 5.76718231319, 291.7040307277], [153684e-11, 4.70659406659, 543.0242872189], [170043e-11, 4.50995820508, 288.0806940053], [164097e-11, 5.22527540372, 67.3592350258], [194341e-11, 6.1169036471, 414.0680179038], [168027e-11, 5.25810639105, 518.6452648307], [156641e-11, 0.66304836778, 220.4126424388], [18233e-10, 0.78383856974, 417.0369633204], [167462e-11, 4.92241597775, 422.6660376129], [17077e-10, 2.30927162659, 98.8999885246], [161678e-11, 3.27259601116, 443.8636662634], [132763e-11, 2.88875442023, 373.9079928365], [16114e-10, 3.82341391177, 451.9404211107], [179292e-11, 4.82405681293, 366.485629295], [178153e-11, 3.98026039043, 10138.5039476437], [141929e-11, 1.26972581554, 159.1244246902], [15375e-10, 4.27847681414, 45.5766510387], [161513e-11, 4.99545008738, 73.8183907208], [146315e-11, 2.65664902119, 465.9550667912], [124875e-11, 4.30470898895, 339.2864193365], [15462e-10, 4.3204622812, 760.25553592], [142894e-11, 2.07773752143, 457.8783119439], [152408e-11, 4.64742446768, 155.7829722581], [116389e-11, 4.43513730944, 5.9378908332], [113444e-11, 4.65351596266, 80.1982245387], [107611e-11, 3.77290419929, 142.4496501338], [13374e-10, 5.30894739047, 14.0146456805], [116104e-11, 2.5118272567, 296.1574488526], [129106e-11, 0.36277717661, 96.8729990951], [122766e-11, 2.38341351026, 141.4864422873], [101368e-11, 1.05739625315, 92.3077063856], [114669e-11, 6.24863527978, 767.3690829208], [113283e-11, 0.83051319425, 100.3844612329], [107199e-11, 2.39365512354, 347.8844390456], [95443e-11, 0.80094579583, 342.2553647531], [110789e-11, 0.38651051525, 216.9224321604], [126978e-11, 0.4235935825, 331.3215390738], [112635e-11, 0.08107814739, 558.0021407459], [103166e-11, 0.69792283389, 358.9301393095], [111474e-11, 0.75023459027, 80.7194894005], [90902e-11, 5.16530481614, 144.1465711632], [90677e-11, 0.22036476597, 333.657345044], [98568e-11, 4.33164222339, 74.5209661364], [89306e-11, 2.18851161761, 74.8297826771], [117216e-11, 3.94965784596, 74.2603337055], [89088e-11, 5.87783179087, 74.7334144575], [97316e-11, 0.6942969502, 977.4867846211], [116587e-11, 1.83677031994, 1289.9465010146], [85449e-11, 5.80255966149, 6.592282139], [86823e-11, 5.61973473261, 300.6108669775], [105226e-11, 5.94513614941, 328.3525936572], [112117e-11, 1.21168089807, 329.7251917809], [82982e-11, 2.20797412496, 74.9416572617], [94345e-11, 4.53937998713, 28.5718080822], [106847e-11, 1.82071328579, 306.830642101], [103572e-11, 2.99368274596, 6.2197751235], [106357e-11, 0.8158387475, 1087.6931058405], [77728e-11, 2.73390123734, 110.2063212194], [98405e-11, 3.73478182667, 75.0422309982], [86231e-11, 2.83316881064, 983.1158589136], [89023e-11, 4.7375445896, 604.4725636619], [83013e-11, 1.88273535999, 387.2413149608], [90227e-11, 3.80367274711, 986.0848043302], [84598e-11, 1.25774132938, 142.1408335931], [7469e-10, 1.35097482767, 350.3321196004], [9577e-10, 5.54845504768, 969.6224780949], [90277e-11, 0.36773710508, 0.9632078465], [82748e-11, 5.85590525764, 74.6215398729], [75828e-11, 2.78019216029, 88.1149206916], [8385e-10, 1.84386358668, 227.3137411185], [70705e-11, 4.65567024014, 44.7253177768], [71322e-11, 3.64963906751, 894.8408795276], [94141e-11, 4.98819201726, 403.1341922245], [88966e-11, 4.43895583278, 154.0166152595], [79436e-11, 5.66662613679, 267.4737661858], [75615e-11, 5.40971072536, 50.4025761791], [68583e-11, 4.76679841388, 991.7138786227], [65256e-11, 0.69286370395, 152.7445908723], [63031e-11, 2.89946567712, 79.889407998], [63878e-11, 0.09820555288, 681.5417840896], [80101e-11, 2.97520561915, 526.722019678], [69693e-11, 3.95281159807, 187.6962327724], [59492e-11, 3.59642351692, 58.1068240109], [59273e-11, 0.50930692071, 28.3111756513], [6859e-10, 2.4188031153, 235.3904959658], [66007e-11, 5.04558399435, 30.7106720963], [70223e-11, 3.73647415486, 546.956440482], [66836e-11, 0.85506033017, 522.5774180938], [63027e-11, 0.29269109052, 119.5069163441], [62023e-11, 2.31557510311, 74.0308390419], [71379e-11, 3.16967571102, 23.5758732361], [74827e-11, 5.36812537961, 373.0142209592], [64204e-11, 2.3681714946, 157.6399519819], [70712e-11, 0.55830476304, 92.940845832], [55762e-11, 5.27011035858, 874.3940104025], [75638e-11, 4.66344127677, 101.8689339412], [73727e-11, 6.20581665991, 312.4597163935], [7294e-10, 0.58406607757, 367.9701020033], [5323e-10, 2.24728742995, 17.5261078183], [63139e-11, 4.59563922296, 67.8804998876], [6055e-10, 0.57591315857, 253.5709950899], [52946e-11, 2.45947017614, 264.5048207692], [70236e-11, 1.51860943454, 552.5855147745], [68624e-11, 2.44507780453, 555.5544601911], [62796e-11, 0.33786296181, 561.1835344836], [49009e-11, 1.09233728279, 19.1224551112], [64636e-11, 5.274699709, 68.1893164283], [62957e-11, 5.35891188483, 92.0470739547], [47664e-11, 3.90924952181, 192.6921676185], [65279e-11, 4.23629510074, 771.3012361839], [6519e-10, 3.73942854797, 536.8045120954], [59452e-11, 6.10554259948, 365.0011565867], [52153e-11, 1.71734604937, 905.8865797915], [46035e-11, 3.87093684776, 210.3301500214], [46429e-11, 5.97423131576, 477.8039162072], [62115e-11, 2.67544358037, 130.4407420234], [46038e-11, 3.89378239085, 48.7580447764], [42663e-11, 3.81519760715, 61.2882177486], [53909e-11, 2.86457147106, 353.301065017], [46936e-11, 1.00011046774, 166.828672522], [42217e-11, 2.61748790314, 90.8232336773], [43324e-11, 4.15777895713, 173.6815870919], [41296e-11, 1.79930408254, 149.45132255], [4496e-10, 1.76623306927, 0.5212648618], [51904e-11, 2.97773319756, 383.0967133766], [42931e-11, 1.57416456203, 120.9913890524], [49611e-11, 4.0342792047, 303.8616966844], [45263e-11, 3.58382163089, 97.4155158163], [38695e-11, 2.39404211169, 31.492569389], [38072e-11, 5.7947367035, 75.5323580927], [50126e-11, 4.76412907201, 911.3032057629], [50884e-11, 5.15513957132, 439.782755154], [43148e-11, 0.84999004804, 58.319272332], [42732e-11, 5.17318058934, 162.0933701068], [50298e-11, 5.81603435915, 66.9172920411], [35639e-11, 1.87447823723, 472.1748419147], [49963e-11, 1.8894349079, 42.5864537627], [39974e-11, 1.74262050679, 89.7594520943], [45252e-11, 1.92511912328, 55.1378785943], [44896e-11, 1.4835590189, 450.9772132642], [34297e-11, 5.20257496546, 316.3918696566], [46355e-11, 0.33942039181, 273.1028404783], [37152e-11, 2.03757941865, 117.9105690512], [46106e-11, 5.62315633955, 1819.6374661092], [39368e-11, 4.19402806344, 486.4019359163], [41039e-11, 4.82994471947, 149.6750717192], [44959e-11, 0.72694662195, 3265.8308281325], [43617e-11, 0.75332422672, 404.6186649328], [31823e-11, 3.84768075667, 20.4468691251], [44196e-11, 4.36769721266, 418.2608035978], [379e-9, 3.02928044053, 167.0893049529], [43684e-11, 1.57328182739, 491.5579294568], [34004e-11, 1.26257052908, 260.9933586314], [31276e-11, 4.16123711648, 13.3333221243], [39984e-11, 2.8662612562, 468.2426886516], [3649e-10, 2.58804294589, 68.5618234438], [32364e-11, 3.11577354875, 103.3534066495], [33857e-11, 0.15592410716, 24.1183899573], [35933e-11, 1.36784550071, 59.2824801785], [33633e-11, 0.755011774, 290.2195580194], [29751e-11, 5.33178627038, 1033.3583763983], [32036e-11, 4.67549858, 205.2223405907], [30991e-11, 4.62823866461, 258.8757464767], [35268e-11, 1.00718464327, 1108.1399749656], [33366e-11, 3.40738625377, 43.1289704839], [32638e-11, 5.25485850258, 114.1384744825], [29825e-11, 5.64157476876, 254.9435932136], [31613e-11, 3.7823139311, 152.0108776894], [3098e-10, 2.26660677937, 104.0077979553], [34591e-11, 5.17326577255, 25.6028626656], [28398e-11, 1.76872790446, 820.0592809603], [27991e-11, 3.92486885309, 199.2844497575], [28986e-11, 2.58171811759, 76.4785195967], [33772e-11, 5.79359878723, 274.0660483248], [29401e-11, 5.93638676504, 280.9671470045], [31094e-11, 1.39352495971, 178.7893965226], [30118e-11, 0.44367887423, 27.0873353739], [3382e-10, 6.26168443513, 401.6497195162], [27513e-11, 2.15194454461, 480.7728616238], [2688e-10, 2.5130027278, 123.5396433437], [26139e-11, 0.21985367371, 286.596221297], [26455e-11, 3.88229792258, 372.4235201282], [33974e-11, 1.44637843871, 88.7962442478], [30107e-11, 0.82723915882, 100.6450936638], [27715e-11, 4.64827434185, 198.321241911], [33687e-11, 1.14348201049, 82.4858463991], [26493e-11, 1.97889544238, 95.3885263868], [24355e-11, 2.3783917615, 146.3818033969], [2659e-10, 0.39881920389, 106.0135355254], [27006e-11, 2.10206230691, 1057.8974574809], [23976e-11, 6.21233637686, 16.6747745564], [3097e-10, 5.34005431547, 476.4313180835], [24073e-11, 3.42953641968, 1044.4040766622], [27023e-11, 0.71284764471, 248.7238180901], [29098e-11, 3.99184722502, 908.3342603463], [22862e-11, 2.26978781393, 175.1660598002], [24026e-11, 0.36584131268, 73.1852512744], [28024e-11, 3.46485782266, 1439.5096981492], [22034e-11, 0.051638073, 33.1371007917], [22185e-11, 5.32252126255, 483.2205421786], [21027e-11, 0.37224660652, 214.7835681463], [20548e-11, 1.80004483299, 118.0224436358], [27835e-11, 4.1241255353, 694.0719570618], [255e-9, 5.49632191634, 115.8835796217], [21377e-11, 3.89179204956, 66.1835788582], [27201e-11, 5.761487979, 1215.1649024473], [24984e-11, 0.65339418015, 132.8884225782], [23976e-11, 4.56161326826, 458.8415197904], [21116e-11, 1.1361070625, 60.5545045657], [26263e-11, 2.77532723118, 490.0734567485], [26369e-11, 3.371200393, 49.7212526229], [2287e-10, 4.5313563762, 78.4049352897], [26872e-11, 3.26037129303, 691.1030116452], [25004e-11, 3.65018677651, 73.4090004436], [20874e-11, 3.92589972978, 134.0640787458], [20915e-11, 5.53955400138, 129.9194771616], [23067e-11, 2.56806856688, 332.8060117821], [2263e-10, 5.02721554401, 150.5264049811], [19123e-11, 1.92386327535, 124.5028511902], [20678e-11, 0.98302410602, 29.2049475286], [18755e-11, 1.07911898422, 70.1157321213], [19458e-11, 1.33847349577, 616.3214130779], [23071e-11, 3.93152899657, 43.2890291783], [23313e-11, 0.61185525008, 189.7232222019], [1966e-10, 1.40884902649, 1589.0728952838], [2499e-10, 0.91842956919, 441.2672278623], [23555e-11, 0.02127675886, 593.426863398], [18288e-11, 4.55111843462, 165.6048322446], [2098e-10, 0.88504201898, 326.8681209489], [2494e-10, 4.63470443286, 162.8965192589], [18941e-11, 5.10763304564, 81.8951455681], [18911e-11, 1.23351635328, 13.4933808187], [17358e-11, 4.05768226252, 403.0223176399], [17362e-11, 5.2860722764, 7.8643065262], [22513e-11, 3.15059891398, 419.7452763061], [21237e-11, 2.14856256664, 75.5847477194], [17845e-11, 2.54349200329, 47.061123747], [16995e-11, 2.48647736969, 2043.9822618111], [23676e-11, 5.80355919955, 232.0490435337], [22639e-11, 2.07623129509, 699.7010313543], [19261e-11, 1.56494156016, 425.1137181677], [21067e-11, 5.30844438236, 237.6781178262], [22733e-11, 0.2830312644, 0.1118745846], [16372e-11, 3.45984005656, 0.7507595254], [21213e-11, 0.95828006612, 405.9912630565], [18033e-11, 1.60723214246, 215.4379594521], [16267e-11, 4.8900201636, 69.1525242748], [21738e-11, 3.24738839789, 1744.8558675419], [16149e-11, 0.35803995032, 77.0692204277], [2171e-10, 0.88800040769, 344.9636777388], [17204e-11, 6.04366142241, 32.2433289144], [17883e-11, 4.01076173641, 280.003939158], [15918e-11, 2.96623390816, 25.8634950965], [14769e-11, 3.73887340623, 610.6923387854], [15033e-11, 4.24825484707, 228.276948965], [15586e-11, 5.0798708274, 114.9416236346], [15392e-11, 0.22971106129, 17.2654753874], [15354e-11, 0.25482391126, 661.0949149645], [14617e-11, 1.13349626273, 823.9914342234], [16232e-11, 3.4349974381, 147.1155165798], [14654e-11, 1.68288566884, 207.8824694666], [17682e-11, 5.94376629143, 624.919432787], [18837e-11, 1.3833540807, 377.1588225434], [15425e-11, 1.66489033237, 440.6822725257], [14764e-11, 4.41710614445, 16.4623262353], [14402e-11, 0.41359448817, 142.6620984549], [16992e-11, 0.16042368544, 438.2982824457], [13268e-11, 3.04634728126, 668.2084619653], [1646e-10, 0.92068542861, 369.0820676961], [17239e-11, 4.51659246818, 606.7601855223], [13238e-11, 0.13650358961, 216.4804891757], [15832e-11, 4.94315562971, 124.2904028691], [14374e-11, 2.93700606008, 419.4846438752], [12927e-11, 1.65950183061, 54.3347294422], [14224e-11, 4.42286781619, 47.6942631934], [12753e-11, 0.03020931725, 217.2312487011], [14792e-11, 1.08447500622, 49.5088043018], [14031e-11, 3.68785757687, 16.04163511], [13709e-11, 4.78890618802, 72.7758609972], [13073e-11, 1.54064778942, 218.9281697305], [17474e-11, 5.05621281434, 564.8550553158], [12686e-11, 3.4464088888, 958.576777831], [13035e-11, 0.56445754615, 1171.875873269], [12458e-11, 3.29187197133, 902.7051860538], [11893e-11, 1.41294011193, 55.7710180407], [15018e-11, 3.43209569509, 19.0105805266], [1647e-10, 2.04067754807, 411.620337349], [15619e-11, 1.53464600544, 833.552661779], [15678e-11, 5.92839374034, 778.4147831847], [12039e-11, 5.17748353434, 135.336103133], [15523e-11, 3.54656631824, 113.8778420516], [14364e-11, 4.19825110964, 89.338760969], [15424e-11, 2.12697366269, 106.2741679563], [11957e-11, 1.43314130608, 455.8725743738], [15938e-11, 5.49575810978, 513.079881013], [13532e-11, 4.11463529983, 95.2284676924], [15105e-11, 1.86350524526, 7.7042478318], [15832e-11, 3.42498484109, 79.5169009825], [11492e-11, 4.6518745562, 149.6113812444], [11406e-11, 1.31085455047, 63.6240237188], [14469e-11, 3.35284802718, 19.643719973], [11953e-11, 0.20979051344, 65.8747623175], [12039e-11, 0.0142323841, 397.3932433474], [14157e-11, 1.87440535404, 6283.0758499914], [11357e-11, 0.19079103112, 5.6290742925], [14109e-11, 0.09348109701, 6133.5126528568], [15322e-11, 3.54468546172, 252.6559713532], [11681e-11, 0.85100356112, 5.1078094307], [14134e-11, 5.66340426198, 639.897286314], [11052e-11, 0.47607339302, 150.0844619964], [11507e-11, 5.19480309409, 1182.9215735329], [11492e-11, 2.05801478181, 149.5150130248], [11571e-11, 4.7821072497, 334.2904844904], [10671e-11, 4.67373109923, 149.723255829], [11651e-11, 3.13272450186, 93.9040536785], [14316e-11, 0.08421279341, 240.3864308119], [10855e-11, 4.52379396618, 453.9461586808], [119e-9, 1.41784572428, 26.0235537909], [10851e-11, 4.40625021974, 57.1436161644], [13385e-11, 0.76174742916, 37.8724032069], [10664e-11, 5.81644528276, 193.655375465], [107e-9, 5.3459550607, 331.2096644892], [10465e-11, 3.82648204886, 180.1619946463], [1335e-10, 0.86920479636, 22.8945496799], [10324e-11, 2.99969783109, 525.7588118315], [14293e-11, 1.06904465002, 477.9157907918], [12341e-11, 4.62813430535, 1894.4190646765], [12539e-11, 3.70404881494, 67.0773507355], [11771e-11, 1.07971321862, 363.5166838784], [11466e-11, 0.9352838604, 121.8427223143], [12839e-11, 0.31988787839, 474.9468453752], [10194e-11, 6.23976471898, 84.1827674285], [123e-9, 2.85238700423, 184.0941479094], [13861e-11, 3.4836768877, 157.2674449664], [11395e-11, 4.2553344068, 181.0557665236], [10146e-11, 6.01371693363, 43.2408450685], [10798e-11, 2.4636424394, 140.6563608848], [11012e-11, 3.77284307154, 494.2662424425], [10226e-11, 1.49169427598, 80.4106728598], [11981e-11, 2.69741212203, 369.4545747116], [10658e-11, 1.7870288097, 252.0865223816], [12506e-11, 4.66852994807, 64.6991061499], [1164e-10, 5.70405852396, 39.0962434843], [12305e-11, 1.73322306013, 229.0800981171], [11004e-11, 3.58723041577, 449.2802922348], [10581e-11, 2.79550711884, 1246.6574718363], [10411e-11, 2.8672714553, 189.1807054807], [12468e-11, 0.76477162698, 122.4758617607], [10099e-11, 6.06894682979, 156.1554792736], [12671e-11, 6.19797171716, 149.8238295655], [10455e-11, 1.23531019351, 148.5999892881], [10645e-11, 5.50399216121, 460.5384408198], [12433e-11, 5.298436616, 20.4950532349], [1211e-10, 3.14577799081, 30.0562807905], [1038e-10, 3.54528360301, 619.2903584945], [10139e-11, 1.90528799801, 25.0603459444], [11206e-11, 5.8782323899, 832.5894539325], [10994e-11, 0.05721003392, 54.2865453324], [10843e-11, 1.4281264822, 268.4369740323], [10874e-11, 2.6136174199, 446.3113468182], [1077e-10, 0.19304986906, 463.5073862364], [10216e-11, 5.04428111805, 241.8709035202], [10621e-11, 4.39013117792, 63.847772888], [10414e-11, 4.96367476854, 97.6761482472], [10135e-11, 1.90258069764, 91.4563731237], [10291e-11, 3.58217488981, 842.1506814881], [10672e-11, 2.28920805112, 194.2885149114], [10397e-11, 4.90564475822, 829.6205085159], [10072e-11, 1.18963356664, 621.7380390493], [10074e-11, 2.59066128203, 711.4493070338]], [[0.0147989637, 3.67205705317, 74.7815985673], [71212085e-11, 6.22601006675, 63.7358983034], [68626972e-11, 6.13411265052, 149.5631971346], [20857262e-11, 5.24625494219, 11.0457002639], [21468152e-11, 2.6017670427, 76.2660712756], [24059649e-11, 3.14159265359, 0], [11405346e-11, 0.01848461561, 70.8494453042], [7496775e-11, 0.42360033283, 73.297125859], [42438e-9, 1.41692350371, 85.8272988312], [3505936e-11, 2.58354048851, 138.5174968707], [3228835e-11, 5.25499602896, 3.9321532631], [3926694e-11, 3.15513991323, 71.8126531507], [306001e-10, 0.15321893225, 1.4844727083], [3578446e-11, 2.31160668309, 224.3447957019], [2564251e-11, 0.98076846352, 148.0787244263], [2429445e-11, 3.99440122468, 52.6901980395], [1644719e-11, 2.65349313124, 127.4717966068], [1583766e-11, 1.43045619196, 78.7137518304], [1413112e-11, 4.57461892062, 202.2533951741], [1489525e-11, 2.67559167316, 56.6223513026], [1403237e-11, 1.36985349744, 77.7505439839], [122822e-10, 1.04703640149, 62.2514255951], [1508028e-11, 5.05996325425, 151.0476698429], [992085e-11, 2.17168865909, 65.2203710117], [1032731e-11, 0.26459059027, 131.4039498699], [861867e-11, 5.05530802218, 351.8165923087], [744445e-11, 3.07640148939, 35.1640902212], [604362e-11, 0.90717667985, 984.6003316219], [646851e-11, 4.4729042291, 70.3281804424], [57471e-10, 3.23070708457, 447.7958195265], [68747e-10, 2.49912565674, 77.962992305], [623602e-11, 0.8625307382, 9.5612275556], [527794e-11, 5.15136007084, 2.9689454166], [561839e-11, 2.7177815898, 462.0229135281], [530364e-11, 5.91655309045, 213.299095438], [46008e-10, 4.22302465979, 12.5301729722], [49428e-10, 0.46291078127, 145.6310438715], [487336e-11, 0.70614146398, 380.12776796], [380908e-11, 3.85089591694, 3.1813937377], [444352e-11, 2.15558291251, 67.6680515665], [3388e-9, 2.53820897704, 18.1592472647], [372947e-11, 5.05141251694, 529.6909650946], [348345e-11, 1.74874852104, 71.6002048296], [405881e-11, 1.229617276, 22.0914005278], [268913e-11, 6.24069521597, 340.7708920448], [255585e-11, 2.95695013627, 84.3428261229], [259465e-11, 3.92053708924, 59.8037450403], [224731e-11, 3.90961468562, 160.6088973985], [22171e-10, 3.64727173951, 137.0330241624], [254591e-11, 3.50411592815, 38.1330356378], [23829e-10, 2.04879982674, 269.9214467406], [272355e-11, 3.38363105223, 222.8603229936], [200648e-11, 1.24861003313, 69.3649725959], [234153e-11, 0.27825220612, 108.4612160802], [188515e-11, 4.41307507326, 265.9892934775], [211691e-11, 0.68027381802, 111.4301614968], [205946e-11, 1.53379817229, 284.1485407422], [196179e-11, 4.77152996605, 299.1263942692], [153102e-11, 5.21761881347, 209.3669421749], [162563e-11, 4.3405435361, 33.6796175129], [150563e-11, 1.98966326297, 54.1746707478], [137012e-11, 0.40323866041, 195.1398481733], [117171e-11, 0.39649791652, 87.3117715395], [127913e-11, 2.40333045173, 39.6175083461], [104218e-11, 2.92152185788, 134.5853436076], [103862e-11, 1.81622936156, 72.3339180125], [105741e-11, 0.17067407327, 79.2350166922], [106419e-11, 0.69799543514, 2.4476805548], [95326e-11, 4.02880266738, 82.8583534146], [104772e-11, 4.43616414428, 305.3461693927], [93825e-11, 5.01823592717, 51.2057253312], [103739e-11, 2.57553519741, 191.2076949102], [106679e-11, 1.22996874093, 225.8292684102], [93452e-11, 3.09274255916, 77.2292791221], [97398e-11, 3.81380841075, 152.5321425512], [84583e-11, 5.72473747348, 68.8437077341], [77395e-11, 0.08281157747, 45.5766510387], [76207e-11, 4.20384370842, 73.8183907208], [86249e-11, 0.53131085736, 145.1097790097], [75795e-11, 3.78559826812, 75.7448064138], [77592e-11, 1.63628139623, 479.2883889155], [84612e-11, 0.6166245601, 116.4260963429], [100209e-11, 4.94084867643, 120.358249606], [72142e-11, 4.30505812564, 565.1156877467], [70733e-11, 2.38450718488, 60.7669528868], [71585e-11, 3.93906647867, 153.4953503977], [84566e-11, 5.56037336584, 344.7030453079], [63556e-11, 1.93742986679, 41.6444977756], [71619e-11, 3.71213491656, 408.4389436113], [61594e-11, 3.90006698249, 4.4534181249], [64973e-11, 1.55845503407, 106.9767433719], [59913e-11, 0.60110866128, 74.8934731519], [62e-8, 4.39369268007, 453.424893819], [63361e-11, 4.19159979468, 184.7272873558], [62301e-11, 3.23773103318, 422.6660376129], [54427e-11, 3.72545550857, 7.1135470008], [52474e-11, 6.08562717749, 404.5067903482], [59073e-11, 1.55568469603, 456.3938392356], [52597e-11, 3.5049223397, 125.9873238985], [52835e-11, 5.20100035142, 358.9301393095], [58123e-11, 5.33480562448, 220.4126424388], [52909e-11, 4.44819701196, 426.598190876], [50934e-11, 0.526385342, 490.3340891794], [54968e-11, 1.60146090981, 14.977853527], [49491e-11, 4.25534603275, 5.4166259714], [51303e-11, 0.36772379136, 206.1855484372], [51821e-11, 1.75832999538, 8.0767548473], [56964e-11, 0.84114552694, 146.594251718], [49109e-11, 0.94061875871, 99.1606209555], [46361e-11, 5.35115472594, 152.7445908723], [48023e-11, 1.97249712347, 288.0806940053], [43772e-11, 3.03713403879, 20.6069278195], [49493e-11, 5.84619560979, 112.9146342051], [41987e-11, 0.04620500196, 128.9562693151], [48628e-11, 3.62817742782, 81.0013736908], [41472e-11, 2.33730376429, 277.0349937414], [41948e-11, 2.51050760642, 24.3790223882], [42597e-11, 1.260887373, 1514.2912967165]], [[22439904e-11, 0.6995311876, 74.7815985673], [4727037e-11, 1.69901641488, 63.7358983034], [1681903e-11, 4.64833551727, 70.8494453042], [1433755e-11, 3.52119917947, 149.5631971346], [1649559e-11, 3.0966007898, 11.0457002639], [770188e-11, 0, 0], [461009e-11, 0.76676632849, 3.9321532631], [500429e-11, 6.17229032223, 76.2660712756], [390371e-11, 4.49605283502, 56.6223513026], [389945e-11, 5.52673426377, 85.8272988312], [292097e-11, 0.20389012095, 52.6901980395], [272898e-11, 3.84707823651, 138.5174968707], [286579e-11, 3.5335768327, 73.297125859], [205449e-11, 3.24758017121, 78.7137518304], [219674e-11, 1.96418942891, 131.4039498699], [215788e-11, 0.84812474187, 77.962992305]], [[1164382e-11, 4.73453291602, 74.7815985673]], []] };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/vsop87d_neptune.embedded.json
+var vsop87d_neptune_embedded_default = { L: [[[5.31188633047, 0, 0], [0.01798475509, 2.9010127305, 38.1330356378], [0.01019727662, 0.4858092366, 1.4844727083], [0.00124531845, 4.83008090682, 36.6485629295], [4206445e-10, 5.41054991607, 2.9689454166], [37714589e-11, 6.09221834946, 35.1640902212], [33784734e-11, 1.24488865578, 76.2660712756], [16482741e-11, 7729261e-11, 491.5579294568], [9198582e-11, 4.93747059924, 39.6175083461], [8994249e-11, 0.27462142569, 175.1660598002], [4216235e-11, 1.98711914364, 73.297125859], [3364818e-11, 1.03590121818, 33.6796175129], [22848e-9, 4.20606932559, 4.4534181249], [1433512e-11, 2.78340432711, 74.7815985673], [90024e-10, 2.07606702418, 109.9456887885], [744996e-11, 3.19032530145, 71.8126531507], [506206e-11, 5.74785370252, 114.3991069134], [399552e-11, 0.34972342569, 1021.2488945514], [345195e-11, 3.46186210169, 41.1019810544], [306338e-11, 0.49684039897, 0.5212648618], [287322e-11, 4.50523446022, 0.0481841098], [323004e-11, 2.24815188609, 32.1951448046], [340323e-11, 3.30369900416, 77.7505439839], [266605e-11, 4.88932609483, 0.9632078465], [227079e-11, 1.79713054538, 453.424893819], [244722e-11, 1.24693337933, 9.5612275556], [232887e-11, 2.50459795017, 137.0330241624], [28217e-10, 2.24565579693, 146.594251718], [251941e-11, 5.78166597292, 388.4651552382], [15018e-10, 2.99706110414, 5.9378908332], [170404e-11, 3.3239063065, 108.4612160802], [151401e-11, 2.1915309428, 33.9402499438], [148295e-11, 0.85948986145, 111.4301614968], [118672e-11, 3.67706204305, 2.4476805548], [101821e-11, 5.70539236951, 0.1118745846], [97873e-11, 2.80518260528, 8.0767548473], [103054e-11, 4.40441222, 70.3281804424], [103305e-11, 0.04078966679, 0.2606324309], [1093e-9, 2.41599378049, 183.2428146475], [73938e-11, 1.32805041516, 529.6909650946], [77725e-11, 4.16446516424, 4.192785694], [86379e-11, 4.22834506045, 490.0734567485], [81536e-11, 5.19908046216, 493.0424021651], [71503e-11, 5.29530386579, 350.3321196004], [64418e-11, 3.5454101605, 168.0525127994], [6257e-10, 0.15028731465, 182.279606801], [58488e-11, 3.50106873945, 145.1097790097], [48276e-11, 1.11259925628, 112.9146342051], [47229e-11, 4.57373229818, 46.2097904851], [39124e-11, 1.6656935605, 213.299095438], [47728e-11, 0.12906212461, 484.444382456], [46858e-11, 3.01699530327, 498.6714764576], [38659e-11, 2.38685706479, 2.9207613068], [47046e-11, 4.498446604, 173.6815870919], [47565e-11, 2.58404814824, 219.891377577], [44714e-11, 5.47302733614, 176.6505325085], [32279e-11, 3.4575915122, 30.7106720963], [28249e-11, 4.13282446716, 6.592282139], [24433e-11, 4.55736848232, 106.9767433719], [24661e-11, 3.67822620786, 181.7583419392], [24505e-11, 1.55095867965, 7.1135470008], [21848e-11, 1.04366818343, 39.0962434843], [16936e-11, 6.10896452834, 44.7253177768], [22169e-11, 2.74932970271, 256.5399405065], [16614e-11, 4.98188930613, 37.611770776], [17728e-11, 3.55049134167, 1.3725981237], [17347e-11, 2.1406923488, 42.5864537627], [14953e-11, 3.36405649131, 98.8999885246], [14566e-11, 0.69857991985, 1550.939859646], [15676e-11, 6.22010212025, 454.9093665273], [13243e-11, 5.61712542227, 68.8437077341], [14837e-11, 3.52557245517, 25.6028626656], [12757e-11, 0.04509743861, 11.0457002639], [11988e-11, 4.81687553351, 24.1183899573], [1106e-10, 1.78958277553, 7.4223635415], [12108e-11, 1.87022663714, 79.2350166922], [11698e-11, 0.49005698002, 1.5963472929], [10459e-11, 2.38743199893, 381.3516082374], [11681e-11, 3.85151357766, 218.4069048687], [11343e-11, 0.81432278263, 525.4981794006], [10097e-11, 5.03383557061, 601.7642506762], [10803e-11, 2.92081211459, 293.188503436], [10183e-11, 1.15395455831, 6244.9428143536]], [[38.37687716731, 0, 0], [16604187e-11, 4.86319129565, 1.4844727083], [15807148e-11, 2.27923488532, 38.1330356378], [3334701e-11, 3.6819967602, 76.2660712756], [130584e-10, 3.67320813491, 2.9689454166], [604832e-11, 1.50477747549, 35.1640902212], [178623e-11, 3.45318524147, 39.6175083461], [106537e-11, 2.45126138334, 4.4534181249], [105747e-11, 2.7547932655, 33.6796175129], [72684e-11, 5.48724732699, 36.6485629295], [57069e-11, 5.2164980497, 0.5212648618], [57355e-11, 1.85767603384, 114.3991069134]], [[53892649e-11, 0, 0], [281251e-11, 1.19084538887, 38.1330356378], [295693e-11, 1.85520292248, 1.4844727083], [27019e-10, 5.72143228148, 76.2660712756]], [], [], []], B: [[[0.03088622933, 1.44104372626, 38.1330356378], [27780087e-11, 5.91271882843, 76.2660712756], [27623609e-11, 0, 0], [1535549e-10, 2.52123799481, 36.6485629295], [15448133e-11, 3.50877080888, 39.6175083461], [1999919e-11, 1.50998669505, 74.7815985673], [196754e-10, 4.37778195768, 1.4844727083], [1015137e-11, 3.21561035875, 35.1640902212], [605767e-11, 2.80246601405, 73.297125859], [594878e-11, 2.12892708114, 41.1019810544], [588805e-11, 3.18655882497, 2.9689454166], [40183e-10, 4.16883287237, 114.3991069134], [254333e-11, 3.27120499438, 453.424893819], [261647e-11, 3.76722704749, 213.299095438], [279964e-11, 1.68165309699, 77.7505439839], [20559e-10, 4.25652348864, 529.6909650946], [140455e-11, 3.52969556376, 137.0330241624], [9853e-10, 4.16774829927, 33.6796175129], [51257e-11, 1.95121181203, 4.4534181249], [67971e-11, 4.66970781659, 71.8126531507], [41931e-11, 5.41783694467, 111.4301614968], [41822e-11, 5.94832001477, 112.9146342051], [30637e-11, 0.93620571932, 42.5864537627], [11084e-11, 5.88898793049, 108.4612160802]], [[0.00227279214, 3.8079308987, 38.1330356378], [180312e-10, 1.97576485377, 76.2660712756], [1385733e-11, 4.82555548018, 36.6485629295], [14333e-9, 3.14159265359, 0], [1073298e-11, 6.08054240712, 39.6175083461], [147903e-11, 3.85766231348, 74.7815985673], [136448e-11, 0.47764957338, 1.4844727083], [70285e-11, 6.18782052139, 35.1640902212], [51899e-11, 5.05221791891, 73.297125859], [42568e-11, 0.30721737205, 114.3991069134]], [[9690766e-11, 5.57123750291, 38.1330356378]], [], [], []], R: [[[30.07013206102, 0, 0], [0.2706225949, 1.3299945893, 38.1330356378], [0.01691764281, 3.25186138896, 36.6485629295], [0.00807830737, 5.18592836167, 1.4844727083], [0.00537760613, 4.52113902845, 35.1640902212], [0.00495725642, 1.57105654815, 491.5579294568], [0.0027457197, 1.84552256801, 175.1660598002], [0.00135134095, 3.37220607384, 39.6175083461], [0.00121801825, 5.79754444303, 76.2660712756], [0.00100895397, 0.37702748681, 73.297125859], [69791722e-11, 3.79617226928, 2.9689454166], [46687838e-11, 5.74937810094, 33.6796175129], [24593778e-11, 0.50801728204, 109.9456887885], [16939242e-11, 1.59422166991, 71.8126531507], [14229686e-11, 1.07786112902, 74.7815985673], [12011825e-11, 1.92062131635, 1021.2488945514], [8394731e-11, 0.67816895547, 146.594251718], [75718e-9, 1.07149263431, 388.4651552382], [5720852e-11, 2.59059512267, 4.4534181249], [4839672e-11, 1.9068599107, 41.1019810544], [4483492e-11, 2.90573457534, 529.6909650946], [4270202e-11, 3.41343865825, 453.424893819], [435379e-10, 0.6798566237, 32.1951448046], [4420804e-11, 1.74993796503, 108.4612160802], [2881063e-11, 1.98600105123, 137.0330241624], [2635535e-11, 3.09755943422, 213.299095438], [338093e-10, 0.84810683275, 183.2428146475], [2878942e-11, 3.67415901855, 350.3321196004], [2306293e-11, 2.80962935724, 70.3281804424], [2530149e-11, 5.79839567009, 490.0734567485], [2523132e-11, 0.48630800015, 493.0424021651], [2087303e-11, 0.61858378281, 33.9402499438], [1976522e-11, 5.1170304456, 168.0525127994], [1905254e-11, 1.72186472126, 182.279606801], [1654039e-11, 1.92782545887, 145.1097790097], [1435072e-11, 1.70005157785, 484.444382456], [1403029e-11, 4.58914203187, 498.6714764576], [1499193e-11, 1.01623299513, 219.891377577], [139886e-10, 0.7622031762, 176.6505325085], [1403377e-11, 6.07659416908, 173.6815870919], [112856e-10, 5.96661179805, 9.5612275556], [1228304e-11, 1.59881465324, 77.7505439839], [835414e-11, 3.97066884218, 114.3991069134], [811186e-11, 3.0025888087, 46.2097904851], [731925e-11, 2.10447054189, 181.7583419392], [615781e-11, 2.97874625677, 106.9767433719], [704778e-11, 1.1873821088, 256.5399405065], [50204e-10, 1.38657803368, 5.9378908332], [530357e-11, 4.24059166485, 111.4301614968], [437096e-11, 2.27029212923, 1550.939859646], [40025e-10, 1.25609325435, 8.0767548473], [421011e-11, 1.89084929506, 30.7106720963], [382457e-11, 3.29965259685, 983.1158589136], [422485e-11, 5.53186169605, 525.4981794006], [355389e-11, 2.27847846648, 218.4069048687], [280062e-11, 1.54129714238, 98.8999885246], [314499e-11, 3.95932948594, 381.3516082374], [280556e-11, 4.54238271682, 44.7253177768], [267738e-11, 5.13323364247, 112.9146342051], [333311e-11, 5.75067616021, 39.0962434843], [291625e-11, 4.02398326341, 68.8437077341], [321429e-11, 1.50625025822, 454.9093665273], [309196e-11, 2.85452752153, 72.0732855816], [345094e-11, 1.35905860594, 293.188503436], [307439e-11, 0.31964571332, 601.7642506762], [251356e-11, 3.53992782846, 312.1990839626], [248152e-11, 3.41078346726, 37.611770776], [306e-8, 2.72475094464, 6244.9428143536], [293532e-11, 4.89079857814, 528.2064923863], [234479e-11, 0.59231043427, 42.5864537627], [239628e-11, 3.16441455173, 143.6253063014], [214523e-11, 3.6248028304, 278.2588340188], [246198e-11, 1.01506302015, 141.2258098564], [174089e-11, 5.55011789988, 567.8240007324], [163934e-11, 2.10166491786, 2.4476805548], [162897e-11, 2.48946521653, 4.192785694], [193455e-11, 1.5842528758, 138.5174968707], [155323e-11, 3.28425127954, 31.019488637], [182469e-11, 2.45244890571, 255.0554677982], [177846e-11, 4.14773474853, 10175.1525105732], [174413e-11, 1.53042999914, 329.8370663655], [137649e-11, 3.34900537767, 0.9632078465], [161011e-11, 5.16655038482, 211.8146227297], [113473e-11, 4.96286007991, 148.0787244263], [128823e-11, 3.25521535448, 24.1183899573], [107363e-11, 3.26457701792, 1059.3819301892], [122732e-11, 5.39399536941, 62.2514255951], [120529e-11, 3.08050145518, 184.7272873558], [99356e-11, 1.92888554099, 28.5718080822], [97713e-11, 2.59474415429, 6.592282139], [124095e-11, 3.1151675034, 221.3758502853], [124693e-11, 2.97042405451, 251.4321310758], [114252e-11, 0.25039919123, 594.6507036754], [111006e-11, 3.34276426767, 180.2738692309], [120939e-11, 1.92914010593, 25.6028626656], [104667e-11, 0.94883561775, 395.578702239], [109779e-11, 5.43147520571, 494.5268748734], [96919e-11, 0.86184760695, 1014.1353475506], [98685e-11, 0.8957795271, 488.5889840402], [88968e-11, 4.78109764779, 144.1465711632], [107888e-11, 0.98700578434, 1124.34166877], [97067e-11, 2.62667400276, 291.7040307277], [75131e-11, 5.88936524779, 43.2408450685], [93718e-11, 6.09873565184, 526.722019678], [94822e-11, 0.2066294394, 456.3938392356], [70036e-11, 2.39683345663, 426.598190876], [77187e-11, 4.2107675324, 105.4922706636], [89874e-11, 3.25100749923, 258.0244132148], [69133e-11, 4.93031154435, 1028.3624415522], [90657e-11, 1.69466970587, 366.485629295], [74242e-11, 3.14479101276, 82.8583534146], [57995e-11, 0.86159785905, 60.7669528868], [78695e-11, 1.0930757555, 700.6642392008], [5723e-10, 0.81331949225, 2.9207613068], [63443e-11, 4.39590123005, 149.5631971346], [55698e-11, 3.89047249911, 47.6942631934], [5643e-10, 5.15003563302, 0.5212648618], [56174e-11, 5.42986960794, 911.042573332], [61746e-11, 6.16453667559, 1019.7644218431], [70503e-11, 0.08077330612, 40.5807161926], [74677e-11, 4.8590449998, 186.2117600641], [61861e-11, 4.78702599861, 11.0457002639], [61135e-11, 0.83712253227, 1022.7333672597], [61268e-11, 5.70228826765, 178.1350052168], [52887e-11, 0.37458943972, 27.0873353739], [56722e-11, 3.52318112447, 216.9224321604], [48819e-11, 5.10789123481, 64.9597385808], [6329e-10, 4.3942491003, 807.9497991134], [64062e-11, 6.28297531806, 7.1135470008], [46356e-11, 1.34735469284, 451.9404211107], [6054e-10, 3.40316162416, 294.6729761443], [469e-9, 0.17048203552, 7.4223635415], [56766e-11, 0.45048868231, 140.001969579], [55887e-11, 1.06815733757, 172.1971143836], [53761e-11, 2.79644687008, 328.3525936572], [43828e-11, 6.04655696644, 135.5485514541], [49549e-11, 0.64106656292, 41.0537969446], [5396e-10, 2.91774494436, 563.6312150384], [42961e-11, 5.40175361431, 487.3651437628], [51508e-11, 0.09105540708, 210.3301500214], [41889e-11, 3.12343223889, 29.226199388], [47655e-11, 3.90701760087, 63.7358983034], [41639e-11, 6.26847783513, 32.7164096664], [41429e-11, 4.45464156759, 37.1698277913], [40745e-11, 0.16043648294, 79.2350166922], [48205e-11, 1.8419837301, 403.1341922245], [36912e-11, 0.44771386183, 30.0562807905], [47762e-11, 0.88083849566, 3302.479391062], [39465e-11, 3.50565484069, 357.4456666012], [42139e-11, 0.63375113663, 343.2185725996], [41275e-11, 1.36370496322, 31.2319369581], [42612e-11, 3.55270845713, 38.6543004996], [38931e-11, 5.2669175327, 415.2918581812], [38967e-11, 5.25866056502, 386.9806825299], [33734e-11, 5.24400184426, 67.3592350258], [40879e-11, 3.55292279438, 331.3215390738], [38768e-11, 1.12288359393, 38.1812197476], [375e-9, 6.08687972441, 35.4247226521], [38831e-11, 4.67876780698, 38.084851528], [38231e-11, 6.26491054328, 389.9496279465], [29976e-11, 4.45759985804, 22.633917249], [31356e-11, 0.07746010366, 12.5301729722], [26341e-11, 4.59559782754, 106.0135355254], [27465e-11, 5.9954158789, 206.1855484372], [25152e-11, 4.4986776032, 34.2008823747], [24122e-11, 5.17089441917, 129.9194771616], [28997e-11, 3.6492721021, 253.5709950899], [27173e-11, 4.37944546475, 142.1408335931], [30634e-11, 1.5934880656, 348.8476468921], [31464e-11, 1.05065113524, 100.3844612329], [24056e-11, 1.02801635413, 41.7563723602], [22632e-11, 4.72511111292, 81.3738807063], [21942e-11, 3.48416607882, 69.1525242748], [26333e-11, 3.01556008632, 365.0011565867], [22355e-11, 3.92220883921, 5.1078094307], [22498e-11, 4.03487494425, 19.1224551112], [22885e-11, 1.58977064672, 189.3931538018], [2652e-10, 3.61427038042, 367.9701020033], [25496e-11, 2.43810518614, 351.8165923087], [19111e-11, 2.59694457001, 2080.6308247406], [1964e-10, 6.15701741238, 35.212274331], [25688e-11, 2.00512719767, 439.782755154], [21613e-11, 3.32354204724, 119.5069163441], [25389e-11, 4.74025836522, 1474.6737883704], [18107e-11, 5.35129342595, 244.318584075], [23295e-11, 5.93767742799, 316.3918696566], [22087e-11, 4.81594755148, 84.3428261229], [16972e-11, 3.0510514994, 220.4126424388], [20022e-11, 4.99276451168, 179.0982130633], [2037e-10, 1.86508317889, 171.2339065371], [19426e-11, 2.04829970231, 5.4166259714], [22628e-11, 0.27205783433, 666.723989257], [19072e-11, 3.70882976684, 164.1203595363], [17969e-11, 3.40425338171, 69.3649725959], [18716e-11, 0.90215956591, 285.3723810196], [15889e-11, 0.42011285882, 697.743477894], [14988e-11, 3.08544843665, 704.8570248948], [14774e-11, 3.36129613309, 274.0660483248], [15972e-11, 1.82864185268, 477.3308354552], [13892e-11, 2.94161501165, 38.3936680687], [13922e-11, 2.85574364078, 37.8724032069], [15481e-11, 4.94982954853, 101.8689339412], [17571e-11, 5.82317632469, 35.685355083], [15856e-11, 5.04973561582, 36.9091953604], [16414e-11, 3.63049397028, 45.2465826386], [17158e-11, 2.51251149482, 20.6069278195], [12941e-11, 3.03041555329, 522.5774180938], [15752e-11, 5.00292909214, 247.2393453818], [12679e-11, 0.20331109568, 460.5384408198], [1626e-10, 5.93480347217, 815.0633461142], [12903e-11, 3.51141502996, 446.3113468182], [13891e-11, 5.5106469767, 31.5407534988], [13668e-11, 5.4557613532, 39.3568759152], [13418e-11, 3.95805150079, 290.2195580194], [15368e-11, 2.45783892707, 26.826702943], [14246e-11, 3.18588280921, 401.6497195162], [12222e-11, 4.94370170146, 14.0146456805], [15484e-11, 3.79703715637, 404.6186649328], [13427e-11, 3.79527836573, 151.0476698429], [1445e-10, 4.93940408761, 120.9913890524], [14331e-11, 4.71117327722, 738.7972748386], [11566e-11, 5.91003539239, 536.8045120954], [15578e-11, 2.91836788254, 875.830299001], [13124e-11, 2.16056013419, 152.5321425512], [11744e-11, 2.94770244071, 2.7083129857], [12793e-11, 1.97868575679, 1.3725981237], [12969e-11, 0.00535826017, 97.4155158163], [13891e-11, 4.7643544182, 0.2606324309], [13729e-11, 2.3230647385, 38.2449102224], [10714e-11, 6.18129683877, 115.8835796217], [1161e-10, 4.61712859898, 178.7893965226], [11257e-11, 0.79300245838, 42.3258213318], [145e-9, 5.44690193314, 44.070926471], [11534e-11, 5.26580538005, 160.9389657986], [13355e-11, 5.20849186729, 32.4557772355], [13658e-11, 2.15687632802, 476.4313180835], [13782e-11, 3.47865209163, 38.0211610532], [12714e-11, 2.09462988855, 20.4950532349], [13257e-11, 5.15138524813, 103.0927742186], [1034e-10, 5.38977407079, 222.8603229936], [13357e-11, 5.89635739027, 748.0978699633], [12632e-11, 1.20306997433, 16.1535096946], [11437e-11, 1.58444114292, 495.4900827199], [11424e-11, 4.74142930795, 487.6257761937], [11506e-11, 3.11649121817, 17.6379824029], [1016e-10, 3.74441320429, 457.617679513], [11162e-11, 1.92907800408, 564.8550553158]], [[0.00236338502, 0.70498011235, 38.1330356378], [13220279e-11, 3.32015499895, 1.4844727083], [8621863e-11, 6.2162895163, 35.1640902212], [270174e-10, 1.88140666779, 39.6175083461], [215315e-10, 5.16873840979, 76.2660712756], [2154735e-11, 2.09431198086, 2.9689454166], [1463924e-11, 1.18417031047, 33.6796175129], [1603165e-11, 0, 0], [1135773e-11, 3.91891199655, 36.6485629295], [89765e-10, 5.24122933533, 388.4651552382], [789908e-11, 0.5331548458, 168.0525127994], [76003e-10, 0.02051033644, 182.279606801], [607183e-11, 1.0770650035, 1021.2488945514], [571622e-11, 3.40060785432, 484.444382456], [56079e-10, 2.88685815667, 498.6714764576], [49019e-10, 3.46830928696, 137.0330241624], [264093e-11, 0.86220057976, 4.4534181249], [270526e-11, 3.27355867939, 71.8126531507], [203524e-11, 2.41820674409, 32.1951448046], [155438e-11, 0.36537064534, 41.1019810544], [132766e-11, 3.60157672619, 9.5612275556], [93626e-11, 0.66670888163, 46.2097904851], [83317e-11, 3.25992461673, 98.8999885246], [72205e-11, 4.47717435693, 601.7642506762], [68983e-11, 1.46326969479, 74.7815985673], [86953e-11, 5.77228651853, 381.3516082374], [68717e-11, 4.52563942435, 70.3281804424], [64724e-11, 3.85477388838, 73.297125859], [68377e-11, 3.39509945953, 108.4612160802], [53375e-11, 5.43650770516, 395.578702239], [44453e-11, 3.61409723545, 2.4476805548], [41243e-11, 4.73866592865, 8.0767548473], [48331e-11, 1.98568593981, 175.1660598002], [41744e-11, 4.94257598763, 31.019488637], [44102e-11, 1.41744904844, 1550.939859646], [4117e-10, 1.41999374753, 490.0734567485], [41099e-11, 4.86312637841, 493.0424021651], [40619e-11, 2.27237172464, 529.6909650946]], [[4247412e-11, 5.89910679117, 38.1330356378], [21757e-10, 0.3458182908, 1.4844727083], [163025e-11, 2.2387294713, 168.0525127994]], [], []] };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/nutation_iau1980.json
+var nutation_iau1980_default = [[0, 0, 0, 0, 1, -171996, -174.2, 92025, 8.9], [-2, 0, 0, 2, 2, -13187, -1.6, 5736, -3.1], [0, 0, 0, 2, 2, -2274, -0.2, 977, -0.5], [0, 0, 0, 0, 2, 2062, 0.2, -895, 0.5], [0, 1, 0, 0, 0, 1426, -3.4, 54, -0.1], [0, 0, 1, 0, 0, 712, 0.1, -7, 0], [-2, 1, 0, 2, 2, -517, 1.2, 224, -0.6], [0, 0, 0, 2, 1, -386, -0.4, 200, 0], [0, 0, 1, 2, 2, -301, 0, 129, -0.1], [-2, -1, 0, 2, 2, 217, -0.5, -95, 0.3], [-2, 0, 1, 0, 0, -158, 0, 0, 0], [-2, 0, 0, 2, 1, 129, 0.1, -70, 0], [0, 0, -1, 2, 2, 123, 0, -53, 0], [2, 0, 0, 0, 0, 63, 0, 0, 0], [0, 0, 1, 0, 1, 63, 0.1, -33, 0], [2, 0, -1, 2, 2, -59, 0, 26, 0], [0, 0, -1, 0, 1, -58, -0.1, 32, 0], [0, 0, 1, 2, 1, -51, 0, 27, 0], [-2, 0, 2, 0, 0, 48, 0, 0, 0], [0, 0, -2, 2, 1, 46, 0, -24, 0], [2, 0, 0, 2, 2, -38, 0, 16, 0], [0, 0, 2, 2, 2, -31, 0, 13, 0], [0, 0, 2, 0, 0, 29, 0, 0, 0], [-2, 0, 1, 2, 2, 29, 0, -12, 0], [0, 0, 0, 2, 0, 26, 0, 0, 0], [-2, 0, 0, 2, 0, -22, 0, 0, 0], [0, 0, -1, 2, 1, 21, 0, -10, 0], [0, 2, 0, 0, 0, 17, -0.1, 0, 0], [2, 0, -1, 0, 1, 16, 0, -8, 0], [-2, 2, 0, 2, 2, -16, 0.1, 7, 0], [0, 1, 0, 0, 1, -15, 0, 9, 0], [-2, 0, 1, 0, 1, -13, 0, 7, 0], [0, -1, 0, 0, 1, -12, 0, 6, 0], [0, 0, 2, -2, 0, 11, 0, 0, 0], [2, 0, -1, 2, 1, -10, 0, 5, 0], [2, 0, 1, 2, 2, -8, 0, 3, 0], [0, 1, 0, 2, 2, 7, 0, -3, 0], [-2, 1, 1, 0, 0, -7, 0, 0, 0], [0, -1, 0, 2, 2, -7, 0, 3, 0], [2, 0, 0, 2, 1, -7, 0, 3, 0], [2, 0, 1, 0, 0, 6, 0, 0, 0], [-2, 0, 2, 2, 2, 6, 0, -3, 0], [-2, 0, 1, 2, 1, 6, 0, -3, 0], [2, 0, -2, 0, 1, -6, 0, 3, 0], [2, 0, 0, 0, 1, -6, 0, 3, 0], [0, -1, 1, 0, 0, 5, 0, 0, 0], [-2, -1, 0, 2, 1, -5, 0, 3, 0], [-2, 0, 0, 0, 1, -5, 0, 3, 0], [0, 0, 2, 2, 1, -5, 0, 3, 0], [-2, 0, 2, 0, 1, 4, 0, 0, 0], [-2, 1, 0, 2, 1, 4, 0, 0, 0], [0, 0, 1, -2, 0, 4, 0, 0, 0], [-1, 0, 1, 0, 0, -4, 0, 0, 0], [-2, 1, 0, 0, 0, -4, 0, 0, 0], [1, 0, 0, 0, 0, -4, 0, 0, 0], [0, 0, 1, 2, 0, 3, 0, 0, 0], [0, 0, -2, 2, 2, -3, 0, 0, 0], [-1, -1, 1, 0, 0, -3, 0, 0, 0], [0, 1, 1, 0, 0, -3, 0, 0, 0], [0, -1, 1, 2, 2, -3, 0, 0, 0], [2, -1, -1, 2, 2, -3, 0, 0, 0], [0, 0, 3, 2, 2, -3, 0, 0, 0], [2, -1, 0, 2, 2, -3, 0, 0, 0]];
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/moon_meeus47.json
+var moon_meeus47_default = { ta: [[0, 0, 1, 0, 6288774, -20905355], [2, 0, -1, 0, 1274027, -3699111], [2, 0, 0, 0, 658314, -2955968], [0, 0, 2, 0, 213618, -569925], [0, 1, 0, 0, -185116, 48888], [0, 0, 0, 2, -114332, -3149], [2, 0, -2, 0, 58793, 246158], [2, -1, -1, 0, 57066, -152138], [2, 0, 1, 0, 53322, -170733], [2, -1, 0, 0, 45758, -204586], [0, 1, -1, 0, -40923, -129620], [1, 0, 0, 0, -34720, 108743], [0, 1, 1, 0, -30383, 104755], [2, 0, 0, -2, 15327, 10321], [0, 0, 1, 2, -12528, 0], [0, 0, 1, -2, 10980, 79661], [4, 0, -1, 0, 10675, -34782], [0, 0, 3, 0, 10034, -23210], [4, 0, -2, 0, 8548, -21636], [2, 1, -1, 0, -7888, 24208], [2, 1, 0, 0, -6766, 30824], [1, 0, -1, 0, -5163, -8379], [1, 1, 0, 0, 4987, -16675], [2, -1, 1, 0, 4036, -12831], [2, 0, 2, 0, 3994, -10445], [4, 0, 0, 0, 3861, -11650], [2, 0, -3, 0, 3665, 14403], [0, 1, -2, 0, -2689, -7003], [2, 0, -1, 2, -2602, 0], [2, -1, -2, 0, 2390, 10056], [1, 0, 1, 0, -2348, 6322], [2, -2, 0, 0, 2236, -9884], [0, 1, 2, 0, -2120, 5751], [0, 2, 0, 0, -2069, 0], [2, -2, -1, 0, 2048, -4950], [2, 0, 1, -2, -1773, 4130], [2, 0, 0, 2, -1595, 0], [4, -1, -1, 0, 1215, -3958], [0, 0, 2, 2, -1110, 0], [3, 0, -1, 0, -892, 3258], [2, 1, 1, 0, -810, 2616], [4, -1, -2, 0, 759, -1897], [0, 2, -1, 0, -713, -2117], [2, 2, -1, 0, -700, 2354], [2, 1, -2, 0, 691, 0], [2, -1, 0, -2, 596, 0], [4, 0, 1, 0, 549, -1423], [0, 0, 4, 0, 537, -1117], [4, -1, 0, 0, 520, -1571], [1, 0, -2, 0, -487, -1739], [2, 1, 0, -2, -399, 0], [0, 0, 2, -2, -381, -4421], [1, 1, 1, 0, 351, 0], [3, 0, -2, 0, -340, 0], [4, 0, -3, 0, 330, 0], [2, -1, 2, 0, 327, 0], [0, 2, 1, 0, -323, 1165], [1, 1, -1, 0, 299, 0], [2, 0, 3, 0, 294, 0], [2, 0, -1, -2, 0, 8752]], tb: [[0, 0, 0, 1, 5128122], [0, 0, 1, 1, 280602], [0, 0, 1, -1, 277693], [2, 0, 0, -1, 173237], [2, 0, -1, 1, 55413], [2, 0, -1, -1, 46271], [2, 0, 0, 1, 32573], [0, 0, 2, 1, 17198], [2, 0, 1, -1, 9266], [0, 0, 2, -1, 8822], [2, -1, 0, -1, 8216], [2, 0, -2, -1, 4324], [2, 0, 1, 1, 4200], [2, 1, 0, -1, -3359], [2, -1, -1, 1, 2463], [2, -1, 0, 1, 2211], [2, -1, -1, -1, 2065], [0, 1, -1, -1, -1870], [4, 0, -1, -1, 1828], [0, 1, 0, 1, -1794], [0, 0, 0, 3, -1749], [0, 1, -1, 1, -1565], [1, 0, 0, 1, -1491], [0, 1, 1, 1, -1475], [0, 1, 1, -1, -1410], [0, 1, 0, -1, -1344], [1, 0, 0, -1, -1335], [0, 0, 3, 1, 1107], [4, 0, 0, -1, 1021], [4, 0, -1, 1, 833], [0, 0, 1, -3, 777], [4, 0, -2, 1, 671], [2, 0, 0, -3, 607], [2, 0, 2, -1, 596], [2, -1, 1, -1, 491], [2, 0, -2, 1, -451], [0, 0, 3, -1, 439], [2, 0, 2, 1, 422], [2, 0, -3, -1, 421], [2, 1, -1, 1, -366], [2, 1, 0, 1, -351], [4, 0, 0, 1, 331], [2, -1, 1, 1, 315], [2, -2, 0, -1, 302], [0, 0, 1, 3, -283], [2, 1, 1, -1, -229], [1, 1, 0, -1, 223], [1, 1, 0, 1, 223], [0, 1, -2, -1, -220], [2, 1, -1, -1, -220], [1, 0, 1, 1, -185], [2, -1, -2, -1, 181], [0, 1, 2, 1, -177], [4, 0, -2, -1, 176], [4, -1, -1, -1, 166], [1, 0, 1, -1, -164], [4, 0, 1, -1, 132], [1, 0, -1, -1, -119], [4, -1, 0, -1, 115], [2, -2, 0, 1, 107]] };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/pluto_meeus37.json
+var pluto_meeus37_default = [[0, 0, 1, -19.799805, 19.850055, -5.452852, -14.974862, 6.6865439, 6.8951812], [0, 0, 2, 0.897144, -4.954829, 3.527812, 1.67279, -1.1827535, -0.0332538], [0, 0, 3, 0.611149, 1.211027, -1.050748, 0.327647, 0.1593179, -0.143889], [0, 0, 4, -0.341243, -0.189585, 0.17869, -0.292153, -18444e-7, 0.048322], [0, 0, 5, 0.129287, -0.034992, 0.01865, 0.10034, -65977e-7, -85431e-7], [0, 0, 6, -0.038164, 0.030893, -0.030697, -0.025823, 31174e-7, -6032e-7], [0, 1, -1, 0.020442, -9987e-6, 4878e-6, 0.011248, -5794e-7, 22161e-7], [0, 1, 0, -4063e-6, -5071e-6, 226e-6, -64e-6, 4601e-7, 4032e-7], [0, 1, 1, -6016e-6, -3336e-6, 203e-5, -836e-6, -1729e-7, 234e-7], [0, 1, 2, -3956e-6, 3039e-6, 69e-6, -604e-6, -415e-7, 702e-7], [0, 1, 3, -667e-6, 3572e-6, -247e-6, -567e-6, 239e-7, 723e-7], [0, 2, -2, 1276e-6, 501e-6, -57e-6, 1e-6, 67e-7, -67e-7], [0, 2, -1, 1152e-6, -917e-6, -122e-6, 175e-6, 1034e-7, -451e-7], [0, 2, 0, 63e-5, -1277e-6, -49e-6, -164e-6, -129e-7, 504e-7], [1, -1, 0, 2571e-6, -459e-6, -197e-6, 199e-6, 48e-6, -231e-7], [1, -1, 1, 899e-6, -1449e-6, -25e-6, 217e-6, 2e-7, -441e-7], [1, 0, -3, -1016e-6, 1043e-6, 589e-6, -248e-6, -3359e-7, 265e-7], [1, 0, -2, -2343e-6, -1012e-6, -269e-6, 711e-6, 7856e-7, -7832e-7], [1, 0, -1, 7042e-6, 788e-6, 185e-6, 193e-6, 36e-7, 45763e-7], [1, 0, 0, 1199e-6, -338e-6, 315e-6, 807e-6, 8663e-7, 8547e-7], [1, 0, 1, 418e-6, -67e-6, -13e-5, -43e-6, -809e-7, -769e-7], [1, 0, 2, 12e-5, -274e-6, 5e-6, 3e-6, 263e-7, -144e-7], [1, 0, 3, -6e-5, -159e-6, 2e-6, 17e-6, -126e-7, 32e-7], [1, 0, 4, -82e-6, -29e-6, 2e-6, 5e-6, -35e-7, -16e-7], [1, 1, -3, -36e-6, -29e-6, 2e-6, 3e-6, -19e-7, -4e-7], [1, 1, -2, -4e-5, 7e-6, 3e-6, 1e-6, -15e-7, 8e-7], [1, 1, -1, -14e-6, 22e-6, 2e-6, -1e-6, -4e-7, 12e-7], [1, 1, 0, 4e-6, 13e-6, 1e-6, -1e-6, 5e-7, 6e-7], [1, 1, 1, 5e-6, 2e-6, 0, -1e-6, 3e-7, 1e-7], [1, 1, 3, -1e-6, 0, 0, 0, 6e-7, -2e-7], [2, 0, -6, 2e-6, 0, 0, -2e-6, 2e-7, 2e-7], [2, 0, -5, -4e-6, 5e-6, 2e-6, 2e-6, -2e-7, -2e-7], [2, 0, -4, 4e-6, -7e-6, -7e-6, 0, 14e-7, 13e-7], [2, 0, -3, 14e-6, 24e-6, 1e-5, -8e-6, -63e-7, 13e-7], [2, 0, -2, -49e-6, -34e-6, -3e-6, 2e-5, 136e-7, -236e-7], [2, 0, -1, 163e-6, -48e-6, 6e-6, 5e-6, 273e-7, 1065e-7], [2, 0, 0, 9e-6, -24e-6, 14e-6, 17e-6, 251e-7, 149e-7], [2, 0, 1, -4e-6, 1e-6, -2e-6, 0, -25e-7, -9e-7], [2, 0, 2, -3e-6, 1e-6, 0, 0, 9e-7, -2e-7], [2, 0, 3, 1e-6, 3e-6, 0, 0, -8e-7, 7e-7], [3, 0, -2, -3e-6, -1e-6, 0, 1e-6, 2e-7, -1e-6], [3, 0, -1, 5e-6, -3e-6, 0, 0, 19e-7, 35e-7], [3, 0, 0, 0, 0, 1e-6, 0, 1e-6, 3e-7]];
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/chiron_cheb.json
+var chiron_cheb_default = { jd0: 23967585e-1, seg_days: 2922, scale: 1, segments: [[[3.204583546, 7.194013245, -0.2316114115, -0.08607072357, 0.01693338275, -0.002164547166, 1563497567e-13, 2326462059e-14, -108069116e-13, 13177367e-15, -3426691673e-16, 4059456965e-16, -2924696759e-16], [-10.66050961, -0.8930935174, 1.020408149, -0.09779420742, 0.002463780643, 0.001198028735, -3470563326e-13, 7160564771e-14, -9697125021e-15, -8491481852e-16, 1167291404e-15, -344982021e-15, -1325971549e-15], [1.323706518, 0.5437552385, -0.1216812984, 0.005003761674, 7695217814e-13, -2698068556e-13, 44051495e-12, -570410373e-14, 1194207484e-15, 2166472727e-16, -3046512861e-16, -6735036714e-17, 7857540286e-17]], [[14.30044151, 3.702303918, -0.5005250417, 0.002134711844, 227145923e-12, -1221818722e-13, 2092870736e-14, -3224212725e-15, 3711609939e-16, -9886395404e-16, 1511413477e-16, -2629092725e-16, -3849106678e-16], [-7.1702302, 3.754701271, 0.2616716443, -0.03326515347, 0.002129209636, -2354991068e-13, 1519581181e-14, -1502728088e-15, -5581972064e-17, 9960609164e-17, 6133920468e-16, -3542249394e-16, -1562839037e-15], [1.649418859, -0.1651638032, -0.05931213024, 0.003762020311, -1744310579e-13, 1047745985e-14, -2931825893e-16, -2438574791e-17, 7844663524e-18, 156120249e-16, 9509976504e-19, -4775051651e-17, 1025295701e-17]], [[17.78620787, -0.1927231819, -0.4708728708, 0.003834298912, 1583611948e-13, -1124519325e-13, -8760081664e-15, 9327697957e-15, -9826205239e-16, -1691601757e-15, 3344690787e-17, -2422777874e-16, -298420636e-16], [1.40218585, 4.56980926, -0.03894654214, -0.02089431444, 4848128214e-13, 2572264969e-15, -2720642311e-14, -2211335295e-15, 253910404e-14, 1378276894e-17, 4474300127e-16, -7221109667e-16, -1557694725e-15], [0.9627836572, -0.4934062808, -0.02536632966, 0.002249053699, -2651136776e-14, 8085503942e-15, 6479501647e-16, -7091847082e-17, -7334277023e-17, 3736547803e-17, 2104541796e-17, -6250948387e-17, -157006912e-17]], [[13.75146037, -3.816381154, -0.4391305034, 0.00270080512, 6505591075e-13, 1897219876e-13, 1753357021e-14, -2752010757e-15, -1805037408e-15, -1029308137e-15, -9855023623e-18, 1619681031e-16, 3042434947e-17], [9.444329009, 3.255311171, -0.3041637302, -0.02945373702, -0.001821978383, -1150903521e-13, 1696409265e-14, 4725815456e-15, -1565684074e-16, -4076079998e-16, 3026230543e-16, -6934602211e-16, -1235349898e-15], [-0.1374827089, -0.5817472437, 0.005150101094, 0.003338954459, 1813143484e-13, 1584479502e-14, 1095894784e-15, 1639414542e-16, 3162807374e-17, 1651305079e-17, -55720248e-16, -6830178953e-17, 3217534571e-18]], [[3.070662351, -6.656235464, -0.1741157576, 0.06223233704, 0.01020894498, 0.001386050159, 1321539214e-13, 1777441339e-15, -1863789751e-15, -1738981577e-15, 1667659489e-17, 1231422258e-16, -3234297388e-16], [11.9906608, -1.181756261, -0.8745499754, -0.06923974015, -0.002759267884, 3806036408e-13, 163894983e-12, 2853699941e-14, 3856233279e-15, 4097706412e-16, 4135363353e-16, -2950062458e-16, -1233246878e-15], [-1.072361406, -0.2911175755, 0.08111139695, 0.01131690167, 954157613e-12, 4114399578e-14, -8786226436e-15, -3093161157e-15, -5858812465e-16, -4471430367e-17, -2187057747e-17, -6008073895e-17, 1033280828e-17]], [[-6.398898904, -1.062426664, 1.819076958, 0.1187607197, -0.06136854405, -0.01018686498, 0.002462448654, 831873752e-12, -8547424201e-14, -6593813365e-14, 175756915e-15, 452660283e-14, 1514732516e-16], [1.627036561, -8.860399531, -0.3489919506, 0.3182695496, 0.03380466652, -0.01206492691, -0.002858551151, 4800018902e-13, 2303523858e-13, -120141657e-13, -169382895e-13, -1069076177e-15, -3431693102e-16], [-0.5698513734, 0.8690077882, 0.1499935071, -0.02639145769, -0.007370964056, 6470842499e-13, 4490087291e-13, -5683500449e-16, -2950686608e-14, -2783375784e-15, 1825801087e-15, 3356874198e-16, -1027170096e-16]], [[1.657156097, 7.309278456, -0.08374243776, -0.119991906, 0.02196153519, -0.002170201402, -6523252383e-14, 8130958493e-14, -1320808116e-14, -5768770153e-15, 2002016172e-15, 7012266196e-16, -1017231949e-15], [-10.38730408, -1.913918643, 1.136122468, -0.09800035401, -0.002008440873, 0.002666535311, -5522682205e-13, 4001214403e-14, 1162853683e-14, 9069582359e-16, -3575554386e-15, 6086523352e-16, -1075711479e-15], [1.189085122, 0.644540721, -0.1264856995, 0.003748699972, 0.001532172215, -5310011293e-13, 9573380271e-14, 4274312355e-15, -106774666e-13, 3095105165e-15, 7210257337e-16, -1009821338e-15, 304913344e-15]], [[13.5213173, 4.252145829, -0.4865489024, 8794230249e-13, 5540820713e-13, -1643081543e-13, 2539623046e-14, -3134894905e-15, 344692964e-15, -1062797946e-15, -1396038515e-16, 1684648594e-16, 9184851602e-17], [-8.229725309, 3.383025033, 0.3105419177, -0.03651718922, 0.002474724624, -2546011911e-13, 1465777438e-14, -1487283272e-15, -1114167837e-16, 6797505952e-17, 3403084888e-16, -5902646642e-16, -1244557779e-15], [1.676699705, -0.1016754594, -0.06213391081, 0.004043016547, -2051451409e-13, 1070626903e-14, -8598481942e-17, -837946218e-16, 880190056e-17, 1872065534e-17, 3989667681e-18, -6720203741e-17, 9597416218e-19]], [[18.21391908, 0.4681543083, -0.4530089422, 0.004653069941, -1881486098e-14, -1222490046e-13, 6322042295e-15, 6443012202e-15, -1609497371e-15, -1265379141e-15, 2662890128e-16, 1370350669e-16, -2600162553e-16], [-0.07705935023, 4.512692297, -6916930704e-13, -0.01921975582, 766890855e-12, -4019906829e-14, -2684000109e-14, 1928204843e-15, 1853950922e-15, -545852994e-15, 2840016146e-16, -1169501345e-16, -1284071837e-15], [1.099813168, -0.4464954066, -0.02738594714, 0.002128908316, -4714414605e-14, 8411455934e-15, 3181195223e-16, -2359602847e-16, -1943353789e-17, 5610266438e-17, -1296284161e-17, -6140614223e-17, 8132466335e-18]], [[15.648283, -3.010727534, -0.4244559804, 0.001225402851, 3961514537e-13, 1475264538e-13, 4568081019e-15, -4970976193e-15, -1129156192e-15, -7936608011e-16, 2121113278e-16, -252023687e-15, -1781700428e-16], [8.262430274, 3.644528131, -0.2235999648, -0.02330021416, -0.001238246301, -3735226464e-14, 254482134e-13, 2178470733e-15, -123454504e-14, -6426045674e-16, 666191369e-15, -1455413502e-16, -1647494721e-15], [0.06727807092, -0.5646015792, -0.001397138723, 0.002549207737, 9655651632e-14, 8303207153e-15, 5643942702e-16, 1387877872e-16, 1475959585e-17, 1092703418e-17, -2281411836e-18, -4705622632e-17, -5353919095e-18]], [[6.460315228, -6.078663919, -0.300953736, 0.02682944167, 0.004249536151, 6481371486e-13, 7441682436e-14, 6610745119e-15, 4892074303e-16, -1082725094e-15, -1951773358e-16, -2012010765e-16, 2105466047e-16], [12.62104527, 0.3680894234, -0.6430164268, -0.05199749245, -0.003300358861, -1501336468e-13, 2524574735e-14, 5452782988e-15, 1461267891e-15, 1638148952e-16, 6804229801e-16, -5436093463e-16, -1573498961e-15], [-0.9426042573, -0.4036618835, 0.04954615778, 0.007246909308, 6232277158e-13, 4789027025e-14, 164185129e-14, -2926385538e-16, -1092545353e-16, 7594953655e-19, 3509000234e-18, -5778932483e-17, -1301483544e-17]], [[-5.189444566, -4.397000408, 1.140955617, 0.2470488959, 0.004651048341, -0.008176153131, -0.001867157382, -1160265433e-14, 9126211806e-14, 2047481183e-14, -5364838533e-16, -1265767428e-15, -1379229703e-16], [6.114299744, -7.305803581, -1.069894276, 0.1011927233, 0.04757370046, 0.005300277299, -9955530013e-13, -4698632108e-13, -5471902675e-14, 1314662575e-14, 7013674943e-15, 3570577816e-16, -1419605535e-15], [-0.9545145175, 0.5075904869, 0.1811056373, 0.004155129118, -0.004627953189, -0.001033605103, -1779286106e-14, 4395131296e-14, 9974498936e-15, -2530729105e-16, -5717231052e-16, -1163562054e-16, 4464047198e-17]], [[-2.226132582, 6.774113241, 0.5364401113, -0.2385632784, 0.02596154288, 0.002605604923, -0.00160900162, 2655933935e-13, 776828415e-14, -1615223993e-14, 3656150024e-15, 8421331375e-17, -3656709696e-16], [-8.274990321, -4.807884048, 1.369920065, -0.02785962308, -0.03185367458, 0.007557016131, -4100904342e-13, -2339132017e-13, 7712823057e-14, -8194429453e-15, -1886947089e-15, 1053517518e-15, -1489464231e-15], [0.7420891906, 0.9135739385, -0.1125234677, -0.01127845067, 0.004865256234, -661316408e-12, -4044904685e-14, 3848134447e-14, -7586419604e-15, 1869162724e-16, 2345600215e-16, -8575527251e-17, -7551504107e-18]], [[10.73962805, 5.395032509, -0.4812189089, -0.006951032751, 0.002253640377, -4268508431e-13, 6116804286e-14, -5376031034e-15, 1030238952e-15, -1090355969e-15, 71686178e-15, -2358173762e-16, -7328231254e-17], [-9.797309336, 2.493959217, 0.4693815747, -0.05200211318, 0.003862251853, -3288604769e-13, 7788658993e-15, 1021032385e-15, -9772143757e-17, 6300612967e-17, 6252538539e-16, -1068907278e-16, -170270416e-14], [1.677786605, 0.05766788304, -0.07854471419, 0.005259071716, -260501585e-12, 195006014e-14, 2679403455e-15, -6177364319e-16, 9263444631e-17, 1174731288e-17, 6529135025e-18, -4878521694e-17, -1102218468e-17]], [[17.64559436, 1.526559715, -0.4652217537, 0.005467394773, -1019802807e-13, -1183315769e-13, 1565265902e-14, 3237099211e-15, -1802834448e-15, -1010135537e-15, -9316580571e-17, -1777071354e-16, 3143819877e-16], [-2.538371767, 4.432483076, 0.06596321415, -0.02121616652, 0.001167667762, -1015896153e-13, -1874202495e-14, 5513157224e-15, 7724593498e-16, -6896568015e-16, 6938182562e-16, -432285205e-15, -1597473767e-15], [1.322318749, -0.3772482648, -0.03512186409, 0.002440041912, -8240071388e-14, 1011452437e-14, -5203472196e-16, -2157520094e-16, 9165746922e-17, 1906400882e-17, -1305238521e-18, -5336768524e-17, -1935122698e-17]], [[17.12142337, -2.022731965, -0.4307028602, 0.001471970438, 3340748844e-13, 1163410725e-13, -9493984654e-15, -7503895984e-15, -6911430967e-16, -5958727777e-16, -3634867149e-17, 2002234674e-16, 2409420756e-16], [6.153086069, 4.079238097, -0.1536830942, -0.02047040791, -7263695026e-13, 2410978438e-14, 2558534135e-14, -240281655e-14, -2392543274e-15, -2604356224e-16, 5756955032e-16, -304026321e-15, -1223923313e-15], [0.3712453586, -0.5522601689, -0.00902486046, 0.002198190977, 3828601436e-14, 5482071259e-15, 5217379962e-16, 1561305819e-16, -1700337562e-17, 8644443803e-18, 4615231245e-18, -6202047105e-17, -841876412e-17]], [[9.780287906, -5.263630095, -0.3639637299, 0.01142321229, 0.001623429613, 293063541e-12, 3449365451e-14, 4018976243e-15, 6925911126e-16, -10633175e-13, 8603301481e-17, 1052375518e-16, -1296557618e-16], [12.17211314, 1.675181933, -0.474928287, -0.03777955999, -0.002490541736, -1988126879e-13, -2526860194e-15, -1187134417e-16, 5612060059e-16, -8956115566e-19, 4547790927e-16, 3797364884e-17, -1315773698e-15], [-0.704392796, -0.4927035925, 0.02841782978, 0.004868829612, 3722799773e-13, 3108510875e-14, 1959263596e-15, 6304338851e-17, -3277972817e-17, 1759339685e-17, -291862989e-17, -5491890609e-17, -2490268089e-18]], [[-2.299808475, -6.228677824, 0.3829120696, 0.1664816284, 0.02194424855, 8875653334e-13, -4045265006e-13, -1473075475e-13, -3030121341e-14, -24043071e-13, 1714079394e-15, 1810624258e-16, -1499053724e-16], [9.751832352, -4.676130222, -1.150786071, -0.04463085055, 0.01370386248, 0.004212540352, 6335019072e-13, 2419256501e-14, -1605644268e-14, -4145275463e-15, -9911366193e-18, -6052806694e-16, -1796548689e-15], [-1.169717461, 0.1238817813, 0.1445945311, 0.01460737329, -1111096881e-13, -403656306e-12, -9332089139e-14, -7826522583e-15, 2968269837e-16, -419491782e-15, 1784880169e-17, 2033604735e-16, 449853742e-16]], [[-5.248198029, 4.351634412, 1.438022628, -0.2465304124, -0.02796769268, 0.01412326433, -3297094875e-13, -7773091861e-13, 1247855335e-13, 3310725194e-14, -1363849732e-14, -6168537659e-16, 1434809966e-15], [-4.588249185, -7.686650851, 1.055424747, 0.2027486318, -0.05787168024, -0.002221225304, 0.003308246434, -3023048179e-13, -1668108438e-13, 4271507723e-14, 6060908958e-15, -4210551303e-15, -1434720679e-15], [0.1736209553, 1.074467478, -0.02567022647, -0.03627259412, 0.004400886084, 0.001081030086, -3652577028e-13, -1421942768e-14, 2484187934e-14, -252705582e-14, -1351577736e-15, 3265077977e-16, 1972531093e-17]], [[7.148475631, 6.488176834, -0.4180327786, -0.02979666144, 0.006804972456, -0.001100145751, 1441133532e-13, -9741003647e-15, 3442047292e-16, -9217421096e-16, -2508696088e-16, 2147196245e-16, 3235907385e-16], [-10.80303195, 1.056192354, 0.7048472667, -0.07506364699, 0.005268221746, -1913140983e-13, -6224036561e-14, 1680255891e-14, -2864827168e-15, 2959870736e-16, 2902920896e-16, -2117600483e-16, -1206369152e-15], [1.571088269, 0.2736412748, -0.09973845602, 0.006360549852, -1494736148e-13, -5298729289e-14, 1502685255e-14, -239222584e-14, 3559109915e-16, -1361389602e-17, -1957092161e-18, -6561320168e-17, -1448006349e-17]], [[16.35716611, 2.680101019, -0.4771136965, 0.00537689997, -6143388284e-14, -1260630213e-13, 2348765967e-14, -1193443032e-16, -1212044455e-15, -7940241951e-16, 1511656799e-16, 465010298e-16, -4082943409e-17], [-5.143994401, 4.147720675, 0.1523156348, -0.02551564515, 0.001697094583, -1699158289e-13, -5341987353e-15, 502289235e-14, -5050188704e-16, -453943425e-15, 5408131928e-16, 1484141248e-16, -1330921424e-15], [1.518912628, -0.2803477455, -0.04500227857, 0.002951655396, -1312842515e-13, 1234228871e-14, -8828930161e-16, -556613816e-16, 4131072985e-17, 2616380727e-18, 264816056e-17, -510769112e-16, -6653765546e-18]], [[18.04838177, -0.9589334447, -0.4402171655, 0.00198675987, 3469692987e-13, 7695096958e-14, -2511043063e-14, -710223618e-14, 116590452e-14, -2380418291e-16, 1365600377e-17, -34879068e-14, 9967676611e-17], [3.576546624, 4.378219414, -0.08536882231, -0.01941897795, -2873607413e-13, 6077142982e-14, 1815388125e-14, -6474557902e-15, -1369239523e-15, 2291779519e-16, 8370434069e-16, -115775411e-16, -1716776528e-15], [0.6940151497, -0.5211359968, -0.01667690209, 0.002071539276, -4095496805e-15, 4663467466e-15, 4795534212e-16, 6205897804e-17, -259534535e-16, 2591481548e-17, 1061459121e-17, -4893313072e-17, -2190951022e-17]], [[12.73073857, -4.322775342, -0.3976215111, 0.004691956713, 5427930709e-13, 1490217766e-13, 1876110451e-14, 3353979021e-15, 1807370379e-16, -1155949881e-15, -2873942836e-16, -1220040789e-16, 4968695602e-16], [10.87012323, 2.69916398, -0.3481031318, -0.02849424955, -0.001752379725, -1693510227e-13, -5505058371e-15, 4936992859e-16, 7563275778e-16, -9440694677e-17, 5926287927e-16, -290615186e-15, -1556369916e-15], [-0.3958873438, -0.5441211597, 0.01332432506, 0.003483435303, 2171220811e-13, 1811867163e-14, 119505018e-14, 7737832947e-17, -216838012e-16, 1929904841e-17, 1072855682e-17, -5658651707e-17, -2980991976e-17]], [[1.49457285, -6.650860769, -0.06125517833, 0.07967575603, 0.0126067699, 0.001489580597, 1222648461e-13, -8169954329e-15, -4799062158e-15, -2242579668e-15, -5092212669e-16, 3025265008e-16, 4148419633e-16], [11.93157907, -2.12487456, -0.9324557036, -0.06816662172, -7935241256e-13, 7913393786e-13, 2283961251e-13, 4900485933e-14, 3435400416e-15, -9845004873e-16, 6289093818e-16, -1898962578e-17, -1281575242e-15], [-1.176625543, -0.1698874878, 0.09482607046, 0.01191504674, 8806719291e-13, 484830534e-14, -1761664687e-14, -5474796468e-15, -9175514057e-16, 1163259779e-16, -1155315426e-17, -1006406436e-16, -955224608e-17]], [[-6.546575282, 0.3483524383, 1.860090828, 0.02553158827, -0.07015911963, -0.003777185343, 0.003642965131, 3820383482e-13, -2215191021e-13, -3739653814e-14, 1443005982e-14, 341534135e-14, -9275550056e-16], [0.149228789, -8.954582556, 0.01666187008, 0.3374111485, 0.00992042715, -0.01526112413, -0.001162821809, 8779407606e-13, 1148650817e-13, -5608821105e-14, -1042213513e-14, 3891921323e-15, -319941821e-15], [-0.4050162607, 0.9712767266, 0.1092493366, -0.03443407958, -0.005283382038, 0.001405803579, 3448809993e-13, -7094250582e-14, -2577531973e-14, 3794211283e-15, 2042291015e-15, -2311359063e-16, -1808782633e-16]], [[2.972837346, 7.259083287, -0.206374433, -0.0900527381, 0.01748492044, -0.002234630113, 1389770216e-13, 3031167415e-14, -126949329e-13, 1219096054e-15, -2066874214e-16, -2238171784e-16, 2340991193e-16], [-10.67259504, -1.086328276, 1.03190736, -0.09716641037, 0.002197173149, 0.001359818808, -423897416e-12, 6999068444e-14, -4738528462e-15, -1948499789e-16, 1052835675e-15, -2888965444e-17, -1716743412e-15], [1.309012164, 0.5459058905, -0.121661506, 0.005130428549, 7947469906e-13, -2834801962e-13, 5390020016e-14, -5777493148e-15, -3840444546e-16, 8731643669e-17, -3166685625e-17, -5268173939e-18, -1307125161e-17]], [[14.31684325, 3.873396055, -0.4893883805, 0.003746537907, 3675496624e-13, -184843755e-12, 3390179693e-14, -3330153212e-15, -7630651353e-16, -7311450867e-16, -3106949367e-16, -1388520965e-16, 583860274e-15], [-7.493663258, 3.627108314, 0.2632898796, -0.03371843441, 0.002526298993, -2494010847e-13, 789360258e-14, 3805034306e-15, -786164696e-15, -2553645858e-16, 6252247605e-16, -2218607524e-16, -1522232657e-15], [1.645703965, -0.1547478523, -0.057535833, 0.003763696663, -1920323144e-13, 1352624006e-14, -7800474267e-16, -5604920071e-18, 1736286693e-17, 9295875861e-18, 1466440696e-17, -5541489517e-17, -3202447287e-17]], [[18.28252199, 0.1238250546, -0.4510941126, 0.003104504933, 358943308e-12, 184411776e-13, -3534410692e-14, -3072437392e-15, 2947227257e-15, -6420217096e-16, -4350505465e-16, 150419378e-15, 4870361586e-16], [0.8752061846, 4.509443565, -0.02032414937, -0.01973430507, 1878147902e-13, 714793724e-13, 79495933e-13, -8089026712e-15, -7995970824e-16, 2652083536e-16, 3916752295e-16, -5524250155e-18, -1182889401e-15], [0.9924066747, -0.4711188552, -0.02434157087, 0.002133930561, -4046533903e-14, 5131665435e-15, 2818244219e-16, 1006791078e-16, 4310014453e-18, 1025533513e-17, -9664889625e-18, -5789178206e-17, -2111296903e-17]], [[15.05282628, -3.321915761, -0.4141748342, 0.001852119254, 6938404221e-14, 9989974139e-14, 1566121172e-14, 2367385474e-15, 1840249046e-16, -1193182453e-15, 4436207114e-17, -1878248976e-18, 1385175441e-16], [9.016288178, 3.443060154, -0.2500061723, -0.02275064415, -0.001255580232, -1360592409e-13, -2355948194e-15, 1243311001e-15, 8948824884e-16, -1740823139e-16, 4526226603e-16, 3604775925e-16, -1338087617e-15], [-0.06416471833, -0.5636042564, 0.002195766549, 0.002703971317, 1243525872e-13, 1099589312e-14, 4866883148e-16, 893523146e-17, -2348479119e-17, 1971818509e-17, 1285026847e-18, -4435600571e-17, -2038974115e-17]], [[5.353615028, -6.2594467, -0.2635230421, 0.03561196136, 0.005479995278, 7292361157e-13, 1026162065e-13, 5853295311e-15, -6181337381e-16, -7770278467e-16, -5326828066e-17, -4014856271e-16, 3476166698e-16], [12.7018862, -0.1315841756, -0.7013138434, -0.05588427233, -0.002976087579, -101138148e-12, 4607858192e-14, 1242738463e-14, 6738803799e-16, 2369911522e-16, 76153578e-14, 1459494597e-16, -1618405762e-15], [-1.03093162, -0.3572171772, 0.05837510683, 0.008034017043, 6915426028e-13, 5242666778e-14, 1390523982e-16, -6836677255e-16, -8425232029e-17, -3022874344e-17, -4655357207e-18, -3451591726e-17, -3216763585e-17]], [[-5.768663192, -3.517063387, 1.361836015, 0.2366177717, -0.01041110433, -0.01107992433, -0.001567724695, 2711203301e-13, 142365857e-12, 131946726e-13, -6258897753e-15, -2586036747e-15, 5053349743e-16], [4.935783314, -7.910524985, -0.9225974764, 0.1617313056, 0.05212971505, 0.002545493418, -0.001975196279, -5166419218e-13, 6126295658e-15, 3182269274e-14, 7472930834e-15, -7441625824e-16, -2151818804e-15], [-0.8641702856, 0.6347452723, 0.1798399327, -0.003398085408, -0.006306861364, -9174587878e-13, 1341136736e-13, 7110366337e-14, 5505465019e-15, -2601881311e-15, -7051288602e-16, -1275507879e-16, -3602368772e-17]], [[-1.149075437, 7.112691692, 0.3187105889, -0.2064624132, 0.02798566059, -2991167335e-15, -0.001027961245, 2696790864e-13, -2037515934e-14, -8513658806e-15, 1804129045e-15, -8805738353e-17, 7080206936e-16], [-8.972339421, -3.906580465, 1.348544393, -0.06189734499, -0.02100414428, 0.006396673451, -7798530875e-13, -5469263184e-14, 4940038482e-14, -1318652217e-14, 1354380942e-15, 1079311879e-15, -1408859249e-15], [0.8904243319, 0.8353431216, -0.125099937, -0.005447945252, 0.00389515492, -6831653439e-13, 1868222456e-14, 1923683158e-14, -5831157683e-15, 1642431819e-15, -4696304256e-17, -3491263231e-16, 3255322176e-18]], [[11.61163008, 5.013310594, -0.4998886056, -0.002511139967, 0.001678669368, -3749553952e-13, 5758770746e-14, -7763797701e-15, 7816926768e-16, -8073456342e-16, 1377707154e-17, -5277615958e-17, 2161820466e-16], [-9.188032169, 2.886868472, 0.4151934783, -0.04791100655, 0.003769648582, -3409994355e-13, 1336996227e-14, 3201207274e-15, -1099030376e-15, -1609339037e-16, 4701991138e-16, 4627000262e-16, -1349720311e-15], [1.663928584, -0.01416809739, -0.0743720154, 0.00500464352, -2465291931e-13, 9502772886e-15, 4220237768e-16, -4236651587e-16, 8275440795e-17, 1459865988e-17, 2099248123e-18, -4295819581e-17, -2523567096e-17]], [[17.67613319, 1.071804209, -0.4765506766, 0.004278887922, 3777338927e-13, -5019866008e-14, -3300122287e-14, 3690041191e-15, 2861341914e-15, -1454596494e-15, -2962797715e-16, -3084823486e-16, 4729586302e-16], [-1.452179381, 4.541281873, 0.03979871228, -0.0225690317, 704570571e-12, 5310152965e-14, -3553094283e-15, -8853237797e-15, 6202171675e-16, 4317895784e-16, 7309119404e-16, 1902945493e-16, -1637471518e-15], [1.192585797, -0.4221713417, -0.03204420391, 0.002470880144, -7908097874e-14, 6921754067e-15, 2898779597e-16, 2213979523e-16, -5705459785e-17, -3517005908e-17, 1912341301e-17, -2646383419e-17, -3907594373e-17]], [[16.16382735, -2.549256764, -0.4356673022, 0.001322015886, -4837611587e-14, 9641429755e-14, 1615835637e-14, 1408955735e-15, -5855947439e-16, -1225746716e-15, -3511586679e-16, -1479586642e-16, 7505949041e-16], [7.1927518, 3.912213588, -0.1938244695, -0.02125848462, -0.001013930744, -1189566866e-13, 3777087467e-15, 3411704379e-15, 1054070768e-15, -2868690169e-16, 4818470378e-16, -4297347239e-17, -1385204429e-15], [0.1788011137, -0.568984209, -0.004581021539, 0.002507702253, 8083786995e-14, 8252110528e-15, 1693979274e-16, 1242107525e-17, -7706764048e-18, 2025434402e-17, 1477831992e-17, -4898295238e-17, -3840825151e-17]], [[7.750950392, -5.787318795, -0.3392678205, 0.02138688988, 0.003054504689, 4453896461e-13, 6653875616e-14, 1765514146e-15, 6434718821e-16, -7503645954e-16, -2547842884e-16, 1458911867e-16, 5457802607e-16], [12.40408729, 0.9761625142, -0.5835955651, -0.04699069059, -0.002777904733, -2063667559e-13, 134747696e-13, 4042526823e-15, 1964262673e-17, -6721633826e-17, 3272430573e-16, 2329624874e-16, -1093504553e-15], [-0.8729296055, -0.4445063885, 0.04211782938, 0.006342498842, 5224514518e-13, 434977111e-13, 1762126658e-15, 1957625601e-19, -6813685575e-17, -6063912075e-18, 5144357349e-18, -5207115723e-17, -3035692636e-17]], [[-4.25474523, -5.276678363, 0.8372105667, 0.2302920655, 0.01813570067, -0.003675649598, -0.001565510658, -2132847853e-13, 1964492289e-14, 1388114808e-14, 3010801344e-15, -7320557237e-17, 1017970663e-16], [7.554570975, -6.362436982, -1.170161202, 0.02884395975, 0.03498058045, 0.00662578524, 1490032688e-13, -2522080199e-13, -6806079118e-14, -5635152438e-15, 2431849063e-15, 1383696538e-15, -1189570007e-15], [-1.058408074, 0.3724909705, 0.1746177069, 0.01023166357, -0.002684991583, -9020952523e-13, -1058096304e-13, 1320904484e-14, 8288596247e-15, 1526775934e-15, -4044892609e-17, -1328660595e-16, -5582002283e-17]], [[-3.432576648, 6.162539988, 0.8665855298, -0.2732350214, 0.01384883227, 0.007702491806, -0.002123803321, 5482428734e-14, 1045038781e-13, -2478816294e-14, -2653632587e-15, 1447171777e-15, 7743317023e-16], [-7.057827491, -5.880206637, 1.36602366, 0.04234457938, -0.04784255365, 0.007182504312, 6541030408e-13, -4978215895e-13, 8379562779e-14, 8343503597e-15, -7977134932e-15, 260565943e-14, -1481416809e-15], [0.5558913879, 0.9916681742, -0.09556595024, -0.02053012469, 0.006004735341, -3444088418e-13, -2111927214e-13, 6685315935e-14, -2285783791e-15, -4932441198e-15, 1622273186e-15, 2209543752e-16, -4037256272e-16]]], provenance: { source: "JPL Horizons", body: "2060 Chiron", center: "@sun", frame: "heliocentric ecliptic J2000", correction: "geometric (VEC_CORR=NONE)", range: "1850-2150", seg_days: 2922, degree: 12, fit_residual_au: 49263423296252995e-22 } };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/fixed_stars.json
+var fixed_stars_default = { provenance: "HYG database v4.1 (github.com/astronexus/HYG-Database, CC BY-SA 4.0): named stars to mag 5, ICRS J2000 with proper motions; Galactic Center per Reid & Brunthaler 2004", frame: "ICRS J2000.0", stars: { Sol: { ra: 0, dec: 0, pmra: 0, pmdec: 0, rv: 0, plx: 0, mag: -26.7, bayer: "" }, Alpheratz: { ra: 2.096865, dec: 29.090432, pmra: 135.68, pmdec: -162.95, rv: -12, plx: 33.62, mag: 2.07, bayer: "21Alp And" }, Caph: { ra: 2.293305, dec: 59.14978, pmra: 523.39, pmdec: -180.42, rv: 11.3, plx: 59.58, mag: 2.28, bayer: "11Bet Cas" }, Algenib: { ra: 3.30897, dec: 15.183596, pmra: 4.7, pmdec: -8.24, rv: 4, plx: 8.33, mag: 2.83, bayer: "88Gam Peg" }, Ankaa: { ra: 6.57084, dec: -42.305981, pmra: 232.76, pmdec: -353.64, rv: 75, plx: 38.5, mag: 2.4, bayer: "Alp Phe" }, Fulu: { ra: 9.24282, dec: 53.896909, pmra: 17.77, pmdec: -9.15, rv: 2, plx: 5.5, mag: 3.69, bayer: "17Zet Cas" }, Schedar: { ra: 10.12674, dec: 56.537331, pmra: 50.36, pmdec: -32.17, rv: -4, plx: 14.29, mag: 2.24, bayer: "18Alp Cas" }, Diphda: { ra: 10.89735, dec: -17.986605, pmra: 232.79, pmdec: 32.71, rv: 13.3, plx: 33.86, mag: 2.04, bayer: "16Bet Cet" }, Achird: { ra: 12.2739, dec: 57.815187, pmra: 1087.11, pmdec: -559.65, rv: 8.2, plx: 167.98, mag: 3.46, bayer: "24Eta Cas" }, Castula: { ra: 14.16648, dec: 59.181056, pmra: -92.56, pmdec: -45.33, rv: -47, plx: 16.32, mag: 4.62, bayer: "28Ups2Cas" }, Cih: { ra: 14.177145, dec: 60.71674, pmra: 25.65, pmdec: -3.82, rv: -7, plx: 5.94, mag: 2.15, bayer: "27Gam Cas" }, Wurren: { ra: 17.09613, dec: -55.24576, pmra: 21.17, pmdec: 29.7, rv: 15, plx: 10.92, mag: 3.94, bayer: "Zet Phe" }, Mirach: { ra: 17.43291, dec: 35.620558, pmra: 175.59, pmdec: -112.23, rv: -0.8, plx: 16.52, mag: 2.07, bayer: "43Bet And" }, Adhil: { ra: 20.585055, dec: 45.528778, pmra: 32.21, pmdec: 8.73, rv: -13, plx: 15.21, mag: 4.87, bayer: "46Xi  And" }, Ruchbah: { ra: 21.45324, dec: 60.235283, pmra: 297.24, pmdec: -49.49, rv: 7, plx: 32.81, mag: 2.66, bayer: "37Del Cas" }, Alpherg: { ra: 22.870875, dec: 15.345823, pmra: 25.73, pmdec: -3.29, rv: 15, plx: 9.33, mag: 3.62, bayer: "99Eta Psc" }, Titawin: { ra: 24.199485, dec: 41.405459, pmra: -172.57, pmdec: -381.01, rv: -28.7, plx: 74.12, mag: 4.1, bayer: "50Ups And" }, Achernar: { ra: 24.42834, dec: -57.236757, pmra: 88.02, pmdec: -40.08, rv: 16, plx: 23.39, mag: 0.45, bayer: "Alp Eri" }, Nembus: { ra: 24.498075, dec: 48.628213, pmra: 60.9, pmdec: -112.42, rv: 16, plx: 18.41, mag: 3.59, bayer: "51    And" }, Torcular: { ra: 26.34846, dec: 9.157736, pmra: 70.82, pmdec: 38.99, rv: 14, plx: 11.67, mag: 4.26, bayer: "110Omi Psc" }, "Baten Kaitos": { ra: 27.86514, dec: -10.335038, pmra: 38.78, pmdec: -38.04, rv: 9, plx: 13.88, mag: 3.74, bayer: "55Zet Cet" }, Mothallah: { ra: 28.27044, dec: 29.578829, pmra: 12.02, pmdec: -233.69, rv: -16.2, plx: 51.5, mag: 3.42, bayer: "2Alp Tri" }, Mesarthim: { ra: 28.38255, dec: 19.293852, pmra: 79.43, pmdec: -99.1, rv: -1, plx: 19.88, mag: 3.88, bayer: "5Gam2Ari" }, Segin: { ra: 28.59876, dec: 63.670101, pmra: 31.98, pmdec: -18.66, rv: -8, plx: 7.92, mag: 3.35, bayer: "45Eps Cas" }, Sheratan: { ra: 28.66002, dec: 20.808035, pmra: 96.32, pmdec: -108.8, rv: -4, plx: 55.6, mag: 2.64, bayer: "6Bet Ari" }, Alrescha: { ra: 30.511755, dec: 2.763759, pmra: 33.29, pmdec: -0.42, rv: 9, plx: 21.66, mag: 3.82, bayer: "113Alp Psc" }, Almach: { ra: 30.97476, dec: 42.329725, pmra: 43.08, pmdec: -50.85, rv: -12, plx: 8.3, mag: 2.1, bayer: "57Gam1And" }, Hamal: { ra: 31.793325, dec: 23.462423, pmra: 190.73, pmdec: -145.77, rv: -14.4, plx: 49.56, mag: 2.01, bayer: "13Alp Ari" }, Polaris: { ra: 37.94625, dec: 89.264109, pmra: 44.22, pmdec: -11.74, rv: -17, plx: 7.54, mag: 1.97, bayer: "1Alp UMi" }, Kaffaljidhma: { ra: 40.82517, dec: 3.235818, pmra: -146.43, pmdec: -145.27, rv: -5.1, plx: 40.97, mag: 3.47, bayer: "86Gam Cet" }, "Lilii Borea": { ra: 41.9772, dec: 29.247118, pmra: 148.42, pmdec: -125.76, rv: -15, plx: 19.01, mag: 4.52, bayer: "39    Ari" }, Bharani: { ra: 42.495945, dec: 27.260507, pmra: 65.47, pmdec: -116.59, rv: 4, plx: 19.69, mag: 3.61, bayer: "41    Ari" }, Miram: { ra: 42.674175, dec: 55.895496, pmra: 16.64, pmdec: -13.76, rv: -1, plx: 3.71, mag: 3.77, bayer: "15Eta Per" }, Angetenar: { ra: 42.759675, dec: -21.004019, pmra: -39, pmdec: -16.63, rv: -9, plx: 17.45, mag: 4.76, bayer: "2Tau2Eri" }, Azha: { ra: 44.10687, dec: -8.898144, pmra: 77.73, pmdec: -219.99, rv: -20, plx: 23.89, mag: 3.89, bayer: "3Eta Eri" }, Acamar: { ra: 44.565345, dec: -40.304672, pmra: -53.53, pmdec: 25.71, rv: 12, plx: 20.23, mag: 2.88, bayer: "The1Eri" }, Menkar: { ra: 45.56988, dec: 4.089734, pmra: -11.81, pmdec: -78.76, rv: -26, plx: 13.09, mag: 2.54, bayer: "92Alp Cet" }, Algol: { ra: 47.04222, dec: 40.955648, pmra: 2.39, pmdec: -1.44, rv: 4, plx: 36.27, mag: 2.09, bayer: "26Bet Per" }, Misam: { ra: 47.37387, dec: 44.857544, pmra: 173.01, pmdec: -142.05, rv: 29, plx: 28.93, mag: 3.79, bayer: "27Kap Per" }, Botein: { ra: 47.90733, dec: 19.726677, pmra: 154.61, pmdec: -8.39, rv: 25, plx: 19.22, mag: 4.35, bayer: "57Del Ari" }, Dalim: { ra: 48.018735, dec: -28.987618, pmra: 371.49, pmdec: 612.26, rv: -20, plx: 70.24, mag: 3.8, bayer: "Alp For" }, Zibal: { ra: 48.95844, dec: -8.81973, pmra: -3.82, pmdec: 45.52, rv: -4, plx: 29.72, mag: 4.8, bayer: "13Zet Eri" }, "82 G. Eri": { ra: 49.97916, dec: -43.069784, pmra: 3038.08, pmdec: 726.34, rv: 86.7, plx: 165.47, mag: 4.26, bayer: "" }, Mirfak: { ra: 51.08067, dec: 49.86118, pmra: 24.11, pmdec: -26.01, rv: -2, plx: 6.44, mag: 1.79, bayer: "33Alp Per" }, Ran: { ra: 53.23272, dec: -9.458262, pmra: -976.44, pmdec: 17.97, rv: 16.9, plx: 310.94, mag: 3.72, bayer: "18Eps Eri" }, Rana: { ra: 55.81209, dec: -9.763395, pmra: -91.71, pmdec: 742.23, rv: -5.1, plx: 110.61, mag: 3.52, bayer: "23Del Eri" }, Atik: { ra: 56.07972, dec: 32.288248, pmra: 8.11, pmdec: -10.32, rv: 19, plx: 2.91, mag: 3.84, bayer: "38Omi Per" }, Electra: { ra: 56.218905, dec: 24.113339, pmra: 21.55, pmdec: -44.92, rv: 12, plx: 8.06, mag: 3.72, bayer: "17    Tau" }, Taygeta: { ra: 56.30205, dec: 24.467278, pmra: 19.35, pmdec: -41.63, rv: 6, plx: 7.97, mag: 4.3, bayer: "19    Tau" }, Maia: { ra: 56.456685, dec: 24.367748, pmra: 21.09, pmdec: -45.03, rv: 8, plx: 8.51, mag: 3.87, bayer: "20    Tau" }, Merope: { ra: 56.58156, dec: 23.948358, pmra: 21.17, pmdec: -42.67, rv: 6, plx: 8.58, mag: 4.14, bayer: "23    Tau" }, Alcyone: { ra: 56.87115, dec: 24.105137, pmra: 19.35, pmdec: -43.11, rv: 10, plx: 8.09, mag: 2.85, bayer: "25Eta Tau" }, Atlas: { ra: 57.290595, dec: 24.053415, pmra: 17.77, pmdec: -44.7, rv: 9, plx: 8.53, mag: 3.62, bayer: "27    Tau" }, Zaurak: { ra: 59.507355, dec: -13.508515, pmra: 60.51, pmdec: -111.34, rv: 62, plx: 16.04, mag: 2.97, bayer: "34Gam Eri" }, Menkib: { ra: 59.74125, dec: 35.791033, pmra: 1.92, pmdec: 2.3, rv: 70, plx: 2.62, mag: 3.98, bayer: "46Xi  Per" }, Beid: { ra: 62.966415, dec: -6.837581, pmra: 11.92, pmdec: 81.28, rv: 11, plx: 26.8, mag: 4.04, bayer: "38Omi1Eri" }, Keid: { ra: 63.818055, dec: -7.652871, pmra: -2239.33, pmdec: -3419.86, rv: -42.7, plx: 200.62, mag: 4.43, bayer: "40Omi2Eri" }, "Prima Hyadum": { ra: 64.948335, dec: 15.627642, pmra: 115.29, pmdec: -23.86, rv: 39, plx: 20.19, mag: 3.65, bayer: "54Gam Tau" }, "Secunda Hyadum": { ra: 65.733705, dec: 17.542514, pmra: 107.75, pmdec: -28.84, rv: 39, plx: 20.96, mag: 3.77, bayer: "61Del1Tau" }, Beemim: { ra: 66.009195, dec: -34.016846, pmra: 73.77, pmdec: 57.57, rv: 24, plx: 11.01, mag: 3.97, bayer: "43    Eri" }, Ain: { ra: 67.154145, dec: 19.180431, pmra: 107.23, pmdec: -36.77, rv: 39, plx: 22.24, mag: 3.53, bayer: "74Eps Tau" }, Chamukuy: { ra: 67.165575, dec: 15.870883, pmra: 108.66, pmdec: -26.39, rv: 40, plx: 21.69, mag: 3.4, bayer: "78The2Tau" }, Theemin: { ra: 68.88768, dec: -30.562341, pmra: -48.92, pmdec: -12.75, rv: -4, plx: 15.25, mag: 3.81, bayer: "52Ups2Eri" }, Aldebaran: { ra: 68.980155, dec: 16.509301, pmra: 62.78, pmdec: -189.36, rv: 54.5, plx: 48.94, mag: 0.87, bayer: "87Alp Tau" }, Sceptrum: { ra: 69.5451, dec: -14.30402, pmra: -77.86, pmdec: -178.06, rv: 41.8, plx: 29.69, mag: 3.86, bayer: "53    Eri" }, Tabit: { ra: 72.460035, dec: 6.961276, pmra: 463.44, pmdec: 11.62, rv: 24.4, plx: 123.94, mag: 3.19, bayer: "1Pi 3Ori" }, Hassaleh: { ra: 74.24841, dec: 33.16609, pmra: 3.63, pmdec: -18.54, rv: 18, plx: 6.61, mag: 2.69, bayer: "3Iot Aur" }, Almaaz: { ra: 75.492225, dec: 43.823308, pmra: 0.18, pmdec: -2.31, rv: -3, plx: 1.53, mag: 3.03, bayer: "7Eps Aur" }, Saclateni: { ra: 75.619515, dec: 41.075837, pmra: 8.88, pmdec: -21.43, rv: 13, plx: 4.15, mag: 3.69, bayer: "8Zet Aur" }, Haedus: { ra: 76.6287, dec: 41.234474, pmra: 30.6, pmdec: -68.41, rv: 7, plx: 13.4, mag: 3.18, bayer: "10Eta Aur" }, Cursa: { ra: 76.962435, dec: -5.086446, pmra: -83.39, pmdec: -75.44, rv: -9.2, plx: 36.5, mag: 2.78, bayer: "67Bet Eri" }, Rigel: { ra: 78.63447, dec: -8.20164, pmra: 1.87, pmdec: -0.56, rv: 21, plx: 3.78, mag: 0.18, bayer: "19Bet Ori" }, Capella: { ra: 79.17225, dec: 45.997991, pmra: 75.52, pmdec: -427.13, rv: 22.2, plx: 76.2, mag: 0.08, bayer: "13Alp Aur" }, Bellatrix: { ra: 81.282765, dec: 6.349702, pmra: -8.75, pmdec: -13.28, rv: 18, plx: 12.92, mag: 1.64, bayer: "24Gam Ori" }, Elnath: { ra: 81.57297, dec: 28.60745, pmra: 23.28, pmdec: -174.22, rv: 9, plx: 24.36, mag: 1.65, bayer: "112Bet Tau" }, Nihal: { ra: 82.06134, dec: -20.759441, pmra: -5.03, pmdec: -85.92, rv: -14, plx: 20.34, mag: 2.81, bayer: "9Bet Lep" }, Mintaka: { ra: 83.001675, dec: -0.299092, pmra: 1.67, pmdec: 0.56, rv: 16, plx: 4.71, mag: 2.25, bayer: "34Del Ori" }, Arneb: { ra: 83.18256, dec: -17.822289, pmra: 3.27, pmdec: 1.54, rv: 24, plx: 1.47, mag: 2.58, bayer: "11Alp Lep" }, Meissa: { ra: 83.784495, dec: 9.934158, pmra: -1.03, pmdec: -1.86, rv: 34, plx: 2.97, mag: 3.39, bayer: "39Lam Ori" }, Hatysa: { ra: 83.858265, dec: -5.909901, pmra: 2.27, pmdec: -0.62, rv: 22, plx: 1.4, mag: 2.75, bayer: "44Iot Ori" }, Alnilam: { ra: 84.053385, dec: -1.20192, pmra: 1.49, pmdec: -1.06, rv: 26, plx: 1.65, mag: 1.69, bayer: "46Eps Ori" }, Tianguan: { ra: 84.411195, dec: 21.142549, pmra: 2.39, pmdec: -18.04, rv: 20, plx: 7.33, mag: 2.97, bayer: "123Zet Tau" }, Phact: { ra: 84.912255, dec: -34.074108, pmra: -0.1, pmdec: -24.05, rv: 35, plx: 12.48, mag: 2.65, bayer: "Alp Col" }, Alnitak: { ra: 85.189695, dec: -1.942572, pmra: 3.99, pmdec: 2.54, rv: 18, plx: 4.43, mag: 1.74, bayer: "50Zet Ori" }, Saiph: { ra: 86.939115, dec: -9.669605, pmra: 1.55, pmdec: -1.2, rv: 21, plx: 5.04, mag: 2.07, bayer: "53Kap Ori" }, Wazn: { ra: 87.739935, dec: -35.768309, pmra: 55.74, pmdec: 404.68, rv: 89, plx: 37.41, mag: 3.12, bayer: "Bet Col" }, Betelgeuse: { ra: 88.792935, dec: 7.407063, pmra: 27.33, pmdec: 10.86, rv: 21, plx: 6.55, mag: 0.45, bayer: "58Alp Ori" }, Menkalinan: { ra: 89.882235, dec: 44.947433, pmra: -56.41, pmdec: -0.88, rv: -19.4, plx: 40.21, mag: 1.9, bayer: "34Bet Aur" }, Mahasim: { ra: 89.930265, dec: 37.212585, pmra: 42.09, pmdec: -73.61, rv: 30, plx: 19.7, mag: 2.65, bayer: "37The Aur" }, Elkurud: { ra: 91.881795, dec: -37.25292, pmra: 0.9, pmdec: 0.3, rv: 45, plx: 4.52, mag: 5, bayer: "The Col" }, Propus: { ra: 93.719415, dec: 22.506799, pmra: -62.53, pmdec: -10.24, rv: 19, plx: 8.48, mag: 3.31, bayer: "7Eta Gem" }, Furud: { ra: 95.078295, dec: -30.063367, pmra: 8, pmdec: 3.81, rv: 32, plx: 9, mag: 3.02, bayer: "1Zet CMa" }, Mirzam: { ra: 95.674935, dec: -17.955918, pmra: -3.45, pmdec: -0.47, rv: 34, plx: 6.62, mag: 1.98, bayer: "2Bet CMa" }, Tejat: { ra: 95.740095, dec: 22.513586, pmra: 56.84, pmdec: -108.79, rv: 55, plx: 14.08, mag: 2.87, bayer: "13Mu  Gem" }, Canopus: { ra: 95.987925, dec: -52.69566, pmra: 19.99, pmdec: 23.67, rv: 21, plx: 10.55, mag: -0.62, bayer: "Alp Car" }, Alhena: { ra: 99.42792, dec: 16.399252, pmra: -2.04, pmdec: -66.92, rv: -13, plx: 29.84, mag: 1.93, bayer: "24Gam Gem" }, Mebsuta: { ra: 100.98303, dec: 25.131124, pmra: -5.93, pmdec: -12.81, rv: 10, plx: 3.86, mag: 3.06, bayer: "27Eps Gem" }, Sirius: { ra: 101.287215, dec: -16.716116, pmra: -546.01, pmdec: -1223.08, rv: -9.4, plx: 379.2, mag: -1.44, bayer: "9Alp CMa" }, Alzirr: { ra: 101.32236, dec: 12.895591, pmra: -115.16, pmdec: -190.91, rv: 30, plx: 55.56, mag: 3.35, bayer: "31Xi  Gem" }, Adhara: { ra: 104.656455, dec: -28.972084, pmra: 2.63, pmdec: 2.29, rv: 27, plx: 8.05, mag: 1.5, bayer: "21Eps CMa" }, Nganurganity: { ra: 105.42978, dec: -27.93483, pmra: -6.01, pmdec: 4.64, rv: 22, plx: 2.91, mag: 3.49, bayer: "22Sig CMa" }, Muliphein: { ra: 105.939555, dec: -15.633286, pmra: -0.81, pmdec: -11.2, rv: 32, plx: 7.38, mag: 4.11, bayer: "23Gam CMa" }, Mekbuda: { ra: 106.027215, dec: 20.570297, pmra: -5.72, pmdec: -0.96, rv: 7, plx: 2.37, mag: 4.01, bayer: "43Zet Gem" }, Wezen: { ra: 107.097855, dec: -26.3932, pmra: -2.75, pmdec: 3.33, rv: 34, plx: 2.03, mag: 1.83, bayer: "25Del CMa" }, Wasat: { ra: 110.030745, dec: 21.98232, pmra: -18.72, pmdec: -7.76, rv: -15.3, plx: 53.94, mag: 3.5, bayer: "55Del Gem" }, Aludra: { ra: 111.02376, dec: -29.303104, pmra: -3.76, pmdec: 6.66, rv: 41, plx: 1.64, mag: 2.45, bayer: "31Eta CMa" }, Gomeisa: { ra: 111.78768, dec: 8.289315, pmra: -50.28, pmdec: -38.45, rv: 22, plx: 20.17, mag: 2.89, bayer: "3Bet CMi" }, Castor: { ra: 113.64951, dec: 31.888276, pmra: -206.33, pmdec: -148.18, rv: 6, plx: 64.12, mag: 1.58, bayer: "66Alp Gem" }, Jishui: { ra: 114.7914, dec: 34.584346, pmra: -35.97, pmdec: -118.03, rv: 7, plx: 19.61, mag: 4.89, bayer: "71Omi Gem" }, Procyon: { ra: 114.825495, dec: 5.224993, pmra: -716.57, pmdec: -1034.58, rv: -4, plx: 284.56, mag: 0.4, bayer: "10Alp CMi" }, Pollux: { ra: 116.329155, dec: 28.026199, pmra: -625.69, pmdec: -45.95, rv: 3.6, plx: 96.54, mag: 1.16, bayer: "78Bet Gem" }, Azmidi: { ra: 117.323565, dec: -24.859786, pmra: -5.56, pmdec: -0.71, rv: 3, plx: 2.72, mag: 3.34, bayer: "7Xi  Pup" }, Naos: { ra: 120.896055, dec: -40.003148, pmra: -30.82, pmdec: 16.77, rv: -24, plx: 3.01, mag: 2.21, bayer: "Zet Pup" }, Tureis: { ra: 121.886055, dec: -24.304324, pmra: -83.29, pmdec: 46.38, rv: 46, plx: 51.33, mag: 2.83, bayer: "15Rho Pup" }, Tegmine: { ra: 123.053025, dec: 17.647771, pmra: 28.29, pmdec: -150.94, rv: -11, plx: 39.87, mag: 4.67, bayer: "16Zet2Cnc" }, Tarf: { ra: 124.12884, dec: 9.185545, pmra: -46.8, pmdec: -48.65, rv: 22, plx: 10.75, mag: 3.53, bayer: "17Bet Cnc" }, Avior: { ra: 125.62854, dec: -59.509483, pmra: -25.34, pmdec: 22.72, rv: 2, plx: 5.39, mag: 1.86, bayer: "Eps Car" }, Alsciaukat: { ra: 125.70882, dec: 43.188131, pmra: -25.62, pmdec: -99.44, rv: 24, plx: 8.53, mag: 4.25, bayer: "31    Lyn" }, Muscida: { ra: 127.566465, dec: 60.718169, pmra: -134.31, pmdec: -107.73, rv: 20, plx: 18.21, mag: 3.35, bayer: "1Omi UMa" }, Minchir: { ra: 129.689325, dec: 3.341435, pmra: -19.03, pmdec: -16.29, rv: 25, plx: 8.75, mag: 4.45, bayer: "5Sig Hya" }, "Asellus Borealis": { ra: 130.821465, dec: 21.468501, pmra: -106.94, pmdec: -39.25, rv: 29, plx: 18, mag: 4.66, bayer: "43Gam Cnc" }, "Asellus Australis": { ra: 131.17125, dec: 18.154309, pmra: -17.1, pmdec: -228.46, rv: 17, plx: 24.98, mag: 3.94, bayer: "47Del Cnc" }, Alsephina: { ra: 131.175885, dec: -54.708821, pmra: 28.78, pmdec: -104.14, rv: 2.2, plx: 40.49, mag: 1.93, bayer: "Del Vel" }, Ashlesha: { ra: 131.693805, dec: 6.418809, pmra: -231.04, pmdec: -40.17, rv: 36, plx: 25.23, mag: 3.38, bayer: "11Eps Hya" }, Acubens: { ra: 134.62176, dec: 11.857701, pmra: 41.45, pmdec: -29.22, rv: -14, plx: 17.32, mag: 4.26, bayer: "65Alp Cnc" }, Talitha: { ra: 134.80242, dec: 48.041826, pmra: -441.12, pmdec: -215.21, rv: 9, plx: 68.92, mag: 3.12, bayer: "9Iot UMa" }, Alkaphrah: { ra: 135.906405, dec: 47.156525, pmra: -37.37, pmdec: -55.39, rv: 4, plx: 9.1, mag: 3.57, bayer: "12Kap UMa" }, Suhail: { ra: 136.99902, dec: -43.432589, pmra: -23.21, pmdec: 14.28, rv: 18, plx: 5.99, mag: 2.23, bayer: "Lam Vel" }, Miaplacidus: { ra: 138.300615, dec: -69.717208, pmra: -157.66, pmdec: 108.91, rv: -5, plx: 28.82, mag: 1.67, bayer: "Bet Car" }, Aspidiske: { ra: 139.27257, dec: -59.275229, pmra: -19.03, pmdec: 13.11, rv: 13, plx: 4.26, mag: 2.21, bayer: "Iot Car" }, Markeb: { ra: 140.52843, dec: -55.010668, pmra: -10.72, pmdec: 11.24, rv: 22, plx: 5.7, mag: 2.47, bayer: "Kap Vel" }, Alphard: { ra: 141.89685, dec: -8.658603, pmra: -14.49, pmdec: 33.25, rv: -4, plx: 18.09, mag: 1.99, bayer: "30Alp Hya" }, Alterf: { ra: 142.930125, dec: 22.967971, pmra: -19.38, pmdec: -39.04, rv: 27, plx: 9.91, mag: 4.32, bayer: "4Lam Leo" }, Ukdah: { ra: 144.964005, dec: -1.14281, pmra: 47.81, pmdec: -62.92, rv: 23, plx: 12.39, mag: 3.9, bayer: "35Iot Hya" }, Subra: { ra: 145.287645, dec: 9.892308, pmra: -143.67, pmdec: -37.45, rv: 27, plx: 25.03, mag: 3.52, bayer: "14Omi Leo" }, "Ras Elased Australis": { ra: 146.46282, dec: 23.774255, pmra: -46.09, pmdec: -9.57, rv: 4, plx: 13.22, mag: 2.97, bayer: "17Eps Leo" }, Zhang: { ra: 147.86955, dec: -14.846603, pmra: 18.68, pmdec: -21.88, rv: -15, plx: 12.36, mag: 4.11, bayer: "39Ups1Hya" }, Rasalas: { ra: 148.19097, dec: 26.006951, pmra: -216.29, pmdec: -54.92, rv: 14, plx: 26.28, mag: 3.88, bayer: "24Mu  Leo" }, Felis: { ra: 148.717545, dec: -19.00936, pmra: -46.09, pmdec: -37.04, rv: 50, plx: 5.31, mag: 4.94, bayer: "" }, Regulus: { ra: 152.09298, dec: 11.967207, pmra: -249.4, pmdec: 4.91, rv: 6, plx: 41.13, mag: 1.36, bayer: "32Alp Leo" }, Adhafera: { ra: 154.172565, dec: 23.417311, pmra: 19.84, pmdec: -7.3, rv: -16, plx: 11.9, mag: 3.43, bayer: "36Zet Leo" }, "Tania Borealis": { ra: 154.27428, dec: 42.914365, pmra: -170.11, pmdec: -42.64, rv: 18, plx: 23.72, mag: 3.45, bayer: "33Lam UMa" }, Algieba: { ra: 154.993095, dec: 19.841489, pmra: 310.77, pmdec: -152.88, rv: -37, plx: 25.07, mag: 2.01, bayer: "41Gam1Leo" }, "Tania Australis": { ra: 155.582325, dec: 41.499516, pmra: -80.47, pmdec: 34.1, rv: -21, plx: 14.16, mag: 3.06, bayer: "34Mu  UMa" }, Praecipua: { ra: 163.32789, dec: 34.214871, pmra: 92.47, pmdec: -286.06, rv: 16, plx: 34.38, mag: 3.79, bayer: "46    LMi" }, Alkes: { ra: 164.94366, dec: -18.298783, pmra: -462.39, pmdec: 129.11, rv: 47, plx: 20.49, mag: 4.08, bayer: "7Alp Crt" }, Merak: { ra: 165.460155, dec: 56.382427, pmra: 81.66, pmdec: 33.74, rv: -12, plx: 40.9, mag: 2.34, bayer: "48Bet UMa" }, Dubhe: { ra: 165.932325, dec: 61.751033, pmra: -136.46, pmdec: -35.25, rv: -9, plx: 26.54, mag: 1.81, bayer: "50Alp UMa" }, Zosma: { ra: 168.52707, dec: 20.523717, pmra: 143.31, pmdec: -130.43, rv: -20.2, plx: 55.82, mag: 2.56, bayer: "68Del Leo" }, Chertan: { ra: 168.560025, dec: 15.42957, pmra: -59.01, pmdec: -79.37, rv: 8, plx: 19.76, mag: 3.33, bayer: "70The Leo" }, "Alula Borealis": { ra: 169.619745, dec: 33.094306, pmra: -26.61, pmdec: 27.51, rv: -9, plx: 8.17, mag: 3.49, bayer: "54Nu  UMa" }, Giausar: { ra: 172.851105, dec: 69.331076, pmra: -41.14, pmdec: -18.79, rv: 7, plx: 9.79, mag: 3.82, bayer: "1Lam Dra" }, Taiyangshou: { ra: 176.512725, dec: 47.779406, pmra: -138.38, pmdec: 28.37, rv: -9, plx: 17.76, mag: 3.69, bayer: "63Chi UMa" }, Denebola: { ra: 177.264945, dec: 14.57206, pmra: -499.02, pmdec: -113.78, rv: -0.2, plx: 90.91, mag: 2.14, bayer: "94Bet Leo" }, Zavijava: { ra: 177.67383, dec: 1.764718, pmra: 740.96, pmdec: -271.18, rv: 4.3, plx: 91.5, mag: 3.59, bayer: "5Bet Vir" }, Phecda: { ra: 178.45752, dec: 53.69476, pmra: 107.76, pmdec: 11.16, rv: -13, plx: 39.21, mag: 2.41, bayer: "64Gam UMa" }, Alchiba: { ra: 182.103375, dec: -24.728875, pmra: 100.18, pmdec: -39.33, rv: 2.9, plx: 66.95, mag: 4.02, bayer: "1Alp Crv" }, Imai: { ra: 183.786405, dec: -58.748928, pmra: -36.68, pmdec: -10.72, rv: 22, plx: 9.45, mag: 2.79, bayer: "Del Cru" }, Megrez: { ra: 183.85629, dec: 57.032617, pmra: 103.56, pmdec: 7.81, rv: -13.4, plx: 40.51, mag: 3.32, bayer: "69Del UMa" }, Gienah: { ra: 183.951555, dec: -17.541929, pmra: -159.58, pmdec: 22.31, rv: -4, plx: 21.23, mag: 2.58, bayer: "4Gam Crv" }, Zaniah: { ra: 184.97649, dec: -0.666803, pmra: -59.14, pmdec: -23.13, rv: 2, plx: 12.29, mag: 3.89, bayer: "15Eta Vir" }, Ginan: { ra: 185.340465, dec: -60.401147, pmra: -171.06, pmdec: 91.82, rv: -5, plx: 14.19, mag: 3.59, bayer: "Eps Cru" }, Acrux: { ra: 186.649665, dec: -63.099092, pmra: -35.37, pmdec: -14.73, rv: -11, plx: 10.13, mag: 0.77, bayer: "Alp1Cru" }, Algorab: { ra: 187.466085, dec: -16.515432, pmra: -209.97, pmdec: -139.3, rv: 9, plx: 37.55, mag: 2.94, bayer: "7Del Crv" }, Gacrux: { ra: 187.791435, dec: -57.113212, pmra: 27.94, pmdec: -264.33, rv: 21, plx: 36.83, mag: 1.59, bayer: "Gam Cru" }, Chara: { ra: 188.436165, dec: 41.35748, pmra: -705.06, pmdec: 292.93, rv: 6.6, plx: 118.49, mag: 4.24, bayer: "8Bet CVn" }, Kraz: { ra: 188.596815, dec: -23.396759, pmra: 0.86, pmdec: -56, rv: -8, plx: 22.39, mag: 2.65, bayer: "9Bet Crv" }, Porrima: { ra: 190.415175, dec: -1.449375, pmra: -616.66, pmdec: 60.66, rv: -19.9, plx: 85.58, mag: 2.74, bayer: "29Gam Vir" }, Mimosa: { ra: 191.930385, dec: -59.688764, pmra: -48.24, pmdec: -12.82, rv: 16, plx: 11.71, mag: 1.25, bayer: "Bet Cru" }, Alioth: { ra: 193.50708, dec: 55.959821, pmra: 111.74, pmdec: -8.99, rv: -9, plx: 39.51, mag: 1.76, bayer: "77Eps UMa" }, Minelauva: { ra: 193.900875, dec: 3.39747, pmra: -471.44, pmdec: -52.81, rv: -18, plx: 16.44, mag: 3.39, bayer: "43Del Vir" }, "Cor Caroli": { ra: 194.007105, dec: 38.31838, pmra: -233.43, pmdec: 54.98, rv: -3, plx: 28.41, mag: 2.89, bayer: "12Alp2CVn" }, Vindemiatrix: { ra: 195.54417, dec: 10.95915, pmra: -275.05, pmdec: 19.96, rv: -14, plx: 29.76, mag: 2.85, bayer: "47Eps Vir" }, Diadem: { ra: 197.497035, dec: 17.529431, pmra: -445.95, pmdec: 129.69, rv: -11.6, plx: 56.1, mag: 4.32, bayer: "42Alp Com" }, Mizar: { ra: 200.981205, dec: 54.925362, pmra: 121.23, pmdec: -22.01, rv: -5.6, plx: 38.01, mag: 2.23, bayer: "79Zet UMa" }, Spica: { ra: 201.298245, dec: -11.161322, pmra: -42.5, pmdec: -31.73, rv: 1, plx: 13.06, mag: 0.98, bayer: "67Alp Vir" }, Alcor: { ra: 201.306195, dec: 54.987958, pmra: 120.35, pmdec: -16.94, rv: -8.9, plx: 39.91, mag: 3.99, bayer: "80    UMa" }, Heze: { ra: 203.6733, dec: -0.59582, pmra: -278.89, pmdec: 48.56, rv: -13.2, plx: 44.03, mag: 3.38, bayer: "79Zet Vir" }, Alkaid: { ra: 206.88531, dec: 49.313265, pmra: -121.23, pmdec: -15.56, rv: -11, plx: 31.38, mag: 1.85, bayer: "85Eta UMa" }, Muphrid: { ra: 208.671165, dec: 18.397717, pmra: -60.95, pmdec: -358.1, rv: 1, plx: 87.75, mag: 2.68, bayer: "8Eta Boo" }, Hadar: { ra: 210.955935, dec: -60.373039, pmra: -33.96, pmdec: -25.06, rv: 6, plx: 8.32, mag: 0.61, bayer: "Bet Cen" }, Thuban: { ra: 211.097475, dec: 64.37585, pmra: -56.52, pmdec: 17.19, rv: -13, plx: 10.76, mag: 3.67, bayer: "11Alp Dra" }, Menkent: { ra: 211.670925, dec: -36.369954, pmra: -519.29, pmdec: -517.87, rv: 1.3, plx: 55.45, mag: 2.06, bayer: "5The Cen" }, Kang: { ra: 213.223935, dec: -10.273702, pmra: 8.04, pmdec: 140.79, rv: -4, plx: 12.8, mag: 4.18, bayer: "98Kap Vir" }, Arcturus: { ra: 213.91545, dec: 19.18241, pmra: -1093.45, pmdec: -1999.4, rv: -5, plx: 88.83, mag: -0.05, bayer: "16Alp Boo" }, Syrma: { ra: 214.00362, dec: -6.000547, pmra: -25.84, pmdec: -419.84, rv: 14.6, plx: 44.97, mag: 4.07, bayer: "99Iot Vir" }, Xuange: { ra: 214.09611, dec: 46.088305, pmra: -187.42, pmdec: 159.01, rv: -8.1, plx: 32.94, mag: 4.18, bayer: "19Lam Boo" }, Khambalia: { ra: 214.77747, dec: -13.371095, pmra: -17.12, pmdec: 29.39, rv: -11, plx: 17.49, mag: 4.52, bayer: "100Lam Vir" }, Elgafar: { ra: 217.05057, dec: -2.227957, pmra: -140.94, pmdec: -2.92, rv: -10.1, plx: 27.58, mag: 4.81, bayer: "105Phi Vir" }, Seginus: { ra: 218.01954, dec: 38.308253, pmra: -115.55, pmdec: 151.87, rv: -37, plx: 37.58, mag: 3.04, bayer: "27Gam Boo" }, Toliman: { ra: 219.90519, dec: -60.8383, pmra: -3678.19, pmdec: 481.84, rv: -26.2, plx: 754.83, mag: 1.35, bayer: "Alp2Cen" }, "Rigil Kentaurus": { ra: 219.911475, dec: -60.833976, pmra: -3678.19, pmdec: 481.84, rv: -26.2, plx: 754.83, mag: -0.01, bayer: "Alp1Cen" }, Izar: { ra: 221.24676, dec: 27.074222, pmra: -50.65, pmdec: 20, rv: -23, plx: 16.1, mag: 2.35, bayer: "36Eps Boo" }, Kochab: { ra: 222.676575, dec: 74.155505, pmra: -32.29, pmdec: 11.91, rv: 17, plx: 24.91, mag: 2.07, bayer: "7Bet UMi" }, Zubenelgenubi: { ra: 222.719655, dec: -16.041778, pmra: -105.69, pmdec: -69, rv: -46.7, plx: 43.03, mag: 2.75, bayer: "9Alp2Lib" }, Nekkar: { ra: 225.48654, dec: 40.390566, pmra: -40.2, pmdec: -29.22, rv: -20, plx: 14.48, mag: 3.49, bayer: "42Bet Boo" }, Brachium: { ra: 226.017585, dec: -25.281965, pmra: -71.85, pmdec: -44.69, rv: -4, plx: 11.31, mag: 3.25, bayer: "20Sig Lib" }, Zubeneschamali: { ra: 229.251735, dec: -9.382917, pmra: -96.39, pmdec: -20.76, rv: -35, plx: 17.62, mag: 2.61, bayer: "27Bet Lib" }, Pherkad: { ra: 230.182245, dec: 71.834016, pmra: -18.03, pmdec: 17.68, rv: -4, plx: 6.7, mag: 3, bayer: "13Gam UMi" }, Alkalurops: { ra: 231.122715, dec: 37.377167, pmra: -147.68, pmdec: 84.69, rv: -8.6, plx: 28.83, mag: 4.31, bayer: "51Mu 1Boo" }, Edasich: { ra: 231.23241, dec: 58.966065, pmra: -8.27, pmdec: 17.3, rv: -11, plx: 32.23, mag: 3.29, bayer: "12Iot Dra" }, Nusakan: { ra: 231.95727, dec: 29.105703, pmra: -181.39, pmdec: 86.84, rv: -19, plx: 29.17, mag: 3.66, bayer: "3Bet CrB" }, Alphecca: { ra: 233.67192, dec: 26.714693, pmra: 120.38, pmdec: -89.44, rv: 2, plx: 43.46, mag: 2.22, bayer: "5Alp CrB" }, Zubenelhakrabi: { ra: 233.881575, dec: -14.789537, pmra: 65.67, pmdec: 6.93, rv: -28.2, plx: 19.99, mag: 3.91, bayer: "38Gam Lib" }, Unukalhai: { ra: 236.06697, dec: 6.425627, pmra: 134.66, pmdec: 44.14, rv: 2.7, plx: 44.1, mag: 2.63, bayer: "24Alp Ser" }, Gudja: { ra: 237.184905, dec: 18.141564, pmra: -51.78, pmdec: -88.72, rv: -39, plx: 8.54, mag: 4.09, bayer: "35Kap Ser" }, Iklil: { ra: 239.221155, dec: -29.214073, pmra: -15.2, pmdec: -25.1, rv: 3.3, plx: 6.91, mag: 3.87, bayer: "5Rho Sco" }, Fang: { ra: 239.712975, dec: -26.114105, pmra: -12, pmdec: -25.71, rv: -3, plx: 5.57, mag: 2.89, bayer: "6Pi  Sco" }, Dschubba: { ra: 240.083355, dec: -22.62171, pmra: -8.67, pmdec: -36.9, rv: -7, plx: 6.64, mag: 2.29, bayer: "7Del Sco" }, Acrab: { ra: 241.3593, dec: -19.805453, pmra: -6.75, pmdec: -24.89, rv: -1, plx: 8.07, mag: 2.56, bayer: "8Bet1Sco" }, "Acrab B": { ra: 241.36065, dec: -19.80186, pmra: -34.59, pmdec: -7.47, rv: -4, plx: 8.19, mag: 4.9, bayer: "8Bet2Sco" }, Marsic: { ra: 242.018865, dec: 17.04698, pmra: -34.29, pmdec: -5.46, rv: -11, plx: 8.87, mag: 5, bayer: "7Kap Her" }, Jabbah: { ra: 242.99889, dec: -19.460708, pmra: -9.7, pmdec: -25.25, rv: 2, plx: 6.88, mag: 4, bayer: "14Nu  Sco" }, "Yed Prior": { ra: 243.58641, dec: -3.694323, pmra: -45.83, pmdec: -142.91, rv: -20, plx: 19.06, mag: 2.73, bayer: "1Del Oph" }, "Yed Posterior": { ra: 244.58037, dec: -4.692511, pmra: 82.39, pmdec: 40.08, rv: -7.7, plx: 30.64, mag: 3.23, bayer: "2Eps Oph" }, Alniyat: { ra: 245.297145, dec: -25.592796, pmra: -10.03, pmdec: -18.03, rv: 3, plx: 4.68, mag: 2.9, bayer: "20Sig Sco" }, Athebyne: { ra: 245.9979, dec: 61.514213, pmra: -16.98, pmdec: 56.68, rv: -13.7, plx: 35.42, mag: 2.73, bayer: "14Eta Dra" }, Cujam: { ra: 246.35397, dec: 14.03327, pmra: 39.39, pmdec: -59.89, rv: -6, plx: 13.04, mag: 4.57, bayer: "24Ome Her" }, Antares: { ra: 247.35192, dec: -26.432002, pmra: -10.16, pmdec: -23.21, rv: -3, plx: 5.89, mag: 1.06, bayer: "21Alp Sco" }, Kornephoros: { ra: 247.55502, dec: 21.489613, pmra: -98.43, pmdec: -14.49, rv: -26, plx: 23.44, mag: 2.78, bayer: "27Bet Her" }, Marfik: { ra: 247.728435, dec: 1.983923, pmra: -31.37, pmdec: -73, rv: -14, plx: 18.84, mag: 3.82, bayer: "10Lam Oph" }, Paikauhale: { ra: 248.970645, dec: -28.216016, pmra: -8.59, pmdec: -22.5, rv: 2, plx: 6.88, mag: 2.82, bayer: "23Tau Sco" }, Atria: { ra: 252.166155, dec: -69.027715, pmra: 17.85, pmdec: -32.92, rv: -3, plx: 8.35, mag: 1.91, bayer: "Alp TrA" }, Larawag: { ra: 252.5412, dec: -34.293232, pmra: -611.83, pmdec: -255.87, rv: -3, plx: 51.19, mag: 2.29, bayer: "26Eps Sco" }, Xamidimura: { ra: 252.967635, dec: -38.04738, pmra: -8.84, pmdec: -21.6, rv: -25, plx: 6.51, mag: 3, bayer: "Mu 1Sco" }, Pipirima: { ra: 253.083945, dec: -38.017536, pmra: -12.92, pmdec: -23.8, rv: 1, plx: 6.88, mag: 3.56, bayer: "Mu 2Sco" }, Aldhibah: { ra: 257.19672, dec: 65.714683, pmra: -20.76, pmdec: 19.15, rv: -17, plx: 9.93, mag: 3.17, bayer: "22Zet Dra" }, Sabik: { ra: 257.59452, dec: -15.72491, pmra: 41.16, pmdec: 97.65, rv: -2.4, plx: 36.91, mag: 2.43, bayer: "35Eta Oph" }, Rasalgethi: { ra: 258.661905, dec: 14.390333, pmra: -6.71, pmdec: 32.78, rv: -33, plx: 9.07, mag: 2.78, bayer: "64Alp1Her" }, Sarin: { ra: 258.757965, dec: 24.839204, pmra: -21.14, pmdec: -157.68, rv: -40, plx: 43.41, mag: 3.12, bayer: "65Del Her" }, Guniibuu: { ra: 258.83754, dec: -26.602829, pmra: -473.69, pmdec: -1143.93, rv: 0.9, plx: 168.54, mag: 4.33, bayer: "36    Oph" }, Rastaban: { ra: 262.608195, dec: 52.301387, pmra: -15.59, pmdec: 11.57, rv: -20, plx: 8.58, mag: 2.79, bayer: "23Bet Dra" }, Maasym: { ra: 262.68462, dec: 26.110645, pmra: 18.39, pmdec: 16.78, rv: -26, plx: 8.83, mag: 4.41, bayer: "76Lam Her" }, Lesath: { ra: 262.69098, dec: -37.295811, pmra: -4.19, pmdec: -29.14, rv: 8, plx: 5.66, mag: 2.7, bayer: "34Ups Sco" }, Yildun: { ra: 263.05377, dec: 86.58646, pmra: 10.54, pmdec: 53.97, rv: -8, plx: 18.95, mag: 4.35, bayer: "23Del UMi" }, Shaula: { ra: 263.402175, dec: -37.103821, pmra: -8.9, pmdec: -29.95, rv: -3, plx: 5.71, mag: 1.62, bayer: "35Lam Sco" }, Rasalhague: { ra: 263.733615, dec: 12.560035, pmra: 110.08, pmdec: -222.61, rv: 12.6, plx: 67.13, mag: 2.08, bayer: "55Alp Oph" }, Sargas: { ra: 264.3297, dec: -42.997824, pmra: 6.06, pmdec: -0.95, rv: 1, plx: 10.86, mag: 1.86, bayer: "The Sco" }, Dziban: { ra: 265.48467, dec: 72.148843, pmra: 26.6, pmdec: -269.77, rv: -13.7, plx: 43.79, mag: 4.57, bayer: "31Psi1Dra" }, Cebalrai: { ra: 265.868145, dec: 4.567303, pmra: -40.67, pmdec: 158.8, rv: -12, plx: 39.85, mag: 2.76, bayer: "60Bet Oph" }, Fuyue: { ra: 267.464475, dec: -37.043304, pmra: 42.09, pmdec: 27.77, rv: 25, plx: 25.92, mag: 3.19, bayer: "" }, Grumium: { ra: 268.38201, dec: 56.872643, pmra: 93.65, pmdec: 78.44, rv: -26, plx: 28.98, mag: 3.73, bayer: "32Xi  Dra" }, Eltanin: { ra: 269.151555, dec: 51.488895, pmra: -8.52, pmdec: -23.05, rv: -28, plx: 21.14, mag: 2.24, bayer: "33Gam Dra" }, Alnasl: { ra: 271.452045, dec: -30.424091, pmra: -55.75, pmdec: -181.53, rv: 22, plx: 33.67, mag: 2.98, bayer: "10Gam2Sgr" }, Polis: { ra: 273.44088, dec: -21.058834, pmra: 1.72, pmdec: -1.39, rv: -6, plx: 0.01, mag: 3.84, bayer: "13Mu  Sgr" }, "Kaus Media": { ra: 275.2485, dec: -29.828103, pmra: 29.96, pmdec: -26.38, rv: -20, plx: 9.38, mag: 2.72, bayer: "19Del Sgr" }, "Kaus Australis": { ra: 276.04302, dec: -34.384616, pmra: -39.61, pmdec: -124.05, rv: -15, plx: 22.76, mag: 1.79, bayer: "20Eps Sgr" }, Fafnir: { ra: 276.496035, dec: 65.56348, pmra: 106.52, pmdec: -27.07, rv: 32, plx: 10.36, mag: 4.82, bayer: "42    Dra" }, "Kaus Borealis": { ra: 276.992685, dec: -25.4217, pmra: -44.81, pmdec: -186.29, rv: -43.2, plx: 41.72, mag: 2.82, bayer: "22Lam Sgr" }, Vega: { ra: 279.2346, dec: 38.783692, pmra: 201.02, pmdec: 287.46, rv: -12.1, plx: 130.23, mag: 0.03, bayer: "3Alp Lyr" }, Sheliak: { ra: 282.519975, dec: 33.362667, pmra: 1.1, pmdec: -4.46, rv: -19, plx: 3.39, mag: 3.52, bayer: "10Bet Lyr" }, Ainalrami: { ra: 283.542405, dec: -22.744834, pmra: 2.95, pmdec: -5.7, rv: -12, plx: 2.9, mag: 4.86, bayer: "32Nu 1Sgr" }, Nunki: { ra: 283.81635, dec: -26.296722, pmra: 13.87, pmdec: -52.65, rv: -11, plx: 14.32, mag: 2.05, bayer: "34Sig Sgr" }, Alya: { ra: 284.054925, dec: 4.203595, pmra: 37.69, pmdec: 26.98, rv: -46, plx: 21.09, mag: 4.62, bayer: "63The1Ser" }, "Alya B": { ra: 284.061015, dec: 4.202132, pmra: 52.42, pmdec: 31.17, rv: -53, plx: 19.25, mag: 4.98, bayer: "63The2Ser" }, Sulafat: { ra: 284.735925, dec: 32.689557, pmra: -2.76, pmdec: 1.77, rv: -21, plx: 5.26, mag: 3.25, bayer: "14Gam Lyr" }, Ascella: { ra: 285.65298, dec: -29.880105, pmra: -14.1, pmdec: 3.66, rv: 22, plx: 36.98, mag: 2.6, bayer: "38Zet Sgr" }, Okab: { ra: 286.352535, dec: 13.863478, pmra: -7.04, pmdec: -95.31, rv: -25, plx: 39.28, mag: 2.99, bayer: "17Zet Aql" }, Meridiana: { ra: 287.368035, dec: -37.904474, pmra: 85.73, pmdec: -96.65, rv: -18, plx: 26.02, mag: 4.11, bayer: "Alp CrA" }, Albaldah: { ra: 287.440965, dec: -21.023615, pmra: -1.17, pmdec: -36.83, rv: -10, plx: 6.4, mag: 2.88, bayer: "41Pi  Sgr" }, Altais: { ra: 288.138375, dec: 67.661541, pmra: 94.49, pmdec: 92.3, rv: 25, plx: 33.48, mag: 3.07, bayer: "57Del Dra" }, Aladfar: { ra: 288.43953, dec: 39.145968, pmra: -1.59, pmdec: -0.61, rv: -8, plx: 2.35, mag: 4.43, bayer: "20Eta Lyr" }, "Arkab Prior": { ra: 290.659545, dec: -44.458965, pmra: 7.31, pmdec: -22.43, rv: -11, plx: 10.4, mag: 3.96, bayer: "Bet1Sgr" }, "Arkab Posterior": { ra: 290.80464, dec: -44.799778, pmra: 92.78, pmdec: -53.73, rv: 19, plx: 24.31, mag: 4.27, bayer: "Bet2Sgr" }, Rukbat: { ra: 290.971545, dec: -40.61594, pmra: 32.67, pmdec: -120.81, rv: -1, plx: 17.94, mag: 3.96, bayer: "Alp Sgr" }, Anser: { ra: 292.176405, dec: 24.664905, pmra: -126.45, pmdec: -106.99, rv: -86, plx: 10.97, mag: 4.44, bayer: "6Alp Vul" }, Albireo: { ra: 292.680345, dec: 27.959681, pmra: -7.09, pmdec: -5.63, rv: -24, plx: 7.51, mag: 3.05, bayer: "6Bet1Cyg" }, Alsafi: { ra: 293.087235, dec: 69.661175, pmra: 598.43, pmdec: -1738.81, rv: 28.2, plx: 173.77, mag: 4.67, bayer: "61Sig Dra" }, Sham: { ra: 295.024125, dec: 18.01389, pmra: 15.09, pmdec: -19.72, rv: 2, plx: 7.67, mag: 4.39, bayer: "5Alp Sge" }, Fawaris: { ra: 296.24361, dec: 45.13081, pmra: 43.22, pmdec: 48.44, rv: -20, plx: 19.77, mag: 2.86, bayer: "18Del Cyg" }, Tarazed: { ra: 296.56491, dec: 10.613261, pmra: 15.72, pmdec: -3.08, rv: -2, plx: 8.26, mag: 2.72, bayer: "50Gam Aql" }, Altair: { ra: 297.69582, dec: 8.868322, pmra: 536.82, pmdec: 385.54, rv: -26.1, plx: 194.95, mag: 0.76, bayer: "53Alp Aql" }, Libertas: { ra: 298.56201, dec: 8.461453, pmra: 101.43, pmdec: -81.28, rv: -42, plx: 17.77, mag: 4.71, bayer: "59Xi  Aql" }, Alshain: { ra: 298.828305, dec: 6.406763, pmra: 46.35, pmdec: -481.32, rv: -40.7, plx: 73, mag: 3.71, bayer: "60Bet Aql" }, Terebellum: { ra: 298.959765, dec: -26.299506, pmra: 203.96, pmdec: 74.4, rv: -21, plx: 38.48, mag: 4.7, bayer: "58Ome Sgr" }, Algedi: { ra: 304.51356, dec: -12.544852, pmra: 61.78, pmdec: 2.85, rv: 0.7, plx: 30.82, mag: 3.58, bayer: "6Alp2Cap" }, Alshat: { ra: 305.165895, dec: -12.75908, pmra: 15.71, pmdec: -14.63, rv: -2, plx: 12.88, mag: 4.77, bayer: "8Nu  Cap" }, Dabih: { ra: 305.252805, dec: -14.781367, pmra: 48.42, pmdec: 14, rv: -19, plx: 9.98, mag: 3.05, bayer: "9Bet Cap" }, Sadr: { ra: 305.557095, dec: 40.256679, pmra: 2.43, pmdec: -0.93, rv: -8, plx: 1.78, mag: 2.23, bayer: "37Gam Cyg" }, Peacock: { ra: 306.411885, dec: -56.73509, pmra: 7.71, pmdec: -86.15, rv: 2, plx: 18.24, mag: 1.94, bayer: "Alp Pav" }, Aldulfin: { ra: 308.303205, dec: 11.303263, pmra: 10.75, pmdec: -28.54, rv: -19, plx: 9.87, mag: 4.03, bayer: "2Eps Del" }, Rotanev: { ra: 309.38724, dec: 14.595087, pmra: 118.28, pmdec: -47.65, rv: -23, plx: 32.33, mag: 3.64, bayer: "6Bet Del" }, Sualocin: { ra: 309.909525, dec: 15.912072, pmra: 54.14, pmdec: 7.91, rv: -3, plx: 12.85, mag: 3.77, bayer: "9Alp Del" }, Deneb: { ra: 310.35798, dec: 45.280338, pmra: 1.56, pmdec: 1.55, rv: -5, plx: 2.31, mag: 1.25, bayer: "50Alp Cyg" }, Aljanah: { ra: 311.55267, dec: 33.970256, pmra: 356.16, pmdec: 330.28, rv: -10.9, plx: 44.86, mag: 2.48, bayer: "53Eps Cyg" }, Albali: { ra: 311.91897, dec: -9.495776, pmra: 31.89, pmdec: -35.32, rv: -16, plx: 15.7, mag: 3.78, bayer: "2Eps Aqr" }, Kitalpha: { ra: 318.955965, dec: 5.247845, pmra: 59.63, pmdec: -94.33, rv: -16, plx: 17.14, mag: 3.92, bayer: "8Alp Equ" }, Alderamin: { ra: 319.64445, dec: 62.585573, pmra: 149.91, pmdec: 48.27, rv: -11.5, plx: 66.5, mag: 2.45, bayer: "5Alp Cep" }, Alfirk: { ra: 322.16493, dec: 70.560716, pmra: 12.6, pmdec: 8.73, rv: -8, plx: 4.76, mag: 3.23, bayer: "8Bet Cep" }, Sadalsuud: { ra: 322.88973, dec: -5.571172, pmra: 22.79, pmdec: -6.7, rv: 7, plx: 6.07, mag: 2.9, bayer: "22Bet Aqr" }, Bunda: { ra: 324.437955, dec: -7.854201, pmra: 114.29, pmdec: -24.44, rv: -21, plx: 18.26, mag: 4.68, bayer: "23Xi  Aqr" }, Nashira: { ra: 325.022715, dec: -16.662308, pmra: 187.39, pmdec: -22.33, rv: -31.2, plx: 20.77, mag: 3.69, bayer: "40Gam Cap" }, Azelfafage: { ra: 325.523595, dec: 51.189622, pmra: 5.25, pmdec: -2.11, rv: -8, plx: 1.89, mag: 4.69, bayer: "80Pi 1Cyg" }, Enif: { ra: 326.046495, dec: 9.875011, pmra: 30.02, pmdec: 1.38, rv: 5, plx: 4.73, mag: 2.38, bayer: "8Eps Peg" }, "Deneb Algedi": { ra: 326.760165, dec: -16.127286, pmra: 263.26, pmdec: -296.23, rv: -6.3, plx: 84.27, mag: 2.85, bayer: "49Del Cap" }, Aldhanab: { ra: 328.48212, dec: -37.364852, pmra: 95.88, pmdec: -12.1, rv: -2, plx: 15.45, mag: 3, bayer: "Gam Gru" }, Kurhah: { ra: 330.947025, dec: 64.627971, pmra: 214.46, pmdec: 89.29, rv: -6, plx: 33.79, mag: 4.26, bayer: "17Xi  Cep" }, Sadalmelik: { ra: 331.445985, dec: -0.319851, pmra: 17.9, pmdec: -9.93, rv: 8, plx: 6.23, mag: 2.95, bayer: "34Alp Aqr" }, Alnair: { ra: 332.058135, dec: -46.960975, pmra: 127.6, pmdec: -147.91, rv: 10.9, plx: 32.29, mag: 1.73, bayer: "Alp Gru" }, Biham: { ra: 332.54994, dec: 6.197865, pmra: 281.96, pmdec: 31.23, rv: -7.9, plx: 35.34, mag: 3.52, bayer: "26The Peg" }, Ancha: { ra: 334.208475, dec: -7.78329, pmra: 118.95, pmdec: -21.91, rv: -15, plx: 17.4, mag: 4.17, bayer: "43The Aqr" }, Sadachbia: { ra: 335.41407, dec: -1.387331, pmra: 129.24, pmdec: 8.9, rv: -25.6, plx: 19.92, mag: 3.86, bayer: "48Gam Aqr" }, Homam: { ra: 340.365495, dec: 10.831364, pmra: 77.38, pmdec: -10.98, rv: 7, plx: 15.96, mag: 3.41, bayer: "42Zet Peg" }, Tiaki: { ra: 340.666725, dec: -46.884577, pmra: 135.68, pmdec: -4.51, rv: 2, plx: 18.43, mag: 2.07, bayer: "Bet Gru" }, Matar: { ra: 340.75056, dec: 30.221245, pmra: 13.11, pmdec: -26.11, rv: 4, plx: 15.22, mag: 2.93, bayer: "44Eta Peg" }, Sadalbari: { ra: 342.500775, dec: 24.601579, pmra: 144.11, pmdec: -43.44, rv: 15.3, plx: 30.74, mag: 3.51, bayer: "48Mu  Peg" }, Skat: { ra: 343.662555, dec: -15.82082, pmra: -44.08, pmdec: -24.81, rv: 18, plx: 20.31, mag: 3.27, bayer: "76Del Aqr" }, Fomalhaut: { ra: 344.41257, dec: -29.622236, pmra: 329.22, pmdec: -164.22, rv: 6.1, plx: 129.81, mag: 1.17, bayer: "24Alp PsA" }, Scheat: { ra: 345.943515, dec: 28.082789, pmra: 187.76, pmdec: 137.61, rv: 9, plx: 16.64, mag: 2.44, bayer: "53Bet Peg" }, Fumalsamakah: { ra: 345.969225, dec: 3.820045, pmra: 12.86, pmdec: -10.13, rv: 0.3, plx: 7.99, mag: 4.48, bayer: "4Bet Psc" }, Markab: { ra: 346.19022, dec: 15.205264, pmra: 61.1, pmdec: -42.56, rv: -4, plx: 24.46, mag: 2.49, bayer: "54Alp Peg" }, Salm: { ra: 350.15934, dec: 23.740337, pmra: 30.48, pmdec: -9.14, rv: 16, plx: 20.17, mag: 4.58, bayer: "62Tau Peg" }, Alkarab: { ra: 351.344895, dec: 23.404101, pmra: 193.12, pmdec: 36.47, rv: -11, plx: 19.14, mag: 4.42, bayer: "68Ups Peg" }, Errai: { ra: 354.8373, dec: 77.632276, pmra: -48.85, pmdec: 127.18, rv: -43.1, plx: 70.91, mag: 3.21, bayer: "35Gam Cep" }, "Castor B": { ra: 113.652405, dec: 31.89052, pmra: -162.69, pmdec: -98.14, rv: -1.2, plx: 63.27, mag: 2.85, bayer: "66Alp Gem" }, "Alula Australis": { ra: 169.54677, dec: 31.528783, pmra: -425.24, pmdec: -581.01, rv: -15.9, plx: 96, mag: 4.33, bayer: "53Xi  UMa" }, "Alula Australis B": { ra: 169.54677, dec: 31.528783, pmra: -425.24, pmdec: -581.01, rv: -13.6, plx: 96, mag: 4.8, bayer: "53Xi  UMa" }, Graffias: { ra: 241.09161, dec: -11.374611, pmra: -61.63, pmdec: -33.19, rv: -32.2, plx: 41.1, mag: 4.84, bayer: "Xi  Sco" }, "Galactic Center": { ra: 266.4168371, dec: -29.0078106, pmra: -3.151, pmdec: -5.547, rv: 0, plx: 0.125, mag: 99, bayer: "Sgr A*" } } };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/data/constellations.json
+var constellations_default = { provenance: "Constellation figures from d3-celestial (github.com/ofrohn/d3-celestial, BSD-3), IAU modern sky culture; vertices as ecliptic J2000 (lon, lat) degrees", lines: [{ con: "And", segs: [[[44.225396, 27.806206], [30.405239, 25.943405], [21.813496, 24.350762], [14.308444, 25.68042]], [[22.376026, 15.930211], [20.579947, 17.620271], [20.924311, 23.022254], [21.813496, 24.350762], [22.679297, 27.148854], [16.084797, 41.029168], [7.779489, 43.750244]], [[16.084797, 41.029168], [17.298492, 41.717969], [18.286962, 43.775919]], [[30.405239, 25.943405], [29.175267, 29.658707], [29.149286, 32.562159], [36.421723, 36.369608], [42.439948, 35.414919]], [[17.298492, 41.717969], [19.94087, 42.948328]]] }, { con: "Ant", segs: [[[161.002945, -47.35093], [172.440721, -37.427573], [183.041394, -39.819083]]] }, { con: "Aps", segs: [[[254.429923, -58.234891], [261.510046, -55.992697], [262.949557, -54.549312], [262.703522, -56.007049]]] }, { con: "Aqr", segs: [[[311.723217, 8.080513], [313.058119, 8.24], [323.395044, 8.614997], [333.352466, 10.661524], [336.714083, 8.235183], [338.909679, 8.845663], [340.403129, 8.146869], [341.576098, -0.386618], [346.729534, -4.283348], [340.017803, -14.490231]], [[323.395044, 8.614997], [328.719942, -2.081028]], [[333.352466, 10.661524], [333.263489, 2.706843]], [[338.909679, 8.845663], [338.598096, 10.472937]], [[343.456761, -14.786492], [346.729534, -4.283348], [348.612731, -14.514182]]] }, { con: "Aql", segs: [[[300.938937, 31.24362], [301.77638, 29.303447], [302.423647, 26.659197], [304.913509, 18.727705], [300.433731, 21.523319], [293.637743, 24.817088], [289.795972, 36.185746], [301.77638, 29.303447], [293.637743, 24.817088], [287.332289, 17.565703]]] }, { con: "Ara", segs: [[[264.293241, -33.109666], [265.556654, -37.355907], [258.904284, -36.276392], [259.8239, -33.0916], [259.578436, -30.266167], [264.93426, -26.560525], [264.205868, -32.264958]]] }, { con: "Ari", segs: [[[48.203557, 10.449678], [37.662513, 9.96508], [33.969961, 8.487233], [33.18464, 7.162419]]] }, { con: "Aur", segs: [[[89.910386, 21.508146], [81.857899, 22.864276], [79.446175, 18.283842], [76.639446, 10.454495], [82.574965, 5.385154], [89.942848, 13.773323], [89.910386, 21.508146], [89.919632, 30.845442], [81.857899, 22.864276], [78.841396, 20.944377], [78.63337, 18.202268]]] }, { con: "Boo", segs: [[[197.931826, 26.513879], [199.336641, 28.077114], [204.233619, 30.736225], [202.785991, 42.45176], [197.66342, 49.551623], [204.250562, 54.151024], [213.157512, 48.965547], [208.106285, 40.624846], [204.233619, 30.736225], [213.037569, 27.878487]], [[197.66342, 49.551623], [186.96327, 54.648155], [179.954396, 58.894321], [182.610482, 60.108809], [186.96327, 54.648155]]] }, { con: "Cae", segs: [[[49.983179, -65.325538], [56.148072, -62.9882], [59.381328, -58.529932], [68.412723, -57.885262]]] }, { con: "Cam", segs: [[[79.268517, 30.895333], [81.267779, 37.430989], [80.979574, 43.418929], [74.645629, 49.616648], [71.873294, 44.126709], [66.581163, 39.531689]], [[80.979574, 43.418929], [92.389815, 45.919592], [95.677952, 53.834258]]] }, { con: "Cnc", segs: [[[133.641682, -5.080429], [128.721949, 0.077143], [127.538403, 3.190483], [126.338139, 10.429703]], [[128.721949, 0.077143], [124.257295, -10.287647]]] }, { con: "CVn", segs: [[[174.564549, 40.116038], [167.705818, 40.543935]]] }, { con: "CMa", segs: [[[97.187895, -41.253699], [104.081718, -39.605228], [111.002749, -46.130379], [113.39609, -48.453195], [111.556099, -50.225809], [110.762945, -51.360221], [97.377594, -53.372714]], [[119.536535, -50.608742], [113.39609, -48.453195]], [[104.081718, -39.605228], [107.522433, -39.64362], [109.607928, -37.993817], [106.184305, -34.719859], [107.522433, -39.64362]]] }, { con: "CMi", segs: [[[115.785537, -16.019607], [112.191736, -13.487231]]] }, { con: "Cap", segs: [[[303.769675, 6.988354], [304.047391, 4.588644], [305.165358, 1.198238], [307.158972, -7.028594], [307.95949, -8.962684], [316.936923, -6.990911], [323.542563, -2.601688], [321.790757, -2.557264], [317.682236, -1.366773], [313.843893, -0.585957], [303.769675, 6.988354]]] }, { con: "Car", segs: [[[107.147917, -66.074154], [104.96066, -75.823917], [211.968839, -72.236004], [217.439567, -67.382371], [209.18951, -62.139038], [203.058152, -61.446292], [200.075591, -62.604949], [185.326212, -67.116338], [173.129245, -72.679903], [150.729153, -70.326712], [147.349569, -64.46419], [168.947786, -67.197784], [185.326212, -67.116338]], [[209.18951, -62.139038], [209.461155, -58.850331], [209.083724, -58.355714], [207.499947, -56.88148], [205.127657, -56.28762], [202.437291, -57.574743], [203.058152, -61.446292]]] }, { con: "Cas", segs: [[[54.763694, 47.548207], [47.930016, 46.40348], [43.931099, 48.814868], [37.783633, 46.622152], [35.116654, 51.214996]]] }, { con: "Cen", segs: [[[202.196483, -51.810726], [207.482367, -44.509664], [210.725507, -42.387841], [212.317133, -40.162431], [225.554804, -39.586001], [224.950594, -32.943388], [221.536168, -28.979207], [221.154277, -28.267972], [222.308531, -22.079948], [230.248891, -25.512952], [234.794752, -24.031366]], [[221.154277, -28.267972], [213.128812, -26.016246]], [[239.477601, -42.598441], [225.554804, -39.586001], [233.792252, -44.137617]], [[210.725507, -42.387841], [209.392171, -45.582657], [209.478722, -54.578223]]] }, { con: "Cep", segs: [[[4.854295, 73.932934], [4.677447, 71.779774], [12.778181, 68.913701], [9.707011, 64.19433], [13.048986, 59.942332], [13.962915, 61.147181], [17.609191, 59.541371], [33.240657, 62.616013], [60.092956, 64.669813], [35.54625, 71.152764], [12.778181, 68.913701]], [[35.54625, 71.152764], [33.240657, 62.616013]]] }, { con: "Cet", segs: [[[39.432944, -11.996153], [38.387438, -9.180581], [37.469931, -5.855563], [41.94153, -5.566724], [45.09328, -7.785924], [44.320143, -12.585617], [39.432944, -11.996153], [37.5714, -14.46174], [31.521947, -15.936852], [21.950075, -20.334507], [17.818584, -24.815871], [2.583529, -20.783545], [0.916126, -10.02168], [11.767506, -16.118431], [16.226183, -15.767342], [21.950075, -20.334507]]] }, { con: "Cha", segs: [[[239.299096, -75.40938], [240.421398, -68.084161], [245.46596, -67.806728], [245.437916, -63.594165], [242.318128, -63.935104], [240.421398, -68.084161]]] }, { con: "Cir", segs: [[[244.307149, -38.931597], [242.362609, -46.202531], [245.443556, -39.174799]]] }, { con: "Col", segs: [[[98.423586, -56.714145], [86.419531, -59.179505], [82.169154, -57.375169], [78.697681, -58.627752]], [[86.419531, -59.179505], [89.611436, -66.254103]]] }, { con: "Com", segs: [[[188.949994, 22.978241], [184.365469, 32.512113], [173.89006, 28.398781]]] }, { con: "CrA", segs: [[[282.037819, -14.279594], [283.617229, -14.405765], [284.13487, -15.313602], [284.061789, -16.752299], [283.577092, -17.8594], [282.346851, -19.329747], [279.573842, -20.40591], [276.544061, -19.063292]]] }, { con: "CrB", segs: [[[219.450329, 48.552103], [219.116742, 46.054059], [222.295841, 44.323557], [224.873355, 44.506958], [227.026715, 44.76451], [229.117935, 46.068669], [229.012634, 49.159596]]] }, { con: "Crv", segs: [[[192.2445, -21.749241], [191.66541, -19.673567], [190.725579, -14.500893], [193.451754, -12.196252], [197.367935, -18.044661], [191.66541, -19.673567]]] }, { con: "Crt", segs: [[[178.591341, -11.303772], [176.247517, -13.470002], [176.686942, -17.572448], [173.689444, -22.716361], [178.554588, -25.637789], [179.374553, -20.812675], [179.23403, -19.666545], [184.069525, -18.296589], [186.097572, -16.09084]], [[176.686942, -17.572448], [179.23403, -19.666545]]] }, { con: "Cru", segs: [[[221.646077, -48.638796], [215.664761, -50.419482]], [[221.869947, -52.878857], [216.739633, -47.831187]]] }, { con: "Cyg", segs: [[[333.041397, 43.694676], [327.745594, 49.422312], [324.841537, 57.124425], [316.249535, 64.414051], [317.968653, 71.451061], [314.918348, 73.802304]], [[335.329209, 59.906109], [324.841537, 57.124425], [312.927906, 54.27451], [301.2516, 48.967736]]] }, { con: "Del", segs: [[[314.061018, 29.073194], [316.341397, 31.917952], [317.380558, 33.022366], [319.365563, 32.702938], [318.116246, 31.943672], [316.341397, 31.917952]]] }, { con: "Dor", segs: [[[36.545451, -70.141523], [37.829462, -74.581775], [52.122494, -85.044187], [26.444412, -88.253795], [79.085443, -86.472905], [52.122494, -85.044187], [48.684786, -78.940996], [37.829462, -74.581775]]] }, { con: "Dra", segs: [[[264.755367, 80.282433], [267.968619, 74.922208], [251.966455, 75.27782], [250.401225, 78.13991], [264.755367, 80.282433], [17.161376, 82.886258], [71.089724, 84.876511], [183.380006, 84.761531], [194.487115, 78.441023], [196.665849, 74.436765], [184.949636, 71.093569], [157.456094, 66.362128], [136.25655, 61.762197], [130.333668, 57.241179]], [[71.089724, 84.876511], [75.930471, 83.567981]], [[17.161376, 82.886258], [32.694157, 79.490269]]] }, { con: "Equ", segs: [[[323.117239, 20.121799], [324.444526, 24.732299], [323.42732, 25.182769]]] }, { con: "Eri", segs: [[[75.27586, -27.861725], [69.33684, -25.367858], [66.814895, -25.123608], [59.432695, -27.453423], [53.867556, -33.202129], [50.96527, -31.118456], [50.862072, -28.676382], [48.167767, -27.715807], [38.750005, -24.54669], [33.755766, -28.247872], [32.108288, -32.749352], [34.534573, -38.906079], [40.109896, -38.506441], [44.204992, -39.439846], [47.360761, -41.887849], [59.885311, -51.817182], [54.487146, -54.537588], [52.502823, -53.964776], [41.758137, -54.309654], [34.929488, -57.08542], [27.223479, -58.11178], [23.27228, -53.74019], [18.771605, -51.714369], [7.935527, -57.012626], [0.999811, -58.985619], [356.24729, -57.017419], [345.311193, -59.378168]]] }, { con: "For", segs: [[[34.612326, -44.690845], [26.234641, -45.856015], [16.34304, -38.921723]]] }, { con: "Gem", segs: [[[93.436168, -0.888137], [95.301879, -0.82011], [99.93877, 2.069942], [105.444321, 7.754486], [110.240142, 10.095761], [113.215677, 6.684196], [111.344321, 5.215964], [108.519266, -0.17842], [104.99022, -2.038836], [99.104562, -6.742517], [101.20925, -10.104204]], [[108.519266, -0.17842], [108.778792, -5.635199]]] }, { con: "Gru", segs: [[[321.933694, -41.985315], [320.729898, -39.787809], [322.327317, -35.432083], [321.567816, -31.614316], [315.906989, -32.91328], [322.327317, -35.432083]], [[321.602454, -31.347432], [319.998009, -28.342666], [318.939265, -25.969742], [317.4193, -23.05031]]] }, { con: "Her", segs: [[[239.2145, 40.007754], [241.091283, 42.702392], [241.459536, 53.109668], [238.787639, 60.289846], [233.242009, 63.161979], [224.384478, 65.829937], [221.632575, 63.778452], [218.239282, 60.299609]], [[241.459536, 53.109668], [248.327012, 53.248336]], [[238.787639, 60.289846], [252.067418, 59.550836]], [[268.477033, 60.684839], [255.373043, 60.125006], [252.067418, 59.550836], [248.327012, 53.248336], [254.76357, 47.685617], [265.224666, 51.103889], [269.19568, 52.685631], [272.696462, 52.184143]], [[256.15195, 37.286118], [241.091283, 42.702392]]] }, { con: "Hor", segs: [[[45.823972, -61.730828], [8.235223, -61.014214], [4.624746, -61.848028], [2.478454, -63.663651], [358.12008, -69.458965], [346.335998, -71.345804]]] }, { con: "Hya", segs: [[[132.344775, -11.104111], [132.909816, -11.551748], [132.303956, -14.250772], [131.209759, -14.601864], [130.304311, -12.392525], [132.344775, -11.104111], [134.575618, -10.969551], [140.288444, -13.052131], [147.641805, -14.277201], [147.279166, -22.382407], [155.691307, -26.077245], [159.366992, -22.013988], [165.03646, -24.671472], [170.366001, -21.797998], [187.988058, -31.59853], [193.447387, -31.469306], [207.018286, -13.742601], [218.623916, -13.049574], [228.481653, -11.097577]]] }, { con: "Hyi", segs: [[[300.971516, -64.784787], [310.472341, -76.756936], [331.913841, -71.216198], [329.176254, -69.801924], [329.028751, -67.112197], [342.117967, -64.242188]]] }, { con: "Ind", segs: [[[299.10418, -27.753643], [298.670467, -32.485221], [297.785631, -39.1571], [309.801982, -39.464493], [304.1981, -35.779454], [299.10418, -27.753643]]] }, { con: "Lac", segs: [[[8.63218, 55.564387], [8.143191, 53.290546], [5.225102, 51.408532], [2.250231, 51.30182], [1.439517, 47.53576], [4.619639, 47.503501], [5.225102, 51.408532], [5.873011, 53.322117], [8.63218, 55.564387]], [[1.439517, 47.53576], [354.928768, 46.295719], [354.008289, 44.394725]]] }, { con: "Leo", segs: [[[149.829172, 0.464844], [147.905066, 4.865732], [149.614997, 8.814859], [161.316604, 14.333571], [171.617505, 12.266909], [163.422992, 9.674327], [149.829172, 0.464844]], [[149.614997, 8.814859], [147.56551, 11.865073], [141.430001, 12.348906], [140.704847, 9.715425]]] }, { con: "LMi", segs: [[[141.009179, 22.099946], [145.405163, 22.235471], [150.876922, 24.931161], [144.539497, 25.065228], [141.009179, 22.099946], [133.820353, 20.74575]]] }, { con: "Lep", segs: [[[91.896376, -38.364462], [88.899997, -37.603559], [85.986354, -38.215867], [81.380619, -41.057826], [75.394286, -39.050039], [72.055652, -44.964579], [79.672348, -43.914494], [84.846072, -45.818224], [87.167259, -44.297059]], [[75.904033, -35.810205], [75.394286, -39.050039], [77.778542, -36.188316]]] }, { con: "Lib", segs: [[[230.687285, -7.644489], [225.082636, 0.33304], [229.371658, 8.495948], [235.138044, 4.38597], [238.609364, -8.507525], [239.350952, -10.020874]], [[225.082636, 0.33304], [235.138044, 4.38597]]] }, { con: "Lup", segs: [[[242.840528, -13.179687], [240.698019, -14.470387], [237.494121, -17.178306], [238.656818, -21.425856], [235.025529, -25.046172], [233.503764, -30.025866], [240.757536, -32.831477], [240.373559, -28.502644], [240.122294, -25.245126], [241.49797, -21.24403], [245.771431, -17.444662], [246.744396, -15.624107]], [[238.656818, -21.425856], [241.49797, -21.24403]]] }, { con: "Lyn", segs: [[[93.105141, 35.624576], [99.146363, 35.437304], [105.706471, 26.947482], [117.559556, 23.105372], [125.275218, 23.714338], [130.570691, 20.100608], [131.8425, 17.964065]]] }, { con: "Lyr", segs: [[[288.10743, 60.342717], [288.62099, 62.336646], [285.316334, 61.732879], [288.10743, 60.342717], [291.666439, 59.317198], [291.922331, 55.01301], [288.883744, 55.98418], [288.10743, 60.342717]]] }, { con: "Men", segs: [[[265.295028, -81.765828], [279.564511, -79.98439], [295.053015, -80.13917], [310.73899, -83.025497]]] }, { con: "Mic", segs: [[[305.625908, -15.445852], [302.213711, -25.146103], [309.529978, -24.007612], [311.934232, -15.652046], [308.431482, -14.665354], [305.625908, -15.445852]]] }, { con: "Mon", segs: [[[119.280934, -30.453503], [125.137465, -22.587156], [109.535753, -22.721884], [98.285724, -30.265406], [94.249162, -29.659327]], [[109.535753, -22.721884], [102.775715, -20.498005], [96.254872, -18.717468], [98.483532, -15.864373], [100.36615, -13.17561]]] }, { con: "Mus", segs: [[[220.991911, -58.506957], [226.559317, -57.035305], [230.374199, -56.556993], [230.153753, -55.242762], [236.190113, -56.775563], [234.018314, -58.870616], [230.374199, -56.556993]]] }, { con: "Nor", segs: [[[248.514021, -23.828015], [252.868009, -25.486177], [252.068225, -28.263357], [248.870429, -27.909862], [248.514021, -23.828015]]] }, { con: "Oct", segs: [[[259.026333, -62.331337], [288.020277, -62.650746], [289.688919, -57.779384], [259.026333, -62.331337]]] }, { con: "Oph", segs: [[[269.753145, 13.665483], [266.632569, 26.111217], [265.336692, 27.93973], [262.448594, 35.835172], [251.821506, 31.836153], [245.593849, 23.555889], [242.30211, 17.241222], [243.510083, 16.439701], [249.229148, 11.391314], [257.969553, 7.197806]], [[251.821506, 31.836153], [249.229148, 11.391314], [248.666345, 5.196437], [247.979247, 3.223677], [247.550404, 1.552988], [248.437358, -1.7575]], [[265.336692, 27.93973], [257.969553, 7.197806], [261.394832, -1.843472], [262.880694, -6.629183]]] }, { con: "Ori", segs: [[[91.85155, -8.658625], [88.680828, -3.156661], [90.921513, -3.297657], [92.931344, -9.200122], [90.604809, -13.79074], [88.754559, -16.026973], [80.946502, -16.816048], [73.594572, -12.366356]], [[73.538398, -20.851648], [72.490798, -20.00505], [72.1008, -16.771903], [71.924669, -15.38415], [72.367094, -13.483542], [73.594572, -12.366356], [74.343999, -9.064426], [76.535598, -7.389817], [77.794292, -7.310854]], [[76.82963, -31.122732], [80.157567, -25.533473], [82.362161, -23.553033], [80.946502, -16.816048], [83.706842, -13.369414], [88.754559, -16.026973], [84.681326, -25.293124], [86.398604, -33.070633]], [[84.681326, -25.293124], [83.463659, -24.506366], [82.362161, -23.553033]]] }, { con: "Pav", segs: [[[293.817463, -36.267634], [292.494207, -45.954645], [287.613235, -44.699458], [277.805125, -39.101555], [273.519064, -38.125524], [271.24625, -40.238588], [267.973452, -41.309698], [275.115632, -48.179816], [283.529621, -50.885939], [292.494207, -45.954645], [298.606513, -46.972022]]] }, { con: "Peg", segs: [[[349.549031, 40.982811], [355.713241, 35.108126], [359.374214, 31.140515], [14.308444, 25.68042], [9.156073, 12.599921], [353.485598, 19.406069], [347.947615, 18.404606], [346.151627, 17.679502], [336.833067, 16.340671], [331.884921, 22.099883]], [[353.485598, 19.406069], [359.374214, 31.140515], [354.385913, 29.386898], [353.055119, 28.796381], [344.408712, 34.255476], [338.934106, 36.638574]]] }, { con: "Per", segs: [[[61.14319, 12.184333], [63.123836, 11.333469], [64.97248, 14.943801], [65.67782, 19.11454], [63.823171, 22.153545], [64.802111, 27.301782], [63.745785, 27.970871], [62.080936, 30.125492], [60.021423, 34.530169], [58.701817, 37.481874], [57.911816, 34.371293], [59.270163, 30.632043], [57.691235, 26.082948], [56.167555, 22.428488], [56.361719, 20.969729], [54.910797, 20.574653], [53.903712, 21.730743], [54.533147, 22.983036], [56.167555, 22.428488]], [[69.751293, 28.886202], [70.794767, 26.706888], [69.497523, 26.235064], [64.802111, 27.301782]], [[59.270163, 30.632043], [54.667231, 31.616665], [44.593534, 36.85081]]] }, { con: "Phe", segs: [[[345.493763, -40.633067], [350.439132, -48.199494], [358.143519, -47.585012], [353.621984, -52.582607], [342.379115, -55.131762], [350.439132, -48.199494], [339.648073, -41.956017], [345.493763, -40.633067]]] }, { con: "Pic", segs: [[[144.115556, -83.039848], [82.181333, -79.536947], [82.543559, -74.423512]]] }, { con: "Psc", segs: [[[26.459314, 15.50323], [28.317541, 20.739036], [28.788068, 17.465546], [26.459314, 15.50323], [24.532356, 12.440644], [26.815965, 5.377632], [27.743171, -1.620295], [29.378724, -9.060833], [27.52102, -7.921562], [25.506552, -4.694145], [23.13525, -3.06397], [19.877597, -0.213402], [17.525363, 1.09376], [14.147348, 2.176588], [2.583558, 6.362944], [357.644719, 7.153955], [355.189064, 9.033253], [353.026082, 8.872101], [351.453212, 7.257126], [352.903479, 4.432518], [356.58811, 3.417539], [358.266717, 4.551828], [357.644719, 7.153955]], [[351.453212, 7.257126], [348.585357, 9.053049]]] }, { con: "PsA", segs: [[[331.328661, -17.273334], [333.860277, -21.135584], [332.195033, -23.64035], [331.327738, -23.64587], [327.181014, -21.365884], [322.115564, -20.083997], [317.250236, -18.342244], [318.607799, -16.553658], [322.115564, -20.083997], [331.328661, -17.273334]]] }, { con: "Pup", segs: [[[107.147917, -66.074154], [120.300777, -58.524942], [122.92272, -49.119216], [123.457963, -47.413912], [126.041727, -44.939463], [127.638441, -42.577239], [131.388845, -43.270099], [138.550689, -58.347714], [147.349569, -64.46419]], [[126.041727, -44.939463], [126.06405, -46.050777], [125.884833, -49.211756], [122.92272, -49.119216]]] }, { con: "Pyx", segs: [[[138.550689, -58.347714], [146.800835, -51.155773], [146.500501, -48.922902], [145.466785, -43.291322]]] }, { con: "Ret", segs: [[[7.505745, -78.040512], [19.607288, -76.317637], [7.054421, -75.909628], [351.395045, -76.088031], [7.505745, -78.040512]]] }, { con: "Sge", segs: [[[301.071421, 38.792288], [303.387169, 38.912872], [307.043635, 39.190167]], [[301.205916, 38.218107], [303.387169, 38.912872]]] }, { con: "Sgr", segs: [[[273.627743, -13.377887], [275.078547, -11.051781], [274.580865, -6.47223], [276.317119, -2.13562], [273.213528, 2.342116]], [[285.776021, -22.144683], [286.635811, -18.380118], [283.638379, -7.178902], [280.181334, -3.954025], [276.317119, -2.13562]], [[292.556539, -20.659152], [294.870039, -14.385697], [295.850707, -5.421918], [291.84732, -3.259413], [289.336222, -2.48904], [287.044403, -2.927945], [282.385367, -3.449499], [280.181334, -3.954025], [274.580865, -6.47223], [271.261406, -6.991167], [275.078547, -11.051781], [283.638379, -7.178902], [284.834237, -5.088828], [282.385367, -3.449499], [284.994093, 0.860011], [286.251838, 1.437086], [288.348605, 3.258621], [289.450094, 4.224023], [289.727868, 6.095937]], [[284.994093, 0.860011], [283.451131, 1.661194], [282.471602, 0.110091], [282.385367, -3.449499]]] }, { con: "Sco", segs: [[[242.939901, -5.475358], [242.571269, -1.986036], [243.190032, 1.007721]], [[242.571269, -1.986036], [247.799645, -4.037364], [249.762279, -4.569944], [251.456873, -6.120393], [255.335136, -11.738484], [256.155594, -15.423153], [257.237259, -19.643879], [260.74285, -20.183543], [265.599405, -19.645088], [267.522528, -16.714398], [266.469464, -15.644348], [264.585738, -13.78843]]] }, { con: "Scl", segs: [[[0.492749, -32.513168], [345.571829, -24.558925], [336.998255, -25.687714], [337.236076, -31.707935]]] }, { con: "Sct", segs: [[[279.016524, 14.920124], [282.380019, 18.185982], [280.75816, 13.992979], [277.146082, 8.692603], [279.016524, 14.920124]]] }, { con: "Ser", segs: [[[229.948473, 34.326652], [227.176785, 38.105013], [229.775903, 37.110662], [232.781339, 35.19571], [229.948473, 34.326652], [228.341761, 28.880518], [232.075183, 25.507989], [234.330978, 24.006685], [242.30211, 17.241222]]] }, { con: "Ser", segs: [[[257.969553, 7.197806], [264.546086, 7.934672], [269.753145, 13.665483], [270.790523, 15.256877], [275.679142, 20.435526], [285.755333, 26.877424]]] }, { con: "Sex", segs: [[[154.115948, -11.115449], [153.261874, -19.712357], [160.106636, -11.34572], [159.500033, -9.319891]]] }, { con: "Tau", segs: [[[84.784642, -2.195668], [69.789223, -5.467335], [67.961944, -5.838466], [65.805713, -5.732295], [66.870699, -3.96952], [68.465068, -2.567197], [82.574965, 5.385154]], [[65.805713, -5.732295], [60.634532, -7.959857], [51.911994, -8.798623], [59.919171, -14.4517]], [[51.911994, -8.798623], [51.163599, -9.334208], [51.952283, -18.436692]]] }, { con: "Tel", segs: [[[272.112707, -22.535695], [275.073558, -22.647902], [275.236576, -25.762245]]] }, { con: "Tri", segs: [[[36.860847, 16.800485], [42.352542, 20.580701], [43.518092, 18.948254], [36.860847, 16.800485]]] }, { con: "TrA", segs: [[[260.895853, -46.151345], [251.841241, -41.945931], [249.39342, -48.102834], [260.895853, -46.151345]]] }, { con: "Tuc", segs: [[[309.671356, -45.403767], [320.440055, -47.849949], [326.589899, -57.350985], [322.371421, -57.719574], [318.771954, -56.64963], [307.166748, -49.913687], [309.671356, -45.403767]]] }, { con: "UMa", segs: [[[151.064833, 51.656693], [135.197438, 49.680283], [139.434669, 45.132963], [150.476943, 47.14156], [151.064833, 51.656693], [158.933507, 54.318781], [165.700062, 56.378946], [176.933174, 54.388024]], [[150.476943, 47.14156], [153.660144, 41.543895], [156.653604, 26.162438], [157.342324, 24.726616]], [[153.660144, 41.543895], [148.813092, 35.537759], [141.234968, 28.998074]], [[148.813092, 35.537759], [139.5498, 29.885315]], [[135.197438, 49.680283], [120.822831, 45.168774], [112.995786, 40.243427], [126.267732, 42.652297], [139.434669, 45.132963]], [[139.434669, 45.132963], [129.348627, 38.261184], [127.264121, 34.89599], [122.799829, 29.57525]], [[123.93676, 28.979479], [127.264121, 34.89599]]] }, { con: "UMi", segs: [[[117.404412, 75.122054], [120.315479, 77.829697], [141.598221, 75.24111], [133.319488, 72.987608], [117.404412, 75.122054], [99.136368, 73.922873], [91.203145, 69.945147], [88.567576, 66.101457]]] }, { con: "Vel", segs: [[[168.947786, -67.197784], [178.892071, -63.721731], [185.946607, -59.950494], [190.515846, -51.087794], [176.995687, -48.25898], [164.738756, -51.163888], [161.187658, -55.870838], [147.349569, -64.46419]]] }, { con: "Vir", segs: [[[174.159191, 4.586331], [177.164139, 0.694225], [184.83213, 1.365282], [190.141489, 2.790278], [198.237312, 1.742899], [203.841307, -2.054488], [213.797139, 7.19953], [220.131183, 9.672068]], [[189.94027, 16.20503], [191.460902, 8.613476], [190.141489, 2.790278]], [[198.237312, 1.742899], [202.134192, 8.636595], [207.748715, 13.062523], [218.517236, 17.101181]]] }, { con: "Vol", segs: [[[200.593349, -72.201399], [195.171989, -75.585212], [204.167947, -77.779985], [199.42398, -82.477127], [219.858784, -82.616941], [204.167947, -77.779985], [200.593349, -72.201399]]] }, { con: "Vul", segs: [[[294.650487, 43.212704], [299.507611, 45.858324], [307.039732, 43.939402], [310.850041, 46.991295], [315.364641, 46.052244]]] }], labels: [{ name: "Andromeda", con: "And", lon: 20.955615, lat: 38.455988 }, { name: "Antlia", con: "Ant", lon: 174.735788, lat: -42.080474 }, { name: "Apus", con: "Aps", lon: 257.092353, lat: -51.904863 }, { name: "Aquarius", con: "Aqr", lon: 337.329617, lat: 4.110466 }, { name: "Aquila", con: "Aql", lon: 294.113395, lat: 29.698226 }, { name: "Ara", con: "Ara", lon: 262.041384, lat: -32.891758 }, { name: "Aries", con: "Ari", lon: 46.188307, lat: 5.561323 }, { name: "Auriga", con: "Aur", lon: 83.840012, lat: 13.720946 }, { name: "Bootes", con: "Boo", lon: 205.951338, lat: 48.637135 }, { name: "Caelum", con: "Cae", lon: 61.428577, lat: -63.811664 }, { name: "Camelopardalis", con: "Cam", lon: 87.199278, lat: 48.619038 }, { name: "Cancer", con: "Cnc", lon: 123.845871, lat: 7.943384 }, { name: "Canes\u2005Venatici", con: "CVn", lon: 169.562929, lat: 43.330531 }, { name: "Canis\u2005Maior", con: "CMa", lon: 100.336831, lat: -49.170521 }, { name: "Canis\u2005Minor", con: "CMi", lon: 110.35675, lat: -17.071843 }, { name: "Capricornus", con: "Cap", lon: 311.138601, lat: -4.755563 }, { name: "Carina", con: "Car", lon: 203.640954, lat: -68.948777 }, { name: "Cassiopeia", con: "Cas", lon: 25.897784, lat: 51.230519 }, { name: "Centaurus", con: "Cen", lon: 214.175793, lat: -29.211191 }, { name: "Cepheus", con: "Cep", lon: 41.035564, lat: 66.4993 }, { name: "Cetus", con: "Cet", lon: 24.633932, lat: -15.607413 }, { name: "Chamaeleon", con: "Cha", lon: 249.594205, lat: -63.695553 }, { name: "Circinus", con: "Cir", lon: 242.056423, lat: -48.584367 }, { name: "Columba", con: "Col", lon: 82.457261, lat: -62.321517 }, { name: "Coma\u2005Berenices", con: "Com", lon: 182.183846, lat: 27.258429 }, { name: "Corona\u2005Australis", con: "CrA", lon: 279.585003, lat: -16.959154 }, { name: "Corona\u2005Borealis", con: "CrB", lon: 225.608874, lat: 50.697817 }, { name: "Corvus", con: "Crv", lon: 193.39099, lat: -15.489851 }, { name: "Crater", con: "Crt", lon: 181.302013, lat: -15.820165 }, { name: "Crux", con: "Cru", lon: 224.70154, lat: -50.040072 }, { name: "Cygnus", con: "Cyg", lon: 337.36534, lat: 64.915234 }, { name: "Delphinus", con: "Del", lon: 313.155187, lat: 23.787173 }, { name: "Dorado", con: "Dor", lon: 18.159014, lat: -83.817272 }, { name: "Draco", con: "Dra", lon: 255.552625, lat: 87.363775 }, { name: "Equuleus", con: "Equ", lon: 326.66303, lat: 25.605003 }, { name: "Eridanus", con: "Eri", lon: 44.519798, lat: -35.707669 }, { name: "Fornax", con: "For", lon: 26.814788, lat: -41.210591 }, { name: "Gemini", con: "Gem", lon: 105.782595, lat: 1.000873 }, { name: "Grus", con: "Gru", lon: 326.251441, lat: -31.056323 }, { name: "Hercules", con: "Her", lon: 244.712309, lat: 56.999718 }, { name: "Horologium", con: "Hor", lon: 17.951182, lat: -65.966252 }, { name: "Hydra", con: "Hya", lon: 161.009927, lat: -31.877244 }, { name: "Hydrus", con: "Hyi", lon: 319.472098, lat: -70.424343 }, { name: "Indus", con: "Ind", lon: 301.926445, lat: -37.255007 }, { name: "Lacerta", con: "Lac", lon: 8.55361, lat: 49.010961 }, { name: "Leo", con: "Leo", lon: 154.997755, lat: 5.725842 }, { name: "Leo\u2005Minor", con: "LMi", lon: 147.846031, lat: 19.08147 }, { name: "Lepus", con: "Lep", lon: 87.951035, lat: -48.428623 }, { name: "Libra", con: "Lib", lon: 235.245999, lat: -7.143373 }, { name: "Lupus", con: "Lup", lon: 235.748543, lat: -16.335816 }, { name: "Lynx", con: "Lyn", lon: 112.8512, lat: 28.029299 }, { name: "Lyra", con: "Lyr", lon: 283.019722, lat: 53.033283 }, { name: "Mensa", con: "Men", lon: 275.537729, lat: -76.415797 }, { name: "Microscopium", con: "Mic", lon: 307.914456, lat: -19.480056 }, { name: "Monoceros", con: "Mon", lon: 117.879447, lat: -27.075403 }, { name: "Musca", con: "Mus", lon: 237.878456, lat: -57.918356 }, { name: "Norma", con: "Nor", lon: 251.108158, lat: -30.316864 }, { name: "Octans", con: "Oct", lon: 279.308533, lat: -57.535505 }, { name: "Ophiuchus", con: "Oph", lon: 256.656955, lat: 25.885164 }, { name: "Orion", con: "Ori", lon: 84.057939, lat: -10.315617 }, { name: "Pavo", con: "Pav", lon: 286.171101, lat: -40.068089 }, { name: "Pegasus", con: "Peg", lon: 342.711491, lat: 24.677229 }, { name: "Perseus", con: "Per", lon: 71.784076, lat: 23.066797 }, { name: "Phoenix", con: "Phe", lon: 353.434499, lat: -45.100485 }, { name: "Pictor", con: "Pic", lon: 73.318613, lat: -73.005111 }, { name: "Pisces", con: "Psc", lon: 23.651833, lat: 6.269517 }, { name: "Piscis\u2005Austrinus", con: "PsA", lon: 324.437362, lat: -16.67001 }, { name: "Puppis", con: "Pup", lon: 128.868327, lat: -66.627854 }, { name: "Pyxis", con: "Pyx", lon: 142.973021, lat: -40.032582 }, { name: "Reticulum", con: "Ret", lon: 3.889761, lat: -74.024087 }, { name: "Sagitta", con: "Sge", lon: 296.231267, lat: 39.546111 }, { name: "Sagittarius", con: "Sgr", lon: 288.928, lat: -12.027413 }, { name: "Scorpius", con: "Sco", lon: 252.933494, lat: -15.796715 }, { name: "Sculptor", con: "Scl", lon: 346.808958, lat: -30.559261 }, { name: "Scutum", con: "Sct", lon: 281.911655, lat: 10.444467 }, { name: "Serpens", con: "Ser", lon: 228.706062, lat: 23.224868 }, { name: "Serpens", con: "Ser", lon: 281.683344, lat: 26.014439 }, { name: "Sextans", con: "Sex", lon: 161.883533, lat: -15.242268 }, { name: "Taurus", con: "Tau", lon: 55.299145, lat: -4.208221 }, { name: "Telescopium", con: "Tel", lon: 275.118769, lat: -30.693895 }, { name: "Triangulum", con: "Tri", lon: 37.546066, lat: 21.305214 }, { name: "Triangulum\u2005Australe", con: "TrA", lon: 254.096715, lat: -45.709961 }, { name: "Tucana", con: "Tuc", lon: 314.186678, lat: -52.033726 }, { name: "Ursa\u2005Maior", con: "UMa", lon: 144.88515, lat: 37.801918 }, { name: "Ursa\u2005Minor", con: "UMi", lon: 155.134834, lat: 73.488468 }, { name: "Vela", con: "Vel", lon: 170.294375, lat: -55.619929 }, { name: "Virgo", con: "Vir", lon: 199.514594, lat: 3.925366 }, { name: "Volans", con: "Vol", lon: 231.125009, lat: -80.389936 }, { name: "Vulpecula", con: "Vul", lon: 302.513591, lat: 41.60393 }] };
+
+// node_modules/.pnpm/caelus@0.23.0/node_modules/caelus/dist/src/data-embedded.js
+var embeddedData = {
+  vsop: { mercury: vsop87d_mercury_embedded_default, venus: vsop87d_venus_embedded_default, earth: vsop87d_earth_embedded_default, mars: vsop87d_mars_embedded_default, jupiter: vsop87d_jupiter_embedded_default, saturn: vsop87d_saturn_embedded_default, uranus: vsop87d_uranus_embedded_default, neptune: vsop87d_neptune_embedded_default },
+  nutation: nutation_iau1980_default,
+  moonMeeus: moon_meeus47_default,
+  pluto: pluto_meeus37_default,
+  chiron: chiron_cheb_default,
+  fixedStars: fixed_stars_default,
+  constellations: constellations_default
+};
+
+// packages/vedic/src/vedic-provider.ts
+var CAELUS_VERSION = "0.23.0";
+var PROVIDER4 = { id: "caelus", version: CAELUS_VERSION, license: "MIT" };
+var ENGINE = new Engine(embeddedData);
+var MS_PER_DAY3 = 864e5;
+var UNIX_EPOCH_JD = 24405875e-1;
+var GRAHAS = [
+  ["Sun", "sun"],
+  ["Moon", "moon"],
+  ["Mercury", "mercury"],
+  ["Venus", "venus"],
+  ["Mars", "mars"],
+  ["Jupiter", "jupiter"],
+  ["Saturn", "saturn"]
+];
+function norm3602(value) {
+  const out = value % 360;
+  return out < 0 ? out + 360 : out;
+}
+function round62(value) {
+  return Math.round(value * 1e6) / 1e6;
+}
+function computeVedicP2Positions(input) {
+  const jdUt = input.utcInstantMs / MS_PER_DAY3 + UNIX_EPOCH_JD;
+  const chart = ENGINE.chartAt(jdUt, input.latitudeDeg, input.longitudeEastDeg, {
+    zodiac: "sidereal:lahiri",
+    houseSystem: "whole_sign"
+  });
+  const grahas = {};
+  for (const [graha, body] of GRAHAS) grahas[graha] = round62(chart.bodies[body].lon);
+  const meanRahuLongitudeDeg = round62(chart.bodies.mean_node.lon);
+  const trueRahuLongitudeDeg = round62(chart.bodies.true_node.lon);
+  return {
+    grahas,
+    meanRahuLongitudeDeg,
+    meanKetuLongitudeDeg: round62(norm3602(meanRahuLongitudeDeg + 180)),
+    trueRahuLongitudeDeg,
+    trueKetuLongitudeDeg: round62(norm3602(trueRahuLongitudeDeg + 180)),
+    lagnaLongitudeDeg: round62(chart.angles.asc)
+  };
+}
+function computeVedic(normalized, settings) {
+  const positions = computeVedicP2Positions({
+    utcInstantMs: normalized.utcInstantMs,
+    latitudeDeg: normalized.location.latitude,
+    longitudeEastDeg: normalized.location.longitude
+  });
+  const result = {
+    rulesetId: settings.rulesetId,
+    provider: PROVIDER4,
+    ayanamsha: { id: "lahiri-iae-1985", swissReferenceMode: "SE_SIDM_LAHIRI" },
+    grahas: GRAHAS.map(([graha]) => ({ graha, longitudeDeg: positions.grahas[graha] })),
+    nodes: {
+      mean: {
+        rahuLongitudeDeg: positions.meanRahuLongitudeDeg,
+        ketuLongitudeDeg: positions.meanKetuLongitudeDeg
+      },
+      true: {
+        rahuLongitudeDeg: positions.trueRahuLongitudeDeg,
+        ketuLongitudeDeg: positions.trueKetuLongitudeDeg
+      }
+    },
+    // Normalization anchors an unknown wall time at noon only for date-based work;
+    // that anchor must never become a claimed ascendant.
+    lagnaLongitudeDeg: normalized.timeKnown ? positions.lagnaLongitudeDeg : null,
+    precision: "high"
+  };
+  return { result, warnings: [] };
 }
 
 // packages/orchestrator/src/calculate.ts
@@ -51918,6 +53777,8 @@ function calculate(input, options = {}) {
       warnings.push(...vedicWarnings);
       if (result !== null) {
         bundle.vedic = result;
+        providers.push(result.provider);
+        rulesets.push(parseRulesetId(result.rulesetId));
       }
     } else {
       warnings.push(pendingSystemWarning(system));
@@ -53002,7 +54863,7 @@ function industryFinding(bazi) {
 // packages/bazi-rules/src/interpret.ts
 var BAZI_RULES_VERSION = "0.1.0";
 var BAZI_RULES_RULESET_ID = `bazi-rules-ziping@${BAZI_RULES_VERSION}`;
-var PROVIDER4 = { id: "bazi-rules", version: BAZI_RULES_VERSION, license: "MIT" };
+var PROVIDER5 = { id: "bazi-rules", version: BAZI_RULES_VERSION, license: "MIT" };
 function interpretBazi(bazi, opts = {}) {
   const findings = [
     strengthFinding(bazi),
@@ -53016,7 +54877,7 @@ function interpretBazi(bazi, opts = {}) {
     ...luckClashFindings(bazi),
     ...opts.focusYear !== void 0 ? annualTimelineFindings(bazi, opts.focusYear) : []
   ];
-  return { rulesetId: BAZI_RULES_RULESET_ID, provider: PROVIDER4, findings };
+  return { rulesetId: BAZI_RULES_RULESET_ID, provider: PROVIDER5, findings };
 }
 
 // packages/western-rules/src/planet-sign.ts
@@ -53256,7 +55117,7 @@ function dignityFindings(chart) {
 // packages/western-rules/src/interpret.ts
 var WESTERN_RULES_VERSION = "0.1.0";
 var WESTERN_RULES_RULESET_ID = `western-rules@${WESTERN_RULES_VERSION}`;
-var PROVIDER5 = {
+var PROVIDER6 = {
   id: "western-rules",
   version: WESTERN_RULES_VERSION,
   license: "MIT"
@@ -53264,7 +55125,7 @@ var PROVIDER5 = {
 function interpretWestern(chart) {
   return {
     rulesetId: WESTERN_RULES_RULESET_ID,
-    provider: PROVIDER5,
+    provider: PROVIDER6,
     findings: [
       ...planetSignFindings(chart),
       ...planetHouseFindings(chart),
@@ -53450,7 +55311,7 @@ function brightnessFindings(chart) {
 // packages/ziwei-rules/src/interpret.ts
 var ZIWEI_RULES_VERSION = "0.1.0";
 var ZIWEI_RULES_RULESET_ID = `ziwei-rules@${ZIWEI_RULES_VERSION}`;
-var PROVIDER6 = {
+var PROVIDER7 = {
   id: "ziwei-rules",
   version: ZIWEI_RULES_VERSION,
   license: "MIT"
@@ -53458,7 +55319,7 @@ var PROVIDER6 = {
 function interpretZiwei(chart) {
   return {
     rulesetId: ZIWEI_RULES_RULESET_ID,
-    provider: PROVIDER6,
+    provider: PROVIDER7,
     findings: [
       ...mainStarFindings(chart),
       ...palaceStarFindings(chart),
@@ -55672,7 +57533,7 @@ function ziweiSynastryFindings(a, b) {
 }
 
 // packages/synastry/src/western-synastry.ts
-var ASPECTS = [
+var ASPECTS2 = [
   { type: "\u5408\u76F8(conjunction)", angle: 0, orb: 8, polarity: "\u4E2D\u6027" },
   { type: "\u516D\u5206\u76F8(sextile)", angle: 60, orb: 4, polarity: "\u5409" },
   { type: "\u5211\u76F8(square)", angle: 90, orb: 7, polarity: "\u51F6" },
@@ -55705,7 +57566,7 @@ function westernSynastryFindings(a, b) {
   for (const x of pa) {
     for (const y of pb) {
       const sep = separation(x.lon, y.lon);
-      for (const def of ASPECTS) {
+      for (const def of ASPECTS2) {
         if (Math.abs(sep - def.angle) <= def.orb) {
           out.push({
             system: "western",

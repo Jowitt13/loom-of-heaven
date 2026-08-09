@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Vedic (Jyotish) provider skeleton (ADR 0013 P1). Computes NOTHING yet: always returns null + SYSTEM_NOT_YET_IMPLEMENTED. Precise Lahiri ayanamsha, grahas, nodes and Lagna land in P2 behind an independent Swiss golden.",
+  "description": "Vedic (Jyotish) P2 numeric provider (ADR 0013): precise Lahiri grahas, both node modes and Lagna behind the offline Swiss golden; P3 classifications and dashas remain unimplemented.",
   "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -11,7 +11,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ming/contracts": "workspace:*"
+    "@ming/contracts": "workspace:*",
+    "caelus": "0.23.0"
   },
   "devDependencies": {
     "@ming/time-location": "workspace:*"

@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { computeVedicP2Positions } from '@ming/vedic';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const fixturePath = join(here, '..', 'goldens', 'swiss-vedic-mode1.json');
@@ -50,6 +51,11 @@ function isLongitude(value: number): boolean {
   return Number.isFinite(value) && value >= 0 && value < 360;
 }
 
+function arcMinuteDifference(actual: number, expected: number): number {
+  const delta = Math.abs(norm360(actual - expected));
+  return Math.min(delta, 360 - delta) * 60;
+}
+
 function boundaryIndex(c: GoldenCase): number {
   if (c.boundaryTags.includes('rashi')) return Math.floor(c.grahas.Moon / 30);
   if (c.boundaryTags.includes('nakshatra')) return Math.floor(c.grahas.Moon / (360 / 27));
@@ -90,6 +96,39 @@ describe('Vedic Swiss mode-1 golden: fail-closed fixture gate', () => {
       }
       expect(norm360(c.meanKetu - c.meanRahu)).toBeCloseTo(180, 9);
       expect(norm360(c.trueKetu - c.trueRahu)).toBeCloseTo(180, 9);
+    }
+  });
+
+  it('keeps every P2 runtime field within the frozen Swiss tolerance', () => {
+    for (const c of fixture.cases) {
+      const actual = computeVedicP2Positions({
+        utcInstantMs: Date.parse(c.utcIso),
+        latitudeDeg: c.latDeg,
+        longitudeEastDeg: c.lonEastDeg,
+      });
+      for (const graha of GRAHAS) {
+        expect(
+          arcMinuteDifference(actual.grahas[graha], c.grahas[graha]),
+          `${c.id} ${graha}`,
+        ).toBeLessThanOrEqual(fixture.toleranceArcmin);
+      }
+      for (const [label, observed, expected] of [
+        ['mean Rahu', actual.meanRahuLongitudeDeg, c.meanRahu],
+        ['true Rahu', actual.trueRahuLongitudeDeg, c.trueRahu],
+        ['Lagna', actual.lagnaLongitudeDeg, c.lagna],
+      ] as const) {
+        expect(arcMinuteDifference(observed, expected), `${c.id} ${label}`).toBeLessThanOrEqual(
+          fixture.toleranceArcmin,
+        );
+      }
+      expect(norm360(actual.meanKetuLongitudeDeg - actual.meanRahuLongitudeDeg)).toBeCloseTo(
+        180,
+        9,
+      );
+      expect(norm360(actual.trueKetuLongitudeDeg - actual.trueRahuLongitudeDeg)).toBeCloseTo(
+        180,
+        9,
+      );
     }
   });
 

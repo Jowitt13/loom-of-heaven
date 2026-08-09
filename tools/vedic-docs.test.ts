@@ -4,10 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Vedic P0 doc gate (ADR 0013): the Jyotish line exists ONLY as frozen documentation.
- * This test (a) pins the P0 deliverables and their required sections so they cannot
- * silently disappear or lose the convention freeze, and (b) fails if any user-facing
- * surface starts claiming Vedic capability before the ADR 0013 P5 slice actually ships.
+ * Vedic architecture gate (ADR 0013). It pins the P0 convention freeze and makes
+ * P2's narrow numeric scope explicit while preventing a user-facing capability claim
+ * before the ADR 0013 P5 slice actually ships.
  */
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel: string): string => readFileSync(join(root, rel), 'utf8');
@@ -99,17 +98,19 @@ describe('vedic docs gate: P0 deliverables present and complete', () => {
     }
   });
 
-  it('RULESETS.md lists the vedic ruleset as PLANNED and links ADR 0013', () => {
+  it('RULESETS.md scopes the ruleset to the P2 numeric substrate and links ADR 0013', () => {
     const rulesets = read('docs/RULESETS.md');
     expect(rulesets).toContain('vedic-parashara-lahiri@0.1.0');
-    expect(rulesets).toMatch(/PLANNED, not implemented/);
+    expect(rulesets).toMatch(/P2 numeric substrate; not user-facing/);
+    expect(rulesets).toContain('P3-only products');
     expect(rulesets).toContain('adr/0013-vedic-architecture.md');
   });
 
-  it('P0 docs never present the plan as a shipped capability', () => {
+  it('P2 docs disclose their narrow implemented scope and retain the P3 boundary', () => {
     for (const rel of [ADR, MATRIX]) {
-      expect(read(rel), `${rel} must carry a not-implemented notice`).toMatch(
-        /no Vedic code exists yet|Nothing in this file is implemented yet/,
+      expect(read(rel), `${rel} must describe the P2 numeric boundary`).toMatch(/P2.*numeric/i);
+      expect(read(rel), `${rel} must retain an unimplemented P3 boundary`).toMatch(
+        /P3[\s\S]*unimplemented/i,
       );
     }
   });
