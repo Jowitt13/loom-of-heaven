@@ -4,6 +4,7 @@
 # (handoff §7.1). This file carries UI text only; it never changes calculation.
 name: calculate-birth-charts
 description: >-
+  Includes a bounded Vedic/Jyotish Lahiri chart; both node modes are returned without a product default.
   Deterministically calculate Western natal charts, Four Pillars/BaZi (四柱八字) and
   Zi Wei Dou Shu (紫微斗数) from birth date, local time, IANA timezone, coordinates,
   calendar and versioned rule profiles, and on request narrate a sourced reading with

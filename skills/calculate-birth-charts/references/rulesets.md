@@ -81,6 +81,18 @@ version, whether true solar time is applied, and the major/minor limit configura
 
 ## Solar time (important)
 
+## Vedic / Jyotish (`vedic-parashara-lahiri@0.1.0`)
+
+The Vedic provider uses Lahiri IAE-1985 (`SE_SIDM_LAHIRI` reference mode), whole-sign bhava,
+27 nakshatras, D1/D9, instantaneous panchanga and `julian-365.25` Vimshottari. It returns both
+mean and true Rahu/Ketu node pairs; there is **no product node default yet**, so `vedic.nodes`
+is an explicit school selection only. Ketu is exactly opposite its corresponding Rahu.
+
+The MIT `caelus@0.23.0` provider runs offline. `precision: "high"` is a narrow fixture claim:
+the relevant fields passed the recorded Swiss-only external numeric reference at <=1 arc-minute.
+Swiss Ephemeris is never bundled or loaded by runtime/CI. For unknown birth time,
+`VEDIC_TIME_REQUIRED` suppresses Lagna, bhava, D9 Lagna, Vaara and Vimshottari.
+
 Mean and apparent solar time are optional inputs to BaZi / Zi Wei only. They are **never**
 substituted for the Western UTC instant + coordinates. Mean solar time is longitude-driven
 (1° = 4 minutes); the fixed 120°E / UTC+8 simplification is never applied globally.

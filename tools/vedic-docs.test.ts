@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Vedic architecture gate (ADR 0013). P3B may expose internal provider fields
- * only after its reviewed fixtures pass. P5 still owns every user-facing surface.
+ * Vedic architecture gate (ADR 0013). P5 may expose Vedic only after its
+ * reviewed fixtures pass, and must retain every disclosed scope boundary.
  */
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel: string): string => readFileSync(join(root, rel), 'utf8');
@@ -92,11 +92,11 @@ describe('vedic docs gate: P0 conventions and P3B evidence', () => {
     expect(matrix).toContain('5.457 seconds');
   });
 
-  it('scopes the ruleset to the P2/P3B internal substrate and links ADR 0013', () => {
+  it('documents the shipped P5 ruleset boundary and links ADR 0013', () => {
     const rulesets = read('docs/RULESETS.md');
     expect(rulesets).toContain('vedic-parashara-lahiri@0.1.0');
-    expect(rulesets).toMatch(/P2\/P3B substrate; not user-facing/);
-    expect(rulesets).toContain('internal provider outputs only');
+    expect(rulesets).toMatch(/P5 user-facing system/i);
+    expect(rulesets).toMatch(/both node modes/i);
     expect(rulesets).toContain('16.610 seconds');
     expect(rulesets).toContain('5.457 seconds');
     expect(rulesets).toContain('adr/0013-vedic-architecture.md');
@@ -114,7 +114,7 @@ describe('vedic docs gate: P0 conventions and P3B evidence', () => {
     }
   });
 
-  it('locks P4 to a v2 hard cut while retaining the P5 user-surface boundary', () => {
+  it('locks P4 to a v2 hard cut and records the P5 user-surface boundary', () => {
     const adr = read(ADR);
     const matrix = read(MATRIX);
     const rulesets = read('docs/RULESETS.md');
@@ -125,10 +125,11 @@ describe('vedic docs gate: P0 conventions and P3B evidence', () => {
     }
     expect(adr).toContain('VEDIC_TIME_REQUIRED');
     expect(adr).toMatch(/samples every civil minute/i);
+    expect(adr).toMatch(/P5.*implemented/i);
   });
 });
 
-describe('vedic docs gate: no premature capability claims on user-facing surfaces', () => {
+describe('vedic docs gate: P5 user-facing claims stay truthful', () => {
   const skillSurfaces = [
     'skills/calculate-birth-charts/SKILL.md',
     'skills/calculate-birth-charts/agents/openai.yaml',
@@ -136,29 +137,29 @@ describe('vedic docs gate: no premature capability claims on user-facing surface
     'skills/calculate-birth-charts/references/input-contract.md',
     'skills/calculate-birth-charts/references/output-contract.md',
     '.claude-plugin/plugin.json',
-    'install-manifest.json',
   ];
 
-  it('keeps skill surfaces free of Vedic or Jyotish claims', () => {
-    const offenders = skillSurfaces.filter((file) => /vedic|jyotish/i.test(read(file)));
-    expect(offenders, `remove Vedic claims from: ${offenders.join(', ')}`).toEqual([]);
+  it('exposes Vedic consistently across current Skill surfaces', () => {
+    const missing = skillSurfaces.filter((file) => !/vedic|jyotish/i.test(read(file)));
+    expect(missing, `P5 Skill surface lacks Vedic disclosure: ${missing.join(', ')}`).toEqual([]);
+    const rulesets = read('skills/calculate-birth-charts/references/rulesets.md');
+    expect(rulesets).toMatch(/both[\s\S]*mean[\s\S]*true|mean[\s\S]*true[\s\S]*both/i);
+    expect(rulesets).toMatch(/no.*default|default.*pending/i);
+    expect(rulesets).toContain('VEDIC_TIME_REQUIRED');
   });
 
-  it('keeps CLI --systems all at the three shipped systems until P5', () => {
+  it('expands CLI --systems all while retaining the legacy no-flag default', () => {
     const cli = read('skills/calculate-birth-charts/scripts/ming-chart.mjs');
-    expect(cli).toContain("['western', 'bazi', 'ziwei']");
-    expect(cli).not.toMatch(/vedic|jyotish/i);
+    expect(cli).toContain("['western', 'bazi', 'ziwei', 'vedic']");
+    const contracts = read('packages/contracts/src/birth-input.ts');
+    expect(contracts).toContain("default(['western', 'bazi', 'ziwei'])");
   });
 
-  it('allows README to mention Vedic only as an explicit plan', () => {
+  it('keeps public wording within the precision and published-release boundary', () => {
     const readme = read('README.md');
-    const mentions = readme.match(/^.*(vedic|jyotish).*$/gim) ?? [];
-    const unplanned = mentions.filter(
-      (line) => !/planned|roadmap|not implemented|ADR 0013/i.test(line),
-    );
-    expect(
-      unplanned,
-      `README lines claiming Vedic without a plan marker: ${unplanned.join(' | ')}`,
-    ).toEqual([]);
+    expect(readme).toMatch(/Vedic|Jyotish/i);
+    expect(readme).toMatch(/Swiss-only external numeric reference/i);
+    expect(readme).toMatch(/both.*mean.*true|mean.*true.*both/i);
+    expect(read('install-manifest.json')).not.toMatch(/vedic|jyotish/i);
   });
 });

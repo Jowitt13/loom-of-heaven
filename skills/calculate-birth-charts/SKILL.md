@@ -35,6 +35,21 @@ narrate only from its output.
   astrology 失势/detriment ≠ 落陷/fall; 水逆 ≠ 思考慢); avoid single-star verdicts; self-check for
   contradictions. See `references/reading-style.md`.
 
+## Vedic / Jyotish boundary (P5)
+
+For a full technical chart, `calculate --systems all` explicitly requests Western, BaZi, Zi Wei
+and **Vedic / Jyotish**. The Vedic result contains Lahiri sidereal Sun–Saturn, both
+`nodes.mean` and `nodes.true` (Ketu is exactly opposite the corresponding Rahu), plus Lagna,
+whole-sign bhava, nakshatra/pada, panchanga, D1/D9 and Vimshottari only when the engine returns
+them. Never describe mean or true Rahu as the product default: the user or host may select
+`vedic.nodes` explicitly, but the owner-level default remains pending.
+
+`precision: "high"` is limited to the recorded Swiss-only external numeric-reference fixture;
+Swiss Ephemeris never runs in the bundle or at runtime. When birth time is unknown, relay
+`VEDIC_TIME_REQUIRED`: Lagna, bhava, D9 Lagna, Vaara and Vimshottari are suppressed rather than
+inferred from a noon anchor. The raw `calculate` input without `--systems` retains its legacy
+three-system default for compatibility.
+
 ## Inputs to collect (only what calculation needs)
 
 Required: calendar (`gregorian` | `lunar`), local date `YYYY-MM-DD`, local time `HH:mm[:ss]`
@@ -137,7 +152,9 @@ node scripts/ming-chart.mjs version
 node scripts/ming-chart.mjs migrate --host qoder|workbuddy --source <extracted-new-package-dir>
 ```
 
-- `--systems` accepts `all` or a comma list of `western,bazi,ziwei`. Always run `all`.
+- `--systems` accepts `all` or a comma list of `western,bazi,ziwei,vedic`. `all` explicitly
+  requests all four systems. Without the flag, raw `calculate` keeps the legacy three-system
+  default for compatibility.
 - `calculate` accepts `--now <iso|ms>` and `--request-id <id>` for reproducible output.
 - `version` reads the sibling `BUILD_MANIFEST.json` and reports the REAL installed version
   (engineVersion / releaseVersion / releaseTag / legacy / doubleNested) — never guessed, and not

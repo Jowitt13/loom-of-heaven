@@ -60,6 +60,18 @@ whole-sign bhava, 27-nakshatra scheme, instantaneous panchanga, D1/D9)
 live in [ADR 0013](adr/0013-vedic-architecture.md) and the per-topic source registry
 [`docs/VEDIC_SOURCE_MATRIX.md`](VEDIC_SOURCE_MATRIX.md). Target product version: v0.3.0.
 
+## Vedic P5 exposure boundary
+
+This is the **P5 user-facing system** boundary.
+
+P5 exposes `vedic-parashara-lahiri@0.1.0` as a user-facing technical chart through
+`calculate --systems all`, the Skill and host source metadata. The raw no-settings `systems`
+default remains Western/BaZi/Zi Wei for compatibility. The chart returns **both node modes**;
+there is no product default while the owner decision remains pending. Unknown time emits
+`VEDIC_TIME_REQUIRED` and suppresses time-of-day values. The provider is offline MIT `caelus`;
+the <=1 arc-minute statement is limited to the recorded Swiss-only external numeric-reference
+fixture, never a general astrometric claim. Published v0.2 assets remain P6 work.
+
 ## Solar-time rule (invariant)
 
 ### P4 internal answer-contract update (2026-08-09)

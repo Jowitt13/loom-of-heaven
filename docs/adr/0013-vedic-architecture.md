@@ -396,6 +396,14 @@ Until a future independent source passes a field, user-facing and release docume
    rejected; v2 is the only public result and answer-plan contract. There is no dual-emission or
    migration shim at runtime.
 
+## P5 implementation note (2026-08-09)
+
+P5 is implemented: `--systems all` requests all four systems and the current Skill/host source
+metadata documents the bounded Vedic technical chart. The raw no-settings default remains three
+systems for compatibility. Both node modes stay visible without implying a product default, and
+the user-facing precision statement remains Swiss-only external numeric-reference evidence rather
+than a general accuracy claim. Published release assets remain reserved for P6.
+
 ## Consequences
 
 - No calculation code, contract, bundle, CLI, lockfile, SBOM or golden changes in P0 — only this

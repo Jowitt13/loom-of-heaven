@@ -10,7 +10,7 @@
  *
  *   node scripts/ming-chart.mjs doctor [--json]
  *   node scripts/ming-chart.mjs normalize  --input-file in.json [--output-file out.json]
- *   node scripts/ming-chart.mjs calculate  --input-file in.json [--systems all|western,bazi,ziwei] [--output-file out.json] [--now <iso|ms>] [--request-id <id>]
+ *   node scripts/ming-chart.mjs calculate  --input-file in.json [--systems all|western,bazi,ziwei,vedic] [--output-file out.json] [--now <iso|ms>] [--request-id <id>]
  *   node scripts/ming-chart.mjs compare    --input-file in.json --profiles a,b [--output-file out.json]
  *   node scripts/ming-chart.mjs horoscope  --input-file in.json --at YYYY-MM-DD[THH:mm:ss] [--output-file out.json]
  *   node scripts/ming-chart.mjs interpret  --input-file in.json [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file interpretation.json]
@@ -114,7 +114,7 @@ function applySystems(raw, systemsArg) {
   if (typeof systemsArg !== 'string') return raw;
   const systems =
     systemsArg === 'all'
-      ? ['western', 'bazi', 'ziwei']
+      ? ['western', 'bazi', 'ziwei', 'vedic']
       : systemsArg.split(',').map((s) => s.trim());
   return { ...raw, settings: { ...(raw.settings ?? {}), systems } };
 }

@@ -23,7 +23,7 @@ The CLI accepts a single JSON object. Unknown top-level keys are rejected. JavaS
   "ruleGender": "unspecified", // "male" | "female" | "unspecified" (only where a rule needs it)
   "dstDisambiguation": "earlier", // "earlier" | "later"; required only when the local time is ambiguous
   "settings": {
-    "systems": ["western", "bazi", "ziwei"],
+    "systems": ["western", "bazi", "ziwei", "vedic"],
     "western": {
       "rulesetId": "western-tropical-placidus@0.1.0",
       "zodiac": "tropical", // "tropical" | "sidereal"
@@ -42,6 +42,11 @@ The CLI accepts a single JSON object. Unknown top-level keys are rejected. JavaS
       "rulesetId": "iztro-default@0.1.0",
       "useApparentSolarTime": false,
     },
+    "vedic": {
+      "rulesetId": "vedic-parashara-lahiri@0.1.0",
+      "nodes": "mean", // optional explicit school selection: "mean" | "true"; no product default
+      "dashaYear": "julian-365.25",
+    },
   },
 }
 ```
@@ -59,6 +64,10 @@ The CLI accepts a single JSON object. Unknown top-level keys are rejected. JavaS
 - Supported year range in this version is 1901–2100; outside it returns `DATE_OUT_OF_RANGE`.
 - `settings` and every sub-object may be omitted; documented defaults are applied and echoed
   back in `originalInput`.
+- `vedic.nodes` is deliberately optional. The Vedic chart always reports both `nodes.mean` and
+  `nodes.true`; omit the setting unless the caller has explicitly selected a node school. The raw
+  no-settings default remains Western/BaZi/Zi Wei for compatibility; use `--systems all` to ask
+  for the complete four-system technical chart.
 
 ## Minimal example
 

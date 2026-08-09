@@ -9,6 +9,9 @@
   equation-of-time approximation (US Government, public domain).
 - **Chinese calendar / BaZi**: [GB/T 33661-2017 《农历的编算和颁行》](https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296) defines the calendar and the 24 solar terms. BaZi computation via tyme4ts (MIT).
 - **Zi Wei Dou Shu**: via iztro (MIT) with the `iztro-default` ruleset.
+- **Vedic / Jyotish**: the MIT `caelus@0.23.0` embedded-data provider, using the Lahiri
+  IAE-1985 convention. Swiss Ephemeris is a Swiss-only external numeric reference for the
+  recorded fixture gate; it is not a runtime dependency, bundled file or CI tool.
 - **Western position cross-check**: [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) and Swiss
   Ephemeris documentation; positions via astronomy-engine (MIT, VSOP87 + NOVAS based; upstream
   claims ~±1′ accuracy and tests against JPL Horizons). See the Western limitation note below.
@@ -23,6 +26,10 @@
   zodiac (生肖), luck cycle (大运/起运). Gender-gated and time-gated (no fabrication).
 - **Zi Wei Dou Shu (紫微斗数)**: natal twelve palaces, stars with brightness and 四化,
   major limits (大限), 命主/身主, five-elements class (五行局). Gender- and time-gated.
+- **Vedic / Jyotish**: Lahiri sidereal Sun–Saturn, both mean and true Rahu/Ketu modes, Lagna
+  with whole-sign bhava, 27 nakshatra/pada, panchanga, D1/D9 and Vimshottari where the input
+  supports them. `precision: "high"` means returned P2 fields passed the recorded Swiss-only
+  external numeric-reference fixture at <=1 arc-minute; it is not a general astrometric claim.
 - Versioned metadata, warnings and provenance on every result.
 
 ## Current limitations (stated honestly)
@@ -41,6 +48,10 @@
   of being silently switched; houses/ascendant require a known birth time.
 - BaZi and Zi Wei both need a known birth time. Zi Wei and the BaZi luck cycle (大运)
   also need `ruleGender`. When missing, those parts are omitted with a warning.
+- **Vedic node choice remains explicit.** Both `nodes.mean` and `nodes.true` are returned and
+  neither is silently presented as the product default. With unknown birth time,
+  `VEDIC_TIME_REQUIRED` suppresses Lagna, bhava, D9 Lagna, Vaara and Vimshottari; only facts
+  stable across the whole local civil day may remain.
 - **`interpret` 吉凶 is a sourced traditional-metaphysical judgement, 非科学预测.** It emits
   刑冲合害 / 神煞 / 格局 / 大运·流年 facts each with `polarity` (吉/凶/中性) and a `reason` chain;
   concrete probabilities and years are the host model's 命理 assessment layered on top, always

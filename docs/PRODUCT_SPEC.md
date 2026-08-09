@@ -1,6 +1,10 @@
 # Product Spec — Ming Engine (`calculate-birth-charts`)
 
-> Deterministic three-system birth-chart engine delivered as a self-contained WorkBuddy Skill.
+> Deterministic four-system birth-chart engine delivered as a self-contained WorkBuddy Skill.
+
+> P5 note: `calculate --systems all` explicitly requests the bounded Vedic/Jyotish technical
+> chart alongside Western, BaZi and Zi Wei. Both Vedic node modes are returned without a product
+> default; unknown time must relay `VEDIC_TIME_REQUIRED` rather than fabricate time-of-day values.
 
 ## Goal
 
