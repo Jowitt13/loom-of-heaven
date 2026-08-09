@@ -34,10 +34,11 @@ describe('calculate: explicit vedic dispatch (P2 numerical substrate)', () => {
     expect(bundle.provenance.providers.map((p) => p.id)).toEqual(['astronomy-engine', 'caelus']);
   });
 
-  it('default input behavior is unchanged: Vedic remains opt-in until P5', () => {
+  it('default input computes Vedic alongside the other shipped systems', () => {
     const bundle = calculate(parseBirthInput(raw), { now: FIXED });
-    expect(bundle.vedic).toBeUndefined();
-    expect(bundle.warnings.some((w) => w.system === 'vedic')).toBe(false);
+    expect(bundle.vedic).toBeDefined();
+    expect(bundle.vedic?.provider.id).toBe('caelus');
+    expect(bundle.warnings.some((w) => w.code === 'SYSTEM_NOT_YET_IMPLEMENTED')).toBe(false);
     expect(bundle.western).toBeDefined();
     expect(bundle.bazi).toBeDefined();
   });

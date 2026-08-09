@@ -14,11 +14,12 @@ const base = {
 describe('BirthInput schema', () => {
   it('applies nested defaults via prefault', () => {
     const parsed = parseBirthInput({ ...base, localTime: '14:30' });
-    expect(parsed.settings.systems).toEqual(['western', 'bazi', 'ziwei']);
+    expect(parsed.settings.systems).toEqual(['western', 'bazi', 'ziwei', 'vedic']);
     expect(parsed.settings.western.houseSystem).toBe('placidus');
     expect(parsed.settings.western.nodes).toBe('true');
     expect(parsed.settings.bazi.dayBoundary).toBe('zi-hour');
     expect(parsed.settings.ziwei.rulesetId).toBe('iztro-default@0.1.0');
+    expect(parsed.settings.vedic.nodes).toBe('mean');
     expect(parsed.schemaVersion.length).toBeGreaterThan(0);
   });
 

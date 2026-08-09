@@ -77,7 +77,7 @@ export const PUBLISHED_RELEASE_TAG: string | null = 'v0.3.0';
 /** Engine semver of the candidate: the audited source engine, not a second hand-maintained value. */
 export const CANDIDATE_ENGINE_VERSION = ENGINE_VERSION;
 /** Install-package release version of the next candidate; unpublished until explicit Release authorization. */
-export const CANDIDATE_RELEASE_VERSION = '0.3.1';
+export const CANDIDATE_RELEASE_VERSION = '0.4.0';
 /** Immutable tag the CANDIDATE build targets (never `latest/download`). */
 export const CANDIDATE_RELEASE_TAG = `v${CANDIDATE_RELEASE_VERSION}`;
 /** Sub-directory under `releases/` for the candidate build (gitignored). */

@@ -142,8 +142,8 @@ and never treats the noon normalization anchor as a natal time.
 
 `precision: "high"` means only that covered fields satisfy the recorded Swiss-only external
 numeric-reference fixture at <=1 arc-minute. It does not make a general accuracy claim and Swiss
-Ephemeris is not a runtime, bundle or CI dependency. `vedic.nodes` is optional input: both node
-modes remain in output until an owner confirms a product default.
+Ephemeris is not a runtime, bundle or CI dependency. `vedic.nodes` defaults to `"mean"`; both node
+modes remain in output and callers may explicitly select `"true"`.
 
 ## Error envelope and exit codes
 

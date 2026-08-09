@@ -1,8 +1,8 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
 > **P5 Vedic/Jyotish technical chart:** `calculate --systems all` explicitly requests Western,
-> BaZi, Zi Wei and Vedic. The Vedic result reports both mean and true Rahu/Ketu modes without a
-> product node default, suppresses time-of-day fields with `VEDIC_TIME_REQUIRED` when birth time
+> BaZi, Zi Wei and Vedic. The Vedic result defaults to the mean Rahu/Ketu convention while still
+> reporting both mean and true modes, suppresses time-of-day fields with `VEDIC_TIME_REQUIRED` when birth time
 > is unknown, and uses an offline MIT provider. Its `precision: "high"` is limited to the covered
 > **Swiss-only external numeric reference** fixture (<=1 arc-minute), not a general astrometric
 > accuracy claim. Swiss Ephemeris is never bundled or loaded at runtime. The v0.3.0 Release

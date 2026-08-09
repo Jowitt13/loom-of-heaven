@@ -85,8 +85,8 @@ version, whether true solar time is applied, and the major/minor limit configura
 
 The Vedic provider uses Lahiri IAE-1985 (`SE_SIDM_LAHIRI` reference mode), whole-sign bhava,
 27 nakshatras, D1/D9, instantaneous panchanga and `julian-365.25` Vimshottari. It returns both
-mean and true Rahu/Ketu node pairs; there is **no product node default yet**, so `vedic.nodes`
-is an explicit school selection only. Ketu is exactly opposite its corresponding Rahu.
+mean and true Rahu/Ketu node pairs; the owner-confirmed product default is `vedic.nodes: "mean"`,
+while callers may explicitly choose `"true"`. Ketu is exactly opposite its corresponding Rahu.
 
 The MIT `caelus@0.23.0` provider runs offline. `precision: "high"` is a narrow fixture claim:
 the relevant fields passed the recorded Swiss-only external numeric reference at <=1 arc-minute.

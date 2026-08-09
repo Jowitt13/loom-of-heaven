@@ -41,10 +41,10 @@ describe('vedic docs gate: P0 conventions and P3B evidence', () => {
     expect(adr).toMatch(/never be\s+treated as\s+synonyms/i);
   });
 
-  it('keeps Rahu proposed while recording the bounded P3B evidence results', () => {
+  it('locks owner-confirmed defaults while recording the bounded P3B evidence results', () => {
     const adr = read(ADR);
-    expect(adr).toMatch(/- Status: Proposed/);
-    expect(adr).not.toMatch(/- Status: Accepted/);
+    expect(adr).toMatch(/- Status: Accepted/);
+    expect(adr).not.toMatch(/- Status: Proposed/);
     expect(adr).toMatch(/Owner-confirmed default \(2026-07-31\):\s+`julian-365\.25`/i);
     expect(adr).toContain('upper-limb-standard-refraction');
     expect(adr).toMatch(/NDAstro 0\.28\.1/i);
@@ -54,7 +54,8 @@ describe('vedic docs gate: P0 conventions and P3B evidence', () => {
     expect(adr).toMatch(/16 synthetic.*swetest -rise -emos/i);
     expect(adr).not.toMatch(/remaining Vimshottari blocker is verification/i);
     expect(adr).not.toMatch(/not yet verified and is a P2\/P3\s+implementation blocker/i);
-    expect(adr).toMatch(/\*\*Proposed\*\* default `nodes: 'mean'`/);
+    expect(adr).toMatch(/\*\*Owner-confirmed default \(2026-08-09\): mean node\.\*\*/);
+    expect(adr).toMatch(/v0\.4\.0[\s\S]*default[\s\S]*all four\s+systems/i);
   });
 
   it('keeps the P2 evidence amendment field-scoped without lowering the Swiss gate', () => {
@@ -97,12 +98,13 @@ describe('vedic docs gate: P0 conventions and P3B evidence', () => {
     expect(rulesets).toContain('vedic-parashara-lahiri@0.1.0');
     expect(rulesets).toMatch(/P5 user-facing system/i);
     expect(rulesets).toMatch(/both node modes/i);
+    expect(rulesets).toMatch(/owner-confirmed default is mean/i);
     expect(rulesets).toContain('16.610 seconds');
     expect(rulesets).toContain('5.457 seconds');
     expect(rulesets).toContain('adr/0013-vedic-architecture.md');
   });
 
-  it('documents P2, P3A, and P3B as narrow internal work', () => {
+  it('documents P2, P3A, and P3B scope boundaries', () => {
     for (const rel of [ADR, MATRIX]) {
       const text = read(rel);
       expect(text, `${rel} must describe the P2 numeric boundary`).toMatch(/P2.*numeric/i);
@@ -148,11 +150,11 @@ describe('vedic docs gate: P5 user-facing claims stay truthful', () => {
     expect(rulesets).toContain('VEDIC_TIME_REQUIRED');
   });
 
-  it('expands CLI --systems all while retaining the legacy no-flag default', () => {
+  it('aligns CLI --systems all and the raw no-flag default at four systems', () => {
     const cli = read('skills/calculate-birth-charts/scripts/ming-chart.mjs');
     expect(cli).toContain("['western', 'bazi', 'ziwei', 'vedic']");
     const contracts = read('packages/contracts/src/birth-input.ts');
-    expect(contracts).toContain("default(['western', 'bazi', 'ziwei'])");
+    expect(contracts).toContain("default(['western', 'bazi', 'ziwei', 'vedic'])");
   });
 
   it('keeps public wording within the precision and published-release boundary', () => {
@@ -160,6 +162,7 @@ describe('vedic docs gate: P5 user-facing claims stay truthful', () => {
     expect(readme).toMatch(/Vedic|Jyotish/i);
     expect(readme).toMatch(/Swiss-only external numeric reference/i);
     expect(readme).toMatch(/both.*mean.*true|mean.*true.*both/i);
+    expect(readme).toMatch(/default.*mean|mean.*default/i);
     expect(read('install-manifest.json')).not.toMatch(/vedic|jyotish/i);
   });
 });

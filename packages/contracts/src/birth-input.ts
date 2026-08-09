@@ -14,9 +14,9 @@ export const TimeAccuracy = z.enum(['exact', 'approximate', 'unknown']);
 export type TimeAccuracy = z.infer<typeof TimeAccuracy>;
 
 /**
- * Chart systems. 'vedic' is contract-reserved as of P1 (ADR 0013): explicitly
- * requesting it is valid input, but the provider returns SYSTEM_NOT_YET_IMPLEMENTED
- * until the P2/P3 slices land. It is NOT part of the default systems array.
+ * Chart systems. Vedic became a first-class calculated system in v0.3.0. The
+ * v0.4.0 product default requests all four systems; callers may still select
+ * an explicit subset when that is the intended scope.
  */
 export const ChartSystem = z.enum(['western', 'bazi', 'ziwei', 'vedic']);
 export type ChartSystem = z.infer<typeof ChartSystem>;
@@ -69,8 +69,8 @@ export const ZiweiSettings = z.strictObject({
 export type ZiweiSettings = z.infer<typeof ZiweiSettings>;
 
 export const CalculationSettings = z.strictObject({
-  /** Default stays the three implemented systems; 'vedic' is opt-in only (ADR 0013 P1). */
-  systems: z.array(ChartSystem).min(1).default(['western', 'bazi', 'ziwei']),
+  /** Default requests every shipped chart system; callers may still select a subset explicitly. */
+  systems: z.array(ChartSystem).min(1).default(['western', 'bazi', 'ziwei', 'vedic']),
   western: WesternSettings.prefault({}),
   bazi: BaziSettings.prefault({}),
   ziwei: ZiweiSettings.prefault({}),

@@ -7,18 +7,18 @@
 export const SCHEMA_VERSION = '0.1.0';
 
 /**
- * Deterministic calculation engine version. v0.3.0 is the release-preparation bump for the
- * shipped Vedic/Jyotish system and public-result/answer-plan v2 hard cut. It changes emitted
- * contracts, deterministic request ids, and provenance; consumers must record this version
- * alongside every result.
+ * Deterministic calculation engine version. v0.4.0 records the owner-confirmed mean-Rahu
+ * product default and the new four-system default calculation scope. It changes normalized
+ * input, deterministic request ids, and provenance; consumers must record this version alongside
+ * every result.
  */
-export const ENGINE_VERSION = '0.3.0';
+export const ENGINE_VERSION = '0.4.0';
 
 /** Human-facing engine name. */
 export const ENGINE_NAME = 'ming-engine';
 
 /**
- * First unified support window for all three systems (handoff §1.1).
+ * Unified support window for all four systems (handoff §1.1).
  * A single provider may later widen this only after independent verification.
  */
 export const SUPPORTED_YEAR_MIN = 1901;

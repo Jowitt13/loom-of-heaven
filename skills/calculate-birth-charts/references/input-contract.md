@@ -44,7 +44,7 @@ The CLI accepts a single JSON object. Unknown top-level keys are rejected. JavaS
     },
     "vedic": {
       "rulesetId": "vedic-parashara-lahiri@0.1.0",
-      "nodes": "mean", // optional explicit school selection: "mean" | "true"; no product default
+      "nodes": "mean", // product default; callers may explicitly choose "true"
       "dashaYear": "julian-365.25",
     },
   },
@@ -64,10 +64,9 @@ The CLI accepts a single JSON object. Unknown top-level keys are rejected. JavaS
 - Supported year range in this version is 1901–2100; outside it returns `DATE_OUT_OF_RANGE`.
 - `settings` and every sub-object may be omitted; documented defaults are applied and echoed
   back in `originalInput`.
-- `vedic.nodes` is deliberately optional. The Vedic chart always reports both `nodes.mean` and
-  `nodes.true`; omit the setting unless the caller has explicitly selected a node school. The raw
-  no-settings default remains Western/BaZi/Zi Wei for compatibility; use `--systems all` to ask
-  for the complete four-system technical chart.
+- `vedic.nodes` defaults to `"mean"`. The Vedic chart always reports both `nodes.mean` and
+  `nodes.true`; callers may explicitly select `"true"` for a different school convention. The raw
+  no-settings default requests all four shipped systems; callers may pass an explicit subset.
 
 ## Minimal example
 

@@ -4,7 +4,8 @@ import { BirthInput, VedicSettings, parseBirthInput } from '@ming/contracts';
 
 /**
  * Vedic P1/P2 contract tests (ADR 0013): the 'vedic' system id is reserved in
- * the contracts, old inputs stay valid, and the Rahu node default remains absent.
+ * the contracts, default input requests all four systems, and the owner-confirmed
+ * Rahu convention defaults to the mean node.
  */
 const base = {
   calendar: 'gregorian',
@@ -16,11 +17,10 @@ const base = {
 };
 
 describe('vedic contracts (P1/P2)', () => {
-  it('legacy input without any vedic key still parses; default systems stay three', () => {
+  it('input without any vedic key still parses; default systems include all four', () => {
     const parsed = parseBirthInput(base);
-    expect(parsed.settings.systems).toEqual(['western', 'bazi', 'ziwei']);
-    expect(parsed.settings.systems).not.toContain('vedic');
-    // The vedic settings block exists via prefault, without breaking old JSON.
+    expect(parsed.settings.systems).toEqual(['western', 'bazi', 'ziwei', 'vedic']);
+    // The vedic settings block exists via prefault, without requiring a nested input object.
     expect(parsed.settings.vedic.rulesetId).toBe('vedic-parashara-lahiri@0.1.0');
   });
 
@@ -29,12 +29,12 @@ describe('vedic contracts (P1/P2)', () => {
     expect(parsed.settings.systems).toEqual(['vedic']);
   });
 
-  it('keeps Rahu undecided while defaulting only the owner-confirmed P3B dasha model', () => {
+  it('defaults Rahu to mean while retaining explicit true-node and dasha choices', () => {
     const settings = VedicSettings.parse({});
-    expect(settings.nodes).toBeUndefined();
+    expect(settings.nodes).toBe('mean');
     expect(settings.dashaYear).toBe('julian-365.25');
     const parsed = parseBirthInput({ ...base, settings: { systems: ['vedic'] } });
-    expect(parsed.settings.vedic.nodes).toBeUndefined();
+    expect(parsed.settings.vedic.nodes).toBe('mean');
     expect(parsed.settings.vedic.dashaYear).toBe('julian-365.25');
   });
 
