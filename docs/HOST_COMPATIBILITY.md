@@ -1,6 +1,6 @@
 # 宿主兼容性审计
 
-> 当前分发状态：安装包来自 GitHub Release `v0.2.0`；Qoder、WorkBuddy 与豆包电脑版已有公开 ZIP。可下载性以 `install-manifest.json` 的 `published` 字段及 SHA-256 为准。
+> 当前分发状态：安装包来自 GitHub Release `v0.3.0`；Qoder、WorkBuddy 与豆包电脑版已有公开 ZIP。可下载性以 `install-manifest.json` 的 `published` 字段及 SHA-256 为准。
 >
 > 本文档记录 Ming Engine（`calculate-birth-charts`）在四个目标宿主平台上的能力与验证状态。
 
@@ -28,7 +28,7 @@
 | Node.js 运行环境        | ≥ 22           | ≥ 22                                         | ≥ 22                        | ≥ 22                        |
 | 能力级别                | full           | full                                         | full                        | full                        |
 | 真机验证                | L3             | L3                                           | L3                          | L3                          |
-| 当前分发来源            | 仓库（已公开） | GitHub Release `v0.2.0` ZIP                  | GitHub Release `v0.2.0` ZIP | GitHub Release `v0.2.0` ZIP |
+| 当前分发来源            | 仓库（已公开） | GitHub Release `v0.3.0` ZIP                  | GitHub Release `v0.3.0` ZIP | GitHub Release `v0.3.0` ZIP |
 | Windows 中文 / 空格路径 | 是             | 是                                           | 是                          | 是                          |
 
 ---
@@ -44,14 +44,14 @@
 | 宿主      | 当前安装来源                | 能力级别 | 来源类型      |
 | --------- | --------------------------- | -------- | ------------- |
 | Codex     | 仓库（已公开）              | full     | repo          |
-| Qoder     | GitHub Release `v0.2.0` ZIP | full     | release-asset |
-| WorkBuddy | GitHub Release `v0.2.0` ZIP | full     | release-asset |
-| 豆包      | GitHub Release `v0.2.0` ZIP | full     | release-asset |
+| Qoder     | GitHub Release `v0.3.0` ZIP | full     | release-asset |
+| WorkBuddy | GitHub Release `v0.3.0` ZIP | full     | release-asset |
+| 豆包      | GitHub Release `v0.3.0` ZIP | full     | release-asset |
 
-- 根清单当前为 `status: "published"`：安装包来自 GitHub Release `v0.2.0`，包含不可变下载地址与 SHA-256。安装器必须先检查所选平台的 `published`；为 `false` 时不读取 URL/hash、不下载、不安装。
+- 根清单当前为 `status: "published"`：安装包来自 GitHub Release `v0.3.0`，包含不可变下载地址与 SHA-256。安装器必须先检查所选平台的 `published`；为 `false` 时不读取 URL/hash、不下载、不安装。
 - 静态门禁 `pnpm run verify:install`（L1）；真机安装/触发为 L2/L3。
 - 版本检查：宿主 Agent 运行 `node scripts/ming-chart.mjs version` 读本地 `BUILD_MANIFEST.json` 回报真实已装版本（区分 legacy / 双层目录），不靠猜、不等于线上最新。
-- 更新迁移：只有线上清单将所选平台标记为已发布时，Agent 才可下载不可变 tag 资产、校验 SHA-256 并用 `migrate` 原子替换旧包。当前更新源是 v0.2.0，不能把本地旧包或缓存称作最新版。
+- 更新迁移：只有线上清单将所选平台标记为已发布时，Agent 才可下载不可变 tag 资产、校验 SHA-256 并用 `migrate` 原子替换旧包。当前更新源是 v0.3.0，不能把本地旧包或缓存称作最新版。
 - 候选边界：下一候选构建只供本地验证，且始终 `published:false`；它不是公开安装源。未来发布须创建新的不可变 tag、上传 ZIP、重下验收后再更新根清单。
 
 ---

@@ -367,8 +367,8 @@ Until a future independent source passes a field, user-facing and release docume
 - **P5 — CLI, Skill, hosts, docs**: `ming-chart.mjs` systems expansion, SKILL.md/references,
   four host packages, doc-count/doc-claim gates updated from real runs.
 - **P6 — v0.3.0 release-prep**: engine version, RELEASE_CHECKLIST walk, SBOM regeneration,
-  candidate-host manifests. The v0.3.0 candidate remains unpublished: no release/tag/promote
-  without explicit owner authorization.
+  candidate-host manifests, authorized GitHub Release, C1 download/hash verification, then C2
+  root-manifest promotion. No later release/tag/promote action is implied by this completed step.
 
 ## License boundary (restated, binding)
 
@@ -403,8 +403,8 @@ P5 is implemented: `--systems all` requests all four systems and the current Ski
 metadata documents the bounded Vedic technical chart. The raw no-settings default remains three
 systems for compatibility. Both node modes stay visible without implying a product default, and
 the user-facing precision statement remains Swiss-only external numeric-reference evidence rather
-than a general accuracy claim. P6 prepares an unpublished v0.3.0 candidate; published v0.2
-release assets remain unchanged until a separately authorized Release.
+than a general accuracy claim. P6 has published the v0.3.0 assets after C1 download/hash
+verification and promoted their immutable URLs and SHA-256 hashes into the stable root manifest.
 
 ## Consequences
 

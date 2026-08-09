@@ -70,8 +70,8 @@ default remains Western/BaZi/Zi Wei for compatibility. The chart returns **both 
 there is no product default while the owner decision remains pending. Unknown time emits
 `VEDIC_TIME_REQUIRED` and suppresses time-of-day values. The provider is offline MIT `caelus`;
 the <=1 arc-minute statement is limited to the recorded Swiss-only external numeric-reference
-fixture, never a general astrometric claim. The v0.3.0 candidate is unpublished; published v0.2
-assets remain stable until an explicitly authorized Release.
+fixture, never a general astrometric claim. The v0.3.0 Release assets are published; the stable
+root manifest records their immutable URLs and SHA-256 hashes.
 
 ## Solar-time rule (invariant)
 
