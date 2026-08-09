@@ -44,12 +44,15 @@ Roadmap only — **no Vedic calculation exists in the engine today** and no user
 claim otherwise until the ADR 0013 P5 slice ships. P1 status: the contracts reserve the `vedic`
 system id (`VedicSettings`/`VedicChartResult`, opt-in only — the default `systems` array stays
 three-system) and `@ming/vedic` / `@ming/vedic-rules` exist as skeletons whose provider always
-returns `SYSTEM_NOT_YET_IMPLEMENTED`; nothing is computed and no defaults are wired for the
-unresolved knobs (`nodes`, `dashaYear`). The frozen engineering boundaries (Lahiri =
-IAE-1985 standard / Swiss `SE_SIDM_LAHIRI`, Ketu = Rahu+180°, whole-sign bhava, 27-nakshatra
-scheme, instantaneous panchanga, D1/D9) plus the proposed-but-unconfirmed defaults (mean Rahu;
-upper-limb sunrise target; Vimshottari year model **candidate `julian-365.25` — P3
-implementation blocked on the owner decision and a same-model dual-implementation cross-check**)
+returns `SYSTEM_NOT_YET_IMPLEMENTED`; the engine skeleton still computes no Vedic data at all.
+Owner-confirmed defaults (2026-07-31): the Vimshottari year model is
+`dashaYear: 'julian-365.25'` (365.25 × 86400 SI seconds; savana-360/sidereal only as future new
+rulesets) and the Vaara sunrise rule is `upper-limb-standard-refraction` (upper limb + standard
+34′ refraction). Still undecided: the Rahu node default (`nodes`). Delivery gates remain:
+Vimshottari cannot ship before its same-model (`julian-365.25`) dual-implementation cross-check
+passes, and Vaara cannot ship before the sunrise backend-mapping goldens pass. The frozen
+engineering boundaries (Lahiri = IAE-1985 standard / Swiss `SE_SIDM_LAHIRI`, Ketu = Rahu+180°,
+whole-sign bhava, 27-nakshatra scheme, instantaneous panchanga, D1/D9)
 live in [ADR 0013](adr/0013-vedic-architecture.md) and the per-topic source registry
 [`docs/VEDIC_SOURCE_MATRIX.md`](VEDIC_SOURCE_MATRIX.md). Target product version: v0.3.0.
 

@@ -1,10 +1,12 @@
 # ADR 0013: Vedic (Jyotish) system architecture & rule-convention freeze (P0)
 
-- Status: Proposed — P0 architecture complete; semantic defaults awaiting owner confirmation
-  (**no Vedic code exists yet — nothing below is implemented**). Engineering boundaries in
-  §§1–4, 6–10, 12–16 are frozen; the node default (§5), the sunrise backend mapping (§9) and
-  the Vimshottari year model (§11) are proposed/blocked pending the owner decisions listed under
-  "Open questions".
+- Status: Proposed — P0 architecture complete; only the Rahu node default (§5) still awaits
+  owner confirmation (**no Vedic code exists yet — nothing below is implemented**).
+  Engineering boundaries in §§1–4, 6–10, 12–16 are frozen. The sunrise rule target (§9) and
+  the Vimshottari year model (§11) are **owner-confirmed defaults (2026-07-31) with remaining
+  verification gates**: each still carries an evidence gate (sunrise backend mapping; same-model
+  dual-implementation cross-check) that blocks delivery, but neither is an owner-decision
+  blocker anymore. See "Open questions".
 - Date: 2026-07-29
 - Scope: adds the fourth first-class system `vedic` as a plan. This ADR freezes definitions,
   boundaries and the PR roadmap **before** any contracts or calculation code changes. Companion
@@ -151,7 +153,8 @@ engine, not an almanac); only Vaara additionally needs the sunrise day-boundary.
 - **Vaara** (weekday): runs **from local sunrise to the next local sunrise**, not midnight —
   a birth before sunrise belongs to the previous weekday. Sunrise definition is itself disputed
   (documented, e.g., in Drik Panchang's settings: "Edges" = top edge at horizon vs "Middle
-  Limb" = disc center). **Rule target (proposed): upper-limb sunrise.** Evidence for the
+  Limb" = disc center). **Owner-confirmed (2026-07-31): upper-limb sunrise with standard 34′
+  refraction — model name `upper-limb-standard-refraction`.** Evidence for the
   installed backend, astronomy-engine 2.1.19 (`astronomy.js`, `SearchRiseSet` doc block +
   `BodyRadiusAu`): rise is "the moment that the top of the Sun first appears to peek above the
   horizon", the body's apparent angular radius is applied, and a fixed **34′** atmospheric
@@ -159,7 +162,8 @@ engine, not an almanac); only Vaara additionally needs the sunrise day-boundary.
   numeric mapping to the classical "Sun center at −50′" convention (34′ + fixed 16′
   semi-diameter vs astronomy-engine's true apparent radius) is **not yet verified and is a P2/P3
   implementation blocker**: it must be pinned by sunrise spot-check goldens before any Vaara
-  output ships. Disc-center-without-refraction is a recorded alternative for a future ruleset,
+  output ships or is claimed correct — this is now a verification gate, not an owner-decision
+  gate. Disc-center-without-refraction is a recorded alternative for a future ruleset,
   not a v1 option. Elevation is ignored for sunrise in v1 (sea-level horizon), recorded as a
   caveat.
 
@@ -185,18 +189,17 @@ engine, not an almanac); only Vaara additionally needs the sunrise day-boundary.
 - **Balance at birth**: `balance = (1 − elapsedFractionOfNakshatra) × lordYears`, where
   `elapsedFraction = offsetInNakshatra / 13°20′` from the Moon's sidereal longitude at the birth
   instant. Pure longitude ratio — no day-rounding.
-- **Year length model**: **disputed among schools (365.25-day "solar" year vs 360-day savana
-  year vs sidereal year)** — the models drift apart materially over a life span (a 120-year
+- **Year length model**: disputed among schools (365.25-day "solar" year vs 360-day savana
+  year vs sidereal year) — the models drift apart materially over a life span (a 120-year
   cycle is ~630 days shorter under savana-360 than under julian-365.25; a sidereal year is
-  ~365.2564 days, another ~46 days over 120 years). **Candidate: `julian-365.25`** (dasha year =
-  365.25 × 86400 SI seconds), the software-mainstream convention — but this is **NOT frozen in
-  P0**. The P3 dasha implementation is **BLOCKED** on (a) an explicit owner decision and (b) a
-  same-model cross-check against a second independent implementation (jyotishganit candidate)
-  configured to the identical year model. P1 may reserve a versioned enum
-  (`dashaYear: 'julian-365.25' | 'savana-360' | 'sidereal'`) in settings, but **no value may be
-  wired as the product default** until the owner decision lands; the chosen model is then
-  recorded in the ruleset/provenance so alternates can ship later as new ruleset versions
-  without ambiguity.
+  ~365.2564 days, another ~46 days over 120 years). **Owner-confirmed default (2026-07-31):
+  `julian-365.25`** — dasha year = 365.25 × 86400 SI seconds; ruleset/provenance ultimately
+  records `dashaYear: 'julian-365.25'`. `savana-360` and `sidereal` remain reserved enum values
+  shipping only as future new ruleset versions, never as silent alternates. **The single
+  remaining Vimshottari blocker is verification, not decision**: the P3 dasha implementation
+  cannot ship until it passes a cross-check against a second independent implementation
+  configured to the identical `julian-365.25` model (same-model comparison mandatory; no
+  majority vote).
 - **Antar dashas**: within a Maha of lord L, sub-periods follow the same 9-lord sequence
   starting from L itself; `antarLength = mahaLength × antarLordYears / 120`.
 - **Endpoints**: every period is a half-open instant interval `[start, end)`; `end` of one
@@ -277,8 +280,9 @@ decision (§Open questions); the engine capability does not depend on it.
 
 - **P1 — contracts + provider skeleton**: `VedicSettings`, `VedicChartResult` schema, enum
   extensions above, `packages/vedic` returning `SYSTEM_NOT_YET_IMPLEMENTED`-style honest
-  pending warnings; no numbers computed. Contract version bumps prepared. May reserve the
-  versioned `dashaYear` enum, but wires **no product default** for it (§11).
+  pending warnings; no numbers computed. Contract version bumps prepared. The versioned
+  `dashaYear` enum was reserved with no default wired; wiring the owner-confirmed
+  `julian-365.25` default (§11) is P3 work, gated on its cross-check.
 - **P2 — precise ayanamsha, nine grahas, nodes, Lagna + Swiss golden**: Lahiri (§4)
   implementation; Sun..Saturn sidereal positions; mean+true Rahu, Ketu opposition; sidereal
   Lagna. Golden: ≥50 synthetic cases (multi-decade 1900–2100, N/S latitudes, multiple
@@ -286,14 +290,50 @@ decision (§Open questions); the engine capability does not depend on it.
   the isolated two-phase `swetest -sid1` workflow (staging dir → SHA-256 manifest → reviewed
   transcription; binaries/ephemeris files never enter the repo), gate ≤1′ for grahas, nodes and
   Lagna; Rahu/Ketu opposition asserted; cross-checked against at least one independent MIT
-  implementation (candidate: jyotishganit, Python/Skyfield/JPL) — discrepancies are **recorded
-  per-source in the fixture, never majority-voted away**. All inputs marked synthetic.
-  **Blocker carried into P2/P3**: pin the sunrise backend parameter mapping (§9) with sunrise
-  spot-check goldens before any Vaara output.
+  implementation where one is available — discrepancies are **recorded per-source in the fixture,
+  never majority-voted away**. The field-scoped evidence policy below is binding. All inputs marked
+  synthetic. **Blocker carried into P2/P3**: pin the sunrise backend parameter mapping (§9) with
+  sunrise spot-check goldens before any Vaara output.
+
+### P2 verification evidence boundary (amended 2026-07-30)
+
+This amendment supersedes the generic all-fields independent-MIT wording in the P2 bullet above.
+It does **not** lower any numerical acceptance threshold.
+
+1. **Swiss remains the hard acceptance oracle for every P2 numeric field.** The implementation
+   must match reviewed, isolated `swetest -sid1 -utc -emos` fixtures within ≤1′ for every graha,
+   both Rahu modes and Lagna; Ketu remains an exact opposition invariant. A passing result may be
+   described only as “matches the recorded Swiss fixtures within ≤1′”, never as a general claim of
+   physical or absolute astrometric accuracy.
+2. **MIT cross-checks are field-scoped supplementary evidence, not a substitute oracle.** A
+   passing independent MIT implementation is recorded for the individual fields it demonstrably
+   covers. Its absence or failure for another field never relaxes the Swiss gate; that field is
+   explicitly marked **Swiss-only external numeric reference** in the fixture and public
+   provenance notes. No majority vote is allowed.
+3. **NDAstro 0.28.1 audit record.** Its MIT wheel and tag `v0.28.1` sources were byte-for-byte
+   bound; its Skyfield/JPL route contains no Swiss runtime dependency. Against 11 synthetic cases
+   (110 comparisons) using ordinary `lahiri` only — never its mode-43-compatible
+   `true_lahiri` / `lahiri_traditional` paths — it passed Sun..Saturn (worst 0.710′) and mean
+   Rahu (worst 0.046′). It failed true Rahu (worst 7.633′) and Lagna (worst 10.286′), so it is
+   **REJECTED_FOR_MODE1_REFERENCE** as a full P2 oracle. It is retained only as supplementary
+   pre-screen evidence for the fields that passed; it is never embedded, copied or made a runtime
+   dependency.
+4. **Compensating Swiss-only safeguards.** P2 now requires at least **100 synthetic cases**,
+   including the stated multi-decade, hemisphere, IANA-zone and classification-boundary coverage.
+   Each capture must retain the exact argv, `swetest` version, raw stdout/stderr SHA-256 manifest
+   and reviewed transcription trail outside the repository. True-node tests additionally assert
+   Ketu opposition, continuity and no boundary jump; Lagna tests assert the explicit tropical-to-
+   sidereal transform and the existing high-latitude contract. These are implementation checks,
+   not a claim of a second independent ephemeris.
+
+Until a future independent source passes a field, user-facing and release documentation must say
+“Swiss-only external numeric reference” for that field and must not claim two-source validation.
+
 - **P3 — classifications**: Rashi/Bhava/Nakshatra/Pada/Panchanga/D1/D9/Vimshottari per §§7–12,
-  including boundary-case unit tests on both sides of every segment edge. **Blocked until** the
-  Vimshottari year-model owner decision + same-model dual-implementation cross-check (§11) and
-  the sunrise mapping verification (§9) are done.
+  including boundary-case unit tests on both sides of every segment edge. Both owner decisions
+  are done (2026-07-31); what still gates delivery is evidence: Vimshottari cannot ship until
+  the same-model (`julian-365.25`) dual-implementation cross-check (§11) passes, and Vaara
+  cannot ship until the sunrise mapping verification (§9) passes.
 - **P4 — facts & answer layer**: `vedic-rules` sourced findings, InterpretationFacts wiring,
   AnswerPlan/PublicResult v2, validate-answer update, warning codes + public-copy table,
   timeAccuracy gating (§13).
@@ -316,11 +356,14 @@ decision (§Open questions); the engine capability does not depend on it.
 
 1. **Proposed** default `nodes: 'mean'` (vs `'true'`) for `vedic-parashara-lahiri@0.1.0` —
    awaiting confirmation.
-2. **BLOCKED / owner decision**: Vimshottari year model. Candidate: `julian-365.25`; the P3
-   dasha implementation is blocked on this decision plus a same-model dual-implementation
-   cross-check (§11). No default may be wired before then.
-3. **Proposed** sunrise rule target "upper-limb" for Vaara — awaiting confirmation; the
-   backend parameter mapping additionally requires P2 verification evidence (§9).
+2. **Resolved 2026-07-31**: Vimshottari year model — owner confirmed `julian-365.25`
+   (dasha year = 365.25 × 86400 SI seconds; `savana-360`/`sidereal` future-ruleset-only).
+   Remaining gate is verification only: the same-model dual-implementation cross-check (§11)
+   must pass before the P3 dasha implementation ships.
+3. **Resolved 2026-07-31**: Vaara sunrise rule — owner confirmed upper-limb + standard 34′
+   refraction (`upper-limb-standard-refraction`). Remaining gate is verification only: the
+   backend −50′-mapping must be pinned by P2 sunrise spot-check goldens (§9) before any Vaara
+   output ships.
 4. Should v0.3.0 flip the default `systems` array to all four, or keep 3 and make `vedic`
    opt-in initially?
 5. Public-contract v2 rollout: hard cut in v0.3.0 (recommended) vs dual-emit v1+v2.
@@ -332,9 +375,14 @@ decision (§Open questions); the engine capability does not depend on it.
 - The **engineering boundaries** (system id, package split, frame/time-scale choices, Lahiri
   variant identification, Ketu opposition, whole-sign scope, interval/rounding conventions,
   contract-break plan, license boundary, golden methodology) are frozen: implementation PRs may
-  not silently deviate — a deviation requires editing this ADR first. The **semantic defaults**
-  flagged as proposed/blocked (node default, sunrise mapping, dasha year model) must not be
-  treated as decided until the owner confirms.
+  not silently deviate — a deviation requires editing this ADR first. Two categories must not
+  be conflated: the **frozen owner defaults** (`dashaYear: 'julian-365.25'`; sunrise
+  `upper-limb-standard-refraction` — both confirmed 2026-07-31) are decided and no longer
+  reopenable without a new owner decision, while the **verification gates** (same-model
+  dual-implementation cross-check for Vimshottari; sunrise backend-mapping goldens for Vaara;
+  the P2 ≤1′ Swiss golden for grahas/nodes/Lagna) still block delivery until their evidence
+  actually exists. The one remaining **undecided** semantic default is the Rahu node model
+  (§5), which must not be treated as decided until the owner confirms.
 - The engine keeps its golden rules: the model never computes charts; missing values are
   reported, never backfilled; Vedic capability must not be claimed anywhere user-facing until P5
   ships (guarded by `tools/vedic-docs.test.ts`). No precision (≤1′ or otherwise) may be claimed
