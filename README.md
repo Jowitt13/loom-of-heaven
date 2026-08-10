@@ -29,9 +29,9 @@
 
 ---
 
-## 🔮 这是什么？ / What is this?
+## 🇨🇳 中文版
 
-### 🇨🇳 中文版
+### 🔮 这是什么？
 
 **璇玑玉衡** 把四大命理体系装进一个 **完全离线、字节级确定** 的引擎，并打包成一个供支持本地脚本执行的 AI 宿主调用的 **Skill**。
 
@@ -46,24 +46,7 @@
 | 印度占星(印占) |  🕉️   | Vedic/Jyotish 本命盘 · 恒星黄道 · 罗睺/计都默认均值交点（同时报告均值/真值两种模式）· 出生时间未知时按 `VEDIC_TIME_REQUIRED` 如实降级时辰字段 · 离线 MIT 星历提供方；高精度声明仅限随附的 Swiss 数值参考 fixture |
 | 解读           |  📜   | 按主题（婚姻/财运/事业/学业…）聚合带证据/原因链/吉凶(polarity)的事实 + 结尾追问，交宿主大模型转自然语言                                                                                                          |
 
-### 🇬🇧 English
-
-**loom-of-heaven** packs four birth-chart systems into a **fully offline, byte-level deterministic** engine, shipped as a **Skill** for script-capable AI hosts.
-
-> 🧠 **The LLM only gathers inputs, relays confirmations and narrates results — it never computes charts itself.**
-> Every planet position, house, aspect, ganzhi, ten-god, star and si-hua is computed by the bundled deterministic CLI: regression-tested, reproducible and sourced.
-
-| System            | Emoji | Capabilities                                                                                                                                                                                                                                                                                                                    |
-| ----------------- | :---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Western natal     |  🪐   | Planets (Sun→Pluto) · true nodes · asteroids (Chiron/Ceres/Pallas/Juno/Vesta) · sidereal zodiac (Lahiri) · houses (Placidus/Whole/Equal/Koch/Porphyry) · Asc/MC · aspects · retrogrades · dignities                                                                                                                             |
-| Four Pillars/BaZi |  🎋   | Four pillars · hidden stems · ten gods (day-master shown on day pillar) · nayin · luck pillars/onset · strength/pattern/favorable elements · punishments/clashes/harmonies/harms · shen-sha · fortune leanings (with classical sources)                                                                                         |
-| Zi Wei Dou Shu    |  ⭐   | Twelve palaces · major/minor stars + brightness · si-hua · major limits · san-fang-si-zheng · yearly/monthly/daily/hourly transit charts                                                                                                                                                                                        |
-| Vedic/Jyotish     |  🕉️   | Vedic natal chart · sidereal zodiac · Rahu/Ketu default to the mean-node convention (both mean and true modes reported) · time-of-day fields suppressed with `VEDIC_TIME_REQUIRED` when birth time is unknown · offline MIT provider; the "high" precision claim is limited to the bundled Swiss-only numeric reference fixture |
-| Reading           |  📜   | Topic-based (marriage/wealth/career/study…) facts with evidence/reason chains/fortune polarity + closing follow-ups, handed to the host LLM for natural-language narration                                                                                                                                                      |
-
----
-
-## ⚡ 安装入口 / Install entry
+### ⚡ 安装入口
 
 对你的 AI（Qoder / WorkBuddy / 豆包电脑版 / Codex）说一句：
 
@@ -71,7 +54,7 @@
 
 宿主 AI 会先识别平台并读取 [`install-manifest.json`](install-manifest.json) 的 `published` 状态；**只有所选平台已发布时**，才会读取下载地址、校验 SHA-256 并安装。它不会猜测、拼接或尝试不存在的下载链接。
 
-### 当前可用性 / Availability
+#### 当前可用性
 
 | 宿主       | 当前状态                       | 最简开始方式                                       |
 | ---------- | ------------------------------ | -------------------------------------------------- |
@@ -86,9 +69,7 @@
 
 > 安装包来自 GitHub Release `v0.3.6`：已提供 Qoder、WorkBuddy 与豆包电脑版 ZIP。下载地址与 SHA-256 以 [`install-manifest.json`](install-manifest.json) 和 [`SHA256SUMS.txt`](SHA256SUMS.txt) 为准。
 
----
-
-## 🌟 为什么与众不同 / Why it's different
+### 🌟 为什么与众不同
 
 - 🛡️ **不虚构（no fabrication）** — 未实现或缺输入的部分只发**警告**，绝不编造。未知时间不伪造上升/宫位；缺性别不硬凑紫微盘。
 - 🔒 **完全离线 + 确定性** — 星历（astronomy-engine·VSOP87+NOVAS）、时区（IANA）、历法全部内置。相同输入 + 相同版本 → **字节级一致**的 canonical JSON。
@@ -98,9 +79,7 @@
 - 🗣️ **解读输出有防火墙** — 专题报告（Channel B）交付前经 `lint-reading` 离线体检：第 1–5 部分禁命理术语与顾问黑话、禁空话与换词重复、禁越界预测（无收入 facts 不写加薪、不做群体比较、未知经历须用“如果/可能/例如”条件表达）。随 Skill 发布、可复现；为启发式文本检查，不保证宿主模型 100% 合规。
 - 🧩 **可移植（需脚本执行）** — 一份 `SKILL.md` + 打包好的引擎，四个完整宿主（Codex / Qoder / WorkBuddy / 豆包电脑版）通用；宿主须具备本地脚本执行能力。
 
----
-
-## 🗺️ 架构一览 / Architecture
+### 🗺️ 架构一览
 
 ```mermaid
 flowchart LR
@@ -119,9 +98,7 @@ flowchart LR
 
 **依赖方向铁律**：计算内核离线确定、绝不反向依赖解读层；第三方库类型不泄漏到公共契约。由 `eslint` 导入边界门禁强制执行。
 
----
-
-## 🚀 快速开始 / Quick start
+### 🚀 快速开始
 
 > 需要 **Node ≥ 22**。发布的 Skill 文件夹**自包含**（内置 `scripts/dist/engine.mjs`），无需 `npm install`、无需联网。
 
@@ -161,15 +138,13 @@ node scripts/loom-chart.mjs interpret --input-file birth-input.json --output-fil
 时间未知？把 `timeAccuracy` 设为 `"unknown"` 并省略 `localTime` —— 引擎会照实降级，不伪造上升/时柱。
 </details>
 
----
+### 🧰 在各宿主里使用
 
-## 🧰 在各宿主里使用 / Install in your agent
-
-### 🟣 Qoder
+#### 🟣 Qoder
 
 Qoder 的完整 ZIP 已发布在 GitHub Release `v0.3.6`。普通用户仍只需使用上方安装入口；Agent 会读取清单、下载不可变资产、校验 SHA-256 后安装，不需要 CLI。
 
-### 🟠 Claude Code
+#### 🟠 Claude Code
 
 本仓库同时是一个 **Claude Code 插件市场**（含 `.claude-plugin/marketplace.json`）：
 
@@ -180,14 +155,12 @@ Qoder 的完整 ZIP 已发布在 GitHub Release `v0.3.6`。普通用户仍只需
 
 或手动：把 `skills/xuan-ji-yu-heng/` 复制到 `~/.claude/skills/`。
 
-### 🟢 Codex（及任何读取 AGENTS.md 的宿主）
+#### 🟢 Codex（及任何读取 AGENTS.md 的宿主）
 
 克隆本仓库，Codex 会读取根目录的 [`AGENTS.md`](AGENTS.md)（含运行规则与 CLI 用法）。
 Skill 的 UI 元数据在 [`skills/xuan-ji-yu-heng/agents/openai.yaml`](skills/xuan-ji-yu-heng/agents/openai.yaml)。
 
----
-
-## 🛠️ CLI 速查 / Command reference
+### 🛠️ CLI 速查
 
 单一稳定入口：`node scripts/loom-chart.mjs <subcommand>`（参数走数组/文件，绝不拼 shell）。
 
@@ -206,18 +179,14 @@ Skill 的 UI 元数据在 [`skills/xuan-ji-yu-heng/agents/openai.yaml`](skills/x
 
 > ✅ 成功输出 `{ "ok": true, ... }`；失败输出 `{ "ok": false, "error": { "code": ... } }` 并以稳定退出码退出。
 
----
-
-## ⚠️ 边界与免责 / Scope & disclaimer
+### ⚠️ 边界与免责
 
 - 🎭 面向**传统文化、娱乐与自我反思**。**不是**经科学验证的预测。
 - 🚫 **绝不**给出确定性的医疗、法律、投资、生死建议；健康提示仅是五行/宫位的一般结构描述。
 - 🌗 西方恒星黄道(Lahiri)、真交点、小行星**已实现**；真交点/小行星为**近似精度（角分级近似）**，明确标注且不纳入 ≤1′ 门禁。
 - 🧾 缺时间/性别会**照实降级**并说明原因。
 
----
-
-## 🧑‍💻 开发 / Development
+### 🧑‍💻 开发
 
 pnpm monorepo（`packages/*`）构建出 Skill 的引擎 bundle。
 
@@ -240,12 +209,200 @@ verify:hosts → verify:install → check:doc-counts → scan:deps → scan:lice
 [`docs/LICENSE_AUDIT.md`](docs/LICENSE_AUDIT.md) · [`docs/PRIVACY.md`](docs/PRIVACY.md) ·
 [`skills/xuan-ji-yu-heng/SKILL.md`](skills/xuan-ji-yu-heng/SKILL.md)
 
----
-
-## 📦 依赖与许可 / Dependencies & license
+### 📦 依赖与许可
 
 引擎内联的运行时依赖全部为 **MIT**（闭源友好）：`zod` · `moment-timezone` · `tyme4ts` · `iztro` ·
 `astronomy-engine`。八字解读规则引用公版古籍（《子平真诠》《滴天髓》《渊海子平》）。完整清单见
 [`docs/LICENSE_AUDIT.md`](docs/LICENSE_AUDIT.md) 与 [`THIRD_PARTY_NOTICES`](skills/xuan-ji-yu-heng/THIRD_PARTY_NOTICES.md)。
 
 本项目以 [MIT](LICENSE) 许可发布。🌙 愿你算得开心、看得明白。
+
+---
+
+## 🇬🇧 English
+
+### 🔮 What is this?
+
+**loom-of-heaven** packs four birth-chart systems into a **fully offline, byte-level deterministic** engine, shipped as a **Skill** for script-capable AI hosts.
+
+> 🧠 **The LLM only gathers inputs, relays confirmations and narrates results — it never computes charts itself.**
+> Every planet position, house, aspect, ganzhi, ten-god, star and si-hua is computed by the bundled deterministic CLI: regression-tested, reproducible and sourced.
+
+| System            | Emoji | Capabilities                                                                                                                                                                                                                                                                                                                    |
+| ----------------- | :---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Western natal     |  🪐   | Planets (Sun→Pluto) · true nodes · asteroids (Chiron/Ceres/Pallas/Juno/Vesta) · sidereal zodiac (Lahiri) · houses (Placidus/Whole/Equal/Koch/Porphyry) · Asc/MC · aspects · retrogrades · dignities                                                                                                                             |
+| Four Pillars/BaZi |  🎋   | Four pillars · hidden stems · ten gods (day-master shown on day pillar) · nayin · luck pillars/onset · strength/pattern/favorable elements · punishments/clashes/harmonies/harms · shen-sha · fortune leanings (with classical sources)                                                                                         |
+| Zi Wei Dou Shu    |  ⭐   | Twelve palaces · major/minor stars + brightness · si-hua · major limits · san-fang-si-zheng · yearly/monthly/daily/hourly transit charts                                                                                                                                                                                        |
+| Vedic/Jyotish     |  🕉️   | Vedic natal chart · sidereal zodiac · Rahu/Ketu default to the mean-node convention (both mean and true modes reported) · time-of-day fields suppressed with `VEDIC_TIME_REQUIRED` when birth time is unknown · offline MIT provider; the "high" precision claim is limited to the bundled Swiss-only numeric reference fixture |
+| Reading           |  📜   | Topic-based (marriage/wealth/career/study…) facts with evidence/reason chains/fortune polarity + closing follow-ups, handed to the host LLM for natural-language narration                                                                                                                                                      |
+
+### ⚡ Install entry
+
+Just say this to your AI (Qoder / WorkBuddy / Doubao desktop / Codex):
+
+> Install this skill for me: https://raw.githubusercontent.com/Jowitt13/loom-of-heaven/main/INSTALL.md
+
+The host AI first detects the platform and reads the `published` status in [`install-manifest.json`](install-manifest.json); **only when the chosen platform is published** does it read the download URL, verify the SHA-256 and install. It never guesses, stitches together or tries download links that do not exist.
+
+#### Availability
+
+| Host           | Current status                                  | Easiest way to start                                                                     |
+| -------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Codex          | Full charting Skill usable from the public repo | Clone or download this repo and open the project; no GitHub Release needed               |
+| Qoder          | Published on GitHub Release `v0.3.6`            | Send the install link above; the Agent downloads, verifies and installs                  |
+| WorkBuddy      | Published on GitHub Release `v0.3.6`            | Send the install link above; the Agent downloads, verifies and imports via the host flow |
+| Doubao desktop | Published on GitHub Release `v0.3.6`            | Send the install link above; the Agent downloads, verifies and imports via the host flow |
+
+The full charting capability and real-device compatibility records for all four platforms are documented below; downloadability always follows the manifest's `published` field.
+
+- See [`INSTALL.md`](INSTALL.md) and [`docs/INSTALL_BY_PLATFORM.md`](docs/INSTALL_BY_PLATFORM.md); capability matrix in [`docs/HOST_COMPATIBILITY.md`](docs/HOST_COMPATIBILITY.md).
+
+> Install packages come from GitHub Release `v0.3.6`: ZIPs for Qoder, WorkBuddy and Doubao desktop are provided. Download URLs and SHA-256 hashes are authoritative in [`install-manifest.json`](install-manifest.json) and [`SHA256SUMS.txt`](SHA256SUMS.txt).
+
+### 🌟 Why it's different
+
+- 🛡️ **No fabrication** — parts that are unimplemented or missing inputs only emit **warnings**, never inventions. Unknown birth time never fakes Ascendant/houses; missing gender never forces a Zi Wei chart.
+- 🔒 **Fully offline + deterministic** — ephemeris (astronomy-engine·VSOP87+NOVAS), timezones (IANA) and calendars are all bundled. Same input + same version → **byte-identical** canonical JSON.
+- 📚 **Traceable sources** — BaZi readings cite the public-domain classics 《子平真诠》《滴天髓》《渊海子平》; every conclusion carries `ruleId + source`.
+- 🕵️ **Precision gates (two independent layers)** — Western bodies are computed by astronomy-engine (VSOP87 + NOVAS); precision regressions keep this wrapper consistent with its output. Primary bodies are cross-checked against independent JPL Horizons gold standards (10 bodies × 3 synthetic technical instants, worst 0.20′); five house systems are cross-checked against independent Swiss Ephemeris house gold standards (5 cases × 5 systems, worst 0.69′) — all ≤1′. Asteroids are at the approximate level and are not bound by this gate.
+- 🔐 **Privacy first** — the reading fact layer is de-identified: no names/biographies/free-text place names; no network, no telemetry.
+- 🗣️ **A firewall over reading output** — topic reports (Channel B) pass an offline `lint-reading` check before delivery: sections 1–5 forbid fortune-telling jargon and consultant-speak, empty phrases and reworded repetition, and out-of-bounds predictions (no raise claims without income facts, no group comparisons, unknown experiences must use "if/maybe/for example" conditional wording). Shipped with the Skill and reproducible; it is a heuristic text check and does not guarantee 100% host-model compliance.
+- 🧩 **Portable (requires script execution)** — one `SKILL.md` + packaged engine works across all four full hosts (Codex / Qoder / WorkBuddy / Doubao desktop); the host must support local script execution.
+
+### 🗺️ Architecture
+
+```mermaid
+flowchart LR
+  U["🗣️ User natural-language request"] --> S["📄 SKILL.md trigger & input confirmation"]
+  S --> CLI["⚙️ loom-chart.mjs (the single stable CLI)"]
+  CLI --> T["🕓 Time/place normalization<br/>IANA/DST/UTC/apparent solar time"]
+  T --> W["🪐 Western provider<br/>astronomy-engine"]
+  T --> B["🎋 BaZi provider<br/>tyme4ts"]
+  T --> Z["⭐ Zi Wei provider<br/>iztro"]
+  W --> C["📦 Versioned ChartBundle"]
+  B --> C
+  Z --> C
+  C --> I["📜 Reading fact layer<br/>@loom/interpret (sources+evidence+polarity)"]
+  I --> LLM["🧠 Host LLM → natural-language reading"]
+```
+
+**Iron law of dependency direction**: the computation kernel is offline-deterministic and never depends back on the reading layer; third-party library types never leak into the public contract. Enforced by `eslint` import-boundary gates.
+
+### 🚀 Quick start
+
+> Requires **Node ≥ 22**. The published Skill folder is **self-contained** (ships `scripts/dist/engine.mjs`); no `npm install`, no network.
+
+```bash
+git clone https://github.com/Jowitt13/loom-of-heaven.git
+cd loom-of-heaven/skills/xuan-ji-yu-heng
+
+# 1) Environment self-check
+node scripts/loom-chart.mjs doctor
+
+# 2) Prepare a birth-input.json (see the example below), then compute the charts
+node scripts/loom-chart.mjs calculate --input-file birth-input.json --systems all --output-file chart.json
+
+# 3) When a reading is needed, generate cross-system reading facts (with evidence/reason chains/polarity/disclaimers)
+node scripts/loom-chart.mjs interpret --input-file birth-input.json --output-file interpretation.json
+# (Note: the render command for HTML/SVG reports is temporarily disabled; it returns a disabled notice and exits with code 3)
+```
+
+<details>
+<summary>📥 <b>birth-input.json example</b> (click to expand)</summary>
+
+> **Synthetic example:** the person, date, time and place below are for testing and demonstration only and do not correspond to any real individual.
+
+```json
+{
+  "calendar": "gregorian",
+  "localDate": "1990-03-10",
+  "localTime": "08:15:00",
+  "timeAccuracy": "exact",
+  "timezone": "Asia/Shanghai",
+  "location": { "latitude": 30.5, "longitude": 114.3, "source": "user" },
+  "ruleGender": "male",
+  "settings": { "systems": ["western", "bazi", "ziwei"] }
+}
+```
+
+Unknown birth time? Set `timeAccuracy` to `"unknown"` and omit `localTime` — the engine degrades honestly and never fakes the Ascendant/hour pillar.
+</details>
+
+### 🧰 Install in your agent
+
+#### 🟣 Qoder
+
+The full Qoder ZIP is published on GitHub Release `v0.3.6`. Regular users still only need the install entry above; the Agent reads the manifest, downloads the immutable asset, verifies the SHA-256 and installs — no CLI needed.
+
+#### 🟠 Claude Code
+
+This repo is also a **Claude Code plugin marketplace** (with `.claude-plugin/marketplace.json`):
+
+```text
+/plugin marketplace add Jowitt13/loom-of-heaven
+/plugin install xuan-ji-yu-heng@loom-of-heaven
+```
+
+Or manually: copy `skills/xuan-ji-yu-heng/` to `~/.claude/skills/`.
+
+#### 🟢 Codex (and any host that reads AGENTS.md)
+
+Clone this repo; Codex reads the root [`AGENTS.md`](AGENTS.md) (runtime rules and CLI usage).
+The Skill's UI metadata lives in [`skills/xuan-ji-yu-heng/agents/openai.yaml`](skills/xuan-ji-yu-heng/agents/openai.yaml).
+
+### 🛠️ Command reference
+
+Single stable entry: `node scripts/loom-chart.mjs <subcommand>` (arguments via arrays/files, never shell string assembly).
+
+| Subcommand     | Purpose                                                                                                                                                              |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `doctor`       | Environment self-check: Node, platform, bundled TZDB version, capability list                                                                                        |
+| `normalize`    | Time/place normalization only (UTC instant, apparent solar time, DST disambiguation)                                                                                 |
+| `calculate`    | Compute the charts → versioned `ChartBundle` (`--systems all\|western,bazi,ziwei`)                                                                                   |
+| `compare`      | Compare chart differences across school/true-solar-time versioned profiles                                                                                           |
+| `horoscope`    | Zi Wei **transit charts** (major limit/minor limit/yearly/monthly/daily/hourly), `--at YYYY-MM-DD[THH:mm]`                                                           |
+| `interpret`    | Cross-system **reading facts** (topic-aggregated, with evidence/disclaimers), for the host LLM to narrate                                                            |
+| `synastry`     | **Multi-person compatibility/relationship analysis** (1–5 people, BaZi/Zi Wei/astrology); >2 people requires `analyzePair` naming two                                |
+| `lint-reading` | **Reading check-up**: jargon/empty-phrase/repetition/fact-boundary checks on Channel B report drafts (`--channel topic\|full`, `--simple`); exits non-zero on errors |
+| `render`       | **Temporarily disabled** (HTML/SVG reports) — returns a disabled notice and exits with code 3; use `calculate`/`interpret` JSON instead                              |
+| `verify`       | Engine self-check with bundled fixtures                                                                                                                              |
+
+> ✅ Success outputs `{ "ok": true, ... }`; failure outputs `{ "ok": false, "error": { "code": ... } }` and exits with a stable exit code.
+
+### ⚠️ Scope & disclaimer
+
+- 🎭 For **traditional culture, entertainment and self-reflection**. **Not** scientifically validated prediction.
+- 🚫 **Never** gives deterministic medical, legal, investment or life-and-death advice; health notes are only general five-element/palace structural descriptions.
+- 🌗 Western sidereal zodiac (Lahiri), true nodes and asteroids are **implemented**; true nodes/asteroids are at **approximate precision (arc-minute-level approximation)**, clearly labeled and excluded from the ≤1′ gate.
+- 🧾 Missing time/gender **degrades honestly** with the reason stated.
+
+### 🧑‍💻 Development
+
+A pnpm monorepo (`packages/*`) builds the Skill's engine bundle.
+
+> **Developing this repo requires Node.js ≥ 24**; running the published Skill package only needs Node.js ≥ 22 (no pnpm/Git/source build).
+
+```bash
+pnpm install          # development only
+pnpm run verify:cloud # the non-sensitive gate used by GitHub Actions
+pnpm run verify:all   # controlled local full gate; fail-closed by design when the private token file is absent
+pnpm run build        # rebuild scripts/dist/engine.mjs + sbom.cdx.json (commit the artifacts after changes)
+pnpm run package      # generate dist/*.zip + .sha256 (self-verifying integrity)
+```
+
+`verify:cloud` runs in order: `format:check → lint → typecheck → test → build → validate:provenance →
+validate:skill → validate:reading → validate:docs → smoke → forward:test → package:hosts →
+verify:hosts → verify:install → check:doc-counts → scan:deps → scan:licenses → validate:sbom → scan:secrets`. `verify:all` only appends
+`scan:incident` afterwards; that scan's private token file never enters CI, and its absence must fail-closed. The repo's real current test counts are kept in sync by the GitHub Actions `verify` job and the gate section of [`docs/VALIDATION.md`](docs/VALIDATION.md) (no stale static number is maintained in the README).
+
+Further reading: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/VALIDATION.md`](docs/VALIDATION.md) ·
+[`docs/LICENSE_AUDIT.md`](docs/LICENSE_AUDIT.md) · [`docs/PRIVACY.md`](docs/PRIVACY.md) ·
+[`skills/xuan-ji-yu-heng/SKILL.md`](skills/xuan-ji-yu-heng/SKILL.md)
+
+### 📦 Dependencies & license
+
+All runtime dependencies inlined into the engine are **MIT** (closed-source friendly): `zod` · `moment-timezone` · `tyme4ts` · `iztro` ·
+`astronomy-engine`. BaZi reading rules cite public-domain classics (《子平真诠》《滴天髓》《渊海子平》). The full list is in
+[`docs/LICENSE_AUDIT.md`](docs/LICENSE_AUDIT.md) and [`THIRD_PARTY_NOTICES`](skills/xuan-ji-yu-heng/THIRD_PARTY_NOTICES.md).
+
+This project is released under the [MIT](LICENSE) license. 🌙 May you compute with joy and read with clarity.
