@@ -4,7 +4,7 @@ import {
   ERROR_CODES,
   EngineError,
   WESTERN_RULESET_RETIRED,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import type {
   EngineWarning,
   NormalizedBirthData,
@@ -14,7 +14,7 @@ import type {
   WesternHouse,
   WesternPlanet,
   WesternSettings,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import {
   ASTEROID_BODIES,
   NATAL_BODIES,

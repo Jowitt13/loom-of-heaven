@@ -25,7 +25,7 @@ const add = (name: string, ok: boolean, detail?: string): void => {
 const REQUIRED_FILES = [
   'SKILL.md',
   'agents/openai.yaml',
-  'scripts/ming-chart.mjs',
+  'scripts/loom-chart.mjs',
   'scripts/dist/engine.mjs',
   'scripts/fixtures/smoke.json',
   'references/input-contract.md',
@@ -74,7 +74,7 @@ if (existsSync(skillMdPath)) {
 }
 
 // --- Portability: no hardcoded dev-machine absolute paths ---
-const PORTABILITY_GLOBS = ['SKILL.md', 'scripts/ming-chart.mjs', 'agents/openai.yaml'];
+const PORTABILITY_GLOBS = ['SKILL.md', 'scripts/loom-chart.mjs', 'agents/openai.yaml'];
 const ABS_PATH_RE = /(?:[A-Za-z]:\\Users\\|\/Users\/|\/home\/|C:\/Users\/)/;
 for (const rel of PORTABILITY_GLOBS) {
   const p = join(skillDir, rel);
@@ -85,7 +85,7 @@ for (const rel of PORTABILITY_GLOBS) {
 }
 
 // --- CLI does not shell out ---
-const cliPath = join(skillDir, 'scripts', 'ming-chart.mjs');
+const cliPath = join(skillDir, 'scripts', 'loom-chart.mjs');
 if (existsSync(cliPath)) {
   const cli = readFileSync(cliPath, 'utf8');
   add('CLI does not import child_process', !/child_process|node:child_process/.test(cli));
@@ -189,10 +189,10 @@ add('skill dir has no packages/', !skillEntries.includes('packages'));
 //     personal birth data inside the Skill — forbidden by handoff §10. ---
 const scriptsDir = join(skillDir, 'scripts');
 if (existsSync(scriptsDir)) {
-  const allowedScripts = new Set(['ming-chart.mjs', 'fixtures', 'dist']);
+  const allowedScripts = new Set(['loom-chart.mjs', 'fixtures', 'dist']);
   const stray = readdirSync(scriptsDir).filter((e) => !allowedScripts.has(e));
   add(
-    'scripts/ has no stray files (only ming-chart.mjs, fixtures/, dist/)',
+    'scripts/ has no stray files (only loom-chart.mjs, fixtures/, dist/)',
     stray.length === 0,
     stray.join(', '),
   );

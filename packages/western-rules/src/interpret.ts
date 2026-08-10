@@ -1,4 +1,4 @@
-import type { ProviderRef, WesternChartResult, WesternInterpretation } from '@ming/contracts';
+import type { ProviderRef, WesternChartResult, WesternInterpretation } from '@loom/contracts';
 import { planetSignFindings } from './planet-sign.ts';
 import { planetHouseFindings } from './planet-house.ts';
 import { angleFindings } from './angles.ts';

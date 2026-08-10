@@ -49,9 +49,9 @@
 
 ## GitHub Support 工单草稿（不填入 PII）
 
-> Subject: Sensitive data removal and purge of unreachable objects — private repository `Jowitt13/ming-engine`
+> Subject: Sensitive data removal and purge of unreachable objects — private repository `Jowitt13/loom-of-heaven`
 >
-> Repository: `Jowitt13/ming-engine` (currently private).
+> Repository: `Jowitt13/loom-of-heaven` (currently private).
 >
 > An individual's birth data was accidentally committed as example/demo input and reached the public default branch, historical source tags, and Release ZIP assets. We are deliberately not including the values in this request.
 >

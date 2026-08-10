@@ -1,4 +1,4 @@
-import type { WesternChartResult, WesternRuleFinding } from '@ming/contracts';
+import type { WesternChartResult, WesternRuleFinding } from '@loom/contracts';
 
 /**
  * Angle meaning rules. Ascendant sign = persona, MC sign = career direction.

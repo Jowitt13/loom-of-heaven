@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalJson, parseBirthInput } from '@ming/contracts';
+import { canonicalJson, parseBirthInput } from '@loom/contracts';
 import {
   calculate,
   compareProfiles,
@@ -7,7 +7,7 @@ import {
   doctor,
   renderReport,
   verify,
-} from '@ming/orchestrator';
+} from '@loom/orchestrator';
 
 const raw = {
   calendar: 'gregorian',

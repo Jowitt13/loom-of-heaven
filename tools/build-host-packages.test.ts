@@ -122,7 +122,7 @@ describe('cross-platform reproducible host packaging (real build path)', () => {
       writeFileSync(join(fakeSkill, 'SKILL.md'), '# Synthetic Skill\n');
       writeFileSync(join(fakeSkill, 'LICENSE'), 'MIT\n');
       writeFileSync(join(fakeSkill, 'scripts', 'dist', 'engine.mjs'), 'export const x = 1;\n');
-      writeFileSync(join(fakeSkill, 'scripts', 'ming-chart.mjs'), '#!/usr/bin/env node\n');
+      writeFileSync(join(fakeSkill, 'scripts', 'loom-chart.mjs'), '#!/usr/bin/env node\n');
       writeFileSync(join(fakeSkill, 'references', 'answer-contract.md'), '# contract\n');
       mkdirSync(join(fakeSkill, 'agents'), { recursive: true });
       writeFileSync(join(fakeSkill, 'agents', 'openai.yaml'), 'name: test\n');

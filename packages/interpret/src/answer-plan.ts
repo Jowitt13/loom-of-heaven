@@ -4,7 +4,7 @@ import {
   AnswerPlan as AnswerPlanSchema,
   AnswerRequest as AnswerRequestSchema,
   PublicResult as PublicResultSchema,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import type {
   AnswerLens,
   AnswerPlan,
@@ -16,7 +16,7 @@ import type {
   PublicFact,
   PublicResult,
   PublicWarning,
-} from '@ming/contracts';
+} from '@loom/contracts';
 
 /** P4 v2 hard cut: public answer plans report every first-class system. */
 const SYSTEMS: ChartSystem[] = ['western', 'bazi', 'ziwei', 'vedic'];

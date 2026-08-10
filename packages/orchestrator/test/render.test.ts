@@ -1,7 +1,7 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { parseBirthInput } from '@ming/contracts';
-import { calculate, renderReport, renderSvgReport } from '@ming/orchestrator';
+import { parseBirthInput } from '@loom/contracts';
+import { calculate, renderReport, renderSvgReport } from '@loom/orchestrator';
 
 const rawMale = {
   calendar: 'gregorian',

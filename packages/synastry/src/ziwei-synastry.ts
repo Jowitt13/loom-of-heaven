@@ -1,5 +1,5 @@
-import type { ChartBundle, SynastryFinding, ZiweiChartResult } from '@ming/contracts';
-import { crossBranchRelation } from '@ming/bazi-rules';
+import type { ChartBundle, SynastryFinding, ZiweiChartResult } from '@loom/contracts';
+import { crossBranchRelation } from '@loom/bazi-rules';
 
 /**
  * Zi Wei 合婚: cross-overlay of the two charts' key palaces by earthly branch —

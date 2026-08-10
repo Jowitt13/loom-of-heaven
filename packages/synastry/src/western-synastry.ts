@@ -1,4 +1,4 @@
-import type { ChartBundle, SynastryFinding, WesternChartResult } from '@ming/contracts';
+import type { ChartBundle, SynastryFinding, WesternChartResult } from '@loom/contracts';
 
 /**
  * Western synastry: cross-aspects between the two charts' relationship-relevant points

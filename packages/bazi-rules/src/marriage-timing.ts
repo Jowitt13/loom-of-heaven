@@ -1,4 +1,4 @@
-import type { BaziChartResult, BaziRuleFinding } from '@ming/contracts';
+import type { BaziChartResult, BaziRuleFinding } from '@loom/contracts';
 import { tenGodCategory, tenGodOf } from './fundamentals.ts';
 import { branchPairRelation, crossBranchRelation } from './relations.ts';
 import { BRANCH_MAIN_STEM, yearGanzhi } from './fortune.ts';

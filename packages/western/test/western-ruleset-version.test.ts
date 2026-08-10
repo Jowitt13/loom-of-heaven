@@ -10,9 +10,9 @@ import {
   WESTERN_RULESET_CURRENT,
   WESTERN_RULESET_RETIRED,
   WesternSettings,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import { computeWestern } from '../src/western-provider.ts';
-import { NormalizedBirthData } from '@ming/contracts';
+import { NormalizedBirthData } from '@loom/contracts';
 
 /** A minimal valid NormalizedBirthData for exercising the provider (synthetic). */
 const SYNTHETIC_INPUT = NormalizedBirthData.parse({

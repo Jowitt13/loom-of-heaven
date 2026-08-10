@@ -1,5 +1,5 @@
 {
-  "name": "@ming/synastry",
+  "name": "@loom/synastry",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ming/bazi-rules": "workspace:*",
-    "@ming/contracts": "workspace:*"
+    "@loom/bazi-rules": "workspace:*",
+    "@loom/contracts": "workspace:*"
   }
 }

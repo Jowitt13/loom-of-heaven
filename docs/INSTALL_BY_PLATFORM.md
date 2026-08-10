@@ -1,4 +1,4 @@
-# Ming Engine 安装指南（按平台）
+# Loom of Heaven 安装指南（按平台）
 
 > 当前分发状态：安装包来自 GitHub Release `v0.3.5`。Qoder、WorkBuddy 与豆包电脑版已有公开 ZIP；以 `install-manifest.json` 的 `published` 字段及 SHA-256 为准。
 >
@@ -10,7 +10,7 @@
 
 复制下面一句发送给你的 AI：
 
-> 帮我安装这个技能：https://raw.githubusercontent.com/Jowitt13/ming-engine/main/INSTALL.md
+> 帮我安装这个技能：https://raw.githubusercontent.com/Jowitt13/loom-of-heaven/main/INSTALL.md
 
 AI 会自动识别你所在的平台，并先检查该平台是否已发布。只有 `published: true` 时才会下载、校验 SHA-256、安装、启用并自检；否则会明确告诉你“安装包尚未发布”并停止。你最多只需要确认一次系统权限。
 
@@ -44,7 +44,7 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 30 秒安装
 
-1. 访问 [ming-engine GitHub](https://github.com/Jowitt13/ming-engine)，下载 ZIP（绿色 "Code" 按钮 → Download ZIP）
+1. 访问 [loom-of-heaven GitHub](https://github.com/Jowitt13/loom-of-heaven)，下载 ZIP（绿色 "Code" 按钮 → Download ZIP）
 2. 解压到任意文件夹
 3. 在 Codex 中打开该项目文件夹，直接对话即可
 
@@ -75,7 +75,7 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 安装流程（推荐：一句话，由 Qoder Agent 代装）
 
-把顶部那句“帮我安装这个技能：<INSTALL.md 链接>”发给 Qoder：Qoder 内置 Agent 会**代为**下载 `ming-engine-qoder.zip`、按清单校验 SHA-256、校验 zip 单层目录、解压到临时目录，然后**仅替换**你的用户技能目录 `~/.qoder/skills/xuan-ji-yu-heng/`（不动其它技能，失败不覆盖旧版），再刷新或提示你重启 Qoder / 新开对话一次，并自检。你无需自己下载、解压或使用任何命令行工具。
+把顶部那句“帮我安装这个技能：<INSTALL.md 链接>”发给 Qoder：Qoder 内置 Agent 会**代为**下载 `loom-of-heaven-qoder.zip`、按清单校验 SHA-256、校验 zip 单层目录、解压到临时目录，然后**仅替换**你的用户技能目录 `~/.qoder/skills/xuan-ji-yu-heng/`（不动其它技能，失败不覆盖旧版），再刷新或提示你重启 Qoder / 新开对话一次，并自检。你无需自己下载、解压或使用任何命令行工具。
 
 #### 手动备用方案（仅在正式发布且 Qoder 不允许 Agent 写入技能目录时）
 
@@ -95,7 +95,7 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 检查版本 / 更新 / 卸载
 
-- 检查版本：说“检查 Ming Engine 版本”，AI 运行 `node scripts/ming-chart.mjs version` 读取本地 `BUILD_MANIFEST.json`，回报真实已装版本，不等于“线上最新”。
+- 检查版本：说“检查 Loom of Heaven 版本”，AI 运行 `node scripts/loom-chart.mjs version` 读取本地 `BUILD_MANIFEST.json`，回报真实已装版本，不等于“线上最新”。
 - 更新：先读线上 `install-manifest.json`。若 Qoder `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；只有已发布时才下载不可变 tag 资产、校验 SHA-256 并用 `migrate --host qoder` 原子替换 `~/.qoder/skills/xuan-ji-yu-heng`（清理 legacy RC 双层、失败回滚，不碰其它技能）→ 回报 before→after。全程 Agent 文件操作，无需命令行工具。
 - 卸载：在技能管理中删除 `xuan-ji-yu-heng`，或删除技能文件夹。
 
@@ -127,8 +127,8 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 检查版本 / 更新 / 卸载
 
-- 检查版本：说“检查 Ming Engine 版本”，AI 运行 `node scripts/ming-chart.mjs version` 读取本地 `BUILD_MANIFEST.json`，回报真实已装版本，不等于“线上最新”。
-- 更新：先读线上 `install-manifest.json`。若 WorkBuddy `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；只有已发布时才下载不可变 tag 资产、校验 SHA-256 并用 `migrate --host workbuddy` 原子替换 `~/.workbuddy/skills/xuan-ji-yu-heng`（清理 legacy RC 双层、失败回滚），或经「Skills 管理」先删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 `xuan-ji-yu-heng` → 回报 before→after。
+- 检查版本：说“检查 Loom of Heaven 版本”，AI 运行 `node scripts/loom-chart.mjs version` 读取本地 `BUILD_MANIFEST.json`，回报真实已装版本，不等于“线上最新”。
+- 更新：先读线上 `install-manifest.json`。若 WorkBuddy `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；只有已发布时才下载不可变 tag 资产、校验 SHA-256 并用 `migrate --host workbuddy` 原子替换 `~/.workbuddy/skills/xuan-ji-yu-heng`（清理 legacy RC 双层、失败回滚），或经「Skills 管理」先删旧 Loom of Heaven 再导入新版、不碰其它技能；升级后只保留一个可触发 `xuan-ji-yu-heng` → 回报 before→after。
 - 卸载：在「Skills 管理」中删除该技能。
 
 ### 已知限制

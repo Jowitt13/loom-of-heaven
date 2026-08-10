@@ -4,9 +4,9 @@ import {
   SCHEMA_VERSION,
   canonicalJson,
   fnv1a64Hex,
-} from '@ming/contracts';
-import type { EngineWarning, SynastryInput, SynastryPerson, SynastryResult } from '@ming/contracts';
-import { synastryFindings } from '@ming/synastry';
+} from '@loom/contracts';
+import type { EngineWarning, SynastryInput, SynastryPerson, SynastryResult } from '@loom/contracts';
+import { synastryFindings } from '@loom/synastry';
 import { calculate } from './calculate.ts';
 
 export interface SynastryRunOptions {

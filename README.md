@@ -9,10 +9,10 @@
 > assets are published and their hashes are recorded in the stable root install manifest.
 
 <p align="center">
-  <img src="docs/assets/hero.png" alt="ming-engine — deterministic Western natal, BaZi and Zi Wei Dou Shu engine" width="100%" />
+  <img src="docs/assets/hero.png" alt="loom-of-heaven — deterministic Western natal, BaZi and Zi Wei Dou Shu engine" width="100%" />
 </p>
 
-<h1 align="center">✨ ming-engine ✨</h1>
+<h1 align="center">✨ loom-of-heaven ✨</h1>
 
 <p align="center">
   <b>一个确定性命理计算引擎</b> — 西方占星本命盘 · 四柱八字 · 紫微斗数<br/>
@@ -31,7 +31,7 @@
 
 ## 🔮 这是什么？ / What is this?
 
-**ming-engine** 把三大命理体系装进一个 **完全离线、字节级确定** 的引擎，并打包成一个供支持本地脚本执行的 AI 宿主调用的 **Skill**。
+**loom-of-heaven** 把三大命理体系装进一个 **完全离线、字节级确定** 的引擎，并打包成一个供支持本地脚本执行的 AI 宿主调用的 **Skill**。
 
 > 🧠 **大模型只负责收集输入、复述确认、转达结果——它从不亲自算命。**
 > 所有行星位置、宫位、相位、干支、十神、星曜、四化都由内置的确定性 CLI 计算，可回归、可复现、有来源。
@@ -49,7 +49,7 @@
 
 对你的 AI（Qoder / WorkBuddy / 豆包电脑版 / Codex）说一句：
 
-> 帮我安装这个技能：https://raw.githubusercontent.com/Jowitt13/ming-engine/main/INSTALL.md
+> 帮我安装这个技能：https://raw.githubusercontent.com/Jowitt13/loom-of-heaven/main/INSTALL.md
 
 宿主 AI 会先识别平台并读取 [`install-manifest.json`](install-manifest.json) 的 `published` 状态；**只有所选平台已发布时**，才会读取下载地址、校验 SHA-256 并安装。它不会猜测、拼接或尝试不存在的下载链接。
 
@@ -87,7 +87,7 @@
 ```mermaid
 flowchart LR
   U["🗣️ 用户自然语言请求"] --> S["📄 SKILL.md 触发与输入确认"]
-  S --> CLI["⚙️ ming-chart.mjs（唯一稳定 CLI）"]
+  S --> CLI["⚙️ loom-chart.mjs（唯一稳定 CLI）"]
   CLI --> T["🕓 时间地点归一化<br/>IANA/DST/UTC/真太阳时"]
   T --> W["🪐 西方 Provider<br/>astronomy-engine"]
   T --> B["🎋 八字 Provider<br/>tyme4ts"]
@@ -95,7 +95,7 @@ flowchart LR
   W --> C["📦 版本化 ChartBundle"]
   B --> C
   Z --> C
-  C --> I["📜 解读事实层<br/>@ming/interpret（带来源+证据+吉凶）"]
+  C --> I["📜 解读事实层<br/>@loom/interpret（带来源+证据+吉凶）"]
   I --> LLM["🧠 宿主大模型 → 自然语言解读"]
 ```
 
@@ -108,17 +108,17 @@ flowchart LR
 > 需要 **Node ≥ 22**。发布的 Skill 文件夹**自包含**（内置 `scripts/dist/engine.mjs`），无需 `npm install`、无需联网。
 
 ```bash
-git clone https://github.com/Jowitt13/ming-engine.git
-cd ming-engine/skills/xuan-ji-yu-heng
+git clone https://github.com/Jowitt13/loom-of-heaven.git
+cd loom-of-heaven/skills/xuan-ji-yu-heng
 
 # 1) 环境自检
-node scripts/ming-chart.mjs doctor
+node scripts/loom-chart.mjs doctor
 
 # 2) 准备一个 birth-input.json（见下方示例），然后算三盘
-node scripts/ming-chart.mjs calculate --input-file birth-input.json --systems all --output-file chart.json
+node scripts/loom-chart.mjs calculate --input-file birth-input.json --systems all --output-file chart.json
 
 # 3) 需要解读时，生成跨系统解读事实（带证据/原因链/吉凶/免责）
-node scripts/ming-chart.mjs interpret --input-file birth-input.json --output-file interpretation.json
+node scripts/loom-chart.mjs interpret --input-file birth-input.json --output-file interpretation.json
 # （注：render 生成 HTML/SVG 报告的功能已暂时关闭，返回禁用提示并以退出码 3 退出）
 ```
 
@@ -156,8 +156,8 @@ Qoder 的完整 ZIP 已发布在 GitHub Release `v0.3.5`。普通用户仍只需
 本仓库同时是一个 **Claude Code 插件市场**（含 `.claude-plugin/marketplace.json`）：
 
 ```text
-/plugin marketplace add Jowitt13/ming-engine
-/plugin install xuan-ji-yu-heng@ming-engine
+/plugin marketplace add Jowitt13/loom-of-heaven
+/plugin install xuan-ji-yu-heng@loom-of-heaven
 ```
 
 或手动：把 `skills/xuan-ji-yu-heng/` 复制到 `~/.claude/skills/`。
@@ -171,7 +171,7 @@ Skill 的 UI 元数据在 [`skills/xuan-ji-yu-heng/agents/openai.yaml`](skills/x
 
 ## 🛠️ CLI 速查 / Command reference
 
-单一稳定入口：`node scripts/ming-chart.mjs <subcommand>`（参数走数组/文件，绝不拼 shell）。
+单一稳定入口：`node scripts/loom-chart.mjs <subcommand>`（参数走数组/文件，绝不拼 shell）。
 
 | 子命令         | 作用                                                                                                                         |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------- |

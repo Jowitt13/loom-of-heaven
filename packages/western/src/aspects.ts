@@ -1,4 +1,4 @@
-import type { WesternAspect, WesternAspectType } from '@ming/contracts';
+import type { WesternAspect, WesternAspectType } from '@loom/contracts';
 import { deltaLon } from './ephemeris.ts';
 
 /**

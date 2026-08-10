@@ -3,7 +3,7 @@ import type {
   VedicDerivedPlacement,
   VedicGraha,
   VedicVaara,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import { wholeSignBhavaOf } from './bhava.ts';
 import { nakshatraOf } from './nakshatra.ts';
 import { instantaneousPanchanga } from './panchanga.ts';

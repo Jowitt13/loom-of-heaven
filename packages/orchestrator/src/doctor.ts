@@ -5,8 +5,8 @@ import {
   SOLAR_TIME_METHOD,
   SUPPORTED_YEAR_MAX,
   SUPPORTED_YEAR_MIN,
-} from '@ming/contracts';
-import { momentVersion, tzdbVersion, zoneCount } from '@ming/time-location';
+} from '@loom/contracts';
+import { momentVersion, tzdbVersion, zoneCount } from '@loom/time-location';
 import { PROVIDER_REGISTRY } from './provenance-build.ts';
 
 /** Optional runtime facts supplied by the CLI (the engine stays process-free). */

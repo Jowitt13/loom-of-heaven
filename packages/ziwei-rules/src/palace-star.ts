@@ -1,4 +1,4 @@
-import type { ZiweiChartResult, ZiweiRuleFinding } from '@ming/contracts';
+import type { ZiweiChartResult, ZiweiRuleFinding } from '@loom/contracts';
 
 /**
  * Palace-star combination rules. Major star in career/wealth palace → domain meaning.

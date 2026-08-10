@@ -1,13 +1,13 @@
 # reading-lite 用户引导
 
-> 本文档仅用于 `ming-engine-doubao-reading-lite`（解读辅助版）。
+> 本文档仅用于 `loom-of-heaven-doubao-reading-lite`（解读辅助版）。
 > 此版本**不包含排盘引擎**，不能自行计算八字、紫微、占星。
 
 ## 此版本能做什么
 
 1. 引导你收集完整的出生信息（日期、时间、地点、时区等）
-2. 接收已由完整 Ming Engine 生成的 `facts`（结构化命盘事实）
-3. 按 Ming Engine 的"说人话"输出规范生成事业、感情、财运等自然语言解读
+2. 接收已由完整 Loom of Heaven 生成的 `facts`（结构化命盘事实）
+3. 按 Loom of Heaven 的"说人话"输出规范生成事业、感情、财运等自然语言解读
 4. 提供专业依据、时间线、风险提示和现实建议
 
 ## 此版本不能做什么
@@ -21,9 +21,9 @@
 
 ### 方式一：已有完整引擎的 facts（推荐）
 
-1. 在装有任何完整版 Ming Engine 的环境（Codex / Qoder / WorkBuddy）中运行排盘
+1. 在装有任何完整版 Loom of Heaven 的环境（Codex / Qoder / WorkBuddy）中运行排盘
 2. 将生成的 `interpretation.json` 中的 facts 部分复制出来
-3. 粘贴到豆包，说："我已从完整 Ming Engine 拿到了 facts，帮我按规范写一份事业解读"
+3. 粘贴到豆包，说："我已从完整 Loom of Heaven 拿到了 facts，帮我按规范写一份事业解读"
 4. 豆包会按 reading-style.md 的 7 步结构生成大白话解读
 
 ### 方式二：先收集信息，后续再解读
@@ -55,4 +55,4 @@
 
 - 此版本仅供传统文化、娱乐与自我反思用途
 - 非科学预测，不构成医疗、法律、投资或人生重大决策建议
-- 如需完整排盘能力，请使用 Codex / Qoder / WorkBuddy 上的完整版 Ming Engine
+- 如需完整排盘能力，请使用 Codex / Qoder / WorkBuddy 上的完整版 Loom of Heaven

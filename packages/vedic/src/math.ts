@@ -1,4 +1,4 @@
-import { roundTo } from '@ming/contracts';
+import { roundTo } from '@loom/contracts';
 
 /** Normalize an angle to [0, 360). */
 export function norm360(value: number): number {

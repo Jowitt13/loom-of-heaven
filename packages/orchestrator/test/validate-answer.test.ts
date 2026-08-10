@@ -9,7 +9,7 @@ import {
   normalizeSafetyText,
   parseValidateAnswerInputBounded,
   validateAnswer,
-} from '@ming/interpret';
+} from '@loom/interpret';
 import {
   MAX_ALLOWED_FACT_IDS,
   MAX_CAVEATS_EXPRESSED,
@@ -22,8 +22,8 @@ import {
   MAX_VALIDATE_ANSWER_INPUT_BYTES,
   MAX_VIOLATIONS,
   ValidateAnswerInput as ValidateAnswerInputSchema,
-} from '@ming/contracts';
-import type { ValidateAnswerInput } from '@ming/contracts';
+} from '@loom/contracts';
+import type { ValidateAnswerInput } from '@loom/contracts';
 
 /** Minimal valid AnswerPlan stub for testing. */
 function makePlan(
@@ -1117,7 +1117,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
 
   describe('bounded input entry (facade + CLI byte cap)', () => {
     const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-    const cliPath = join(repoRoot, 'skills', 'xuan-ji-yu-heng', 'scripts', 'ming-chart.mjs');
+    const cliPath = join(repoRoot, 'skills', 'xuan-ji-yu-heng', 'scripts', 'loom-chart.mjs');
     const tmpDir = join(repoRoot, '.tmp', 'validate-answer-tests');
 
     it('parseValidateAnswerInputBounded rejects a huge top-level array before Zod', () => {
@@ -1901,7 +1901,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
 
     it('CLI: structurally invalid input yields exit != 0 and no echo of caller keys', () => {
       const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-      const cliPath = join(repoRoot, 'skills', 'xuan-ji-yu-heng', 'scripts', 'ming-chart.mjs');
+      const cliPath = join(repoRoot, 'skills', 'xuan-ji-yu-heng', 'scripts', 'loom-chart.mjs');
       const tmpDir = join(repoRoot, '.tmp', 'validate-answer-tests');
       mkdirSync(tmpDir, { recursive: true });
       const junkFile = join(tmpDir, 'junk-input.json');

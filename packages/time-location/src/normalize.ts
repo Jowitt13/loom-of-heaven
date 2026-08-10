@@ -6,15 +6,15 @@ import {
   SUPPORTED_YEAR_MIN,
   WARNING_CODES,
   makeWarning,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import type {
   AmbiguityInfo,
   BirthInput,
   EngineWarning,
   NormalizedBirthData,
   NormalizedTimePublic,
-} from '@ming/contracts';
-import { NormalizedBirthData as NormalizedBirthDataSchema } from '@ming/contracts';
+} from '@loom/contracts';
+import { NormalizedBirthData as NormalizedBirthDataSchema } from '@loom/contracts';
 import { resolveWallClock } from './disambiguate.ts';
 import { computeSolarTime } from './solar-time.ts';
 import { tzdbRef, zoneExists } from './tzdb.ts';

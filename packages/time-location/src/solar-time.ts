@@ -1,5 +1,5 @@
-import { SOLAR_TIME_METHOD, roundTo } from '@ming/contracts';
-import type { SolarTimeInfo } from '@ming/contracts';
+import { SOLAR_TIME_METHOD, roundTo } from '@loom/contracts';
+import type { SolarTimeInfo } from '@loom/contracts';
 import { formatWallDateTime, utcDayOfYear } from './format.ts';
 
 /**

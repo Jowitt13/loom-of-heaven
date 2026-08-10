@@ -1,5 +1,5 @@
 /**
- * @ming/orchestrator — the engine facade. One deterministic entry per CLI verb.
+ * @loom/orchestrator — the engine facade. One deterministic entry per CLI verb.
  */
 export * from './provenance-build.ts';
 export * from './calculate.ts';

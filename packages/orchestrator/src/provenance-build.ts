@@ -1,5 +1,5 @@
-import { ENGINE_NAME, ENGINE_VERSION, SCHEMA_VERSION } from '@ming/contracts';
-import type { NormalizedBirthData, Provenance, ProviderRef, RulesetRef } from '@ming/contracts';
+import { ENGINE_NAME, ENGINE_VERSION, SCHEMA_VERSION } from '@loom/contracts';
+import type { NormalizedBirthData, Provenance, ProviderRef, RulesetRef } from '@loom/contracts';
 
 /**
  * Verified upstream provider metadata (license/version audit). `status` reflects

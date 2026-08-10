@@ -1,6 +1,6 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { BirthInput, canonicalJson, fnv1a64Hex, parseBirthInput, roundTo } from '@ming/contracts';
+import { BirthInput, canonicalJson, fnv1a64Hex, parseBirthInput, roundTo } from '@loom/contracts';
 
 // Valid base WITHOUT localTime, so we can test the localTime refinement cleanly.
 const base = {

@@ -5,10 +5,10 @@ import {
   marriageTimingFinding,
   elementsByRelation,
   type Element,
-} from '@ming/bazi-rules';
-import { interpretWestern } from '@ming/western-rules';
-import { interpretZiwei as interpretZiweiRules } from '@ming/ziwei-rules';
-import { interpretVedic } from '@ming/vedic-rules';
+} from '@loom/bazi-rules';
+import { interpretWestern } from '@loom/western-rules';
+import { interpretZiwei as interpretZiweiRules } from '@loom/ziwei-rules';
+import { interpretVedic } from '@loom/vedic-rules';
 import type {
   BaziInterpretation,
   ChartBundle,
@@ -23,7 +23,7 @@ import type {
   ZiweiChartResult,
   ZiweiHoroscopeResult,
   ZiweiInterpretation,
-} from '@ming/contracts';
+} from '@loom/contracts';
 
 /**
  * Build the cross-system interpretation-facts document (handoff §8 layer 2). Pure,

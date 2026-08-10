@@ -1,6 +1,6 @@
 import { Engine } from 'caelus';
 import { embeddedData } from 'caelus/data-embedded';
-import { WARNING_CODES, makeWarning } from '@ming/contracts';
+import { WARNING_CODES, makeWarning } from '@loom/contracts';
 import type {
   EngineWarning,
   NormalizedBirthData,
@@ -9,7 +9,7 @@ import type {
   VedicGraha,
   VedicSettings,
   VedicUnknownTimeStable,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import { deriveVedicClassifications } from './classifications.ts';
 import { nakshatraOf } from './nakshatra.ts';
 import { instantaneousPanchanga } from './panchanga.ts';

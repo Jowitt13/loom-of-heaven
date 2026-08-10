@@ -7,7 +7,7 @@ school is implemented" (handoff §5).
 
 ## `compare` profiles (available now)
 
-`node scripts/ming-chart.mjs compare --input-file in.json --profiles a,b`
+`node scripts/loom-chart.mjs compare --input-file in.json --profiles a,b`
 
 | profile          | effect                                                                 |
 | ---------------- | ---------------------------------------------------------------------- |

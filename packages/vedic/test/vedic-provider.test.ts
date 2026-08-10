@@ -1,8 +1,8 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { parseBirthInput } from '@ming/contracts';
-import { normalizeBirthData } from '@ming/time-location';
-import { computeVedic } from '@ming/vedic';
+import { parseBirthInput } from '@loom/contracts';
+import { normalizeBirthData } from '@loom/time-location';
+import { computeVedic } from '@loom/vedic';
 
 const input = parseBirthInput({
   calendar: 'gregorian',

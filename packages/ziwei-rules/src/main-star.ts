@@ -1,4 +1,4 @@
-import type { ZiweiChartResult, ZiweiRuleFinding } from '@ming/contracts';
+import type { ZiweiChartResult, ZiweiRuleFinding } from '@loom/contracts';
 
 /**
  * Main star core meaning rules. Each of the 14 main stars has one-line core象义.

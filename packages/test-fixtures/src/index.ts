@@ -1,4 +1,4 @@
-import type { BirthInputRaw, ErrorCode } from '@ming/contracts';
+import type { BirthInputRaw, ErrorCode } from '@loom/contracts';
 
 /**
  * Sourced time & location boundary fixtures (handoff §9.1). Expectations are

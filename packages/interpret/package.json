@@ -1,5 +1,5 @@
 {
-  "name": "@ming/interpret",
+  "name": "@loom/interpret",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,10 +11,10 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ming/bazi-rules": "workspace:*",
-    "@ming/western-rules": "workspace:*",
-    "@ming/ziwei-rules": "workspace:*",
-    "@ming/vedic-rules": "workspace:*",
-    "@ming/contracts": "workspace:*"
+    "@loom/bazi-rules": "workspace:*",
+    "@loom/western-rules": "workspace:*",
+    "@loom/ziwei-rules": "workspace:*",
+    "@loom/vedic-rules": "workspace:*",
+    "@loom/contracts": "workspace:*"
   }
 }

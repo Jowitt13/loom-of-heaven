@@ -1,7 +1,7 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
 import { Horizon, Observer } from 'astronomy-engine';
-import { ERROR_CODES, EngineError } from '@ming/contracts';
+import { ERROR_CODES, EngineError } from '@loom/contracts';
 import { deltaLon, norm360 } from '../src/ephemeris.ts';
 import {
   ascendantLongitude,

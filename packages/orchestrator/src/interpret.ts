@@ -1,4 +1,4 @@
-import { buildAnswerPlan, buildInterpretationFacts, buildPublicResult } from '@ming/interpret';
+import { buildAnswerPlan, buildInterpretationFacts, buildPublicResult } from '@loom/interpret';
 import type {
   AnswerLens,
   AnswerPlan,
@@ -7,7 +7,7 @@ import type {
   InterpretationFacts,
   InterpretationTopic,
   PublicResult,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import { calculate, runHoroscope, type HoroscopeOptions } from './calculate.ts';
 
 export interface InterpretOptions {

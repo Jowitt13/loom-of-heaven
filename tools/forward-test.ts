@@ -132,7 +132,7 @@ try {
 
   record(
     'skill copied to OS temp dir outside repo',
-    existsSync(join(tempSkill, 'scripts', 'ming-chart.mjs')),
+    existsSync(join(tempSkill, 'scripts', 'loom-chart.mjs')),
   );
   record('isolated copy has no node_modules', !existsSync(join(tempSkill, 'node_modules')));
   record('isolated copy has no packages/', !existsSync(join(tempBase, 'packages')));
@@ -142,20 +142,20 @@ try {
   );
 
   // --- Shared precondition: doctor + verify in the clean dir. ------------------
-  const doctor = runNode(tempSkill, ['scripts/ming-chart.mjs', 'doctor']);
+  const doctor = runNode(tempSkill, ['scripts/loom-chart.mjs', 'doctor']);
   const doctorJson = parseJson(doctor.stdout);
   const tzdbVersion = ((doctorJson?.tzdb as Json | undefined)?.version as string | undefined) ?? '';
   record('doctor runs in clean dir (exit 0)', doctor.code === 0);
   record('doctor reports a bundled TZDB version', tzdbVersion.length > 0, tzdbVersion);
 
-  const verify = runNode(tempSkill, ['scripts/ming-chart.mjs', 'verify']);
+  const verify = runNode(tempSkill, ['scripts/loom-chart.mjs', 'verify']);
   record('verify passes in clean dir', verify.code === 0);
 
   // --- Request A: full four-system chart, exact time, gender known. ------------
   const aInput = writeInput('a-input.json', exactMale);
 
   const aNormalize = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'normalize',
     '--input-file',
     aInput,
@@ -170,7 +170,7 @@ try {
   );
 
   const calcArgs = (input: string): string[] => [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'calculate',
     '--input-file',
     input,
@@ -226,7 +226,7 @@ try {
   // writes no report file — hosts present the structured calculate/interpret JSON.
   runNode(tempSkill, [...calcArgs(aInput), '--output-file', 'a-chart.json']);
   const aRender = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'render',
     '--input-file',
     'a-chart.json',
@@ -306,7 +306,7 @@ try {
 
   // --- Request E: school / true-solar-time comparison (compare subcommand). ----
   const eCompare = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'compare',
     '--input-file',
     aInput,
@@ -325,7 +325,7 @@ try {
 
   // --- Request F: Zi Wei dynamic chart (运限盘) via the horoscope subcommand. ----
   const fHoro = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'horoscope',
     '--input-file',
     aInput,
@@ -344,7 +344,7 @@ try {
       ['decadal', 'age', 'yearly', 'monthly', 'daily', 'hourly'].every((k) => fH[k] !== undefined),
   );
   runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'horoscope',
     '--input-file',
     aInput,
@@ -354,7 +354,7 @@ try {
     'f-horo.json',
   ]);
   const fRender = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'render',
     '--input-file',
     'f-horo.json',
@@ -369,7 +369,7 @@ try {
 
   // --- Request G: cross-system interpretation facts (the interpret subcommand). --
   const gInterp = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'interpret',
     '--input-file',
     aInput,
@@ -431,7 +431,7 @@ try {
   };
   writeFileSync(join(tempSkill, 'people.json'), JSON.stringify(hPeople), 'utf8');
   const hSyn = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'synastry',
     '--input-file',
     'people.json',
@@ -454,7 +454,7 @@ try {
 
   // --- Request I: ordinary question uses only the public answer-plan contract. --
   const iAnswer = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'answer-plan',
     '--input-file',
     aInput,

@@ -1,5 +1,5 @@
 /**
- * @ming/contracts — versioned Zod contracts, canonical JSON, warnings, errors
+ * @loom/contracts — versioned Zod contracts, canonical JSON, warnings, errors
  * and provenance shared by every layer of the engine.
  */
 export * from './version.ts';

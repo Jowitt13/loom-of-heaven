@@ -1,4 +1,4 @@
-import type { VedicInstantaneousPanchanga } from '@ming/contracts';
+import type { VedicInstantaneousPanchanga } from '@loom/contracts';
 import { canonicalLongitude, norm360 } from './math.ts';
 
 const DEGREES_PER_YOGA = 360 / 27;

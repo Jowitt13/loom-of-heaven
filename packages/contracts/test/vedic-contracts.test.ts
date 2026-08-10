@@ -1,6 +1,6 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { BirthInput, VedicSettings, parseBirthInput } from '@ming/contracts';
+import { BirthInput, VedicSettings, parseBirthInput } from '@loom/contracts';
 
 /**
  * Vedic P1/P2 contract tests (ADR 0013): the 'vedic' system id is reserved in

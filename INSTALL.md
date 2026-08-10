@@ -1,6 +1,6 @@
-# Ming Engine 跨平台自动安装入口
+# Loom of Heaven 跨平台自动安装入口
 
-这是 Ming Engine 的跨平台自动安装入口。请先识别当前宿主为 Codex、Qoder、Qoder CN、WorkBuddy 或豆包电脑版，再按对应流程安装。不要把 Lite 版误称为完整排盘版。
+这是 Loom of Heaven 的跨平台自动安装入口。请先识别当前宿主为 Codex、Qoder、Qoder CN、WorkBuddy 或豆包电脑版，再按对应流程安装。不要把 Lite 版误称为完整排盘版。
 
 ---
 
@@ -8,7 +8,7 @@
 
 把下面这一句复制发给你的 AI（Qoder / WorkBuddy / 豆包电脑版 / Codex 均可）：
 
-> 帮我安装这个技能：https://raw.githubusercontent.com/Jowitt13/ming-engine/main/INSTALL.md
+> 帮我安装这个技能：https://raw.githubusercontent.com/Jowitt13/loom-of-heaven/main/INSTALL.md
 
 然后你只需要：
 
@@ -23,17 +23,17 @@
 ## 给宿主 AI：自动安装协议（请严格按顺序执行）
 
 1. **识别当前宿主**：判断你运行在 Codex、Qoder / Qoder CN、WorkBuddy（桌面端 / OpenClaw）还是豆包电脑版。若无法确定，走下方“平台未知”规则。
-2. **读取清单**：抓取 `https://raw.githubusercontent.com/Jowitt13/ming-engine/main/install-manifest.json`。
+2. **读取清单**：抓取 `https://raw.githubusercontent.com/Jowitt13/loom-of-heaven/main/install-manifest.json`。
 3. **选择平台并先检查可用性**：在 `platforms[]` 中选 `host` 等于当前宿主的项；先读取 `published`、`capability`、`downloadType` 与 `installer`。在确认 `published` 为 `true` 前，**不得**读取、猜测或使用 `downloadUrl`、`sha256`。
 4. **未发布时立即停止**：若所选平台 `published` 不是 `true`，明确告诉用户“该平台安装包尚未发布”，不要下载、不要校验、不要运行安装器、不要用本地旧包或缓存冒充最新版。Codex 的 `repo` 来源仅在仓库已公开且可访问时可继续；仓库未公开时同样停止并说明尚不可公开安装。
 5. **仅对已发布平台校验来源与完整性**：
-   - 下载地址必须以 `https://github.com/Jowitt13/ming-engine` 或 `https://raw.githubusercontent.com/Jowitt13/ming-engine` 开头，**不得**从任何第三方 URL 下载；
+   - 下载地址必须以 `https://github.com/Jowitt13/loom-of-heaven` 或 `https://raw.githubusercontent.com/Jowitt13/loom-of-heaven` 开头，**不得**从任何第三方 URL 下载；
    - release 资产地址必须指向不可变版本 tag（形如 `/releases/download/<tag>/…`），**不得**使用 `latest/download`；
    - 下载后计算 SHA-256，必须与该平台的 `sha256`（并可对照 `SHA256SUMS.txt`）**完全一致**。
 6. **按宿主原生方式安装**：严格遵循对应的安装器指令文件（见 `installer` 字段，即 `docs/installers/<host>.md`）。不要把复杂步骤、终端命令或路径抛给用户。
 7. **最小权限**：仅在确有需要时，向用户申请**一次**最小权限（如允许运行本地 `node`、允许导入技能）；不要反复索权，也不要索取无关权限。
 8. **刷新技能**：安装后刷新 / 重载宿主的 Skill 列表，确认技能可见。
-9. **自检**：full 版跑 `engineSelfCheck`（`node scripts/ming-chart.mjs verify`，返回 `ok:true`，无需出生资料、不猜坐标）；如需演示可用 `userDemoPrompt`（已含完整时区/经纬度）。reading-lite 版确认可接收 facts 并生成解读。
+9. **自检**：full 版跑 `engineSelfCheck`（`node scripts/loom-chart.mjs verify`，返回 `ok:true`，无需出生资料、不猜坐标）；如需演示可用 `userDemoPrompt`（已含完整时区/经纬度）。reading-lite 版确认可接收 facts 并生成解读。
 10. **一句话反馈**：告诉用户四件事——是否安装成功；装的是**完整排盘版**还是 **reading-lite（解读辅助版）**；如何调用；如何卸载。
 
 用户可见流程最多为：发一句安装请求 →（仅在已发布且确有需要时）至多确认一次权限 → AI 如实回复“已安装，可直接使用”或“安装包尚未发布”。
@@ -46,7 +46,7 @@
 - **SHA-256 不一致**：立即**拒绝安装**，提示用户重新下载或核对来源，绝不安装未通过校验的文件。
 - **平台未知**：如实说明“暂不支持在该宿主自动安装”，引导用户查看 `docs/INSTALL_BY_PLATFORM.md` 手动安装，**不强行安装**。
 - **安装失败**：只给用户**一步修复动作**（一句话，例如“请先安装 Node.js ≥ 22 再重试”），不要倒出长篇教程。
-- **只认本仓库来源**：所有下载地址必须来自 `github.com/Jowitt13/ming-engine` 或其 `raw.githubusercontent.com` / GitHub Release，禁止任意第三方 URL。
+- **只认本仓库来源**：所有下载地址必须来自 `github.com/Jowitt13/loom-of-heaven` 或其 `raw.githubusercontent.com` / GitHub Release，禁止任意第三方 URL。
 - **能力级别以清单为准**：以 `platforms[].capability` 为准告知用户；**不得把 `reading-lite` 版本误称为完整排盘版**。当前四个宿主均为 `full`（完整排盘）。
 
 ---
@@ -67,9 +67,9 @@
 
 ## 检查版本 / 更新 / 卸载（同样一句话）
 
-- 检查版本：**“检查 Ming Engine 版本”** — AI 运行 `node scripts/ming-chart.mjs version` 读取本地 `BUILD_MANIFEST.json`，回报真实**已装**版本（engineVersion / releaseVersion / releaseTag / 是否 legacy / 是否双层目录），不靠猜、不等于“线上最新”。
-- 更新：**“帮我更新 Ming Engine”** — AI 先读线上 `install-manifest.json` 取目标版本，下载不可变 tag 资产并校验 SHA-256，解压后用 `node scripts/ming-chart.mjs migrate` 原子替换旧包（含清理 legacy RC 双层目录、失败自动回滚），再回报 before→after（旧 tag / 新 tag / 新 SHA-256 / 最终 BUILD_MANIFEST）。下载失败 / SHA 不一致 / Release 不存在即明确失败并停止，不因本地旧包或缓存说“已是最新”。
-- 卸载：**“帮我卸载 Ming Engine”** — AI 会在技能管理中删除，或删除已放置的技能文件夹。
+- 检查版本：**“检查 Loom of Heaven 版本”** — AI 运行 `node scripts/loom-chart.mjs version` 读取本地 `BUILD_MANIFEST.json`，回报真实**已装**版本（engineVersion / releaseVersion / releaseTag / 是否 legacy / 是否双层目录），不靠猜、不等于“线上最新”。
+- 更新：**“帮我更新 Loom of Heaven”** — AI 先读线上 `install-manifest.json` 取目标版本，下载不可变 tag 资产并校验 SHA-256，解压后用 `node scripts/loom-chart.mjs migrate` 原子替换旧包（含清理 legacy RC 双层目录、失败自动回滚），再回报 before→after（旧 tag / 新 tag / 新 SHA-256 / 最终 BUILD_MANIFEST）。下载失败 / SHA 不一致 / Release 不存在即明确失败并停止，不因本地旧包或缓存说“已是最新”。
+- 卸载：**“帮我卸载 Loom of Heaven”** — AI 会在技能管理中删除，或删除已放置的技能文件夹。
 
 ---
 

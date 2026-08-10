@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { parseBirthInput } from '@ming/contracts';
-import { normalizeBirthData, parseWallToMs, resolveWallClock } from '@ming/time-location';
-import { timeLocationFixtures } from '@ming/test-fixtures';
+import { parseBirthInput } from '@loom/contracts';
+import { normalizeBirthData, parseWallToMs, resolveWallClock } from '@loom/time-location';
+import { timeLocationFixtures } from '@loom/test-fixtures';
 
 describe('resolveWallClock', () => {
   it('returns exactly one instant for an ordinary time', () => {

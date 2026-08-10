@@ -1,5 +1,5 @@
 {
-  "name": "@ming/bazi",
+  "name": "@loom/bazi",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ming/contracts": "workspace:*",
+    "@loom/contracts": "workspace:*",
     "tyme4ts": "^1.5.2"
   }
 }

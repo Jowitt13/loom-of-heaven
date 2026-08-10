@@ -151,7 +151,7 @@ describe('vedic docs gate: P5 user-facing claims stay truthful', () => {
   });
 
   it('aligns CLI --systems all and the raw no-flag default at four systems', () => {
-    const cli = read('skills/xuan-ji-yu-heng/scripts/ming-chart.mjs');
+    const cli = read('skills/xuan-ji-yu-heng/scripts/loom-chart.mjs');
     expect(cli).toContain("['western', 'bazi', 'ziwei', 'vedic']");
     const contracts = read('packages/contracts/src/birth-input.ts');
     expect(contracts).toContain("default(['western', 'bazi', 'ziwei', 'vedic'])");

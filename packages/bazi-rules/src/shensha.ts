@@ -1,4 +1,4 @@
-import type { BaziChartResult, BaziPillar, BaziRuleFinding } from '@ming/contracts';
+import type { BaziChartResult, BaziPillar, BaziRuleFinding } from '@loom/contracts';
 
 /**
  * Symbolic stars (神煞) — the classic auspicious/inauspicious markers of

@@ -1,8 +1,8 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { canonicalJson, parseBirthInput } from '@ming/contracts';
-import type { BirthInputRaw } from '@ming/contracts';
-import { calculate, runHoroscope } from '@ming/orchestrator';
+import { canonicalJson, parseBirthInput } from '@loom/contracts';
+import type { BirthInputRaw } from '@loom/contracts';
+import { calculate, runHoroscope } from '@loom/orchestrator';
 
 const base: BirthInputRaw = {
   calendar: 'gregorian',

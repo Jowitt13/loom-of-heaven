@@ -1,4 +1,4 @@
-import type { WesternChartResult, WesternRuleFinding } from '@ming/contracts';
+import type { WesternChartResult, WesternRuleFinding } from '@loom/contracts';
 
 /**
  * Planet-house meaning rules. Sun and Moon in angular houses (1/4/7/10).

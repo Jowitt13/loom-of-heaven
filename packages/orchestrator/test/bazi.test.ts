@@ -1,9 +1,9 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { canonicalJson, parseBirthInput } from '@ming/contracts';
-import type { BirthInputRaw } from '@ming/contracts';
+import { canonicalJson, parseBirthInput } from '@loom/contracts';
+import type { BirthInputRaw } from '@loom/contracts';
 import { calculate } from '../src/index.ts';
-import { lunarToGregorian } from '@ming/bazi';
+import { lunarToGregorian } from '@loom/bazi';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
 

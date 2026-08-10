@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { EngineError, parseBirthInput } from '@ming/contracts';
-import { collectTimeWarnings, normalizeBirthData } from '@ming/time-location';
-import { fixtureCount, timeLocationFixtures } from '@ming/test-fixtures';
+import { EngineError, parseBirthInput } from '@loom/contracts';
+import { collectTimeWarnings, normalizeBirthData } from '@loom/time-location';
+import { fixtureCount, timeLocationFixtures } from '@loom/test-fixtures';
 
 describe('time/location boundary fixtures', () => {
   it('ships at least 30 sourced boundary fixtures', () => {

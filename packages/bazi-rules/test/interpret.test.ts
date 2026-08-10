@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { BaziChartResult, BaziRuleFinding } from '@ming/contracts';
-import { parseBirthInput } from '@ming/contracts';
-import { calculate } from '@ming/orchestrator';
+import type { BaziChartResult, BaziRuleFinding } from '@loom/contracts';
+import { parseBirthInput } from '@loom/contracts';
+import { calculate } from '@loom/orchestrator';
 import {
   interpretBazi,
   BAZI_RULES_RULESET_ID,

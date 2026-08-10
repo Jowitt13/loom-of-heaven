@@ -1,5 +1,5 @@
 {
-  "name": "@ming/orchestrator",
+  "name": "@loom/orchestrator",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,19 +12,19 @@
     "./entry": "./src/engine-entry.ts"
   },
   "dependencies": {
-    "@ming/bazi": "workspace:*",
-    "@ming/contracts": "workspace:*",
-    "@ming/interpret": "workspace:*",
-    "@ming/synastry": "workspace:*",
-    "@ming/time-location": "workspace:*",
-    "@ming/vedic": "workspace:*",
-    "@ming/western": "workspace:*",
-    "@ming/ziwei": "workspace:*",
+    "@loom/bazi": "workspace:*",
+    "@loom/contracts": "workspace:*",
+    "@loom/interpret": "workspace:*",
+    "@loom/synastry": "workspace:*",
+    "@loom/time-location": "workspace:*",
+    "@loom/vedic": "workspace:*",
+    "@loom/western": "workspace:*",
+    "@loom/ziwei": "workspace:*",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@ming/test-fixtures": "workspace:*",
-    "@ming/western-rules": "workspace:*",
-    "@ming/ziwei-rules": "workspace:*"
+    "@loom/test-fixtures": "workspace:*",
+    "@loom/western-rules": "workspace:*",
+    "@loom/ziwei-rules": "workspace:*"
   }
 }

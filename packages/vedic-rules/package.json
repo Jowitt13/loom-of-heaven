@@ -1,5 +1,5 @@
 {
-  "name": "@ming/vedic-rules",
+  "name": "@loom/vedic-rules",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,10 +11,10 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ming/contracts": "workspace:*",
-    "@ming/vedic": "workspace:*"
+    "@loom/contracts": "workspace:*",
+    "@loom/vedic": "workspace:*"
   },
   "devDependencies": {
-    "@ming/time-location": "workspace:*"
+    "@loom/time-location": "workspace:*"
   }
 }

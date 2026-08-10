@@ -29,14 +29,14 @@ describe('assertSingleTopDir', () => {
   it('accepts a single top-level dir equal to packageName with SKILL.md', () => {
     const good = [
       `${PKG}/SKILL.md`,
-      `${PKG}/scripts/ming-chart.mjs`,
+      `${PKG}/scripts/loom-chart.mjs`,
       `${PKG}/scripts/dist/engine.mjs`,
     ];
     expect(assertSingleTopDir(good, PKG).ok).toBe(true);
   });
 
   it('rejects the double-nested packageName/packageName/ layout (the Round 11 bug)', () => {
-    const doubled = [`${PKG}/${PKG}/SKILL.md`, `${PKG}/${PKG}/scripts/ming-chart.mjs`];
+    const doubled = [`${PKG}/${PKG}/SKILL.md`, `${PKG}/${PKG}/scripts/loom-chart.mjs`];
     const res = assertSingleTopDir(doubled, PKG);
     expect(res.ok).toBe(false);
     expect(res.error).toMatch(/double-nested/);
@@ -55,7 +55,7 @@ describe('assertSingleTopDir', () => {
   });
 
   it('rejects a package missing top-level SKILL.md', () => {
-    const res = assertSingleTopDir([`${PKG}/scripts/ming-chart.mjs`], PKG);
+    const res = assertSingleTopDir([`${PKG}/scripts/loom-chart.mjs`], PKG);
     expect(res.ok).toBe(false);
     expect(res.error).toMatch(/SKILL\.md/);
   });
@@ -68,7 +68,7 @@ describe('assertSingleTopDir', () => {
 describe('buildZip / listZipEntries / extractZip round-trip', () => {
   const files = [
     { name: `${PKG}/SKILL.md`, data: Buffer.from('# skill\n', 'utf8') },
-    { name: `${PKG}/scripts/ming-chart.mjs`, data: Buffer.from('export const x = 1;\n', 'utf8') },
+    { name: `${PKG}/scripts/loom-chart.mjs`, data: Buffer.from('export const x = 1;\n', 'utf8') },
   ];
 
   it('lists exactly the written entries and passes the single-top-dir assertion', () => {

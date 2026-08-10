@@ -1,4 +1,4 @@
-import type { ZiweiChartResult, ZiweiRuleFinding } from '@ming/contracts';
+import type { ZiweiChartResult, ZiweiRuleFinding } from '@loom/contracts';
 
 /**
  * 四化 (sihua) meaning rules. 化禄/化权/化科/化忌 general meanings.

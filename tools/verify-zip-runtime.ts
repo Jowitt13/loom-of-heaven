@@ -44,10 +44,10 @@ function main(): void {
     const pkgRoot = join(tmp, 'payload', h.packageName);
     const fixture = 'scripts/fixtures/smoke.json';
 
-    const doctor = run(pkgRoot, ['scripts/ming-chart.mjs', 'doctor']);
+    const doctor = run(pkgRoot, ['scripts/loom-chart.mjs', 'doctor']);
     results.push({ name: 'doctor exit 0', ok: doctor.code === 0, detail: `exit ${doctor.code}` });
 
-    const verify = run(pkgRoot, ['scripts/ming-chart.mjs', 'verify']);
+    const verify = run(pkgRoot, ['scripts/loom-chart.mjs', 'verify']);
     results.push({
       name: 'verify ok:true',
       ok: verify.code === 0 && /"ok":\s*true/.test(verify.stdout),
@@ -55,7 +55,7 @@ function main(): void {
     });
 
     const calc = run(pkgRoot, [
-      'scripts/ming-chart.mjs',
+      'scripts/loom-chart.mjs',
       'calculate',
       '--input-file',
       fixture,
@@ -71,7 +71,7 @@ function main(): void {
     });
 
     const interp = run(pkgRoot, [
-      'scripts/ming-chart.mjs',
+      'scripts/loom-chart.mjs',
       'interpret',
       '--input-file',
       fixture,
@@ -85,7 +85,7 @@ function main(): void {
     });
 
     const answerPlan = run(pkgRoot, [
-      'scripts/ming-chart.mjs',
+      'scripts/loom-chart.mjs',
       'answer-plan',
       '--input-file',
       fixture,
@@ -115,7 +115,7 @@ function main(): void {
 
     const targetDate = '2026-05-20';
     const dynamicAnswerPlan = run(pkgRoot, [
-      'scripts/ming-chart.mjs',
+      'scripts/loom-chart.mjs',
       'answer-plan',
       '--input-file',
       fixture,

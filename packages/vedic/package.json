@@ -1,5 +1,5 @@
 {
-  "name": "@ming/vedic",
+  "name": "@loom/vedic",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,12 +11,12 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ming/contracts": "workspace:*",
+    "@loom/contracts": "workspace:*",
     "astronomy-engine": "2.1.19",
     "caelus": "0.23.0",
     "moment-timezone": "0.6.3"
   },
   "devDependencies": {
-    "@ming/time-location": "workspace:*"
+    "@loom/time-location": "workspace:*"
   }
 }

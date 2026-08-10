@@ -45,7 +45,7 @@ import type {
   PlanConstraintKind,
   ValidateAnswerInput,
   ViolationCode,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import {
   MAX_ALLOWED_FACT_IDS,
   MAX_CAVEAT_ENTRY_CHARS,
@@ -74,7 +74,7 @@ import {
   READING_DRAFT_CONTRACT_VERSION,
   VALIDATION_RESULT_CONTRACT_VERSION,
   ValidateAnswerInput as ValidateAnswerInputSchema,
-} from '@ming/contracts';
+} from '@loom/contracts';
 
 // --- Safety-text normalization (single shared entry point for the safety scan) ---
 // Deliberately NOT merged with reading-lint's style word lists: this normalizer only
@@ -390,7 +390,7 @@ function toScanText(text: string): string {
 
 const RESOURCE_LIMIT_DETAIL = '输入超出资源保护上限，未执行内容校验。';
 const RESOURCE_LIMIT_REMEDIATION =
-  '将输入规模缩减到 @ming/contracts validate-answer 导出的上限常量以内（见 patternKey 对应的常量名）。';
+  '将输入规模缩减到 @loom/contracts validate-answer 导出的上限常量以内（见 patternKey 对应的常量名）。';
 
 /** limitKey is always one of OUR limit-constant names — never caller text. */
 function resourceViolation(limitKey: string): AnswerViolation {

@@ -6,7 +6,7 @@ import {
   canonicalJson,
   fnv1a64Hex,
   makeWarning,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import type {
   BirthInput,
   ChartBundle,
@@ -16,16 +16,16 @@ import type {
   ProviderRef,
   RulesetRef,
   ZiweiHoroscopeResult,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import {
   collectTimeWarnings,
   normalizeBirthData,
   toPublicNormalizedTime,
-} from '@ming/time-location';
-import { computeBazi, lunarToGregorian } from '@ming/bazi';
-import { computeZiwei, computeZiweiHoroscope } from '@ming/ziwei';
-import { computeWestern } from '@ming/western';
-import { computeVedic } from '@ming/vedic';
+} from '@loom/time-location';
+import { computeBazi, lunarToGregorian } from '@loom/bazi';
+import { computeZiwei, computeZiweiHoroscope } from '@loom/ziwei';
+import { computeWestern } from '@loom/western';
+import { computeVedic } from '@loom/vedic';
 import { buildProvenance, parseRulesetId } from './provenance-build.ts';
 
 export interface CalculateOptions {

@@ -1,5 +1,5 @@
-import type { ChartBundle, SynastryFinding } from '@ming/contracts';
-import type { BaziChartResult } from '@ming/contracts';
+import type { ChartBundle, SynastryFinding } from '@loom/contracts';
+import type { BaziChartResult } from '@loom/contracts';
 import {
   annualResonance,
   assessStrength,
@@ -8,7 +8,7 @@ import {
   stemHeElement,
   yearGanzhi,
   type Element,
-} from '@ming/bazi-rules';
+} from '@loom/bazi-rules';
 
 /**
  * BaZi 合婚 signals between two charts (sourced to 《三命通会·论男女婚姻》 / 子平 practice):

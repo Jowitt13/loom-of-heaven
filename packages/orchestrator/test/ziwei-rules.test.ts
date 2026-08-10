@@ -1,8 +1,8 @@
 // Synthetic fixture - fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { interpretZiwei as interpretZiweiRules } from '@ming/ziwei-rules';
-import { canonicalJson, parseBirthInput } from '@ming/contracts';
-import { calculate } from '@ming/orchestrator';
+import { interpretZiwei as interpretZiweiRules } from '@loom/ziwei-rules';
+import { canonicalJson, parseBirthInput } from '@loom/contracts';
+import { calculate } from '@loom/orchestrator';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
 

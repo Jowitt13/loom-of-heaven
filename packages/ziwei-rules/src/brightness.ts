@@ -1,4 +1,4 @@
-import type { ZiweiChartResult, ZiweiRuleFinding } from '@ming/contracts';
+import type { ZiweiChartResult, ZiweiRuleFinding } from '@loom/contracts';
 
 /**
  * Brightness (亮度) modifier rules. 庙旺→充分发挥, 平→中性, 不/陷→受限.

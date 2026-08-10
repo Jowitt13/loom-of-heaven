@@ -12,7 +12,7 @@ skills/
   xuan-ji-yu-heng/
     SKILL.md                    # orchestration only (name + description frontmatter)
     agents/openai.yaml          # UI metadata (name + description)
-    scripts/ming-chart.mjs      # stable CLI (hand-authored, committed)
+    scripts/loom-chart.mjs      # stable CLI (hand-authored, committed)
     scripts/dist/engine.mjs     # esbuild bundle (generated) — the only runtime code path
     scripts/fixtures/smoke.json # fictional post-install self-check sample
     references/*.md             # one-level input/output/ruleset/sources/privacy docs
@@ -34,12 +34,12 @@ Test-only: `test-fixtures`.
 ```text
 contracts  <-  time-location  <-  orchestrator  ->  engine-entry (esbuild)  ->  scripts/dist/engine.mjs
    ^                 ^                    ^                                            ^
-   +----- test-fixtures (types) ---------+                              scripts/ming-chart.mjs (CLI)
+   +----- test-fixtures (types) ---------+                              scripts/loom-chart.mjs (CLI)
 ```
 
 - Contracts depend on nothing but Zod. No package depends on the orchestrator except the build
   entry. A future `interpret-birth-charts` may read results; no compute package may depend on it.
-  These boundaries — no calculation package reverse-depends on `@ming/interpret`, and the offline
+  These boundaries — no calculation package reverse-depends on `@loom/interpret`, and the offline
   compute core imports no network / AI-vendor-SDK / prompt module — are enforced by ESLint
   (`eslint.config.js`) via `pnpm run lint` in `verify:all` and CI.
 - Third-party libraries are reached only through provider adapters. Public schemas

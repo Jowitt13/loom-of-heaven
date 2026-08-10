@@ -6,14 +6,14 @@
 
 1. Codex 直接使用仓库，**不依赖 GitHub Release 资产**。
    - 若用户本地已有仓库目录，直接在 Codex 中打开该项目；
-   - 仓库当前已公开，可引导用户克隆或下载：`https://github.com/Jowitt13/ming-engine`；若将来不可访问，明确说明当前没有公开安装路径并停止。
+   - 仓库当前已公开，可引导用户克隆或下载：`https://github.com/Jowitt13/loom-of-heaven`；若将来不可访问，明确说明当前没有公开安装路径并停止。
 2. Codex 自动读取仓库根目录的 `AGENTS.md` 与 `skills/xuan-ji-yu-heng/`。
 3. 引擎使用预构建的 `scripts/dist/engine.mjs`，无需安装依赖。
 4. 自检：用下方一句话触发一次，返回三盘（西方 / 八字 / 紫微）即成功。
 
 ## 权限
 
-- 需要本地 Node.js ≥ 22 运行 `node scripts/ming-chart.mjs`。首次运行若提示授权，允许即可。
+- 需要本地 Node.js ≥ 22 运行 `node scripts/loom-chart.mjs`。首次运行若提示授权，允许即可。
 
 ## 自检指令
 
@@ -25,8 +25,8 @@
 
 ## 更新 / 卸载
 
-- 更新：说“帮我更新 Ming Engine”，或重新拉取 / 下载仓库覆盖原文件夹。
-- 卸载：说“帮我卸载 Ming Engine”，或删除克隆 / 解压出的仓库文件夹。
+- 更新：说“帮我更新 Loom of Heaven”，或重新拉取 / 下载仓库覆盖原文件夹。
+- 卸载：说“帮我卸载 Loom of Heaven”，或删除克隆 / 解压出的仓库文件夹。
 
 ## 与其他平台差异
 

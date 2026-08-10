@@ -1,4 +1,4 @@
-import type { VedicRashi } from '@ming/contracts';
+import type { VedicRashi } from '@loom/contracts';
 import { canonicalLongitude } from './math.ts';
 
 /** Twelve sidereal rashis in fixed zodiacal order. */
