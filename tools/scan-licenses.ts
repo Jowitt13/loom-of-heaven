@@ -183,7 +183,7 @@ function main(): void {
   );
 
   // --- Cross-check: committed Skill SBOM license claims must match reality. ---
-  const sbomPath = join(root, 'skills', 'calculate-birth-charts', 'sbom.cdx.json');
+  const sbomPath = join(root, 'skills', 'xuan-ji-yu-heng', 'sbom.cdx.json');
   const sbomText = existsSync(sbomPath) ? readFileSync(sbomPath, 'utf8') : null;
   add('skill sbom.cdx.json exists', sbomText !== null);
   if (sbomText !== null) {

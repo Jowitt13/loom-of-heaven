@@ -257,7 +257,7 @@ function checkCandidate(): void {
   const enginePath = join(
     root,
     'skills',
-    'calculate-birth-charts',
+    'xuan-ji-yu-heng',
     'scripts',
     'dist',
     'engine.mjs',

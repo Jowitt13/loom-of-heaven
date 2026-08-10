@@ -2,7 +2,7 @@
 
 > 当前分发状态：安装包来自 GitHub Release `v0.3.0`；Qoder、WorkBuddy 与豆包电脑版已有公开 ZIP。可下载性以 `install-manifest.json` 的 `published` 字段及 SHA-256 为准。
 >
-> 本文档记录 Ming Engine（`calculate-birth-charts`）在四个目标宿主平台上的能力与验证状态。
+> 本文档记录 Ming Engine（`xuan-ji-yu-heng`）在四个目标宿主平台上的能力与验证状态。
 
 ---
 
@@ -60,19 +60,19 @@
 
 ### 1. Codex（及任何读取 AGENTS.md 的宿主）
 
-- 能力：**full**。真机 **L3**。仓库已公开，宿主可克隆 / 下载仓库并读取 `AGENTS.md` 与 `skills/calculate-birth-charts/`，引擎用预构建 `scripts/dist/engine.mjs`。
+- 能力：**full**。真机 **L3**。仓库已公开，宿主可克隆 / 下载仓库并读取 `AGENTS.md` 与 `skills/xuan-ji-yu-heng/`，引擎用预构建 `scripts/dist/engine.mjs`。
 
 ### 2. Qoder / Qoder CN
 
-- 能力：**full**。真机 **L3**：装到 `~/.qoder/skills/calculate-birth-charts`，`/calculate-birth-charts` 可触发，三盘正常，`engine.mjs` 与 canonical byte-identical；首次运行脚本授权一次。
+- 能力：**full**。真机 **L3**：装到 `~/.qoder/skills/xuan-ji-yu-heng`，`/xuan-ji-yu-heng` 可触发，三盘正常，`engine.mjs` 与 canonical byte-identical；首次运行脚本授权一次。
 
 ### 3. 腾讯 WorkBuddy（桌面端 / OpenClaw）
 
-- 能力：**full**。真机 **L3**：上传 zip 导入到 `~/.workbuddy/skills/calculate-birth-charts/`，三盘 + 63 条解读事实正常，离线无 shell；仅申请导入 / 写入 / 执行权限。
+- 能力：**full**。真机 **L3**：上传 zip 导入到 `~/.workbuddy/skills/xuan-ji-yu-heng/`，三盘 + 63 条解读事实正常，离线无 shell；仅申请导入 / 写入 / 执行权限。
 
 ### 4. 豆包电脑版
 
-- 能力：**full**（**真机已确认可导入技能并执行本地 Node 脚本**）。真机 **L3**：装到 `~/.agents/skills/calculate-birth-charts/`，三盘 + 跨系统解读正常。
+- 能力：**full**（**真机已确认可导入技能并执行本地 Node 脚本**）。真机 **L3**：装到 `~/.agents/skills/xuan-ji-yu-heng/`，三盘 + 跨系统解读正常。
 - 说明：早期豆包脚本执行能力未确认，曾以 `reading-lite` 方式发布；真机验证脚本执行通过后升级为 `full`。facts 与 canonical byte-identical（同一 `engine.mjs`）。
 
 ---

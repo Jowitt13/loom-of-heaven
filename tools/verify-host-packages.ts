@@ -26,7 +26,7 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const srcSkill = join(root, 'skills', 'calculate-birth-charts');
+const srcSkill = join(root, 'skills', 'xuan-ji-yu-heng');
 const candidateDir = join(root, 'releases', CANDIDATE_DIR);
 const FIXED_NOW = '2026-01-01T00:00:00Z';
 
@@ -58,7 +58,7 @@ const KNOWN_COMMANDS = [
 ];
 
 function selfTest(): void {
-  const pkg = 'calculate-birth-charts';
+  const pkg = 'xuan-ji-yu-heng';
   const good = [`${pkg}/SKILL.md`, `${pkg}/scripts/ming-chart.mjs`];
   const bad = [`${pkg}/${pkg}/SKILL.md`, `${pkg}/${pkg}/scripts/ming-chart.mjs`];
   add('[self-test] 单层结构通过', assertSingleTopDir(good, pkg).ok === true);

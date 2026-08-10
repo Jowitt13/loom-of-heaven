@@ -18,7 +18,7 @@ import {
  * Post-release READ-ONLY verifier for a PUBLISHED GitHub Release (NOT part of the offline
  * verify:all). Downloads the assets for a tag and checks, honestly:
  *   INTEGRITY   — each zip's SHA-256 matches the release SHA256SUMS.txt; every zip has a
- *                 single top-level `calculate-birth-charts/` dir with no double-nesting; the
+ *                 single top-level `xuan-ji-yu-heng/` dir with no double-nesting; the
  *                 engine.mjs is identical across all zips (and, when the tag is the current
  *                 published release, matches the committed root install-manifest.json engineSha256).
  *   REPRODUCIBLE — every shipped text file already equals its LF-normalized form. If a file

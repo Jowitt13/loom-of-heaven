@@ -23,7 +23,7 @@ import {
   readZipFileSafe,
 } from './zip.ts';
 
-const PKG = 'calculate-birth-charts';
+const PKG = 'xuan-ji-yu-heng';
 
 describe('assertSingleTopDir', () => {
   it('accepts a single top-level dir equal to packageName with SKILL.md', () => {

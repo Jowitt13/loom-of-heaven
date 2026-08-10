@@ -13,7 +13,7 @@ import { lintReading } from '../packages/interpret/src/reading-lint.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const skillDir = join(root, 'skills', 'calculate-birth-charts');
+const skillDir = join(root, 'skills', 'xuan-ji-yu-heng');
 const refDir = join(skillDir, 'references');
 const skillMdPath = join(skillDir, 'SKILL.md');
 

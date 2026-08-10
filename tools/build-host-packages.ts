@@ -30,7 +30,7 @@ import {
  * explicitly published Release and are updated only by the explicit promote-release.ts step.
  *
  * Currently all four hosts (codex/qoder/workbuddy/doubao) are `full`: each stages a clean
- * copy of the canonical `skills/calculate-birth-charts` + INSTALL.md + BUILD_MANIFEST.json.
+ * copy of the canonical `skills/xuan-ji-yu-heng` + INSTALL.md + BUILD_MANIFEST.json.
  * The `reading-lite` path (references/ + a generated no-engine SKILL.md that refuses to
  * compute) is RETAINED for any FUTURE script-less host; no current host uses it.
  *
@@ -44,7 +44,7 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const srcSkill = join(root, 'skills', 'calculate-birth-charts');
+const srcSkill = join(root, 'skills', 'xuan-ji-yu-heng');
 const releasesDir = join(root, 'releases');
 
 /** Files/dirs excluded from EVERY host package to keep zips byte-reproducible.
@@ -69,7 +69,7 @@ function readingLiteSkillMd(): string {
     '  解读辅助版(reading-lite)——接收已由完整 Ming Engine 生成的命盘 facts(八字/紫微/占星),',
     '  按「说人话」规范生成事业、感情、财运、学业解读(7步结构 + 专业依据 + 时间线 + 风险提示)。',
     '  **此版本不包含排盘引擎,不能自行计算八字四柱、紫微星曜、占星行星位置。**',
-    '  如需完整排盘,请使用 Codex / Qoder / WorkBuddy 上的完整版 calculate-birth-charts。',
+    '  如需完整排盘,请使用 Codex / Qoder / WorkBuddy 上的完整版 xuan-ji-yu-heng。',
     '  触发词:解读命盘、帮我看事业、感情解读、财运分析、命理分析、八字解读。',
     '---',
   ];
@@ -181,7 +181,7 @@ function installMd(
     L.push(
       '1. 克隆仓库 `git clone https://github.com/Jowitt13/ming-engine.git`(或下载 ZIP 解压)。',
     );
-    L.push('2. 宿主读取仓库根目录的 `AGENTS.md` 与 `skills/calculate-birth-charts/`。');
+    L.push('2. 宿主读取仓库根目录的 `AGENTS.md` 与 `skills/xuan-ji-yu-heng/`。');
     L.push('3. 直接对话触发。');
   } else if (h.id === 'qoder') {
     // Qoder Desktop / Qoder CN: the built-in Agent performs the FILE install itself.
@@ -270,8 +270,8 @@ function installMd(
   if (!isLite && (h.id === 'qoder' || h.id === 'workbuddy')) {
     const targetDir =
       h.id === 'qoder'
-        ? '~/.qoder/skills/calculate-birth-charts'
-        : '~/.workbuddy/skills/calculate-birth-charts';
+        ? '~/.qoder/skills/xuan-ji-yu-heng'
+        : '~/.workbuddy/skills/xuan-ji-yu-heng';
     L.push('## 更新（读线上 manifest,迁移替换旧包,清理旧 RC）');
     L.push('');
     L.push('说「帮我更新 Ming Engine」,Agent 按序执行(普通用户不敲命令):');
@@ -279,14 +279,14 @@ function installMd(
       '1. 抓取 `https://raw.githubusercontent.com/Jowitt13/ming-engine/main/install-manifest.json`——线上稳定清单是唯一目标版本来源。',
     );
     L.push(
-      '2. 取本平台不可变 `downloadUrl`(非 latest)与 `sha256`,下载→校验 SHA-256→校验单层 `calculate-birth-charts/`→解压临时目录;下载失败 / SHA 不一致 / Release 不存在即明确失败并停止,绝不因本地旧包或缓存说“已是最新”。',
+      '2. 取本平台不可变 `downloadUrl`(非 latest)与 `sha256`,下载→校验 SHA-256→校验单层 `xuan-ji-yu-heng/`→解压临时目录;下载失败 / SHA 不一致 / Release 不存在即明确失败并停止,绝不因本地旧包或缓存说“已是最新”。',
     );
     L.push(
-      `3. 迁移替换:运行 \`node <临时目录>/calculate-birth-charts/scripts/ming-chart.mjs migrate --host ${h.id} --source <临时目录>/calculate-birth-charts\`——原子替换 \`${targetDir}\`、清理 legacy RC 双层目录、只动该技能、失败自动回滚(不删整个 skills 目录、不碰其它技能)。`,
+      `3. 迁移替换:运行 \`node <临时目录>/xuan-ji-yu-heng/scripts/ming-chart.mjs migrate --host ${h.id} --source <临时目录>/xuan-ji-yu-heng\`——原子替换 \`${targetDir}\`、清理 legacy RC 双层目录、只动该技能、失败自动回滚(不删整个 skills 目录、不碰其它技能)。`,
     );
     if (h.id === 'workbuddy') {
       L.push(
-        '   若 WorkBuddy 必须经 Skills 管理界面:先只删旧 Ming Engine 再导入新版,不碰其它技能;升级后只保留一个可触发 `calculate-birth-charts`。',
+        '   若 WorkBuddy 必须经 Skills 管理界面:先只删旧 Ming Engine 再导入新版,不碰其它技能;升级后只保留一个可触发 `xuan-ji-yu-heng`。',
       );
     }
     L.push(

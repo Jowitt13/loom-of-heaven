@@ -32,11 +32,11 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const skillDir = join(root, 'skills', 'calculate-birth-charts');
+const skillDir = join(root, 'skills', 'xuan-ji-yu-heng');
 const entry = join(root, 'packages', 'orchestrator', 'src', 'engine-entry.ts');
 const outfile = join(skillDir, 'scripts', 'dist', 'engine.mjs');
 
-const APP_NAME = 'calculate-birth-charts';
+const APP_NAME = 'xuan-ji-yu-heng';
 const APP_VERSION = ENGINE_VERSION;
 // SPDX requires creationInfo.created; a wall-clock value would break the
 // v0.1.2 byte-reproducibility of committed build artifacts, so this is a

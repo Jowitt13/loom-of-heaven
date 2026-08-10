@@ -23,7 +23,7 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const srcSkill = join(root, 'skills', 'calculate-birth-charts');
+const srcSkill = join(root, 'skills', 'xuan-ji-yu-heng');
 
 /** Rewrite every text file under `dir` to the given line ending, in place. */
 function rewriteLineEndings(dir: string, eol: '\n' | '\r\n'): void {

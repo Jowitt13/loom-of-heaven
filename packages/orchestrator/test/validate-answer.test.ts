@@ -1117,7 +1117,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
 
   describe('bounded input entry (facade + CLI byte cap)', () => {
     const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-    const cliPath = join(repoRoot, 'skills', 'calculate-birth-charts', 'scripts', 'ming-chart.mjs');
+    const cliPath = join(repoRoot, 'skills', 'xuan-ji-yu-heng', 'scripts', 'ming-chart.mjs');
     const tmpDir = join(repoRoot, '.tmp', 'validate-answer-tests');
 
     it('parseValidateAnswerInputBounded rejects a huge top-level array before Zod', () => {
@@ -1873,7 +1873,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
     it('the built engine exports the documented validate-answer surface', async () => {
       const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
       const engineUrl = new URL(
-        `file:///${join(repoRoot, 'skills', 'calculate-birth-charts', 'scripts', 'dist', 'engine.mjs').replace(/\\/g, '/')}`,
+        `file:///${join(repoRoot, 'skills', 'xuan-ji-yu-heng', 'scripts', 'dist', 'engine.mjs').replace(/\\/g, '/')}`,
       );
       const engine = (await import(engineUrl.href)) as Record<string, unknown>;
       expect(typeof engine.validateAnswer).toBe('function');
@@ -1904,7 +1904,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
       const cliPath = join(
         repoRoot,
         'skills',
-        'calculate-birth-charts',
+        'xuan-ji-yu-heng',
         'scripts',
         'ming-chart.mjs',
       );

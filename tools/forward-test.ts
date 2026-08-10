@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
  * Phase 3 forward test (handoff §11 completion bar).
  *
  * Simulates a brand-new session that only ever sees the published Skill: it copies
- * ONLY `skills/calculate-birth-charts` into an OS temp dir outside the repo (no
+ * ONLY `skills/xuan-ji-yu-heng` into an OS temp dir outside the repo (no
  * `packages/`, no `node_modules`, no `npm install`), then walks the SKILL.md
  * workflow for several realistic requests — fully offline. Where the clean-dir
  * smoke proves doctor/calculate/verify + byte-identical determinism (render is
@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const srcSkill = join(root, 'skills', 'calculate-birth-charts');
+const srcSkill = join(root, 'skills', 'xuan-ji-yu-heng');
 const FIXED_NOW = '2026-01-01T00:00:00Z';
 
 interface Step {
@@ -108,7 +108,7 @@ const approximateMale = {
 };
 
 const tempBase = mkdtempSync(join(tmpdir(), 'ming-skill-forward-'));
-const tempSkill = join(tempBase, 'calculate-birth-charts');
+const tempSkill = join(tempBase, 'xuan-ji-yu-heng');
 
 function writeInput(name: string, input: unknown): string {
   const file = join(tempSkill, name);

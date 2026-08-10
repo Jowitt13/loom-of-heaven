@@ -2,7 +2,7 @@
 # and description, mirroring SKILL.md. Do NOT add speculative fields — confirm any
 # additional keys against the target host's official agents manifest spec first
 # (handoff §7.1). This file carries UI text only; it never changes calculation.
-name: calculate-birth-charts
+name: xuan-ji-yu-heng
 description: >-
   Includes a bounded Vedic/Jyotish Lahiri chart; it defaults to the mean node while returning both node modes.
   Deterministically calculate Western natal charts, Four Pillars/BaZi (四柱八字) and

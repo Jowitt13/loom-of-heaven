@@ -1,4 +1,4 @@
-# Product Spec — Ming Engine (`calculate-birth-charts`)
+# Product Spec — Ming Engine (`xuan-ji-yu-heng`)
 
 > Deterministic four-system birth-chart engine delivered as a self-contained WorkBuddy Skill.
 
@@ -19,7 +19,7 @@ never computes.
 Calendar (gregorian/lunar), local date & time with accuracy (exact/approximate/unknown), IANA
 timezone, WGS84 coordinates (+ optional elevation), lunar leap-month flag, rule gender (only
 where a rule needs it), DST fold choice, and per-system versioned settings. Name and life
-events are never inputs. Full schema: `skills/calculate-birth-charts/references/input-contract.md`.
+events are never inputs. Full schema: `skills/xuan-ji-yu-heng/references/input-contract.md`.
 
 ## Outputs
 

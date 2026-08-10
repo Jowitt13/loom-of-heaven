@@ -18,17 +18,17 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 /**
  * Round 13.1 + 13.2: exercise the REAL shipped `ming-chart.mjs migrate` + `version` CLI (spawned
  * as a subprocess, as a host Agent would run it). Round 13.2 adds the target-allowlist security
- * gate: migrate may only write to `<home>/.qoder/skills/calculate-birth-charts` or
- * `<home>/.workbuddy/skills/calculate-birth-charts` (even after resolving symlinks). Tests point
+ * gate: migrate may only write to `<home>/.qoder/skills/xuan-ji-yu-heng` or
+ * `<home>/.workbuddy/skills/xuan-ji-yu-heng` (even after resolving symlinks). Tests point
  * `HOME`/`USERPROFILE` at a temp dir so `os.homedir()` resolves there; a bad/arbitrary target,
  * bare skills dir, home/root/project dir, or symlink escape must be refused before any mutation.
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const srcSkill = join(root, 'skills', 'calculate-birth-charts');
+const srcSkill = join(root, 'skills', 'xuan-ji-yu-heng');
 const CLI = join(srcSkill, 'scripts', 'ming-chart.mjs');
-const PKG = 'calculate-birth-charts';
+const PKG = 'xuan-ji-yu-heng';
 
 const CANDIDATE_MANIFEST = {
   name: PKG,
@@ -84,12 +84,12 @@ function makeCandidate(dir: string): string {
   return pkg;
 }
 
-/** A legacy v0.1.0-rc.1 install: <skills>/calculate-birth-charts/calculate-birth-charts/... */
+/** A legacy v0.1.0-rc.1 install: <skills>/xuan-ji-yu-heng/xuan-ji-yu-heng/... */
 function installLegacy(skillsDir: string): string {
   const target = join(skillsDir, PKG);
   const inner = join(target, PKG); // the tell-tale double nesting
   mkdirSync(join(inner, 'scripts'), { recursive: true });
-  writeFileSync(join(inner, 'SKILL.md'), '---\nname: calculate-birth-charts\n---\nlegacy rc\n');
+  writeFileSync(join(inner, 'SKILL.md'), '---\nname: xuan-ji-yu-heng\n---\nlegacy rc\n');
   writeFileSync(join(inner, 'scripts', 'ming-chart.mjs'), '// legacy rc cli\n');
   writeFileSync(
     join(inner, 'BUILD_MANIFEST.json'),
@@ -152,7 +152,7 @@ afterAll(() => {
 });
 
 describe('ming-chart migrate: legacy RC -> candidate (allowed host targets)', () => {
-  it('migrates the legacy install at ~/.qoder/skills/calculate-birth-charts (--host qoder)', () => {
+  it('migrates the legacy install at ~/.qoder/skills/xuan-ji-yu-heng (--host qoder)', () => {
     const home = mkdtempSync(join(tmpdir(), 'ming-home-q-'));
     try {
       const skills = join(home, '.qoder', 'skills');
@@ -179,13 +179,13 @@ describe('ming-chart migrate: legacy RC -> candidate (allowed host targets)', ()
 
       expect(readFileSync(join(other, 'SKILL.md'), 'utf8')).toContain('keep me');
       expect(residueOf(skills)).toEqual([]);
-      expect(readdirSync(skills).sort()).toEqual([PKG, 'some-other-skill']);
+      expect(readdirSync(skills).sort()).toEqual(['some-other-skill', PKG]);
     } finally {
       rmSync(home, { recursive: true, force: true });
     }
   });
 
-  it('migrates the legacy install at ~/.workbuddy/skills/calculate-birth-charts (--host workbuddy)', () => {
+  it('migrates the legacy install at ~/.workbuddy/skills/xuan-ji-yu-heng (--host workbuddy)', () => {
     const home = mkdtempSync(join(tmpdir(), 'ming-home-w-'));
     try {
       const skills = join(home, '.workbuddy', 'skills');
@@ -262,7 +262,7 @@ describe('ming-chart migrate: source validation still enforced', () => {
       mkdirSync(join(badSrc, PKG), { recursive: true });
       writeFileSync(
         join(badSrc, PKG, 'SKILL.md'),
-        '---\nname: calculate-birth-charts\n---\nnested\n',
+        '---\nname: xuan-ji-yu-heng\n---\nnested\n',
       );
 
       const { code, out } = migrate(home, ['--host', 'qoder', '--source', badSrc]);

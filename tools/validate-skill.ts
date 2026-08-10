@@ -10,7 +10,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const skillDir = join(root, 'skills', 'calculate-birth-charts');
+const skillDir = join(root, 'skills', 'xuan-ji-yu-heng');
 
 interface Check {
   name: string;

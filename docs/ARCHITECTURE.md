@@ -9,7 +9,7 @@ packages/
   orchestrator/    # engine facade: doctor/normalize/calculate/compare/render/verify
   test-fixtures/   # sourced time & location boundary fixtures + loader
 skills/
-  calculate-birth-charts/
+  xuan-ji-yu-heng/
     SKILL.md                    # orchestration only (name + description frontmatter)
     agents/openai.yaml          # UI metadata (name + description)
     scripts/ming-chart.mjs      # stable CLI (hand-authored, committed)

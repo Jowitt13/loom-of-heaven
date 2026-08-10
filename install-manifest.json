@@ -1,5 +1,5 @@
 {
-  "skill": "calculate-birth-charts",
+  "skill": "xuan-ji-yu-heng",
   "product": "ming-engine",
   "engineVersion": "0.3.0",
   "releaseVersion": "0.3.0",
@@ -16,7 +16,7 @@
     {
       "host": "codex",
       "label": "Codex（及任何读取 AGENTS.md 的宿主）",
-      "packageName": "calculate-birth-charts",
+      "packageName": "xuan-ji-yu-heng",
       "capability": "full",
       "scriptExecution": true,
       "needsUserAuth": false,
@@ -34,7 +34,7 @@
     {
       "host": "qoder",
       "label": "Qoder / Qoder CN",
-      "packageName": "calculate-birth-charts",
+      "packageName": "xuan-ji-yu-heng",
       "capability": "full",
       "scriptExecution": true,
       "needsUserAuth": true,
@@ -43,7 +43,7 @@
       "engineSelfCheck": "node scripts/ming-chart.mjs verify",
       "userDemoPrompt": "男，公历 1990-06-15 14:20（时间准确，示例·虚构人物，非真实个人信息），出生地 示例城市，时区 Asia/Shanghai，纬度 30.00、经度 120.00，帮我看事业。",
       "updateHint": "说「帮我更新 Ming Engine」：Agent 读线上稳定 manifest→下载校验→migrate 原子替换 ~/.qoder/skills 旧包（清理 legacy RC 双层）→回报 before→after。",
-      "uninstallHint": "说「帮我卸载 Ming Engine」，或在技能管理中删除 calculate-birth-charts。",
+      "uninstallHint": "说「帮我卸载 Ming Engine」，或在技能管理中删除 xuan-ji-yu-heng。",
       "realDeviceVerified": true,
       "releaseAsset": "ming-engine-qoder.zip",
       "downloadType": "release-asset",
@@ -54,7 +54,7 @@
     {
       "host": "workbuddy",
       "label": "腾讯 WorkBuddy（桌面端 / OpenClaw）",
-      "packageName": "calculate-birth-charts",
+      "packageName": "xuan-ji-yu-heng",
       "capability": "full",
       "scriptExecution": true,
       "needsUserAuth": true,
@@ -74,7 +74,7 @@
     {
       "host": "doubao",
       "label": "豆包电脑版",
-      "packageName": "calculate-birth-charts",
+      "packageName": "xuan-ji-yu-heng",
       "capability": "full",
       "scriptExecution": true,
       "needsUserAuth": true,

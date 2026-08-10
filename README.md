@@ -109,7 +109,7 @@ flowchart LR
 
 ```bash
 git clone https://github.com/Jowitt13/ming-engine.git
-cd ming-engine/skills/calculate-birth-charts
+cd ming-engine/skills/xuan-ji-yu-heng
 
 # 1) 环境自检
 node scripts/ming-chart.mjs doctor
@@ -157,15 +157,15 @@ Qoder 的完整 ZIP 已发布在 GitHub Release `v0.3.0`。普通用户仍只需
 
 ```text
 /plugin marketplace add Jowitt13/ming-engine
-/plugin install calculate-birth-charts@ming-engine
+/plugin install xuan-ji-yu-heng@ming-engine
 ```
 
-或手动：把 `skills/calculate-birth-charts/` 复制到 `~/.claude/skills/`。
+或手动：把 `skills/xuan-ji-yu-heng/` 复制到 `~/.claude/skills/`。
 
 ### 🟢 Codex（及任何读取 AGENTS.md 的宿主）
 
 克隆本仓库，Codex 会读取根目录的 [`AGENTS.md`](AGENTS.md)（含运行规则与 CLI 用法）。
-Skill 的 UI 元数据在 [`skills/calculate-birth-charts/agents/openai.yaml`](skills/calculate-birth-charts/agents/openai.yaml)。
+Skill 的 UI 元数据在 [`skills/xuan-ji-yu-heng/agents/openai.yaml`](skills/xuan-ji-yu-heng/agents/openai.yaml)。
 
 ---
 
@@ -220,7 +220,7 @@ verify:hosts → verify:install → check:doc-counts → scan:deps → scan:lice
 
 深入阅读：[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/VALIDATION.md`](docs/VALIDATION.md) ·
 [`docs/LICENSE_AUDIT.md`](docs/LICENSE_AUDIT.md) · [`docs/PRIVACY.md`](docs/PRIVACY.md) ·
-[`skills/calculate-birth-charts/SKILL.md`](skills/calculate-birth-charts/SKILL.md)
+[`skills/xuan-ji-yu-heng/SKILL.md`](skills/xuan-ji-yu-heng/SKILL.md)
 
 ---
 
@@ -228,6 +228,6 @@ verify:hosts → verify:install → check:doc-counts → scan:deps → scan:lice
 
 引擎内联的运行时依赖全部为 **MIT**（闭源友好）：`zod` · `moment-timezone` · `tyme4ts` · `iztro` ·
 `astronomy-engine`。八字解读规则引用公版古籍（《子平真诠》《滴天髓》《渊海子平》）。完整清单见
-[`docs/LICENSE_AUDIT.md`](docs/LICENSE_AUDIT.md) 与 [`THIRD_PARTY_NOTICES`](skills/calculate-birth-charts/THIRD_PARTY_NOTICES.md)。
+[`docs/LICENSE_AUDIT.md`](docs/LICENSE_AUDIT.md) 与 [`THIRD_PARTY_NOTICES`](skills/xuan-ji-yu-heng/THIRD_PARTY_NOTICES.md)。
 
 本项目以 [MIT](LICENSE) 许可发布。🌙 愿你算得开心、看得明白。

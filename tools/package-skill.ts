@@ -6,25 +6,25 @@ import { buildZip, collectFiles, verifyZip } from './lib/zip.ts';
 
 /**
  * Package the published Skill into a distributable install bundle (handoff Phase 4:
- * "本地 Skill 安装包"). Stages a clean copy of `skills/calculate-birth-charts` (no
+ * "本地 Skill 安装包"). Stages a clean copy of `skills/xuan-ji-yu-heng` (no
  * scratch output), writes a SHA-256 manifest for integrity, and produces a
  * dependency-free ZIP archive via the shared `lib/zip.ts` writer (which also
  * re-parses and fully decompresses the archive to prove it round-trips).
  *
  * Outputs (all under `dist/`, gitignored):
- *   dist/calculate-birth-charts/            staged publishable folder
- *   dist/calculate-birth-charts.zip         install archive
- *   dist/calculate-birth-charts.sha256      "<hex>  <path>" integrity manifest
+ *   dist/xuan-ji-yu-heng/            staged publishable folder
+ *   dist/xuan-ji-yu-heng.zip         install archive
+ *   dist/xuan-ji-yu-heng.sha256      "<hex>  <path>" integrity manifest
  *
  * Requires `pnpm run build` first (the staged folder must contain dist/engine.mjs).
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const srcSkill = join(root, 'skills', 'calculate-birth-charts');
+const srcSkill = join(root, 'skills', 'xuan-ji-yu-heng');
 const distDir = join(root, 'dist');
-const stageDir = join(distDir, 'calculate-birth-charts');
-const PKG_NAME = 'calculate-birth-charts';
+const stageDir = join(distDir, 'xuan-ji-yu-heng');
+const PKG_NAME = 'xuan-ji-yu-heng';
 
 function main(): void {
   if (!existsSync(join(srcSkill, 'scripts', 'dist', 'engine.mjs'))) {

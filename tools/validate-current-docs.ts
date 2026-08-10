@@ -28,7 +28,7 @@ export interface Check {
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const SKILL = 'skills/calculate-birth-charts';
+const SKILL = 'skills/xuan-ji-yu-heng';
 
 const defaultReadDoc: DocReader = (rel: string): string | null => {
   const p = join(root, rel);

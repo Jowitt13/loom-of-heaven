@@ -3,7 +3,7 @@
 Every calculation selects a **versioned `rulesetId`** recorded in the result. The UI only offers
 rulesets that are implemented and tested. "The library supports plugins" ≠ "the school is
 implemented" (handoff §5). The runtime-facing summary lives in
-`skills/calculate-birth-charts/references/rulesets.md`; this file adds the versioning policy and
+`skills/xuan-ji-yu-heng/references/rulesets.md`; this file adds the versioning policy and
 roadmap.
 
 ## Versioning policy

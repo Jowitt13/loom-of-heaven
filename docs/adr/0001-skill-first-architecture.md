@@ -11,7 +11,7 @@ be deterministic, versioned and testable — never produced by an LLM.
 
 ## Decision
 
-- Ship exactly one user-visible Skill, `calculate-birth-charts`, supporting
+- Ship exactly one user-visible Skill, `xuan-ji-yu-heng`, supporting
   `western | bazi | ziwei | all` internally. Interpretation, if ever built, becomes a separate
   `interpret-birth-charts` Skill that only reads result JSON.
 - `SKILL.md` is orchestration only (trigger, input confirmation, CLI calls, error handling,

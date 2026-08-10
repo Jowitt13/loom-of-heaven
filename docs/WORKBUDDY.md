@@ -8,7 +8,7 @@ service is required (handoff §7.3). Official docs:
 
 ## Deliverable
 
-The installable unit is the directory `skills/calculate-birth-charts/`. After `pnpm run build`
+The installable unit is the directory `skills/xuan-ji-yu-heng/`. After `pnpm run build`
 it contains everything needed at runtime, including `scripts/dist/engine.mjs`. It depends on
 neither the repo's `packages/` nor `node_modules`, and runs offline.
 
@@ -21,17 +21,17 @@ pnpm run validate:skill # structure / offline / CSP / no-stray-files checks (exp
 pnpm run smoke          # copy to a clean temp dir and run offline (expect 10/10)
 pnpm run forward:test   # clean-dir SKILL workflow, 7 realistic requests (expect 38/38)
 pnpm run example        # regenerate the de-identified examples/ artifacts (needs build)
-pnpm run package        # stage dist/calculate-birth-charts/ + .zip + .sha256 (needs build)
+pnpm run package        # stage dist/xuan-ji-yu-heng/ + .zip + .sha256 (needs build)
 ```
 
-Then ship either the `skills/calculate-birth-charts/` folder or the archive
-`dist/calculate-birth-charts.zip` produced by `pnpm run package`.
+Then ship either the `skills/xuan-ji-yu-heng/` folder or the archive
+`dist/xuan-ji-yu-heng.zip` produced by `pnpm run package`.
 
 ## Packaging & integrity
 
 `pnpm run package` stages a clean copy of the published Skill (no scratch output) into
-`dist/calculate-birth-charts/`, writes a SHA-256 manifest `dist/calculate-birth-charts.sha256`
-(`sha256sum`-compatible), and builds `dist/calculate-birth-charts.zip` in-process (CRC32 + DEFLATE,
+`dist/xuan-ji-yu-heng/`, writes a SHA-256 manifest `dist/xuan-ji-yu-heng.sha256`
+(`sha256sum`-compatible), and builds `dist/xuan-ji-yu-heng.zip` in-process (CRC32 + DEFLATE,
 fixed timestamp for byte-reproducibility). The tool then re-parses the archive and fully
 decompresses every entry to prove it round-trips — a green run means the archive is well-formed and
 complete, with no external tool. `dist/` is gitignored; regenerate on demand.
@@ -39,7 +39,7 @@ complete, with no external tool. `dist/` is gitignored; regenerate on demand.
 ## Install & enable
 
 1. In WorkBuddy, open the Skills Market / local Skill import and upload the
-   `calculate-birth-charts` folder (or its archive).
+   `xuan-ji-yu-heng` folder (or its archive).
 2. Enable the Skill. It declares least privilege: local file execution, no network, no telemetry.
 3. Requires a Node runtime available to the host to run `node scripts/ming-chart.mjs`.
 
@@ -83,7 +83,7 @@ use the checklist below.
 Run these on a real WorkBuddy install; the automated gates above already prove the offline,
 zero-install, deterministic behavior in a clean directory.
 
-1. Import `dist/calculate-birth-charts.zip` (or the folder) via the Skills Market / local import;
+1. Import `dist/xuan-ji-yu-heng.zip` (or the folder) via the Skills Market / local import;
    confirm the install security scan shows no unexplained high-risk item (the Skill declares least
    privilege: local file execution, no network, no telemetry).
 2. Enable the Skill. Confirm a Node runtime is available to run `node scripts/ming-chart.mjs`.

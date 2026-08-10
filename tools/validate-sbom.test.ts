@@ -18,7 +18,7 @@ function pkg(name: string, version: string, license = 'MIT'): BundlePackage {
   };
 }
 
-const APP_NAME = 'calculate-birth-charts';
+const APP_NAME = 'xuan-ji-yu-heng';
 const APP_VERSION = '0.1.0';
 
 function cdx(
