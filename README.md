@@ -1,13 +1,5 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
-> **P5 Vedic/Jyotish technical chart:** `calculate --systems all` explicitly requests Western,
-> BaZi, Zi Wei and Vedic. The Vedic result defaults to the mean Rahu/Ketu convention while still
-> reporting both mean and true modes, suppresses time-of-day fields with `VEDIC_TIME_REQUIRED` when birth time
-> is unknown, and uses an offline MIT provider. Its `precision: "high"` is limited to the covered
-> **Swiss-only external numeric reference** fixture (<=1 arc-minute), not a general astrometric
-> accuracy claim. Swiss Ephemeris is never bundled or loaded at runtime. The v0.3.6 Release
-> assets are published and their hashes are recorded in the stable root install manifest.
-
 <h1 align="center">✨ loom-of-heaven ✨</h1>
 
 <p align="center">
@@ -34,13 +26,13 @@
 > 🧠 **大模型只负责收集输入、复述确认、转达结果——它从不亲自算命。**
 > 所有行星位置、宫位、相位、干支、十神、星曜、四化都由内置的确定性 CLI 计算，可回归、可复现、有来源。
 
-| 体系           | Emoji | 能力                                                                                                                                                                                                             |
-| -------------- | :---: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 西方占星       |  🪐   | 行星（日→冥）· 真交点 · 小行星(Chiron/谷神/智神/婚神/灶神) · 恒星黄道(Lahiri) · 宫位(Placidus/整宫/等宫/Koch/Porphyry) · 上升中天 · 相位 · 逆行 · 尊贵                                                           |
-| 四柱八字       |  🎋   | 四柱 · 藏干 · 十神(日柱显示日主) · 纳音 · 大运/起运 · 旺衰/格局/喜用神 · 刑冲合害 · 神煞 · 吉凶倾向（带古籍来源）                                                                                                |
-| 紫微斗数       |  ⭐   | 十二宫 · 主辅星+亮度 · 四化 · 大限 · 三方四正 · 流年/流月/流日/流时 运限盘                                                                                                                                       |
-| 印度占星(印占) |  🕉️   | Vedic/Jyotish 本命盘 · 恒星黄道 · 罗睺/计都默认均值交点（同时报告均值/真值两种模式）· 出生时间未知时按 `VEDIC_TIME_REQUIRED` 如实降级时辰字段 · 离线 MIT 星历提供方；高精度声明仅限随附的 Swiss 数值参考 fixture |
-| 解读           |  📜   | 按主题（婚姻/财运/事业/学业…）聚合带证据/原因链/吉凶(polarity)的事实 + 结尾追问，交宿主大模型转自然语言                                                                                                          |
+| 体系           | Emoji | 能力                                                                                                                                                                                                                                                                           |
+| -------------- | :---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 西方占星       |  🪐   | 行星（日→冥）· 真交点 · 小行星(Chiron/谷神/智神/婚神/灶神) · 恒星黄道(Lahiri) · 宫位(Placidus/整宫/等宫/Koch/Porphyry) · 上升中天 · 相位 · 逆行 · 尊贵                                                                                                                         |
+| 四柱八字       |  🎋   | 四柱 · 藏干 · 十神(日柱显示日主) · 纳音 · 大运/起运 · 旺衰/格局/喜用神 · 刑冲合害 · 神煞 · 吉凶倾向（带古籍来源）                                                                                                                                                              |
+| 紫微斗数       |  ⭐   | 十二宫 · 主辅星+亮度 · 四化 · 大限 · 三方四正 · 流年/流月/流日/流时 运限盘                                                                                                                                                                                                     |
+| 印度占星(印占) |  🕉️   | Vedic/Jyotish 本命盘 · 恒星黄道 · 罗睺/计都默认均值交点（同时报告均值/真值两种模式）· 出生时间未知时按 `VEDIC_TIME_REQUIRED` 如实降级时辰字段 · 离线 MIT 星历提供方；高精度声明仅限所覆盖的 **Swiss-only external numeric reference** fixture（≤1 角分），不作一般天文精度宣称 |
+| 解读           |  📜   | 按主题（婚姻/财运/事业/学业…）聚合带证据/原因链/吉凶(polarity)的事实 + 结尾追问，交宿主大模型转自然语言                                                                                                                                                                        |
 
 ### ⚡ 安装入口
 
@@ -224,13 +216,13 @@ verify:hosts → verify:install → check:doc-counts → scan:deps → scan:lice
 > 🧠 **The LLM only gathers inputs, relays confirmations and narrates results — it never computes charts itself.**
 > Every planet position, house, aspect, ganzhi, ten-god, star and si-hua is computed by the bundled deterministic CLI: regression-tested, reproducible and sourced.
 
-| System            | Emoji | Capabilities                                                                                                                                                                                                                                                                                                                    |
-| ----------------- | :---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Western natal     |  🪐   | Planets (Sun→Pluto) · true nodes · asteroids (Chiron/Ceres/Pallas/Juno/Vesta) · sidereal zodiac (Lahiri) · houses (Placidus/Whole/Equal/Koch/Porphyry) · Asc/MC · aspects · retrogrades · dignities                                                                                                                             |
-| Four Pillars/BaZi |  🎋   | Four pillars · hidden stems · ten gods (day-master shown on day pillar) · nayin · luck pillars/onset · strength/pattern/favorable elements · punishments/clashes/harmonies/harms · shen-sha · fortune leanings (with classical sources)                                                                                         |
-| Zi Wei Dou Shu    |  ⭐   | Twelve palaces · major/minor stars + brightness · si-hua · major limits · san-fang-si-zheng · yearly/monthly/daily/hourly transit charts                                                                                                                                                                                        |
-| Vedic/Jyotish     |  🕉️   | Vedic natal chart · sidereal zodiac · Rahu/Ketu default to the mean-node convention (both mean and true modes reported) · time-of-day fields suppressed with `VEDIC_TIME_REQUIRED` when birth time is unknown · offline MIT provider; the "high" precision claim is limited to the bundled Swiss-only numeric reference fixture |
-| Reading           |  📜   | Topic-based (marriage/wealth/career/study…) facts with evidence/reason chains/fortune polarity + closing follow-ups, handed to the host LLM for natural-language narration                                                                                                                                                      |
+| System            | Emoji | Capabilities                                                                                                                                                                                                                                                                                                                                                                                            |
+| ----------------- | :---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Western natal     |  🪐   | Planets (Sun→Pluto) · true nodes · asteroids (Chiron/Ceres/Pallas/Juno/Vesta) · sidereal zodiac (Lahiri) · houses (Placidus/Whole/Equal/Koch/Porphyry) · Asc/MC · aspects · retrogrades · dignities                                                                                                                                                                                                     |
+| Four Pillars/BaZi |  🎋   | Four pillars · hidden stems · ten gods (day-master shown on day pillar) · nayin · luck pillars/onset · strength/pattern/favorable elements · punishments/clashes/harmonies/harms · shen-sha · fortune leanings (with classical sources)                                                                                                                                                                 |
+| Zi Wei Dou Shu    |  ⭐   | Twelve palaces · major/minor stars + brightness · si-hua · major limits · san-fang-si-zheng · yearly/monthly/daily/hourly transit charts                                                                                                                                                                                                                                                                |
+| Vedic/Jyotish     |  🕉️   | Vedic natal chart · sidereal zodiac · Rahu/Ketu default to the mean-node convention (both mean and true modes reported) · time-of-day fields suppressed with `VEDIC_TIME_REQUIRED` when birth time is unknown · offline MIT provider; the "high" precision claim is limited to the covered **Swiss-only external numeric reference** fixture (<=1 arc-minute), not a general astrometric accuracy claim |
+| Reading           |  📜   | Topic-based (marriage/wealth/career/study…) facts with evidence/reason chains/fortune polarity + closing follow-ups, handed to the host LLM for natural-language narration                                                                                                                                                                                                                              |
 
 ### ⚡ Install entry
 
