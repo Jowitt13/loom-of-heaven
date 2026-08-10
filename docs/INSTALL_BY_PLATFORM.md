@@ -1,6 +1,6 @@
 # Loom of Heaven 安装指南（按平台）
 
-> 当前分发状态：安装包来自 GitHub Release `v0.3.5`。Qoder、WorkBuddy 与豆包电脑版已有公开 ZIP；以 `install-manifest.json` 的 `published` 字段及 SHA-256 为准。
+> 当前分发状态：安装包来自 GitHub Release `v0.3.6`。Qoder、WorkBuddy 与豆包电脑版已有公开 ZIP；以 `install-manifest.json` 的 `published` 字段及 SHA-256 为准。
 >
 > 本文档帮你用最简单的方式完成安装。不需要编程知识，不需要安装 pnpm 或克隆代码仓库。
 
@@ -16,9 +16,9 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 | 平台       | 用户需要做什么                          | 最终能力 |
 | ---------- | --------------------------------------- | -------- |
-| Qoder      | 发一句安装链接；Agent 下载并校验 v0.3.5 | 完整排盘 |
-| WorkBuddy  | 发一句安装链接；Agent 下载并校验 v0.3.5 | 完整排盘 |
-| 豆包电脑版 | 发一句安装链接；Agent 下载并校验 v0.3.5 | 完整排盘 |
+| Qoder      | 发一句安装链接；Agent 下载并校验 v0.3.6 | 完整排盘 |
+| WorkBuddy  | 发一句安装链接；Agent 下载并校验 v0.3.6 | 完整排盘 |
+| 豆包电脑版 | 发一句安装链接；Agent 下载并校验 v0.3.6 | 完整排盘 |
 | Codex      | 公开仓库可用                            | 完整排盘 |
 
 > 四个平台的完整排盘能力使用同一份引擎，结果一致；可下载性始终以 `install-manifest.json` 的 `published` 字段与 SHA-256 为准。
@@ -36,7 +36,7 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 > 四个平台功能一致，都能计算八字、紫微、西方占星并给出解读。最省事的方式仍是上面那句“一句话安装”。
 
-> 当前公开安装源是 GitHub Release `v0.3.5`。候选 ZIP 仍只用于本地验证，不能作为公开“一句话安装”的来源；后续版本必须创建新的不可变 Release、完成重下验收后再更新清单。
+> 当前公开安装源是 GitHub Release `v0.3.6`。候选 ZIP 仍只用于本地验证，不能作为公开“一句话安装”的来源；后续版本必须创建新的不可变 Release、完成重下验收后再更新清单。
 
 ---
 
@@ -71,7 +71,7 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 当前状态
 
-安装包来自 GitHub Release `v0.3.5`。把顶部安装入口发给 Qoder 后，Agent 会先读取清单，确认 Qoder `published: true` 后下载不可变资产并校验 SHA-256；不要请求旧链接，也不要用本地缓存冒充最新版。
+安装包来自 GitHub Release `v0.3.6`。把顶部安装入口发给 Qoder 后，Agent 会先读取清单，确认 Qoder `published: true` 后下载不可变资产并校验 SHA-256；不要请求旧链接，也不要用本地缓存冒充最新版。
 
 ### 安装流程（推荐：一句话，由 Qoder Agent 代装）
 
@@ -109,7 +109,7 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 当前状态
 
-安装包来自 GitHub Release `v0.3.5`。安装入口会先读取清单，确认 WorkBuddy `published: true` 后才读取 URL/hash、下载并按宿主流程导入。
+安装包来自 GitHub Release `v0.3.6`。安装入口会先读取清单，确认 WorkBuddy `published: true` 后才读取 URL/hash、下载并按宿主流程导入。
 
 ### 安装流程
 
@@ -141,7 +141,7 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 当前状态
 
-安装包来自 GitHub Release `v0.3.5`。安装入口会先读取清单，确认豆包 `published: true` 后才读取 URL/hash、下载并按宿主流程导入。
+安装包来自 GitHub Release `v0.3.6`。安装入口会先读取清单，确认豆包 `published: true` 后才读取 URL/hash、下载并按宿主流程导入。
 
 ### 安装流程
 
