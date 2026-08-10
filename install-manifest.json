@@ -2,14 +2,14 @@
   "skill": "xuan-ji-yu-heng",
   "product": "loom-of-heaven",
   "engineVersion": "0.4.0",
-  "releaseVersion": "0.3.5",
-  "releaseTag": "v0.3.5",
+  "releaseVersion": "0.3.6",
+  "releaseTag": "v0.3.6",
   "repo": "https://github.com/Jowitt13/loom-of-heaven",
   "status": "published",
-  "statusNote": "GitHub Release v0.3.5 已发布。release-asset ZIP 必须从 downloadUrl 下载，并核对 SHA-256 与本清单及 SHA256SUMS.txt 一致。",
+  "statusNote": "GitHub Release v0.3.6 已发布。release-asset ZIP 必须从 downloadUrl 下载，并核对 SHA-256 与本清单及 SHA256SUMS.txt 一致。",
   "canonicalEngine": {
     "version": "0.4.0",
-    "engineSha256": "99e18fa9f8e64fb40cd4c2d7f0d13a8c09ae8e43203b90331f937184315d8aee"
+    "engineSha256": "f2606ddb14eaac11ebb5f539c75eba03ee7cd3ff77c6b496dca5ab64e10099be"
   },
   "entry": "https://raw.githubusercontent.com/Jowitt13/loom-of-heaven/main/INSTALL.md",
   "platforms": [
@@ -47,8 +47,8 @@
       "realDeviceVerified": true,
       "releaseAsset": "loom-of-heaven-qoder.zip",
       "downloadType": "release-asset",
-      "downloadUrl": "https://github.com/Jowitt13/loom-of-heaven/releases/download/v0.3.5/loom-of-heaven-qoder.zip",
-      "sha256": "2fac6cad5f05c21c9a168a0c56398ab980cd599c92bd5101cf23448dca19d609",
+      "downloadUrl": "https://github.com/Jowitt13/loom-of-heaven/releases/download/v0.3.6/loom-of-heaven-qoder.zip",
+      "sha256": "4545e7886770aa64763d299a8b32a40ab3431fe458f62f4e3bfff57c19869dc5",
       "published": true
     },
     {
@@ -67,8 +67,8 @@
       "realDeviceVerified": true,
       "releaseAsset": "loom-of-heaven-workbuddy.zip",
       "downloadType": "release-asset",
-      "downloadUrl": "https://github.com/Jowitt13/loom-of-heaven/releases/download/v0.3.5/loom-of-heaven-workbuddy.zip",
-      "sha256": "448c7edc377da13dc46ed27fae1554bb13da3aa674aedca6b93da429d16c5f14",
+      "downloadUrl": "https://github.com/Jowitt13/loom-of-heaven/releases/download/v0.3.6/loom-of-heaven-workbuddy.zip",
+      "sha256": "d85e38bb2905f0a3615604687693a8077c61648f6f1a9db057e52d3f3c936bc6",
       "published": true
     },
     {
@@ -87,8 +87,8 @@
       "realDeviceVerified": true,
       "releaseAsset": "loom-of-heaven-doubao.zip",
       "downloadType": "release-asset",
-      "downloadUrl": "https://github.com/Jowitt13/loom-of-heaven/releases/download/v0.3.5/loom-of-heaven-doubao.zip",
-      "sha256": "8c9a860c253f82c9e502cef9947d29a869dcbe431d07471b7b52cc3579e160e7",
+      "downloadUrl": "https://github.com/Jowitt13/loom-of-heaven/releases/download/v0.3.6/loom-of-heaven-doubao.zip",
+      "sha256": "7e2f1e5cc385790be31f3ce2ff8a489604ffaf33418b3f855e25472f194b067f",
       "published": true
     }
   ]
