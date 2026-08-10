@@ -1901,13 +1901,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
 
     it('CLI: structurally invalid input yields exit != 0 and no echo of caller keys', () => {
       const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-      const cliPath = join(
-        repoRoot,
-        'skills',
-        'xuan-ji-yu-heng',
-        'scripts',
-        'ming-chart.mjs',
-      );
+      const cliPath = join(repoRoot, 'skills', 'xuan-ji-yu-heng', 'scripts', 'ming-chart.mjs');
       const tmpDir = join(repoRoot, '.tmp', 'validate-answer-tests');
       mkdirSync(tmpDir, { recursive: true });
       const junkFile = join(tmpDir, 'junk-input.json');

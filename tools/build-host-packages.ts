@@ -269,9 +269,7 @@ function installMd(
   L.push('');
   if (!isLite && (h.id === 'qoder' || h.id === 'workbuddy')) {
     const targetDir =
-      h.id === 'qoder'
-        ? '~/.qoder/skills/xuan-ji-yu-heng'
-        : '~/.workbuddy/skills/xuan-ji-yu-heng';
+      h.id === 'qoder' ? '~/.qoder/skills/xuan-ji-yu-heng' : '~/.workbuddy/skills/xuan-ji-yu-heng';
     L.push('## 更新（读线上 manifest,迁移替换旧包,清理旧 RC）');
     L.push('');
     L.push('说「帮我更新 Ming Engine」,Agent 按序执行(普通用户不敲命令):');

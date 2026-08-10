@@ -260,10 +260,7 @@ describe('ming-chart migrate: source validation still enforced', () => {
       const target = installLegacy(skills);
       const badSrc = makeCandidate(join(home, 'badnest'));
       mkdirSync(join(badSrc, PKG), { recursive: true });
-      writeFileSync(
-        join(badSrc, PKG, 'SKILL.md'),
-        '---\nname: xuan-ji-yu-heng\n---\nnested\n',
-      );
+      writeFileSync(join(badSrc, PKG, 'SKILL.md'), '---\nname: xuan-ji-yu-heng\n---\nnested\n');
 
       const { code, out } = migrate(home, ['--host', 'qoder', '--source', badSrc]);
       expect(code).not.toBe(0);

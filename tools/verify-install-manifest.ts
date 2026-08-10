@@ -254,14 +254,7 @@ function checkCandidate(): void {
   );
   add('candidate status=unpublished', manifest.status === 'unpublished', String(manifest.status));
 
-  const enginePath = join(
-    root,
-    'skills',
-    'xuan-ji-yu-heng',
-    'scripts',
-    'dist',
-    'engine.mjs',
-  );
+  const enginePath = join(root, 'skills', 'xuan-ji-yu-heng', 'scripts', 'dist', 'engine.mjs');
   const canonical = manifest.canonicalEngine as Json | undefined;
   if (existsSync(enginePath)) {
     const sha = createHash('sha256').update(readFileSync(enginePath)).digest('hex');
