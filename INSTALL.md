@@ -56,9 +56,9 @@
 | 平台             | 能力级别 | 包 / 来源                   | 安装器指令                     |
 | ---------------- | -------- | --------------------------- | ------------------------------ |
 | Codex            | 完整排盘 | 仓库（已公开）              | `docs/installers/codex.md`     |
-| Qoder / Qoder CN | 完整排盘 | GitHub Release `v0.3.0` ZIP | `docs/installers/qoder.md`     |
-| WorkBuddy        | 完整排盘 | GitHub Release `v0.3.0` ZIP | `docs/installers/workbuddy.md` |
-| 豆包电脑版       | 完整排盘 | GitHub Release `v0.3.0` ZIP | `docs/installers/doubao.md`    |
+| Qoder / Qoder CN | 完整排盘 | GitHub Release `v0.3.5` ZIP | `docs/installers/qoder.md`     |
+| WorkBuddy        | 完整排盘 | GitHub Release `v0.3.5` ZIP | `docs/installers/workbuddy.md` |
+| 豆包电脑版       | 完整排盘 | GitHub Release `v0.3.5` ZIP | `docs/installers/doubao.md`    |
 
 > 四个宿主均为完整版，使用同一份预构建引擎 `scripts/dist/engine.mjs`，排盘输出一致（真机已验证）。
 > `reading-lite`（无引擎、需外部 facts）作为未来“不能运行脚本”宿主的降级模式保留（见 `docs/HOST_COMPATIBILITY.md`）。
@@ -75,7 +75,7 @@
 
 ## 当前分发状态
 
-根清单当前为 `status: "published"`：安装包来自 GitHub Release `v0.3.0`，已提供 Qoder / WorkBuddy / 豆包电脑版的 ZIP、不可变下载地址与 SHA-256。安装器必须先检查所选平台的 `published`，再下载和校验；不能引用历史下载地址或要求用户手动寻找旧包。
+根清单当前为 `status: "published"`：安装包来自 GitHub Release `v0.3.5`，已提供 Qoder / WorkBuddy / 豆包电脑版的 ZIP、不可变下载地址与 SHA-256。安装器必须先检查所选平台的 `published`，再下载和校验；不能引用历史下载地址或要求用户手动寻找旧包。
 
 - **Codex**：可直接克隆 / 下载公开仓库使用（不依赖 Release）。
 - **Qoder / WorkBuddy / 豆包电脑版**：完整排盘包已按当前清单发布；更新时仍必须下载清单指定的不可变资产并校验 SHA-256。
