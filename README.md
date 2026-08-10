@@ -8,10 +8,6 @@
 > accuracy claim. Swiss Ephemeris is never bundled or loaded at runtime. The v0.3.6 Release
 > assets are published and their hashes are recorded in the stable root install manifest.
 
-<p align="center">
-  <img src="docs/assets/hero.png" alt="loom-of-heaven — deterministic Western natal, BaZi and Zi Wei Dou Shu engine" width="100%" />
-</p>
-
 <h1 align="center">✨ loom-of-heaven ✨</h1>
 
 <p align="center">
