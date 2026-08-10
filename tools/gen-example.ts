@@ -17,7 +17,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const skillDir = join(root, 'skills', 'calculate-birth-charts');
+const skillDir = join(root, 'skills', 'xuan-ji-yu-heng');
 const enginePath = join(skillDir, 'scripts', 'dist', 'engine.mjs');
 const outDir = join(root, 'examples');
 const FIXED_NOW = Date.parse('2026-01-01T00:00:00Z');

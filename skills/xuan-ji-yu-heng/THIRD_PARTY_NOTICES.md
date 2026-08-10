@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-The `calculate-birth-charts` Skill bundles the deterministic engine into
+The `xuan-ji-yu-heng` Skill bundles the deterministic engine into
 `scripts/dist/engine.mjs`. That bundle inlines the following third-party packages.
 All are permissive (MIT) and closed-source-friendly. Versions are recorded in
 `sbom.cdx.json` (CycloneDX) and re-verified at build time.

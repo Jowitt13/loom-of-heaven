@@ -1,7 +1,7 @@
 # Privacy & Security (repository view)
 
 Birth time, place and name are sensitive personal data. The runtime-facing statement is in
-`skills/calculate-birth-charts/references/privacy.md`; this file records the engineering posture.
+`skills/xuan-ji-yu-heng/references/privacy.md`; this file records the engineering posture.
 
 ## Posture
 

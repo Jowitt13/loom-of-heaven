@@ -1,6 +1,6 @@
 /**
  * Single source of truth for the multi-host publishing layer. The canonical Skill at
- * `skills/calculate-birth-charts` is the ONLY maintained copy; `build-host-packages.ts`
+ * `skills/xuan-ji-yu-heng` is the ONLY maintained copy; `build-host-packages.ts`
  * derives each host bundle from it plus the metadata declared here. No host has a
  * hand-maintained SKILL.md — that would drift.
  *
@@ -60,8 +60,8 @@ export interface HostConfig {
   notes: string;
 }
 
-export const SKILL_NAME = 'calculate-birth-charts';
-export const SKILL_NAME_LITE = 'calculate-birth-charts-doubao-lite';
+export const SKILL_NAME = 'xuan-ji-yu-heng';
+export const SKILL_NAME_LITE = 'xuan-ji-yu-heng-doubao-lite';
 
 export const REPO_URL = 'https://github.com/Jowitt13/ming-engine';
 
@@ -77,7 +77,7 @@ export const PUBLISHED_RELEASE_TAG: string | null = 'v0.3.0';
 /** Engine semver of the candidate: the audited source engine, not a second hand-maintained value. */
 export const CANDIDATE_ENGINE_VERSION = ENGINE_VERSION;
 /** Install-package release version of the next candidate; unpublished until explicit Release authorization. */
-export const CANDIDATE_RELEASE_VERSION = '0.4.0';
+export const CANDIDATE_RELEASE_VERSION = '0.3.5';
 /** Immutable tag the CANDIDATE build targets (never `latest/download`). */
 export const CANDIDATE_RELEASE_TAG = `v${CANDIDATE_RELEASE_VERSION}`;
 /** Sub-directory under `releases/` for the candidate build (gitignored). */
@@ -139,7 +139,7 @@ export const HOSTS: HostConfig[] = [
     needsUserAuth: true,
     updateHint:
       '说「帮我更新 Ming Engine」：Agent 读线上稳定 manifest→下载校验→migrate 原子替换 ~/.qoder/skills 旧包（清理 legacy RC 双层）→回报 before→after。',
-    uninstallHint: '说「帮我卸载 Ming Engine」，或在技能管理中删除 calculate-birth-charts。',
+    uninstallHint: '说「帮我卸载 Ming Engine」，或在技能管理中删除 xuan-ji-yu-heng。',
     label: 'Qoder / Qoder CN',
     format:
       '标准 SKILL.md（YAML frontmatter）+ 辅助文件；由 Qoder 内置 Agent 代为下载校验并写入用户技能目录 ~/.qoder/skills/（普通用户无需命令行工具、无需自行下载或解压）',
@@ -151,7 +151,7 @@ export const HOSTS: HostConfig[] = [
     engineSelfCheck: ENGINE_SELF_CHECK,
     userDemoPrompt: USER_DEMO_PROMPT,
     notes:
-      'Qoder 原生支持 SKILL.md 与脚本执行；name 符合小写/连字符/≤64 约束。真机确认：装到 ~/.qoder/skills/calculate-birth-charts，/calculate-birth-charts 可触发，引擎执行、三盘正常（engine.mjs 与 canonical byte-identical）；首次运行脚本授权一次。',
+      'Qoder 原生支持 SKILL.md 与脚本执行；name 符合小写/连字符/≤64 约束。真机确认：装到 ~/.qoder/skills/xuan-ji-yu-heng，/xuan-ji-yu-heng 可触发，引擎执行、三盘正常（engine.mjs 与 canonical byte-identical）；首次运行脚本授权一次。',
   },
   {
     id: 'workbuddy',
@@ -171,7 +171,7 @@ export const HOSTS: HostConfig[] = [
     engineSelfCheck: ENGINE_SELF_CHECK,
     userDemoPrompt: USER_DEMO_PROMPT,
     notes:
-      'OpenClaw 调用技能时会启动独立进程运行 scripts/ 下脚本（Node/Python/Bash），故可跑完整引擎；终端机器需有 Node。真机确认：上传 zip 导入到 ~/.workbuddy/skills/calculate-birth-charts/，三盘 + 63 条解读事实正常，engine.mjs 与 canonical byte-identical；zip 内不含 .git/tests/node_modules/源码。更新用 migrate 原子替换 ~/.workbuddy/skills/calculate-birth-charts（清理 legacy RC 双层、失败回滚），或经 Skills 管理先删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 calculate-birth-charts。',
+      'OpenClaw 调用技能时会启动独立进程运行 scripts/ 下脚本（Node/Python/Bash），故可跑完整引擎；终端机器需有 Node。真机确认：上传 zip 导入到 ~/.workbuddy/skills/xuan-ji-yu-heng/，三盘 + 63 条解读事实正常，engine.mjs 与 canonical byte-identical；zip 内不含 .git/tests/node_modules/源码。更新用 migrate 原子替换 ~/.workbuddy/skills/xuan-ji-yu-heng（清理 legacy RC 双层、失败回滚），或经 Skills 管理先删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 xuan-ji-yu-heng。',
   },
   // Doubao is full (real-device confirmed it imports the Skill AND runs the Node engine).
   // reading-lite is retained as the designated pattern for any FUTURE script-less host
@@ -192,7 +192,7 @@ export const HOSTS: HostConfig[] = [
     engineSelfCheck: ENGINE_SELF_CHECK,
     userDemoPrompt: USER_DEMO_PROMPT,
     notes:
-      '真机确认：豆包电脑版可导入技能并执行 Node 脚本，装完整包（含预构建 engine.mjs），装到 ~/.agents/skills/calculate-birth-charts/；三盘 + 跨系统解读正常，facts 与 canonical byte-identical（同一 engine.mjs）。',
+      '真机确认：豆包电脑版可导入技能并执行 Node 脚本，装完整包（含预构建 engine.mjs），装到 ~/.agents/skills/xuan-ji-yu-heng/；三盘 + 跨系统解读正常，facts 与 canonical byte-identical（同一 engine.mjs）。',
   },
 ];
 

@@ -7,7 +7,7 @@
 1. Codex 直接使用仓库，**不依赖 GitHub Release 资产**。
    - 若用户本地已有仓库目录，直接在 Codex 中打开该项目；
    - 仓库当前已公开，可引导用户克隆或下载：`https://github.com/Jowitt13/ming-engine`；若将来不可访问，明确说明当前没有公开安装路径并停止。
-2. Codex 自动读取仓库根目录的 `AGENTS.md` 与 `skills/calculate-birth-charts/`。
+2. Codex 自动读取仓库根目录的 `AGENTS.md` 与 `skills/xuan-ji-yu-heng/`。
 3. 引擎使用预构建的 `scripts/dist/engine.mjs`，无需安装依赖。
 4. 自检：用下方一句话触发一次，返回三盘（西方 / 八字 / 紫微）即成功。
 

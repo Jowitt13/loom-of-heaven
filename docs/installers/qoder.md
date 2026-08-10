@@ -6,17 +6,17 @@
 
 1. 判断当前是 Qoder 还是 Qoder CN（二者安装方式一致），并先读取所选平台的 `published`。若它不是 `true`：明确回复“Qoder 安装包尚未发布”，**立即停止**；不得读取、猜测或请求 `downloadUrl` / `sha256`，不得下载、导入或用旧包冒充最新版。
 2. 只有 `published: true` 时，才从清单取当前 Qoder ZIP 的 `downloadUrl` 与 `sha256`；下载并校验 SHA-256（不一致立即中止，不写入）。
-3. 校验 zip 只有一层顶层目录 `calculate-birth-charts/`（防双层目录 / Zip Slip；异常即中止）。
-4. 解压到临时目录，再**仅替换**用户技能目录 `~/.qoder/skills/calculate-birth-charts/`：
+3. 校验 zip 只有一层顶层目录 `xuan-ji-yu-heng/`（防双层目录 / Zip Slip；异常即中止）。
+4. 解压到临时目录，再**仅替换**用户技能目录 `~/.qoder/skills/xuan-ji-yu-heng/`：
    - 只替换该目标目录；**不删除也不触碰** `~/.qoder/skills` 下的其它技能；
    - 下载 / 校验 / 解压 / 写入任一步失败都**失败不覆盖旧版**（保留已装好的上一版本）；
    - 用户无需手动复制文件、无需找目录、无需理解任何安装命令。
-5. 刷新 / 重载 Skills，确认 `calculate-birth-charts` 可见；若 Qoder Desktop 无刷新能力，则提示用户重启 Qoder 或新开一个对话一次。
+5. 刷新 / 重载 Skills，确认 `xuan-ji-yu-heng` 可见；若 Qoder Desktop 无刷新能力，则提示用户重启 Qoder 或新开一个对话一次。
 6. 运行安装自检（`node scripts/ming-chart.mjs verify`，由 Agent 执行），返回 `ok:true` 即引擎就绪。
 7. 一句话反馈成功。
 
 > 完整排盘真实依赖本机 Node.js ≥ 22。若缺 Node：明确告知“完整排盘需要 Node.js ≥ 22”，给一个简短动作（到 nodejs.org 安装）；不要安装任何命令行工具、不做全局 npm 安装、也不静默降级为只解读版。
-> 仅当宿主不允许 Agent 写入用户技能目录时，才展示手动备用方案（用户把单层 `calculate-birth-charts/` 文件夹放入 `~/.qoder/skills/` 并重启 Qoder）——该备用方案同样不需要任何命令行工具。
+> 仅当宿主不允许 Agent 写入用户技能目录时，才展示手动备用方案（用户把单层 `xuan-ji-yu-heng/` 文件夹放入 `~/.qoder/skills/` 并重启 Qoder）——该备用方案同样不需要任何命令行工具。
 
 ## 权限（至多一次）
 
@@ -29,13 +29,13 @@
 
 ## 一句话反馈模板
 
-> 已安装完整排盘版（Qoder）。输入 `/calculate-birth-charts` 或直接说需求即可；卸载说“帮我卸载 Ming Engine”。
+> 已安装完整排盘版（Qoder）。输入 `/xuan-ji-yu-heng` 或直接说需求即可；卸载说“帮我卸载 Ming Engine”。
 
 ## 检查版本
 
-- 说“检查 Ming Engine 版本”：AI 运行 `node scripts/ming-chart.mjs version` 读取 `~/.qoder/skills/calculate-birth-charts/BUILD_MANIFEST.json`，回报真实已装版本（engineVersion / releaseVersion / releaseTag / 是否 legacy / 是否双层目录），不靠猜、不等于“线上最新”。
+- 说“检查 Ming Engine 版本”：AI 运行 `node scripts/ming-chart.mjs version` 读取 `~/.qoder/skills/xuan-ji-yu-heng/BUILD_MANIFEST.json`，回报真实已装版本（engineVersion / releaseVersion / releaseTag / 是否 legacy / 是否双层目录），不靠猜、不等于“线上最新”。
 
 ## 更新 / 卸载
 
-- 更新：先读线上 `install-manifest.json`。若 Qoder `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；不得使用本地旧包或缓存称作最新版。只有已发布时才下载不可变 tag 资产、校验 SHA-256、校验单层、解压临时目录并运行 `node <临时目录>/calculate-birth-charts/scripts/ming-chart.mjs migrate --host qoder --source <临时目录>/calculate-birth-charts` 仅替换 `~/.qoder/skills/calculate-birth-charts`（清理 legacy RC 双层、失败自动回滚，不碰其它技能）→ 运行 `version` 复核并回报 before→after。全程 Agent 文件操作，无需任何命令行工具。
-- 卸载：说“帮我卸载 Ming Engine”，或在技能管理中删除 `calculate-birth-charts`。
+- 更新：先读线上 `install-manifest.json`。若 Qoder `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；不得使用本地旧包或缓存称作最新版。只有已发布时才下载不可变 tag 资产、校验 SHA-256、校验单层、解压临时目录并运行 `node <临时目录>/xuan-ji-yu-heng/scripts/ming-chart.mjs migrate --host qoder --source <临时目录>/xuan-ji-yu-heng` 仅替换 `~/.qoder/skills/xuan-ji-yu-heng`（清理 legacy RC 双层、失败自动回滚，不碰其它技能）→ 运行 `version` 复核并回报 before→after。全程 Agent 文件操作，无需任何命令行工具。
+- 卸载：说“帮我卸载 Ming Engine”，或在技能管理中删除 `xuan-ji-yu-heng`。

@@ -28,9 +28,9 @@
 
 ## 检查版本
 
-- 说“检查 Ming Engine 版本”：AI 运行 `node scripts/ming-chart.mjs version` 读取 `~/.workbuddy/skills/calculate-birth-charts/BUILD_MANIFEST.json`，回报真实已装版本（engineVersion / releaseVersion / releaseTag / 是否 legacy / 是否双层目录），不靠猜、不等于“线上最新”。
+- 说“检查 Ming Engine 版本”：AI 运行 `node scripts/ming-chart.mjs version` 读取 `~/.workbuddy/skills/xuan-ji-yu-heng/BUILD_MANIFEST.json`，回报真实已装版本（engineVersion / releaseVersion / releaseTag / 是否 legacy / 是否双层目录），不靠猜、不等于“线上最新”。
 
 ## 更新 / 卸载
 
-- 更新：先读线上 `install-manifest.json`。若 WorkBuddy `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；不得使用本地旧包或缓存称作最新版。只有已发布时才下载不可变 tag 资产、校验 SHA-256、校验单层、解压临时目录；若可写技能目录则运行 `node <临时目录>/calculate-birth-charts/scripts/ming-chart.mjs migrate --host workbuddy --source <临时目录>/calculate-birth-charts` 原子替换 `~/.workbuddy/skills/calculate-birth-charts`（清理 legacy RC 双层、失败自动回滚）；若必须经「Skills 管理」界面，则先只删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 `calculate-birth-charts`。随后运行 `version` 复核并回报 before→after。下载失败 / SHA 不一致 / Release 不存在即明确失败并停止。
+- 更新：先读线上 `install-manifest.json`。若 WorkBuddy `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；不得使用本地旧包或缓存称作最新版。只有已发布时才下载不可变 tag 资产、校验 SHA-256、校验单层、解压临时目录；若可写技能目录则运行 `node <临时目录>/xuan-ji-yu-heng/scripts/ming-chart.mjs migrate --host workbuddy --source <临时目录>/xuan-ji-yu-heng` 原子替换 `~/.workbuddy/skills/xuan-ji-yu-heng`（清理 legacy RC 双层、失败自动回滚）；若必须经「Skills 管理」界面，则先只删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 `xuan-ji-yu-heng`。随后运行 `version` 复核并回报 before→after。下载失败 / SHA 不一致 / Release 不存在即明确失败并停止。
 - 卸载：说“帮我卸载 Ming Engine”，或在「Skills 管理」中删除该技能。

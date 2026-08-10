@@ -100,7 +100,7 @@ function selfTest(): void {
 function main(): void {
   selfTest();
 
-  const engine = join(root, 'skills', 'calculate-birth-charts', 'scripts', 'dist', 'engine.mjs');
+  const engine = join(root, 'skills', 'xuan-ji-yu-heng', 'scripts', 'dist', 'engine.mjs');
   let engineScanned = false;
 
   for (const file of scanTargets()) {

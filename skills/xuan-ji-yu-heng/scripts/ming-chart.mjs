@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ming-chart — the single stable CLI entry for the calculate-birth-charts Skill.
+ * ming-chart — the single stable CLI entry for the xuan-ji-yu-heng Skill.
  *
  * It does NO astrology math itself: it parses arguments, reads JSON input files,
  * calls the bundled deterministic engine (./dist/engine.mjs), and writes
@@ -41,7 +41,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
-const PKG_NAME = 'calculate-birth-charts';
+const PKG_NAME = 'xuan-ji-yu-heng';
 const ANSWER_TOPICS = new Set([
   'character',
   'career',
@@ -518,7 +518,7 @@ function readBuildManifest(dir) {
   return null;
 }
 
-/** True when `dir` is (or contains) a double-nested calculate-birth-charts/calculate-birth-charts. */
+/** True when `dir` is (or contains) a double-nested xuan-ji-yu-heng/xuan-ji-yu-heng. */
 function isDoubleNested(dir) {
   const parts = dir.split(/[\\/]+/);
   for (let i = 1; i < parts.length; i++) {
@@ -570,9 +570,9 @@ function samePath(a, b) {
 
 /**
  * Security allowlist for `migrate`: the FINAL target (after resolving symlinks) MUST be exactly the
- * host's Ming Engine skill dir under the real home — `<home>/.qoder/skills/calculate-birth-charts`
- * or `<home>/.workbuddy/skills/calculate-birth-charts`. This rejects a bare skills dir, the home
- * dir, the filesystem root, a project dir, any broad dir without calculate-birth-charts, and any
+ * host's Ming Engine skill dir under the real home — `<home>/.qoder/skills/xuan-ji-yu-heng`
+ * or `<home>/.workbuddy/skills/xuan-ji-yu-heng`. This rejects a bare skills dir, the home
+ * dir, the filesystem root, a project dir, any broad dir without xuan-ji-yu-heng, and any
  * symlink that escapes the allowed location. When `host` is given it restricts to that host only.
  */
 function checkMigrateTarget(target, host) {
@@ -648,7 +648,7 @@ function runMigrate(args) {
     process.exit(2);
   }
 
-  // Security gate: the resolved target MUST be exactly the host's calculate-birth-charts skill dir
+  // Security gate: the resolved target MUST be exactly the host's xuan-ji-yu-heng skill dir
   // under home (no arbitrary --target, no bare skills dir, no symlink escape). Checked BEFORE any
   // source read or filesystem mutation, so a rejected target never touches the old install.
   const targetCheck = checkMigrateTarget(target, args.host);
@@ -672,7 +672,7 @@ function runMigrate(args) {
     emitJson({
       ok: false,
       step: 'validate-source',
-      error: 'source is not a clean single-layer calculate-birth-charts',
+      error: 'source is not a clean single-layer xuan-ji-yu-heng',
       source,
     });
     process.exit(1);

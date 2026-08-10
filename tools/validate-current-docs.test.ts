@@ -83,22 +83,19 @@ function baseFixture(): Map<string, string> {
 
   files.set('docs/adr/0003-provider-selection.md', 'VSOP87 NOVAS. Provider selection.');
 
-  files.set(
-    'skills/calculate-birth-charts/SKILL.md',
-    ['Channel B', 'VSOP87', 'answer-plan'].join('\n'),
-  );
+  files.set('skills/xuan-ji-yu-heng/SKILL.md', ['Channel B', 'VSOP87', 'answer-plan'].join('\n'));
 
   files.set(
-    'skills/calculate-birth-charts/references/answer-contract.md',
+    'skills/xuan-ji-yu-heng/references/answer-contract.md',
     ['answer-plan', 'free-form user question', 'originalInput', 'consent'].join('\n'),
   );
 
   files.set(
-    'skills/calculate-birth-charts/references/sources-and-limitations.md',
+    'skills/xuan-ji-yu-heng/references/sources-and-limitations.md',
     ['VSOP87 NOVAS', 'JPL Horizons'].join('\n'),
   );
 
-  files.set('skills/calculate-birth-charts/references/privacy.md', 'privacy notes');
+  files.set('skills/xuan-ji-yu-heng/references/privacy.md', 'privacy notes');
 
   files.set(
     'AGENTS.md',

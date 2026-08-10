@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "calculate-birth-charts",
+      "name": "xuan-ji-yu-heng",
       "source": "./",
       "description": "Calculate Western natal charts, BaZi, Zi Wei Dou Shu, and bounded Vedic/Jyotish charts offline and deterministically. Vedic output reports both node modes without a product default; the bundled CLI does all math and the model never computes charts.",
       "category": "productivity",

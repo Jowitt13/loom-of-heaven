@@ -133,25 +133,25 @@ describe('vedic docs gate: P0 conventions and P3B evidence', () => {
 
 describe('vedic docs gate: P5 user-facing claims stay truthful', () => {
   const skillSurfaces = [
-    'skills/calculate-birth-charts/SKILL.md',
-    'skills/calculate-birth-charts/agents/openai.yaml',
-    'skills/calculate-birth-charts/references/rulesets.md',
-    'skills/calculate-birth-charts/references/input-contract.md',
-    'skills/calculate-birth-charts/references/output-contract.md',
+    'skills/xuan-ji-yu-heng/SKILL.md',
+    'skills/xuan-ji-yu-heng/agents/openai.yaml',
+    'skills/xuan-ji-yu-heng/references/rulesets.md',
+    'skills/xuan-ji-yu-heng/references/input-contract.md',
+    'skills/xuan-ji-yu-heng/references/output-contract.md',
     '.claude-plugin/plugin.json',
   ];
 
   it('exposes Vedic consistently across current Skill surfaces', () => {
     const missing = skillSurfaces.filter((file) => !/vedic|jyotish/i.test(read(file)));
     expect(missing, `P5 Skill surface lacks Vedic disclosure: ${missing.join(', ')}`).toEqual([]);
-    const rulesets = read('skills/calculate-birth-charts/references/rulesets.md');
+    const rulesets = read('skills/xuan-ji-yu-heng/references/rulesets.md');
     expect(rulesets).toMatch(/both[\s\S]*mean[\s\S]*true|mean[\s\S]*true[\s\S]*both/i);
     expect(rulesets).toMatch(/no.*default|default.*pending/i);
     expect(rulesets).toContain('VEDIC_TIME_REQUIRED');
   });
 
   it('aligns CLI --systems all and the raw no-flag default at four systems', () => {
-    const cli = read('skills/calculate-birth-charts/scripts/ming-chart.mjs');
+    const cli = read('skills/xuan-ji-yu-heng/scripts/ming-chart.mjs');
     expect(cli).toContain("['western', 'bazi', 'ziwei', 'vedic']");
     const contracts = read('packages/contracts/src/birth-input.ts');
     expect(contracts).toContain("default(['western', 'bazi', 'ziwei', 'vedic'])");

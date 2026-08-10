@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const srcSkill = join(root, 'skills', 'calculate-birth-charts');
+const srcSkill = join(root, 'skills', 'xuan-ji-yu-heng');
 const FIXED_NOW = '2026-01-01T00:00:00Z';
 
 interface Step {
@@ -33,7 +33,7 @@ function runNode(cwd: string, args: string[]): { code: number; stdout: string; s
 }
 
 const tempBase = mkdtempSync(join(tmpdir(), 'ming-skill-smoke-'));
-const tempSkill = join(tempBase, 'calculate-birth-charts');
+const tempSkill = join(tempBase, 'xuan-ji-yu-heng');
 
 try {
   // Copy only the Skill, excluding scratch output.

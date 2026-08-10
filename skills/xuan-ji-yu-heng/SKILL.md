@@ -1,9 +1,9 @@
 ---
-name: calculate-birth-charts
+name: xuan-ji-yu-heng
 description: Deterministically calculate Western natal charts, Four Pillars/BaZi (四柱八字), and Zi Wei Dou Shu (紫微斗数) from a birth date, local time, IANA timezone, coordinates, calendar and versioned rule profiles, then on request narrate a sourced reading with 吉凶/喜用神/大运流年 facts. Use when a user asks to 排盘、算命盘、看星盘、本命盘、占星、四柱八字、紫微斗数、真太阳时、恒星黄道、真交点、小行星、吉凶/运势/事业/感情/财运/学业解读、合婚/关系配对/正缘/结婚时机/适合行业/投资时机(1-5人)、比较流派/宫制差异，或导出结构化命盘 JSON (calculate a natal chart, BaZi, or Zi Wei chart, sidereal zodiac, synastry/relationship compatibility for up to 5 people, compare schools, export chart JSON). Do NOT use for sales/analytics "star charts"（销售星盘图、数据可视化星形图）, radar/scatter plots, or ungrounded predictive life advice.
 ---
 
-# calculate-birth-charts
+# xuan-ji-yu-heng
 
 This Skill is the entry point and orchestrator. It does **not** compute charts with the
 language model. All astronomy, calendar, ganzhi, star-placement, rule and interpretation math

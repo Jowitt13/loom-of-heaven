@@ -26,9 +26,9 @@ import {
  *                        spawning a fresh build. Purely for offline unit tests.
  *   --root <dir>        override the repo root (default: parent of this file).
  *   --sbom-cdx <file>   path to CycloneDX SBOM (default:
- *                        skills/calculate-birth-charts/sbom.cdx.json).
+ *                        skills/xuan-ji-yu-heng/sbom.cdx.json).
  *   --sbom-spdx <file>  path to SPDX SBOM (default:
- *                        skills/calculate-birth-charts/sbom.spdx.json).
+ *                        skills/xuan-ji-yu-heng/sbom.spdx.json).
  *
  * There is a documented exceptions file (tools/validate-sbom.exceptions.json)
  * — currently absent; if ever present it must be a JSON array of
@@ -53,7 +53,7 @@ const root = rootArg
 const metafileArg = getFlag('--metafile');
 const sbomCdxArg = getFlag('--sbom-cdx');
 const sbomSpdxArg = getFlag('--sbom-spdx');
-const APP_NAME = 'calculate-birth-charts';
+const APP_NAME = 'xuan-ji-yu-heng';
 
 interface Check {
   name: string;
@@ -444,12 +444,12 @@ async function main(): Promise<void> {
     ? sbomCdxArg.startsWith('.')
       ? join(root, sbomCdxArg)
       : sbomCdxArg
-    : join(root, 'skills', 'calculate-birth-charts', 'sbom.cdx.json');
+    : join(root, 'skills', 'xuan-ji-yu-heng', 'sbom.cdx.json');
   const spdxPath = sbomSpdxArg
     ? sbomSpdxArg.startsWith('.')
       ? join(root, sbomSpdxArg)
       : sbomSpdxArg
-    : join(root, 'skills', 'calculate-birth-charts', 'sbom.spdx.json');
+    : join(root, 'skills', 'xuan-ji-yu-heng', 'sbom.spdx.json');
   if (!existsSync(cdxPath)) {
     process.stdout.write(`[FAIL] cyclonedx SBOM not found: ${relative(root, cdxPath)}\n`);
     process.exit(1);

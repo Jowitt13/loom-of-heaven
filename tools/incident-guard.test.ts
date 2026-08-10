@@ -20,7 +20,7 @@ describe('incident guard: example data declared synthetic (no real PII)', () => 
 
   it('smoke fixture location is labeled fictional', () => {
     const smoke = JSON.parse(
-      readFileSync(join(root, 'skills/calculate-birth-charts/scripts/fixtures/smoke.json'), 'utf8'),
+      readFileSync(join(root, 'skills/xuan-ji-yu-heng/scripts/fixtures/smoke.json'), 'utf8'),
     ) as { location?: { displayName?: string } };
     expect(SYNTHETIC.test(smoke.location?.displayName ?? '')).toBe(true);
   });
@@ -35,7 +35,7 @@ describe('incident guard: example data declared synthetic (no real PII)', () => 
       'packages/orchestrator/test/ziwei.test.ts',
       'packages/time-location/test/solar-time.test.ts',
       'packages/western/test/houses.test.ts',
-      'skills/calculate-birth-charts/references/input-contract.md',
+      'skills/xuan-ji-yu-heng/references/input-contract.md',
     ];
     const missing = files.filter((f) => !SYNTHETIC.test(readFileSync(join(root, f), 'utf8')));
     expect(missing, `missing synthetic marker: ${missing.join(', ')}`).toEqual([]);

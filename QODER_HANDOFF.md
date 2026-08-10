@@ -10,7 +10,7 @@
 
 项目形态改为 **Skill-first**，但不要把公式写成提示词。Skill 负责识别请求、收集并确认输入、调用其自带的确定性脚本、解释警告和回传产物；脚本负责版本化、可回归验证的排盘。大模型只作为 Skill 的编排与可选表达层，不能参与行星位置、历法转换、干支、宫位或星曜安置等基础计算。
 
-第一版只交付一个主 Skill：`calculate-birth-charts`。它同时支持西占、八字、紫微及三盘合算，避免多个 Skill 互相抢触发。未来若增加自然语言深度解读，再单独建立 `interpret-birth-charts`，让“计算”和“解读”在安装、授权和依赖上彻底分离。
+第一版只交付一个主 Skill：`xuan-ji-yu-heng`。它同时支持西占、八字、紫微及三盘合算，避免多个 Skill 互相抢触发。未来若增加自然语言深度解读，再单独建立 `interpret-birth-charts`，让“计算”和“解读”在安装、授权和依赖上彻底分离。
 
 默认按“未来可能闭源商用”设计：优先采用许可清晰的 MIT/BSD/Apache 依赖，所有第三方代码和数据来源做许可证清单；任何 AGPL/GPL 或来源不清的代码在得到项目所有者明确同意前不得引入。
 
@@ -101,7 +101,7 @@
 
 ```text
 skills/
-  calculate-birth-charts/
+  xuan-ji-yu-heng/
     SKILL.md                         # 只有 name/description frontmatter + 精简工作流
     agents/
       openai.yaml                    # 跨 Codex 生态的 UI 元数据；与 SKILL.md 保持一致
@@ -295,11 +295,11 @@ type ChartBundle = {
 
 ### 7.1 主 Skill
 
-第一版只发布 `calculate-birth-charts`。建议 frontmatter：
+第一版只发布 `xuan-ji-yu-heng`。建议 frontmatter：
 
 ```yaml
 ---
-name: calculate-birth-charts
+name: xuan-ji-yu-heng
 description: Calculate deterministic Western natal charts, Four Pillars/BaZi, and Zi Wei Dou Shu charts from birth date, local time, IANA timezone, coordinates, calendar, and versioned rule profiles. Use when users ask to 排盘、算星盘、四柱八字、紫微斗数、比较真太阳时或流派差异、导出结构化命盘或 HTML/SVG 报告. Do not use for ungrounded predictive life advice.
 ---
 ```
@@ -421,7 +421,7 @@ CI 最低门槛（长期目标）分两档，避免“声明的门禁”与“�
 
 ### Phase 0：设计冻结与风险核验
 
-交付：产品说明、Skill 架构、输入输出 schema 草案、规则集矩阵、许可证审计、ADR、风险表，初始化 `skills/calculate-birth-charts`，以及三个候选 provider 在 Node 中的最小调用 spike。
+交付：产品说明、Skill 架构、输入输出 schema 草案、规则集矩阵、许可证审计、ADR、风险表，初始化 `skills/xuan-ji-yu-heng`，以及三个候选 provider 在 Node 中的最小调用 spike。
 
 完成条件：所有核心依赖的许可证与传递依赖已核验；闭源友好默认路线明确；TZDB 方案已通过 ADR 固定；Skill frontmatter/目录通过校验；没有开始复制来源不清代码。
 
@@ -464,7 +464,7 @@ CI 最低门槛（长期目标）分两档，避免“声明的门禁”与“�
 ## 12. Qoder 执行规则
 
 - 先读本文件，再检查仓库现状；不要假设仓库为空，也不要覆盖用户已有改动。
-- 把可独立安装的 `skills/calculate-birth-charts` 作为第一交付物；若环境提供标准 Skill 初始化器/验证器，优先使用它初始化并运行验证。
+- 把可独立安装的 `skills/xuan-ji-yu-heng` 作为第一交付物；若环境提供标准 Skill 初始化器/验证器，优先使用它初始化并运行验证。
 - `SKILL.md` 保持精简，详细 schema、规则和资料只放一层 `references/`；Skill 内不创建 README、安装指南、更新日志等重复文档。
 - 先提出可验证计划并开始 Phase 0/1；只在会导致架构分叉、许可证风险或不可逆变更时询问。
 - 每个阶段结束更新 `docs/STATUS.md`：已完成、命令、测试结果、未解决风险、下一步。
@@ -482,7 +482,7 @@ CI 最低门槛（长期目标）分两档，避免“声明的门禁”与“�
 下面这段可原样交给 Qoder。若 Qoder 能访问当前仓库，最好连同本文件一起提供。
 
 ````text
-你现在接手一个从空仓库或早期仓库开始的真实工程：构建一个可安装到腾讯 WorkBuddy、兼容主流 `SKILL.md + scripts` 生态的 `calculate-birth-charts` Skill。它从出生日期、当地时间、经纬度、IANA 时区、历法和版本化规则集，确定性计算西方占星本命盘、八字与紫微斗数，并输出 canonical JSON 和离线 HTML/SVG 报告。
+你现在接手一个从空仓库或早期仓库开始的真实工程：构建一个可安装到腾讯 WorkBuddy、兼容主流 `SKILL.md + scripts` 生态的 `xuan-ji-yu-heng` Skill。它从出生日期、当地时间、经纬度、IANA 时区、历法和版本化规则集，确定性计算西方占星本命盘、八字与紫微斗数，并输出 canonical JSON 和离线 HTML/SVG 报告。
 
 这不是“写一个超长提示词”的任务。Skill 是用户入口和编排层，所有排盘必须由 Skill 内自带的本地确定性脚本完成。请把它当作可长期维护、未来可能闭源商用的产品，而不是一次性 Demo。
 
@@ -490,7 +490,7 @@ CI 最低门槛（长期目标）分两档，避免“声明的门禁”与“�
 
 最高优先级原则：
 
-1. 第一版只发布一个用户可见 Skill：`calculate-birth-charts`，内部支持 `western|bazi|ziwei|all`。不要一开始拆成三个会竞争触发的 Skill。
+1. 第一版只发布一个用户可见 Skill：`xuan-ji-yu-heng`，内部支持 `western|bazi|ziwei|all`。不要一开始拆成三个会竞争触发的 Skill。
 2. LLM 不参与任何基础排盘计算。行星、宫位、相位、节气、干支、十神、起运、星曜和四化必须来自确定性、版本化、可测试的代码。以后若做解读，另建 `interpret-birth-charts` Skill，只读取结果 JSON。
 3. Skill 默认完全本地、无网络、无遥测，不启动数据库、Web 服务或 MCP。在线地理编码必须单独授权；用户也必须能手工输入经纬度和 IANA 时区完成全部计算。
 4. 发行 Skill 必须自包含：不得依赖仓库外的 `packages/`，不得首次运行 `npm install`、`npx` 或下载数据。pnpm 只用于开发构建，最终把引擎和 TZDB 打包进 Skill。
@@ -514,7 +514,7 @@ CI 最低门槛（长期目标）分两档，避免“声明的门禁”与“�
 目标结构：
 
 ```text
-skills/calculate-birth-charts/
+skills/xuan-ji-yu-heng/
   SKILL.md
   agents/openai.yaml
   scripts/ming-chart.mjs
@@ -610,7 +610,7 @@ Phase 1：
 如果 Qoder 中途换会话，可用下面的短提示继续：
 
 ```text
-继续当前 `calculate-birth-charts` Skill 项目。先完整阅读 `QODER_HANDOFF.md` 与 `docs/STATUS.md`，检查 Git diff、最近测试和 Skill 发布目录，保留现有改动。根据 STATUS 完成下一个可运行切片；不要重新搭脚手架，不要引入未经许可审计的依赖，不要让 LLM 参与计算。完成后运行对应测试、Skill validate、干净目录离线 smoke，更新 STATUS 并报告真实结果和剩余风险。
+继续当前 `xuan-ji-yu-heng` Skill 项目。先完整阅读 `QODER_HANDOFF.md` 与 `docs/STATUS.md`，检查 Git diff、最近测试和 Skill 发布目录，保留现有改动。根据 STATUS 完成下一个可运行切片；不要重新搭脚手架，不要引入未经许可审计的依赖，不要让 LLM 参与计算。完成后运行对应测试、Skill validate、干净目录离线 smoke，更新 STATUS 并报告真实结果和剩余风险。
 ```
 
 ## 15. 项目所有者最终需要决定的两件事

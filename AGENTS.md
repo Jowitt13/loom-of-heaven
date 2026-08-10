@@ -1,8 +1,8 @@
 # AGENTS.md — ming-engine
 
 Guidance for coding agents (OpenAI Codex, and any host that reads `AGENTS.md`) working in this
-repository. The user-facing capability is the **`calculate-birth-charts`** Skill under
-[`skills/calculate-birth-charts/`](skills/calculate-birth-charts/).
+repository. The user-facing capability is the **`xuan-ji-yu-heng`** Skill under
+[`skills/xuan-ji-yu-heng/`](skills/xuan-ji-yu-heng/).
 
 ## What this project is
 
@@ -29,11 +29,11 @@ CLI. **The model never computes a chart itself.**
 
 ## How to run the Skill (the only supported entry point)
 
-The single stable CLI is `skills/calculate-birth-charts/scripts/ming-chart.mjs`. Pass arguments as
+The single stable CLI is `skills/xuan-ji-yu-heng/scripts/ming-chart.mjs`. Pass arguments as
 an array and JSON via files — never build a shell string from user text.
 
 ```bash
-cd skills/calculate-birth-charts
+cd skills/xuan-ji-yu-heng
 node scripts/ming-chart.mjs doctor
 node scripts/ming-chart.mjs normalize  --input-file birth-input.json --output-file normalized.json
 node scripts/ming-chart.mjs calculate  --input-file birth-input.json --systems all --output-file chart.json
@@ -46,8 +46,8 @@ node scripts/ming-chart.mjs verify
 
 Requires a Node runtime (>=22). The published Skill folder is self-contained: it ships
 `scripts/dist/engine.mjs`, needs no `npm install`, and runs offline. Full workflow and input rules
-live in [`skills/calculate-birth-charts/SKILL.md`](skills/calculate-birth-charts/SKILL.md) and
-`skills/calculate-birth-charts/references/`.
+live in [`skills/xuan-ji-yu-heng/SKILL.md`](skills/xuan-ji-yu-heng/SKILL.md) and
+`skills/xuan-ji-yu-heng/references/`.
 
 ## Working on the engine (development)
 

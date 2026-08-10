@@ -75,12 +75,12 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 安装流程（推荐：一句话，由 Qoder Agent 代装）
 
-把顶部那句“帮我安装这个技能：<INSTALL.md 链接>”发给 Qoder：Qoder 内置 Agent 会**代为**下载 `ming-engine-qoder.zip`、按清单校验 SHA-256、校验 zip 单层目录、解压到临时目录，然后**仅替换**你的用户技能目录 `~/.qoder/skills/calculate-birth-charts/`（不动其它技能，失败不覆盖旧版），再刷新或提示你重启 Qoder / 新开对话一次，并自检。你无需自己下载、解压或使用任何命令行工具。
+把顶部那句“帮我安装这个技能：<INSTALL.md 链接>”发给 Qoder：Qoder 内置 Agent 会**代为**下载 `ming-engine-qoder.zip`、按清单校验 SHA-256、校验 zip 单层目录、解压到临时目录，然后**仅替换**你的用户技能目录 `~/.qoder/skills/xuan-ji-yu-heng/`（不动其它技能，失败不覆盖旧版），再刷新或提示你重启 Qoder / 新开对话一次，并自检。你无需自己下载、解压或使用任何命令行工具。
 
 #### 手动备用方案（仅在正式发布且 Qoder 不允许 Agent 写入技能目录时）
 
 1. 从当前清单指定的正式 Release 下载 Qoder ZIP，核对 SHA-256。
-2. 解压得到单层 `calculate-birth-charts/` 文件夹。
+2. 解压得到单层 `xuan-ji-yu-heng/` 文件夹。
 3. 把该文件夹放入 Qoder 的用户技能目录 `~/.qoder/skills/`，重启 Qoder 或新开一个对话。
 
 （备用方案同样不需要任何命令行工具。）
@@ -91,13 +91,13 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 
 ### 如何确认已加载
 
-输入 `/calculate-birth-charts` 能看到技能并正常触发即成功。首次运行脚本若弹出授权提示，点“允许”（引擎需要调用本地 Node.js，所有计算在本机完成，不上传）。
+输入 `/xuan-ji-yu-heng` 能看到技能并正常触发即成功。首次运行脚本若弹出授权提示，点“允许”（引擎需要调用本地 Node.js，所有计算在本机完成，不上传）。
 
 ### 检查版本 / 更新 / 卸载
 
 - 检查版本：说“检查 Ming Engine 版本”，AI 运行 `node scripts/ming-chart.mjs version` 读取本地 `BUILD_MANIFEST.json`，回报真实已装版本，不等于“线上最新”。
-- 更新：先读线上 `install-manifest.json`。若 Qoder `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；只有已发布时才下载不可变 tag 资产、校验 SHA-256 并用 `migrate --host qoder` 原子替换 `~/.qoder/skills/calculate-birth-charts`（清理 legacy RC 双层、失败回滚，不碰其它技能）→ 回报 before→after。全程 Agent 文件操作，无需命令行工具。
-- 卸载：在技能管理中删除 `calculate-birth-charts`，或删除技能文件夹。
+- 更新：先读线上 `install-manifest.json`。若 Qoder `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；只有已发布时才下载不可变 tag 资产、校验 SHA-256 并用 `migrate --host qoder` 原子替换 `~/.qoder/skills/xuan-ji-yu-heng`（清理 legacy RC 双层、失败回滚，不碰其它技能）→ 回报 before→after。全程 Agent 文件操作，无需命令行工具。
+- 卸载：在技能管理中删除 `xuan-ji-yu-heng`，或删除技能文件夹。
 
 ### 已知限制
 
@@ -128,7 +128,7 @@ AI 会自动识别你所在的平台，并先检查该平台是否已发布。�
 ### 检查版本 / 更新 / 卸载
 
 - 检查版本：说“检查 Ming Engine 版本”，AI 运行 `node scripts/ming-chart.mjs version` 读取本地 `BUILD_MANIFEST.json`，回报真实已装版本，不等于“线上最新”。
-- 更新：先读线上 `install-manifest.json`。若 WorkBuddy `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；只有已发布时才下载不可变 tag 资产、校验 SHA-256 并用 `migrate --host workbuddy` 原子替换 `~/.workbuddy/skills/calculate-birth-charts`（清理 legacy RC 双层、失败回滚），或经「Skills 管理」先删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 `calculate-birth-charts` → 回报 before→after。
+- 更新：先读线上 `install-manifest.json`。若 WorkBuddy `published` 不是 `true`，明确说明“当前没有可更新的公开安装包”并停止；只有已发布时才下载不可变 tag 资产、校验 SHA-256 并用 `migrate --host workbuddy` 原子替换 `~/.workbuddy/skills/xuan-ji-yu-heng`（清理 legacy RC 双层、失败回滚），或经「Skills 管理」先删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 `xuan-ji-yu-heng` → 回报 before→after。
 - 卸载：在「Skills 管理」中删除该技能。
 
 ### 已知限制
