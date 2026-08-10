@@ -1,4 +1,4 @@
-import type { WesternChartResult, WesternRuleFinding } from '@ming/contracts';
+import type { WesternChartResult, WesternRuleFinding } from '@loom/contracts';
 
 /**
  * Planet-sign meaning rules. For Sun, Moon, Mercury, Venus, Mars: a core one-line

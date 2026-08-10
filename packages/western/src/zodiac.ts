@@ -1,4 +1,4 @@
-import type { WesternSign } from '@ming/contracts';
+import type { WesternSign } from '@loom/contracts';
 import { norm360 } from './ephemeris.ts';
 
 /**

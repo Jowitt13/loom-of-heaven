@@ -24,7 +24,7 @@ facts / reason / evidence / schema / 命理 judgements are frozen.
 
 - **B. `reading-lint` term firewall (packages/interpret/src/reading-lint.ts).** A pure, dependency-
   free `lintReading(md, {channel, simple})` — bundled into `engine.mjs` and exposed as
-  `ming-chart.mjs lint-reading --input-file draft.md --channel topic [--simple]`. It parses the
+  `loom-chart.mjs lint-reading --input-file draft.md --channel topic [--simple]`. It parses the
   7-step report, EXEMPTS 专业依据 + 信息可靠性与声明, and checks sections 1-5 + the follow-up
   (including parentheticals and the first-200-char strict zone). Tiered severity (user-confirmed):
   命理 terms + strong jargon are `error`; soft jargon is `warn` in sections 2-5 but `error` in the

@@ -1,5 +1,5 @@
 import moment from 'moment-timezone';
-import type { TzdbRef } from '@ming/contracts';
+import type { TzdbRef } from '@loom/contracts';
 
 /**
  * Single choke point for the bundled, version-pinned IANA time-zone database.

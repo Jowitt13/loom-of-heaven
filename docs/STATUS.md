@@ -4,7 +4,7 @@
 
 ## Where the project lives
 
-The public home is the sanitized repository `github.com/Jowitt13/ming-engine` (after a PII
+The public home is the sanitized repository `github.com/Jowitt13/loom-of-heaven` (after a PII
 incident the public history was rewritten and republished; see
 [INCIDENT_PII_REMEDIATION.md](./INCIDENT_PII_REMEDIATION.md)). The original handoff document is
 kept at the repository root as `QODER_HANDOFF.md` for continuity. Pre-incident workspaces are
@@ -87,7 +87,7 @@ retired and must never be pushed from or copied from.
   safe to commit.
 - Privacy remediation + guard: removed stray real-looking birth data (`scripts/birth-input.json`,
   `scripts/chart.json`, `.tmp/`) from the Skill source, and added a `validate:skill` check that
-  `scripts/` holds only `ming-chart.mjs`, `fixtures/`, `dist/` (handoff §10); the enforced check
+  `scripts/` holds only `loom-chart.mjs`, `fixtures/`, `dist/` (handoff §10); the enforced check
   count lives in the "Commands & results" table below.
 - Remaining Phase 4 step: **live WorkBuddy upload/enable/trigger acceptance on a real device**
   (checklist in `docs/WORKBUDDY.md`); it cannot be exercised from the dev workspace.
@@ -166,7 +166,7 @@ retired and must never be pushed from or copied from.
 - **HTML/SVG report paused:** `render` returns a disabled notice (exit 3); renderer + template stay
   dormant. Tools (`smoke`/`forward-test`/`gen-example`) updated accordingly.
 - **取格修正 + 应期 + 解读严谨 (ADR 0006):** 建禄仅禄�?阳刃仅刃位；杂气月透干取格（戊土辰月→杂气
-  正财格，非建禄）；新增五行缺失、天干五�?日主合财)、大�?流年冲合应期(�?2028 申冲�?�? reading-style/SKILL 增反绝对化与术语/系统隔离/一致性铁律�?- **逐年流年 + 语义精修 (ADR 0007):** 引擎按当前年锚定逐年产出流年主题(天干/地支十神+合冲)；日�? 多重合合并为一�?贴身/遥见、不双合�?；缺 X 改述为“需后天训练、非无能力”；概率话术改为趋势�? reading-style/SKILL 增十神象�?财格/官杀藏≠排斥组织/紫微忌单�?水逆≠�?校对敏感项�?- **常见追问 + 多人合婚 (ADR 0008):** 新增婚姻/正缘应期、适合行业、配偶画像事�?+ 追问 playbook；新�? `@ming/synastry` 包与 `synastry` 命令�?-5 人、八�?紫微/占星三系�?2 人需 analyzePair）；SKILL
+  正财格，非建禄）；新增五行缺失、天干五�?日主合财)、大�?流年冲合应期(�?2028 申冲�?�? reading-style/SKILL 增反绝对化与术语/系统隔离/一致性铁律�?- **逐年流年 + 语义精修 (ADR 0007):** 引擎按当前年锚定逐年产出流年主题(天干/地支十神+合冲)；日�? 多重合合并为一�?贴身/遥见、不双合�?；缺 X 改述为“需后天训练、非无能力”；概率话术改为趋势�? reading-style/SKILL 增十神象�?财格/官杀藏≠排斥组织/紫微忌单�?水逆≠�?校对敏感项�?- **常见追问 + 多人合婚 (ADR 0008):** 新增婚姻/正缘应期、适合行业、配偶画像事�?+ 追问 playbook；新�? `@loom/synastry` 包与 `synastry` 命令�?-5 人、八�?紫微/占星三系�?2 人需 analyzePair）；SKILL
   多人工作流（先确认关系与分析哪两人）；反绝对化——不作“注�?必分”。W5 “synastry 不做”假设作废�?
 
 ## Commands & results (2026-07-26)

@@ -44,7 +44,7 @@ export const VALIDATION_RESULT_CONTRACT_VERSION = 'validation-result/v2';
 // spends reading or JSON-parsing a file before validation. The bare Zod schemas
 // below EXPRESS the contract but are not themselves fail-fast against an
 // arbitrarily large in-memory object; use `parseValidateAnswerInputBounded`
-// (from @ming/interpret) for bounded parsing, and the CLI additionally enforces
+// (from @loom/interpret) for bounded parsing, and the CLI additionally enforces
 // MAX_VALIDATE_ANSWER_INPUT_BYTES on the input file before reading it. A real
 // reading is a handful of sections with a few short paragraphs each — the
 // limits below are an order of magnitude above legitimate use.

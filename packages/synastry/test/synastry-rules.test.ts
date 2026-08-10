@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { BaziChartResult, ChartBundle, ZiweiChartResult } from '@ming/contracts';
+import type { BaziChartResult, ChartBundle, ZiweiChartResult } from '@loom/contracts';
 import { baziSynastryFindings, ziweiSynastryFindings } from '../src/index.ts';
 
 /**

@@ -66,7 +66,7 @@ function readingLiteSkillMd(): string {
     '---',
     `name: ${SKILL_NAME_LITE}`,
     'description: >-',
-    '  解读辅助版(reading-lite)——接收已由完整 Ming Engine 生成的命盘 facts(八字/紫微/占星),',
+    '  解读辅助版(reading-lite)——接收已由完整 Loom of Heaven 生成的命盘 facts(八字/紫微/占星),',
     '  按「说人话」规范生成事业、感情、财运、学业解读(7步结构 + 专业依据 + 时间线 + 风险提示)。',
     '  **此版本不包含排盘引擎,不能自行计算八字四柱、紫微星曜、占星行星位置。**',
     '  如需完整排盘,请使用 Codex / Qoder / WorkBuddy 上的完整版 xuan-ji-yu-heng。',
@@ -79,13 +79,13 @@ function readingLiteSkillMd(): string {
     '',
     '> **重要:此版本是解读辅助版(reading-lite),不包含排盘引擎。**',
     '> 它不能自行计算八字四柱、紫微星曜、占星行星位置、吉凶、喜用神、大运流年。',
-    '> 如需完整排盘能力,请使用 Codex / Qoder / WorkBuddy 上的完整版 Ming Engine。',
+    '> 如需完整排盘能力,请使用 Codex / Qoder / WorkBuddy 上的完整版 Loom of Heaven。',
     '',
     '## 此版本能做什么',
     '',
     '1. 引导用户收集完整的出生信息(日期、时间、地点、时区等)',
-    '2. 接收已由完整 Ming Engine 生成的 `facts`(结构化命盘事实)',
-    '3. 按 Ming Engine 的「说人话」输出规范生成事业、感情、财运等自然语言解读',
+    '2. 接收已由完整 Loom of Heaven 生成的 `facts`(结构化命盘事实)',
+    '3. 按 Loom of Heaven 的「说人话」输出规范生成事业、感情、财运等自然语言解读',
     '4. 提供专业依据、时间线、风险提示和现实建议',
     '',
     '## 此版本不能做什么',
@@ -99,7 +99,7 @@ function readingLiteSkillMd(): string {
     '',
     '- **永远不要自行计算或猜测行星位置、宫位、相位、节气、干支、十神、起运、星曜、四化。**',
     '- **永远不要声称可以完成完整八字、紫微、占星计算。**',
-    '- 如果用户要求排盘而没有提供 facts,引导用户去完整版 Ming Engine 先排盘。',
+    '- 如果用户要求排盘而没有提供 facts,引导用户去完整版 Loom of Heaven 先排盘。',
     '- 如果用户提供了 facts,严格按照 `references/reading-style.md` 的 7 步结构生成解读。',
     '- 解读中所有命理术语只放在第 6 部分「专业依据」。',
     '- 不给出确定性医疗、法律、投资、生死建议。',
@@ -124,7 +124,7 @@ function readingLiteSkillMd(): string {
     '### 用户请求排盘(无 facts)',
     '',
     '1. 告知用户此版本不能排盘',
-    '2. 引导用户去完整版 Ming Engine(Codex / Qoder / WorkBuddy)先排盘',
+    '2. 引导用户去完整版 Loom of Heaven(Codex / Qoder / WorkBuddy)先排盘',
     '3. 帮助用户整理出生信息为 `birth-input.json` 格式(参考 `references/reading-lite-input.md`)',
     '4. 请用户拿到 facts 后再回来解读',
     '',
@@ -179,7 +179,7 @@ function installMd(
     L.push('3. 首次使用请先阅读 `references/reading-lite-input.md` 了解如何提供 facts。');
   } else if (h.id === 'codex') {
     L.push(
-      '1. 克隆仓库 `git clone https://github.com/Jowitt13/ming-engine.git`(或下载 ZIP 解压)。',
+      '1. 克隆仓库 `git clone https://github.com/Jowitt13/loom-of-heaven.git`(或下载 ZIP 解压)。',
     );
     L.push('2. 宿主读取仓库根目录的 `AGENTS.md` 与 `skills/xuan-ji-yu-heng/`。');
     L.push('3. 直接对话触发。');
@@ -241,7 +241,7 @@ function installMd(
     L.push('## 检查已装版本（读本地清单,不靠猜）');
     L.push('');
     L.push(
-      '说「检查 Ming Engine 版本」:Agent 运行 `node scripts/ming-chart.mjs version` 读取本包同级 `BUILD_MANIFEST.json`,输出真实本地版本(engineVersion / releaseVersion / releaseTag / 是否 legacy / 是否双层目录 / 读取路径)。这是“当前已装版本”,不等于“线上最新版本”。',
+      '说「检查 Loom of Heaven 版本」:Agent 运行 `node scripts/loom-chart.mjs version` 读取本包同级 `BUILD_MANIFEST.json`,输出真实本地版本(engineVersion / releaseVersion / releaseTag / 是否 legacy / 是否双层目录 / 读取路径)。这是“当前已装版本”,不等于“线上最新版本”。',
     );
     L.push('');
   }
@@ -272,23 +272,23 @@ function installMd(
       h.id === 'qoder' ? '~/.qoder/skills/xuan-ji-yu-heng' : '~/.workbuddy/skills/xuan-ji-yu-heng';
     L.push('## 更新（读线上 manifest,迁移替换旧包,清理旧 RC）');
     L.push('');
-    L.push('说「帮我更新 Ming Engine」,Agent 按序执行(普通用户不敲命令):');
+    L.push('说「帮我更新 Loom of Heaven」,Agent 按序执行(普通用户不敲命令):');
     L.push(
-      '1. 抓取 `https://raw.githubusercontent.com/Jowitt13/ming-engine/main/install-manifest.json`——线上稳定清单是唯一目标版本来源。',
+      '1. 抓取 `https://raw.githubusercontent.com/Jowitt13/loom-of-heaven/main/install-manifest.json`——线上稳定清单是唯一目标版本来源。',
     );
     L.push(
       '2. 取本平台不可变 `downloadUrl`(非 latest)与 `sha256`,下载→校验 SHA-256→校验单层 `xuan-ji-yu-heng/`→解压临时目录;下载失败 / SHA 不一致 / Release 不存在即明确失败并停止,绝不因本地旧包或缓存说“已是最新”。',
     );
     L.push(
-      `3. 迁移替换:运行 \`node <临时目录>/xuan-ji-yu-heng/scripts/ming-chart.mjs migrate --host ${h.id} --source <临时目录>/xuan-ji-yu-heng\`——原子替换 \`${targetDir}\`、清理 legacy RC 双层目录、只动该技能、失败自动回滚(不删整个 skills 目录、不碰其它技能)。`,
+      `3. 迁移替换:运行 \`node <临时目录>/xuan-ji-yu-heng/scripts/loom-chart.mjs migrate --host ${h.id} --source <临时目录>/xuan-ji-yu-heng\`——原子替换 \`${targetDir}\`、清理 legacy RC 双层目录、只动该技能、失败自动回滚(不删整个 skills 目录、不碰其它技能)。`,
     );
     if (h.id === 'workbuddy') {
       L.push(
-        '   若 WorkBuddy 必须经 Skills 管理界面:先只删旧 Ming Engine 再导入新版,不碰其它技能;升级后只保留一个可触发 `xuan-ji-yu-heng`。',
+        '   若 WorkBuddy 必须经 Skills 管理界面:先只删旧 Loom of Heaven 再导入新版,不碰其它技能;升级后只保留一个可触发 `xuan-ji-yu-heng`。',
       );
     }
     L.push(
-      '4. 运行 `node scripts/ming-chart.mjs version` 复核,并输出 before→after:旧 tag / 新 tag / 新 SHA-256 / 最终 BUILD_MANIFEST。',
+      '4. 运行 `node scripts/loom-chart.mjs version` 复核,并输出 before→after:旧 tag / 新 tag / 新 SHA-256 / 最终 BUILD_MANIFEST。',
     );
     L.push('');
   }
@@ -366,7 +366,7 @@ export function buildHostZips(srcSkillDir: string, stagingRoot: string): HostZip
       capability: h.capability,
       scriptExecution: h.scriptExecution,
       runtime: h.runtime,
-      ...(isLite ? {} : { engine: 'scripts/dist/engine.mjs', cli: 'scripts/ming-chart.mjs' }),
+      ...(isLite ? {} : { engine: 'scripts/dist/engine.mjs', cli: 'scripts/loom-chart.mjs' }),
       realDeviceVerified: h.realDeviceVerified,
     };
     writeFileSync(
@@ -463,7 +463,7 @@ function main(): void {
 
   const candidateManifest = {
     skill: SKILL_NAME,
-    product: 'ming-engine',
+    product: 'loom-of-heaven',
     engineVersion: CANDIDATE_ENGINE_VERSION,
     releaseVersion: CANDIDATE_RELEASE_VERSION,
     releaseTag: CANDIDATE_RELEASE_TAG,
@@ -474,7 +474,7 @@ function main(): void {
       '真实 Release 创建 + 资产上传 + 重下校验后,才由 promote-release 步骤更新根目录稳定清单。' +
       '安装器遇 404/published:false 必须提示「安装包尚未发布」,不得伪装成功。',
     canonicalEngine: { version: CANDIDATE_ENGINE_VERSION, engineSha256 },
-    entry: 'https://raw.githubusercontent.com/Jowitt13/ming-engine/main/INSTALL.md',
+    entry: 'https://raw.githubusercontent.com/Jowitt13/loom-of-heaven/main/INSTALL.md',
     platforms,
   };
   writeFileSync(

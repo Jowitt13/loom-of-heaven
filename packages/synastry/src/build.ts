@@ -1,4 +1,4 @@
-import type { ChartBundle, SynastryFinding } from '@ming/contracts';
+import type { ChartBundle, SynastryFinding } from '@loom/contracts';
 import { baziSynastryFindings } from './bazi-synastry.ts';
 import { ziweiSynastryFindings } from './ziwei-synastry.ts';
 import { westernSynastryFindings } from './western-synastry.ts';

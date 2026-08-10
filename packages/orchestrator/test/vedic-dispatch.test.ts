@@ -1,7 +1,7 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { AnswerPlan, ChartBundle, PublicResult, parseBirthInput } from '@ming/contracts';
-import { calculate, runAnswerPlan } from '@ming/orchestrator';
+import { AnswerPlan, ChartBundle, PublicResult, parseBirthInput } from '@loom/contracts';
+import { calculate, runAnswerPlan } from '@loom/orchestrator';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
 

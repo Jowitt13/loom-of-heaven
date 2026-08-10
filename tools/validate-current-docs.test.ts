@@ -23,7 +23,7 @@ function baseFixture(): Map<string, string> {
   files.set(
     'README.md',
     [
-      '# ming-engine',
+      '# loom-of-heaven',
       '运行需要 Node.js ≥ 22 和 开发 Node.js ≥ 24. astronomy-engine (VSOP87 + NOVAS).',
       '',
       '需要脚本执行 能力。',
@@ -41,7 +41,7 @@ function baseFixture(): Map<string, string> {
     [
       '运行需要 Node.js ≥ 22.',
       'verify.',
-      'ming-chart.mjs version',
+      'loom-chart.mjs version',
       'install-manifest.json 更新协议。',
       'migrate --host qoder',
       '安装包来自 GitHub Release `v0.1.6`',
@@ -106,7 +106,7 @@ function baseFixture(): Map<string, string> {
 
   files.set(
     'package.json',
-    JSON.stringify({ name: 'ming-engine', description: 'deterministic engine' }),
+    JSON.stringify({ name: 'loom-of-heaven', description: 'deterministic engine' }),
   );
 
   files.set('docs/installers/codex.md', 'codex installer');
@@ -116,14 +116,14 @@ function baseFixture(): Map<string, string> {
       '~/.qoder/skills',
       '仅替换',
       '运行需要 Node.js ≥ 22',
-      'ming-chart.mjs version',
+      'loom-chart.mjs version',
       'install-manifest.json',
       'migrate',
     ].join('\n'),
   );
   files.set(
     'docs/installers/workbuddy.md',
-    ['ming-chart.mjs version', 'install-manifest.json', 'migrate', '运行需要 Node.js ≥ 22'].join(
+    ['loom-chart.mjs version', 'install-manifest.json', 'migrate', '运行需要 Node.js ≥ 22'].join(
       '\n',
     ),
   );

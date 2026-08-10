@@ -77,7 +77,7 @@ function checkInstallMd(): void {
   if (!install) return;
   add(
     'INSTALL.md has the raw entry point',
-    /raw\.githubusercontent\.com\/Jowitt13\/ming-engine\/main\/INSTALL\.md/.test(install),
+    /raw\.githubusercontent\.com\/Jowitt13\/loom-of-heaven\/main\/INSTALL\.md/.test(install),
   );
   add('INSTALL.md reads install-manifest.json', install.includes('install-manifest.json'));
   add(
@@ -92,11 +92,11 @@ function checkInstallMd(): void {
   );
   add(
     'INSTALL.md has update and uninstall prompts',
-    install.includes('帮我更新 Ming Engine') && install.includes('帮我卸载 Ming Engine'),
+    install.includes('帮我更新 Loom of Heaven') && install.includes('帮我卸载 Loom of Heaven'),
   );
   add(
     'INSTALL.md limits downloads to this repository',
-    install.includes('github.com/Jowitt13/ming-engine') && install.includes('第三方'),
+    install.includes('github.com/Jowitt13/loom-of-heaven') && install.includes('第三方'),
   );
   add(
     'INSTALL.md does not claim Node is unnecessary',
@@ -330,13 +330,13 @@ function checkInstallers(): void {
     if (host.id === 'workbuddy') {
       add(
         'workbuddy installer supports native import',
-        /导入|上传/.test(text) && text.includes('ming-engine-workbuddy.zip'),
+        /导入|上传/.test(text) && text.includes('loom-of-heaven-workbuddy.zip'),
       );
     }
     if (host.id === 'doubao') {
       add(
         'doubao installer supports native import',
-        /导入|上传/.test(text) && text.includes('ming-engine-doubao.zip'),
+        /导入|上传/.test(text) && text.includes('loom-of-heaven-doubao.zip'),
       );
     }
   }

@@ -4,8 +4,8 @@
 // parser purely so the core `no-restricted-imports` rule can read import/export specifiers, and
 // encodes the two invariants from docs/ARCHITECTURE.md ("Dependency direction"):
 //
-//   1. `@ming/interpret` (cross-system interpretation layer, handoff §8 layer 2) may be consumed
-//      ONLY by the `@ming/orchestrator` facade. No calculation package may reverse-depend on it,
+//   1. `@loom/interpret` (cross-system interpretation layer, handoff §8 layer 2) may be consumed
+//      ONLY by the `@loom/orchestrator` facade. No calculation package may reverse-depend on it,
 //      so the deterministic compute core never points "up" into interpretation.
 //   2. The calculation core is offline and deterministic: it must never import a network/transport
 //      module, an AI model-provider ("vendor") SDK, or a prompt/LLM module.
@@ -62,7 +62,7 @@ const OFFLINE_MESSAGE =
   'Calculation core is offline & deterministic: no network, AI model-provider SDK, or prompt/LLM module (docs/ARCHITECTURE.md).';
 
 const INTERPRET_MESSAGE =
-  '@ming/interpret may be imported only by @ming/orchestrator; calculation packages must not reverse-depend on it (docs/ARCHITECTURE.md).';
+  '@loom/interpret may be imported only by @loom/orchestrator; calculation packages must not reverse-depend on it (docs/ARCHITECTURE.md).';
 
 // Offline guard (network / vendor SDK / prompt) — applied to every package, including orchestrator.
 const offlinePaths = [...networkModules, ...vendorSdkModules].map((name) => ({
@@ -76,8 +76,8 @@ const offlinePatterns = [
 ];
 
 // Interpret-boundary guard — added on top of the offline guard for calculation packages.
-const interpretPaths = [{ name: '@ming/interpret', message: INTERPRET_MESSAGE }];
-const interpretPatterns = [{ group: ['@ming/interpret/*'], message: INTERPRET_MESSAGE }];
+const interpretPaths = [{ name: '@loom/interpret', message: INTERPRET_MESSAGE }];
+const interpretPatterns = [{ group: ['@loom/interpret/*'], message: INTERPRET_MESSAGE }];
 
 export default [
   {
@@ -91,7 +91,7 @@ export default [
     ],
   },
   // Every calculation / rules / interpretation package: offline core AND no reverse dependency
-  // on @ming/interpret.
+  // on @loom/interpret.
   {
     files: ['packages/**/*.ts'],
     languageOptions: {
@@ -109,7 +109,7 @@ export default [
       ],
     },
   },
-  // The orchestrator facade is the ONLY package allowed to import @ming/interpret; it stays bound
+  // The orchestrator facade is the ONLY package allowed to import @loom/interpret; it stays bound
   // by the offline (network / vendor SDK / prompt) guard.
   {
     files: ['packages/orchestrator/**/*.ts'],

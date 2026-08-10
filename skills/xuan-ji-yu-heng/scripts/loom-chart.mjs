@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ming-chart — the single stable CLI entry for the xuan-ji-yu-heng Skill.
+ * loom-chart — the single stable CLI entry for the xuan-ji-yu-heng Skill.
  *
  * It does NO astrology math itself: it parses arguments, reads JSON input files,
  * calls the bundled deterministic engine (./dist/engine.mjs), and writes
@@ -8,23 +8,23 @@
  * stable exit codes. Arguments are passed as an array / via files only — user
  * text is never concatenated into a shell command (handoff §7.1).
  *
- *   node scripts/ming-chart.mjs doctor [--json]
- *   node scripts/ming-chart.mjs normalize  --input-file in.json [--output-file out.json]
- *   node scripts/ming-chart.mjs calculate  --input-file in.json [--systems all|western,bazi,ziwei,vedic] [--output-file out.json] [--now <iso|ms>] [--request-id <id>]
- *   node scripts/ming-chart.mjs compare    --input-file in.json --profiles a,b [--output-file out.json]
- *   node scripts/ming-chart.mjs horoscope  --input-file in.json --at YYYY-MM-DD[THH:mm:ss] [--output-file out.json]
- *   node scripts/ming-chart.mjs interpret  --input-file in.json [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file interpretation.json]
- *   node scripts/ming-chart.mjs answer-plan --input-file in.json --topic <topic> [--lens overview|strengths|risks|timing|advice|explain] [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file answer-plan.json]
- *   node scripts/ming-chart.mjs synastry  --input-file people.json [--now <iso|ms>] [--output-file synastry.json]  (1-5 people; set analyzePair when >2)
- *   node scripts/ming-chart.mjs lint-reading --input-file draft-reading.md [--channel topic|full] [--simple] [--output-file reading-lint.json]
- *   node scripts/ming-chart.mjs validate-answer --input-file validate-input.json [--output-file validation-result.json]
+ *   node scripts/loom-chart.mjs doctor [--json]
+ *   node scripts/loom-chart.mjs normalize  --input-file in.json [--output-file out.json]
+ *   node scripts/loom-chart.mjs calculate  --input-file in.json [--systems all|western,bazi,ziwei,vedic] [--output-file out.json] [--now <iso|ms>] [--request-id <id>]
+ *   node scripts/loom-chart.mjs compare    --input-file in.json --profiles a,b [--output-file out.json]
+ *   node scripts/loom-chart.mjs horoscope  --input-file in.json --at YYYY-MM-DD[THH:mm:ss] [--output-file out.json]
+ *   node scripts/loom-chart.mjs interpret  --input-file in.json [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file interpretation.json]
+ *   node scripts/loom-chart.mjs answer-plan --input-file in.json --topic <topic> [--lens overview|strengths|risks|timing|advice|explain] [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file answer-plan.json]
+ *   node scripts/loom-chart.mjs synastry  --input-file people.json [--now <iso|ms>] [--output-file synastry.json]  (1-5 people; set analyzePair when >2)
+ *   node scripts/loom-chart.mjs lint-reading --input-file draft-reading.md [--channel topic|full] [--simple] [--output-file reading-lint.json]
+ *   node scripts/loom-chart.mjs validate-answer --input-file validate-input.json [--output-file validation-result.json]
  *       (input file is size-capped; ordinary-question gate order: answer-plan → host writes a
  *        reading-draft/v2 JSON → validate-answer → render the SAME visible text as Markdown →
  *        lint-reading → show the answer only when BOTH gates pass; re-run BOTH after any rewrite)
- *   node scripts/ming-chart.mjs render     [DISABLED] visualization reports are temporarily off; use calculate/interpret JSON (exit 3)
- *   node scripts/ming-chart.mjs verify     [--fixture fixtures/smoke.json]
- *   node scripts/ming-chart.mjs version    (reads the sibling BUILD_MANIFEST.json of THIS installed package)
- *   node scripts/ming-chart.mjs migrate    --source <extracted new pkg> [--host qoder|workbuddy | --target <dir>] [--dry-run]
+ *   node scripts/loom-chart.mjs render     [DISABLED] visualization reports are temporarily off; use calculate/interpret JSON (exit 3)
+ *   node scripts/loom-chart.mjs verify     [--fixture fixtures/smoke.json]
+ *   node scripts/loom-chart.mjs version    (reads the sibling BUILD_MANIFEST.json of THIS installed package)
+ *   node scripts/loom-chart.mjs migrate    --source <extracted new pkg> [--host qoder|workbuddy | --target <dir>] [--dry-run]
  */
 import {
   cpSync,
@@ -370,7 +370,7 @@ async function main() {
       }
       default: {
         process.stderr.write(
-          'Usage: ming-chart <doctor|normalize|calculate|compare|horoscope|interpret|answer-plan|synastry|lint-reading|validate-answer|verify|version|migrate> [options]\n',
+          'Usage: loom-chart <doctor|normalize|calculate|compare|horoscope|interpret|answer-plan|synastry|lint-reading|validate-answer|verify|version|migrate> [options]\n',
         );
         process.exit(2);
       }
@@ -570,7 +570,7 @@ function samePath(a, b) {
 
 /**
  * Security allowlist for `migrate`: the FINAL target (after resolving symlinks) MUST be exactly the
- * host's Ming Engine skill dir under the real home — `<home>/.qoder/skills/xuan-ji-yu-heng`
+ * host's Loom of Heaven skill dir under the real home — `<home>/.qoder/skills/xuan-ji-yu-heng`
  * or `<home>/.workbuddy/skills/xuan-ji-yu-heng`. This rejects a bare skills dir, the home
  * dir, the filesystem root, a project dir, any broad dir without xuan-ji-yu-heng, and any
  * symlink that escapes the allowed location. When `host` is given it restricts to that host only.
@@ -666,7 +666,7 @@ function runMigrate(args) {
   // 1. source must be a clean single-layer package.
   const srcClean =
     existsSync(join(source, 'SKILL.md')) &&
-    existsSync(join(source, 'scripts', 'ming-chart.mjs')) &&
+    existsSync(join(source, 'scripts', 'loom-chart.mjs')) &&
     existsSync(join(source, 'BUILD_MANIFEST.json'));
   if (!srcClean || existsSync(join(source, PKG_NAME, 'SKILL.md'))) {
     emitJson({

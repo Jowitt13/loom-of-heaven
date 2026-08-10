@@ -41,7 +41,7 @@ complete, with no external tool. `dist/` is gitignored; regenerate on demand.
 1. In WorkBuddy, open the Skills Market / local Skill import and upload the
    `xuan-ji-yu-heng` folder (or its archive).
 2. Enable the Skill. It declares least privilege: local file execution, no network, no telemetry.
-3. Requires a Node runtime available to the host to run `node scripts/ming-chart.mjs`.
+3. Requires a Node runtime available to the host to run `node scripts/loom-chart.mjs`.
 
 ## Trigger examples
 
@@ -86,7 +86,7 @@ zero-install, deterministic behavior in a clean directory.
 1. Import `dist/xuan-ji-yu-heng.zip` (or the folder) via the Skills Market / local import;
    confirm the install security scan shows no unexplained high-risk item (the Skill declares least
    privilege: local file execution, no network, no telemetry).
-2. Enable the Skill. Confirm a Node runtime is available to run `node scripts/ming-chart.mjs`.
+2. Enable the Skill. Confirm a Node runtime is available to run `node scripts/loom-chart.mjs`.
 3. Trigger with a full-contract chart request, e.g. “男，公历 1990-06-15 14:20（时间准确），出生地 示例城市，时区 Asia/Shanghai，纬度 30.00、经度 120.00，帮我看事业”.
    The model should restate time/place/coordinates/IANA zone/calendar/ruleset and confirm before
    computing.

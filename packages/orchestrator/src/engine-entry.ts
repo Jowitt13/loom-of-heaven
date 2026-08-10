@@ -15,28 +15,28 @@ export { runAnswerPlan, runInterpret } from './interpret.ts';
 export type { AnswerPlanOptions, InterpretOptions } from './interpret.ts';
 
 // Output-layer term firewall for produced Channel B reports (ADR 0011). Pure text util.
-export { lintReading, READING_TERMS, JARGON_STRONG, JARGON_SOFT } from '@ming/interpret';
+export { lintReading, READING_TERMS, JARGON_STRONG, JARGON_SOFT } from '@loom/interpret';
 export type {
   ReadingLintResult,
   ReadingViolation,
   ReadingLintOptions,
   ReadingChannel,
-} from '@ming/interpret';
+} from '@loom/interpret';
 
 // Fact-boundary and safety validator for host-produced answer drafts (P0),
 // plus the bounded parsing facade shared by the CLI and host integrations.
-export { validateAnswer, parseValidateAnswerInputBounded } from '@ming/interpret';
+export { validateAnswer, parseValidateAnswerInputBounded } from '@loom/interpret';
 
 // Validator types come from the contracts layer.
 export type {
   AnswerValidationResult,
   AnswerViolation as AnswerValidationViolation,
-} from '@ming/contracts';
+} from '@loom/contracts';
 
 export { runSynastry } from './synastry.ts';
 export type { SynastryRunOptions } from './synastry.ts';
 
-export { timeIndexFromHour } from '@ming/ziwei';
+export { timeIndexFromHour } from '@loom/ziwei';
 
 export { compareProfiles, listCompareProfiles, COMPARE_PROFILES } from './compare.ts';
 export type { CompareResult, CompareEntry } from './compare.ts';
@@ -96,7 +96,7 @@ export {
   ENGINE_NAME,
   ENGINE_VERSION,
   SCHEMA_VERSION,
-} from '@ming/contracts';
+} from '@loom/contracts';
 export type {
   BirthInput,
   ChartBundle,
@@ -104,4 +104,4 @@ export type {
   SynastryInput,
   SynastryResult,
   ValidateAnswerInput as ValidateAnswerInputType,
-} from '@ming/contracts';
+} from '@loom/contracts';

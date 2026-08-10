@@ -1,4 +1,4 @@
-import type { VedicVaara } from '@ming/contracts';
+import type { VedicVaara } from '@loom/contracts';
 import { Body, Observer, SearchRiseSet } from 'astronomy-engine';
 import moment from 'moment-timezone';
 

@@ -1,5 +1,5 @@
 {
-  "name": "@ming/time-location",
+  "name": "@loom/time-location",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,11 +11,11 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ming/contracts": "workspace:*",
+    "@loom/contracts": "workspace:*",
     "moment-timezone": "^0.6.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@ming/test-fixtures": "workspace:*"
+    "@loom/test-fixtures": "workspace:*"
   }
 }

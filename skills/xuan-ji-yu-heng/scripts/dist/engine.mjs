@@ -25280,7 +25280,7 @@ var require_lib2 = __commonJS({
 // packages/contracts/src/version.ts
 var SCHEMA_VERSION = "0.1.0";
 var ENGINE_VERSION = "0.4.0";
-var ENGINE_NAME = "ming-engine";
+var ENGINE_NAME = "loom-of-heaven";
 var SUPPORTED_YEAR_MIN = 1901;
 var SUPPORTED_YEAR_MAX = 2100;
 var SOLAR_TIME_METHOD = "noaa-eot@0.1.0";
@@ -57562,7 +57562,7 @@ function toScanText(text) {
   return masked.replace(/\n+/g, " ").replace(CJK_SEPARATOR_RE, "");
 }
 var RESOURCE_LIMIT_DETAIL = "\u8F93\u5165\u8D85\u51FA\u8D44\u6E90\u4FDD\u62A4\u4E0A\u9650\uFF0C\u672A\u6267\u884C\u5185\u5BB9\u6821\u9A8C\u3002";
-var RESOURCE_LIMIT_REMEDIATION = "\u5C06\u8F93\u5165\u89C4\u6A21\u7F29\u51CF\u5230 @ming/contracts validate-answer \u5BFC\u51FA\u7684\u4E0A\u9650\u5E38\u91CF\u4EE5\u5185\uFF08\u89C1 patternKey \u5BF9\u5E94\u7684\u5E38\u91CF\u540D\uFF09\u3002";
+var RESOURCE_LIMIT_REMEDIATION = "\u5C06\u8F93\u5165\u89C4\u6A21\u7F29\u51CF\u5230 @loom/contracts validate-answer \u5BFC\u51FA\u7684\u4E0A\u9650\u5E38\u91CF\u4EE5\u5185\uFF08\u89C1 patternKey \u5BF9\u5E94\u7684\u5E38\u91CF\u540D\uFF09\u3002";
 function resourceViolation(limitKey) {
   return {
     code: "RESOURCE_LIMIT_EXCEEDED",

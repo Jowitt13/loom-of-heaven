@@ -20,7 +20,7 @@
 
 ## Context
 
-Ming Engine computes Western natal, BaZi and Zi Wei charts deterministically (ADR 0001, 0003).
+Loom of Heaven computes Western natal, BaZi and Zi Wei charts deterministically (ADR 0001, 0003).
 The next system is Indian sidereal astrology (Jyotish). Two hard constraints shape the design:
 
 1. **Everything stays deterministic, offline and MIT-clean.** Swiss Ephemeris (AGPL/commercial)
@@ -44,8 +44,8 @@ The next system is Indian sidereal astrology (Jyotish). Two hard constraints sha
 ### 1. System id and package boundary
 
 - Public system id: **`vedic`** (joins `western` | `bazi` | `ziwei` in `ChartSystem`).
-- Packages: **`packages/vedic`** (`@ming/vedic`, deterministic calculation provider) and
-  **`packages/vedic-rules`** (`@ming/vedic-rules`, sourced interpretation rules; P4).
+- Packages: **`packages/vedic`** (`@loom/vedic`, deterministic calculation provider) and
+  **`packages/vedic-rules`** (`@loom/vedic-rules`, sourced interpretation rules; P4).
 - Initial ruleset id: **`vedic-parashara-lahiri@0.1.0`** — Parashari framework, Lahiri
   ayanamsha, whole-sign bhava, Vimshottari. Every disputed convention below is carried by this
   versioned ruleset, not by scattered booleans (same policy as BaZi settings).
@@ -221,7 +221,7 @@ engine, not an almanac); only Vaara additionally needs the sunrise day-boundary.
 - Angles normalized to `[0, 360)` via the existing `norm360`.
 - All segment classifications (rashi, nakshatra, pada, navamsha, tithi, yoga, karana) are
   **left-closed right-open** on the _rounded_ canonical value: classify **after** rounding the
-  longitude with the shared `roundTo` policy (`@ming/contracts` `ids.ts`, which already adds
+  longitude with the shared `roundTo` policy (`@loom/contracts` `ids.ts`, which already adds
   `Number.EPSILON` to avoid platform 0.5-flapping). Longitudes are canonicalized at **6 decimal
   places** (≈ 0.0036″ — far below both the ≤1′ gate and any boundary the classifications use),
   matching the Western provider's rounding. This makes classification deterministic across
@@ -287,7 +287,7 @@ Additive-but-breaking surface (implemented in P1, shipped in v0.3.0):
 | `PublicResult.systems` (`answer-plan.ts`)                         | `.length(3)` → `.length(4)`                                                                | **Breaking** for consumers pinned to 3 entries.                                      |
 | `PUBLIC_RESULT_CONTRACT_VERSION` / `ANSWER_PLAN_CONTRACT_VERSION` | bump `public-result/v1`→`v2`, `answer-plan/v1`→`v2`                                        | Honest versioned break; validate-answer v2 gate updated in the same PR (P4).         |
 | `interpret.ts` / `interpret/src/answer-plan.ts` SYSTEMS           | hardcoded 3-system lists → 4                                                               | Internal.                                                                            |
-| `ming-chart.mjs --systems all`                                    | expands to 4                                                                               | CLI output gains a `vedic` block; `--systems western,bazi,ziwei` keeps old behavior. |
+| `loom-chart.mjs --systems all`                                    | expands to 4                                                                               | CLI output gains a `vedic` block; `--systems western,bazi,ziwei` keeps old behavior. |
 | `ENGINE_VERSION`                                                  | → `0.3.0` at release-prep (P6)                                                             | Deterministic request ids change, as with every engine bump.                         |
 | `SCHEMA_VERSION`                                                  | evaluate in P1: stays `0.1.0` if all input changes are default-compatible, else minor bump | Decision recorded in P1 PR.                                                          |
 
@@ -367,7 +367,7 @@ Until a future independent source passes a field, user-facing and release docume
 - **P4 — facts & answer layer**: `vedic-rules` sourced findings, InterpretationFacts wiring,
   AnswerPlan/PublicResult v2, validate-answer update, warning codes + public-copy table,
   timeAccuracy gating (§13).
-- **P5 — CLI, Skill, hosts, docs**: `ming-chart.mjs` systems expansion, SKILL.md/references,
+- **P5 — CLI, Skill, hosts, docs**: `loom-chart.mjs` systems expansion, SKILL.md/references,
   four host packages, doc-count/doc-claim gates updated from real runs.
 - **P6 — v0.3.0 release-prep**: engine version, RELEASE_CHECKLIST walk, SBOM regeneration,
   candidate-host manifests, authorized GitHub Release, C1 download/hash verification, then C2

@@ -15,7 +15,7 @@ be deterministic, versioned and testable — never produced by an LLM.
   `western | bazi | ziwei | all` internally. Interpretation, if ever built, becomes a separate
   `interpret-birth-charts` Skill that only reads result JSON.
 - `SKILL.md` is orchestration only (trigger, input confirmation, CLI calls, error handling,
-  artifact hand-off). All computation is in a single stable CLI `scripts/ming-chart.mjs` that
+  artifact hand-off). All computation is in a single stable CLI `scripts/loom-chart.mjs` that
   calls a bundled engine `scripts/dist/engine.mjs`.
 - The engine is a pnpm monorepo of small packages (`contracts`, `time-location`, `orchestrator`,
   `test-fixtures`) bundled with esbuild into one self-contained ESM file.

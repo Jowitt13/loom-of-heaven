@@ -2,7 +2,7 @@
 
 > 当前分发状态：安装包来自 GitHub Release `v0.3.5`；Qoder、WorkBuddy 与豆包电脑版已有公开 ZIP。可下载性以 `install-manifest.json` 的 `published` 字段及 SHA-256 为准。
 >
-> 本文档记录 Ming Engine（`xuan-ji-yu-heng`）在四个目标宿主平台上的能力与验证状态。
+> 本文档记录 Loom of Heaven（`xuan-ji-yu-heng`）在四个目标宿主平台上的能力与验证状态。
 
 ---
 
@@ -37,7 +37,7 @@
 
 用户对宿主 AI 说一句：
 
-> 帮我安装这个技能：https://raw.githubusercontent.com/Jowitt13/ming-engine/main/INSTALL.md
+> 帮我安装这个技能：https://raw.githubusercontent.com/Jowitt13/loom-of-heaven/main/INSTALL.md
 
 宿主 AI 按 `INSTALL.md` 协议识别平台、读 `install-manifest.json`，先判断所选平台的 `published`。只有已发布平台才会按**不可变版本 tag**下载并校验 SHA-256；未发布时必须停止并如实说明。
 
@@ -50,7 +50,7 @@
 
 - 根清单当前为 `status: "published"`：安装包来自 GitHub Release `v0.3.5`，包含不可变下载地址与 SHA-256。安装器必须先检查所选平台的 `published`；为 `false` 时不读取 URL/hash、不下载、不安装。
 - 静态门禁 `pnpm run verify:install`（L1）；真机安装/触发为 L2/L3。
-- 版本检查：宿主 Agent 运行 `node scripts/ming-chart.mjs version` 读本地 `BUILD_MANIFEST.json` 回报真实已装版本（区分 legacy / 双层目录），不靠猜、不等于线上最新。
+- 版本检查：宿主 Agent 运行 `node scripts/loom-chart.mjs version` 读本地 `BUILD_MANIFEST.json` 回报真实已装版本（区分 legacy / 双层目录），不靠猜、不等于线上最新。
 - 更新迁移：只有线上清单将所选平台标记为已发布时，Agent 才可下载不可变 tag 资产、校验 SHA-256 并用 `migrate` 原子替换旧包。当前更新源是 v0.3.5，不能把本地旧包或缓存称作最新版。
 - 候选边界：下一候选构建只供本地验证，且始终 `published:false`；它不是公开安装源。未来发布须创建新的不可变 tag、上传 ZIP、重下验收后再更新根清单。
 

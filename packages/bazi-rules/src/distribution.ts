@@ -1,4 +1,4 @@
-import type { BaziChartResult, BaziPillar } from '@ming/contracts';
+import type { BaziChartResult, BaziPillar } from '@loom/contracts';
 import {
   elementsByRelation,
   tenGodCategory,

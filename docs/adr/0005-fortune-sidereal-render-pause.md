@@ -21,7 +21,7 @@ A capability iteration asked for three things that touch product policy and lice
 1. **吉凶 is productized as sourced structured facts + host-model narration.** `packages/bazi-rules`
    emits findings with a `polarity` (吉/凶/中性) and a `reason` chain, from new rule modules:
    `relations.ts` (刑冲合害), `shensha.ts` (吉神凶煞), `fortune.ts` (大运/流年 生克吉凶), plus reason
-   chains on `strength`/`useful-god`. `@ming/interpret` aggregates them and adds `followupOffers`.
+   chains on `strength`/`useful-god`. `@loom/interpret` aggregates them and adds `followupOffers`.
    The engine supplies **sourced 吉凶 facts and 大运/流年 timepoints only**; concrete probabilities
    and specific years are the host model's 命理 judgement layered on top, always carrying the
    "传统文化 / 非科学预测" disclaimers. Default: on.

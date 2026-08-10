@@ -44,7 +44,7 @@ try {
 
   record(
     'skill copied to OS temp dir outside repo',
-    existsSync(join(tempSkill, 'scripts', 'ming-chart.mjs')),
+    existsSync(join(tempSkill, 'scripts', 'loom-chart.mjs')),
   );
   record('isolated copy has no node_modules', !existsSync(join(tempSkill, 'node_modules')));
   record('isolated copy has no packages/', !existsSync(join(tempBase, 'packages')));
@@ -53,7 +53,7 @@ try {
     existsSync(join(tempSkill, 'scripts', 'dist', 'engine.mjs')),
   );
 
-  const doctor = runNode(tempSkill, ['scripts/ming-chart.mjs', 'doctor']);
+  const doctor = runNode(tempSkill, ['scripts/loom-chart.mjs', 'doctor']);
   record('doctor runs in clean dir (exit 0)', doctor.code === 0);
   let tzdbVersion = '';
   try {
@@ -64,7 +64,7 @@ try {
   record('doctor reports a bundled TZDB version', tzdbVersion.length > 0, tzdbVersion);
 
   const calcArgs = [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'calculate',
     '--input-file',
     'scripts/fixtures/smoke.json',
@@ -82,7 +82,7 @@ try {
   );
 
   const answerArgs = [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'answer-plan',
     '--input-file',
     'scripts/fixtures/smoke.json',
@@ -137,7 +137,7 @@ try {
   );
   const rejectedQuestion = 'Synthetic free-form question sentinel';
   const rejected = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'answer-plan',
     '--input-file',
     'scripts/fixtures/smoke.json',
@@ -152,7 +152,7 @@ try {
       !rejected.stderr.includes(rejectedQuestion),
   );
   const missingTopicValue = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'answer-plan',
     '--input-file',
     'scripts/fixtures/smoke.json',
@@ -164,7 +164,7 @@ try {
       /"code":\s*"INPUT_VALIDATION_FAILED"/.test(missingTopicValue.stdout),
   );
   const missingTopic = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'answer-plan',
     '--input-file',
     'scripts/fixtures/smoke.json',
@@ -190,7 +190,7 @@ try {
   // stable disabled notice (exit 3), never crash, and never write a report file.
   runNode(tempSkill, [...calcArgs, '--output-file', 'chart.json']);
   const render = runNode(tempSkill, [
-    'scripts/ming-chart.mjs',
+    'scripts/loom-chart.mjs',
     'render',
     '--input-file',
     'chart.json',
@@ -202,7 +202,7 @@ try {
     render.code === 3 && !existsSync(reportPath) && /"disabled":\s*true/.test(render.stdout);
   record('render is disabled (exit 3, no report written)', renderDisabled);
 
-  const verify = runNode(tempSkill, ['scripts/ming-chart.mjs', 'verify']);
+  const verify = runNode(tempSkill, ['scripts/loom-chart.mjs', 'verify']);
   record('verify passes in clean dir', verify.code === 0);
 } finally {
   rmSync(tempBase, { recursive: true, force: true });

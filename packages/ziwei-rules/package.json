@@ -1,5 +1,5 @@
 {
-  "name": "@ming/ziwei-rules",
+  "name": "@loom/ziwei-rules",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,6 +11,6 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ming/contracts": "workspace:*"
+    "@loom/contracts": "workspace:*"
   }
 }

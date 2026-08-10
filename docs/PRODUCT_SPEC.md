@@ -1,4 +1,4 @@
-# Product Spec — Ming Engine (`xuan-ji-yu-heng`)
+# Product Spec — Loom of Heaven (`xuan-ji-yu-heng`)
 
 > Deterministic four-system birth-chart engine delivered as a self-contained WorkBuddy Skill.
 

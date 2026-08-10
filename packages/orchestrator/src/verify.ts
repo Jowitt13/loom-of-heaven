@@ -1,5 +1,5 @@
-import { ChartBundle as ChartBundleSchema, canonicalJson, parseBirthInput } from '@ming/contracts';
-import type { BirthInput } from '@ming/contracts';
+import { ChartBundle as ChartBundleSchema, canonicalJson, parseBirthInput } from '@loom/contracts';
+import type { BirthInput } from '@loom/contracts';
 import { calculate } from './calculate.ts';
 
 export interface VerifyCheck {

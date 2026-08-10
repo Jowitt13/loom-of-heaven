@@ -1,4 +1,4 @@
-import type { VedicNakshatraPlacement } from '@ming/contracts';
+import type { VedicNakshatraPlacement } from '@loom/contracts';
 import { canonicalLongitude } from './math.ts';
 
 const DEGREES_PER_NAKSHATRA = 360 / 27;

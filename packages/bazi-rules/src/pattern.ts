@@ -1,4 +1,4 @@
-import type { BaziChartResult, BaziRuleFinding } from '@ming/contracts';
+import type { BaziChartResult, BaziRuleFinding } from '@loom/contracts';
 import { bladeBranchOf, isTombBranch, luBranchOf } from './fundamentals.ts';
 import { transparentTenGods } from './distribution.ts';
 

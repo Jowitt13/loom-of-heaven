@@ -1,4 +1,4 @@
-import { computeVedicP2Positions, nakshatraOf } from '@ming/vedic';
+import { computeVedicP2Positions, nakshatraOf } from '@loom/vedic';
 import type {
   ProviderRef,
   TimeAccuracy,
@@ -7,7 +7,7 @@ import type {
   VedicInterpretation,
   VedicRuleFinding,
   VedicRuleSource,
-} from '@ming/contracts';
+} from '@loom/contracts';
 
 /** P4's versioned, structural-only Vedic ruleset. */
 export const VEDIC_RULES_VERSION = '0.1.0';

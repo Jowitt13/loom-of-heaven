@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalJson, parseSynastryInput } from '@ming/contracts';
-import type { SynastryInputRaw } from '@ming/contracts';
-import { runSynastry } from '@ming/orchestrator';
+import { canonicalJson, parseSynastryInput } from '@loom/contracts';
+import type { SynastryInputRaw } from '@loom/contracts';
+import { runSynastry } from '@loom/orchestrator';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
 

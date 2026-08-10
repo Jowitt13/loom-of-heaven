@@ -1,5 +1,5 @@
 import { ChildLimit, Gender, HeavenStem, SixtyCycle, SolarTime } from 'tyme4ts';
-import { WARNING_CODES, makeWarning } from '@ming/contracts';
+import { WARNING_CODES, makeWarning } from '@loom/contracts';
 import type {
   BaziChartResult,
   BaziMajorCycle,
@@ -8,7 +8,7 @@ import type {
   EngineWarning,
   NormalizedBirthData,
   ProviderRef,
-} from '@ming/contracts';
+} from '@loom/contracts';
 
 /** Pinned tyme4ts version (authoritative record is sbom.cdx.json, regenerated at build). */
 export const TYME4TS_VERSION = '1.5.2';

@@ -1,4 +1,4 @@
-import type { WesternChartResult, WesternRuleFinding } from '@ming/contracts';
+import type { WesternChartResult, WesternRuleFinding } from '@loom/contracts';
 
 /**
  * Essential dignity rules. Reports when a planet is in domicile, exaltation, detriment or fall.

@@ -1,4 +1,4 @@
-/** @ming/vedic — P2 numerical provider plus evidence-unblocked P3A classifications (ADR 0013). */
+/** @loom/vedic — P2 numerical provider plus evidence-unblocked P3A classifications (ADR 0013). */
 export {
   computeVedic,
   computeVedicP2Positions,

@@ -1,4 +1,4 @@
-import { canonicalJsonPretty } from '@ming/contracts';
+import { canonicalJsonPretty } from '@loom/contracts';
 import type {
   BaziChartResult,
   ChartBundle,
@@ -8,7 +8,7 @@ import type {
   ZiweiChartResult,
   ZiweiHoroscopeItem,
   ZiweiHoroscopeResult,
-} from '@ming/contracts';
+} from '@loom/contracts';
 
 export interface RenderOptions {
   /**

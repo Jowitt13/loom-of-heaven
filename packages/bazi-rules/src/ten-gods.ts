@@ -1,4 +1,4 @@
-import type { BaziChartResult, BaziRuleFinding } from '@ming/contracts';
+import type { BaziChartResult, BaziRuleFinding } from '@loom/contracts';
 
 /**
  * Ten-god symbolic meanings (十神象义), summarized from 《渊海子平》. These are the

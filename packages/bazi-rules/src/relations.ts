@@ -1,4 +1,4 @@
-import type { BaziChartResult, BaziRuleFinding } from '@ming/contracts';
+import type { BaziChartResult, BaziRuleFinding } from '@loom/contracts';
 import { tenGodCategory } from './fundamentals.ts';
 
 /**

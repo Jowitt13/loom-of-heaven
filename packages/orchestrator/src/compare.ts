@@ -1,5 +1,5 @@
-import { canonicalJson } from '@ming/contracts';
-import type { BirthInput, ChartBundle } from '@ming/contracts';
+import { canonicalJson } from '@loom/contracts';
+import type { BirthInput, ChartBundle } from '@loom/contracts';
 import { calculate } from './calculate.ts';
 import type { CalculateOptions } from './calculate.ts';
 

@@ -1,5 +1,5 @@
 {
-  "name": "@ming/ziwei",
+  "name": "@loom/ziwei",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ming/contracts": "workspace:*",
+    "@loom/contracts": "workspace:*",
     "iztro": "^2.5.8"
   }
 }

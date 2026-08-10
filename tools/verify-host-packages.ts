@@ -59,8 +59,8 @@ const KNOWN_COMMANDS = [
 
 function selfTest(): void {
   const pkg = 'xuan-ji-yu-heng';
-  const good = [`${pkg}/SKILL.md`, `${pkg}/scripts/ming-chart.mjs`];
-  const bad = [`${pkg}/${pkg}/SKILL.md`, `${pkg}/${pkg}/scripts/ming-chart.mjs`];
+  const good = [`${pkg}/SKILL.md`, `${pkg}/scripts/loom-chart.mjs`];
+  const bad = [`${pkg}/${pkg}/SKILL.md`, `${pkg}/${pkg}/scripts/loom-chart.mjs`];
   add('[self-test] 单层结构通过', assertSingleTopDir(good, pkg).ok === true);
   add('[self-test] 双层目录被拒(负例)', assertSingleTopDir(bad, pkg).ok === false);
   // Round-trip a synthesized double-nested zip through listZipEntries -> must be rejected.
@@ -98,8 +98,8 @@ function main(): void {
     );
     if (h.capability !== 'reading-lite') {
       add(
-        `[${h.id}] ZIP 含 ${h.packageName}/scripts/ming-chart.mjs`,
-        entries.includes(`${h.packageName}/scripts/ming-chart.mjs`),
+        `[${h.id}] ZIP 含 ${h.packageName}/scripts/loom-chart.mjs`,
+        entries.includes(`${h.packageName}/scripts/loom-chart.mjs`),
       );
       add(
         `[${h.id}] ZIP 含 ${h.packageName}/scripts/dist/engine.mjs`,
@@ -146,7 +146,7 @@ function main(): void {
     const requiredFiles =
       h.capability === 'reading-lite'
         ? ['LICENSE', 'INSTALL.md']
-        : ['scripts/ming-chart.mjs', 'scripts/dist/engine.mjs', 'LICENSE', 'INSTALL.md'];
+        : ['scripts/loom-chart.mjs', 'scripts/dist/engine.mjs', 'LICENSE', 'INSTALL.md'];
     for (const f of requiredFiles) add(`[${h.id}] 解压后含 ${f}`, existsSync(join(pkgRoot, f)));
 
     // 8. Every SKILL.md-referenced file exists in the extracted package.
@@ -212,7 +212,7 @@ function main(): void {
       // -> before/after), verified against the REAL zip so stale RC packages can be replaced.
       add(
         `[${h.id}] ZIP INSTALL.md 有 version 版本检查命令`,
-        /ming-chart\.mjs version/.test(installMd),
+        /loom-chart\.mjs version/.test(installMd),
       );
       add(
         `[${h.id}] ZIP INSTALL.md 更新读线上 install-manifest.json`,
@@ -241,12 +241,12 @@ function main(): void {
       );
     } else {
       // 6/7. Run doctor + verify + calculate FROM THE EXTRACTED zip; facts == canonical.
-      const doctor = runNode(pkgRoot, ['scripts/ming-chart.mjs', 'doctor']);
+      const doctor = runNode(pkgRoot, ['scripts/loom-chart.mjs', 'doctor']);
       add(`[${h.id}] 解压后 doctor exit 0`, doctor.code === 0);
-      const verify = runNode(pkgRoot, ['scripts/ming-chart.mjs', 'verify']);
+      const verify = runNode(pkgRoot, ['scripts/loom-chart.mjs', 'verify']);
       add(`[${h.id}] 解压后 verify ok`, verify.code === 0 && /"ok":\s*true/.test(verify.stdout));
       const calcArgs = [
-        'scripts/ming-chart.mjs',
+        'scripts/loom-chart.mjs',
         'calculate',
         '--input-file',
         'scripts/fixtures/smoke.json',
@@ -264,7 +264,7 @@ function main(): void {
       );
 
       const answerArgs = [
-        'scripts/ming-chart.mjs',
+        'scripts/loom-chart.mjs',
         'answer-plan',
         '--input-file',
         'scripts/fixtures/smoke.json',
@@ -297,7 +297,7 @@ function main(): void {
 
       // Round 13.1: the deterministic `version` command reads the packaged BUILD_MANIFEST and
       // reports the REAL installed version (not guessed) — no legacy schema, no double-nesting.
-      const ver = runNode(pkgRoot, ['scripts/ming-chart.mjs', 'version']);
+      const ver = runNode(pkgRoot, ['scripts/loom-chart.mjs', 'version']);
       let vj: Record<string, unknown> = {};
       try {
         vj = JSON.parse(ver.stdout) as Record<string, unknown>;

@@ -27,8 +27,8 @@
       （Windows 用 `Get-FileHash -Algorithm SHA256`，macOS/Linux 用 `shasum -a 256`）。真机
       测试之后若重跑过 `package:hosts`，真机证据即作废，必须用新 ZIP 重测。
 - [ ] **A5 多宿主真机证据齐全**：四个宿主（codex / qoder / workbuddy / doubao）各自从 A4
-      核对过哈希的 ZIP 安装后，在宿主内真实跑通 `node scripts/ming-chart.mjs doctor` 与
-      `node scripts/ming-chart.mjs verify`（Skill 自带命令），并留存去标识化证据——绝不含
+      核对过哈希的 ZIP 安装后，在宿主内真实跑通 `node scripts/loom-chart.mjs doctor` 与
+      `node scripts/loom-chart.mjs verify`（Skill 自带命令），并留存去标识化证据——绝不含
       真实姓名、出生时间或地点（黄金规则）。
 
 ## B. 发布（逐次用户授权）

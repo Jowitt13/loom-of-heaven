@@ -1,5 +1,5 @@
 import { MakeTime, SiderealTime, e_tilt } from 'astronomy-engine';
-import { ERROR_CODES, EngineError } from '@ming/contracts';
+import { ERROR_CODES, EngineError } from '@loom/contracts';
 import { norm360 } from './ephemeris.ts';
 
 /**

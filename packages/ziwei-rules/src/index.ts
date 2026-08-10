@@ -1,5 +1,5 @@
 /**
- * @ming/ziwei-rules — sourced Zi Wei Dou Shu interpretation rules.
+ * @loom/ziwei-rules — sourced Zi Wei Dou Shu interpretation rules.
  * Every finding carries a classical citation; no unsourced verdicts.
  */
 export * from './main-star.ts';

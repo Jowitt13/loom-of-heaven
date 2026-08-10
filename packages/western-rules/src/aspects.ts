@@ -1,4 +1,4 @@
-import type { WesternChartResult, WesternRuleFinding } from '@ming/contracts';
+import type { WesternChartResult, WesternRuleFinding } from '@loom/contracts';
 
 /**
  * Aspect meaning rules. Sun-Moon aspects and luminaries to major planets.

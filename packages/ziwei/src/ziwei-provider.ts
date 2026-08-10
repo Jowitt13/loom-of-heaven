@@ -1,5 +1,5 @@
 import { astro } from 'iztro';
-import { WARNING_CODES, makeWarning } from '@ming/contracts';
+import { WARNING_CODES, makeWarning } from '@loom/contracts';
 import type {
   EngineWarning,
   NormalizedBirthData,
@@ -10,7 +10,7 @@ import type {
   ZiweiPalace,
   ZiweiSettings,
   ZiweiStar,
-} from '@ming/contracts';
+} from '@loom/contracts';
 
 /** Pinned iztro version (authoritative record is sbom.cdx.json, regenerated at build). */
 export const IZTRO_VERSION = '2.5.8';

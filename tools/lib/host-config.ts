@@ -63,7 +63,7 @@ export interface HostConfig {
 export const SKILL_NAME = 'xuan-ji-yu-heng';
 export const SKILL_NAME_LITE = 'xuan-ji-yu-heng-doubao-lite';
 
-export const REPO_URL = 'https://github.com/Jowitt13/ming-engine';
+export const REPO_URL = 'https://github.com/Jowitt13/loom-of-heaven';
 
 // --- ROOT / PUBLISHED: live public-release metadata. ---
 /** Engine semver in the committed root manifest (the last published source release). */
@@ -77,7 +77,7 @@ export const PUBLISHED_RELEASE_TAG: string | null = 'v0.3.5';
 /** Engine semver of the candidate: the audited source engine, not a second hand-maintained value. */
 export const CANDIDATE_ENGINE_VERSION = ENGINE_VERSION;
 /** Install-package release version of the next candidate; unpublished until explicit Release authorization. */
-export const CANDIDATE_RELEASE_VERSION = '0.4.0';
+export const CANDIDATE_RELEASE_VERSION = '0.3.6';
 /** Immutable tag the CANDIDATE build targets (never `latest/download`). */
 export const CANDIDATE_RELEASE_TAG = `v${CANDIDATE_RELEASE_VERSION}`;
 /** Sub-directory under `releases/` for the candidate build (gitignored). */
@@ -102,7 +102,7 @@ export function assertDistinctReleaseTags(
 }
 
 /** Deterministic machine self-check: engine `verify`, no coordinates, no birth data. */
-export const ENGINE_SELF_CHECK = 'node scripts/ming-chart.mjs verify';
+export const ENGINE_SELF_CHECK = 'node scripts/loom-chart.mjs verify';
 /**
  * User demo prompt with a COMPLETE deterministic location (Gregorian + exact time + IANA
  * tz + lat/lon) so the host never has to silently guess coordinates.
@@ -120,8 +120,8 @@ export const HOSTS: HostConfig[] = [
   {
     id: 'codex',
     needsUserAuth: false,
-    updateHint: '说「帮我更新 Ming Engine」，或重新拉取/下载仓库覆盖原文件夹。',
-    uninstallHint: '说「帮我卸载 Ming Engine」，或删除克隆/解压出的仓库文件夹。',
+    updateHint: '说「帮我更新 Loom of Heaven」，或重新拉取/下载仓库覆盖原文件夹。',
+    uninstallHint: '说「帮我卸载 Loom of Heaven」，或删除克隆/解压出的仓库文件夹。',
     label: 'Codex（及任何读取 AGENTS.md 的宿主）',
     format: 'GitHub 仓库 / 文件夹（agents/openai.yaml UI 元数据 + AGENTS.md）',
     scriptExecution: true,
@@ -135,11 +135,11 @@ export const HOSTS: HostConfig[] = [
   },
   {
     id: 'qoder',
-    releaseAsset: 'ming-engine-qoder.zip',
+    releaseAsset: 'loom-of-heaven-qoder.zip',
     needsUserAuth: true,
     updateHint:
-      '说「帮我更新 Ming Engine」：Agent 读线上稳定 manifest→下载校验→migrate 原子替换 ~/.qoder/skills 旧包（清理 legacy RC 双层）→回报 before→after。',
-    uninstallHint: '说「帮我卸载 Ming Engine」，或在技能管理中删除 xuan-ji-yu-heng。',
+      '说「帮我更新 Loom of Heaven」：Agent 读线上稳定 manifest→下载校验→migrate 原子替换 ~/.qoder/skills 旧包（清理 legacy RC 双层）→回报 before→after。',
+    uninstallHint: '说「帮我卸载 Loom of Heaven」，或在技能管理中删除 xuan-ji-yu-heng。',
     label: 'Qoder / Qoder CN',
     format:
       '标准 SKILL.md（YAML frontmatter）+ 辅助文件；由 Qoder 内置 Agent 代为下载校验并写入用户技能目录 ~/.qoder/skills/（普通用户无需命令行工具、无需自行下载或解压）',
@@ -155,11 +155,11 @@ export const HOSTS: HostConfig[] = [
   },
   {
     id: 'workbuddy',
-    releaseAsset: 'ming-engine-workbuddy.zip',
+    releaseAsset: 'loom-of-heaven-workbuddy.zip',
     needsUserAuth: true,
     updateHint:
-      '说「帮我更新 Ming Engine」：读线上 manifest→下载校验→migrate 迁移替换旧包（或经 Skills 管理先删旧再导入）→回报 before→after。',
-    uninstallHint: '说「帮我卸载 Ming Engine」，或在「Skills 管理」中删除该技能。',
+      '说「帮我更新 Loom of Heaven」：读线上 manifest→下载校验→migrate 迁移替换旧包（或经 Skills 管理先删旧再导入）→回报 before→after。',
+    uninstallHint: '说「帮我卸载 Loom of Heaven」，或在「Skills 管理」中删除该技能。',
     label: '腾讯 WorkBuddy（桌面端 / OpenClaw）',
     format:
       'OpenClaw 技能 zip（SKILL.md + scripts/ 位于压缩包根目录），在「Claw 设置 → Skills 管理」本地上传',
@@ -171,17 +171,17 @@ export const HOSTS: HostConfig[] = [
     engineSelfCheck: ENGINE_SELF_CHECK,
     userDemoPrompt: USER_DEMO_PROMPT,
     notes:
-      'OpenClaw 调用技能时会启动独立进程运行 scripts/ 下脚本（Node/Python/Bash），故可跑完整引擎；终端机器需有 Node。真机确认：上传 zip 导入到 ~/.workbuddy/skills/xuan-ji-yu-heng/，三盘 + 63 条解读事实正常，engine.mjs 与 canonical byte-identical；zip 内不含 .git/tests/node_modules/源码。更新用 migrate 原子替换 ~/.workbuddy/skills/xuan-ji-yu-heng（清理 legacy RC 双层、失败回滚），或经 Skills 管理先删旧 Ming Engine 再导入新版、不碰其它技能；升级后只保留一个可触发 xuan-ji-yu-heng。',
+      'OpenClaw 调用技能时会启动独立进程运行 scripts/ 下脚本（Node/Python/Bash），故可跑完整引擎；终端机器需有 Node。真机确认：上传 zip 导入到 ~/.workbuddy/skills/xuan-ji-yu-heng/，三盘 + 63 条解读事实正常，engine.mjs 与 canonical byte-identical；zip 内不含 .git/tests/node_modules/源码。更新用 migrate 原子替换 ~/.workbuddy/skills/xuan-ji-yu-heng（清理 legacy RC 双层、失败回滚），或经 Skills 管理先删旧 Loom of Heaven 再导入新版、不碰其它技能；升级后只保留一个可触发 xuan-ji-yu-heng。',
   },
   // Doubao is full (real-device confirmed it imports the Skill AND runs the Node engine).
   // reading-lite is retained as the designated pattern for any FUTURE script-less host
   // (see readingLiteSkillMd + SKILL_NAME_LITE); no current host uses it.
   {
     id: 'doubao',
-    releaseAsset: 'ming-engine-doubao.zip',
+    releaseAsset: 'loom-of-heaven-doubao.zip',
     needsUserAuth: true,
-    updateHint: '说「帮我更新 Ming Engine」，宿主会重新导入最新版覆盖。',
-    uninstallHint: '说「帮我卸载 Ming Engine」，或在豆包技能管理中删除该技能。',
+    updateHint: '说「帮我更新 Loom of Heaven」，宿主会重新导入最新版覆盖。',
+    uninstallHint: '说「帮我卸载 Loom of Heaven」，或在豆包技能管理中删除该技能。',
     label: '豆包电脑版',
     format: '可导入技能文件夹/zip（SKILL.md + scripts/ + references/）',
     scriptExecution: true,

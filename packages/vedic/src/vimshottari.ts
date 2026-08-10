@@ -1,4 +1,4 @@
-import type { VedicDashaAntarPeriod, VedicDashaLord, VedicVimshottari } from '@ming/contracts';
+import type { VedicDashaAntarPeriod, VedicDashaLord, VedicVimshottari } from '@loom/contracts';
 import { canonicalLongitude } from './math.ts';
 
 /** Owner-confirmed P3B model: 365.25 SI days, never calendar-year arithmetic. */

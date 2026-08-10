@@ -2,7 +2,7 @@
 
 > 更新日期：2026-07-21
 >
-> 项目暂定名：Ming Engine（可随时更名）
+> 项目暂定名：Loom of Heaven（可随时更名）
 >
 > 目标：交付一个可导入腾讯 WorkBuddy、兼容主流 `SKILL.md + scripts` 生态的本地 Skill，稳定计算西方占星本命盘、八字和紫微斗数，并按需生成结构化 JSON 与可预览的 HTML/SVG 命盘报告。
 
@@ -106,7 +106,7 @@ skills/
     agents/
       openai.yaml                    # 跨 Codex 生态的 UI 元数据；与 SKILL.md 保持一致
     scripts/
-      ming-chart.mjs                 # 唯一稳定 CLI：doctor/normalize/calculate/compare/render/verify
+      loom-chart.mjs                 # 唯一稳定 CLI：doctor/normalize/calculate/compare/render/verify
       dist/
         engine.mjs                   # 构建产生的确定性引擎 bundle
       fixtures/
@@ -311,7 +311,7 @@ Skill 的标准工作流：
 1. 判断用户要西占、八字、紫微还是三盘合算，以及要 JSON、HTML 报告还是对话摘要；
 2. 只收集计算必需字段，不要求姓名和人生经历；
 3. 向用户复述当地时间、地点、经纬度、IANA 时区、历法/闰月、规则性别和 ruleset。遇到 DST 歧义、近似时间或跨边界风险必须确认；
-4. 先运行 `ming-chart.mjs doctor`，再调用同一 CLI 的 `normalize` 与 `calculate` 子命令；需要可视化时再运行 `render`；
+4. 先运行 `loom-chart.mjs doctor`，再调用同一 CLI 的 `normalize` 与 `calculate` 子命令；需要可视化时再运行 `render`；
 5. 检查退出码、JSON schema、warnings 与 provenance。脚本失败时返回错误，不让模型补算；
 6. 对话只给简洁事实摘要，并把完整 JSON/HTML/SVG 作为工作区产物；
 7. 默认不做吉凶预测。若未来安装了单独的解释 Skill，只把脱敏后的 `ChartBundle` 交给它。
@@ -319,12 +319,12 @@ Skill 的标准工作流：
 建议稳定 CLI：
 
 ```text
-node scripts/ming-chart.mjs doctor --json
-node scripts/ming-chart.mjs normalize --input-file birth-input.json --output-file normalized.json
-node scripts/ming-chart.mjs calculate --input-file birth-input.json --systems all --output-file chart.json
-node scripts/ming-chart.mjs compare --input-file birth-input.json --profiles profile-a,profile-b --output-file comparison.json
-node scripts/ming-chart.mjs render --input-file chart.json --output-file chart-report.html
-node scripts/ming-chart.mjs verify
+node scripts/loom-chart.mjs doctor --json
+node scripts/loom-chart.mjs normalize --input-file birth-input.json --output-file normalized.json
+node scripts/loom-chart.mjs calculate --input-file birth-input.json --systems all --output-file chart.json
+node scripts/loom-chart.mjs compare --input-file birth-input.json --profiles profile-a,profile-b --output-file comparison.json
+node scripts/loom-chart.mjs render --input-file chart.json --output-file chart-report.html
+node scripts/loom-chart.mjs verify
 ```
 
 参数必须通过安全的参数数组或文件传递，禁止把用户文本拼接成 shell 命令。临时输入存放在当前工作区的私有临时目录，成功/失败后清理；只有用户要求保存的 JSON/HTML 报告作为产物保留。
@@ -509,7 +509,7 @@ CI 最低门槛（长期目标）分两档，避免“声明的门禁”与“�
 - 紫微用 iztro provider；
 - 未经批准不得把 Kerykeion、Immanuel、PySwissEph 或 Swiss AGPL 路线引入默认发布物；
 - 产物报告使用自包含 HTML + SVG，无 CDN、远程字体和跟踪脚本；
-- Skill 内只提供一个稳定入口 `node scripts/ming-chart.mjs <subcommand>`，支持 `doctor`、`normalize`、`calculate`、`compare`、`render`、`verify`；stdout 输出版本化 JSON，诊断走 stderr，失败使用稳定错误码。
+- Skill 内只提供一个稳定入口 `node scripts/loom-chart.mjs <subcommand>`，支持 `doctor`、`normalize`、`calculate`、`compare`、`render`、`verify`；stdout 输出版本化 JSON，诊断走 stderr，失败使用稳定错误码。
 
 目标结构：
 
@@ -517,7 +517,7 @@ CI 最低门槛（长期目标）分两档，避免“声明的门禁”与“�
 skills/xuan-ji-yu-heng/
   SKILL.md
   agents/openai.yaml
-  scripts/ming-chart.mjs
+  scripts/loom-chart.mjs
   scripts/dist/engine.mjs
   scripts/fixtures/smoke.json
   references/input-contract.md

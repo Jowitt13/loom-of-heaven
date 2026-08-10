@@ -1,6 +1,6 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { computeSolarTime, equationOfTimeMinutes, parseWallToMs } from '@ming/time-location';
+import { computeSolarTime, equationOfTimeMinutes, parseWallToMs } from '@loom/time-location';
 
 describe('equation of time', () => {
   it('stays within +/- 20 minutes across the whole year', () => {

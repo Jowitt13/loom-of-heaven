@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 /**
- * Round 13.1 + 13.2: exercise the REAL shipped `ming-chart.mjs migrate` + `version` CLI (spawned
+ * Round 13.1 + 13.2: exercise the REAL shipped `loom-chart.mjs migrate` + `version` CLI (spawned
  * as a subprocess, as a host Agent would run it). Round 13.2 adds the target-allowlist security
  * gate: migrate may only write to `<home>/.qoder/skills/xuan-ji-yu-heng` or
  * `<home>/.workbuddy/skills/xuan-ji-yu-heng` (even after resolving symlinks). Tests point
@@ -27,7 +27,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
 const srcSkill = join(root, 'skills', 'xuan-ji-yu-heng');
-const CLI = join(srcSkill, 'scripts', 'ming-chart.mjs');
+const CLI = join(srcSkill, 'scripts', 'loom-chart.mjs');
 const PKG = 'xuan-ji-yu-heng';
 
 const CANDIDATE_MANIFEST = {
@@ -90,7 +90,7 @@ function installLegacy(skillsDir: string): string {
   const inner = join(target, PKG); // the tell-tale double nesting
   mkdirSync(join(inner, 'scripts'), { recursive: true });
   writeFileSync(join(inner, 'SKILL.md'), '---\nname: xuan-ji-yu-heng\n---\nlegacy rc\n');
-  writeFileSync(join(inner, 'scripts', 'ming-chart.mjs'), '// legacy rc cli\n');
+  writeFileSync(join(inner, 'scripts', 'loom-chart.mjs'), '// legacy rc cli\n');
   writeFileSync(
     join(inner, 'BUILD_MANIFEST.json'),
     `${JSON.stringify(LEGACY_MANIFEST, null, 2)}\n`,
@@ -127,7 +127,7 @@ function migrate(homeDir: string, args: string[]): { code: number; out: MigrateO
 }
 
 function version(pkgDir: string): { code: number; json: VersionOut } {
-  const res = spawnSync(process.execPath, [join(pkgDir, 'scripts', 'ming-chart.mjs'), 'version'], {
+  const res = spawnSync(process.execPath, [join(pkgDir, 'scripts', 'loom-chart.mjs'), 'version'], {
     encoding: 'utf8',
   });
   let json = {} as VersionOut;
@@ -151,7 +151,7 @@ afterAll(() => {
   if (shared) rmSync(shared.dir, { recursive: true, force: true });
 });
 
-describe('ming-chart migrate: legacy RC -> candidate (allowed host targets)', () => {
+describe('loom-chart migrate: legacy RC -> candidate (allowed host targets)', () => {
   it('migrates the legacy install at ~/.qoder/skills/xuan-ji-yu-heng (--host qoder)', () => {
     const home = mkdtempSync(join(tmpdir(), 'ming-home-q-'));
     try {
@@ -230,7 +230,7 @@ describe('ming-chart migrate: legacy RC -> candidate (allowed host targets)', ()
   });
 });
 
-describe('ming-chart migrate: source validation still enforced', () => {
+describe('loom-chart migrate: source validation still enforced', () => {
   it('fails and leaves the old install intact when the source lacks BUILD_MANIFEST', () => {
     const home = mkdtempSync(join(tmpdir(), 'ming-home-nomani-'));
     try {
@@ -272,7 +272,7 @@ describe('ming-chart migrate: source validation still enforced', () => {
   });
 });
 
-describe('ming-chart migrate: target allowlist (security gate)', () => {
+describe('loom-chart migrate: target allowlist (security gate)', () => {
   const badTargets: Array<[string, (home: string) => string]> = [
     ['bare skills dir', (h) => join(h, '.qoder', 'skills')],
     ['home dir', (h) => h],
@@ -333,7 +333,7 @@ describe('ming-chart migrate: target allowlist (security gate)', () => {
   );
 });
 
-describe('ming-chart version: real installed-version report', () => {
+describe('loom-chart version: real installed-version report', () => {
   it('detects legacy schema + double-nesting when run from a nested legacy layout', () => {
     const work = mkdtempSync(join(tmpdir(), 'ming-ver-legacy-'));
     try {

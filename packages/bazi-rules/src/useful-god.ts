@@ -1,4 +1,4 @@
-import type { BaziChartResult, BaziRuleFinding } from '@ming/contracts';
+import type { BaziChartResult, BaziRuleFinding } from '@loom/contracts';
 import { assessStrength } from './strength.ts';
 import { elementsByRelation, type Element } from './fundamentals.ts';
 import { distributionPhrase, missingElements, wealthRoot } from './distribution.ts';

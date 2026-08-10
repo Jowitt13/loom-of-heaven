@@ -73,7 +73,7 @@ function spdx(components: { name: string; version: string; purl?: string; licens
     dataLicense: 'CC0-1.0',
     SPDXID: 'SPDXRef-DOCUMENT',
     name: `${APP_NAME}-${APP_VERSION}`,
-    documentNamespace: `https://github.com/Jowitt13/ming-engine/spdx/${APP_NAME}-${APP_VERSION}`,
+    documentNamespace: `https://github.com/Jowitt13/loom-of-heaven/spdx/${APP_NAME}-${APP_VERSION}`,
     creationInfo: {
       created: '2026-01-01T00:00:00Z',
       creators: ['Tool: ming-build-skill-0.1.0'],

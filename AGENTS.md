@@ -1,4 +1,4 @@
-# AGENTS.md — ming-engine
+# AGENTS.md — loom-of-heaven
 
 Guidance for coding agents (OpenAI Codex, and any host that reads `AGENTS.md`) working in this
 repository. The user-facing capability is the **`xuan-ji-yu-heng`** Skill under
@@ -29,19 +29,19 @@ CLI. **The model never computes a chart itself.**
 
 ## How to run the Skill (the only supported entry point)
 
-The single stable CLI is `skills/xuan-ji-yu-heng/scripts/ming-chart.mjs`. Pass arguments as
+The single stable CLI is `skills/xuan-ji-yu-heng/scripts/loom-chart.mjs`. Pass arguments as
 an array and JSON via files — never build a shell string from user text.
 
 ```bash
 cd skills/xuan-ji-yu-heng
-node scripts/ming-chart.mjs doctor
-node scripts/ming-chart.mjs normalize  --input-file birth-input.json --output-file normalized.json
-node scripts/ming-chart.mjs calculate  --input-file birth-input.json --systems all --output-file chart.json
-node scripts/ming-chart.mjs compare    --input-file birth-input.json --profiles default,apparent-solar --output-file comparison.json
-node scripts/ming-chart.mjs horoscope  --input-file birth-input.json --at 2026-05-20T14:00 --output-file horoscope.json
-node scripts/ming-chart.mjs interpret  --input-file birth-input.json --at 2026-05-20T14:00 --output-file interpretation.json
+node scripts/loom-chart.mjs doctor
+node scripts/loom-chart.mjs normalize  --input-file birth-input.json --output-file normalized.json
+node scripts/loom-chart.mjs calculate  --input-file birth-input.json --systems all --output-file chart.json
+node scripts/loom-chart.mjs compare    --input-file birth-input.json --profiles default,apparent-solar --output-file comparison.json
+node scripts/loom-chart.mjs horoscope  --input-file birth-input.json --at 2026-05-20T14:00 --output-file horoscope.json
+node scripts/loom-chart.mjs interpret  --input-file birth-input.json --at 2026-05-20T14:00 --output-file interpretation.json
 # render is disabled (temporary): returns a stable notice + exit 3 — use calculate/interpret JSON instead.
-node scripts/ming-chart.mjs verify
+node scripts/loom-chart.mjs verify
 ```
 
 Requires a Node runtime (>=22). The published Skill folder is self-contained: it ships

@@ -3,7 +3,7 @@ import type {
   BaziInterpretation,
   BaziRuleFinding,
   ProviderRef,
-} from '@ming/contracts';
+} from '@loom/contracts';
 import { strengthFinding } from './strength.ts';
 import { patternFinding } from './pattern.ts';
 import { usefulGodFinding } from './useful-god.ts';

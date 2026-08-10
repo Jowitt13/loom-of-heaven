@@ -1,5 +1,5 @@
 /**
- * @ming/synastry — deterministic multi-person 合婚 (relationship/synastry) rules over two
+ * @loom/synastry — deterministic multi-person 合婚 (relationship/synastry) rules over two
  * computed ChartBundles. Sourced structural compatibility signals across BaZi, Zi Wei and
  * Western; never a fated verdict. The orchestrator charts each person and assembles the result.
  */

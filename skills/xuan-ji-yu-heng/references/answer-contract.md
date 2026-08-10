@@ -8,7 +8,7 @@ neither emitted nor accepted. The Vedic evidence remains bounded by returned fac
 including `VEDIC_TIME_REQUIRED` whenever a missing birth time suppresses values.
 
 ```text
-node scripts/ming-chart.mjs answer-plan \
+node scripts/loom-chart.mjs answer-plan \
   --input-file birth-input.json \
   --topic career \
   --lens advice \
@@ -91,7 +91,7 @@ For a user who explicitly asks for a full technical chart or raw JSON, use `calc
 ## validate-answer (structure-and-wording gate)
 
 ```text
-node scripts/ming-chart.mjs validate-answer --input-file validate-input.json [--output-file validation-result.json]
+node scripts/loom-chart.mjs validate-answer --input-file validate-input.json [--output-file validation-result.json]
 ```
 
 The input file is one JSON object: `{ "answerPlan": { … }, "readingDraft": { … } }`. The

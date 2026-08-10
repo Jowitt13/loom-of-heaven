@@ -1,5 +1,5 @@
 /**
- * @ming/bazi-rules — sourced BaZi interpretation rules (旺衰/格局/喜用神/十神象义).
+ * @loom/bazi-rules — sourced BaZi interpretation rules (旺衰/格局/喜用神/十神象义).
  * Every finding carries a public-domain classic citation; no unsourced verdicts.
  */
 export * from './fundamentals.ts';

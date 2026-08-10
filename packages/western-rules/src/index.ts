@@ -1,5 +1,5 @@
 /**
- * @ming/western-rules — sourced Western astrology interpretation rules.
+ * @loom/western-rules — sourced Western astrology interpretation rules.
  * Every finding carries a classical citation; no unsourced verdicts.
  */
 export * from './planet-sign.ts';

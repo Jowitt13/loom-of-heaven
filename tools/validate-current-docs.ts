@@ -47,7 +47,7 @@ const DISPLAY_ALL =
 const QODER_CLI =
   /qodercli|Qoder\s*CLI|Skills\s*CLI|npx\s+skills|@qoder-ai|方式一[（(]命令行|\/skills\s*安装/i;
 /** Round 13.1: local version-check + online-manifest migrate-update protocol markers. */
-const VERSION_CMD = /ming-chart\.mjs version/;
+const VERSION_CMD = /loom-chart\.mjs version/;
 const ONLINE_MANIFEST = /install-manifest\.json/;
 const MIGRATE = /\bmigrate\b/;
 /** Round 14: STATUS.md must not point at the retired pre-incident workspace. */
@@ -300,8 +300,8 @@ function selfTest(add: (name: string, ok: boolean, detail?: string) => void): vo
       '由 Qoder 内置 Agent 代为下载校验并仅替换写入 ~/.qoder/skills（无需命令行工具）',
     ),
   );
-  add('[self-test] version 命令检测命中', VERSION_CMD.test('node scripts/ming-chart.mjs version'));
-  add('[self-test] version 不误报 verify', !VERSION_CMD.test('node scripts/ming-chart.mjs verify'));
+  add('[self-test] version 命令检测命中', VERSION_CMD.test('node scripts/loom-chart.mjs version'));
+  add('[self-test] version 不误报 verify', !VERSION_CMD.test('node scripts/loom-chart.mjs verify'));
   add('[self-test] migrate 协议检测命中', MIGRATE.test('migrate --host qoder --source tmp'));
   add(
     '[self-test] startmoon 旧工作区命中',

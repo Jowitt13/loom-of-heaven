@@ -1,4 +1,4 @@
-import type { ProviderRef, ZiweiChartResult, ZiweiInterpretation } from '@ming/contracts';
+import type { ProviderRef, ZiweiChartResult, ZiweiInterpretation } from '@loom/contracts';
 import { mainStarFindings } from './main-star.ts';
 import { palaceStarFindings } from './palace-star.ts';
 import { sihuaFindings } from './sihua.ts';

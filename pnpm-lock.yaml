@@ -32,7 +32,7 @@ importers:
 
   packages/bazi:
     dependencies:
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
       tyme4ts:
@@ -41,11 +41,11 @@ importers:
 
   packages/bazi-rules:
     dependencies:
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
     devDependencies:
-      '@ming/orchestrator':
+      '@loom/orchestrator':
         specifier: workspace:*
         version: link:../orchestrator
 
@@ -57,80 +57,80 @@ importers:
 
   packages/interpret:
     dependencies:
-      '@ming/bazi-rules':
+      '@loom/bazi-rules':
         specifier: workspace:*
         version: link:../bazi-rules
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@ming/vedic-rules':
+      '@loom/vedic-rules':
         specifier: workspace:*
         version: link:../vedic-rules
-      '@ming/western-rules':
+      '@loom/western-rules':
         specifier: workspace:*
         version: link:../western-rules
-      '@ming/ziwei-rules':
+      '@loom/ziwei-rules':
         specifier: workspace:*
         version: link:../ziwei-rules
 
   packages/orchestrator:
     dependencies:
-      '@ming/bazi':
+      '@loom/bazi':
         specifier: workspace:*
         version: link:../bazi
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@ming/interpret':
+      '@loom/interpret':
         specifier: workspace:*
         version: link:../interpret
-      '@ming/synastry':
+      '@loom/synastry':
         specifier: workspace:*
         version: link:../synastry
-      '@ming/time-location':
+      '@loom/time-location':
         specifier: workspace:*
         version: link:../time-location
-      '@ming/vedic':
+      '@loom/vedic':
         specifier: workspace:*
         version: link:../vedic
-      '@ming/western':
+      '@loom/western':
         specifier: workspace:*
         version: link:../western
-      '@ming/ziwei':
+      '@loom/ziwei':
         specifier: workspace:*
         version: link:../ziwei
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@ming/test-fixtures':
+      '@loom/test-fixtures':
         specifier: workspace:*
         version: link:../test-fixtures
-      '@ming/western-rules':
+      '@loom/western-rules':
         specifier: workspace:*
         version: link:../western-rules
-      '@ming/ziwei-rules':
+      '@loom/ziwei-rules':
         specifier: workspace:*
         version: link:../ziwei-rules
 
   packages/synastry:
     dependencies:
-      '@ming/bazi-rules':
+      '@loom/bazi-rules':
         specifier: workspace:*
         version: link:../bazi-rules
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
 
   packages/test-fixtures:
     dependencies:
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
 
   packages/time-location:
     dependencies:
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
       moment-timezone:
@@ -140,13 +140,13 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@ming/test-fixtures':
+      '@loom/test-fixtures':
         specifier: workspace:*
         version: link:../test-fixtures
 
   packages/vedic:
     dependencies:
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
       astronomy-engine:
@@ -159,26 +159,26 @@ importers:
         specifier: 0.6.3
         version: 0.6.3
     devDependencies:
-      '@ming/time-location':
+      '@loom/time-location':
         specifier: workspace:*
         version: link:../time-location
 
   packages/vedic-rules:
     dependencies:
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@ming/vedic':
+      '@loom/vedic':
         specifier: workspace:*
         version: link:../vedic
     devDependencies:
-      '@ming/time-location':
+      '@loom/time-location':
         specifier: workspace:*
         version: link:../time-location
 
   packages/western:
     dependencies:
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
       astronomy-engine:
@@ -187,13 +187,13 @@ importers:
 
   packages/western-rules:
     dependencies:
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
 
   packages/ziwei:
     dependencies:
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
       iztro:
@@ -202,7 +202,7 @@ importers:
 
   packages/ziwei-rules:
     dependencies:
-      '@ming/contracts':
+      '@loom/contracts':
         specifier: workspace:*
         version: link:../contracts
 

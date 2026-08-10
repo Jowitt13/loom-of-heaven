@@ -9,7 +9,7 @@ import {
   navamshaRashiIndexByTriplicity,
   rashiOf,
   wholeSignBhavaOf,
-} from '@ming/vedic';
+} from '@loom/vedic';
 
 describe('Vedic P3A classifications: canonical boundaries', () => {
   it('classifies rashi after the frozen six-decimal rounding and uses [start, end)', () => {
