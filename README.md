@@ -47,15 +47,15 @@
 | 宿主       | 当前状态                       | 最简开始方式                                       |
 | ---------- | ------------------------------ | -------------------------------------------------- |
 | Codex      | 可从公开仓库使用完整排盘 Skill | 克隆或下载本仓库后打开项目；不依赖 GitHub Release  |
-| Qoder      | 已发布 GitHub Release `v0.3.6` | 发送上方安装链接；Agent 下载、校验后安装           |
-| WorkBuddy  | 已发布 GitHub Release `v0.3.6` | 发送上方安装链接；Agent 下载、校验后按宿主流程导入 |
-| 豆包电脑版 | 已发布 GitHub Release `v0.3.6` | 发送上方安装链接；Agent 下载、校验后按宿主流程导入 |
+| Qoder      | 已发布 GitHub Release `v0.4.0` | 发送上方安装链接；Agent 下载、校验后安装           |
+| WorkBuddy  | 已发布 GitHub Release `v0.4.0` | 发送上方安装链接；Agent 下载、校验后按宿主流程导入 |
+| 豆包电脑版 | 已发布 GitHub Release `v0.4.0` | 发送上方安装链接；Agent 下载、校验后按宿主流程导入 |
 
 四个平台的完整排盘能力与真机兼容性记录仍见下方文档；可下载性始终以清单的 `published` 字段为准。
 
 - 详见 [`INSTALL.md`](INSTALL.md) 与 [`docs/INSTALL_BY_PLATFORM.md`](docs/INSTALL_BY_PLATFORM.md)；能力矩阵见 [`docs/HOST_COMPATIBILITY.md`](docs/HOST_COMPATIBILITY.md)。
 
-> 安装包来自 GitHub Release `v0.3.6`：已提供 Qoder、WorkBuddy 与豆包电脑版 ZIP。下载地址与 SHA-256 以 [`install-manifest.json`](install-manifest.json) 和 [`SHA256SUMS.txt`](SHA256SUMS.txt) 为准。
+> 安装包来自 GitHub Release `v0.4.0`：已提供 Qoder、WorkBuddy 与豆包电脑版 ZIP。下载地址与 SHA-256 以 [`install-manifest.json`](install-manifest.json) 和 [`SHA256SUMS.txt`](SHA256SUMS.txt) 为准。
 
 ### 🌟 为什么与众不同
 
@@ -130,7 +130,7 @@ node scripts/loom-chart.mjs interpret --input-file birth-input.json --output-fil
 
 #### 🟣 Qoder
 
-Qoder 的完整 ZIP 已发布在 GitHub Release `v0.3.6`。普通用户仍只需使用上方安装入口；Agent 会读取清单、下载不可变资产、校验 SHA-256 后安装，不需要 CLI。
+Qoder 的完整 ZIP 已发布在 GitHub Release `v0.4.0`。普通用户仍只需使用上方安装入口；Agent 会读取清单、下载不可变资产、校验 SHA-256 后安装，不需要 CLI。
 
 #### 🟠 Claude Code
 
@@ -237,15 +237,15 @@ The host AI first detects the platform and reads the `published` status in [`ins
 | Host           | Current status                                  | Easiest way to start                                                                     |
 | -------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Codex          | Full charting Skill usable from the public repo | Clone or download this repo and open the project; no GitHub Release needed               |
-| Qoder          | Published on GitHub Release `v0.3.6`            | Send the install link above; the Agent downloads, verifies and installs                  |
-| WorkBuddy      | Published on GitHub Release `v0.3.6`            | Send the install link above; the Agent downloads, verifies and imports via the host flow |
-| Doubao desktop | Published on GitHub Release `v0.3.6`            | Send the install link above; the Agent downloads, verifies and imports via the host flow |
+| Qoder          | Published on GitHub Release `v0.4.0`            | Send the install link above; the Agent downloads, verifies and installs                  |
+| WorkBuddy      | Published on GitHub Release `v0.4.0`            | Send the install link above; the Agent downloads, verifies and imports via the host flow |
+| Doubao desktop | Published on GitHub Release `v0.4.0`            | Send the install link above; the Agent downloads, verifies and imports via the host flow |
 
 The full charting capability and real-device compatibility records for all four platforms are documented below; downloadability always follows the manifest's `published` field.
 
 - See [`INSTALL.md`](INSTALL.md) and [`docs/INSTALL_BY_PLATFORM.md`](docs/INSTALL_BY_PLATFORM.md); capability matrix in [`docs/HOST_COMPATIBILITY.md`](docs/HOST_COMPATIBILITY.md).
 
-> Install packages come from GitHub Release `v0.3.6`: ZIPs for Qoder, WorkBuddy and Doubao desktop are provided. Download URLs and SHA-256 hashes are authoritative in [`install-manifest.json`](install-manifest.json) and [`SHA256SUMS.txt`](SHA256SUMS.txt).
+> Install packages come from GitHub Release `v0.4.0`: ZIPs for Qoder, WorkBuddy and Doubao desktop are provided. Download URLs and SHA-256 hashes are authoritative in [`install-manifest.json`](install-manifest.json) and [`SHA256SUMS.txt`](SHA256SUMS.txt).
 
 ### 🌟 Why it's different
 
@@ -320,7 +320,7 @@ Unknown birth time? Set `timeAccuracy` to `"unknown"` and omit `localTime` — t
 
 #### 🟣 Qoder
 
-The full Qoder ZIP is published on GitHub Release `v0.3.6`. Regular users still only need the install entry above; the Agent reads the manifest, downloads the immutable asset, verifies the SHA-256 and installs — no CLI needed.
+The full Qoder ZIP is published on GitHub Release `v0.4.0`. Regular users still only need the install entry above; the Agent reads the manifest, downloads the immutable asset, verifies the SHA-256 and installs — no CLI needed.
 
 #### 🟠 Claude Code
 

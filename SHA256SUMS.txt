@@ -1,3 +1,3 @@
-4545e7886770aa64763d299a8b32a40ab3431fe458f62f4e3bfff57c19869dc5  loom-of-heaven-qoder.zip
-d85e38bb2905f0a3615604687693a8077c61648f6f1a9db057e52d3f3c936bc6  loom-of-heaven-workbuddy.zip
-7e2f1e5cc385790be31f3ce2ff8a489604ffaf33418b3f855e25472f194b067f  loom-of-heaven-doubao.zip
+5a1786c720c44b21b825a54bfc4efd47ebff949852b2c6a3c6dd3cffe37fa8cd  loom-of-heaven-qoder.zip
+22cfe79dd2fb11a030f66504a0b08d58c17ca13f85ffb03a11260789c2c4433d  loom-of-heaven-workbuddy.zip
+8a3eea444beba97d1c463e6e27cf8b7a03546bd8ef781da9bf15e9df2415df1d  loom-of-heaven-doubao.zip
