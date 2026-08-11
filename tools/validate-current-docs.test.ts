@@ -30,9 +30,11 @@ function baseFixture(): Map<string, string> {
       '',
       '主星体经独立 JPL Horizons 金标交叉校验。',
       '',
-      'verify:cloud 依次运行 scan:deps → scan:licenses → validate:sbom → scan:secrets.',
+      '[docs/VALIDATION.md](docs/VALIDATION.md)',
       '',
-      '指向 GitHub Release `v0.1.6`.',
+      '[docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)',
+      '',
+      '已发布 GitHub Release `v0.1.6`.',
     ].join('\n'),
   );
 
@@ -233,20 +235,12 @@ describe('validate-current-docs: injected reader', () => {
     expect(failed.map((f) => f.name)).toContain('ARCHITECTURE.md: no stale "not created yet"');
   });
 
-  it('7. README.md missing scan:licenses in chain -> matching FAIL', () => {
+  it('7. README.md missing validation-guide link -> matching FAIL', () => {
     const files = baseFixture();
     const cur = files.get('README.md') as string;
-    files.set(
-      'README.md',
-      cur.replace(
-        'scan:deps → scan:licenses → validate:sbom → scan:secrets',
-        'scan:deps → scan:secrets',
-      ),
-    );
+    files.set('README.md', cur.replace('[docs/VALIDATION.md](docs/VALIDATION.md)', ''));
     const { failed } = runChecks(readerOf(files));
-    expect(failed.map((f) => f.name)).toContain(
-      'README.md: verify:cloud chain includes scan:licenses',
-    );
+    expect(failed.map((f) => f.name)).toContain('README.md: links validation guide');
   });
 
   it('8. AGENTS.md missing scan:licenses in chain -> matching FAIL (new guard)', () => {
@@ -365,20 +359,15 @@ describe('validate-current-docs: injected reader', () => {
     );
   });
 
-  it('17. README verify:cloud chain missing validate:sbom -> matching FAIL (new guard)', () => {
+  it('17. README missing release-checklist link -> matching FAIL', () => {
     const files = baseFixture();
     const cur = files.get('README.md') as string;
     files.set(
       'README.md',
-      cur.replace(
-        'scan:deps → scan:licenses → validate:sbom → scan:secrets',
-        'scan:deps → scan:licenses → scan:secrets',
-      ),
+      cur.replace('[docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)', ''),
     );
     const { failed } = runChecks(readerOf(files));
-    expect(failed.map((f) => f.name)).toContain(
-      'README.md: verify:cloud chain includes validate:sbom',
-    );
+    expect(failed.map((f) => f.name)).toContain('README.md: links release checklist');
   });
 
   it('18. AGENTS.md verify:cloud chain missing validate:sbom -> matching FAIL (new guard)', () => {

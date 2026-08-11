@@ -251,7 +251,7 @@ const RULES: DocRule[] = [
 
 /** D2: a "current release" mention in a user doc (captures the version tag). */
 const CURRENT_RELEASE_RE =
-  /(?:安装包来自|指向)[^\n]{0,40}?GitHub Release\s*`?(v\d+\.\d+\.\d+)`?|最后更新[:：]\s*`?(v\d+\.\d+\.\d+)`?/g;
+  /(?:安装包来自|指向|已发布|published(?:\s+on)?)[^\n]{0,40}?GitHub Release\s*`?(v\d+\.\d+\.\d+)`?|最后更新[:：]\s*`?(v\d+\.\d+\.\d+)`?/gi;
 const PUBLICATION_ENTRY_DOCS = [
   'README.md',
   'INSTALL.md',
@@ -489,12 +489,12 @@ export function runChecks(readDoc: DocReader = defaultReadDoc): {
   const readmeMd = readDoc('README.md');
   if (readmeMd) {
     add(
-      'README.md: verify:cloud chain includes scan:licenses',
-      /scan:deps[\s\S]*scan:licenses[\s\S]*scan:secrets/.test(readmeMd),
+      'README.md: links validation guide',
+      /\[.*VALIDATION\.md.*\]\(docs\/VALIDATION\.md\)/.test(readmeMd),
     );
     add(
-      'README.md: verify:cloud chain includes validate:sbom',
-      /scan:licenses[\s\S]*validate:sbom[\s\S]*scan:secrets/.test(readmeMd),
+      'README.md: links release checklist',
+      /\[.*RELEASE_CHECKLIST\.md.*\]\(docs\/RELEASE_CHECKLIST\.md\)/.test(readmeMd),
     );
     // Static test counts drift the moment the suite grows; the real count lives
     // on GitHub Actions `verify` + docs/VALIDATION.md, not in README. Match both
