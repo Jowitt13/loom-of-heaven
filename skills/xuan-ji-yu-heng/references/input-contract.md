@@ -25,7 +25,7 @@ The CLI accepts a single JSON object. Unknown top-level keys are rejected. JavaS
   "settings": {
     "systems": ["western", "bazi", "ziwei", "vedic"],
     "western": {
-      "rulesetId": "western-tropical-placidus@0.1.0",
+      "rulesetId": "western-tropical-placidus@0.2.0",
       "zodiac": "tropical", // "tropical" | "sidereal"
       "ayanamsha": "lahiri", // "lahiri" | "fagan-bradley" (only applied when zodiac = "sidereal")
       "houseSystem": "placidus", // placidus | whole-sign | equal | koch | porphyry
@@ -64,6 +64,9 @@ The CLI accepts a single JSON object. Unknown top-level keys are rejected. JavaS
 - Supported year range in this version is 1901–2100; outside it returns `DATE_OUT_OF_RANGE`.
 - `settings` and every sub-object may be omitted; documented defaults are applied and echoed
   back in `originalInput`.
+- Western defaults to `western-tropical-placidus@0.2.0`. The retired
+  `western-tropical-placidus@0.1.0` is rejected with `RULESET_UNSUPPORTED`; delete the field to
+  use the default, or pass `@0.2.0` explicitly.
 - `vedic.nodes` defaults to `"mean"`. The Vedic chart always reports both `nodes.mean` and
   `nodes.true`; callers may explicitly select `"true"` for a different school convention. The raw
   no-settings default requests all four shipped systems; callers may pass an explicit subset.

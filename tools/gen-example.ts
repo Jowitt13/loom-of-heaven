@@ -61,7 +61,6 @@ async function main(): Promise<void> {
       source: 'user',
     },
     ruleGender: 'male',
-    settings: { systems: ['western', 'bazi', 'ziwei'] },
   });
 
   const bundle = engine.calculate(input, { now: FIXED_NOW });

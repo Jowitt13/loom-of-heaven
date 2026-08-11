@@ -17,10 +17,10 @@ school is implemented" (handoff §5).
 | `whole-sign`     | Western `houseSystem = whole-sign`.                                    |
 
 In this engine version, normalization (the UTC instant) is invariant to these rule settings,
-so `compare` reports that normalized time is identical and notes that chart-level differences
-arrive with the Phase 2 providers. This is an honest result, not a fabricated divergence.
+so `compare` reports identical normalized time and any chart-level difference is attributable to
+the selected settings, not an invented time conversion.
 
-## Western defaults (`western-tropical-placidus@0.1.0`)
+## Western defaults (`western-tropical-placidus@0.2.0`)
 
 Tropical zodiac, geocentric, Placidus houses, true node, and the five asteroids on by default.
 Also selectable: whole-sign, equal, koch, porphyry; `sidereal` with a Lahiri / Fagan-Bradley
@@ -29,6 +29,10 @@ ayanamsha; `mean` node; `asteroids: false`. The ten planets hold the ≤1′ ast
 and asteroids (Chiron/Ceres/Pallas/Juno/Vesta) are self-computed from public-domain orbital
 elements and reported `precision: approximate`. At high latitude a quadrant house system that
 cannot be computed must raise `HOUSE_SYSTEM_UNAVAILABLE` — never silently switch.
+
+`western-tropical-placidus@0.1.0` is retired because its Koch-house calculation was corrected.
+It returns `RULESET_UNSUPPORTED`; remove `rulesetId` to use the current default or select
+`western-tropical-placidus@0.2.0` explicitly.
 
 ## BaZi disputed points (`bazi-standard@0.1.0`)
 

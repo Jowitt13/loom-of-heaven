@@ -6,7 +6,7 @@
       "不得对医疗、法律、投资、生死等重大事项给出确定性断言；健康提示仅为五行/宫位结构描述、非医疗建议。",
       "基于脱敏命盘离线计算（不含姓名与人生事件）；不为“提升准确度”索取或臆断个人隐私。"
     ],
-    "engineVersion": "0.1.1",
+    "engineVersion": "0.4.0",
     "facts": [
       {
         "claim": "四柱：年:庚午(七杀)  月:己卯(正财)  日:甲戌(日主(日元))  时:戊辰(偏财)",
@@ -812,6 +812,489 @@
         "topic": "general"
       },
       {
+        "claim": "Sun在Pisces：直觉敏锐、富同理心",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Sun在Pisces：直觉敏锐、富同理心",
+            "ref": "western-rule/planet-sign/sun-pisces"
+          }
+        ],
+        "reason": "Sun落入Pisces，该星体的能量以此星座的方式表达",
+        "topic": "character"
+      },
+      {
+        "claim": "Moon在Virgo：情绪内敛、需要秩序感",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Moon在Virgo：情绪内敛、需要秩序感",
+            "ref": "western-rule/planet-sign/moon-virgo"
+          }
+        ],
+        "reason": "Moon落入Virgo，该星体的能量以此星座的方式表达",
+        "topic": "character"
+      },
+      {
+        "claim": "Mercury在Pisces：思考直觉化跳跃",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Mercury在Pisces：思考直觉化跳跃",
+            "ref": "western-rule/planet-sign/mercury-pisces"
+          }
+        ],
+        "reason": "Mercury落入Pisces，该星体的能量以此星座的方式表达",
+        "topic": "character"
+      },
+      {
+        "claim": "Venus在Aquarius：情感独立不拘传统",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Venus在Aquarius：情感独立不拘传统",
+            "ref": "western-rule/planet-sign/venus-aquarius"
+          }
+        ],
+        "reason": "Venus落入Aquarius，该星体的能量以此星座的方式表达",
+        "topic": "character"
+      },
+      {
+        "claim": "Mars在Capricorn：行动有计划有纪律",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Mars在Capricorn：行动有计划有纪律",
+            "ref": "western-rule/planet-sign/mars-capricorn"
+          }
+        ],
+        "reason": "Mars落入Capricorn，该星体的能量以此星座的方式表达",
+        "topic": "character"
+      },
+      {
+        "claim": "上升Aries：外在形象主动果敢",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "上升Aries：外在形象主动果敢",
+            "ref": "western-rule/angle/asc-aries"
+          }
+        ],
+        "reason": "上升点落入Aries，决定外在表现与他人第一印象",
+        "topic": "character"
+      },
+      {
+        "claim": "MC在Capricorn：事业方向偏向管理和建构",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "MC在Capricorn：事业方向偏向管理和建构",
+            "ref": "western-rule/angle/mc-capricorn"
+          }
+        ],
+        "reason": "天顶(MC)落入Capricorn，显示社会角色与事业方向的基调",
+        "topic": "career"
+      },
+      {
+        "claim": "Sun与Saturnsextile：有发展机会、需要主动把握",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Sun与Saturnsextile：有发展机会、需要主动把握",
+            "ref": "western-rule/aspect/sun-sextile-saturn"
+          }
+        ],
+        "reason": "Sun和Saturn形成sextile相位（容许度3.7°），两者主题产生互动",
+        "topic": "character"
+      },
+      {
+        "claim": "Sun与Plutotrine：能量和谐流动、天然优势",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Sun与Plutotrine：能量和谐流动、天然优势",
+            "ref": "western-rule/aspect/sun-trine-pluto"
+          }
+        ],
+        "reason": "Sun和Pluto形成trine相位（容许度1.5°），两者主题产生互动",
+        "topic": "character"
+      },
+      {
+        "claim": "Moon与Jupitersextile：有发展机会、需要主动把握",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Moon与Jupitersextile：有发展机会、需要主动把握",
+            "ref": "western-rule/aspect/moon-sextile-jupiter"
+          }
+        ],
+        "reason": "Moon和Jupiter形成sextile相位（容许度1.3°），两者主题产生互动",
+        "topic": "character"
+      },
+      {
+        "claim": "Moon与Uranustrine：能量和谐流动、天然优势",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Moon与Uranustrine：能量和谐流动、天然优势",
+            "ref": "western-rule/aspect/moon-trine-uranus"
+          }
+        ],
+        "reason": "Moon和Uranus形成trine相位（容许度6.7°），两者主题产生互动",
+        "topic": "character"
+      },
+      {
+        "claim": "Mercury处于detriment状态：在弱势座，能量表达受限，需后天努力",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Mercury处于detriment状态：在弱势座，能量表达受限，需后天努力",
+            "ref": "western-rule/dignity/mercury-detriment"
+          }
+        ],
+        "reason": "Mercury在Pisces为detriment，古典占星认为此位置在弱势座，能量表达受限，需后天努力",
+        "topic": "character"
+      },
+      {
+        "claim": "Mars处于exaltation状态：在旺座，能量提升",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Mars处于exaltation状态：在旺座，能量提升",
+            "ref": "western-rule/dignity/mars-exaltation"
+          }
+        ],
+        "reason": "Mars在Capricorn为exaltation，古典占星认为此位置在旺座，能量提升",
+        "topic": "character"
+      },
+      {
+        "claim": "Jupiter处于exaltation状态：在旺座，能量提升",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Jupiter处于exaltation状态：在旺座，能量提升",
+            "ref": "western-rule/dignity/jupiter-exaltation"
+          }
+        ],
+        "reason": "Jupiter在Cancer为exaltation，古典占星认为此位置在旺座，能量提升",
+        "topic": "character"
+      },
+      {
+        "claim": "Saturn处于domicile状态：在本座，能量充分表达",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Saturn处于domicile状态：在本座，能量充分表达",
+            "ref": "western-rule/dignity/saturn-domicile"
+          }
+        ],
+        "reason": "Saturn在Capricorn为domicile，古典占星认为此位置在本座，能量充分表达",
+        "topic": "character"
+      },
+      {
+        "claim": "Pluto处于domicile状态：在本座，能量充分表达",
+        "evidence": [
+          {
+            "kind": "western-rule",
+            "note": "Pluto处于domicile状态：在本座，能量充分表达",
+            "ref": "western-rule/dignity/pluto-domicile"
+          }
+        ],
+        "reason": "Pluto在Scorpio为domicile，古典占星认为此位置在本座，能量充分表达",
+        "topic": "character"
+      },
+      {
+        "claim": "命宫主星武曲：刚毅果决，善于理财与执行",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "命宫主星武曲：刚毅果决，善于理财与执行",
+            "ref": "ziwei-rule/main-star/武曲"
+          }
+        ],
+        "reason": "武曲坐守命宫，其星性为本人核心性格底色",
+        "topic": "character"
+      },
+      {
+        "claim": "命宫主星破军：变动性强，敢于破旧立新",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "命宫主星破军：变动性强，敢于破旧立新",
+            "ref": "ziwei-rule/main-star/破军"
+          }
+        ],
+        "reason": "破军坐守命宫，其星性为本人核心性格底色",
+        "topic": "character"
+      },
+      {
+        "claim": "命宫主星组合：武曲、破军——决定本人核心性格底色",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "命宫主星组合：武曲、破军——决定本人核心性格底色",
+            "ref": "ziwei-rule/palace-star/soul-武曲、破军"
+          }
+        ],
+        "reason": "命宫主星为武曲、破军，三方四正星曜共同影响性格全貌",
+        "topic": "character"
+      },
+      {
+        "claim": "官禄宫主星紫微、贪狼：适合管理、统筹全局的工作；适合社交、销售、艺术娱乐",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "官禄宫主星紫微、贪狼：适合管理、统筹全局的工作；适合社交、销售、艺术娱乐",
+            "ref": "ziwei-rule/palace-star/career-紫微、贪狼"
+          }
+        ],
+        "reason": "官禄宫主星决定事业方向与适合的工作环境",
+        "topic": "career"
+      },
+      {
+        "claim": "财帛宫主星廉贞、七杀：财务来源多元复杂；赚钱能力强但花销也大",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "财帛宫主星廉贞、七杀：财务来源多元复杂；赚钱能力强但花销也大",
+            "ref": "ziwei-rule/palace-star/wealth-廉贞、七杀"
+          }
+        ],
+        "reason": "财帛宫主星决定理财风格与进财方式",
+        "topic": "wealth"
+      },
+      {
+        "claim": "太阴化科在田宅：该宫位主题名声提升、贵人帮助、文雅有序",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "太阴化科在田宅：该宫位主题名声提升、贵人帮助、文雅有序",
+            "ref": "ziwei-rule/sihua/太阴-化科-田宅"
+          }
+        ],
+        "reason": "太阴化科落入田宅，四化能量作用于该宫位所管领域",
+        "topic": "character"
+      },
+      {
+        "claim": "天同化忌在兄弟：该宫位主题纠结困扰、需要面对、不可回避的功课",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "天同化忌在兄弟：该宫位主题纠结困扰、需要面对、不可回避的功课",
+            "ref": "ziwei-rule/sihua/天同-化忌-兄弟"
+          }
+        ],
+        "reason": "天同化忌落入兄弟，四化能量作用于该宫位所管领域",
+        "topic": "character"
+      },
+      {
+        "claim": "武曲化权在命宫：该宫位主题掌控力增强、竞争意愿、主动性高",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "武曲化权在命宫：该宫位主题掌控力增强、竞争意愿、主动性高",
+            "ref": "ziwei-rule/sihua/武曲-化权-命宫"
+          }
+        ],
+        "reason": "武曲化权落入命宫，四化能量作用于该宫位所管领域",
+        "topic": "character"
+      },
+      {
+        "claim": "太阳化禄在父母：该宫位主题机会增加、资源流入、有利发展",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "太阳化禄在父母：该宫位主题机会增加、资源流入、有利发展",
+            "ref": "ziwei-rule/sihua/太阳-化禄-父母"
+          }
+        ],
+        "reason": "太阳化禄落入父母，四化能量作用于该宫位所管领域",
+        "topic": "character"
+      },
+      {
+        "claim": "命宫武曲亮度\"平\"：能量中性，无明显增减",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "命宫武曲亮度\"平\"：能量中性，无明显增减",
+            "ref": "ziwei-rule/brightness/武曲-平"
+          }
+        ],
+        "reason": "武曲在命宫亮度为\"平\"，影响该星特质的发挥程度",
+        "topic": "character"
+      },
+      {
+        "claim": "命宫破军亮度\"平\"：能量中性，无明显增减",
+        "evidence": [
+          {
+            "kind": "ziwei-rule",
+            "note": "命宫破军亮度\"平\"：能量中性，无明显增减",
+            "ref": "ziwei-rule/brightness/破军-平"
+          }
+        ],
+        "reason": "破军在命宫亮度为\"平\"，影响该星特质的发挥程度",
+        "topic": "character"
+      },
+      {
+        "caveat": "This is a sourced structural chart classification, not a deterministic prediction.",
+        "claim": "The Moon is in Magha, pada 3, in Simha.",
+        "evidence": [
+          {
+            "kind": "vedic",
+            "note": "The Moon is in Magha, pada 3, in Simha.",
+            "ref": "vedic.derived.grahas[Moon].nakshatra"
+          },
+          {
+            "kind": "vedic-rule",
+            "note": "Brihat Parashara Hora Shastra, Nakshatra and lunar-mansion divisions",
+            "ref": "vedic-rule/nakshatra/moon"
+          }
+        ],
+        "topic": "character"
+      },
+      {
+        "caveat": "This is a sourced structural chart classification, not a deterministic prediction.",
+        "claim": "Whole-sign bhava 1 is Meena; placements: no classical graha.",
+        "evidence": [
+          {
+            "kind": "vedic",
+            "note": "Whole-sign bhava 1 is Meena; placements: no classical graha.",
+            "ref": "vedic.derived.(lagna|grahas).bhava"
+          },
+          {
+            "kind": "vedic-rule",
+            "note": "Brihat Parashara Hora Shastra, Rashi and Bhava divisions",
+            "ref": "vedic-rule/bhava/whole-sign-1"
+          }
+        ],
+        "reason": "P4 maps this structural whole-sign bhava finding to the character answer topic without asserting an outcome.",
+        "topic": "character"
+      },
+      {
+        "caveat": "This is a sourced structural chart classification, not a deterministic prediction.",
+        "claim": "Whole-sign bhava 2 is Mesha; placements: no classical graha.",
+        "evidence": [
+          {
+            "kind": "vedic",
+            "note": "Whole-sign bhava 2 is Mesha; placements: no classical graha.",
+            "ref": "vedic.derived.(lagna|grahas).bhava"
+          },
+          {
+            "kind": "vedic-rule",
+            "note": "Brihat Parashara Hora Shastra, Rashi and Bhava divisions",
+            "ref": "vedic-rule/bhava/whole-sign-2"
+          }
+        ],
+        "reason": "P4 maps this structural whole-sign bhava finding to the wealth answer topic without asserting an outcome.",
+        "topic": "wealth"
+      },
+      {
+        "caveat": "This is a sourced structural chart classification, not a deterministic prediction.",
+        "claim": "Whole-sign bhava 4 is Mithuna; placements: Jupiter (Mithuna).",
+        "evidence": [
+          {
+            "kind": "vedic",
+            "note": "Whole-sign bhava 4 is Mithuna; placements: Jupiter (Mithuna).",
+            "ref": "vedic.derived.(lagna|grahas).bhava"
+          },
+          {
+            "kind": "vedic-rule",
+            "note": "Brihat Parashara Hora Shastra, Rashi and Bhava divisions",
+            "ref": "vedic-rule/bhava/whole-sign-4"
+          }
+        ],
+        "reason": "P4 maps this structural whole-sign bhava finding to the studies answer topic without asserting an outcome.",
+        "topic": "studies"
+      },
+      {
+        "caveat": "This is a sourced structural chart classification, not a deterministic prediction.",
+        "claim": "Whole-sign bhava 6 is Simha; placements: Moon (Simha).",
+        "evidence": [
+          {
+            "kind": "vedic",
+            "note": "Whole-sign bhava 6 is Simha; placements: Moon (Simha).",
+            "ref": "vedic.derived.(lagna|grahas).bhava"
+          },
+          {
+            "kind": "vedic-rule",
+            "note": "Brihat Parashara Hora Shastra, Rashi and Bhava divisions",
+            "ref": "vedic-rule/bhava/whole-sign-6"
+          }
+        ],
+        "reason": "P4 maps this structural whole-sign bhava finding to the health answer topic without asserting an outcome.",
+        "topic": "health"
+      },
+      {
+        "caveat": "This is a sourced structural chart classification, not a deterministic prediction.",
+        "claim": "Whole-sign bhava 7 is Kanya; placements: no classical graha.",
+        "evidence": [
+          {
+            "kind": "vedic",
+            "note": "Whole-sign bhava 7 is Kanya; placements: no classical graha.",
+            "ref": "vedic.derived.(lagna|grahas).bhava"
+          },
+          {
+            "kind": "vedic-rule",
+            "note": "Brihat Parashara Hora Shastra, Rashi and Bhava divisions",
+            "ref": "vedic-rule/bhava/whole-sign-7"
+          }
+        ],
+        "reason": "P4 maps this structural whole-sign bhava finding to the marriage answer topic without asserting an outcome.",
+        "topic": "marriage"
+      },
+      {
+        "caveat": "This is a sourced structural chart classification, not a deterministic prediction.",
+        "claim": "Whole-sign bhava 10 is Dhanu; placements: Saturn (Dhanu).",
+        "evidence": [
+          {
+            "kind": "vedic",
+            "note": "Whole-sign bhava 10 is Dhanu; placements: Saturn (Dhanu).",
+            "ref": "vedic.derived.(lagna|grahas).bhava"
+          },
+          {
+            "kind": "vedic-rule",
+            "note": "Brihat Parashara Hora Shastra, Rashi and Bhava divisions",
+            "ref": "vedic-rule/bhava/whole-sign-10"
+          }
+        ],
+        "reason": "P4 maps this structural whole-sign bhava finding to the career answer topic without asserting an outcome.",
+        "topic": "career"
+      },
+      {
+        "caveat": "This is a sourced structural chart classification, not a deterministic prediction.",
+        "claim": "Tithi 14 (shukla), Yoga 8, Karana Vanija. Vaara: Shanivara.",
+        "evidence": [
+          {
+            "kind": "vedic",
+            "note": "Tithi 14 (shukla), Yoga 8, Karana Vanija. Vaara: Shanivara.",
+            "ref": "vedic.derived.panchanga"
+          },
+          {
+            "kind": "vedic-rule",
+            "note": "Surya Siddhanta, Tithi, Yoga and Karana definitions",
+            "ref": "vedic-rule/panchanga/instantaneous"
+          }
+        ],
+        "topic": "general"
+      },
+      {
+        "caveat": "Vimshottari is a traditional timing framework, not a deterministic event prediction.",
+        "claim": "Vimshottari uses the julian-365.25 model; the birth sequence begins in Ketu Maha Dasha.",
+        "evidence": [
+          {
+            "kind": "vedic",
+            "note": "Vimshottari uses the julian-365.25 model; the birth sequence begins in Ketu Maha Dasha.",
+            "ref": "vedic.derived.vimshottari"
+          },
+          {
+            "kind": "vedic-rule",
+            "note": "Brihat Parashara Hora Shastra, Vimshottari Dasha",
+            "ref": "vedic-rule/vimshottari/birth-balance"
+          }
+        ],
+        "topic": "general"
+      },
+      {
         "caveat": "行业为参考方向，非唯一；需结合兴趣与现实。",
         "claim": "适合行业方向(按喜用五行)：火(能源/电子/餐饮/传媒/照明/文创/教育培训)；土(地产/建筑/农业/仓储/陶瓷/中介/管理)；金(金融/机械/IT硬件/五金/珠宝/汽车/法务)",
         "evidence": [
@@ -858,11 +1341,11 @@
       "学业：学习优势、适合的提升方法",
       "流年：今年最值得把握和最需要注意什么"
     ],
-    "requestId": "req_4fe25a52908a996b",
+    "requestId": "req_b723b87d35913162",
     "rulesets": [
       {
         "id": "western-tropical-placidus",
-        "version": "0.1.0"
+        "version": "0.2.0"
       },
       {
         "id": "bazi-standard",
@@ -870,6 +1353,22 @@
       },
       {
         "id": "iztro-default",
+        "version": "0.1.0"
+      },
+      {
+        "id": "vedic-parashara-lahiri",
+        "version": "0.1.0"
+      },
+      {
+        "id": "western-rules@0.1.0",
+        "version": "0.1.0"
+      },
+      {
+        "id": "ziwei-rules@0.1.0",
+        "version": "0.1.0"
+      },
+      {
+        "id": "vedic-rules-parashara",
         "version": "0.1.0"
       }
     ],

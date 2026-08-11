@@ -8,7 +8,7 @@ roadmap.
 
 ## Versioning policy
 
-- Ruleset ids are `name@semver`, e.g. `western-tropical-placidus@0.1.0`, `bazi-standard@0.1.0`,
+- Ruleset ids are `name@semver`, e.g. `western-tropical-placidus@0.2.0`, `bazi-standard@0.1.0`,
   `iztro-default@0.1.0`.
 - Any change that can alter output bumps the ruleset version; the previous id keeps its meaning.
 - The four-transformations table, star-brightness table and solar-term source each carry their
@@ -16,15 +16,20 @@ roadmap.
 
 ## `compare` profiles (implemented now)
 
-`default`, `apparent-solar`, `mean-solar`, `whole-sign`. In Phase 1 these do not change the UTC
-instant, so `compare` reports normalized time identical and notes that chart-level differences
-arrive with the providers. Implemented in `packages/orchestrator/src/compare.ts`.
+`default`, `apparent-solar`, `mean-solar`, `whole-sign`. These profiles do not change the UTC
+instant, so `compare` reports identical normalized time and any chart-level difference is
+attributable to the selected settings, not an invented time conversion. Implemented in
+`packages/orchestrator/src/compare.ts`.
 
-## Western — `western-tropical-placidus@0.1.0` (default)
+## Western — `western-tropical-placidus@0.2.0` (default)
 
 Tropical, geocentric, Placidus, true node. Configurable: house system (whole-sign/equal/koch/
 porphyry), sidereal + ayanamsha, mean node, aspect set + orb (Phase 2). High-latitude
 quadrant-house failure must raise `HOUSE_SYSTEM_UNAVAILABLE`, never a silent switch.
+
+`western-tropical-placidus@0.1.0` is retired because its Koch-house calculation was corrected.
+Current inputs must omit `rulesetId` or pass `western-tropical-placidus@0.2.0`; the old id
+returns `RULESET_UNSUPPORTED` instead of silently changing its historical meaning.
 
 ## BaZi — `bazi-standard@0.1.0`
 

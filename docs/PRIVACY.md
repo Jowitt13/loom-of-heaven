@@ -19,11 +19,11 @@ Birth time, place and name are sensitive personal data. The runtime-facing state
 
 ## Artifacts & sharing
 
-- `chart.json` / `chart-report.html` are written only where requested; temporary inputs are
+- `chart.json` / `interpretation.json` are written only where requested; temporary inputs are
   removed after a run, keeping only requested artifacts.
-- The HTML report is fully self-contained (no CDN, no remote fonts, no scripts), sets a strict
-  Content-Security-Policy, and HTML-escapes all user-supplied text (verified by a test that
-  injects `<script>`). All paths resolve relative to the Skill or the current workspace — no
+- The HTML/SVG renderer is currently disabled and writes no report files. Any future return must
+  restore the local-only, no-CDN, strict-CSP and escaping requirements before making report
+  artifacts available again. All paths resolve relative to the Skill or current workspace — no
   hard-coded developer paths (validator-enforced).
 - Prefer de-identified copies when sharing; never place raw PII in a publicly shareable URL.
 
@@ -36,9 +36,9 @@ Birth time, place and name are sensitive personal data. The runtime-facing state
   than claiming a clean result. Before any release or visibility change, run the full gate and
   `pnpm run scan:incident:history` in that controlled environment.
 
-## Deferred (Phase 6)
+## Future hardening
 
-Dependency **license** scan and an SPDX-format SBOM. (The dependency **vulnerability** scan
-`scan:deps` and the **secret** scan `scan:secrets` are already wired into `verify:cloud` and
-`verify:all`.) And, if a
-public API is ever added — input limits, rate limiting, CORS/CSP for that surface.
+The dependency **license** scan and committed SPDX SBOM are already enforced in
+`verify:cloud`, alongside the dependency **vulnerability** scan (`scan:deps`) and the secret
+scan (`scan:secrets`). If a public API is ever added, it still needs input limits, rate limiting
+and surface-specific CORS/CSP.
