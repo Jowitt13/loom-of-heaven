@@ -13,7 +13,9 @@ import { AnswerGuardrail } from './answer-plan.ts';
  * 3. High-risk expression patterns (medical, legal, investment, fate, life-death,
  *    manipulation) are blocked in ALL visible text: every heading and every
  *    paragraph of every section, with no section-id exemption.
- * 4. All required caveats and warnings must be claimed as expressed/disclosed.
+ * 4. All material caveats and warnings selected by the AnswerPlan must be
+ *    expressed/disclosed. Plan disclaimers remain traceable metadata, but are
+ *    not a compulsory visible footer for an ordinary answer.
  *
  * Honest scope: citation presence is a structural check — it CANNOT prove that a
  * paragraph's meaning actually follows from the cited facts, and the pattern scan
@@ -125,6 +127,9 @@ export type PlanConstraintKind = z.infer<typeof PlanConstraintKind>;
  * Structured reference from a draft paragraph to a REAL AnswerPlan constraint:
  * kind selects the plan array (disclaimer → answerPlan.disclaimers, caveat →
  * requiredCaveats, warning → requiredWarningCodes) and index locates the entry.
+ * A disclaimer reference is optional: it is available when a user asks for
+ * technical detail or a topic genuinely needs a boundary statement, but default
+ * delivery does not need to render every plan disclaimer.
  * Only paragraphs whose references all resolve are fact-exempt in v2 — a free
  * section id never grants exemption.
  */
@@ -140,8 +145,8 @@ export const ReadingParagraph = z.strictObject({
   /** Fact IDs from the AnswerPlan that ground this paragraph. */
   sourceFactIds: z.array(z.string().max(MAX_FACT_ID_CHARS)).max(MAX_SOURCE_FACT_IDS_PER_PARAGRAPH),
   /**
-   * Present when this paragraph expresses AnswerPlan constraints (disclaimers /
-   * caveats / warnings) instead of new factual claims; such paragraphs are
+   * Present when this paragraph expresses AnswerPlan constraints (caveats /
+   * warnings, or an explicitly requested disclaimer) instead of new factual claims; such paragraphs are
    * fact-exempt only when every reference resolves to a real plan entry.
    */
   constraintRefs: z.array(PlanConstraintRef).max(MAX_CONSTRAINT_REFS_PER_PARAGRAPH).optional(),
@@ -217,7 +222,10 @@ export const ViolationCode = z.enum([
   // Caveat/warning violations
   'MISSING_REQUIRED_CAVEAT', // a requiredCaveat not expressed
   'MISSING_REQUIRED_WARNING', // a requiredWarningCode not disclosed
-  'MISSING_DISCLAIMER', // answerPlan disclaimers not communicated
+  // Legacy diagnostic identifier retained for wire compatibility. V1 default
+  // delivery no longer emits it: plan disclaimers are internal unless material
+  // to the current answer or explicitly requested by the user.
+  'MISSING_DISCLAIMER',
 
   // Constraint-reference violations (v2)
   'INVALID_CONSTRAINT_REF', // a constraintRef does not resolve to a real plan entry

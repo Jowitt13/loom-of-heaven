@@ -16,7 +16,7 @@
  *   node scripts/loom-chart.mjs interpret  --input-file in.json [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file interpretation.json]
  *   node scripts/loom-chart.mjs answer-plan --input-file in.json --topic <topic> [--lens overview|strengths|risks|timing|advice|explain] [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file answer-plan.json]
  *   node scripts/loom-chart.mjs synastry  --input-file people.json [--now <iso|ms>] [--output-file synastry.json]  (1-5 people; set analyzePair when >2)
- *   node scripts/loom-chart.mjs lint-reading --input-file draft-reading.md [--channel topic|full] [--simple] [--output-file reading-lint.json]
+ *   node scripts/loom-chart.mjs lint-reading --input-file draft-reading.md [--channel topic|full] [--simple] [--technical-details] [--output-file reading-lint.json]
  *   node scripts/loom-chart.mjs validate-answer --input-file validate-input.json [--output-file validation-result.json]
  *       (input file is size-capped; ordinary-question gate order: answer-plan → host writes a
  *        reading-draft/v2 JSON → validate-answer → render the SAME visible text as Markdown →
@@ -287,12 +287,16 @@ async function main() {
         return;
       }
       case 'lint-reading': {
-        // Output-layer term firewall for a produced Channel B report (ADR 0011).
-        // Reads a markdown DRAFT (not JSON) and reports term/jargon violations.
+        // Output-layer delivery guard for a produced Channel B report (ADR 0011).
+        // Reads a markdown DRAFT (not JSON) and reports delivery/jargon violations.
         const draftPath = resolve(process.cwd(), requireArg(args, 'input-file'));
         const text = readFileSync(draftPath, 'utf8');
         const channel = args.channel === 'full' ? 'full' : 'topic';
-        const result = lintReading(text, { channel, simple: args.simple === true });
+        const result = lintReading(text, {
+          channel,
+          simple: args.simple === true,
+          technicalDetails: args['technical-details'] === true,
+        });
         writeOutput(args, canonicalJsonPretty(result));
         if (!result.ok) process.exit(1);
         return;

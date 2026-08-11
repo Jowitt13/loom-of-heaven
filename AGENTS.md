@@ -24,7 +24,9 @@ CLI. **The model never computes a chart itself.**
   星曜 or 四化 yourself. If the CLI does not return a value, say so — never backfill.
 - **Offline only.** No network calls, AI model-provider SDKs, or prompt modules in the calculation
   core (enforced by `pnpm run lint`).
-- **No fabricated verdicts.** Interpretation is source-cited; relay every warning honestly.
+- **No fabricated verdicts.** Interpretation is source-cited. Preserve every warning for audit;
+  in a topic reading, state only the practical effect that materially changes the answer, in
+  natural language — never a raw warning code or a warning panel.
 - **De-identified.** Never write a real name, birth time, or location into logs, fixtures, or git.
 
 ## How to run the Skill (the only supported entry point)
@@ -73,3 +75,12 @@ Release acceptance criteria live in [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_C
 
 For traditional-culture, entertainment and self-reflection use. Not scientifically validated
 prediction. Never give deterministic medical, legal, financial, or life-and-death advice.
+
+## Natural narrative delivery (V1)
+
+The default topic answer is continuous, specific prose, not a seven-step report. A professional
+term may appear when its rule mechanism and concrete implication are adjacent. Before writing a
+paragraph, retain its fact evidence, reason, ruleset and relevant caveat internally; the default
+body never prints source ids, rule paths, provenance, warning headings, a fixed disclaimer footer
+or an automatic follow-up menu. Technical detail is shown only when the user asks for it. The
+authoritative delivery contract is [`docs/NARRATIVE_OUTPUT_V1.md`](docs/NARRATIVE_OUTPUT_V1.md).

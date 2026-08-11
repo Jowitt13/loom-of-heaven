@@ -9,9 +9,8 @@ This Skill is the entry point and orchestrator. It does **not** compute charts w
 language model. All astronomy, calendar, ganzhi, star-placement, rule and interpretation math
 is done by the bundled deterministic CLI at `scripts/loom-chart.mjs`. Your job is to gather and
 confirm inputs, call the CLI, **compute every requested system in full** (how much you DISPLAY
-follows the output channel — Channel A shows the full three charts; Channel B shows only the
-asked topic's facts), relay its warnings honestly, and
-narrate only from its output.
+follows the output channel — Channel A shows full technical data; Channel B shows only the
+asked topic's facts), retain warnings honestly for audit, and narrate only from its output.
 
 ## Hard rules
 
@@ -62,7 +61,7 @@ per-system rule settings (Western `zodiac: tropical|sidereal`, `ayanamsha`, `ast
 ## Workflow — identical for EVERY host model (do not shortcut)
 
 To keep results consistent across models, the **calculation** workflow is mandatory: skipping
-`calculate`/`interpret`, a system's computation, or any `warnings` is a **failed run**. The
+`calculate`/`interpret`, a system's computation, or collecting any `warnings` is a **failed run**. The
 **display** of the full four-system chart is now conditional — see step 4 (topic-first).
 
 1. Confirm inputs and restate the local time, place, latitude/longitude, IANA timezone,
@@ -79,21 +78,22 @@ To keep results consistent across models, the **calculation** workflow is mandat
    - **Channel A — 排盘 / 原始数据 / 完整命盘 / 技术报告:** full four-system charts (step 5) + the full BaZi interpretation (step 6) + all warnings/provenance.
    - **Channel B — a single topic (事业/感情/财运/学业/流年):** use only `answerPlan.selectedFacts` and its
      `allowedFactIds`; do not read or attach `chart.json` / `interpretation.json`. The body shows
-     **only the facts relevant to that topic**, with terms under a “专业依据” section. There is no
-     requirement to display all four raw charts or the full 八字 fact set in a topic report.
-   - Per-topic loading: 事业 → `references/reading-style.md` + `references/examples-career.md`; 感情 → `+ references/examples-love.md`; 财运 → `+ references/examples-wealth.md`; 学业/流年 → `reading-style.md`（不加载无关案例文件）。
-   - **Channel B 是强制三阶段写作——第 1-5 部分与追问是无命理术语区：**
-     1. 选事实（内部）：只使用 `answerPlan.selectedFacts`，并保留 `id` / `reason` / `evidence.ref` / `caveat`；**不直接给用户**。
-     2. 通俗中间层（内部写作计划）：把每条事实转成 plainResult / behavior / scenario / upside / risk / action + sourceRefs（对应 `id` 与 evidence.ref）；**不改 schema、不写回输出文件**。
-     3. 成文：第 1-5 部分与结尾追问**只用**通俗中间层；原始 claim/reason、干支、十神、星曜、宫位名**只允许进第 6 部分“专业依据”**。禁止把 claim 轻改后塞进核心结论；禁止括号夹带（不写“技能容易变现（食伤生财）”，写“技能和作品更容易形成收入”，依据放第 6 部分）。“甲戌大运/戊申流年”等干支移入第 6 部分，正文只留年份数字。
-   - **结构与措辞门禁（validate-answer，先于成文）:** 把通俗中间层整理成 `reading-draft/v2` JSON（每段带 `sourceFactIds`；免责/caveat/warning 段落用 `constraintRefs` 引用 AnswerPlan 约束，每一条 disclaimer 都要被引用；legacy `reading-draft/v1` 已在运行时被拒绝），与 `answerPlan` 一起送检：`node scripts/loom-chart.mjs validate-answer --input-file validate-input.json`（输入/输出结构、退出码与限制见 `references/answer-contract.md`）。普通问题的完整门禁顺序：**answer-plan → 写 reading-draft/v2 → validate-answer → 用完全相同的可见文本成文 Markdown → lint-reading → 两个门禁都 ok 才展示；任何重写都必须重新跑两个门禁**。
-   - **术语防火墙 + 真实检查（lint-reading）:** 成文后，删去第 6 部分“专业依据”再检查剩余正文；只要仍出现命理术语（见 `reading-style.md` 开头清单）或顾问黑话，就必须重写。用随 Skill 发布的确定性检查器验证草稿：
-     `node scripts/loom-chart.mjs lint-reading --input-file draft.md --channel topic [--simple]`
-     它输出 `{ ok, violations:[{section,term,category,severity,line,replacementHint}] }`。工作流：①先把报告写入临时草稿 → ②跑 lint-reading → ③按 violations 重写（最多 2 次）→ ④通过（ok:true）才展示 → ⑤仍不过则改用更短更通俗的版本（可加 `--simple`），**绝不把未通过草稿发给用户**。检查器只指出问题，由你重写（不要机械删词，以免病句）。
-   - **空话检测（category 空话）:** 第 1-5 部分不得“没有术语、却说了等于没说”。凡抽象判断（如“逐步提升竞争力/把握机会/稳中求进/需要边界/加强沟通/发挥优势/安全感”），必须在**同一句**用具体动作或可观察表现讲清楚（可用冒号、括号、“也就是”“比如”立即解释）；数字和生活名词只是辅助、不能单独算具体，下一句不相关的具体内容也救不了上一句的抽象（“未来3年稳中求进”“在工作中提高竞争力”必判错，“把收入、支出、储蓄和合作资金分开记录”通过）。检查器会标出这类句子。
-   - **不得换词重复（category 重复，warning）:** 同一个判断不能在 30秒看懂、第2、第3、第5 部分换词重复多次；每一节都要提供新信息，高度相似的连续年份要合并。
+     **only the facts relevant to that topic**. There is no requirement to display all four raw
+     charts or the full fact set in a topic report.
+   - Per-topic loading: use the **自然叙述规范 v1** in `references/reading-style.md`; 事业 → `+ references/examples-career.md`; 感情 → `+ references/examples-love.md`; 财运 → `+ references/examples-wealth.md`; 学业/流年不加载无关案例文件。
+   - **Channel B 的内部链路与默认交付：**先保留每条选中事实的 `id` / `reason` /
+     `evidence.ref` / `caveat`，再按“事实 → 规则机制 → 现实含义 → 条件”写成连续自然段。
+     专业术语可以出现，但术语、机制与具体处境必须紧邻；不得将原始 id、ref、ruleId、
+     ruleset、provenance 或 warning 数据写入默认正文。
+   - **结构与措辞门禁（validate-answer，先于成文）:** 把通俗中间层整理成 `reading-draft/v2` JSON（每段带 `sourceFactIds`；与当前结论直接相关的 caveat/warning 段落用 `constraintRefs` 引用 AnswerPlan 约束；disclaimer 保留为内部可审计字段，仅在用户要求技术细节或当前问题确有必要时引用；legacy `reading-draft/v1` 已在运行时被拒绝），与 `answerPlan` 一起送检：`node scripts/loom-chart.mjs validate-answer --input-file validate-input.json`（输入/输出结构、退出码与限制见 `references/answer-contract.md`）。普通问题的完整门禁顺序：**answer-plan → 写 reading-draft/v2 → validate-answer → 用完全相同的可见文本成文 Markdown → lint-reading → 两个门禁都 ok 才展示；任何重写都必须重新跑两个门禁**。
+   - **交付面与真实检查（lint-reading）:** 默认正文不得含章节模板、`专业依据`、`敏感项校对`、
+     `引擎警告`、`声明`、免责声明页脚、原始来源标识或自动追问菜单。用随 Skill 发布的确定性检查器验证草稿：
+     `node scripts/loom-chart.mjs lint-reading --input-file draft.md --channel topic [--simple] [--technical-details]`
+     它输出 `{ ok, violations:[{section,term,category,severity,line,replacementHint}] }`。默认不带 `--technical-details`；只有用户明确要求来源或计算细节时才加该开关，它会放行来源标识但仍检查空话、重复与越界。工作流：①先把报告写入临时草稿 → ②跑 lint-reading → ③按 violations 重写（最多 2 次）→ ④通过（ok:true）才展示 → ⑤仍不过则改用更短更通俗的版本（可加 `--simple`），**绝不把未通过草稿发给用户**。检查器只指出问题，由你重写（不要机械删词，以免病句）。
+   - **空话检测（category 空话）:** 凡抽象判断（如“逐步提升竞争力/把握机会/稳中求进/需要边界/加强沟通/发挥优势/安全感”），必须在**同一句**用具体动作或可观察表现讲清楚；数字和生活名词只是辅助、不能单独算具体。检查器会标出这类句子。
+   - **不得换词重复（category 重复，warning）:** 同一个判断不能换词重复；每段都要提供新信息，高度相似的连续年份要合并。
    - **事实边界（category 越界，error）:** ① facts 只支持“责任/职位机会”时不得扩写成“升职、加薪”，只有输入 facts 明确含收入/薪资变化才可写加薪；不能把“机会增加”写成“结果一定发生”。② facts 无群体比较数据时禁用“比同龄人/比大多数人/比别人更强”；性格倾向不得扩写成“肯定能做好/一定做得出来”，须区分“愿意做/可能擅长”与“实际能否完成”。③ 引擎不知用户现实经历，第3部分场景必须用“例如/可能出现/如果以后/常见表现可能是”等条件表达，不得认定用户已上班/创业/合伙/结婚/异地/买房/负债。④ 事业正文给“参考方向”时最多 3 类、每类最多 3 个普通人熟悉的岗位例子，并注明“只是参考、非唯一”；完整五行行业映射只放第 6 部分。
-   - **不得靠删内容逃避检查:** 报告仍须保持 7 步结构与信息密度——不得压缩成几句空洞短句、不得删掉风险/时间线/现实建议、不得只写“仅供参考”、不得把具体结论都移到“专业依据”、不得用另一批同义抽象词替换黑话。
+   - **不得靠删内容逃避检查:** 不得压缩成几句空洞短句、不得删掉与问题相关的风险、时间或现实建议，也不得用另一批同义抽象词替换黑话。限制只在它确实影响当前结论时自然说明；用户明确要求技术细节时，才另行展示来源与盘面依据。
 5. **Channel A — full raw charts** from `chart.json`, verbatim (never omit, round away, or re-derive):
    - **西方占星 (Western):** ascendant + MC (when time known), then every planet with `sign`,
      `signDeg`, `house`, `retrograde` and `precision`; the lunar node (mean or true) and — when
@@ -107,15 +107,15 @@ To keep results consistent across models, the **calculation** workflow is mandat
    神煞, 刑冲合害, and the 大运·流年 吉凶倾向 (each fact's `polarity`+`reason`+`source`). These ARE
    engine-produced (via `interpret`); **never** say this version “does not output” them or hand-compute a
    substitute. **Channel A shows the full set; Channel B uses only `answerPlan.selectedFacts`**
-   (their terms go under “专业依据”). Only if the answer plan has no eligible fact may you say it is absent.
-7. Relay every `warnings` entry for Channel A. For Channel B, relay every code in
-   `answerPlan.requiredWarningCodes` using the matching public warning `impact` / `nextStep` — never
-   copy a private warning message or detail. Never present an omitted or approximate result as if it
-   were exact.
+   (their terms may appear naturally when accompanied by their mechanism and implication). Only if
+   the answer plan has no eligible fact may you say it is absent.
+7. Relay every `warnings` entry for Channel A. For Channel B, retain every required warning for
+   audit, but mention only a practical limitation that materially affects the requested conclusion;
+   never copy raw warning codes, private messages or details. Never present an omitted or approximate
+   result as if it were exact.
 8. For a deeper/topic reading (吉凶/运势/事业/感情/财运/学业/流年), narrate only from the
-   `answerPlan` following the **7-step order** in `references/reading-style.md`; cite each
-   selected fact id internally, honor `guardrails`, and keep 排盘校对与免责整篇只出现一次。
-9. **Close with a single one-line follow-up entry** (not a long menu), e.g. “还想看：事业 / 感情 / 财运 / 学业 / 流年？”.
+   `answerPlan` following the natural-delivery rules in `references/reading-style.md`; retain each
+   selected fact id internally and honor `guardrails`. Do not append a fixed 校对、免责声明或追问。
 
 ## Multi-person 合婚 / relationship analysis (`synastry`)
 
@@ -129,8 +129,9 @@ When the user uploads **1-5 people** and asks about a relationship (合婚/配�
 4. Optionally run `calculate --systems all` per person and show each chart; then run `synastry`.
 5. Narrate the pair from `synastry.findings` per `references/reading-style.md` (合婚模板): lead with
    契合度+关键张力, cite 八字/紫微/占星 findings, take the angle for the relationship type (夫妻/情侣/暧昧/前任),
-   give 相处建议, and honor `disclaimers`. **Never** conclude “注定在一起/必分手”.
-6. Close with the synastry `followupOffers` (磨合点/推进年份/合作契合度/与其他人对比).
+   give 相处建议. Keep `disclaimers` internal unless the user asks for technical detail or a
+   boundary is material to the current relationship question. **Never** conclude “注定在一起/必分手”.
+6. Use a synastry `followupOffer` only if the user asks to continue; never append it as an automatic menu.
 
 ## Commands
 
@@ -185,31 +186,31 @@ node scripts/loom-chart.mjs migrate --host qoder|workbuddy --source <extracted-n
 When the user wants an ordinary reading, run `answer-plan` and narrate ONLY from its
 `answerPlan.selectedFacts`. The plan is the de-identified, evidence-grounded substrate — never
 raw birth data and never your own invention. It contains no free-form question text; map the
-question to a bounded topic/lens first, or ask a clarification question. Follow the fixed **7-step order** in
-`references/reading-style.md`:
+question to a bounded topic/lens first, or ask a clarification question. For every substantive
+paragraph, retain the internal chain `fact/evidence → reason/ruleset → concrete implication →
+relevant condition`. Write continuous, specific prose rather than a fixed report sequence.
 
-1. **30秒看懂:** 先给核心结论块（【核心结论】/【最大优势】/【最大风险】/【关键时间】/【现实建议】）。
-2. **现实中会怎么表现:** 把命理结构翻成日常可观察的行为/处境，大白话。
-3. **最可能出现的具体场景:** 1-3 个工作/感情/家庭/金钱场景，无真实经历用“例如/可能表现为”。
-4. **时间线:** 用户可见时间表（时间/现实主题/可能发生什么/怎么应对），**每年同时写有利与风险两路**，锚定引擎大运/流年 fact；不给百分比或“高概率/机会窗口”伪量化。
-5. **可以怎么做:** 针对优势与风险给可执行建议，反绝对化。
-6. **专业依据:** 干支/十神/宫位/星曜/合冲/相位 等术语**只在此节**，引 fact 的 `reason`/`evidence`（`ref`/`ruleId`/出处）。
-7. **信息可靠性与声明:** 出生时间/地点校对 + 全部 `warnings`/不确定性 + 免责，**整篇只一次**。
+Terms such as 干支、十神、宫位、星曜、相位或吠陀分类可以出现，但必须紧接着解释其规则机制和
+现实含义；不要把它们变成脱离结论的术语附录。趋势与年份是传统命理解读，不是统计概率，绝不输出
+X%。不要用后台标签、原始 ref/ruleId、固定免责声明或自动追问打断正文。用户问“为什么”或明确
+要求技术细节时，才在正文之外给出相应的事实、规则和限制来源。
 
-正文用大白话、术语只进第 6 步；趋势与年份是命理判断、非统计概率，绝不输出 X%。
-
-第 1-5 部分按“向一个 15 岁学生解释”写：一句尽量只说一件事；少连续三个名词；少用斜杠/加号/括号；多用“找工作、做项目、跟客户谈、升职、加薪、自己接活、存钱、吵架、搬家”等具体动作；不要用换了包装的行业黑话（专业壁垒/平台核心/定价权/决定权/方法论/赋能/闭环…）。若一句话无法用“具体是谁、在什么场景、做了什么”解释，就说明太抽象，必须重写。成文后用 `lint-reading` 自检（见上面工作流）。
+用具体的工作、关系、金钱或日常选择说明影响；不要用换了包装的行业黑话（专业壁垒/平台核心/
+定价权/决定权/方法论/赋能/闭环…）。若一句话无法用“具体是谁、在什么场景、做了什么”解释，
+就说明太抽象，必须重写。成文后用 `lint-reading` 自检（见上面工作流）。
 
 Guardrails:
 
 - Narrate **only** from `answerPlan.selectedFacts`; if a topic has no fact, say so — do not backfill
   positions, stems, stars, houses, or verdicts.
-- 吉凶/运势 verdicts are permitted as traditional-metaphysical judgements, but honor every item
-  in `disclaimers`: this is traditional-culture / entertainment / self-reflection material, **非科学预测**.
+- 吉凶/运势 verdicts are permitted as traditional-metaphysical judgements. Keep the traditional-
+  culture and non-scientific boundary in the plan for audit; state it naturally only when the
+  current question makes that limitation material, never as a fixed footer.
 - **Never** give deterministic medical, legal, financial, investment, or life-and-death advice.
   Health facts are general five-element notes, not a diagnosis.
-- Where schools disagree or the time is approximate/unknown, state the uncertainty plainly.
-- End with a one-line follow-up entry from `followupOffers` (不罗列长菜单)；排盘校对与免责整篇只一次。
+- Where schools disagree or the time is approximate/unknown, state only the uncertainty that
+  changes the conclusion the user asked about.
+- Use a `followupOffer` only when the user explicitly asks to continue; never append it as a menu.
 
 ## Handling the current engine version
 
@@ -233,8 +234,9 @@ Notes:
 - Lunar input is supported: it is converted to a Gregorian date first (with a `LUNAR_CONVERTED`
   warning). Set `lunarLeapMonth` for a leap month.
 
-Relay every warning plainly; never present an unimplemented or omitted result as if it were
-calculated.
+For a full technical chart, relay every warning plainly. For an ordinary answer, preserve every
+warning for audit but mention only the limitation that changes the requested conclusion; never
+present an omitted or approximate result as if it were calculated.
 
 ## Result handling
 
@@ -247,10 +249,13 @@ calculated.
   of ordinary-topic workspaces; remove them after the task unless the user asks to retain them.
 - If the birth time is unknown, do not claim an ascendant, houses, hour pillar or Zi Wei hour.
 - For full technical output, surface all raw `warnings` and `provenance` versions. For an ordinary
-  answer, surface only the generic impact of `answerPlan.requiredWarningCodes`.
+  answer, fold only a material effect from `answerPlan.requiredWarningCodes` into the paragraph it
+  qualifies; never render raw codes or a warning panel.
 
-## Scope and disclaimer
+## Safety boundary
 
 For traditional-culture, entertainment and self-reflection use. 吉凶/运势/趋势/年份 are 命理
 condition assessments, **非科学预测**. Do not use for medical, legal, financial or other major
-decisions. See `references/sources-and-limitations.md` and `references/privacy.md`.
+decisions. This is a host instruction, not default answer text: include a short, natural boundary
+only when the specific user request concerns one of those decisions. See
+`references/sources-and-limitations.md` and `references/privacy.md`.

@@ -1,8 +1,12 @@
 # 0012 — Empty-talk (vagueness) detection in lint-reading + real-report acceptance
 
-- Status: Accepted
+- Status: Partially superseded by `docs/NARRATIVE_OUTPUT_V1.md` (empty-talk and overreach checks remain active)
 - Date: 2026-07-22
 - Extends: 0011 (Channel B writing isolation + term firewall) — output layer only.
+
+> **Current delivery note (2026-08-11):** The concrete-action requirement remains active.
+> The fixed seven-step requirement, terminology quarantine and mandatory “专业依据” section do not;
+> current default delivery is defined by `docs/NARRATIVE_OUTPUT_V1.md`.
 
 ## Context
 

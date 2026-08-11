@@ -40718,11 +40718,11 @@ var InterpretationFacts = external_exports.object({
   facts: external_exports.array(InterpretationFact),
   /** Rulesets/providers that produced the underlying facts (for traceability). */
   rulesets: external_exports.array(external_exports.object({ id: external_exports.string(), version: external_exports.string() })),
-  /** Global guardrails the host model MUST honor verbatim in spirit. */
+  /** Global guardrails the host MUST honor; they are not a default user-visible footer. */
   disclaimers: external_exports.array(external_exports.string()),
   /**
-   * Standardized closing offers the host should present after the chart: deeper
-   * readings on 事业/感情/财运/学业 etc. So every model ends the same way.
+   * Optional follow-up ideas. A host may use one only when the user invites continuation;
+   * they are never a mandatory closing menu.
    */
   followupOffers: external_exports.array(external_exports.string())
 });
@@ -40862,8 +40862,8 @@ var ReadingParagraph = external_exports.strictObject({
   /** Fact IDs from the AnswerPlan that ground this paragraph. */
   sourceFactIds: external_exports.array(external_exports.string().max(MAX_FACT_ID_CHARS)).max(MAX_SOURCE_FACT_IDS_PER_PARAGRAPH),
   /**
-   * Present when this paragraph expresses AnswerPlan constraints (disclaimers /
-   * caveats / warnings) instead of new factual claims; such paragraphs are
+   * Present when this paragraph expresses AnswerPlan constraints (caveats /
+   * warnings, or an explicitly requested disclaimer) instead of new factual claims; such paragraphs are
    * fact-exempt only when every reference resolves to a real plan entry.
    */
   constraintRefs: external_exports.array(PlanConstraintRef).max(MAX_CONSTRAINT_REFS_PER_PARAGRAPH).optional()
@@ -40934,8 +40934,10 @@ var ViolationCode = external_exports.enum([
   // a requiredCaveat not expressed
   "MISSING_REQUIRED_WARNING",
   // a requiredWarningCode not disclosed
+  // Legacy diagnostic identifier retained for wire compatibility. V1 default
+  // delivery no longer emits it: plan disclaimers are internal unless material
+  // to the current answer or explicitly requested by the user.
   "MISSING_DISCLAIMER",
-  // answerPlan disclaimers not communicated
   // Constraint-reference violations (v2)
   "INVALID_CONSTRAINT_REF",
   // a constraintRef does not resolve to a real plan entry
@@ -57302,7 +57304,7 @@ var LIMITING_WARNING_CODES = /* @__PURE__ */ new Set([
 ]);
 function contentOrder(lens) {
   if (lens === "explain") {
-    return ["summary", "technical-evidence", "uncertainty", "disclaimer"];
+    return ["summary", "technical-evidence", "uncertainty"];
   }
   if (lens === "timing") {
     return [
@@ -57310,8 +57312,7 @@ function contentOrder(lens) {
       "plain-language-explanation",
       "uncertainty",
       "practical-options",
-      "technical-evidence",
-      "disclaimer"
+      "technical-evidence"
     ];
   }
   return [
@@ -57319,19 +57320,47 @@ function contentOrder(lens) {
     "plain-language-explanation",
     "practical-options",
     "uncertainty",
-    "technical-evidence",
-    "disclaimer"
+    "technical-evidence"
   ];
+}
+function evidenceSystem(kind) {
+  switch (kind) {
+    case "western":
+    case "western-rule":
+      return "western";
+    case "bazi":
+    case "bazi-rule":
+      return "bazi";
+    case "ziwei":
+    case "ziwei-horoscope":
+    case "ziwei-rule":
+      return "ziwei";
+    case "vedic":
+    case "vedic-rule":
+      return "vedic";
+    case "time":
+      return "time";
+  }
+}
+function materialWarningCodes(warnings, selectedFacts) {
+  const factSystems = /* @__PURE__ */ new Set();
+  let hasTimeSensitiveCaveat = false;
+  for (const fact2 of selectedFacts) {
+    if (fact2.caveat !== void 0) hasTimeSensitiveCaveat = true;
+    for (const evidence of fact2.evidence) factSystems.add(evidenceSystem(evidence.kind));
+  }
+  return warnings.filter((warning) => {
+    if (warning.system === "time") {
+      return factSystems.has("time") || hasTimeSensitiveCaveat;
+    }
+    return factSystems.has(warning.system);
+  }).map((warning) => warning.code);
 }
 function buildAnswerPlan(publicResult, requestInput) {
   const request = AnswerRequest.parse(requestInput);
   const selectedFacts = selectFacts(publicResult.facts, request.topic);
-  const hasUnavailableSystem = publicResult.systems.some(
-    (system) => system.status === "unavailable"
-  );
-  const hasLimitation = hasUnavailableSystem || publicResult.inputReliability.timeAccuracy !== "exact" || publicResult.warnings.some(
-    (warning) => warning.severity === "warning" || LIMITING_WARNING_CODES.has(warning.code)
-  );
+  const requiredWarningCodes = materialWarningCodes(publicResult.warnings, selectedFacts);
+  const hasLimitation = requiredWarningCodes.some((code) => LIMITING_WARNING_CODES.has(code)) || selectedFacts.some((fact2) => fact2.caveat !== void 0);
   const answerability = selectedFacts.length === 0 ? "not-supported" : hasLimitation ? "limited" : "grounded";
   const noEvidenceReason = selectedFacts.length === 0 ? publicResult.inputReliability.birthTimeKnown ? "NO_TOPIC_FACTS" : "TIME_REQUIRED" : void 0;
   return AnswerPlan.parse({
@@ -57343,7 +57372,7 @@ function buildAnswerPlan(publicResult, requestInput) {
     selectedFacts,
     allowedFactIds: selectedFacts.map((fact2) => fact2.id),
     requiredCaveats: dedupeStrings(selectedFacts.map((fact2) => fact2.caveat)),
-    requiredWarningCodes: publicResult.warnings.map((warning) => warning.code),
+    requiredWarningCodes,
     guardrails: ANSWER_GUARDRAILS,
     responseRequirements: {
       contentOrder: contentOrder(request.lens),
@@ -57683,7 +57712,6 @@ function runValidateAnswer(input) {
       });
     }
   }
-  const referencedDisclaimers = /* @__PURE__ */ new Set();
   const referencedCaveats = /* @__PURE__ */ new Set();
   const referencedWarnings = /* @__PURE__ */ new Set();
   for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
@@ -57751,9 +57779,8 @@ function runValidateAnswer(input) {
       }
       if (refsValid) {
         for (const ref of refs) {
-          if (ref.kind === "disclaimer") referencedDisclaimers.add(ref.index);
-          else if (ref.kind === "caveat") referencedCaveats.add(ref.index);
-          else referencedWarnings.add(ref.index);
+          if (ref.kind === "caveat") referencedCaveats.add(ref.index);
+          else if (ref.kind === "warning") referencedWarnings.add(ref.index);
         }
       }
       const exemptFromMissingFactCheck = (
@@ -57847,17 +57874,6 @@ function runValidateAnswer(input) {
         patternKey: "warning",
         detail: "warningsDisclosed \u4E0E\u6BB5\u843D constraintRefs \u5BF9\u540C\u4E00 warning \u7684\u58F0\u660E\u4E0D\u4E00\u81F4\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.requiredWarningCodes \u4E0B\u6807\uFF09\u3002",
         remediation: "\u4E24\u4E2A\u6765\u6E90\u5FC5\u987B\u4E00\u81F4\uFF1A\u58F0\u660E\u62AB\u9732\u7684\u6BCF\u4E2A warning \u90FD\u8981\u6709\u5BF9\u5E94\u7684 constraintRef\uFF0C\u53CD\u4E4B\u4EA6\u7136\u3002"
-      });
-    }
-  }
-  for (let dIdx = 0; dIdx < answerPlan.disclaimers.length; dIdx++) {
-    if (!referencedDisclaimers.has(dIdx)) {
-      push({
-        code: "MISSING_DISCLAIMER",
-        severity: "error",
-        itemIndex: dIdx,
-        detail: "AnswerPlan \u7684\u67D0\u6761 disclaimer \u672A\u88AB\u4EFB\u4F55\u6BB5\u843D\u7684 constraintRef \u8986\u76D6\uFF08\u89C1 itemIndex \u5BF9\u5E94\u7684 answerPlan.disclaimers \u4E0B\u6807\uFF09\u3002",
-        remediation: '\u7528\u6BB5\u843D\u8868\u8FBE\u6BCF\u4E00\u6761 disclaimer\uFF0C\u5E76\u4E3A\u6BCF\u6761\u52A0 constraintRefs {kind:"disclaimer", index}\u3002'
       });
     }
   }
@@ -58140,14 +58156,6 @@ var MINGLI_WEST = [
   "\u5E99\u65FA"
 ];
 var MINGLI_TIME = ["\u5927\u8FD0", "\u6D41\u5E74", "\u504F\u5409", "\u504F\u51F6", "\u504F\u4E2D\u6027", "\u7A97\u53E3\u671F", "\u80FD\u91CF\u6FC0\u6D3B", "\u8BAE\u9898\u6D6E\u73B0"];
-var CUSTOM_MINGLI = [
-  /[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/g,
-  // 干支组合 (甲戌 / 戊申 …)
-  /上升(?:点|星座|宫|[（(]?\s*ASC)/g,
-  /下降(?:点|星座|宫|[（(]?\s*DSC)/g,
-  /中天|\bMC\b/g,
-  /亮度\s*[“”"『「]?\s*[庙旺得利平不陷]/g
-];
 var JARGON_STRONG = [
   "\u5B9A\u4EF7\u6743",
   "\u8BDD\u8BED\u6743",
@@ -58190,12 +58198,12 @@ var HINTS = {
   \u8D22\u661F: "\u91CD\u89C6\u7A33\u5B9A\u56DE\u62A5\u4E0E\u5BA2\u6237\u5173\u7CFB",
   \u6B63\u8D22: "\u91CD\u89C6\u7A33\u5B9A\u56DE\u62A5\u4E0E\u5BA2\u6237\u5173\u7CFB",
   \u504F\u8D22: "\u7075\u6D3B\u7684\u6536\u5165\u673A\u4F1A",
-  \u8D34\u8EAB: '\u628A\u5E72\u652F/\u4F4D\u7F6E\u63CF\u8FF0\u79FB\u5230"\u4E13\u4E1A\u4F9D\u636E"',
+  \u8D34\u8EAB: "\u7D27\u63A5\u7740\u8BF4\u660E\u8FD9\u9879\u5E72\u652F\u6216\u4F4D\u7F6E\u5173\u7CFB\u5BF9\u5E94\u7684\u89C4\u5219\u673A\u5236\u548C\u73B0\u5B9E\u542B\u4E49",
   \u5B98\u6740: "\u65E9\u671F\u627F\u62C5\u7684\u8D23\u4EFB\u4E0E\u62FF\u5230\u7684\u804C\u4F4D/\u6743\u9650\u53EF\u80FD\u4E0D\u5B8C\u5168\u5339\u914D",
   \u6B63\u5B98: "\u804C\u4F4D\u3001\u89C4\u5219\u4E0E\u8D23\u4EFB",
   \u4E03\u6740: "\u538B\u529B\u3001\u8003\u6838\u4E0E\u8D23\u4EFB",
   \u5B98\u7984\u5BAB: "\u4E8B\u4E1A\u66F4\u9002\u5408\u7A33\u6B65\u79EF\u7D2F\u3001\u9760\u957F\u671F\u4FE1\u7528\u4E0E\u7BA1\u7406\u53D1\u5C55",
-  \u8D22\u5E1B\u5BAB: '\u628A\u7406\u8D22\u98CE\u683C\u63CF\u8FF0\u653E\u5230"\u4E13\u4E1A\u4F9D\u636E"',
+  \u8D22\u5E1B\u5BAB: "\u7D27\u63A5\u7740\u8BF4\u660E\u5BAB\u4F4D\u542B\u4E49\u5982\u4F55\u843D\u5230\u5177\u4F53\u7684\u6536\u652F\u6216\u51B3\u7B56\u4E60\u60EF",
   \u592B\u59BB\u5BAB: "\u6539\u8BF4\u4F34\u4FA3\u7279\u8D28\u6216\u5173\u7CFB\u6C1B\u56F4",
   \u559C\u7528\u4E94\u884C: "\u8F6C\u6210\u5177\u4F53\u80FD\u529B\u6216\u5DE5\u4F5C\u73AF\u5883\uFF0C\u4E0D\u63A8\u8350\u4E94\u884C\u884C\u4E1A",
   \u559C\u7528\u795E: "\u8F6C\u6210\u5177\u4F53\u80FD\u529B\u6216\u5DE5\u4F5C\u73AF\u5883",
@@ -58212,24 +58220,61 @@ var HINTS = {
   \u9AD8\u81EA\u4E3B\u5EA6: "\u4EE5\u540E\u53EF\u4EE5\u81EA\u5DF1\u6311\u5DE5\u4F5C\uFF0C\u4E5F\u53EF\u4EE5\u81EA\u5DF1\u63A5\u6D3B"
 };
 function hintFor(term) {
-  return HINTS[term] ?? '\u6539\u5199\u6210"\u5177\u4F53\u662F\u8C01\u3001\u5728\u4EC0\u4E48\u573A\u666F\u3001\u505A\u4E86\u4EC0\u4E48"\u7684\u5927\u767D\u8BDD\uFF08\u6280\u672F\u4F9D\u636E\u653E\u5230\u4E13\u4E1A\u4F9D\u636E\uFF09';
+  return HINTS[term] ?? "\u6539\u5199\u6210\u5177\u4F53\u7684\u4EBA\u3001\u573A\u666F\u548C\u52A8\u4F5C\uFF0C\u5E76\u8BA9\u672F\u8BED\u7684\u673A\u5236\u4E0E\u73B0\u5B9E\u542B\u4E49\u7D27\u90BB\u51FA\u73B0";
 }
 function esc2(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 function buildTermSpecs() {
   const specs = [];
-  for (const t of [...MINGLI_BAZI, ...MINGLI_ZIWEI, ...MINGLI_WEST, ...MINGLI_TIME]) {
-    specs.push({ re: new RegExp(esc2(t), "g"), category: "\u547D\u7406" });
-  }
-  for (const re of CUSTOM_MINGLI) specs.push({ re, category: "\u547D\u7406" });
   for (const t of JARGON_STRONG) specs.push({ re: new RegExp(esc2(t), "g"), category: "\u9ED1\u8BDD\u5F3A" });
   for (const t of JARGON_SOFT) specs.push({ re: new RegExp(esc2(t), "g"), category: "\u9ED1\u8BDD\u8F6F" });
   return specs;
 }
-var TERM_SPECS = buildTermSpecs();
+var JARGON_SPECS = buildTermSpecs();
 var FOLLOWUP_RE = /还想看|想看更多|想继续看|继续(?:看|了解)|想深入看|接下来想看/;
-var FOLLOWUP_TOPIC_OK = /* @__PURE__ */ new Set(["\u6D41\u5E74", "\u5927\u8FD0"]);
+var DELIVERY_LEAKS = [
+  {
+    term: "\u6A21\u677F\u6807\u9898",
+    re: /^\s{0,3}#{1,6}\s+/,
+    hint: "\u9ED8\u8BA4\u4EA4\u4ED8\u4F7F\u7528\u8FDE\u7EED\u81EA\u7136\u6BB5\uFF1B\u53EA\u6709\u7528\u6237\u660E\u786E\u8981\u6C42\u7ED3\u6784\u5316\u62A5\u544A\u65F6\u624D\u4F7F\u7528\u6807\u9898"
+  },
+  {
+    term: "\u654F\u611F\u9879\u6821\u5BF9",
+    re: /敏感项校对/,
+    hint: "\u5C06\u53D7\u5F71\u54CD\u8303\u56F4\u81EA\u7136\u5199\u8FDB\u76F8\u5173\u6BB5\u843D\uFF0C\u4E0D\u5C55\u793A\u6821\u5BF9\u6807\u9898\u6216\u540E\u53F0\u68C0\u67E5\u7ED3\u679C"
+  },
+  {
+    term: "\u5F15\u64CE\u8B66\u544A",
+    re: /引擎警告|EngineWarning|ENGINE_WARNING/,
+    hint: "\u53EA\u5728\u8BE5\u9650\u5236\u5F71\u54CD\u5F53\u524D\u95EE\u9898\u65F6\uFF0C\u7528\u81EA\u7136\u8BED\u8A00\u8BF4\u660E\u53D7\u5F71\u54CD\u7684\u5224\u65AD\u8303\u56F4"
+  },
+  {
+    term: "\u4E13\u4E1A\u4F9D\u636E",
+    re: /专业依据/,
+    hint: "\u628A\u672F\u8BED\u3001\u673A\u5236\u548C\u73B0\u5B9E\u542B\u4E49\u878D\u5165\u6B63\u6587\uFF1B\u6280\u672F\u7EC6\u8282\u4EC5\u5728\u7528\u6237\u4E3B\u52A8\u8FFD\u95EE\u65F6\u5C55\u5F00"
+  },
+  {
+    term: "\u58F0\u660E",
+    re: /(?:^|[#*\s])(?:信息可靠性与)?声明(?:\*{0,2})?(?:[：:]|$)/m,
+    hint: "\u79FB\u9664\u56FA\u5B9A\u58F0\u660E\u5757\uFF1B\u4EC5\u5728\u4E0E\u5F53\u524D\u95EE\u9898\u76F8\u5173\u7684\u4F4D\u7F6E\u81EA\u7136\u8868\u8FBE\u5FC5\u8981\u8FB9\u754C"
+  },
+  {
+    term: "\u514D\u8D23\u58F0\u660E",
+    re: /免责声明|重要声明/,
+    hint: "\u79FB\u9664\u56FA\u5B9A\u514D\u8D23\u58F0\u660E\u9875\u811A\uFF1B\u9AD8\u98CE\u9669\u95EE\u9898\u53EA\u4FDD\u7559\u6700\u5C0F\u5FC5\u8981\u7684\u81EA\u7136\u63D0\u793A"
+  },
+  {
+    term: "\u56FA\u5B9A\u514D\u8D23\u58F0\u660E\u9875\u811A",
+    re: /^\s*(?:传统命理.{0,80}(?:仅供|非科学预测)|仅供传统文化.{0,80}|.{0,80}非科学预测.{0,80})\s*$/,
+    hint: "\u5220\u9664\u56FA\u5B9A\u9875\u811A\uFF1B\u4EC5\u5728\u5F53\u524D\u95EE\u9898\u786E\u6709\u5FC5\u8981\u65F6\uFF0C\u628A\u8FB9\u754C\u81EA\u7136\u5199\u5165\u76F8\u5173\u6BB5\u843D"
+  },
+  {
+    term: "\u539F\u59CB\u6765\u6E90\u6807\u8BC6",
+    re: /(?:evidenceRef|factId|rulesetId|schemaVersion|provider|\bref\s*:|\bruleId\s*:)/i,
+    hint: "\u5C06\u4E8B\u5B9E\u7F16\u53F7\u3001\u89C4\u5219\u7F16\u53F7\u548C\u6765\u6E90\u8DEF\u5F84\u4FDD\u7559\u5728\u5185\u90E8\u8FFD\u8E2A\u8BB0\u5F55\u6216\u6309\u9700\u6280\u672F\u8BE6\u60C5\u4E2D"
+  }
+];
 var VAGUE_MARKERS = [
   // 抽象目标（只有目标、没有动作）
   "\u63D0\u5347\u7ADE\u4E89\u529B",
@@ -58296,6 +58341,7 @@ var VAGUE_HINT = "\u62BD\u8C61\u5224\u65AD\u5FC5\u987B\u5728\u540C\u4E00\u53E5\u
 var INCOME_FACT_RE = /收入|薪资|薪水|薪酬|进账|赚|回报|财运|财星|财格|得财|进财/;
 var RAISE_RE = /加薪|升职|升上去|晋升|涨薪|涨工资/;
 var SUCCESS_GUARANTEE_RE = /肯定能|一定能|必定能|做得出来|肯定做得|一定能做好|必然能|保证能|稳能/;
+var RELATIONSHIP_FATE_RE = /注定在一起|必分手|必然分手|一定分手|必然结婚|一定结婚|命定伴侣/;
 var GROUP_COMPARE_RE = /比同龄人|比大多数人|比别人|比常人|比一般人|比身边人|比同期/;
 var ASSUMED_FACT_RE = /你现在有|你有一份|你有一个|你已经有|你已经|你和别人正在|你正在和|你目前在|你现在正在|你和[^，。！？；]{0,8}正在|你现在(?:在|有)/;
 var CONDITIONAL_RE = /如果|若|假如|假设|可能|例如|比如|也许|或许|万一|以后|未来|一旦|要是|常见表现|可能出现|会出现|会有这样|或会/;
@@ -58320,8 +58366,6 @@ function splitSentences(md) {
       }
     }
     const heading = !followup && (mdHeading || boldOnly || stepHit && looksHeading);
-    const exempt = (section === "\u4E13\u4E1A\u4F9D\u636E" || section === "\u4FE1\u606F\u53EF\u9760\u6027\u4E0E\u58F0\u660E") && !followup;
-    if (exempt) continue;
     const baseOffset = checkedChars;
     checkedChars += raw.length;
     if (raw.trim() === "") continue;
@@ -58348,17 +58392,47 @@ function lintReading(md, options = {}) {
   const sentences = splitSentences(md);
   const violations = [];
   const seen = /* @__PURE__ */ new Set();
+  if (!options.technicalDetails) {
+    for (const [index, raw] of md.split(/\r?\n/).entries()) {
+      for (const leak of DELIVERY_LEAKS) {
+        if (!leak.re.test(raw)) continue;
+        const key = `delivery|${index + 1}|${leak.term}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        violations.push({
+          section: "\u4EA4\u4ED8\u9762",
+          term: leak.term,
+          category: "\u4EA4\u4ED8\u9762",
+          severity: "error",
+          line: index + 1,
+          replacementHint: leak.hint
+        });
+      }
+      if (FOLLOWUP_RE.test(raw)) {
+        const key = `delivery|${index + 1}|\u81EA\u52A8\u8FFD\u95EE`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        violations.push({
+          section: "\u4EA4\u4ED8\u9762",
+          term: "\u81EA\u52A8\u8FFD\u95EE",
+          category: "\u4EA4\u4ED8\u9762",
+          severity: "error",
+          line: index + 1,
+          replacementHint: "\u5220\u9664\u81EA\u52A8\u8FFD\u95EE\u83DC\u5355\uFF1B\u4EC5\u5728\u7528\u6237\u4E3B\u52A8\u8981\u6C42\u7EE7\u7EED\u65F6\u81EA\u7136\u63A5\u7EED"
+        });
+      }
+    }
+  }
   for (let s = 0; s < sentences.length; s++) {
     const sent = sentences[s];
     const softHits = [];
-    for (const spec of TERM_SPECS) {
+    for (const spec of JARGON_SPECS) {
       spec.re.lastIndex = 0;
       let m;
       while ((m = spec.re.exec(sent.text)) !== null) {
         const term = m[0];
         const matchIndex = m.index;
         if (spec.re.lastIndex === matchIndex) spec.re.lastIndex++;
-        if (sent.followup && FOLLOWUP_TOPIC_OK.has(term)) continue;
         const strict = sent.strictSection || sent.offset + matchIndex < 200;
         if (spec.category === "\u9ED1\u8BDD\u8F6F") {
           softHits.push({ term, strict });
@@ -58437,6 +58511,20 @@ function lintReading(md, options = {}) {
             severity: "error",
             line: sent.line,
             replacementHint: "\u6027\u683C\u503E\u5411\u4E0D\u7B49\u4E8E\u7ED3\u679C\u4FDD\u8BC1\uFF1B\u533A\u5206\u201C\u613F\u610F\u505A/\u53EF\u80FD\u64C5\u957F\u201D\u4E0E\u201C\u5B9E\u9645\u80FD\u5426\u5B8C\u6210\u201D\uFF0C\u52A0\u4E0A\u201C\u8FD8\u8981\u770B\u7ECF\u9A8C\u3001\u65F6\u95F4\u548C\u56E2\u961F\u652F\u6301\u201D"
+          });
+        }
+      }
+      if (RELATIONSHIP_FATE_RE.test(sent.text)) {
+        const key = `${sent.line}|\u5173\u7CFB\u547D\u5B9A\u65AD\u8A00|\u8D8A\u754C`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          violations.push({
+            section: sent.zone,
+            term: "\u5173\u7CFB\u547D\u5B9A\u65AD\u8A00",
+            category: "\u8D8A\u754C",
+            severity: "error",
+            line: sent.line,
+            replacementHint: "\u53EA\u80FD\u63CF\u8FF0\u4E92\u52A8\u6A21\u5F0F\u3001\u538B\u529B\u6761\u4EF6\u548C\u76F8\u5904\u5EFA\u8BAE\uFF1B\u4E0D\u5F97\u65AD\u8A00\u201C\u6CE8\u5B9A\u5728\u4E00\u8D77/\u5FC5\u5206\u624B/\u4E00\u5B9A\u7ED3\u5A5A\u201D"
           });
         }
       }

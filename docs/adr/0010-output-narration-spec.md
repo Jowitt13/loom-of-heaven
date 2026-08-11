@@ -1,7 +1,13 @@
 # ADR 0010: Output narration spec — dual-channel display, 7-step realistic reading, example libraries
 
-- Status: Accepted
+- Status: Superseded for default topic delivery by `docs/NARRATIVE_OUTPUT_V1.md` (historical rationale retained)
 - Date: 2026-07-22
+
+> **Current delivery note (2026-08-11):** Channel B no longer uses a fixed seven-step report,
+> a term-only “专业依据” appendix, a universal declaration footer, or an automatic follow-up.
+> Facts remain traceable internally; terms may appear in natural prose when their mechanism and
+> practical implication are adjacent. This ADR remains the historical record of the dual-channel
+> boundary, not the current default-writing specification.
 
 ## Context
 

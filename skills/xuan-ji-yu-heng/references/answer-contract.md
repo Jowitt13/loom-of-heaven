@@ -77,7 +77,7 @@ For an ordinary answer, the host must:
 
 1. Use only `answerPlan.selectedFacts` and cite their ids internally.
 2. Explain conclusions in plain language before technical terminology.
-3. State every required caveat and use the corresponding fixed public warning `impact` / `nextStep`.
+3. State every material caveat and required warning naturally in the paragraph it affects; do not create a fixed disclaimer footer.
 4. Honor all guardrails: traditional-culture framing; evidence-only reasoning; no deterministic
    fate, medical, legal, investment, life-and-death or unsupported-comparison claims.
 5. Run BOTH deterministic gates before displaying anything, in this order:
@@ -111,14 +111,13 @@ The input file is one JSON object: `{ "answerPlan": { … }, "readingDraft": { �
       "paragraphs": [{ "text": "…", "sourceFactIds": ["fact-1"] }]
     },
     {
-      "id": "disclaimer",
-      "heading": "信息可靠性与声明",
+      "id": "conditions",
+      "heading": "这项判断受出生时间影响",
       "paragraphs": [
         {
           "text": "…",
           "sourceFactIds": [],
           "constraintRefs": [
-            { "kind": "disclaimer", "index": 0 },
             { "kind": "caveat", "index": 0 },
             { "kind": "warning", "index": 0 }
           ]
@@ -148,9 +147,10 @@ The input file is one JSON object: `{ "answerPlan": { … }, "readingDraft": { �
 - `caveatsExpressed` / `warningsDisclosed` must stay consistent with the `constraintRefs`:
   a required caveat/warning that is declared but never referenced (or vice versa) is a
   `CONSTRAINT_ATTESTATION_MISMATCH` error.
-- EVERY entry in `answerPlan.disclaimers` must be covered by its own
-  `{ "kind": "disclaimer", "index": i }` reference — covering just one of several is a
-  per-item `MISSING_DISCLAIMER` error. This strictness is an explicit, auditable v2 rule.
+- `answerPlan.disclaimers` remains internal, auditable safety metadata. It does not require a
+  default visible section. A host may reference a disclaimer with
+  `{ "kind": "disclaimer", "index": i }` when the user explicitly asks for technical detail
+  or the current subject makes that boundary material.
 - Legacy `reading-draft/v1` is REJECTED at runtime (`UNSUPPORTED_CONTRACT_VERSION`) — a
   breaking change targeted at the next release (v0.2.0). Runtime acceptance of
   caller-selected v1 would re-enable the removed section-id fact exemption, so migration

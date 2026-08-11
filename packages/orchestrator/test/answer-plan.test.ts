@@ -139,6 +139,40 @@ describe('public result and answer plan', () => {
     expect(answerPlan.answerability).toBe('limited');
   });
 
+  it('requires only warnings that qualify facts selected for the current topic', () => {
+    const { publicResult } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
+    const scoped = {
+      ...publicResult,
+      facts: [
+        {
+          ...publicResult.facts[0]!,
+          topic: 'career' as const,
+          caveat: undefined,
+          evidence: [{ kind: 'bazi' as const, ref: 'bazi.test' }],
+        },
+      ],
+      warnings: [
+        {
+          code: 'BAZI_GENDER_REQUIRED' as const,
+          severity: 'warning' as const,
+          system: 'bazi' as const,
+          impact: '八字的周期结果受限。',
+          nextStep: '补充所需信息后可重新计算。',
+        },
+        {
+          code: 'HIGH_LATITUDE_HOUSE_RISK' as const,
+          severity: 'warning' as const,
+          system: 'western' as const,
+          impact: '西方宫位可能不稳定。',
+          nextStep: '需要时比较不同宫制。',
+        },
+      ],
+    };
+    const plan = buildAnswerPlan(scoped, { topic: 'career' });
+    expect(plan.requiredWarningCodes).toEqual(['BAZI_GENDER_REQUIRED']);
+    expect(plan.responseRequirements.contentOrder).not.toContain('disclaimer');
+  });
+
   it('uses fixed public warning copy and removes exact dynamic target dates', () => {
     const output = runAnswerPlan(syntheticInput, {
       now: FIXED,
