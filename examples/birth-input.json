@@ -20,14 +20,20 @@
     "systems": [
       "western",
       "bazi",
-      "ziwei"
+      "ziwei",
+      "vedic"
     ],
+    "vedic": {
+      "dashaYear": "julian-365.25",
+      "nodes": "mean",
+      "rulesetId": "vedic-parashara-lahiri@0.1.0"
+    },
     "western": {
       "asteroids": true,
       "ayanamsha": "lahiri",
       "houseSystem": "placidus",
       "nodes": "true",
-      "rulesetId": "western-tropical-placidus@0.1.0",
+      "rulesetId": "western-tropical-placidus@0.2.0",
       "zodiac": "tropical"
     },
     "ziwei": {

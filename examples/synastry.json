@@ -7,7 +7,7 @@
       "不下\"注定在一起 / 必分手 / 必成\"等绝对化断语；张力多的组合可通过沟通与磨合改善，吉多亦需现实经营。",
       "合婚仅为参考，重大关系决定请结合现实相处、双方意愿与专业咨询，勿以命理替代沟通。"
     ],
-    "engineVersion": "0.1.1",
+    "engineVersion": "0.4.0",
     "findings": [
       {
         "claim": "综合信号：吉/合 14 项、张力/冲 13 项、中性 0 项",
@@ -345,7 +345,7 @@
         "timezone": "Asia/Shanghai"
       }
     ],
-    "requestId": "req_syn_e3045c7484e4f036",
+    "requestId": "req_syn_ca3fc116635f76a6",
     "schemaVersion": "0.1.0"
   }
 }

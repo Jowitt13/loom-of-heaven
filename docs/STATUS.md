@@ -83,8 +83,8 @@ retired and must never be pushed from or copied from.
   archive round-trips. Also extractable by standard tools (verified with `Expand-Archive`).
 - De-identified end-to-end example: `tools/gen-example.ts` (`pnpm run example`) runs the published
   bundle from a fictional birth record and writes
-  `examples/{birth-input.json,chart.json,chart-report.html,chart-report.svg}` �?deterministic and
-  safe to commit.
+  `examples/{birth-input.json,chart.json,interpretation.json,synastry.json}` — deterministic and
+  safe to commit. The HTML/SVG renderer remains paused and writes no example artifacts.
 - Privacy remediation + guard: removed stray real-looking birth data (`scripts/birth-input.json`,
   `scripts/chart.json`, `.tmp/`) from the Skill source, and added a `validate:skill` check that
   `scripts/` holds only `loom-chart.mjs`, `fixtures/`, `dist/` (handoff §10); the enforced check
@@ -179,7 +179,7 @@ never by hand.
 | Command                        | Result                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm run typecheck`           | clean (tsc strict over packages, tools, tests)                                                                                                                                                                                                                                                                                            |
-| `pnpm run test`                | 716 tests / 43 files �?all passing (all systems + JPL Horizons 独立 golden + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + validate-answer v2 结构与措辞门禁（约束引用事实豁免+全可见文本安全扫�?资源上限+有界解析入口，非语义正确性证明） + western-rules/ziwei-rules 语义规则 + 版本迁移/回滚/目标白名�?+ PII 隐私护栏 green) |
+| `pnpm run test`                | 719 tests / 44 files �?all passing (all systems + JPL Horizons 独立 golden + interpret + 吉凶 + 合婚 + reading-lint/空话/重复/越界 + validate-answer v2 结构与措辞门禁（约束引用事实豁免+全可见文本安全扫�?资源上限+有界解析入口，非语义正确性证明） + western-rules/ziwei-rules 语义规则 + 版本迁移/回滚/目标白名�?+ PII 隐私护栏 green) |
 | `pnpm run build`               | `engine.mjs` �?3.1 MB + `sbom.cdx.json` + `sbom.spdx.json` (11 runtime deps)                                                                                                                                                                                                                                                              |
 | `pnpm run validate:skill`      | 40 / 40 (incl. scripts/ no-stray-files guard + CycloneDX/SPDX SBOM checks + validate-answer/lint-reading gate-workflow doc checks)                                                                                                                                                                                                        |
 | `pnpm run validate:reading`    | 36 / 36 (topic example libraries + output-spec structure + natural-delivery boundary; offline, no LLM)                                                                                                                                                                                                                                    |
