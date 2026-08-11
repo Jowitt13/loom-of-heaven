@@ -59,7 +59,7 @@ the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not h
 resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **736 tests / 43 files �?all passing**. The Western provider
+- Typecheck: clean. Tests: **716 tests / 43 files �?all passing**. The Western provider
   (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 �?�?gate two ways: wrapper-consistency
   (vs astronomy-engine's own output) plus an **independent JPL Horizons golden** (10 bodies × 3
   technical epochs fetched from the NASA/JPL Horizons service, query recorded in
@@ -70,14 +70,14 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   刑冲合害/神煞/大运吉凶 `polarity`) are covered, and the cross-system interpretation-facts layer is
   checked for topic coverage, grounded evidence, `followupOffers`, de-identification and honest
   caveats. Skill validate: **40/40** (incl. the scripts/ no-stray-files guard, both SBOM checks and the validate-answer/lint-reading gate-workflow doc checks). Reading-example
-  static validate: **53/53** (topic example libraries + output-spec structure + the Channel B
-  无术语区 term firewall; offline, no LLM �?it proves the spec/sample structure, **not** that a host
+  static validate: **36/36** (topic example libraries + output-spec structure + the Channel B
+  V1 natural-delivery boundary + source trace; offline, no LLM �?it proves the spec/sample structure, **not** that a host
   model follows the style 100% of the time). Docs-consistency `validate:docs` passes (four full hosts /
   render disabled / no wrong-ephemeris attribution / dev Node �?24 vs run Node �?22, with positive+negative
   self-tests). Host packages are verified by extracting the REAL candidate zips (single top-level dir, no
-  double-nesting, doctor/verify/calculate byte-identical to canonical). The same firewall ships as `loom-chart.mjs lint-reading`
+  double-nesting, doctor/verify/calculate byte-identical to canonical). The same V1 delivery gate ships as `loom-chart.mjs lint-reading`
   (ADR 0011), which can lint a REAL produced report (`--channel topic [--simple]`) and exit non-zero on
-  命理/黑话 terms in sections 1-5 �?still a static text gate, not a guarantee of host-model wording. Round 9 (ADR 0012) added an 空话 (vagueness) check: abstract judgements in sections 1-5 must carry a concrete
+  leaked delivery artifacts, generic consultant jargon, empty talk, repetition or unsupported claims �?still a static text gate, not a guarantee of host-model wording. Round 9 (ADR 0012) added an 空话 (vagueness) check: abstract judgements in default delivery must carry a concrete
   action/scene/observable/result nearby, and three REAL reports (male, 1990-06-15 14:20, 示例城市; 事业/感情/
   财运, saved unpolished to `docs/round9-acceptance/`) lint to 0 error (test #8 reads them). The detector is a
   nearby-concreteness heuristic, not a meaning judge. The `validate-answer` gate is a **deterministic

@@ -1,8 +1,13 @@
 # 0011 — Channel B writing isolation and the reading-lint term firewall
 
-- Status: Accepted
+- Status: Superseded for default topic delivery by `docs/NARRATIVE_OUTPUT_V1.md` (historical rationale retained)
 - Date: 2026-07-22
 - Supersedes/extends: 0010 (output-narration spec) — output layer only.
+
+> **Current delivery note (2026-08-11):** `lint-reading` remains a deterministic delivery gate,
+> but it no longer quarantines professional vocabulary into a “专业依据” section. Its current job is
+> to reject delivery-surface leakage, empty talk, repetition and overreach while allowing a term
+> when it is naturally connected to its mechanism and concrete implication.
 
 ## Context
 

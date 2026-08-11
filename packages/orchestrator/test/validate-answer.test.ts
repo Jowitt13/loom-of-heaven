@@ -360,7 +360,7 @@ describe('validate-answer — fact boundary and safety layer', () => {
       expect(result.violations.some((v) => v.code === 'MISSING_REQUIRED_WARNING')).toBe(true);
     });
 
-    it('MISSING_DISCLAIMER: errors per uncovered plan disclaimer', () => {
+    it('V1: does not force plan disclaimers into an ordinary visible draft', () => {
       const draft = makeDraft({
         sections: [
           {
@@ -371,12 +371,12 @@ describe('validate-answer — fact boundary and safety layer', () => {
           // No disclaimer-referencing paragraph
         ],
       });
-      const result = validateAnswer({ answerPlan: makePlan(), readingDraft: draft });
-      expect(result.ok).toBe(false); // explicit v2 strictness: uncovered disclaimers are errors
-      const missing = result.violations.find((v) => v.code === 'MISSING_DISCLAIMER');
-      expect(missing).toBeDefined();
-      expect(missing!.severity).toBe('error');
-      expect(missing!.itemIndex).toBe(0);
+      const result = validateAnswer({
+        answerPlan: makePlan({ requiredCaveats: [], requiredWarningCodes: [] }),
+        readingDraft: draft,
+      });
+      expect(result.ok).toBe(true);
+      expect(result.violations.some((v) => v.code === 'MISSING_DISCLAIMER')).toBe(false);
     });
   });
 
@@ -1822,19 +1822,16 @@ describe('validate-answer — fact boundary and safety layer', () => {
     });
   });
 
-  describe('per-item disclaimer coverage (R5)', () => {
-    it('with two plan disclaimers, referencing only one is an error for the other', () => {
+  describe('optional disclaimer references (V1)', () => {
+    it('with two plan disclaimers, a default draft need not render either one', () => {
       const plan = makePlan({ disclaimers: ['合成声明一。', '合成声明二。'] });
-      const draft = makeDraft(); // default draft references disclaimer 0 only
+      const draft = makeDraft(); // optional disclosure may reference one, but need not cover all
       const result = runValidated(plan, draft);
-      expect(result.ok).toBe(false);
-      const missing = result.violations.find((v) => v.code === 'MISSING_DISCLAIMER');
-      expect(missing).toBeDefined();
-      expect(missing!.severity).toBe('error');
-      expect(missing!.itemIndex).toBe(1);
+      expect(result.ok).toBe(true);
+      expect(result.violations.some((v) => v.code === 'MISSING_DISCLAIMER')).toBe(false);
     });
 
-    it('referencing every plan disclaimer passes', () => {
+    it('permits an explicitly requested technical disclosure to reference plan disclaimers', () => {
       const plan = makePlan({ disclaimers: ['合成声明一。', '合成声明二。'] });
       const draft = makeDraft({
         sections: [

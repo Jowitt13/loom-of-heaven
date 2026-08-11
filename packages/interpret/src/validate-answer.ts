@@ -25,9 +25,10 @@
  *    defined as PLAIN TEXT (no HTML, no entities, no Markdown link/image syntax)
  *    so there is no decode/render divergence — any markup is rejected with
  *    CONTAINS_MARKUP before the rule scan runs.
- * 4. Required caveats/warnings via structured `constraintRefs`, with
- *    `caveatsExpressed`/`warningsDisclosed` required to stay consistent; every
- *    plan disclaimer must be covered by a reference, item by item.
+ * 4. Material caveats/warnings via structured `constraintRefs`, with
+ *    `caveatsExpressed`/`warningsDisclosed` required to stay consistent. Plan
+ *    disclaimers remain auditable metadata and may be referenced when relevant,
+ *    but they are not a mandatory visible footer in V1 delivery.
  * 5. Protective resource limits reject oversized inputs before any regex
  *    scanning and cap reported violations. These bound the parse+validation
  *    stages only; the CLI adds a file-byte cap before reading.
@@ -572,7 +573,6 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
   // 3 + 4. Per-section checks. Fact-count exemption requires valid
   // constraintRefs on the paragraph — nothing else. The high-risk scan (4)
   // covers every heading and paragraph regardless.
-  const referencedDisclaimers = new Set<number>();
   const referencedCaveats = new Set<number>();
   const referencedWarnings = new Set<number>();
 
@@ -656,9 +656,8 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
       }
       if (refsValid) {
         for (const ref of refs) {
-          if (ref.kind === 'disclaimer') referencedDisclaimers.add(ref.index);
-          else if (ref.kind === 'caveat') referencedCaveats.add(ref.index);
-          else referencedWarnings.add(ref.index);
+          if (ref.kind === 'caveat') referencedCaveats.add(ref.index);
+          else if (ref.kind === 'warning') referencedWarnings.add(ref.index);
         }
       }
 
@@ -775,23 +774,6 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
           'warningsDisclosed 与段落 constraintRefs 对同一 warning 的声明不一致（见 itemIndex 对应的 answerPlan.requiredWarningCodes 下标）。',
         remediation:
           '两个来源必须一致：声明披露的每个 warning 都要有对应的 constraintRef，反之亦然。',
-      });
-    }
-  }
-
-  // 7. Disclaimers: EVERY plan disclaimer must be covered by a constraintRef,
-  // item by item — "any one referenced" is not enough. This is an explicit,
-  // auditable v2 requirement (error severity), not an implicit ok:true policy.
-  for (let dIdx = 0; dIdx < answerPlan.disclaimers.length; dIdx++) {
-    if (!referencedDisclaimers.has(dIdx)) {
-      push({
-        code: 'MISSING_DISCLAIMER',
-        severity: 'error',
-        itemIndex: dIdx,
-        detail:
-          'AnswerPlan 的某条 disclaimer 未被任何段落的 constraintRef 覆盖（见 itemIndex 对应的 answerPlan.disclaimers 下标）。',
-        remediation:
-          '用段落表达每一条 disclaimer，并为每条加 constraintRefs {kind:"disclaimer", index}。',
       });
     }
   }

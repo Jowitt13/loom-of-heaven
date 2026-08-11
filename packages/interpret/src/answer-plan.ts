@@ -214,7 +214,7 @@ const LIMITING_WARNING_CODES = new Set<PublicWarning['code']>([
 
 function contentOrder(lens: AnswerLens): AnswerPlan['responseRequirements']['contentOrder'] {
   if (lens === 'explain') {
-    return ['summary', 'technical-evidence', 'uncertainty', 'disclaimer'];
+    return ['summary', 'technical-evidence', 'uncertainty'];
   }
   if (lens === 'timing') {
     return [
@@ -223,7 +223,6 @@ function contentOrder(lens: AnswerLens): AnswerPlan['responseRequirements']['con
       'uncertainty',
       'practical-options',
       'technical-evidence',
-      'disclaimer',
     ];
   }
   return [
@@ -232,8 +231,54 @@ function contentOrder(lens: AnswerLens): AnswerPlan['responseRequirements']['con
     'practical-options',
     'uncertainty',
     'technical-evidence',
-    'disclaimer',
   ];
+}
+
+/** Map a public evidence kind back to the system whose result it qualifies. */
+function evidenceSystem(kind: PublicFact['evidence'][number]['kind']): EngineWarning['system'] {
+  switch (kind) {
+    case 'western':
+    case 'western-rule':
+      return 'western';
+    case 'bazi':
+    case 'bazi-rule':
+      return 'bazi';
+    case 'ziwei':
+    case 'ziwei-horoscope':
+    case 'ziwei-rule':
+      return 'ziwei';
+    case 'vedic':
+    case 'vedic-rule':
+      return 'vedic';
+    case 'time':
+      return 'time';
+  }
+}
+
+/**
+ * Default delivery only needs a warning when it qualifies a fact used for the
+ * user's current topic. The full public result retains every warning for audit
+ * and technical detail on request.
+ */
+function materialWarningCodes(
+  warnings: PublicWarning[],
+  selectedFacts: PublicFact[],
+): PublicWarning['code'][] {
+  const factSystems = new Set<EngineWarning['system']>();
+  let hasTimeSensitiveCaveat = false;
+  for (const fact of selectedFacts) {
+    if (fact.caveat !== undefined) hasTimeSensitiveCaveat = true;
+    for (const evidence of fact.evidence) factSystems.add(evidenceSystem(evidence.kind));
+  }
+
+  return warnings
+    .filter((warning) => {
+      if (warning.system === 'time') {
+        return factSystems.has('time') || hasTimeSensitiveCaveat;
+      }
+      return factSystems.has(warning.system);
+    })
+    .map((warning) => warning.code);
 }
 
 /**
@@ -246,15 +291,10 @@ export function buildAnswerPlan(
 ): AnswerPlan {
   const request = AnswerRequestSchema.parse(requestInput);
   const selectedFacts = selectFacts(publicResult.facts, request.topic);
-  const hasUnavailableSystem = publicResult.systems.some(
-    (system) => system.status === 'unavailable',
-  );
+  const requiredWarningCodes = materialWarningCodes(publicResult.warnings, selectedFacts);
   const hasLimitation =
-    hasUnavailableSystem ||
-    publicResult.inputReliability.timeAccuracy !== 'exact' ||
-    publicResult.warnings.some(
-      (warning) => warning.severity === 'warning' || LIMITING_WARNING_CODES.has(warning.code),
-    );
+    requiredWarningCodes.some((code) => LIMITING_WARNING_CODES.has(code)) ||
+    selectedFacts.some((fact) => fact.caveat !== undefined);
   const answerability =
     selectedFacts.length === 0 ? 'not-supported' : hasLimitation ? 'limited' : 'grounded';
   const noEvidenceReason =
@@ -273,7 +313,7 @@ export function buildAnswerPlan(
     selectedFacts,
     allowedFactIds: selectedFacts.map((fact) => fact.id),
     requiredCaveats: dedupeStrings(selectedFacts.map((fact) => fact.caveat)),
-    requiredWarningCodes: publicResult.warnings.map((warning) => warning.code),
+    requiredWarningCodes,
     guardrails: ANSWER_GUARDRAILS,
     responseRequirements: {
       contentOrder: contentOrder(request.lens),

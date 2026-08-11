@@ -4,43 +4,20 @@ import { existsSync, readFileSync } from 'node:fs';
 import { lintReading } from '../packages/interpret/src/reading-lint.ts';
 
 /**
- * Offline, no-network, no-LLM static validator for the topic example libraries and the
- * output-narration spec (ADR 0010). It proves the SPEC + SAMPLES are structurally complete
- * (7-step 优秀 cases, no absolutist words in the good examples, timeline shows both sides,
- * facts↔evidence correspondence). It canNOT prove that a host model will follow the style
- * 100% of the time — that limitation is stated in docs/VALIDATION.md. Exit non-zero on failure.
+ * Offline V1 narration-spec validator. It checks that the shipped examples model the
+ * default delivery surface: natural prose with terms, mechanisms and implications,
+ * while source traces remain explicitly internal. It cannot prove host-model semantics.
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
-const skillDir = join(root, 'skills', 'xuan-ji-yu-heng');
-const refDir = join(skillDir, 'references');
-const skillMdPath = join(skillDir, 'SKILL.md');
+const refDir = join(root, 'skills', 'xuan-ji-yu-heng', 'references');
+const skillMdPath = join(root, 'skills', 'xuan-ji-yu-heng', 'SKILL.md');
+const stylePath = join(refDir, 'reading-style.md');
 
 const EXAMPLE_FILES = ['examples-career.md', 'examples-love.md', 'examples-wealth.md'];
-const BANNED = [
-  '天生不能',
-  '注定',
-  '必须创业',
-  '必分手',
-  '必结婚',
-  '必发财',
-  '稳赚',
-  '一定会',
-  '必婚',
-  '必分',
-  '一定发财',
-];
-const SEVEN_STEPS = [
-  '30秒看懂',
-  '现实中会怎么表现',
-  '最可能出现的具体场景',
-  '时间线',
-  '可以怎么做',
-  '专业依据',
-  '信息可靠性与声明',
-];
-const SCENE_WORDS = ['例如', '可能表现为', '常见场景是'];
+const FATE_WORDS = ['注定在一起', '必分手', '必然分手', '一定分手', '必然结婚', '一定结婚'];
+const TERM_RE = /月令|日主|官杀|中天|MC|官禄宫|夫妻宫|第七宫主星|日支|财星|劫财|财帛宫|金星/;
 
 interface Check {
   name: string;
@@ -52,172 +29,91 @@ const add = (name: string, ok: boolean, detail?: string): void => {
   checks.push(detail === undefined ? { name, ok } : { name, ok, detail });
 };
 
-/** The end-to-end 优秀 block: from a `### …✅…` heading to the next 3-hash `### ` heading. */
-function goodBlock(md: string): string {
+function sectionAfter(md: string, heading: string): string {
   const lines = md.split(/\r?\n/);
-  let start = -1;
-  for (let i = 0; i < lines.length; i++) {
-    if (/^###\s+.*✅/.test(lines[i]!)) {
-      start = i;
-      break;
-    }
-  }
+  const start = lines.findIndex((line) => new RegExp(`^#{2,3} ${heading}$`).test(line));
   if (start < 0) return '';
   let end = lines.length;
-  for (let i = start + 1; i < lines.length; i++) {
-    if (/^###\s/.test(lines[i]!)) {
-      end = i;
+  for (let index = start + 1; index < lines.length; index++) {
+    if (/^#{2,3} /.test(lines[index]!)) {
+      end = index;
       break;
     }
   }
-  return lines.slice(start, end).join('\n');
+  return lines
+    .slice(start + 1, end)
+    .join('\n')
+    .trim();
 }
 
-/** Good-example scope for the banned-word check: the 优秀 block + every 局部改写 `✅` line. */
-function goodContent(md: string): string {
-  const block = goodBlock(md);
-  const rewriteGood = md
-    .split(/\r?\n/)
-    .filter((l) => /^\s*[-*]\s*✅/.test(l))
-    .join('\n');
-  return `${block}\n${rewriteGood}`;
-}
-
-/** The `### 输入事实` section text (up to the next 3-hash heading). */
-function sectionAfter(md: string, headingRe: RegExp): string {
-  const lines = md.split(/\r?\n/);
-  let start = -1;
-  for (let i = 0; i < lines.length; i++) {
-    if (headingRe.test(lines[i]!)) {
-      start = i;
-      break;
-    }
-  }
-  if (start < 0) return '';
-  let end = lines.length;
-  for (let i = start + 1; i < lines.length; i++) {
-    if (/^###?\s/.test(lines[i]!)) {
-      end = i;
-      break;
-    }
-  }
-  return lines.slice(start + 1, end).join('\n');
-}
-
-/** ref:/ruleId: tokens declared in a facts section. */
-function refTokens(text: string): string[] {
-  const out: string[] = [];
-  const re = /(?:ref|ruleId):\s*([^\s|、，)）]+)/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text)) !== null) out.push(m[1]!);
-  return out;
-}
-
-// --- Per-file structural checks ---------------------------------------------------
 for (const file of EXAMPLE_FILES) {
-  const p = join(refDir, file);
-  const ok = existsSync(p);
-  add(`example file exists: references/${file}`, ok);
-  if (!ok) continue;
-  const md = readFileSync(p, 'utf8');
+  const path = join(refDir, file);
+  const exists = existsSync(path);
+  add(`example exists: references/${file}`, exists);
+  if (!exists) continue;
 
-  add(`${file}: has 输入事实`, /###\s+输入事实/.test(md));
-  add(`${file}: has ❌ 错误表达`, /###\s+❌/.test(md));
-  add(`${file}: has 错在哪里`, /###\s+错在哪里/.test(md));
-  add(`${file}: has ✅ 优秀表达`, /###\s+.*✅/.test(md));
-  add(`${file}: has 对照检查`, /###\s+对照检查/.test(md));
-  add(`${file}: has 输出自检清单`, /##\s+输出自检清单/.test(md));
+  const md = readFileSync(path, 'utf8');
+  const input = sectionAfter(md, '输入事实');
+  const delivery = sectionAfter(md, '可交付示例');
+  const trace = sectionAfter(md, '内部来源（默认不展示）');
 
-  const block = goodBlock(md);
-  const missingSteps = SEVEN_STEPS.filter((s) => !block.includes(s));
-  add(`${file}: 优秀案例含 7 个步骤`, missingSteps.length === 0, missingSteps.join('、'));
+  add(`${file}: 输入事实存在`, input.length > 0);
+  add(`${file}: 可交付示例存在`, delivery.length > 0);
+  add(`${file}: 内部来源存在`, trace.length > 0);
+  add(`${file}: 正文保留至少一个专业术语`, TERM_RE.test(delivery));
+  add(`${file}: 内部来源含 chart facts`, /chart facts:/.test(trace));
+  add(`${file}: 内部来源含规则或限制`, /rules:|limitations:/.test(trace));
 
-  const good = goodContent(md);
-  const hitBanned = BANNED.filter((w) => good.includes(w));
-  add(`${file}: 优秀表达无绝对化词`, hitBanned.length === 0, hitBanned.join('、'));
-
-  // ADR 0011: the user-visible narration is a no-term zone. lint-reading exempts the
-  // 专业依据/声明 sections, so the end-to-end 优秀正文 (steps 1-5) must be term-free, and
-  // every 局部改写 `✅ 用户可见表达` line (checked in strict/simple mode) must be term-free too.
-  const lintMain = lintReading(block, { channel: 'topic' });
+  const lint = lintReading(delivery, { channel: 'topic' });
+  const errors = lint.violations.filter((v) => v.severity === 'error');
   add(
-    `${file}: 优秀正文无命理术语/黑话 (lint-reading)`,
-    lintMain.ok,
-    lintMain.violations
-      .filter((v) => v.severity === 'error')
-      .map((v) => `${v.term}@${v.section}`)
-      .join('、'),
-  );
-  const visibleRewrite = md
-    .split(/\r?\n/)
-    .filter((l) => /✅\s*用户可见/.test(l))
-    .join('\n');
-  const lintRewrite = lintReading(visibleRewrite, { channel: 'topic', simple: true });
-  add(
-    `${file}: 局部改写 ✅用户可见 无术语`,
-    lintRewrite.ok,
-    lintRewrite.violations
-      .filter((v) => v.severity === 'error')
-      .map((v) => v.term)
-      .join('、'),
+    `${file}: 默认交付面通过 lint-reading`,
+    errors.length === 0,
+    errors.map((v) => `${v.term}@${v.line}`).join('、'),
   );
 
-  add(
-    `${file}: 优秀表达含现实场景词`,
-    SCENE_WORDS.some((w) => block.includes(w)),
-  );
-  add(`${file}: 时间线含有利+风险两路`, block.includes('有利') && block.includes('风险'));
-  add(`${file}: 免责(非科学预测)在优秀报告出现`, block.includes('非科学预测'));
-
-  const inputRefs = refTokens(sectionAfter(md, /###\s+输入事实/));
-  const linkedRef = inputRefs.find((r) => block.includes(r));
-  add(
-    `${file}: facts↔优秀表达 evidence/ref 对应`,
-    linkedRef !== undefined,
-    linkedRef ?? 'no ref overlap',
-  );
+  const fate = FATE_WORDS.filter((word) => delivery.includes(word));
+  add(`${file}: 无命定关系断言`, fate.length === 0, fate.join('、'));
 }
 
-// --- SKILL.md references the three files + double-channel (no unconditional full display) ---
+if (existsSync(stylePath)) {
+  const style = readFileSync(stylePath, 'utf8');
+  add('reading-style.md 标注 V1', style.includes('自然叙述规范 v1'));
+  add('reading-style.md 要求术语自然落地', style.includes('术语要自然落地'));
+  add('reading-style.md 明确来源默认不展示', style.includes('默认不展示'));
+  add('reading-style.md 禁止固定页脚', style.includes('固定免责声明页脚'));
+  add('reading-style.md 不再强制七步报告', !style.includes('固定 7 步顺序'));
+}
+
 if (existsSync(skillMdPath)) {
   const skill = readFileSync(skillMdPath, 'utf8');
-  for (const file of EXAMPLE_FILES) {
-    add(`SKILL.md references ${file}`, skill.includes(file));
-  }
+  add('SKILL.md 引用 V1 写作规范', skill.includes('自然叙述规范 v1'));
   add(
-    'SKILL.md 声明主题不前置全盘（双通道）',
-    skill.includes('Channel A') &&
-      skill.includes('Channel B') &&
-      skill.includes('never front-load the three raw charts into a topic report'),
+    'SKILL.md 不要求默认追问菜单',
+    !skill.includes('Close with a single one-line follow-up entry'),
   );
 }
 
-// --- Self-test: the banned-word detector must flag a bad ✅ and pass a clean one ------
-const synthBad = '#### 1. 30秒看懂\n你注定发不了财。';
-const synthGood = '#### 1. 30秒看懂\n例如你可能表现为按部就班、稳步推进。';
+const leak = lintReading('**引擎警告**\nTIME_UNKNOWN');
 add(
-  'self-test: 检测器能抓到坏示例中的绝对化词',
-  BANNED.some((w) => synthBad.includes(w)),
+  'self-test: 交付面检查器抓到后台标签',
+  !leak.ok && leak.violations.some((v) => v.category === '交付面'),
 );
-add('self-test: 干净示例不误报', !BANNED.some((w) => synthGood.includes(w)));
+const natural = lintReading(
+  '官杀在这里较集中，指向规则和责任会更容易成为工作主题；目标清楚时，它更容易变成持续投入的动力。',
+);
+add('self-test: 术语与现实含义自然连写可以通过', natural.ok);
 
-// --- Self-test: lint-reading must flag 正文 terms and pass a clean plain 正文 ----------
-const lintBad = lintReading('#### 1. 30秒看懂\n你食伤生财、官杀藏而不透、甲戌大运偏中性。');
-const lintClean = lintReading('#### 1. 30秒看懂\n你更适合把一门本事练扎实，慢慢让别人看见。');
-add('self-test: lint-reading 抓到正文命理术语', !lintBad.ok);
-add('self-test: lint-reading 干净口语正文通过', lintClean.ok);
-
-// --- Report ---
-const failed = checks.filter((c) => !c.ok);
-for (const c of checks) {
-  const mark = c.ok ? 'PASS' : 'FAIL';
-  const detail = c.detail ? ` (${c.detail})` : '';
-  process.stdout.write(`[${mark}] ${c.name}${detail}\n`);
+const failed = checks.filter((check) => !check.ok);
+for (const check of checks) {
+  const mark = check.ok ? 'PASS' : 'FAIL';
+  const detail = check.detail ? ` (${check.detail})` : '';
+  process.stdout.write(`[${mark}] ${check.name}${detail}\n`);
 }
 process.stdout.write(
   `\n${checks.length - failed.length}/${checks.length} reading-example checks passed.\n`,
 );
 process.stdout.write(
-  `Note: static checks prove spec/sample structure, not 100% host-model style compliance.\n`,
+  'Note: static checks prove delivery shape and source traces, not host-model semantic correctness.\n',
 );
 if (failed.length > 0) process.exit(1);

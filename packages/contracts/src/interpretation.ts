@@ -5,9 +5,9 @@ import { z } from 'zod';
  * OFFLINE, source-traceable substrate that a host LLM reads to write a natural-language
  * reading — it is NOT prose and NOT a prediction. Every fact is grounded: it carries
  * machine-checkable evidence pointing back at a chart fact or a sourced rule, plus an
- * honest caveat. The host model must only read these, cite the evidence, honor the
- * disclaimers, and never invent values or give deterministic medical/legal/financial/
- * life-and-death verdicts.
+ * honest caveat. The host model must only read these, preserve evidence internally for
+ * later traceability, and never invent values or give deterministic medical/legal/
+ * financial/life-and-death verdicts. Default prose does not render raw evidence ids.
  */
 
 /** Reading themes the host can address. */
@@ -79,11 +79,11 @@ export const InterpretationFacts = z.object({
   facts: z.array(InterpretationFact),
   /** Rulesets/providers that produced the underlying facts (for traceability). */
   rulesets: z.array(z.object({ id: z.string(), version: z.string() })),
-  /** Global guardrails the host model MUST honor verbatim in spirit. */
+  /** Global guardrails the host MUST honor; they are not a default user-visible footer. */
   disclaimers: z.array(z.string()),
   /**
-   * Standardized closing offers the host should present after the chart: deeper
-   * readings on 事业/感情/财运/学业 etc. So every model ends the same way.
+   * Optional follow-up ideas. A host may use one only when the user invites continuation;
+   * they are never a mandatory closing menu.
    */
   followupOffers: z.array(z.string()),
 });
