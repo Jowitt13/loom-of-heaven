@@ -1,0 +1,16 @@
+{
+  "name": "@loom/psychology-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Private and de-identified psychology contract schemas; P1 skeleton only, with no instruments or scoring.",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

@@ -54,7 +54,10 @@ rmSync(outFile, { force: true });
 
 const run = spawnSync(
   process.execPath,
-  [vitestCli, 'run', '--reporter=json', `--outputFile=${outFile}`],
+  // This verifier needs a stable count, not maximum parallel throughput. Serial execution
+  // prevents unrelated CPU-heavy golden tests from tripping Vitest's per-test timeout while
+  // the JSON reporter is writing the authoritative count artifact.
+  [vitestCli, 'run', '--maxWorkers=1', '--reporter=json', `--outputFile=${outFile}`],
   { cwd: root, encoding: 'utf8' },
 );
 if (run.status !== 0 || !existsSync(outFile)) {

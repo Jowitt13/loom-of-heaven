@@ -113,6 +113,27 @@ importers:
         specifier: workspace:*
         version: link:../ziwei-rules
 
+  packages/personality-assessment:
+    dependencies:
+      '@loom/psychology-contracts':
+        specifier: workspace:*
+        version: link:../psychology-contracts
+
+  packages/psychology-contracts:
+    dependencies:
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+
+  packages/psychology-orchestrator:
+    dependencies:
+      '@loom/personality-assessment':
+        specifier: workspace:*
+        version: link:../personality-assessment
+      '@loom/psychology-contracts':
+        specifier: workspace:*
+        version: link:../psychology-contracts
+
   packages/synastry:
     dependencies:
       '@loom/bazi-rules':

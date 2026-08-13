@@ -1,0 +1,38 @@
+{
+  "instrument": {
+    "id": "ipip-neo-120@2014-zh-cn",
+    "version": "johnson-2014-mandarin-ipip-source-2026-08-13",
+    "language": "zh-CN",
+    "itemSetSha256": "a2acd0795d4117fbcbd8b3bc808c6bbcaa45d453db66b848a25da8952ecf4446",
+    "scoringVersion": "ipip-standard-reverse-and-sum/v1",
+    "sourceUrl": "https://ipip.ori.org/Mandarin%20translation%20of%20IPIP-NEO-120.htm",
+    "licenseRef": "IPIP public-domain items and scales; cite Johnson (2014) and the Mandarin translator."
+  },
+  "rights": "IPIP items and scales are public domain; cite the named scale and translator.",
+  "citation": "Johnson, J. A. (2014). Measuring thirty facets of the Five Factor Model with a 120-item public domain inventory: Development of the IPIP-NEO-120. Journal of Research in Personality, 51, 78-89.",
+  "sources": {
+    "mandarinItems": {
+      "url": "https://ipip.ori.org/Mandarin%20translation%20of%20IPIP-NEO-120.htm",
+      "sha256": "8b9a60302046a5359a8a980a337b148a96c21ee80f8825acc0d552b89480b16c"
+    },
+    "scoringKeys": {
+      "url": "https://ipip.ori.org/30FacetNEO-PI-RItems.htm",
+      "sha256": "a0e491cc737a1d3f0fbc864d64bbc7c283fa696c64c05dab5c639ced4fc14512"
+    },
+    "mandarinReliability": {
+      "url": "https://ipip.ori.org/ChineseIPIP-120reliability.htm",
+      "sha256": "f5db1b99eb44f30613e8f5c5e698b0738c65bad96e926b5638423bc000b2bb25"
+    },
+    "scoringInstructions": {
+      "url": "https://ipip.ori.org/newScoringInstructions.htm",
+      "sha256": "9429ac6d94589173a704c1079afe62833f8fcc5d0fe48e6df595b9022373af87"
+    }
+  },
+  "excludedFields": ["gender", "age", "email"],
+  "productBoundary": [
+    "nonclinical-self-report-only",
+    "no-diagnosis",
+    "no-population-norms-or-percentiles",
+    "no-chart-input-or-automatic-mapping"
+  ]
+}

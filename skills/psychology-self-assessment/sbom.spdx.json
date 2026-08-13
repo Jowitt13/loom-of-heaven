@@ -1,0 +1,53 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "psychology-self-assessment-0.1.0",
+  "documentNamespace": "https://github.com/Jowitt13/loom-of-heaven/spdx/psychology-self-assessment-0.1.0",
+  "creationInfo": {
+    "created": "2026-01-01T00:00:00Z",
+    "creators": [
+      "Tool: loom-build-psychology-skill-0.1.0"
+    ],
+    "comment": "Deterministic committed artifact: created is a fixed build timestamp."
+  },
+  "packages": [
+    {
+      "name": "psychology-self-assessment",
+      "SPDXID": "SPDXRef-Package-psychology-self-assessment",
+      "versionInfo": "0.1.0",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT"
+    },
+    {
+      "name": "zod",
+      "SPDXID": "SPDXRef-Package-zod",
+      "versionInfo": "4.4.3",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/zod@4.4.3"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-Package-psychology-self-assessment"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-psychology-self-assessment",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-zod"
+    }
+  ]
+}

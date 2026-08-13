@@ -1,0 +1,4 @@
+interface:
+  display_name: '心理自评'
+  short_description: 'Offline nonclinical personality self-assessment'
+  default_prompt: 'Use $psychology-self-assessment to start a voluntary, nonclinical personality self-assessment.'
