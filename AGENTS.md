@@ -71,6 +71,20 @@ enter CI, and its absence is intentionally fail-closed. If you change the test c
 
 Release acceptance criteria live in [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md).
 
+## Psychology roadmap (P9 nonclinical Skill only)
+
+The source tree contains an independently packageable P9 **nonclinical** personality
+self-assessment Skill. It remains unpublished until a separately authorized release; it does
+not add chart/personality mapping, narration integration, or any clinical screening. Psychology-
+informed narration and independent mental-health screening remain planned. Before changing any
+related contract, Skill, questionnaire, scoring, safety, privacy, or user-facing claim, read
+[`docs/adr/0014-psychology-and-mental-health-architecture.md`](docs/adr/0014-psychology-and-mental-health-architecture.md),
+[`docs/PSYCHOLOGY_SOURCE_MATRIX.md`](docs/PSYCHOLOGY_SOURCE_MATRIX.md), and
+[`docs/PSYCHOLOGY_IMPLEMENTATION_PLAN.md`](docs/PSYCHOLOGY_IMPLEMENTATION_PLAN.md) completely.
+Never infer questionnaire answers from charts, mix clinical screens into chart interpretation, or
+claim automated diagnosis. Clinical phases stop unless content/translation rights, the safety
+kernel, and qualified human review are all satisfied.
+
 ## Scope & disclaimer
 
 For traditional-culture, entertainment and self-reflection use. Not scientifically validated

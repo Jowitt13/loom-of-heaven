@@ -1,6 +1,6 @@
 import { build } from 'esbuild';
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { dirname, isAbsolute, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   computeBundleClosure,
@@ -29,6 +29,8 @@ import {
  *                        skills/xuan-ji-yu-heng/sbom.cdx.json).
  *   --sbom-spdx <file>  path to SPDX SBOM (default:
  *                        skills/xuan-ji-yu-heng/sbom.spdx.json).
+ *   --entry <file>      esbuild entry for the checked Skill bundle.
+ *   --app-name <name>   application name expected in both SBOMs.
  *
  * There is a documented exceptions file (tools/validate-sbom.exceptions.json)
  * — currently absent; if ever present it must be a JSON array of
@@ -53,7 +55,8 @@ const root = rootArg
 const metafileArg = getFlag('--metafile');
 const sbomCdxArg = getFlag('--sbom-cdx');
 const sbomSpdxArg = getFlag('--sbom-spdx');
-const APP_NAME = 'xuan-ji-yu-heng';
+const entryArg = getFlag('--entry');
+const APP_NAME = getFlag('--app-name') ?? 'xuan-ji-yu-heng';
 
 interface Check {
   name: string;
@@ -188,7 +191,13 @@ async function computeTruthClosure(): Promise<BundlePackage[]> {
     };
   } else {
     const result = await build({
-      entryPoints: [join(root, 'packages', 'orchestrator', 'src', 'engine-entry.ts')],
+      entryPoints: [
+        entryArg
+          ? isAbsolute(entryArg)
+            ? entryArg
+            : join(root, entryArg)
+          : join(root, 'packages', 'orchestrator', 'src', 'engine-entry.ts'),
+      ],
       bundle: true,
       format: 'esm',
       platform: 'node',

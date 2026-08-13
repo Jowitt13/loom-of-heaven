@@ -1,0 +1,27 @@
+{
+  "skill": "psychology-self-assessment",
+  "product": "loom-of-heaven",
+  "releaseVersion": "0.1.0",
+  "status": "unpublished",
+  "runtime": "node >=22",
+  "engine": {
+    "file": "scripts/dist/psychology-engine.mjs",
+    "sha256": "4425f62630e3a12db2e0e06ac67f87fc675eca78408364eb29e87e2dafcbcf5b"
+  },
+  "capabilities": [
+    "doctor",
+    "instruments",
+    "items",
+    "start",
+    "answer",
+    "resume",
+    "cancel",
+    "score",
+    "export",
+    "delete",
+    "verify",
+    "version"
+  ],
+  "exclusions": ["all-clinical-screening", "chart-personality-cross-check", "raw-response-export"],
+  "sourceManifest": "references/ipip-neo-120-source-manifest.json"
+}

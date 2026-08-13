@@ -2,6 +2,8 @@ node_modules/
 skills/xuan-ji-yu-heng/scripts/dist/
 skills/xuan-ji-yu-heng/sbom.cdx.json
 skills/xuan-ji-yu-heng/sbom.spdx.json
+skills/psychology-self-assessment/sbom.cdx.json
+skills/psychology-self-assessment/sbom.spdx.json
 coverage/
 .tmp/
 .qoder/
