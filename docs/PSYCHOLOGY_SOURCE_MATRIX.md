@@ -65,9 +65,11 @@ The two rows above retain their historical planning labels for the public produc
 operative implementation state is: psychology-informed narration = `IMPLEMENTED_INTERNAL` and
 default off; nonclinical personality = `IMPLEMENTED_UNPUBLISHED` through the separate,
 file-only P9 `psychology-self-assessment` Skill. It exposes only explicit-consent IPIP-NEO-120
-session handling and de-identified profile output; it does not expose chart/personality
-cross-checking, norms, host packaging, or any clinical instrument. Personality norms,
-chart/personality cross-checking, and every clinical instrument retain the stated gates.
+session handling and de-identified profile output. Local candidate host packaging is now
+available solely for release preparation; it is explicitly unpublished and is not evidence of a
+real-device install or a host release. P9 does not expose chart/personality cross-checking,
+norms, migration, or any clinical instrument. Personality norms, chart/personality
+cross-checking, and every clinical instrument retain the stated gates.
 
 ## Software and GitHub reference audit
 

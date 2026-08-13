@@ -116,6 +116,23 @@ try {
 }
 
 try {
+  const hostValidation = read('references/host-validation.md');
+  add(
+    'host-validation keeps candidate packages distinct from host verification',
+    hostValidation.includes('not evidence that a host is already verified') &&
+      hostValidation.includes('does **not** prove that Codex, Qoder, WorkBuddy, or Doubao'),
+  );
+  add(
+    'host-validation forbids a premature P9 release claim',
+    hostValidation.includes('never creates') &&
+      hostValidation.includes('GitHub Release') &&
+      hostValidation.includes('owner-authorized action'),
+  );
+} catch (error) {
+  add('host-validation.md is readable', false, String(error));
+}
+
+try {
   const source = JSON.parse(read('references/ipip-neo-120-source-manifest.json')) as Record<
     string,
     unknown
