@@ -424,13 +424,17 @@ questionnaire command, Skill, host integration, profile narration, norm, or char
 - Update user docs only for capabilities that actually ship.
 - Release the nonclinical and clinical surfaces independently when possible.
 
-#### P9 implementation status (source-only, unpublished)
+#### P9 implementation status (candidate-prepared, unpublished)
 
 P9 now packages the source-bound Mandarin IPIP-NEO-120 as a separate nonclinical Skill with a
 file-only CLI, explicit `personality` consent, local private-session handling, a de-identified
 profile export, local deletion, deterministic SBOMs, archive checksum, and extracted-archive
-synthetic verification. It neither packages nor claims any clinical screener, chart/personality
-cross-check, automatic mapping, real-device host validation, migration, or published Release.
+synthetic verification. Its independent candidate builder now creates four host-shaped ZIPs plus
+an unpublished candidate manifest and SHA-256 file under gitignored `releases/`; the verifier
+executes the actual extracted candidates with synthetic answers only. Those artifacts are
+release preparation, **not** a host release or real-device evidence. P9 neither packages nor
+claims any clinical screener, chart/personality cross-check, automatic mapping, real-device host
+validation, migration, tag, GitHub Release, or public download.
 Those are separate, later authorization decisions.
 
 ### P10 — professional assessment (future, separately authorized)
