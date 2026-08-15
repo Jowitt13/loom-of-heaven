@@ -45,13 +45,17 @@ describe('D2-C2 source-admission boundary guard (structure only)', () => {
     }
   });
 
-  it('戊禄巳 存在；戊寄巳 在两份文档与本测试中均不存在', () => {
+  it('戊禄巳 存在；错误三字字面量在两份文档与本测试源码中均不存在', () => {
     expect(ADMISSION).toContain('戊禄巳');
     const bannedWording = ['戊', '寄', '巳'].join('');
     expect(ADMISSION).not.toContain(bannedWording);
     expect(MATRIX).not.toContain(bannedWording);
-    expect(ADMISSION).not.toContain('寄巳');
-    expect(MATRIX).not.toContain('寄巳');
+    const bannedFragment = ['寄', '巳'].join('');
+    expect(ADMISSION).not.toContain(bannedFragment);
+    expect(MATRIX).not.toContain(bannedFragment);
+    // 门禁必须锁住测试源码自身，不能只锁文档
+    const self = readFileSync(__filename, 'utf8');
+    expect(self).not.toContain(bannedWording);
   });
 
   it('文档明确说明阴干仍 unresolved / BLOCKED_SCHOOL，且未放开任何阴干位置', () => {
@@ -117,10 +121,10 @@ describe('D2-C2 source-admission boundary guard (structure only)', () => {
     }
   });
 
-  it('门禁测试自身通过拼接方式检查戊寄巳，不引入该字面量', () => {
+  it('门禁测试自身以运行时拼接构造检查目标，不引入字面量', () => {
     // The banned wording is only constructed at runtime via concatenation,
     // so this test file itself never contains the literal string.
     const joined = ['戊', '寄', '巳'].join('');
-    expect(joined).toBe('戊寄巳');
+    expect(joined).toBe(['戊', '寄', '巳'].join(''));
   });
 });
