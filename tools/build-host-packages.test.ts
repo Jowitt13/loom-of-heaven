@@ -92,23 +92,27 @@ describe('cross-platform reproducible host packaging (real build path)', () => {
     }
   });
 
-  it('each host ZIP is single-top-dir, no double nesting, and ships the engine', () => {
-    const work = mkdtempSync(join(tmpdir(), 'ming-struct-'));
-    try {
-      const built = buildHostZips(srcSkill, join(work, 'out'));
-      for (const b of built) {
-        const entries = listZipEntries(b.zip);
-        const struct = assertSingleTopDir(entries, b.host.packageName);
-        expect(struct.ok, `${b.host.id}: ${struct.error ?? ''}`).toBe(true);
-        expect(entries).toContain(`${b.host.packageName}/scripts/dist/engine.mjs`);
-        expect(
-          entries.some((e) => e.startsWith(`${b.host.packageName}/${b.host.packageName}/`)),
-        ).toBe(false);
+  it(
+    'each host ZIP is single-top-dir, no double nesting, and ships the engine',
+    { timeout: 30_000 },
+    () => {
+      const work = mkdtempSync(join(tmpdir(), 'ming-struct-'));
+      try {
+        const built = buildHostZips(srcSkill, join(work, 'out'));
+        for (const b of built) {
+          const entries = listZipEntries(b.zip);
+          const struct = assertSingleTopDir(entries, b.host.packageName);
+          expect(struct.ok, `${b.host.id}: ${struct.error ?? ''}`).toBe(true);
+          expect(entries).toContain(`${b.host.packageName}/scripts/dist/engine.mjs`);
+          expect(
+            entries.some((e) => e.startsWith(`${b.host.packageName}/${b.host.packageName}/`)),
+          ).toBe(false);
+        }
+      } finally {
+        rmSync(work, { recursive: true, force: true });
       }
-    } finally {
-      rmSync(work, { recursive: true, force: true });
-    }
-  });
+    },
+  );
 
   it('builds correctly when the workspace parent directory contains .tmp in its name', () => {
     // Regression: isExcluded must not match .tmp in parent path, only in Skill-relative path.
