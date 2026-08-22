@@ -19,6 +19,35 @@ export const BAZI_SHADOW_STATE_CONTRACT_VERSION = 'bazi-shadow-state/p0b';
 export type ShadowStateInvalidationCause =
   'input-chart' | 'settings' | 'engine-provider' | 'ruleset' | 'source-profile';
 
+/** Internal fixed stage ids; this is a declared table, not a dynamic DAG. */
+export const BAZI_SHADOW_STATE_NODE_IDS = [
+  'bazi.shadow.direct-roots',
+  'bazi.shadow.relation-geometry',
+  'bazi.shadow.strength-inputs',
+  'bazi.shadow.pattern-inputs',
+] as const;
+
+export type BaziShadowStateNodeId = (typeof BAZI_SHADOW_STATE_NODE_IDS)[number];
+
+/** Every P0-B shadow structure is stale under the same chart-affecting changes. */
+export const BAZI_SHADOW_STATE_INVALIDATIONS: readonly ShadowStateInvalidationCause[] = [
+  'input-chart',
+  'settings',
+  'engine-provider',
+  'ruleset',
+  'source-profile',
+];
+
+/** Fixed upstream references for the four known shadow stages. */
+export const BAZI_SHADOW_STATE_DEPENDENCIES: Readonly<
+  Record<BaziShadowStateNodeId, readonly string[]>
+> = {
+  'bazi.shadow.direct-roots': ['chart.bazi'],
+  'bazi.shadow.relation-geometry': ['chart.bazi'],
+  'bazi.shadow.strength-inputs': ['chart.bazi', 'bazi.shadow.direct-roots'],
+  'bazi.shadow.pattern-inputs': ['chart.bazi', 'bazi.shadow.relation-geometry'],
+};
+
 type ShadowNodeBase<Id extends string, Value> = {
   id: Id;
   layer: 'derived-structure';
@@ -54,14 +83,6 @@ export interface BaziShadowState {
   nodes: readonly BaziShadowStateNode[];
 }
 
-const STRUCTURE_INVALIDATIONS: readonly ShadowStateInvalidationCause[] = [
-  'input-chart',
-  'settings',
-  'engine-provider',
-  'ruleset',
-  'source-profile',
-];
-
 /**
  * Project existing D1/D2 shadow collectors into one internal state record.
  *
@@ -90,29 +111,29 @@ export function projectBaziShadowState(
       {
         id: 'bazi.shadow.direct-roots',
         layer: 'derived-structure',
-        dependsOn: ['chart.bazi'],
-        invalidatedBy: STRUCTURE_INVALIDATIONS,
+        dependsOn: BAZI_SHADOW_STATE_DEPENDENCIES['bazi.shadow.direct-roots'],
+        invalidatedBy: BAZI_SHADOW_STATE_INVALIDATIONS,
         value: directRoots,
       },
       {
         id: 'bazi.shadow.relation-geometry',
         layer: 'derived-structure',
-        dependsOn: ['chart.bazi'],
-        invalidatedBy: STRUCTURE_INVALIDATIONS,
+        dependsOn: BAZI_SHADOW_STATE_DEPENDENCIES['bazi.shadow.relation-geometry'],
+        invalidatedBy: BAZI_SHADOW_STATE_INVALIDATIONS,
         value: relationGeometry,
       },
       {
         id: 'bazi.shadow.strength-inputs',
         layer: 'derived-structure',
-        dependsOn: ['chart.bazi', 'bazi.shadow.direct-roots'],
-        invalidatedBy: STRUCTURE_INVALIDATIONS,
+        dependsOn: BAZI_SHADOW_STATE_DEPENDENCIES['bazi.shadow.strength-inputs'],
+        invalidatedBy: BAZI_SHADOW_STATE_INVALIDATIONS,
         value: strengthInputs,
       },
       {
         id: 'bazi.shadow.pattern-inputs',
         layer: 'derived-structure',
-        dependsOn: ['chart.bazi', 'bazi.shadow.relation-geometry'],
-        invalidatedBy: STRUCTURE_INVALIDATIONS,
+        dependsOn: BAZI_SHADOW_STATE_DEPENDENCIES['bazi.shadow.pattern-inputs'],
+        invalidatedBy: BAZI_SHADOW_STATE_INVALIDATIONS,
         value: patternInputs,
       },
     ],
