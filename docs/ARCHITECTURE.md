@@ -29,6 +29,14 @@ Production packages: `contracts`, `time-location`, `western`, `bazi`, `bazi-rule
 `western-rules`, `ziwei`, `ziwei-rules`, `interpret`, `synastry`, `orchestrator`.
 Test-only: `test-fixtures`.
 
+## Interpretable state and evaluation direction
+
+The current engine and user-facing commands remain deterministic and unchanged. A future internal
+Interpretation State, deterministic rule-path verifier, and development-only Accuracy Lab are
+architecture directions only: they do not add a state CLI, public contract, active rule, host-model
+runtime dependency, or user-visible technical appendix. The governing boundary is
+[ADR 0016](adr/0016-interpretable-state-and-accuracy-lab.md).
+
 ## Dependency direction
 
 ```text
