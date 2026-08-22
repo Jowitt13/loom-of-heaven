@@ -17,6 +17,14 @@ These contracts measure reproducibility and contract compliance. They do not mea
 traditional claim predicts real-world outcomes, and they do not activate any BaZi rule, source
 profile, state CLI, public contract, or narration path.
 
+## P0-E boundary
+
+`shadow-state-integrity-manifest/v1` rebuilds one synthetic P0-B BaZi shadow state and records
+its canonical SHA-256 digest. It also fixes the invalidation table: chart-affecting changes make
+the four derived-structure nodes stale, while topic/lens and language/narrator changes leave that
+already-confirmed structure reusable for a later projection. It neither persists a state nor
+turns a digest into a privacy or security claim.
+
 ## Data and storage rules
 
 - Fixtures must use a `synthetic:` fixture id. Do not put a real name, birth record, location,
@@ -41,3 +49,11 @@ node tools/eval/verify-eval-manifest.ts \
 It checks contract versions, exact field shapes, fixture linkage, canonical artifact digest,
 P0-D's local-only scope, and prohibited private/model fields. It never calls a model, network,
 database, or Skill runtime.
+
+The P0-E integrity check is likewise local-only and synthetic:
+
+```bash
+node tools/eval/verify-shadow-state-integrity.ts \
+  --manifest evals/fixtures/synthetic/p0e-shadow-state-integrity-manifest.json \
+  --chart evals/fixtures/synthetic/p0e-bazi-shadow-chart.json
+```

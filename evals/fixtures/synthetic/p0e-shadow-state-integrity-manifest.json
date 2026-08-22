@@ -1,0 +1,87 @@
+{
+  "contractVersion": "shadow-state-integrity-manifest/v1",
+  "fixtureId": "synthetic:bazi-shadow-p0",
+  "stateId": "opaque-synthetic-bazi-shadow-p0e",
+  "stateContractVersion": "bazi-shadow-state/p0b",
+  "resolution": {
+    "schemaVersion": "synthetic-schema/v1",
+    "engineVersion": "synthetic-engine/v1",
+    "sourceProfileIds": []
+  },
+  "stateDigest": "sha256:5b8584863a5c42def08807318932dd159c7c0ad0506ef949ae8cb79a4ba2e3d5",
+  "invalidationCases": [
+    {
+      "caseId": "invalidation:synthetic:input-chart",
+      "cause": "input-chart",
+      "expectedInvalidatedNodeIds": [
+        "bazi.shadow.direct-roots",
+        "bazi.shadow.relation-geometry",
+        "bazi.shadow.strength-inputs",
+        "bazi.shadow.pattern-inputs"
+      ],
+      "stateRecordReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:settings",
+      "cause": "settings",
+      "expectedInvalidatedNodeIds": [
+        "bazi.shadow.direct-roots",
+        "bazi.shadow.relation-geometry",
+        "bazi.shadow.strength-inputs",
+        "bazi.shadow.pattern-inputs"
+      ],
+      "stateRecordReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:engine-provider",
+      "cause": "engine-provider",
+      "expectedInvalidatedNodeIds": [
+        "bazi.shadow.direct-roots",
+        "bazi.shadow.relation-geometry",
+        "bazi.shadow.strength-inputs",
+        "bazi.shadow.pattern-inputs"
+      ],
+      "stateRecordReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:ruleset",
+      "cause": "ruleset",
+      "expectedInvalidatedNodeIds": [
+        "bazi.shadow.direct-roots",
+        "bazi.shadow.relation-geometry",
+        "bazi.shadow.strength-inputs",
+        "bazi.shadow.pattern-inputs"
+      ],
+      "stateRecordReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:source-profile",
+      "cause": "source-profile",
+      "expectedInvalidatedNodeIds": [
+        "bazi.shadow.direct-roots",
+        "bazi.shadow.relation-geometry",
+        "bazi.shadow.strength-inputs",
+        "bazi.shadow.pattern-inputs"
+      ],
+      "stateRecordReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:topic-lens",
+      "cause": "topic-lens",
+      "expectedInvalidatedNodeIds": [],
+      "stateRecordReusable": true
+    },
+    {
+      "caseId": "invalidation:synthetic:language-narrator",
+      "cause": "language-narrator",
+      "expectedInvalidatedNodeIds": [],
+      "stateRecordReusable": true
+    }
+  ],
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-model-provider",
+    "no-raw-answer",
+    "no-published-skill-runtime"
+  ]
+}

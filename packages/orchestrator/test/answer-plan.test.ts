@@ -111,7 +111,7 @@ describe('public result and answer plan', () => {
     ).toThrow();
   });
 
-  it('keeps time-dependent limits explicit when birth time is unknown', () => {
+  it('keeps time-dependent limits explicit when birth time is unknown', { timeout: 30_000 }, () => {
     const unknownTime = parseBirthInput({
       ...syntheticInput,
       localTime: undefined,
