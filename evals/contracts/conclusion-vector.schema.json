@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/conclusion-vector/v1",
+  "title": "Loom Accuracy Lab conclusion vector",
+  "description": "Development-only, de-identified claim vector. It contains no narrative prose or birth input.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "vectorId",
+    "fixtureId",
+    "stateDigest",
+    "topic",
+    "lens",
+    "claims",
+    "limitations"
+  ],
+  "properties": {
+    "contractVersion": { "const": "conclusion-vector/v1" },
+    "vectorId": {
+      "type": "string",
+      "pattern": "^conclusion-vector:synthetic:[a-z0-9][a-z0-9._-]*$"
+    },
+    "fixtureId": { "type": "string", "pattern": "^synthetic:[a-z0-9][a-z0-9._-]*$" },
+    "stateDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "topic": {
+      "enum": ["character", "career", "wealth", "marriage", "studies", "health", "general"]
+    },
+    "lens": { "enum": ["overview", "strengths", "risks", "timing", "advice", "explain"] },
+    "claims": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claimId", "type", "status", "stateNodeIds", "permittedPhrasing"],
+        "properties": {
+          "claimId": { "type": "string", "pattern": "^claim:synthetic:[a-z0-9][a-z0-9._-]*$" },
+          "type": {
+            "enum": [
+              "structural-tendency",
+              "tradition-qualified-interpretation",
+              "timing-signal",
+              "practical-option",
+              "limitation"
+            ]
+          },
+          "status": { "enum": ["grounded", "limited", "not-supported"] },
+          "stateNodeIds": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 32,
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9.-]+$" }
+          },
+          "permittedPhrasing": { "enum": ["conditional", "descriptive"] },
+          "conditionRef": { "type": "string", "pattern": "^[a-z][a-z0-9:._@/-]+$" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9:._@/-]+$" }
+    }
+  }
+}
