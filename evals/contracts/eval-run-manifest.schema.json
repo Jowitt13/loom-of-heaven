@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/eval-run-manifest/v1",
+  "title": "Loom Accuracy Lab deterministic run manifest",
+  "description": "Development-only local run metadata; no provider settings, prompts, transcripts, or user data.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "runId",
+    "mode",
+    "fixtureIds",
+    "engine",
+    "resolution",
+    "conditions",
+    "repetitions",
+    "conclusionVectorIds",
+    "conclusionVectorDigests",
+    "exclusionPolicy"
+  ],
+  "properties": {
+    "contractVersion": { "const": "eval-run-manifest/v1" },
+    "runId": { "type": "string", "pattern": "^eval:synthetic:[a-z0-9][a-z0-9._-]*$" },
+    "mode": { "const": "deterministic-local-only" },
+    "fixtureIds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": { "type": "string", "pattern": "^synthetic:[a-z0-9][a-z0-9._-]*$" }
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engineVersion", "schemaVersion"],
+      "properties": {
+        "engineVersion": { "type": "string", "minLength": 1 },
+        "schemaVersion": { "type": "string", "minLength": 1 }
+      }
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rulesetIds", "sourceProfileIds"],
+      "properties": {
+        "rulesetIds": {
+          "type": "array",
+          "maxItems": 16,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "sourceProfileIds": { "type": "array", "maxItems": 0 }
+      }
+    },
+    "conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language", "hostModel", "promptTemplate"],
+      "properties": {
+        "language": { "enum": ["zh-CN", "en"] },
+        "hostModel": { "const": "none" },
+        "promptTemplate": { "const": "not-applicable" }
+      }
+    },
+    "repetitions": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "conclusionVectorIds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": { "type": "string", "pattern": "^conclusion-vector:synthetic:[a-z0-9][a-z0-9._-]*$" }
+    },
+    "conclusionVectorDigests": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^conclusion-vector:synthetic:[a-z0-9][a-z0-9._-]*$": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "exclusionPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9:._@/-]+$" }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "contractVersion": "eval-run-manifest/v1",
+  "runId": "eval:synthetic:bazi-shadow-p0-local",
+  "mode": "deterministic-local-only",
+  "fixtureIds": ["synthetic:bazi-shadow-p0"],
+  "engine": {
+    "engineVersion": "0.4.0",
+    "schemaVersion": "0.1.0"
+  },
+  "resolution": {
+    "rulesetIds": ["bazi-standard@0.1.0", "bazi-rules-ziping@0.1.0"],
+    "sourceProfileIds": []
+  },
+  "conditions": {
+    "language": "zh-CN",
+    "hostModel": "none",
+    "promptTemplate": "not-applicable"
+  },
+  "repetitions": 3,
+  "conclusionVectorIds": ["conclusion-vector:synthetic:bazi-shadow-p0-career-overview"],
+  "conclusionVectorDigests": {
+    "conclusion-vector:synthetic:bazi-shadow-p0-career-overview": "sha256:1a53dc815f206c3ba67fb873650daeed3f6ddee7e0bba1a7e599023096404405"
+  },
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-model-provider",
+    "no-raw-answer",
+    "no-published-skill-runtime"
+  ]
+}
