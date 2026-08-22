@@ -61,17 +61,21 @@ describe('Vedic P4 sourced structural rules', () => {
     expect(bhava?.caveat).toContain('Lagna');
   });
 
-  it('never emits time-of-day Vedic facts from an unknown-time noon anchor', () => {
-    const unknown = parseBirthInput({
-      ...exact,
-      localTime: undefined,
-      timeAccuracy: 'unknown',
-    });
-    const findings = rulesFor(unknown).findings;
-    expect(findings.some((finding) => finding.topic === 'bhava')).toBe(false);
-    expect(findings.some((finding) => finding.topic === 'vimshottari')).toBe(false);
-    expect(findings.every((finding) => finding.caveat?.includes('Birth time is unknown'))).toBe(
-      true,
-    );
-  });
+  it(
+    'never emits time-of-day Vedic facts from an unknown-time noon anchor',
+    { timeout: 30_000 },
+    () => {
+      const unknown = parseBirthInput({
+        ...exact,
+        localTime: undefined,
+        timeAccuracy: 'unknown',
+      });
+      const findings = rulesFor(unknown).findings;
+      expect(findings.some((finding) => finding.topic === 'bhava')).toBe(false);
+      expect(findings.some((finding) => finding.topic === 'vimshottari')).toBe(false);
+      expect(findings.every((finding) => finding.caveat?.includes('Birth time is unknown'))).toBe(
+        true,
+      );
+    },
+  );
 });

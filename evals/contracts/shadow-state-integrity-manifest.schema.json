@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/shadow-state-integrity-manifest/v1",
+  "title": "Synthetic Shadow State Integrity Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "fixtureId",
+    "stateId",
+    "stateContractVersion",
+    "resolution",
+    "stateDigest",
+    "invalidationCases",
+    "exclusionPolicy"
+  ],
+  "properties": {
+    "contractVersion": { "const": "shadow-state-integrity-manifest/v1" },
+    "fixtureId": { "type": "string", "pattern": "^synthetic:[a-z0-9][a-z0-9._-]*$" },
+    "stateId": { "type": "string", "pattern": "^opaque-synthetic-[a-z0-9][a-z0-9._-]*$" },
+    "stateContractVersion": { "const": "bazi-shadow-state/p0b" },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "engineVersion", "sourceProfileIds"],
+      "properties": {
+        "schemaVersion": { "type": "string", "minLength": 1 },
+        "engineVersion": { "type": "string", "minLength": 1 },
+        "sourceProfileIds": { "type": "array", "maxItems": 0 }
+      }
+    },
+    "stateDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "invalidationCases": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caseId", "cause", "expectedInvalidatedNodeIds", "stateRecordReusable"],
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "pattern": "^invalidation:synthetic:[a-z0-9][a-z0-9._-]*$"
+          },
+          "cause": {
+            "enum": [
+              "input-chart",
+              "settings",
+              "engine-provider",
+              "ruleset",
+              "source-profile",
+              "topic-lens",
+              "language-narrator"
+            ]
+          },
+          "expectedInvalidatedNodeIds": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "bazi.shadow.direct-roots",
+                "bazi.shadow.relation-geometry",
+                "bazi.shadow.strength-inputs",
+                "bazi.shadow.pattern-inputs"
+              ]
+            }
+          },
+          "stateRecordReusable": { "type": "boolean" }
+        }
+      }
+    },
+    "exclusionPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    }
+  }
+}

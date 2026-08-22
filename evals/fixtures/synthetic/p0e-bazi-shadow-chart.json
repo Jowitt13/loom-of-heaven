@@ -1,0 +1,63 @@
+{
+  "rulesetId": "bazi-standard@0.1.0",
+  "provider": {
+    "id": "synthetic-provider",
+    "version": "0.0.0-test",
+    "license": "MIT"
+  },
+  "solarTimeApplied": "civil",
+  "dayBoundaryApplied": "synthetic-technical",
+  "dayMaster": {
+    "stem": "甲",
+    "element": "木",
+    "yinYang": "阳"
+  },
+  "pillars": {
+    "year": {
+      "stem": "庚",
+      "branch": "午",
+      "stemElement": "金",
+      "branchElement": "火",
+      "stemYinYang": "阳",
+      "naYin": "synthetic-technical",
+      "tenGod": "七杀",
+      "tenGodDisplay": "七杀",
+      "hiddenStems": [
+        { "stem": "丁", "element": "火", "tenGod": "伤官", "primary": true },
+        { "stem": "己", "element": "土", "tenGod": "正财", "primary": false }
+      ]
+    },
+    "month": {
+      "stem": "丙",
+      "branch": "寅",
+      "stemElement": "火",
+      "branchElement": "木",
+      "stemYinYang": "阳",
+      "naYin": "synthetic-technical",
+      "tenGod": "食神",
+      "tenGodDisplay": "食神",
+      "hiddenStems": [
+        { "stem": "甲", "element": "木", "tenGod": "比肩", "primary": true },
+        { "stem": "丙", "element": "火", "tenGod": "食神", "primary": false },
+        { "stem": "戊", "element": "土", "tenGod": "偏财", "primary": false }
+      ]
+    },
+    "day": {
+      "stem": "甲",
+      "branch": "申",
+      "stemElement": "木",
+      "branchElement": "金",
+      "stemYinYang": "阳",
+      "naYin": "synthetic-technical",
+      "tenGod": null,
+      "tenGodDisplay": "日主(日元)",
+      "hiddenStems": [
+        { "stem": "庚", "element": "金", "tenGod": "七杀", "primary": true },
+        { "stem": "壬", "element": "水", "tenGod": "偏印", "primary": false },
+        { "stem": "戊", "element": "土", "tenGod": "偏财", "primary": false }
+      ]
+    },
+    "hour": null
+  },
+  "luckCycle": null
+}
