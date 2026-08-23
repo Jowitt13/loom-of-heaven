@@ -2,7 +2,7 @@
   "contractVersion": "conclusion-vector/v1",
   "vectorId": "conclusion-vector:synthetic:bazi-shadow-p0-career-overview",
   "fixtureId": "synthetic:bazi-shadow-p0",
-  "stateDigest": "sha256:9cf0df75c5cc28b241be1a6526920a32f3c481b992b7e33c94a3542973b0bf68",
+  "stateDigest": "sha256:5b8584863a5c42def08807318932dd159c7c0ad0506ef949ae8cb79a4ba2e3d5",
   "topic": "career",
   "lens": "overview",
   "claims": [

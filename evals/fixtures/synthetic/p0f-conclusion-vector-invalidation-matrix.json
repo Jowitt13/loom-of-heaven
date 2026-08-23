@@ -1,0 +1,57 @@
+{
+  "contractVersion": "conclusion-vector-invalidation-matrix/v1",
+  "fixtureId": "synthetic:bazi-shadow-p0",
+  "stateDigest": "sha256:5b8584863a5c42def08807318932dd159c7c0ad0506ef949ae8cb79a4ba2e3d5",
+  "conclusionVectorId": "conclusion-vector:synthetic:bazi-shadow-p0-career-overview",
+  "conclusionVectorDigest": "sha256:b1105ed72c2f6969d923358a267b1123b1a49a41acd04512f03ca73caafb9cc8",
+  "invalidationCases": [
+    {
+      "caseId": "invalidation:synthetic:input-chart",
+      "cause": "input-chart",
+      "stateRecordReusable": false,
+      "conclusionVectorReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:settings",
+      "cause": "settings",
+      "stateRecordReusable": false,
+      "conclusionVectorReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:engine-provider",
+      "cause": "engine-provider",
+      "stateRecordReusable": false,
+      "conclusionVectorReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:ruleset",
+      "cause": "ruleset",
+      "stateRecordReusable": false,
+      "conclusionVectorReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:source-profile",
+      "cause": "source-profile",
+      "stateRecordReusable": false,
+      "conclusionVectorReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:topic-lens",
+      "cause": "topic-lens",
+      "stateRecordReusable": true,
+      "conclusionVectorReusable": false
+    },
+    {
+      "caseId": "invalidation:synthetic:language-narrator",
+      "cause": "language-narrator",
+      "stateRecordReusable": true,
+      "conclusionVectorReusable": true
+    }
+  ],
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-model-provider",
+    "no-raw-answer",
+    "no-published-skill-runtime"
+  ]
+}

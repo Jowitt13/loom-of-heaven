@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/conclusion-vector-invalidation-matrix/v1",
+  "title": "Synthetic Conclusion Vector Invalidation Matrix",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "fixtureId",
+    "stateDigest",
+    "conclusionVectorId",
+    "conclusionVectorDigest",
+    "invalidationCases",
+    "exclusionPolicy"
+  ],
+  "properties": {
+    "contractVersion": { "const": "conclusion-vector-invalidation-matrix/v1" },
+    "fixtureId": { "type": "string", "pattern": "^synthetic:[a-z0-9][a-z0-9._-]*$" },
+    "stateDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "conclusionVectorId": {
+      "type": "string",
+      "pattern": "^conclusion-vector:synthetic:[a-z0-9][a-z0-9._-]*$"
+    },
+    "conclusionVectorDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "invalidationCases": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caseId", "cause", "stateRecordReusable", "conclusionVectorReusable"],
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "pattern": "^invalidation:synthetic:[a-z0-9][a-z0-9._-]*$"
+          },
+          "cause": {
+            "enum": [
+              "input-chart",
+              "settings",
+              "engine-provider",
+              "ruleset",
+              "source-profile",
+              "topic-lens",
+              "language-narrator"
+            ]
+          },
+          "stateRecordReusable": { "type": "boolean" },
+          "conclusionVectorReusable": { "type": "boolean" }
+        }
+      }
+    },
+    "exclusionPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    }
+  }
+}
