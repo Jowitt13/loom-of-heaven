@@ -33,6 +33,16 @@ topic/lens keeps the state but requires a new topic-scoped vector; language/narr
 structured records reusable. It records no narrative prose and does not represent a narrator,
 host model, or user-visible output.
 
+## P2-A boundary
+
+`shadow-state-lifecycle-matrix/v1` is a development-only regression matrix that joins the
+already-internal P1-A invalidation plan, P1-B structural comparison, and P1-C reuse decision.
+It reprojects only the committed synthetic P0-E chart for eleven fixed transitions: no change;
+each declared change cause; topic/lens and language/narrator projection refreshes; an observed
+collector difference; an observed resolution difference; and a declared-plus-observed change.
+The matrix records expected booleans, node ids, and field paths only — never a state value,
+birth input, prose, model request, persistence key, cache entry, or runtime decision.
+
 ## Data and storage rules
 
 - Fixtures must use a `synthetic:` fixture id. Do not put a real name, birth record, location,
@@ -76,3 +86,16 @@ node tools/eval/verify-conclusion-vector-invalidation.ts \
   --vector evals/fixtures/synthetic/p0d-conclusion-vector.json \
   --run-manifest evals/fixtures/synthetic/p0d-eval-run-manifest.json
 ```
+
+The P2-A lifecycle check is likewise local-only and synthetic:
+
+```bash
+node tools/eval/verify-shadow-state-lifecycle.ts \
+  --matrix evals/fixtures/synthetic/p2a-shadow-state-lifecycle-matrix.json \
+  --state-manifest evals/fixtures/synthetic/p0e-shadow-state-integrity-manifest.json \
+  --chart evals/fixtures/synthetic/p0e-bazi-shadow-chart.json
+```
+
+It verifies the P0-E integrity linkage before executing the fixed P1-A/P1-B/P1-C transition
+matrix. It is a regression harness, not a cache, scheduler, state store, CLI command, or
+user-facing feature.

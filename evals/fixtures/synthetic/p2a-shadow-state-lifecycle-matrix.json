@@ -1,0 +1,197 @@
+{
+  "contractVersion": "shadow-state-lifecycle-matrix/v1",
+  "fixtureId": "synthetic:bazi-shadow-p0",
+  "mode": "deterministic-local-only",
+  "stateContractVersion": "bazi-shadow-state/p0b",
+  "stateDigest": "sha256:5b8584863a5c42def08807318932dd159c7c0ad0506ef949ae8cb79a4ba2e3d5",
+  "cases": [
+    {
+      "caseId": "lifecycle:synthetic:unchanged",
+      "causes": [],
+      "rightStateVariant": "identical",
+      "expected": {
+        "stateRecordReusable": true,
+        "projectionRefreshRequired": false,
+        "recomputeReasons": [],
+        "invalidatedNodeIds": [],
+        "changedResolutionPaths": [],
+        "changedNodeIds": []
+      }
+    },
+    {
+      "caseId": "lifecycle:synthetic:input-chart",
+      "causes": ["input-chart"],
+      "rightStateVariant": "identical",
+      "expected": {
+        "stateRecordReusable": false,
+        "projectionRefreshRequired": false,
+        "recomputeReasons": ["invalidation-plan"],
+        "invalidatedNodeIds": [
+          "bazi.shadow.direct-roots",
+          "bazi.shadow.relation-geometry",
+          "bazi.shadow.strength-inputs",
+          "bazi.shadow.pattern-inputs"
+        ],
+        "changedResolutionPaths": [],
+        "changedNodeIds": []
+      }
+    },
+    {
+      "caseId": "lifecycle:synthetic:settings",
+      "causes": ["settings"],
+      "rightStateVariant": "identical",
+      "expected": {
+        "stateRecordReusable": false,
+        "projectionRefreshRequired": false,
+        "recomputeReasons": ["invalidation-plan"],
+        "invalidatedNodeIds": [
+          "bazi.shadow.direct-roots",
+          "bazi.shadow.relation-geometry",
+          "bazi.shadow.strength-inputs",
+          "bazi.shadow.pattern-inputs"
+        ],
+        "changedResolutionPaths": [],
+        "changedNodeIds": []
+      }
+    },
+    {
+      "caseId": "lifecycle:synthetic:engine-provider",
+      "causes": ["engine-provider"],
+      "rightStateVariant": "identical",
+      "expected": {
+        "stateRecordReusable": false,
+        "projectionRefreshRequired": false,
+        "recomputeReasons": ["invalidation-plan"],
+        "invalidatedNodeIds": [
+          "bazi.shadow.direct-roots",
+          "bazi.shadow.relation-geometry",
+          "bazi.shadow.strength-inputs",
+          "bazi.shadow.pattern-inputs"
+        ],
+        "changedResolutionPaths": [],
+        "changedNodeIds": []
+      }
+    },
+    {
+      "caseId": "lifecycle:synthetic:ruleset",
+      "causes": ["ruleset"],
+      "rightStateVariant": "identical",
+      "expected": {
+        "stateRecordReusable": false,
+        "projectionRefreshRequired": false,
+        "recomputeReasons": ["invalidation-plan"],
+        "invalidatedNodeIds": [
+          "bazi.shadow.direct-roots",
+          "bazi.shadow.relation-geometry",
+          "bazi.shadow.strength-inputs",
+          "bazi.shadow.pattern-inputs"
+        ],
+        "changedResolutionPaths": [],
+        "changedNodeIds": []
+      }
+    },
+    {
+      "caseId": "lifecycle:synthetic:source-profile",
+      "causes": ["source-profile"],
+      "rightStateVariant": "identical",
+      "expected": {
+        "stateRecordReusable": false,
+        "projectionRefreshRequired": false,
+        "recomputeReasons": ["invalidation-plan"],
+        "invalidatedNodeIds": [
+          "bazi.shadow.direct-roots",
+          "bazi.shadow.relation-geometry",
+          "bazi.shadow.strength-inputs",
+          "bazi.shadow.pattern-inputs"
+        ],
+        "changedResolutionPaths": [],
+        "changedNodeIds": []
+      }
+    },
+    {
+      "caseId": "lifecycle:synthetic:topic-lens",
+      "causes": ["topic-lens"],
+      "rightStateVariant": "identical",
+      "expected": {
+        "stateRecordReusable": true,
+        "projectionRefreshRequired": true,
+        "recomputeReasons": [],
+        "invalidatedNodeIds": [],
+        "changedResolutionPaths": [],
+        "changedNodeIds": []
+      }
+    },
+    {
+      "caseId": "lifecycle:synthetic:language-narrator",
+      "causes": ["language-narrator"],
+      "rightStateVariant": "identical",
+      "expected": {
+        "stateRecordReusable": true,
+        "projectionRefreshRequired": true,
+        "recomputeReasons": [],
+        "invalidatedNodeIds": [],
+        "changedResolutionPaths": [],
+        "changedNodeIds": []
+      }
+    },
+    {
+      "caseId": "lifecycle:synthetic:observed-structure",
+      "causes": [],
+      "rightStateVariant": "month-primary-cleared",
+      "expected": {
+        "stateRecordReusable": false,
+        "projectionRefreshRequired": false,
+        "recomputeReasons": ["observed-diff"],
+        "invalidatedNodeIds": [],
+        "changedResolutionPaths": [],
+        "changedNodeIds": [
+          "bazi.shadow.direct-roots",
+          "bazi.shadow.strength-inputs",
+          "bazi.shadow.pattern-inputs"
+        ]
+      }
+    },
+    {
+      "caseId": "lifecycle:synthetic:observed-resolution",
+      "causes": [],
+      "rightStateVariant": "engine-version-changed",
+      "expected": {
+        "stateRecordReusable": false,
+        "projectionRefreshRequired": false,
+        "recomputeReasons": ["observed-diff"],
+        "invalidatedNodeIds": [],
+        "changedResolutionPaths": ["resolution.engineVersion"],
+        "changedNodeIds": []
+      }
+    },
+    {
+      "caseId": "lifecycle:synthetic:declared-and-observed",
+      "causes": ["settings"],
+      "rightStateVariant": "month-primary-cleared",
+      "expected": {
+        "stateRecordReusable": false,
+        "projectionRefreshRequired": false,
+        "recomputeReasons": ["invalidation-plan", "observed-diff"],
+        "invalidatedNodeIds": [
+          "bazi.shadow.direct-roots",
+          "bazi.shadow.relation-geometry",
+          "bazi.shadow.strength-inputs",
+          "bazi.shadow.pattern-inputs"
+        ],
+        "changedResolutionPaths": [],
+        "changedNodeIds": [
+          "bazi.shadow.direct-roots",
+          "bazi.shadow.strength-inputs",
+          "bazi.shadow.pattern-inputs"
+        ]
+      }
+    }
+  ],
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-model-provider",
+    "no-raw-answer",
+    "no-persistence",
+    "no-published-skill-runtime"
+  ]
+}
