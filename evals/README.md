@@ -25,6 +25,14 @@ the four derived-structure nodes stale, while topic/lens and language/narrator c
 already-confirmed structure reusable for a later projection. It neither persists a state nor
 turns a digest into a privacy or security claim.
 
+## P0-F boundary
+
+`conclusion-vector-invalidation-matrix/v1` binds P0-D's structured conclusion vector to P0-E's
+verified synthetic state digest. A chart-affecting invalidation makes both records stale;
+topic/lens keeps the state but requires a new topic-scoped vector; language/narrator leaves both
+structured records reusable. It records no narrative prose and does not represent a narrator,
+host model, or user-visible output.
+
 ## Data and storage rules
 
 - Fixtures must use a `synthetic:` fixture id. Do not put a real name, birth record, location,
@@ -56,4 +64,15 @@ The P0-E integrity check is likewise local-only and synthetic:
 node tools/eval/verify-shadow-state-integrity.ts \
   --manifest evals/fixtures/synthetic/p0e-shadow-state-integrity-manifest.json \
   --chart evals/fixtures/synthetic/p0e-bazi-shadow-chart.json
+```
+
+The P0-F cross-contract check is also local-only and synthetic:
+
+```bash
+node tools/eval/verify-conclusion-vector-invalidation.ts \
+  --matrix evals/fixtures/synthetic/p0f-conclusion-vector-invalidation-matrix.json \
+  --state-manifest evals/fixtures/synthetic/p0e-shadow-state-integrity-manifest.json \
+  --chart evals/fixtures/synthetic/p0e-bazi-shadow-chart.json \
+  --vector evals/fixtures/synthetic/p0d-conclusion-vector.json \
+  --run-manifest evals/fixtures/synthetic/p0d-eval-run-manifest.json
 ```

@@ -19,7 +19,7 @@
   "repetitions": 3,
   "conclusionVectorIds": ["conclusion-vector:synthetic:bazi-shadow-p0-career-overview"],
   "conclusionVectorDigests": {
-    "conclusion-vector:synthetic:bazi-shadow-p0-career-overview": "sha256:1a53dc815f206c3ba67fb873650daeed3f6ddee7e0bba1a7e599023096404405"
+    "conclusion-vector:synthetic:bazi-shadow-p0-career-overview": "sha256:b1105ed72c2f6969d923358a267b1123b1a49a41acd04512f03ca73caafb9cc8"
   },
   "exclusionPolicy": [
     "no-real-birth-input",
