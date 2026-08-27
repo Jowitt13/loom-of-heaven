@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/verification-mutation-matrix/v1",
+  "title": "Synthetic Verification Mutation Matrix",
+  "description": "Development-only fixed fault catalog for existing shadow-state and conclusion-vector verifiers. It contains diagnostic code/path pairs only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "suiteId",
+    "fixtureId",
+    "mode",
+    "baselineDigests",
+    "cases",
+    "exclusionPolicy"
+  ],
+  "properties": {
+    "contractVersion": { "const": "verification-mutation-matrix/v1" },
+    "suiteId": {
+      "type": "string",
+      "pattern": "^mutation-suite:synthetic:[a-z0-9][a-z0-9._-]*$"
+    },
+    "fixtureId": { "type": "string", "pattern": "^synthetic:[a-z0-9][a-z0-9._-]*$" },
+    "mode": { "const": "deterministic-local-only" },
+    "baselineDigests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chart",
+        "stateManifest",
+        "conclusionVector",
+        "runManifest",
+        "conclusionInvalidationMatrix",
+        "lifecycleMatrix"
+      ],
+      "properties": {
+        "chart": { "$ref": "#/$defs/sha256" },
+        "stateManifest": { "$ref": "#/$defs/sha256" },
+        "conclusionVector": { "$ref": "#/$defs/sha256" },
+        "runManifest": { "$ref": "#/$defs/sha256" },
+        "conclusionInvalidationMatrix": { "$ref": "#/$defs/sha256" },
+        "lifecycleMatrix": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 25,
+      "maxItems": 25,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caseId", "target", "mutation", "expectedIssues"],
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "pattern": "^mutation:synthetic:[a-z0-9][a-z0-9._-]*$"
+          },
+          "target": {
+            "enum": [
+              "shadow-state-contract",
+              "shadow-state-integrity",
+              "conclusion-vector-invalidation",
+              "shadow-state-lifecycle"
+            ]
+          },
+          "mutation": {
+            "enum": [
+              "state-node-order-swapped",
+              "state-dependency-dropped",
+              "state-invalidation-dropped",
+              "state-collector-link-drift",
+              "state-forbidden-field",
+              "integrity-digest-drift",
+              "integrity-contract-version-drift",
+              "integrity-state-contract-drift",
+              "integrity-source-profile-added",
+              "integrity-chart-scope-drift",
+              "integrity-chart-structure-drift",
+              "integrity-forbidden-field",
+              "vector-state-linkage-drift",
+              "run-vector-digest-drift",
+              "vector-node-linkage-drift",
+              "conclusion-case-reordered",
+              "conclusion-topic-reuse-flipped",
+              "conclusion-forbidden-field",
+              "lifecycle-state-linkage-drift",
+              "lifecycle-case-missing",
+              "lifecycle-case-reordered",
+              "lifecycle-duplicate-cause",
+              "lifecycle-variant-unknown",
+              "lifecycle-decision-flipped",
+              "lifecycle-cause-omitted"
+            ]
+          },
+          "expectedIssues": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "path"],
+              "properties": {
+                "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+                "path": { "type": "string", "pattern": "^\\$" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "exclusionPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}
