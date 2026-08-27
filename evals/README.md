@@ -43,6 +43,19 @@ collector difference; an observed resolution difference; and a declared-plus-obs
 The matrix records expected booleans, node ids, and field paths only — never a state value,
 birth input, prose, model request, persistence key, cache entry, or runtime decision.
 
+## P2-B boundary
+
+`verification-mutation-matrix/v1` is a development-only fault-detection regression gate for the
+existing P0-B, P0-E, P0-F, and P2-A verifiers. It applies twenty-five fixed, implementation-owned
+synthetic mutations — not fixture-supplied paths or values — and requires the relevant verifier to
+reject each one with the committed diagnostic code/path sequence. Baseline artifact digests are
+checked before injection, so a changed fixture cannot silently redefine the experiment.
+
+This gate shows that declared structural, linkage, invalidation, lifecycle, and privacy-field
+faults are detected. It is not a metaphysical accuracy percentage, a fuzzing interface, a runtime
+self-healing mechanism, or permission to activate a BaZi rule or source profile. Mutated values
+and raw artifacts are never written to the catalog or emitted in diagnostics.
+
 ## Data and storage rules
 
 - Fixtures must use a `synthetic:` fixture id. Do not put a real name, birth record, location,
@@ -99,3 +112,19 @@ node tools/eval/verify-shadow-state-lifecycle.ts \
 It verifies the P0-E integrity linkage before executing the fixed P1-A/P1-B/P1-C transition
 matrix. It is a regression harness, not a cache, scheduler, state store, CLI command, or
 user-facing feature.
+
+The P2-B mutation gate composes all of those existing checks without entering a runtime path:
+
+```bash
+node tools/eval/verify-verification-mutations.ts \
+  --catalog evals/fixtures/synthetic/p2b-verification-mutation-matrix.json \
+  --chart evals/fixtures/synthetic/p0e-bazi-shadow-chart.json \
+  --state-manifest evals/fixtures/synthetic/p0e-shadow-state-integrity-manifest.json \
+  --vector evals/fixtures/synthetic/p0d-conclusion-vector.json \
+  --run-manifest evals/fixtures/synthetic/p0d-eval-run-manifest.json \
+  --conclusion-matrix evals/fixtures/synthetic/p0f-conclusion-vector-invalidation-matrix.json \
+  --lifecycle-matrix evals/fixtures/synthetic/p2a-shadow-state-lifecycle-matrix.json
+```
+
+Its pass count is the number of declared synthetic faults caught, not a claim about prediction,
+interpretation quality, or real-world correctness.

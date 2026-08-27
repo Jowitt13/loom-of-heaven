@@ -1,0 +1,208 @@
+{
+  "contractVersion": "verification-mutation-matrix/v1",
+  "suiteId": "mutation-suite:synthetic:interpretation-state-p2b",
+  "fixtureId": "synthetic:bazi-shadow-p0",
+  "mode": "deterministic-local-only",
+  "baselineDigests": {
+    "chart": "sha256:a31314e64a27d88515f1d87a9dadd3240f7961407c274cfb97b84d22ac84dc07",
+    "stateManifest": "sha256:2831305a981ad177499c0d8a35baaa2bcbf5c9b5d2a3ad7b34407a6e0bc23639",
+    "conclusionVector": "sha256:b1105ed72c2f6969d923358a267b1123b1a49a41acd04512f03ca73caafb9cc8",
+    "runManifest": "sha256:fb895022eeb93e7820c1be572f3ffcde549f31316320e588dfa7740d9daade93",
+    "conclusionInvalidationMatrix": "sha256:c49b7ab0cd32e974860f25319c2d5b1ff743172d7dd61dce291604090bed5263",
+    "lifecycleMatrix": "sha256:26068f9f0137fd3a342da8c2dda1d82704255d0392cbceeafab114082c824ad7"
+  },
+  "cases": [
+    {
+      "caseId": "mutation:synthetic:state-node-order-swapped",
+      "target": "shadow-state-contract",
+      "mutation": "state-node-order-swapped",
+      "expectedIssues": [
+        { "code": "NODE_SET", "path": "$.nodes[0].id" },
+        { "code": "NODE_SET", "path": "$.nodes[1].id" }
+      ]
+    },
+    {
+      "caseId": "mutation:synthetic:state-dependency-dropped",
+      "target": "shadow-state-contract",
+      "mutation": "state-dependency-dropped",
+      "expectedIssues": [{ "code": "DEPENDENCY", "path": "$.nodes[0].dependsOn" }]
+    },
+    {
+      "caseId": "mutation:synthetic:state-invalidation-dropped",
+      "target": "shadow-state-contract",
+      "mutation": "state-invalidation-dropped",
+      "expectedIssues": [{ "code": "INVALIDATION", "path": "$.nodes[0].invalidatedBy" }]
+    },
+    {
+      "caseId": "mutation:synthetic:state-collector-link-drift",
+      "target": "shadow-state-contract",
+      "mutation": "state-collector-link-drift",
+      "expectedIssues": [
+        {
+          "code": "COLLECTOR_LINK",
+          "path": "$.nodes.strength-inputs.value.directRoots"
+        }
+      ]
+    },
+    {
+      "caseId": "mutation:synthetic:state-forbidden-field",
+      "target": "shadow-state-contract",
+      "mutation": "state-forbidden-field",
+      "expectedIssues": [
+        { "code": "STATE_SHAPE", "path": "$" },
+        { "code": "FORBIDDEN_FIELD", "path": "$.prompt" }
+      ]
+    },
+    {
+      "caseId": "mutation:synthetic:integrity-digest-drift",
+      "target": "shadow-state-integrity",
+      "mutation": "integrity-digest-drift",
+      "expectedIssues": [{ "code": "INTEGRITY", "path": "$.manifest.stateDigest" }]
+    },
+    {
+      "caseId": "mutation:synthetic:integrity-contract-version-drift",
+      "target": "shadow-state-integrity",
+      "mutation": "integrity-contract-version-drift",
+      "expectedIssues": [{ "code": "MANIFEST_SHAPE", "path": "$.manifest.contractVersion" }]
+    },
+    {
+      "caseId": "mutation:synthetic:integrity-state-contract-drift",
+      "target": "shadow-state-integrity",
+      "mutation": "integrity-state-contract-drift",
+      "expectedIssues": [{ "code": "STATE_CONTRACT", "path": "$.manifest.stateContractVersion" }]
+    },
+    {
+      "caseId": "mutation:synthetic:integrity-source-profile-added",
+      "target": "shadow-state-integrity",
+      "mutation": "integrity-source-profile-added",
+      "expectedIssues": [{ "code": "SCOPE", "path": "$.manifest.resolution" }]
+    },
+    {
+      "caseId": "mutation:synthetic:integrity-chart-scope-drift",
+      "target": "shadow-state-integrity",
+      "mutation": "integrity-chart-scope-drift",
+      "expectedIssues": [
+        { "code": "SCOPE", "path": "$.chart" },
+        { "code": "INTEGRITY", "path": "$.manifest.stateDigest" }
+      ]
+    },
+    {
+      "caseId": "mutation:synthetic:integrity-chart-structure-drift",
+      "target": "shadow-state-integrity",
+      "mutation": "integrity-chart-structure-drift",
+      "expectedIssues": [{ "code": "CHART_SHAPE", "path": "$.chart" }]
+    },
+    {
+      "caseId": "mutation:synthetic:integrity-forbidden-field",
+      "target": "shadow-state-integrity",
+      "mutation": "integrity-forbidden-field",
+      "expectedIssues": [
+        { "code": "PRIVACY", "path": "$.manifest.prompt" },
+        { "code": "MANIFEST_SHAPE", "path": "$.manifest" }
+      ]
+    },
+    {
+      "caseId": "mutation:synthetic:vector-state-linkage-drift",
+      "target": "conclusion-vector-invalidation",
+      "mutation": "vector-state-linkage-drift",
+      "expectedIssues": [{ "code": "VECTOR_LINKAGE", "path": "$.matrix" }]
+    },
+    {
+      "caseId": "mutation:synthetic:run-vector-digest-drift",
+      "target": "conclusion-vector-invalidation",
+      "mutation": "run-vector-digest-drift",
+      "expectedIssues": [
+        { "code": "RUN_LINKAGE", "path": "$.runManifest" },
+        { "code": "RUN_LINKAGE", "path": "$.runManifest" }
+      ]
+    },
+    {
+      "caseId": "mutation:synthetic:vector-node-linkage-drift",
+      "target": "conclusion-vector-invalidation",
+      "mutation": "vector-node-linkage-drift",
+      "expectedIssues": [{ "code": "NODE_LINKAGE", "path": "$.vector.claims[0].stateNodeIds" }]
+    },
+    {
+      "caseId": "mutation:synthetic:conclusion-case-reordered",
+      "target": "conclusion-vector-invalidation",
+      "mutation": "conclusion-case-reordered",
+      "expectedIssues": [
+        { "code": "INVALIDATION", "path": "$.matrix.invalidationCases[0]" },
+        { "code": "INVALIDATION", "path": "$.matrix.invalidationCases[1]" }
+      ]
+    },
+    {
+      "caseId": "mutation:synthetic:conclusion-topic-reuse-flipped",
+      "target": "conclusion-vector-invalidation",
+      "mutation": "conclusion-topic-reuse-flipped",
+      "expectedIssues": [
+        {
+          "code": "INVALIDATION",
+          "path": "$.matrix.invalidationCases[5].conclusionVectorReusable"
+        }
+      ]
+    },
+    {
+      "caseId": "mutation:synthetic:conclusion-forbidden-field",
+      "target": "conclusion-vector-invalidation",
+      "mutation": "conclusion-forbidden-field",
+      "expectedIssues": [
+        { "code": "PRIVACY", "path": "$.matrix.prompt" },
+        { "code": "MATRIX_SHAPE", "path": "$.matrix" }
+      ]
+    },
+    {
+      "caseId": "mutation:synthetic:lifecycle-state-linkage-drift",
+      "target": "shadow-state-lifecycle",
+      "mutation": "lifecycle-state-linkage-drift",
+      "expectedIssues": [{ "code": "STATE_LINKAGE", "path": "$.matrix" }]
+    },
+    {
+      "caseId": "mutation:synthetic:lifecycle-case-missing",
+      "target": "shadow-state-lifecycle",
+      "mutation": "lifecycle-case-missing",
+      "expectedIssues": [{ "code": "CASE_SET", "path": "$.matrix.cases" }]
+    },
+    {
+      "caseId": "mutation:synthetic:lifecycle-case-reordered",
+      "target": "shadow-state-lifecycle",
+      "mutation": "lifecycle-case-reordered",
+      "expectedIssues": [
+        { "code": "CASE_SET", "path": "$.matrix.cases[0].caseId" },
+        { "code": "CASE_SET", "path": "$.matrix.cases[1].caseId" }
+      ]
+    },
+    {
+      "caseId": "mutation:synthetic:lifecycle-duplicate-cause",
+      "target": "shadow-state-lifecycle",
+      "mutation": "lifecycle-duplicate-cause",
+      "expectedIssues": [{ "code": "CASE_SET", "path": "$.matrix.cases[1].causes" }]
+    },
+    {
+      "caseId": "mutation:synthetic:lifecycle-variant-unknown",
+      "target": "shadow-state-lifecycle",
+      "mutation": "lifecycle-variant-unknown",
+      "expectedIssues": [{ "code": "CASE_SET", "path": "$.matrix.cases[0].rightStateVariant" }]
+    },
+    {
+      "caseId": "mutation:synthetic:lifecycle-decision-flipped",
+      "target": "shadow-state-lifecycle",
+      "mutation": "lifecycle-decision-flipped",
+      "expectedIssues": [{ "code": "DECISION", "path": "$.matrix.cases[8].expected" }]
+    },
+    {
+      "caseId": "mutation:synthetic:lifecycle-cause-omitted",
+      "target": "shadow-state-lifecycle",
+      "mutation": "lifecycle-cause-omitted",
+      "expectedIssues": [{ "code": "DECISION", "path": "$.matrix.cases[1].expected" }]
+    }
+  ],
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-model-provider",
+    "no-raw-answer",
+    "no-persistence",
+    "no-runtime-mutation-api",
+    "no-published-skill-runtime"
+  ]
+}
