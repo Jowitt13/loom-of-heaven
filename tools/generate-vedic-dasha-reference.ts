@@ -1,8 +1,9 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertPathInsideDirectory, validateAbsoluteFilePath } from './lib/safe-spawn.ts';
 
 /**
  * ONE-TIME external reference generator for the P3B Vimshottari arithmetic gate.
@@ -178,7 +179,12 @@ function requireFile(name: string, value: string | undefined): string {
 }
 
 function main(): void {
-  const python = requireFile('NDASTRO_PYTHON', process.env.NDASTRO_PYTHON);
+  let python: string;
+  try {
+    python = validateAbsoluteFilePath(process.env.NDASTRO_PYTHON, 'NDASTRO_PYTHON');
+  } catch {
+    throw new Error('NDASTRO_PYTHON must point to an existing local file.');
+  }
   const ndaHome = process.env.NDASTRO_HOME;
   if (!ndaHome)
     throw new Error('NDASTRO_HOME must point to the controlled temporary home directory.');
@@ -194,6 +200,9 @@ function main(): void {
   const runnerPath = join(stagingDir, 'ndastro-runner.py');
   writeFileSync(inputPath, `${JSON.stringify(SAMPLES, null, 2)}\n`, 'utf8');
   writeFileSync(runnerPath, RUNNER, 'utf8');
+  // The runner must stay canonically inside the controlled staging directory.
+  assertPathInsideDirectory(inputPath, stagingDir, 'ndastro input document');
+  assertPathInsideDirectory(runnerPath, stagingDir, 'ndastro runner');
 
   const result = spawnSync(python, [runnerPath], {
     encoding: 'utf8',
@@ -318,4 +327,6 @@ function main(): void {
   );
 }
 
-main();
+const invokedDirectly =
+  process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (invokedDirectly) main();

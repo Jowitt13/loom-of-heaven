@@ -1,4 +1,3 @@
-import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,9 +8,12 @@ import { fileURLToPath } from 'node:url';
  * Enforces the docs/LICENSE_AUDIT.md policy over the workspace's PRODUCTION
  * dependency closure (the code that actually ships in the Skill bundle):
  * closed-source-friendly licenses only — no AGPL/GPL, no unknown provenance.
- * Reads `pnpm licenses list --prod --json` (local node_modules/lockfile, works
- * fully OFFLINE), so unlike scan-deps there is NO offline skip+warn path: any
- * tooling failure fails the gate (fail-closed).
+ * Validates a `pnpm licenses list --prod --json` document (local
+ * node_modules/lockfile, works fully OFFLINE), so unlike scan-deps there is
+ * NO offline skip+warn path: any tooling failure fails the gate (fail-closed).
+ * This tool never spawns a process and never reads npm_execpath: the pnpm
+ * invocation lives only in the static, variable-free `scan:licenses` script
+ * (`pnpm licenses list --prod --json` piped into `--licenses-stdin`).
  *
  * Also cross-checks the committed Skill SBOM (sbom.cdx.json): every component's
  * declared license must equal the license pnpm reports for that package, so a
@@ -50,6 +52,7 @@ const getFlag = (name: string): string | undefined => {
   return i >= 0 ? argv[i + 1] : undefined;
 };
 const licensesJsonFile = getFlag('--licenses-json');
+const licensesStdin = argv.includes('--licenses-stdin');
 
 interface Check {
   name: string;
@@ -80,43 +83,59 @@ interface LicensePkg {
 }
 type LicenseReport = Record<string, LicensePkg[]>;
 
-function loadReport(): { report?: LicenseReport; error?: string } {
-  if (licensesJsonFile) {
-    const p = join(root, licensesJsonFile);
-    if (!existsSync(p)) return { error: `--licenses-json file not found: ${relative(root, p)}` };
-    try {
-      // Tolerate a UTF-8 BOM in captured documents (some editors/shells add one).
-      return {
-        report: JSON.parse(readFileSync(p, 'utf8').replace(/^\uFEFF/, '')) as LicenseReport,
-      };
-    } catch (e) {
-      return { error: `could not parse ${relative(root, p)}: ${(e as Error).message}` };
-    }
+/** Shared strict input parsing for the license document (file or stdin). */
+function parseLicenseDocument(
+  raw: string,
+  source: string,
+): { report?: LicenseReport; error?: string } {
+  const withoutBom = raw.replace(/^\uFEFF/, '');
+  if (withoutBom.trim().length === 0) {
+    return { error: `${source} was empty or whitespace-only` };
   }
-  // Prefer the pnpm CLI entry that `pnpm run` exposes via npm_execpath (no shell);
-  // fall back to a shell lookup only when invoked outside pnpm.
-  const pnpmJs = process.env.npm_execpath;
-  const res =
-    pnpmJs && /\.[cm]?js$/.test(pnpmJs)
-      ? spawnSync(process.execPath, [pnpmJs, 'licenses', 'list', '--prod', '--json'], {
-          cwd: root,
-          encoding: 'utf8',
-          maxBuffer: 32 * 1024 * 1024,
-        })
-      : spawnSync('pnpm licenses list --prod --json', {
-          cwd: root,
-          encoding: 'utf8',
-          shell: true,
-          maxBuffer: 32 * 1024 * 1024,
-        });
+  let parsed: unknown;
   try {
-    return { report: JSON.parse(res.stdout ?? '') as LicenseReport };
+    parsed = JSON.parse(withoutBom);
   } catch {
-    const why = res.error
-      ? String(res.error)
-      : (res.stderr || res.stdout || 'no JSON on stdout').trim();
-    return { error: `pnpm licenses produced no parseable JSON — ${why.split('\n')[0]}` };
+    return { error: `${source} was not parseable JSON` };
   }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return { error: `${source} is not a pnpm licenses JSON document (expected an object)` };
+  }
+  return { report: parsed as LicenseReport };
+}
+
+function loadReport(): { report?: LicenseReport; error?: string } {
+  if (licensesJsonFile && licensesStdin) {
+    return { error: 'choose exactly one license input: --licenses-json or --licenses-stdin' };
+  }
+  if (licensesJsonFile) {
+    const p =
+      licensesJsonFile.startsWith('/') || /^[A-Za-z]:/.test(licensesJsonFile)
+        ? licensesJsonFile
+        : join(root, licensesJsonFile);
+    if (!existsSync(p)) return { error: `--licenses-json file not found: ${relative(root, p)}` };
+    return parseLicenseDocument(
+      readFileSync(p, 'utf8'),
+      `--licenses-json file ${relative(root, p)}`,
+    );
+  }
+  if (!licensesStdin) {
+    return {
+      error:
+        'no license input — run this tool through the scan:licenses script (which pipes ' +
+        '`pnpm licenses list --prod --json` into --licenses-stdin) or pass --licenses-json <file>',
+    };
+  }
+  // Fully fail-closed: this scan needs no network, so empty, whitespace-only,
+  // non-JSON, or structurally invalid stdin is a real gate failure in every
+  // mode; no raw input is echoed.
+  let raw: string;
+  try {
+    raw = readFileSync(0, 'utf8');
+  } catch {
+    return { error: 'could not read the license document from stdin' };
+  }
+  return parseLicenseDocument(raw, 'stdin');
 }
 
 // --- Exception file (optional; empty by design today). ---

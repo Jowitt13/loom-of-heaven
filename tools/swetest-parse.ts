@@ -46,7 +46,7 @@ export function parseSwetestAngle(field: string, context = 'angle'): number {
   }
 
   let value: number;
-  const dms = DMS_RE.exec(trimmed);
+  const dms = trimmed.match(DMS_RE);
   if (dms) {
     const deg = Number(dms[1]);
     const min = Number(dms[2]);
@@ -77,7 +77,7 @@ export function parseSwetestAngle(field: string, context = 'angle'): number {
  */
 function validateSwetestAuxiliaryAngle(field: string, context: string): void {
   const trimmed = field.trim();
-  const dms = AUX_DMS_RE.exec(trimmed);
+  const dms = trimmed.match(AUX_DMS_RE);
   if (dms) {
     const min = Number(dms[2]);
     const sec = Number(dms[3]);
@@ -111,7 +111,7 @@ export interface ParsedHouse {
  * error stays structural: no raw external content is echoed.
  */
 function parseTwoColumnValue(rest: string, where: string): number {
-  const m = TWO_COL_RE.exec(rest.trim());
+  const m = rest.trim().match(TWO_COL_RE);
   if (!m) {
     throw new Error(`malformed two-column line (${where})`);
   }
@@ -147,7 +147,7 @@ export function parseSwetestHouses(stdout: string, context: string): ParsedHouse
     const where = `${context} line ${n + 1}`;
     if (line === '') continue;
 
-    const h = /^house\s+(\d{1,2})\s+(.+)$/i.exec(line);
+    const h = line.match(/^house\s+(\d{1,2})\s+(.+)$/i);
     if (h) {
       const idx = Number(h[1]) - 1;
       if (idx < 0 || idx > 11) {
@@ -159,7 +159,7 @@ export function parseSwetestHouses(stdout: string, context: string): ParsedHouse
       cusps[idx] = parseTwoColumnValue(h[2]!, where);
       continue;
     }
-    const asc = /^Ascendant\s+(.+)$/i.exec(line);
+    const asc = line.match(/^Ascendant\s+(.+)$/i);
     if (asc) {
       if (ascendant !== undefined) {
         throw new Error(`duplicate Ascendant line (${where})`);
@@ -167,7 +167,7 @@ export function parseSwetestHouses(stdout: string, context: string): ParsedHouse
       ascendant = parseTwoColumnValue(asc[1]!, where);
       continue;
     }
-    const armcM = /^ARMC\s+(.+)$/i.exec(line);
+    const armcM = line.match(/^ARMC\s+(.+)$/i);
     if (armcM) {
       if (armc !== null) {
         throw new Error(`duplicate ARMC line (${where})`);
@@ -175,7 +175,7 @@ export function parseSwetestHouses(stdout: string, context: string): ParsedHouse
       armc = parseTwoColumnValue(armcM[1]!, where);
       continue;
     }
-    const mcM = /^MC\s+(.+)$/i.exec(line);
+    const mcM = line.match(/^MC\s+(.+)$/i);
     if (mcM) {
       if (mc !== undefined) {
         throw new Error(`duplicate MC line (${where})`);

@@ -26,6 +26,7 @@ const script = join(here, 'scan-deps.ts');
 function run(
   args: string[],
   env?: Record<string, string>,
+  stdinText?: string,
 ): { code: number; stdout: string; stderr: string } {
   const cleanEnv: Record<string, string | undefined> = { ...process.env };
   delete cleanEnv.DEPENDENCY_AUDIT_STRICT;
@@ -34,6 +35,7 @@ function run(
     cwd: root,
     encoding: 'utf8',
     env: finalEnv as NodeJS.ProcessEnv,
+    input: stdinText,
   });
   return { code: res.status ?? 1, stdout: res.stdout ?? '', stderr: res.stderr ?? '' };
 }
@@ -348,5 +350,90 @@ describe('scan-deps offline gate tests', () => {
     } finally {
       audit.cleanup();
     }
+  });
+});
+
+describe('scan-deps stdin gate tests (--audit-stdin)', () => {
+  it('S1. valid stdin with zero advisories -> exit 0', () => {
+    const r = run(
+      ['--audit-stdin'],
+      undefined,
+      JSON.stringify({
+        advisories: {},
+        metadata: { vulnerabilities: { info: 0, low: 0, moderate: 0, high: 0, critical: 0 } },
+      }),
+    );
+    expect(r.code).toBe(0);
+    expect(r.stdout).toContain('[PASS]');
+  });
+
+  it('S2. stdin with a blocking advisory -> exit 1', () => {
+    const r = run(
+      ['--audit-stdin'],
+      undefined,
+      JSON.stringify({
+        advisories: {
+          '1': { id: 1, module_name: 'synth-pkg', severity: 'high', title: 'Synthetic advisory' },
+        },
+        metadata: { vulnerabilities: { high: 1 } },
+      }),
+    );
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('[FAIL]');
+  });
+
+  it('S3. empty stdin fails closed in every mode -> exit 1', () => {
+    const r = run(['--audit-stdin'], undefined, '');
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('[FAIL]');
+    expect(r.stdout).toContain('empty or whitespace-only');
+  });
+
+  it('S4. whitespace-only stdin fails closed -> exit 1', () => {
+    const r = run(['--audit-stdin'], undefined, '   \n\t  ');
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('empty or whitespace-only');
+  });
+
+  it('S5. non-JSON stdin fails closed -> exit 1', () => {
+    const r = run(['--audit-stdin'], undefined, 'not json at all');
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('not parseable JSON');
+  });
+
+  it('S6. tool/network error text on stdin fails closed -> exit 1', () => {
+    const r = run(['--audit-stdin'], undefined, 'ERR_PNPM_NETWORK_ERROR request failed');
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('not parseable JSON');
+  });
+
+  it('S7. structurally invalid stdin (array) fails closed -> exit 1', () => {
+    const r = run(['--audit-stdin'], undefined, '[1,2,3]');
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('is not a pnpm audit JSON document');
+  });
+
+  it('S8. --audit-json together with --audit-stdin fails closed -> exit 1', () => {
+    const audit = writeAuditFixture({ advisories: {}, metadata: {} });
+    try {
+      const r = run(['--audit-json', audit.path, '--audit-stdin'], undefined, '{}');
+      expect(r.code).toBe(1);
+      expect(r.stdout).toContain('choose exactly one audit input');
+    } finally {
+      audit.cleanup();
+    }
+  });
+
+  it('S9. a sentinel in non-JSON stdin is not echoed', () => {
+    const r = run(['--audit-stdin'], undefined, 'G0M1-SECRET-SENTINEL not json');
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('not parseable JSON');
+    expect(r.stdout).not.toContain('G0M1-SECRET-SENTINEL');
+  });
+
+  it('S10. no input flag at all fails closed -> exit 1', () => {
+    const r = run([], undefined, '');
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('no audit input');
   });
 });

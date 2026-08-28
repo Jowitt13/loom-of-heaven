@@ -1,8 +1,9 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, renameSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateAbsoluteFilePath } from './lib/safe-spawn.ts';
 import { parseSwetestHouses } from './swetest-parse.ts';
 
 /**
@@ -119,19 +120,38 @@ function pad2(n: number): string {
 }
 
 /** swetest date argument: -bDD.MM.YYYY  (gregorian) */
-function dateArg(c: SampleCase): string {
+export function dateArg(c: SampleCase): string {
   return `-b${pad2(c.utc.d)}.${pad2(c.utc.mo)}.${c.utc.y}`;
 }
 /**
  * swetest UTC argument: -utcHH:MM:SS — input time scale is UTC (matches the
  * samples' utcIso field), NOT -ut which means UT1.
  */
-function utcArg(c: SampleCase): string {
+export function utcArg(c: SampleCase): string {
   return `-utc${pad2(c.utc.h)}:${pad2(c.utc.mi)}:${pad2(c.utc.s)}`;
 }
 /** swetest house argument: -house<lonE>,<lat>,<letter>  (east-positive longitude) */
-function houseArg(c: SampleCase, letter: string): string {
+export function houseArg(c: SampleCase, letter: string): string {
   return `-house${c.lonEastDeg},${c.latDeg},${letter}`;
+}
+
+/**
+ * Structural gate over raw swetest stdout before parsing: every line must be
+ * printable text and the document must contain a house line. The gate only
+ * rejects — a passing document is returned byte-for-byte unchanged, so valid
+ * captures keep their exact golden semantics.
+ */
+export function validatedHouseStdout(stdout: string, label: string): string {
+  const lines = stdout.split(/\r?\n/);
+  for (const line of lines) {
+    if (!/^[\x20-\x7e°]*$/.test(line)) {
+      throw new Error(`swetest stdout for ${label} contains control or non-ASCII bytes`);
+    }
+  }
+  if (!lines.some((line) => /^house\s+\d{1,2}\s/i.test(line))) {
+    throw new Error(`swetest stdout for ${label} does not contain a house line`);
+  }
+  return stdout;
 }
 
 interface RunResult {
@@ -164,8 +184,8 @@ function runSwetestOrExit(swetestPath: string, argv: string[], label: string): R
 }
 
 function main(): void {
-  const swetestPath = process.env.SWETEST_PATH;
-  if (!swetestPath) {
+  const swetestEnv = process.env.SWETEST_PATH;
+  if (!swetestEnv) {
     process.stdout.write(
       '[FAIL] SWETEST_PATH is not set.\n' +
         '\n' +
@@ -180,6 +200,13 @@ function main(): void {
         'The script never downloads anything and adds no dependency. See\n' +
         'packages/western/goldens/README.md for the full capture workflow.\n',
     );
+    process.exit(1);
+  }
+  let swetestPath: string;
+  try {
+    swetestPath = validateAbsoluteFilePath(swetestEnv, 'SWETEST_PATH');
+  } catch (error) {
+    process.stdout.write(`[FAIL] ${(error as Error).message}\n`);
     process.exit(1);
   }
 
@@ -317,7 +344,8 @@ function main(): void {
         stderrFile,
         stderrSha256: sha256(stderr),
       });
-      systems[system] = parseSwetestHouses(stdout, label);
+      const validatedStdout = validatedHouseStdout(stdout, label);
+      systems[system] = parseSwetestHouses(validatedStdout, label);
     }
     draft.cases.push({
       id: c.id,
@@ -354,4 +382,6 @@ function main(): void {
   );
 }
 
-main();
+const invokedDirectly =
+  process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (invokedDirectly) main();
