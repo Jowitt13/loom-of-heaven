@@ -1,4 +1,3 @@
-import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -6,12 +5,14 @@ import { fileURLToPath } from 'node:url';
 /**
  * Supply-chain dependency vulnerability gate (Phase 6 hardening).
  *
- * Runs `pnpm audit --prod --json` over the workspace's PRODUCTION dependency
- * tree — the code that actually ships in the Skill bundle — and fails the gate
- * (non-zero exit) when an advisory at or above the configured severity is
- * found. It adds NO runtime dependency: `pnpm` is already the package manager,
- * and the advisory lookup happens only here at gate time, never in the offline
- * Skill runtime.
+ * Validates a `pnpm audit --prod --json` document over the workspace's
+ * PRODUCTION dependency tree — the code that actually ships in the Skill
+ * bundle — and fails the gate (non-zero exit) when an advisory at or above
+ * the configured severity is found. This tool never spawns a process and
+ * never reads npm_execpath: the pnpm invocation lives only in the static,
+ * variable-free `scan:deps` script (`pnpm audit --prod --json` piped into
+ * `--audit-stdin`), and this tool owns parsing and judgment only. It adds NO
+ * runtime dependency.
  *
  * Behaviour:
  *   - advisory >= --level found            -> [FAIL], exit 1
@@ -28,8 +29,10 @@ import { fileURLToPath } from 'node:url';
  *   --level <info|low|moderate|high|critical>  minimum severity to fail on (default: low)
  *   --strict                                   treat an unreachable service as a failure
  *   --audit-json <file>                        read a pre-captured `pnpm audit --json`
- *                                              document instead of spawning pnpm
- *                                              (deterministic testing / CI debug)
+ *                                              document from a file (deterministic
+ *                                              testing / CI debug)
+ *   --audit-stdin                              read the `pnpm audit --json` document
+ *                                              from stdin (the scan:deps script pipes it)
  *   --allowlist <file>                         override the default allowlist path
  *                                              (default: tools/scan-deps.allowlist.json).
  *                                              Used by isolated tests so they never write
@@ -72,6 +75,7 @@ if (!SEVERITY_ORDER.includes(levelArg as Severity)) {
 }
 const level = levelArg as Severity;
 const auditJsonFile = getFlag('--audit-json');
+const auditStdin = argv.includes('--audit-stdin');
 const allowlistArg = getFlag('--allowlist');
 
 // --- Audit input: a captured document (testing) or a live `pnpm audit` run. ---
@@ -90,46 +94,63 @@ interface AuditReport {
   metadata?: { vulnerabilities?: Record<string, number> };
 }
 
-function loadAudit(): { report?: AuditReport; error?: string } {
+/** Shared strict input parsing for the audit document (file or stdin). */
+function parseAuditDocument(
+  raw: string,
+  source: string,
+): { report?: AuditReport; error?: string; fatal?: boolean } {
+  if (raw.trim().length === 0) {
+    return { error: `${source} was empty or whitespace-only`, fatal: true };
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { error: `${source} was not parseable JSON`, fatal: true };
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return {
+      error: `${source} is not a pnpm audit JSON document (expected an object)`,
+      fatal: true,
+    };
+  }
+  return { report: parsed as AuditReport };
+}
+
+function loadAudit(): { report?: AuditReport; error?: string; fatal?: boolean } {
+  if (auditJsonFile && auditStdin) {
+    return {
+      error: 'choose exactly one audit input: --audit-json or --audit-stdin',
+      fatal: true,
+    };
+  }
   if (auditJsonFile) {
     const p =
       auditJsonFile.startsWith('/') || /^[A-Za-z]:/.test(auditJsonFile)
         ? auditJsonFile
         : join(root, auditJsonFile);
     if (!existsSync(p)) return { error: `--audit-json file not found: ${relative(root, p)}` };
-    try {
-      return { report: JSON.parse(readFileSync(p, 'utf8')) as AuditReport };
-    } catch (e) {
-      return { error: `could not parse ${relative(root, p)}: ${(e as Error).message}` };
-    }
+    return parseAuditDocument(readFileSync(p, 'utf8'), `--audit-json file ${relative(root, p)}`);
   }
-
-  // pnpm audit exits non-zero when advisories are found but still prints JSON to
-  // stdout, so parseability of stdout — not the exit code — tells a real result
-  // apart from a tooling/network failure. Prefer the pnpm CLI entry that `pnpm
-  // run` exposes via npm_execpath (no shell); fall back to a shell lookup only
-  // when invoked outside pnpm.
-  const pnpmJs = process.env.npm_execpath;
-  const res =
-    pnpmJs && /\.[cm]?js$/.test(pnpmJs)
-      ? spawnSync(process.execPath, [pnpmJs, 'audit', '--prod', '--json'], {
-          cwd: root,
-          encoding: 'utf8',
-          maxBuffer: 32 * 1024 * 1024,
-        })
-      : spawnSync('pnpm audit --prod --json', {
-          cwd: root,
-          encoding: 'utf8',
-          shell: true,
-          maxBuffer: 32 * 1024 * 1024,
-        });
-  const raw = res.stdout ?? '';
+  if (!auditStdin) {
+    return {
+      error:
+        'no audit input — run this tool through the scan:deps script (which pipes ' +
+        '`pnpm audit --prod --json` into --audit-stdin) or pass --audit-json <file>',
+      fatal: true,
+    };
+  }
+  // `pnpm audit` exits non-zero when advisories are found but still prints the
+  // full JSON document, so the piped verifier — not the pnpm exit code — owns
+  // the final gate decision. Empty, whitespace-only, non-JSON, and structurally
+  // invalid stdin all fail closed in every mode; no raw input is echoed.
+  let raw: string;
   try {
-    return { report: JSON.parse(raw) as AuditReport };
+    raw = readFileSync(0, 'utf8');
   } catch {
-    const why = res.error ? String(res.error) : (res.stderr || raw || 'no JSON on stdout').trim();
-    return { error: `pnpm audit produced no parseable JSON — ${why.split('\n')[0]}` };
+    return { error: 'could not read the audit document from stdin', fatal: true };
   }
+  return parseAuditDocument(raw, 'stdin');
 }
 
 // --- Allowlist (optional) ---
@@ -250,12 +271,12 @@ process.stdout.write(
     ? '[STRICT] Dependency audit (fail-closed mode).\n'
     : '[LOCAL DIAGNOSTIC] Dependency audit (offline-safe mode).\n',
 );
-const { report, error } = loadAudit();
+const { report, error, fatal } = loadAudit();
 
 if (!report) {
   const msg = error ?? 'unknown audit failure';
-  if (strict) {
-    process.stdout.write(`[FAIL] dependency audit could not run and --strict is set: ${msg}\n`);
+  if (strict || fatal) {
+    process.stdout.write(`[FAIL] dependency audit could not run: ${msg}\n`);
     process.exit(1);
   }
   process.stdout.write(

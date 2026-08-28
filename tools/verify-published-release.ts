@@ -4,6 +4,7 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node
 import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateReleaseTag } from './lib/safe-spawn.ts';
 import { PUBLISHED_RELEASE_TAG, SKILL_NAME } from './lib/host-config.ts';
 import {
   assertSingleTopDir,
@@ -41,14 +42,31 @@ function fail(msg: string): never {
 
 function main(): void {
   const tagIdx = process.argv.indexOf('--tag');
-  const tag = tagIdx >= 0 ? process.argv[tagIdx + 1] : undefined;
-  if (!tag) fail('Usage: node tools/verify-published-release.ts --tag <vX.Y.Z>');
+  const rawTag = tagIdx >= 0 ? process.argv[tagIdx + 1] : undefined;
+  if (!rawTag) fail('Usage: node tools/verify-published-release.ts --tag <vX.Y.Z>');
+  let tag: string;
+  try {
+    tag = validateReleaseTag(rawTag);
+  } catch {
+    fail(
+      'Usage: node tools/verify-published-release.ts --tag <vX.Y.Z>' +
+        ' (refused: tag must match v<MAJOR>.<MINOR>.<PATCH> exactly)',
+    );
+  }
 
-  const tmp = mkdtempSync(join(tmpdir(), `ming-published-${tag}-`));
+  const tmp = mkdtempSync(join(tmpdir(), 'ming-published-'));
   try {
     const dl = spawnSync('gh', ['release', 'download', tag, '--dir', tmp], { encoding: 'utf8' });
     if (dl.status !== 0) {
-      fail(`gh release download ${tag} failed (need gh auth + network):\n${dl.stderr ?? ''}`);
+      const stderrSummary =
+        (dl.stderr ?? '')
+          .split(/\r?\n/)
+          .find((line) => line.trim().length > 0)
+          ?.slice(0, 200) ?? '';
+      fail(
+        `gh release download failed (need gh auth + network): exit=${dl.status}` +
+          (stderrSummary === '' ? '' : `: ${stderrSummary}`),
+      );
     }
 
     const sumsPath = join(tmp, 'SHA256SUMS.txt');

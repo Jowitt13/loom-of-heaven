@@ -125,7 +125,7 @@ if (existsSync(enginePath)) {
     ['XMLHttpRequest', /XMLHttpRequest/],
     ['WebSocket', /new\s+WebSocket|\bWebSocket\s*\(/],
     [
-      'require(http/https/net/tls/dns)',
+      'require of a node builtin network module',
       /require\(\s*['"](?:node:)?(?:https?|net|tls|dns|dgram|http2)['"]\s*\)/,
     ],
     ['import http/https/net/tls', /from\s*['"](?:node:)?(?:https?|net|tls|dns|dgram|http2)['"]/],

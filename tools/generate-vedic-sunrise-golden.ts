@@ -1,8 +1,9 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateAbsoluteFilePath } from './lib/safe-spawn.ts';
 
 /**
  * ONE-TIME external reference generator for the P3B Vaara sunrise gate.
@@ -174,7 +175,7 @@ function sha256(value: string | Buffer): string {
   return createHash('sha256').update(value).digest('hex');
 }
 
-function dateArg(utcMs: number): string {
+export function dateArg(utcMs: number): string {
   const date = new Date(utcMs);
   return `-b${date.getUTCDate()}.${date.getUTCMonth() + 1}.${date.getUTCFullYear()}`;
 }
@@ -183,7 +184,7 @@ function toIso(utcMs: number): string {
   return new Date(utcMs).toISOString().replace(/\.000Z$/, 'Z');
 }
 
-function parseRiseUtcMs(stdout: string, label: string): number {
+export function parseRiseUtcMs(stdout: string, label: string): number {
   const match =
     /^\s*rise\s+(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2}(?:\.\d+)?)/m.exec(stdout);
   if (!match) throw new Error(`missing or malformed rise output (${label})`);
@@ -202,12 +203,31 @@ function parseRiseUtcMs(stdout: string, label: string): number {
   return utcMs;
 }
 
+/**
+ * Structural gate over raw swetest capture output before parsing: every line
+ * must be printable text and the document must contain a rise line. The gate
+ * only rejects — a passing document is returned byte-for-byte unchanged, so
+ * valid captures keep their exact golden semantics.
+ */
+export function validatedRiseStdout(stdout: string, label: string): string {
+  const lines = stdout.split(/\r?\n/);
+  for (const line of lines) {
+    if (!/^[\x20-\x7e°]*$/.test(line)) {
+      throw new Error(`swetest stdout for ${label} contains control or non-ASCII bytes`);
+    }
+  }
+  if (!lines.some((line) => /^\s*rise\s+\d{1,2}\.\d{1,2}\.\d{4}\s/i.test(line))) {
+    throw new Error(`swetest stdout for ${label} does not contain a rise line`);
+  }
+  return stdout;
+}
+
 function ensureSwetestPath(): string {
-  const swetestPath = process.env.SWETEST_PATH;
-  if (!swetestPath || !existsSync(swetestPath)) {
+  try {
+    return validateAbsoluteFilePath(process.env.SWETEST_PATH, 'SWETEST_PATH');
+  } catch {
     throw new Error('SWETEST_PATH must point to a readable local swetest binary.');
   }
-  return swetestPath;
 }
 
 function main(): void {
@@ -266,7 +286,8 @@ function main(): void {
     ];
     // The omission of -norefrac/-disccenter is part of the frozen reference:
     // Swiss default apparent upper limb, matched against astronomy-engine SearchRiseSet.
-    const sunriseUtcMs = parseRiseUtcMs(capture(`${id}-${sample.id}`, argv), sample.id);
+    const capturedStdout = validatedRiseStdout(capture(`${id}-${sample.id}`, argv), sample.id);
+    const sunriseUtcMs = parseRiseUtcMs(capturedStdout, sample.id);
     return { ...sample, startUtcIso: toIso(sample.startUtcMs), sunriseUtcIso: toIso(sunriseUtcMs) };
   });
 
@@ -316,4 +337,6 @@ function main(): void {
   );
 }
 
-main();
+const invokedDirectly =
+  process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (invokedDirectly) main();
