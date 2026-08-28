@@ -4,6 +4,20 @@ Guidance for coding agents (OpenAI Codex, and any host that reads `AGENTS.md`) w
 repository. The user-facing capability is the **`xuan-ji-yu-heng`** Skill under
 [`skills/xuan-ji-yu-heng/`](skills/xuan-ji-yu-heng/).
 
+## Governing product roadmap (mandatory)
+
+Before planning, researching, or editing, read
+[`docs/PRODUCT_TECHNICAL_ROADMAP.md`](docs/PRODUCT_TECHNICAL_ROADMAP.md) and
+[`docs/COMMANDER_PROTOCOL.md`](docs/COMMANDER_PROTOCOL.md) completely. Every task must name a
+roadmap phase and one exit criterion, then use the commander's required scope, invariants,
+acceptance evidence, and stop conditions. A task with no roadmap anchor is not admitted.
+
+The roadmap governs product direction and technical sequence; domain ADRs and source matrices
+govern their narrower subjects. A lower-level prompt may narrow these rules but cannot override
+them. “Continue” means the next unblocked roadmap slice—not whichever feature is easiest to add.
+Changing the route requires the owner decision, ADR, roadmap-version, protocol, and static-gate
+process recorded in the roadmap.
+
 ## What this project is
 
 A **deterministic** four-system birth-chart engine — Western natal astrology, Four Pillars / BaZi
