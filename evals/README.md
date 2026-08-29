@@ -217,3 +217,25 @@ The checker enforces inventory, split, coverage-label, digest, privacy, candidat
 review-reference constraints. It does not assess prose quality, traditional-method correctness,
 prediction accuracy or real-world validity. No IQ-0B artifact is imported by runtime packages,
 the Skill or the CLI.
+
+## IQ-0C1 planned sealed-holdout governance
+
+`iq0c-sealed-holdout-manifest.json` is a fixed, public, metadata-only
+pre-activation record. It has `planned` status, zero cases and SHA-256 empty
+sentinels for both content and access-log digests. It contains no holdout
+inputs, expected boundaries, reviewer material, access-log content or personal
+data. A pass means only that the public record has not drifted into an
+activation or content claim; it does not prove an active holdout, controlled
+storage, human review, answer quality or predictive validity.
+
+Run its offline boundary check with:
+
+```bash
+node tools/eval/verify-sealed-holdout-manifest.ts
+```
+
+Actual sealed content and the access log remain in controlled storage outside
+Git. When an owner later activates a set, the public manifest can record only
+its version, counts and digests. A case inspected to guide a fix must be
+retired into the public regression corpus and replaced; it cannot be counted as
+unseen evidence again.

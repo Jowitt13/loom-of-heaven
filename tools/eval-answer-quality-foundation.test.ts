@@ -371,13 +371,15 @@ describe('IQ-0A answer-quality foundation', () => {
     }
   });
 
-  it('has created no cases, no holdout contents, and no legacy answers', () => {
+  it('keeps IQ-0A case-content-free despite later metadata-only governance artifacts', () => {
     const syntheticDir = join(root, 'evals', 'fixtures', 'synthetic');
     const iq0aFiles = readdirSync(syntheticDir).filter((name) => name.startsWith('iq0a'));
     expect(iq0aFiles).toEqual(['iq0a-answer-quality-rubric.json']);
-    for (const name of readdirSync(syntheticDir)) {
-      expect(name.includes('case') || name.includes('holdout'), name).toBe(false);
-    }
+    const holdoutFiles = readdirSync(syntheticDir).filter((name) => name.includes('holdout'));
+    expect(holdoutFiles).toEqual(['iq0c-sealed-holdout-manifest.json']);
+    expect(readdirSync(syntheticDir).some((name) => name.includes('answer-quality-case-v1'))).toBe(
+      false,
+    );
     const rubric = readJson(RUBRIC_PATH);
     expect(rubric.cases).toBeUndefined();
     expect(rubric.caseCount).toBeUndefined();

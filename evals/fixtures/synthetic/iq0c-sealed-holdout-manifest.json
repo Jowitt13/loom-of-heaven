@@ -1,0 +1,14 @@
+{
+  "contractVersion": "sealed-holdout-manifest/v1",
+  "setId": "sealed-set:career-iq0-holdout",
+  "version": "iq0c-planned-v1",
+  "topic": "career",
+  "rubricId": "rubric:answer-quality:career-v1",
+  "caseCount": 0,
+  "contentDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "accessLogDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "status": "planned",
+  "retiredCaseCount": 0,
+  "custodianRole": "owner-controlled-custodian",
+  "replacementRequired": false
+}

@@ -95,6 +95,25 @@ metadata manifest records `status` (`planned` / `active` / `rotated` /
 exposing content. Holdout evaluation covers answer boundaries and faithfulness
 only — never whether the traditional method is scientifically correct.
 
+## IQ-0C1 planned sealed-holdout manifest
+
+[`evals/fixtures/synthetic/iq0c-sealed-holdout-manifest.json`](../evals/fixtures/synthetic/iq0c-sealed-holdout-manifest.json)
+is the first public manifest, but it is deliberately **pre-activation**: it
+has status `planned`, zero cases, zero retired cases and no replacement claim.
+Both digests are the SHA-256 value for an empty byte sequence. They are an
+explicit sentinel for the absence of any sealed content or access-log entries,
+not an active holdout and not evidence that a holdout has been reviewed.
+
+The public manifest names only a non-personal custodian role. Before activation,
+the owner must establish controlled storage outside Git for the actual holdout
+inputs, expected boundaries, reviewer materials and access log. Activation is a
+separate reviewable change to public metadata only: it records a new version,
+nonzero count and the corresponding controlled-storage digests, but never the
+content. Any inspected case is retired into the public regression corpus and
+replaced before it can be represented as unseen again. The deterministic
+IQ-0C1 checker verifies the planned boundary; it does not access controlled
+storage, assess an answer, attest human review or create an active holdout.
+
 ## Human-review policy
 
 - development cases: at least 1 human reviewer;
@@ -207,7 +226,7 @@ It does not rate prose, establish traditional-method correctness, establish
 prediction accuracy, or replace the human-review policy above.
 
 The remaining IQ-0 work is intentionally still material: documented human
-review of candidate cases, the sealed-holdout metadata and controlled-storage
-protocol, and a separately reviewed legacy baseline. None is created or
-claimed by IQ-0B1, and the corpus remains disconnected from runtime, the Skill,
-the CLI and public contracts.
+review of candidate cases, activation of controlled sealed-holdout storage, and
+a separately reviewed legacy baseline. IQ-0C1 adds only the planned metadata
+boundary; no active holdout or review result is created or claimed. The corpus
+remains disconnected from runtime, the Skill, the CLI and public contracts.
