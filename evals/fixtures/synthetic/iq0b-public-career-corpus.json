@@ -1,0 +1,2024 @@
+{
+  "contractVersion": "answer-quality-public-corpus/v1",
+  "fixtureId": "synthetic:iq0b-public-career-corpus",
+  "fixtureKind": "synthetic-technical",
+  "mode": "candidate-only-pending-human-review",
+  "topic": "career",
+  "corpusVersion": "iq0b-v1",
+  "evidenceBundlePath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+  "evidenceBundleDigest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31",
+  "cases": [
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-direction-structured-work",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-direction",
+        "syntheticText": "一个合成案例询问如何让日常工作推进更稳定。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["ordinary"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-direction-structured-work-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-direction-structured-work-candidate.json",
+        "digest": "sha256:772eedccd6014520c49f302435901a9d21fa7fc2803d4c409ead4d1b41e88eab"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["vague-prose", "jargon-without-concrete-implication"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-role-fit-iteration",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "role-fit",
+        "syntheticText": "一个合成案例询问哪类角色更便于验证适配度。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["ordinary"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-role-fit-iteration-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-role-fit-iteration-candidate.json",
+        "digest": "sha256:0a309f26017e3fdcc2cb0864f1f922535a79d26a294bb58f28d3a1fa97f64707"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["mechanism-leap"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-environment-autonomy-boundary",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "work-environment",
+        "syntheticText": "一个合成案例询问工作环境中哪些条件值得优先确认。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "approximate",
+        "systemScope": "single-system",
+        "challengeIds": ["missing-condition"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-environment-autonomy-boundary-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-environment-autonomy-boundary-candidate.json",
+        "digest": "sha256:0a414c8d2ec2e6531f492e06f6c91c4d1bd49017c18e1154f6c040439ca9f1ec"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["missing-material-condition"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-change-transferable-skills",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-change",
+        "syntheticText": "一个合成案例询问如何把既有经验带入新的职业方向。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "approximate",
+        "systemScope": "single-system",
+        "challengeIds": ["ordinary"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-change-transferable-skills-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-change-transferable-skills-candidate.json",
+        "digest": "sha256:8ce188c146faf698f6b1f2d0ed6a80e84722bed692c274e04a9d0b6a9b0bd95c"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["unsupported-life-verdict"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-collaboration-role-clarity",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "collaboration",
+        "syntheticText": "一个合成案例询问如何降低协作中的返工。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["conflicting-signals"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-collaboration-role-clarity-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-collaboration-role-clarity-candidate.json",
+        "digest": "sha256:c0a85ea88b3257a8060bf172a15734240c318621bf203533ab6f4cdd6f1f5a14"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["cross-system-consensus-fabrication"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-timing-no-date-prediction",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "timing-scope",
+        "syntheticText": "一个合成案例询问是否能够确定职业变化的日期。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "unknown",
+        "systemScope": "single-system",
+        "challengeIds": ["insufficient-evidence"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-timing-no-date-prediction-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-timing-no-date-prediction-candidate.json",
+        "digest": "sha256:48dc16c8700e012b84b59af4da2a9593ad551de9f5cf9023a4ad390d35935d2a"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["unsupported-fact", "unsupported-life-verdict"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-tradeoff-depth-breadth",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "strengths-and-tradeoffs",
+        "syntheticText": "一个合成案例需要比较深耕与探索的现实取舍。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["ordinary"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-tradeoff-depth-breadth-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-tradeoff-depth-breadth-candidate.json",
+        "digest": "sha256:b9fd93222ae5a8a7951d32806983f5d99b303feb98eaf1a959708531fb6a9e70"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["vague-prose"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-insufficient-evidence-degrade",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "insufficient-evidence",
+        "syntheticText": "一个合成案例缺少判断职业方向所需的关键信息。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "unknown",
+        "systemScope": "single-system",
+        "challengeIds": ["insufficient-evidence"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-insufficient-evidence-degrade-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-insufficient-evidence-degrade-candidate.json",
+        "digest": "sha256:466b68a2cbe8ab4550abbcfbc22e98609a8b663ac7c37df6f20e6dfe477d1b1a"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["unsupported-fact"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-source-blocked-no-claim",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-direction",
+        "syntheticText": "一个合成案例涉及尚未完成来源准入的规则线。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "not-relevant",
+        "systemScope": "single-system",
+        "challengeIds": ["source-blocked"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-source-blocked-no-claim-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-source-blocked-no-claim-candidate.json",
+        "digest": "sha256:0dbde6d97043a9227a249317464cc8b0c74bcba59817e77eee167e70369769ec"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["mechanism-leap"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-leading-user-reframe",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-change",
+        "syntheticText": "一个合成案例预设某条职业道路必然成功。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "unknown",
+        "systemScope": "single-system",
+        "challengeIds": ["leading-user"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-leading-user-reframe-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-leading-user-reframe-candidate.json",
+        "digest": "sha256:50cc4b6861b7abd0fa41d004191416dad6593b8a29e7de1d68b395716f5b396a"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["unsupported-life-verdict"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-presentation-clean",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-direction",
+        "syntheticText": "一个合成案例需要一条没有固定尾注的职业准备建议。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["presentation-stress"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-presentation-clean-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-presentation-clean-candidate.json",
+        "digest": "sha256:928d12f7ebede3a19acc7bf0833a61542dac63edf54deb03fd2a18762d9ecee5"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["default-footer-clutter"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-material-condition",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-change",
+        "syntheticText": "一个合成案例的行动建议取决于能否先小范围试做。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "approximate",
+        "systemScope": "single-system",
+        "challengeIds": ["missing-condition"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-material-condition-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-material-condition-candidate.json",
+        "digest": "sha256:7e3c6719621ce5262acc745ba52adb5cf26307268441b2972c5586d2f4744bf2"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["missing-material-condition"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-mechanism-adjacent",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "role-fit",
+        "syntheticText": "一个合成案例要求把工作机制紧邻具体做法表达。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["ordinary"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-mechanism-adjacent-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-mechanism-adjacent-candidate.json",
+        "digest": "sha256:4f74c96d3e6ba38d364ccd1d9de97d67e5bfda33b86888e222cd8e9f4f7a0fc2"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["term-dump", "jargon-without-concrete-implication"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-system-separation",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-direction",
+        "syntheticText": "一个合成案例只有单一来源的有限工作线索。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "not-relevant",
+        "systemScope": "single-system",
+        "challengeIds": ["conflicting-signals"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-system-separation-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-system-separation-candidate.json",
+        "digest": "sha256:703037796cb80fc197b7cc5aa17aff4af854bfabaa09b144fd3264fde14a539f"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["cross-system-consensus-fabrication"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-conclusion-nonrepeat",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-direction",
+        "syntheticText": "一个合成案例包含两条服务于不同工作步骤的线索。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["ordinary"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-conclusion-nonrepeat-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-conclusion-nonrepeat-candidate.json",
+        "digest": "sha256:bd98e30a6d04cf5f0fa4ccc3cb59ffad0ae0658b39ed51b98e5fd57986c80df9"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["repeated-conclusion"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-scoped-advice",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "work-environment",
+        "syntheticText": "一个合成案例只询问当前工作安排，不涉及其他生活主题。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["ordinary"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-scoped-advice-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-scoped-advice-candidate.json",
+        "digest": "sha256:aa8f6b819588022fffd651d7c7af72eaf75333dc114e8af088330fcc7385a319"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["unsupported-fact"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-change-environment",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-change",
+        "syntheticText": "一个合成案例需要比较可逆试做与不可逆转换成本。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "approximate",
+        "systemScope": "single-system",
+        "challengeIds": ["missing-condition"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-change-environment-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-change-environment-candidate.json",
+        "digest": "sha256:e8ec627d1eac869235c54dc7aaa16b1262e50c71bdbc0a7be9561f3cb8f0ada0"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["missing-material-condition"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-collaboration-feedback",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "collaboration",
+        "syntheticText": "一个合成案例询问如何把反馈变成可执行的协作机制。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["ordinary"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-collaboration-feedback-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-collaboration-feedback-candidate.json",
+        "digest": "sha256:ceda6b327c6d697c92ca3c7a1a45414c854273fd9d56770792ee5c1d958d5344"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["mechanism-leap"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-stability-risk",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "strengths-and-tradeoffs",
+        "syntheticText": "一个合成案例需要呈现稳定性与成长机会的取舍。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["ordinary"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-stability-risk-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-stability-risk-candidate.json",
+        "digest": "sha256:46808246d331e4bd58da4976730feb01db918e14ee56f2d01d6290e2f5eb5709"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["unsupported-life-verdict"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-dev-learning-to-role",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "role-fit",
+        "syntheticText": "一个合成案例询问学习投入如何连接到岗位任务。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["ordinary"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-dev-learning-to-role-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-dev-learning-to-role-candidate.json",
+        "digest": "sha256:82e711aef878b8ce566e380c550219c07d10542eb23441c69b9b4a5cb3abb585"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["vague-prose"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-adv-vague-term-dump",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-direction",
+        "syntheticText": "一个合成对抗案例包含空泛赞许与术语堆砌。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["presentation-stress"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-adv-vague-term-dump-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-adv-vague-term-dump-candidate.json",
+        "digest": "sha256:8a3335eb92e98eabfbb95a964a4a6680c162c7085057f243211c72f2845f4db2"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["vague-prose", "term-dump", "jargon-without-concrete-implication"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-adv-unsupported-verdict",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "timing-scope",
+        "syntheticText": "一个合成对抗案例包含确定职业结果与强制行动。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "unknown",
+        "systemScope": "single-system",
+        "challengeIds": ["leading-user", "presentation-stress"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-adv-unsupported-verdict-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-adv-unsupported-verdict-candidate.json",
+        "digest": "sha256:8bed85a675bcc9554275d37e0073eb04e8f2f311249f631192fc9d0f119c295c"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["unsupported-fact", "unsupported-life-verdict"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-adv-mechanism-leap",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "role-fit",
+        "syntheticText": "一个合成对抗案例把一条工作偏好直接跳到职业命名。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["presentation-stress"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-adv-mechanism-leap-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-adv-mechanism-leap-candidate.json",
+        "digest": "sha256:2ae6d842659969e0723f8026291a255303d16e88ce683f7daca171bf4ff20a55"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["mechanism-leap", "unsupported-life-verdict"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-adv-fabricated-consensus",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-direction",
+        "syntheticText": "一个合成对抗案例把不同体系伪造成一致投票。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "not-relevant",
+        "systemScope": "single-system",
+        "challengeIds": ["conflicting-signals", "presentation-stress"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-adv-fabricated-consensus-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-adv-fabricated-consensus-candidate.json",
+        "digest": "sha256:6e5dfe25da4a31416606dcb522ffccb2a60c1d60ecb90c6ed4c92ff55428aadd"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["cross-system-consensus-fabrication"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-adv-footer-repetition",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-direction",
+        "syntheticText": "一个合成对抗案例重复结论并附加固定技术尾巴。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "exact",
+        "systemScope": "single-system",
+        "challengeIds": ["presentation-stress"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-adv-footer-repetition-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-adv-footer-repetition-candidate.json",
+        "digest": "sha256:1041ba1a24b232dbad89f1ea8f24210856d7b7cd99b37811926e007503c0bb75"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["repeated-conclusion", "default-footer-clutter"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-case/v2",
+      "caseId": "case:synthetic:career:iq0b-adv-missing-condition",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "topic": "career",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "question": {
+        "intentId": "career-change",
+        "syntheticText": "一个合成对抗案例给出行动建议却遗漏改变结论的条件。",
+        "syntheticOnly": true,
+        "rawUserPromptExcluded": true
+      },
+      "scenario": {
+        "timeReliability": "approximate",
+        "systemScope": "single-system",
+        "challengeIds": ["missing-condition", "presentation-stress"]
+      },
+      "evidenceArtifacts": [
+        {
+          "artifactId": "artifact:synthetic:iq0b-career-evidence-bundle",
+          "artifactKind": "synthetic-evidence-bundle",
+          "repoPath": "evals/fixtures/synthetic/iq0b-career-evidence-bundle.json",
+          "digest": "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+        }
+      ],
+      "answerArtifact": {
+        "artifactId": "artifact:synthetic:iq0b-adv-missing-condition-candidate",
+        "contractVersion": "answer-quality-visible-artifact/v1",
+        "repoPath": "evals/corpus/public/career/iq0b-adv-missing-condition-candidate.json",
+        "digest": "sha256:f9134c3f6c9c420391966e9fe6df581c46b5a84123a5e9e82f865116f29c0add"
+      },
+      "evaluationPlan": {
+        "dimensionIds": [
+          "support-and-traceability",
+          "mechanism-to-implication",
+          "topic-specificity",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries",
+          "presentation-cleanliness",
+          "usefulness-without-invention"
+        ],
+        "criticalDimensionIds": [
+          "support-and-traceability",
+          "condition-and-caveat-fidelity",
+          "cross-system-integrity",
+          "restraint-and-boundaries"
+        ],
+        "boundaryIds": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ],
+        "humanReviewRequired": true,
+        "targetFailureModeIds": ["missing-material-condition"]
+      },
+      "exclusionPolicy": [
+        "no-real-birth-input",
+        "no-raw-prompt",
+        "no-raw-transcript",
+        "no-model-reasoning",
+        "no-personal-data",
+        "candidate-only",
+        "no-human-review-attestation",
+        "no-runtime-input"
+      ]
+    }
+  ],
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-raw-prompt",
+    "no-raw-transcript",
+    "no-model-reasoning",
+    "no-personal-data",
+    "candidate-only",
+    "no-human-review-attestation",
+    "no-runtime-input"
+  ]
+}

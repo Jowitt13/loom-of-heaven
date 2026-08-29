@@ -1,0 +1,29 @@
+{
+  "contractVersion": "answer-quality-visible-artifact/v1",
+  "artifactId": "artifact:synthetic:iq0b-dev-system-separation-candidate",
+  "caseId": "case:synthetic:career:iq0b-dev-system-separation",
+  "topic": "career",
+  "role": "candidate",
+  "visibleText": "当前材料只给出一条来源内的工作偏好线索，所以建议也只停在这一条：先验证任务边界是否清楚。其他体系没有提供可比信息，不能被拿来填补空白或制造一致结论。",
+  "producerClass": "human-authored-synthetic",
+  "pipelineRevision": "d3ccaf4e22e9b5c43632f44d4fd27fbaa998625f",
+  "rulesetRefs": [{ "id": "synthetic-evaluation-profile", "version": "iq0b-v1" }],
+  "sourceArtifactDigests": [
+    "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+  ],
+  "sanitization": {
+    "syntheticInputOnly": true,
+    "rawTranscriptExcluded": true,
+    "rawPromptExcluded": true,
+    "modelReasoningExcluded": true,
+    "personalDataExcluded": true
+  },
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-raw-prompt",
+    "no-raw-transcript",
+    "no-model-reasoning",
+    "no-personal-data",
+    "candidate-not-accepted-reference"
+  ]
+}

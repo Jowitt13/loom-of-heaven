@@ -1,0 +1,107 @@
+{
+  "fixtureId": "synthetic:iq0b-review-linkage-fixture",
+  "fixtureKind": "synthetic-technical",
+  "mode": "structural-linkage-only-not-human-review",
+  "sourceArtifactPath": "evals/corpus/public/career/iq0b-adv-vague-term-dump-candidate.json",
+  "reviewRecords": [
+    {
+      "contractVersion": "answer-quality-review/v1",
+      "reviewId": "review:synthetic:iq0b-vague-independent-a",
+      "reviewKind": "independent",
+      "caseId": "case:synthetic:career:iq0b-adv-vague-term-dump",
+      "answerArtifactId": "artifact:synthetic:iq0b-adv-vague-term-dump-candidate",
+      "reviewedArtifactDigest": "sha256:8a3335eb92e98eabfbb95a964a4a6680c162c7085057f243211c72f2845f4db2",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "reviewerId": "reviewer:anon:1a2b3c4d5e6f7081",
+      "reviewRound": 1,
+      "judgments": [
+        { "dimensionId": "support-and-traceability", "judgment": "needs-review" },
+        { "dimensionId": "mechanism-to-implication", "judgment": "does-not-meet" },
+        { "dimensionId": "topic-specificity", "judgment": "needs-review" },
+        { "dimensionId": "condition-and-caveat-fidelity", "judgment": "does-not-meet" },
+        { "dimensionId": "cross-system-integrity", "judgment": "not-applicable" },
+        { "dimensionId": "restraint-and-boundaries", "judgment": "does-not-meet" },
+        { "dimensionId": "presentation-cleanliness", "judgment": "does-not-meet" },
+        { "dimensionId": "usefulness-without-invention", "judgment": "does-not-meet" }
+      ],
+      "failureModeIds": ["vague-prose", "term-dump", "jargon-without-concrete-implication"],
+      "boundaryFindingIds": ["mechanism-adjacent-to-implication", "deterministic-verdict-excluded"],
+      "disposition": "reconciliation-required",
+      "sourceReviewIds": [],
+      "exclusionPolicy": [
+        "no-human-review-attestation",
+        "no-freeform-review-prose",
+        "no-personal-data"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-review/v1",
+      "reviewId": "review:synthetic:iq0b-vague-independent-b",
+      "reviewKind": "independent",
+      "caseId": "case:synthetic:career:iq0b-adv-vague-term-dump",
+      "answerArtifactId": "artifact:synthetic:iq0b-adv-vague-term-dump-candidate",
+      "reviewedArtifactDigest": "sha256:8a3335eb92e98eabfbb95a964a4a6680c162c7085057f243211c72f2845f4db2",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "reviewerId": "reviewer:anon:2b3c4d5e6f708192",
+      "reviewRound": 1,
+      "judgments": [
+        { "dimensionId": "support-and-traceability", "judgment": "needs-review" },
+        { "dimensionId": "mechanism-to-implication", "judgment": "does-not-meet" },
+        { "dimensionId": "topic-specificity", "judgment": "needs-review" },
+        { "dimensionId": "condition-and-caveat-fidelity", "judgment": "does-not-meet" },
+        { "dimensionId": "cross-system-integrity", "judgment": "not-applicable" },
+        { "dimensionId": "restraint-and-boundaries", "judgment": "does-not-meet" },
+        { "dimensionId": "presentation-cleanliness", "judgment": "does-not-meet" },
+        { "dimensionId": "usefulness-without-invention", "judgment": "does-not-meet" }
+      ],
+      "failureModeIds": ["vague-prose", "term-dump", "jargon-without-concrete-implication"],
+      "boundaryFindingIds": ["mechanism-adjacent-to-implication", "deterministic-verdict-excluded"],
+      "disposition": "reconciliation-required",
+      "sourceReviewIds": [],
+      "exclusionPolicy": [
+        "no-human-review-attestation",
+        "no-freeform-review-prose",
+        "no-personal-data"
+      ]
+    },
+    {
+      "contractVersion": "answer-quality-review/v1",
+      "reviewId": "review:synthetic:iq0b-vague-reconciliation",
+      "reviewKind": "reconciliation",
+      "caseId": "case:synthetic:career:iq0b-adv-vague-term-dump",
+      "answerArtifactId": "artifact:synthetic:iq0b-adv-vague-term-dump-candidate",
+      "reviewedArtifactDigest": "sha256:8a3335eb92e98eabfbb95a964a4a6680c162c7085057f243211c72f2845f4db2",
+      "rubricId": "rubric:answer-quality:career-v1",
+      "reviewerId": "reviewer:anon:3c4d5e6f708192a3",
+      "reviewRound": 2,
+      "judgments": [
+        { "dimensionId": "support-and-traceability", "judgment": "needs-review" },
+        { "dimensionId": "mechanism-to-implication", "judgment": "does-not-meet" },
+        { "dimensionId": "topic-specificity", "judgment": "needs-review" },
+        { "dimensionId": "condition-and-caveat-fidelity", "judgment": "does-not-meet" },
+        { "dimensionId": "cross-system-integrity", "judgment": "not-applicable" },
+        { "dimensionId": "restraint-and-boundaries", "judgment": "does-not-meet" },
+        { "dimensionId": "presentation-cleanliness", "judgment": "does-not-meet" },
+        { "dimensionId": "usefulness-without-invention", "judgment": "does-not-meet" }
+      ],
+      "failureModeIds": ["vague-prose", "term-dump", "jargon-without-concrete-implication"],
+      "boundaryFindingIds": ["mechanism-adjacent-to-implication", "deterministic-verdict-excluded"],
+      "disposition": "revise",
+      "sourceReviewIds": [
+        "review:synthetic:iq0b-vague-independent-a",
+        "review:synthetic:iq0b-vague-independent-b"
+      ],
+      "exclusionPolicy": [
+        "no-human-review-attestation",
+        "no-freeform-review-prose",
+        "no-personal-data"
+      ]
+    }
+  ],
+  "exclusionPolicy": [
+    "no-human-review-attestation",
+    "no-freeform-review-prose",
+    "no-personal-data",
+    "no-runtime-input"
+  ]
+}

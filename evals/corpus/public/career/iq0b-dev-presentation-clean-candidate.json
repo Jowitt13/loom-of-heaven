@@ -1,0 +1,29 @@
+{
+  "contractVersion": "answer-quality-visible-artifact/v1",
+  "artifactId": "artifact:synthetic:iq0b-dev-presentation-clean-candidate",
+  "caseId": "case:synthetic:career:iq0b-dev-presentation-clean",
+  "topic": "career",
+  "role": "candidate",
+  "visibleText": "可以先选一项本周能完成的工作样本，把目标、过程和结果写清楚。这个动作直接服务于职业准备；与当前选择无关的技术说明不需要附在答案后面。",
+  "producerClass": "human-authored-synthetic",
+  "pipelineRevision": "d3ccaf4e22e9b5c43632f44d4fd27fbaa998625f",
+  "rulesetRefs": [{ "id": "synthetic-evaluation-profile", "version": "iq0b-v1" }],
+  "sourceArtifactDigests": [
+    "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+  ],
+  "sanitization": {
+    "syntheticInputOnly": true,
+    "rawTranscriptExcluded": true,
+    "rawPromptExcluded": true,
+    "modelReasoningExcluded": true,
+    "personalDataExcluded": true
+  },
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-raw-prompt",
+    "no-raw-transcript",
+    "no-model-reasoning",
+    "no-personal-data",
+    "candidate-not-accepted-reference"
+  ]
+}

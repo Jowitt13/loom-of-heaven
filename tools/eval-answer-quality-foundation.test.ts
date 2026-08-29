@@ -666,7 +666,7 @@ describe('IQ-0A-R case carrier and review contract correction', () => {
     const readme = readFileSync(join(root, 'evals', 'README.md'), 'utf8');
     expect(readme).toContain('answer-quality-visible-artifact/v1');
     expect(readme).toContain('Sanitized visible answer');
-    expect(readme).toContain('No corpus instances exist');
+    expect(readme).toContain('synthetic career **candidates**');
     expect(readme).toContain('reviewer:anon:<16-hex>');
   });
 
@@ -677,11 +677,15 @@ describe('IQ-0A-R case carrier and review contract correction', () => {
     expect(doc).toContain('review-reference cycle');
   });
 
-  it('confirms no corpus instances exist', () => {
+  it('keeps v1 instance-free while IQ-0B artifacts remain bounded synthetic candidates', () => {
     expect(
-      readdirSync(join(root, 'evals', 'fixtures', 'synthetic')).some(
-        (n) => n.includes('case-') || n.includes('visible'),
+      readdirSync(join(root, 'evals', 'fixtures', 'synthetic')).some((name) =>
+        name.includes('answer-quality-case-v1'),
       ),
     ).toBe(false);
+    const candidateArtifacts = readdirSync(
+      join(root, 'evals', 'corpus', 'public', 'career'),
+    ).filter((name) => /^iq0b-(?:dev|adv)-[a-z0-9-]+-candidate\.json$/.test(name));
+    expect(candidateArtifacts).toHaveLength(26);
   });
 });

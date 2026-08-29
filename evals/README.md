@@ -122,7 +122,8 @@ part of IQ-0A. See [docs/ANSWER_QUALITY_EVALUATION.md](../docs/ANSWER_QUALITY_EV
   chain-of-thought). Raw answers are forbidden everywhere in the repository.
 - **Sanitized visible answer**: the final, de-identified user-visible text of one answer,
   wrapped in `answer-quality-visible-artifact/v1`, may be stored under
-  `evals/corpus/public/career/` once IQ-0B creates cases. No corpus instances exist yet.
+  `evals/corpus/public/career/`. IQ-0B1 contributes only synthetic career **candidates**;
+  they are not accepted references, production outputs or evidence that human review occurred.
   This allowance does NOT extend to prompts, model reasoning, token logs, provider metadata
   or raw transcripts.
 - A structured review uses only a randomly assigned `reviewer:anon:<16-hex>` pseudonym;
@@ -197,3 +198,22 @@ node tools/eval/verify-verification-mutations.ts \
 
 Its pass count is the number of declared synthetic faults caught, not a claim about prediction,
 interpretation quality, or real-world correctness.
+
+## IQ-0B1 public candidate corpus
+
+The public career corpus is a fixed synthetic-only set of 20 development and 6 adversarial
+candidate artifacts. Each v2 case references the same synthetic evidence bundle and one
+sanitized visible artifact by canonical digest. The companion review-linkage fixture checks only
+record-to-record structure; it carries no human-review attestation and cannot stand in for the
+human-review policy.
+
+Run its offline structural check with:
+
+```bash
+node tools/eval/verify-answer-quality-corpus.ts
+```
+
+The checker enforces inventory, split, coverage-label, digest, privacy, candidate-boundary and
+review-reference constraints. It does not assess prose quality, traditional-method correctness,
+prediction accuracy or real-world validity. No IQ-0B artifact is imported by runtime packages,
+the Skill or the CLI.
