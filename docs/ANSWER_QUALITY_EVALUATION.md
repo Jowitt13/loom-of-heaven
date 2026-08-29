@@ -177,3 +177,37 @@ This corrective slice adds the v2 case carrier, the visible-answer artifact
 contract, and the review record contract. It creates **no** case instances,
 **no** visible-answer artifacts, **no** review records, and **no** corpus
 directory. IQ-0 remains in-progress.
+
+## IQ-0B1 public synthetic career corpus
+
+IQ-0B1 contributes a bounded public corpus under `evals/corpus/public/career/`:
+
+- 20 development candidates and 6 adversarial candidates, all tied to one
+  synthetic evidence bundle by canonical SHA-256 digest;
+- one sanitized visible-answer artifact per case, with no raw prompt,
+  transcript, model reasoning, provider metadata or personal data;
+- all eight frozen dimensions, twelve boundary findings and ten failure modes
+  represented across the corpus; and
+- one separate **synthetic review-linkage fixture** that proves references
+  between two independent-shaped records and one reconciliation-shaped record
+  can be checked structurally.
+
+Every artifact has role `candidate`, not accepted reference or production
+output. The adversarial candidates deliberately show bounded failure patterns;
+they are test inputs and must never be reused as default answer text. The
+development candidates exclude default audit headings and footer clutter. The
+linkage fixture uses pseudonymous synthetic ids and carries an explicit
+no-human-review attestation. It does **not** assert that a person performed,
+approved or reconciled any review.
+
+`node tools/eval/verify-answer-quality-corpus.ts` verifies only deterministic
+structure: exact case inventory and split, digest linkage, sanitization,
+candidate status, coverage of the frozen labels and structural review links.
+It does not rate prose, establish traditional-method correctness, establish
+prediction accuracy, or replace the human-review policy above.
+
+The remaining IQ-0 work is intentionally still material: documented human
+review of candidate cases, the sealed-holdout metadata and controlled-storage
+protocol, and a separately reviewed legacy baseline. None is created or
+claimed by IQ-0B1, and the corpus remains disconnected from runtime, the Skill,
+the CLI and public contracts.

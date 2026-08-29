@@ -1,0 +1,29 @@
+{
+  "contractVersion": "answer-quality-visible-artifact/v1",
+  "artifactId": "artifact:synthetic:iq0b-dev-learning-to-role-candidate",
+  "caseId": "case:synthetic:career:iq0b-dev-learning-to-role",
+  "topic": "career",
+  "role": "candidate",
+  "visibleText": "把学习投入连接到一个可验证的岗位任务，会比笼统增加课程更容易判断是否有效。先做出一个与目标任务相符的样本，再决定是否继续扩大学习范围；学习意愿不等于能力已经具备。",
+  "producerClass": "human-authored-synthetic",
+  "pipelineRevision": "d3ccaf4e22e9b5c43632f44d4fd27fbaa998625f",
+  "rulesetRefs": [{ "id": "synthetic-evaluation-profile", "version": "iq0b-v1" }],
+  "sourceArtifactDigests": [
+    "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+  ],
+  "sanitization": {
+    "syntheticInputOnly": true,
+    "rawTranscriptExcluded": true,
+    "rawPromptExcluded": true,
+    "modelReasoningExcluded": true,
+    "personalDataExcluded": true
+  },
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-raw-prompt",
+    "no-raw-transcript",
+    "no-model-reasoning",
+    "no-personal-data",
+    "candidate-not-accepted-reference"
+  ]
+}

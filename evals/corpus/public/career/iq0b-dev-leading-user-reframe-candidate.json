@@ -1,0 +1,29 @@
+{
+  "contractVersion": "answer-quality-visible-artifact/v1",
+  "artifactId": "artifact:synthetic:iq0b-dev-leading-user-reframe-candidate",
+  "caseId": "case:synthetic:career:iq0b-dev-leading-user-reframe",
+  "topic": "career",
+  "role": "candidate",
+  "visibleText": "与其先确认某条路一定成功，不如把问题改成：哪一种下一步能以较低成本取得更多信息。合成线索支持先做小范围验证，但不支持替你确认预设的成功叙事。",
+  "producerClass": "human-authored-synthetic",
+  "pipelineRevision": "d3ccaf4e22e9b5c43632f44d4fd27fbaa998625f",
+  "rulesetRefs": [{ "id": "synthetic-evaluation-profile", "version": "iq0b-v1" }],
+  "sourceArtifactDigests": [
+    "sha256:a00fcc4db3a34aba3df7ff856d8f73b09f654646616c8bddcb7d793b81cbce31"
+  ],
+  "sanitization": {
+    "syntheticInputOnly": true,
+    "rawTranscriptExcluded": true,
+    "rawPromptExcluded": true,
+    "modelReasoningExcluded": true,
+    "personalDataExcluded": true
+  },
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-raw-prompt",
+    "no-raw-transcript",
+    "no-model-reasoning",
+    "no-personal-data",
+    "candidate-not-accepted-reference"
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "fixtureId": "synthetic:iq0b-career-evidence-bundle",
+  "fixtureKind": "synthetic-technical",
+  "mode": "answer-quality-structural-only",
+  "notRuntimeInput": true,
+  "notChartCalculation": true,
+  "notHumanReview": true,
+  "sourceProfile": {
+    "id": "synthetic-evaluation-profile",
+    "version": "iq0b-v1"
+  },
+  "cases": [
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-direction-structured-work",
+      "mechanismLabel": "任务拆分后的推进线索更稳定",
+      "implicationBoundary": "只能讨论工作方式，不指定职业名称",
+      "caveatLabel": "需结合真实技能与机会"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-role-fit-iteration",
+      "mechanismLabel": "短周期反馈中的修正线索更清楚",
+      "implicationBoundary": "只能比较角色特征，不断言唯一适配",
+      "caveatLabel": "需保留试错空间"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-environment-autonomy-boundary",
+      "mechanismLabel": "边界清楚的协作条件更容易保持专注",
+      "implicationBoundary": "只能说明环境偏好，不评价雇主优劣",
+      "caveatLabel": "时间信息近似，结论须保守"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-change-transferable-skills",
+      "mechanismLabel": "既有经验可被拆成可迁移的工作模块",
+      "implicationBoundary": "只能提出转向步骤，不承诺转行结果",
+      "caveatLabel": "需要先核验实际作品与岗位要求"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-collaboration-role-clarity",
+      "mechanismLabel": "分工明确时反馈冲突较少",
+      "implicationBoundary": "只能建议协作约定，不推断他人动机",
+      "caveatLabel": "不同线索不可合并为共识"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-timing-no-date-prediction",
+      "mechanismLabel": "当前材料只支持准备节奏的讨论",
+      "implicationBoundary": "不能给出升职或跳槽日期",
+      "caveatLabel": "时间信息未知"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-tradeoff-depth-breadth",
+      "mechanismLabel": "深耕与探索各有被支持的条件",
+      "implicationBoundary": "只能呈现取舍，不裁定哪条更好",
+      "caveatLabel": "需由当事人确认风险承受度"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-insufficient-evidence-degrade",
+      "mechanismLabel": "可用线索不足以支持方向判断",
+      "implicationBoundary": "只能说明缺口并提出所需信息",
+      "caveatLabel": "不得把缺口补成结论"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-source-blocked-no-claim",
+      "mechanismLabel": "来源状态未获准入",
+      "implicationBoundary": "不能从未准入规则产生职业判断",
+      "caveatLabel": "应明确停在未决边界"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-leading-user-reframe",
+      "mechanismLabel": "问题预设了单一成功叙事",
+      "implicationBoundary": "只能重述可验证选择，不确认预设",
+      "caveatLabel": "避免把愿望当成证据"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-presentation-clean",
+      "mechanismLabel": "现有线索支持一条具体行动建议",
+      "implicationBoundary": "只能给出必要说明，不附固定尾注",
+      "caveatLabel": "无关技术信息应省略"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-material-condition",
+      "mechanismLabel": "建议依赖一个明确的前置条件",
+      "implicationBoundary": "不能遗漏改变结论的条件",
+      "caveatLabel": "条件未满足时需降级"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-mechanism-adjacent",
+      "mechanismLabel": "工作偏好线索与具体安排可以相邻表达",
+      "implicationBoundary": "不能只抛术语或只给空泛建议",
+      "caveatLabel": "机制不等于因果保证"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-system-separation",
+      "mechanismLabel": "单一来源的边界已明确",
+      "implicationBoundary": "不得借用其他体系补足缺口",
+      "caveatLabel": "跨体系内容保持分开"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-conclusion-nonrepeat",
+      "mechanismLabel": "两条证据指向不同的行动层面",
+      "implicationBoundary": "不能把同一结论换词重复",
+      "caveatLabel": "每段只承担一个作用"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-scoped-advice",
+      "mechanismLabel": "可用材料仅覆盖当前工作安排",
+      "implicationBoundary": "不能外推到收入、健康或关系",
+      "caveatLabel": "超出主题须省略"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-change-environment",
+      "mechanismLabel": "环境变化会改变建议的适用条件",
+      "implicationBoundary": "不能把过渡期描述成命定结果",
+      "caveatLabel": "需要保留可逆步骤"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-collaboration-feedback",
+      "mechanismLabel": "反馈节奏比角色标签更可操作",
+      "implicationBoundary": "只能建议沟通机制，不判断人格",
+      "caveatLabel": "对方信息不在证据范围内"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-stability-risk",
+      "mechanismLabel": "稳定性与成长机会存在可见取舍",
+      "implicationBoundary": "不能替当事人选定风险偏好",
+      "caveatLabel": "决策需结合现实约束"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-dev-learning-to-role",
+      "mechanismLabel": "学习投入应连接到可验证的岗位任务",
+      "implicationBoundary": "不能把学习意愿写成能力已具备",
+      "caveatLabel": "先补作品证据再扩大判断"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-adv-vague-term-dump",
+      "mechanismLabel": "术语本身不是解释",
+      "implicationBoundary": "需要机制和具体含义相邻",
+      "caveatLabel": "该候选用于检验术语堆砌"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-adv-unsupported-verdict",
+      "mechanismLabel": "有限线索不能推出人生结果",
+      "implicationBoundary": "不能给出确定职业结果",
+      "caveatLabel": "该候选用于检验无依据断言"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-adv-mechanism-leap",
+      "mechanismLabel": "一个偏好线索不能决定行业",
+      "implicationBoundary": "不能从机制跳到具体职业命名",
+      "caveatLabel": "该候选用于检验机制跳跃"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-adv-fabricated-consensus",
+      "mechanismLabel": "不同来源不能被投票合并",
+      "implicationBoundary": "不能伪造多体系共识",
+      "caveatLabel": "该候选用于检验体系混同"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-adv-footer-repetition",
+      "mechanismLabel": "结论应一次说清",
+      "implicationBoundary": "不能自动追加模板尾巴",
+      "caveatLabel": "该候选用于检验重复和尾注"
+    },
+    {
+      "caseId": "case:synthetic:career:iq0b-adv-missing-condition",
+      "mechanismLabel": "关键条件改变建议的适用性",
+      "implicationBoundary": "不能遗漏会改变结论的条件",
+      "caveatLabel": "该候选用于检验条件缺失"
+    }
+  ],
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-raw-prompt",
+    "no-raw-transcript",
+    "no-model-reasoning",
+    "no-personal-data",
+    "no-runtime-input",
+    "no-human-review-attestation"
+  ]
+}
