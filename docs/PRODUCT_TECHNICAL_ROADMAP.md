@@ -1,8 +1,9 @@
 # Loom product technical roadmap
 
-- Roadmap id: `loom-product-roadmap/v1`
+- Roadmap id: `loom-product-roadmap/v2`
 - Status: **Accepted and owner-confirmed**
-- Confirmed: 2026-08-28
+- Confirmed: 2026-08-29
+- Supersedes: `loom-product-roadmap/v1`
 - Authority: product direction, technical sequencing, and slice admission
 - Related: [ADR 0017](./adr/0017-product-technical-roadmap-and-execution-governance.md),
   [Commander protocol](./COMMANDER_PROTOCOL.md), [ADR 0016](./adr/0016-interpretable-state-and-accuracy-lab.md),
@@ -78,6 +79,42 @@ Every phase and slice preserves all of these invariants:
 10. No task weakens tests, provenance, privacy, license, SBOM, host, install, or release gates to
     make a phase appear complete.
 
+### 3.1 Answer presentation invariant
+
+The default answer starts from the professional mechanism that matters and immediately gives its
+concrete implication. It never prints a `讲人话` label, a fixed report template, or automatic
+footer sections such as `敏感项校对`, `引擎警告`, `专业依据`, `声明`, or translated equivalents.
+Structure and wording may vary naturally; the evidence, approved claim, material caveat, and
+conclusion boundary may not. A caveat appears inline only when it materially changes the answer.
+Technical evidence, provenance, and audit records appear only on explicit request.
+
+### 3.2 Claim and synthesis invariant
+
+`AnswerClaimCandidate` and `ApprovedAnswerClaim` are distinct internal states. A candidate cannot
+be narrated until deterministic verification approves it. Mechanisms are referenced through
+bounded `mechanismRefs`; conditions and caveats use bounded ids plus permitted parameters. V1 does
+not expose a generic `confidence` field. If a bounded clarity indicator is later necessary, it is
+named `ruleMatchClarity` and describes only rule-match clarity—not truth, probability, prediction,
+or agreement between systems.
+
+An answer claim belongs to exactly one chart system. Cross-system work uses a separate
+`SynthesisRecord`; `cross-system` is not a chart-system value. A synthesis record preserves each
+approved claim and can classify only `convergent`, `conflicting`, or `incomparable` relationships.
+
+### 3.3 Evaluation-lab separation
+
+The project maintains three non-interchangeable evidence programs:
+
+1. **Reliability Lab** — deterministic calculation, rebuild, invalidation, linkage, mutation, host,
+   package, and supply-chain behavior.
+2. **Answer Faithfulness & Quality Lab** — approved-claim fidelity, specificity, restraint,
+   material-caveat retention, natural presentation, and human review.
+3. **Predictive Validity Research** — separately authorized, de-identified, out-of-sample research
+   into whether a traditional method carries predictive information beyond declared baselines.
+
+The third program is research, not a normal product-release gate. Evidence from one lab never
+upgrades the status of another, and no result is collapsed into one product “accuracy” number.
+
 ## 4. Authoritative phase order
 
 The normal order is `G0 -> IQ-0 -> IQ-1 -> IQ-2 -> IQ-3 -> IQ-4 -> IQ-5 -> IQ-6 -> PLAT-1 -> DATA-1 -> EXP-1`.
@@ -104,22 +141,33 @@ runtime-isolation checks pass; no public capability claim changes.
 ### IQ-0 — final-answer quality baseline
 
 Build a de-identified, versioned evaluation corpus for representative user questions, starting
-with career. Record useful answers and failure modes: vague prose, term dumping, unsupported facts,
-mechanism leaps, contradictory systems, repeated conclusions, default footer clutter, and missing
-conditions.
+with career. The first development set is deliberately bounded to 20–30 cases; it grows only after
+the rubric and failure taxonomy stabilize. Record useful answers and failure modes: vague prose,
+term dumping, unsupported facts, mechanism leaps, contradictory systems, repeated conclusions,
+default footer clutter, missing conditions, jargon without a concrete implication, and unsupported
+life verdicts.
 
-Exit criteria: bounded rubric, adversarial cases, deterministic structural checks, and a documented
-human-review layer. No claim that a heuristic text gate proves interpretation quality.
+Public repository material contains the schema, rubric, development and adversarial corpus, and a
+sealed-set manifest plus digest. Controlled off-repository storage contains holdout inputs,
+expected boundaries, reviewer material, and an access log. A holdout case used to guide a fix is
+retired into the public regression corpus and replaced; it is never silently reused as unseen
+evidence. The holdout evaluates answer boundaries and faithfulness—not metaphysical truth.
+
+Exit criteria: bounded rubric, 20–30 development cases, adversarial cases, deterministic structural
+checks, sealed-holdout governance, a legacy baseline, and a documented human-review layer. No claim
+that a heuristic text gate proves interpretation quality.
 
 ### IQ-1 — AnswerClaim and NarrativeTrace
 
-Turn accepted internal state into topic-scoped `answer-claim` records. Each claim binds system,
-fact evidence, rule or source profile, mechanism, practical implication, relevant condition,
-caveat, dependencies, and invalidation causes. `NarrativeTrace` is internal and regenerable; it is
-not chain-of-thought and is not printed by default.
+Turn accepted internal state into topic-scoped `AnswerClaimCandidate` records, verify them into
+`ApprovedAnswerClaim` records, and project only topic-relevant evidence. Each record binds one
+system, fact evidence, rule or source profile, bounded mechanism references, practical implication,
+relevant condition, caveat, dependencies, and invalidation causes. `NarrativeTrace` is internal,
+transient, and regenerable; it is not chain-of-thought, a hidden user memory, or default output.
 
-Exit criteria: typed contracts, deterministic projection, privacy checks, invalidation tests, and
-no change to default prose until a separately admitted runtime slice.
+Exit criteria: candidate/approved typed contracts, deterministic topic projection, privacy checks,
+invalidation tests, bounded reference resolution, and no change to default prose until a separately
+admitted runtime slice.
 
 ### IQ-2 — final-answer faithfulness verifier
 
@@ -132,19 +180,7 @@ Exit criteria: wrong-chart swaps, leading-user contradictions, invented professi
 unsupported causal jumps, omitted material conditions, and forbidden footer leakage are covered
 by adversarial fixtures. A second model may review but cannot be the sole gate.
 
-### IQ-3 — career vertical slice
-
-Prove one complete user journey before expanding horizontally: clarify the question, calculate the
-selected systems, project only relevant evidence, form verified claims, synthesize agreements and
-disagreements, and deliver flexible natural prose. Career is the first slice because it exercises
-ability, environment, timing, trade-offs, and practical advice without requiring medical or
-clinical inference.
-
-Exit criteria: representative exact/approximate/unknown-time cases, single- and multi-system cases,
-conflict cases, source-blocked cases, four-host acceptance, and reviewed answer examples. The
-result must be specific without claiming fate or scientific prediction.
-
-### IQ-4 — structured clarification and response projection
+### IQ-3 — structured clarification and response projection
 
 Add a hard clarification boundary for settings and user intent that materially change the answer.
 The machine surface returns bounded required questions, confirmed settings, and clarification
@@ -154,29 +190,46 @@ to the current topic and requested depth.
 Exit criteria: no hidden default changes; unanswered material settings fail closed or degrade;
 projection cannot conceal a material caveat; full internal evidence remains auditable.
 
+### IQ-4 — single-system career vertical
+
+Prove one complete user journey in one selected, source-admitted system before expanding to four-
+system synthesis: clarify the question, calculate the chart, project only relevant evidence, form
+approved claims, verify the proposed answer, and deliver flexible natural prose. Career is the
+first slice because it exercises ability, environment, timing, trade-offs, and practical advice
+without requiring medical or clinical inference.
+
+Exit criteria: the selected system has representative exact/approximate/unknown-time cases,
+source-blocked cases, contradiction cases, four-host acceptance, and reviewed answer examples. The
+result must be specific without claiming fate or scientific prediction. Other systems remain
+unchanged and cannot be used to repair missing evidence.
+
 ### IQ-5 — cross-system synthesis
 
 Create a traceable synthesis layer over existing four-system claims. Preserve each system's
 mechanism and classify relationships only as `convergent`, `conflicting`, or `incomparable`. Never
 average systems into a confidence score and never let one system repair another system's missing
-evidence.
+evidence. Only after the single-system career slice passes may career expand to a multi-system
+journey.
 
 Exit criteria: synthetic convergence, conflict, incomparability, missing-system, and source-blocked
-cases; every synthesis statement resolves to original claims and caveats.
+cases; every synthesis statement resolves to original approved claims and caveats; the multi-system
+career slice passes the same answer-quality and host gates as IQ-4.
 
-### IQ-6 — optional audit and report delivery
+### IQ-6 — stability, optional audit, and report delivery
 
+Prove repeated-run, cross-host, and supported-language stability over the approved-claim boundary.
 Expose de-identified technical explanation only when requested: calculation convention, source,
 evidence path, relevant warnings, and version chain. After answer quality is stable, add optional
 structured export and then DOCX/PDF reports as separate delivery surfaces.
 
-Exit criteria: default answer remains clean; audit and report reproduce the same approved claims;
-no raw sensitive input or internal reasoning is leaked.
+Exit criteria: repeated-run, host, and language comparisons retain the same approved claim set and
+material caveats; default answer remains clean; audit and report reproduce those claims; no raw
+sensitive input or internal reasoning is leaked.
 
 ### PLAT-1 — optional MCP facade and client configuration
 
 Keep the Skill and stable local CLI canonical. Add a thin optional MCP facade and client-config
-generator only after IQ-0 through IQ-4 are stable. The facade must call the same bundle and public
+generator only after IQ-0 through IQ-6 are stable. The facade must call the same bundle and public
 contracts, add no calculation implementation, and preserve offline behavior.
 
 Exit criteria: compact tool surface, exact CLI parity, host configuration tests, no network or
@@ -211,10 +264,21 @@ tests pass. D2-C source and rights blockers remain real blockers.
 
 ### Psychology
 
-The published nonclinical personality Skill is an independent product surface. Psychology-informed
-narration may later improve wording, questions, uncertainty, and action framing, but it may not
-infer questionnaire answers or diagnoses from a chart. Clinical screening phases remain paused
-until rights, safety kernel, qualified human review, privacy, and host gates are independently met.
+The independently packaged nonclinical personality surface is in **maintenance mode** during G0
+and IQ-0 through IQ-6: security, correctness, privacy, source, documentation, host, and release-
+integrity fixes remain admitted, but new psychology capability does not displace the answer-quality
+critical path. Its source-tree candidate and publication claims remain governed by the psychology
+ADR, source matrix, immutable release evidence, and manifest state. Psychology-informed narration
+may later improve wording, questions, uncertainty, and action framing, but it may not infer
+questionnaire answers or diagnoses from a chart. Clinical screening phases remain paused until
+rights, safety kernel, qualified human review, privacy, and host gates are independently met.
+
+### Zi Wei source governance
+
+Zi Wei source discovery, edition binding, and rule-matrix work may proceed as research-only when it
+does not change runtime output or delay the active IQ phase. An attractive library, repository, or
+technique is not an admitted rule. Runtime changes require the ordinary source, school, contract,
+adversarial-case, and owner gates.
 
 ### Calculation and supply-chain maintenance
 
@@ -272,6 +336,11 @@ next unblocked slice in this roadmap and prove its admission conditions.
 
 ## 9. Roadmap changelog
 
+- `loom-product-roadmap/v2` — 2026-08-29: separates Reliability, Answer Faithfulness & Quality,
+  and Predictive Validity evidence; moves clarification/projection before the career vertical;
+  proves career in one system before four-system synthesis; freezes candidate/approved claim and
+  separate synthesis boundaries; adds sealed-holdout governance, the answer-presentation
+  invariant, Zi Wei research-only routing, and psychology maintenance mode.
 - `loom-product-roadmap/v1` — 2026-08-28: establishes verified-reasoning positioning, freezes the
   G0-to-EXP-1 phase order, adopts selected workflow lessons, and makes the commander protocol
   mandatory.

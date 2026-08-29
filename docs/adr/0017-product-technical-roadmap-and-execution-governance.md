@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-08-28
+- Amended: 2026-08-29 — roadmap v2 sequencing and evaluation boundaries
 - Scope: product positioning, technical sequence, command admission, and roadmap change control
 - Related: [Product technical roadmap](../PRODUCT_TECHNICAL_ROADMAP.md),
   [Commander protocol](../COMMANDER_PROTOCOL.md), [ADR 0016](./0016-interpretable-state-and-accuracy-lab.md),
@@ -36,11 +37,37 @@ The product direction is a compact, deterministic, source-governed, privacy-firs
 reasoning engine. The immediate route is to finish governance and the P2-C laboratory, then improve
 the final-answer quality loop before adding platform surfaces, memory, or technique breadth.
 
-The fixed normal phase order is:
+The fixed normal phase order remains:
 
 ```text
 G0 -> IQ-0 -> IQ-1 -> IQ-2 -> IQ-3 -> IQ-4 -> IQ-5 -> IQ-6 -> PLAT-1 -> DATA-1 -> EXP-1
 ```
+
+Roadmap v2 fixes the responsibilities inside that order:
+
+- IQ-0 establishes a bounded public development corpus plus off-repository sealed-holdout
+  governance;
+- IQ-1 separates `AnswerClaimCandidate` from `ApprovedAnswerClaim`, uses bounded mechanism
+  references, and keeps `NarrativeTrace` transient and regenerable;
+- IQ-2 verifies final-answer faithfulness before a runtime vertical is admitted;
+- IQ-3 implements structured clarification and response projection before the career vertical;
+- IQ-4 proves career in one source-admitted system;
+- IQ-5 introduces the separate `SynthesisRecord` and only then expands career across systems;
+- IQ-6 proves repeated-run, host, and language stability before optional audit/report surfaces.
+
+The project explicitly separates the Reliability Lab, the Answer Faithfulness & Quality Lab, and
+Predictive Validity Research. Their evidence cannot be substituted or collapsed into one accuracy
+number. Predictive validity remains separately authorized research and is not a normal release
+gate.
+
+The default answer presentation is also a governed invariant: the professional mechanism and its
+concrete implication are adjacent; wording and structure remain flexible; material caveats are
+inline; `讲人话` labels, automatic technical panels, fixed disclaimers, and standard follow-up
+menus are forbidden. Technical audit is shown only on request.
+
+During the G0/IQ critical path, the independent nonclinical psychology surface is maintenance-only.
+Zi Wei source work may continue as research-only, but neither track can displace the active phase or
+activate a runtime rule without its ordinary source and owner gates.
 
 Shadow-only and research-only tracks may run in parallel only when they cannot alter runtime output
 and do not displace the active product phase. Urgent calculation, privacy, security, supply-chain,
@@ -65,6 +92,11 @@ A lower-level prompt may narrow higher-level rules but cannot silently override 
 
 - Interpretation quality becomes the next product investment after G0, rather than technique
   count or a new UI shell.
+- Clarification and response projection precede the single-system career vertical; cross-system
+  synthesis follows only after that vertical is proven.
+- Candidate claims cannot be narrated; approved single-system claims and cross-system synthesis
+  remain separate internal records.
+- Public development cases and sealed holdout evidence have separate storage and retirement rules.
 - Final-answer faithfulness must validate claims and mechanism boundaries, not only chart tokens.
 - Clarification, projection, synthesis, report, MCP, and memory work have explicit later phases.
 - BaZi D1/D2 evidence stays shadow-only until source and rule admission is complete.

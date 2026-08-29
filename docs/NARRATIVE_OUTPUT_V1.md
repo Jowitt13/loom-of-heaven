@@ -18,7 +18,8 @@ This document is the implementation source of truth for the Skill instructions,
 | internal audit   | never visible      | Warning records, guardrails, fact ids, rulesets, provenance and validation output. |
 
 The default `body` must not contain a fixed heading, a numbered template, raw warning data,
-provenance, rule ids, a disclaimer footer or an automatic follow-up menu.
+provenance, rule ids, a disclaimer footer or an automatic follow-up menu. It must not label any
+section `讲人话`; it gives the concrete conclusion directly.
 
 ## Required internal reasoning chain
 
@@ -63,6 +64,10 @@ Source priority is fixed:
 ## Narrative rules
 
 - Professional terms are allowed when their mechanism and practical implication are adjacent.
+- Lead with the professional mechanism that matters, then state the concrete topic conclusion
+  directly. Do not add a meta-label announcing that the wording is simplified.
+- Vary paragraph structure, transitions, and emphasis naturally. Variation may change expression,
+  never the approved evidence, claim boundary, or material caveat.
 - Use concrete settings, choices, interactions or observable behavior instead of abstract advice.
 - Use conditions when the engine does not know the user's current life circumstances.
 - Do not force equal coverage of Western, BaZi, Zi Wei and Vedic/Jyotish. Combine systems only
@@ -88,7 +93,7 @@ Never print warning codes, severity labels, provider names or raw details in the
 
 ## Forbidden default-delivery artifacts
 
-`敏感项校对`、`引擎警告`、`专业依据`、`声明`、`免责声明`、`evidenceRef`、`factId`、`rulesetId`、
+`讲人话`、`敏感项校对`、`引擎警告`、`专业依据`、`声明`、`免责声明`、`evidenceRef`、`factId`、`rulesetId`、
 `schemaVersion`、`provider`、`ref:`、`ruleId:` and an automatic “还想看……” menu are internal or
 on-request material. They must not be rendered in `body`.
 
