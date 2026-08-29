@@ -100,8 +100,9 @@ only — never whether the traditional method is scientifically correct.
 - development cases: at least 1 human reviewer;
 - adversarial and sealed-holdout cases: at least 2 independent reviewers,
   judging independently before reconciliation of differences;
-- reviewers are identified by stable ids only; no names, chat transcripts,
-  chain-of-thought or free-form model reasoning is stored;
+- reviewers use only randomly assigned stable pseudonymous ids; they are never
+  names, emails, account ids, birth data or hashes of personal data;
+- no chat transcripts, chain-of-thought or free-form model reasoning is stored;
 - judgments use only the four independent values; no averages, totals or rates.
 
 ## Legacy baseline (future protocol)
@@ -118,3 +119,61 @@ the deterministic foundation verifier. It creates **no** development,
 adversarial or regression cases, **no** real sealed-set manifest, and **no**
 legacy answers. IQ-0 remains in-progress. Nothing here changes runtime output
 or claims any accuracy, quality percentage or predictive validity.
+
+## Contract versions (IQ-0A-R correction)
+
+### `answer-quality-case/v1` — superseded-before-first-case
+
+The v1 identity-only case contract was merged in IQ-0A but carries **no**
+question, scenario, evidence, answer or evaluation-plan fields. It was
+superseded before any v1 case instance was ever created; **no v1 case will
+ever exist in this repository**. The v1 schema file is retained unchanged as
+a historical record; its contract version is never reused.
+
+### `answer-quality-case/v2` — active case carrier
+
+The v2 contract is the sole active carrier for public answer-quality cases.
+It adds the structured question (intentId + bounded synthetic text), scenario
+bounds, evidence-artifact references (digest-anchored, repo-path restricted to
+`evals/fixtures/synthetic/`), a sanitized visible-answer artifact reference
+(digest-anchored, repo-path restricted to `evals/corpus/public/career/`), and
+the frozen evaluation plan (all 8 dimensions, 4 critical dimensions, 12
+boundary findings, target failure modes, mandatory human review).
+
+### Sanitized visible answer vs raw transcript
+
+A **sanitized visible answer** is the final, de-identified user-visible prose
+of one answer, wrapped in `answer-quality-visible-artifact/v1`. It carries
+five sanitization attestations (synthetic input only, no raw transcript, no
+raw prompt, no model reasoning, no personal data) and a bounded
+`visibleText` field.
+
+A **raw answer / raw transcript** is the raw model or provider response, an
+unredacted draft, a full session transcript, or any output carrying internal
+metadata (token logs, provider details, chain-of-thought). Raw answers are
+forbidden everywhere in the repository and can never enter the corpus.
+
+### Structured human review
+
+Review records use `answer-quality-review/v1`. Each record pins one reviewer
+(a randomly assigned stable pseudonymous id only), one answer artifact (by digest), and exactly
+eight ordered dimension judgments using the four independent values. An
+**independent review** cites no other reviews; a **reconciliation review**
+cites at least two distinct review ids and produces the final disposition.
+The schema proves only that those ids are distinct and structurally valid; it
+does not prove that they name independent reviews. No free-form reviewer prose,
+reasoning, totals, weights, percentages or confidence values are expressible.
+
+The IQ-0B corpus verifier must resolve each reconciliation reference and prove
+that the referenced review exists, is an independent review, has the same
+`caseId`, `answerArtifactId`, `reviewedArtifactDigest` and `rubricId`, names a
+different pseudonymous reviewer, does not cite itself, and does not form a
+review-reference cycle. IQ-0A-R defines this requirement but creates no review
+instances and therefore cannot yet verify it.
+
+## Scope of IQ-0A-R
+
+This corrective slice adds the v2 case carrier, the visible-answer artifact
+contract, and the review record contract. It creates **no** case instances,
+**no** visible-answer artifacts, **no** review records, and **no** corpus
+directory. IQ-0 remains in-progress.

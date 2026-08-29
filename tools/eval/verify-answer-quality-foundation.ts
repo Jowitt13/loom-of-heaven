@@ -3,15 +3,18 @@ import { dirname, isAbsolute, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /**
- * IQ-0A foundation verifier — development-only, offline, deterministic.
+ * IQ-0A/IQ-0A-R foundation verifier — development-only, offline, deterministic.
  *
- * It checks that the committed answer-quality rubric and the three evaluation
+ * It checks that the committed answer-quality rubric and the six evaluation
  * contracts match the implementer-owned frozen specs: eight ordered evaluation
  * dimensions, ten ordered failure modes, four independent judgments, seven
- * deterministic structural machine checks, and the fixed human-review policy.
- * It also enforces the data-boundary contracts on the schemas themselves:
- * public case splits only, sealed-holdout manifests carry metadata only, and
- * no accuracy/score-style field is expressible.
+ * deterministic structural machine checks, the fixed human-review policy, and
+ * the IQ-0A-R case/review carrier contracts (v2 case carrier, sanitized
+ * visible-answer artifact, structured human-review record). It also enforces
+ * the data-boundary contracts on the schemas themselves: public case splits
+ * only, sealed-holdout manifests carry metadata only, no accuracy/score-style
+ * field is expressible, and the v1 identity-only case contract stays
+ * superseded-before-first-case without silent semantic rewrites.
  *
  * This proves structure and boundaries only. It cannot and does not judge the
  * semantic quality of any answer — that is the documented human-review duty.
@@ -26,7 +29,11 @@ export type AnswerQualityFoundationCode =
   | 'PRIVACY'
   | 'HOLDOUT_BOUNDARY'
   | 'FORBIDDEN_METRIC'
-  | 'RUNTIME_BOUNDARY';
+  | 'RUNTIME_BOUNDARY'
+  | 'VERSION_BOUNDARY'
+  | 'CASE_CARRIER'
+  | 'ANSWER_ARTIFACT_BOUNDARY'
+  | 'REVIEW_RECORD_BOUNDARY';
 
 export interface AnswerQualityFoundationIssue {
   code: AnswerQualityFoundationCode;
@@ -144,6 +151,127 @@ const HOLDOUT_STATUS_ENUM = ['planned', 'active', 'rotated', 'retired'];
 
 const RUBRIC_SCHEMA_ID = 'loom:eval/answer-quality-rubric/v1';
 const RUBRIC_SCHEMA_KEYS = RUBRIC_KEYS;
+
+// --- IQ-0A-R: case/review carrier registries (implementation-owned) ---------
+
+const CASE_V2_SCHEMA_ID = 'loom:eval/answer-quality-case/v2';
+const CASE_V2_CONTRACT_VERSION = 'answer-quality-case/v2';
+const CASE_V2_KEYS = [
+  'contractVersion',
+  'caseId',
+  'split',
+  'fixtureKind',
+  'topic',
+  'rubricId',
+  'question',
+  'scenario',
+  'evidenceArtifacts',
+  'answerArtifact',
+  'evaluationPlan',
+  'exclusionPolicy',
+];
+const QUESTION_INTENT_IDS = [
+  'career-direction',
+  'role-fit',
+  'work-environment',
+  'career-change',
+  'collaboration',
+  'timing-scope',
+  'strengths-and-tradeoffs',
+  'insufficient-evidence',
+] as const;
+const SCENARIO_CHALLENGE_IDS = [
+  'ordinary',
+  'source-blocked',
+  'conflicting-signals',
+  'leading-user',
+  'missing-condition',
+  'insufficient-evidence',
+  'presentation-stress',
+] as const;
+const SCENARIO_TIME_RELIABILITY = ['exact', 'approximate', 'unknown', 'not-relevant'] as const;
+const SCENARIO_SYSTEM_SCOPE = ['single-system', 'multi-system'] as const;
+const EVIDENCE_ARTIFACT_KINDS = [
+  'answer-plan',
+  'public-result',
+  'synthetic-evidence-bundle',
+] as const;
+
+const VISIBLE_SCHEMA_ID = 'loom:eval/answer-quality-visible-artifact/v1';
+const VISIBLE_CONTRACT_VERSION = 'answer-quality-visible-artifact/v1';
+const VISIBLE_SCHEMA_KEYS = [
+  'contractVersion',
+  'artifactId',
+  'caseId',
+  'topic',
+  'role',
+  'visibleText',
+  'producerClass',
+  'pipelineRevision',
+  'rulesetRefs',
+  'sourceArtifactDigests',
+  'sanitization',
+  'exclusionPolicy',
+];
+const VISIBLE_ROLES = ['legacy-baseline', 'candidate', 'accepted-reference', 'regression'] as const;
+const PRODUCER_CLASSES = [
+  'current-pipeline',
+  'human-authored-synthetic',
+  'host-assisted-sanitized',
+] as const;
+
+const REVIEW_SCHEMA_ID = 'loom:eval/answer-quality-review/v1';
+const REVIEW_CONTRACT_VERSION = 'answer-quality-review/v1';
+const REVIEW_SCHEMA_KEYS = [
+  'contractVersion',
+  'reviewId',
+  'reviewKind',
+  'caseId',
+  'answerArtifactId',
+  'reviewedArtifactDigest',
+  'rubricId',
+  'reviewerId',
+  'reviewRound',
+  'judgments',
+  'failureModeIds',
+  'boundaryFindingIds',
+  'disposition',
+  'sourceReviewIds',
+  'exclusionPolicy',
+];
+const REVIEW_KINDS = ['independent', 'reconciliation'] as const;
+const REVIEW_DISPOSITIONS = ['accept', 'revise', 'reject', 'reconciliation-required'] as const;
+const REVIEWER_ID_PATTERN = '^reviewer:anon:[a-f0-9]{16}$';
+const CRITICAL_DIMENSION_IDS = [
+  'support-and-traceability',
+  'condition-and-caveat-fidelity',
+  'cross-system-integrity',
+  'restraint-and-boundaries',
+] as const;
+const BOUNDARY_IDS = [
+  'claim-support-resolves',
+  'mechanism-adjacent-to-implication',
+  'topic-scope-respected',
+  'material-caveat-retained',
+  'unrelated-warning-omitted',
+  'cross-system-separation-preserved',
+  'unsupported-life-fact-excluded',
+  'deterministic-verdict-excluded',
+  'default-footer-excluded',
+  'audit-metadata-hidden',
+  'insufficient-evidence-degrades',
+  'automatic-followup-excluded',
+] as const;
+
+// The v1 identity-only case contract must never grow content-bearing fields;
+// v2 is the only place where question/scenario/evidence/answer/plan live.
+const V1_FORBIDDEN_CONTENT_FIELDS = [
+  'question',
+  'scenario',
+  'evidenceartifacts',
+  'answerartifact',
+  'evaluationplan',
+];
 
 // Field names that must never appear as declared properties in the evaluation
 // contracts or as keys in the rubric artifact: personal data, raw interaction
@@ -282,6 +410,34 @@ function hasRuntimePathReference(strings: readonly string[]): boolean {
   );
 }
 
+/** The frozen enum of a schema property, or null when absent/malformed. */
+function enumOf(properties: JsonRecord, name: string): readonly unknown[] | null {
+  const field = record(properties[name]);
+  if (field === null) return null;
+  const values = field.enum;
+  return Array.isArray(values) ? values : null;
+}
+
+/** The frozen const of a schema property, or undefined when absent/malformed. */
+function constOf(properties: JsonRecord, name: string): unknown {
+  const field = record(properties[name]);
+  return field === null ? undefined : field.const;
+}
+
+/** The maxLength of a schema property, or null when absent/malformed. */
+function maxLengthOf(properties: JsonRecord, name: string): number | null {
+  const field = record(properties[name]);
+  if (field === null) return null;
+  const value = field.maxLength;
+  return typeof value === 'number' ? value : null;
+}
+
+/** The .properties record of a nested sub-schema, or null. */
+function propsOf(subSchema: unknown): JsonRecord | null {
+  const source = record(subSchema);
+  return source === null ? null : record(source.properties);
+}
+
 function findRepoRoot(startDirectory: string): string {
   let current = startDirectory;
   for (;;) {
@@ -324,10 +480,16 @@ export interface AnswerQualityFoundationInputs {
   rubric: unknown;
   /** The committed rubric schema (evals/contracts/answer-quality-rubric.schema.json). */
   rubricSchema: unknown;
-  /** The committed case schema (evals/contracts/answer-quality-case.schema.json). */
+  /** The committed v1 identity-only case schema (evals/contracts/answer-quality-case.schema.json). */
   caseSchema: unknown;
   /** The committed holdout manifest schema (evals/contracts/sealed-holdout-manifest.schema.json). */
   holdoutManifestSchema: unknown;
+  /** The committed v2 case carrier schema (evals/contracts/answer-quality-case-v2.schema.json). */
+  caseV2Schema: unknown;
+  /** The committed visible-artifact schema (evals/contracts/answer-quality-visible-artifact.schema.json). */
+  visibleArtifactSchema: unknown;
+  /** The committed review record schema (evals/contracts/answer-quality-review.schema.json). */
+  reviewSchema: unknown;
 }
 
 /**
@@ -395,7 +557,7 @@ export function verifyAnswerQualityFoundation(
     add(issues, 'MACHINE_HUMAN_BOUNDARY', '$.rubric.humanReviewPolicy');
   }
 
-  // --- The three evaluation contracts -------------------------------------
+  // --- The six evaluation contracts ---------------------------------------
   const contractList: Array<{
     name: string;
     schema: unknown;
@@ -414,6 +576,24 @@ export function verifyAnswerQualityFoundation(
       schema: inputs.holdoutManifestSchema,
       id: HOLDOUT_SCHEMA_ID,
       keys: HOLDOUT_SCHEMA_KEYS,
+    },
+    {
+      name: 'caseV2Schema',
+      schema: inputs.caseV2Schema,
+      id: CASE_V2_SCHEMA_ID,
+      keys: CASE_V2_KEYS,
+    },
+    {
+      name: 'visibleArtifactSchema',
+      schema: inputs.visibleArtifactSchema,
+      id: VISIBLE_SCHEMA_ID,
+      keys: VISIBLE_SCHEMA_KEYS,
+    },
+    {
+      name: 'reviewSchema',
+      schema: inputs.reviewSchema,
+      id: REVIEW_SCHEMA_ID,
+      keys: REVIEW_SCHEMA_KEYS,
     },
   ];
 
@@ -448,10 +628,17 @@ export function verifyAnswerQualityFoundation(
     contracts += 1;
   }
 
-  // --- Case schema: public splits only, sealed holdout not expressible ------
+  // --- Case schema (v1): identity-only, public splits, no content fields ----
   const caseSchema = record(inputs.caseSchema);
   const caseProperties = caseSchema === null ? null : record(caseSchema.properties);
   if (caseProperties !== null) {
+    // VERSION_BOUNDARY: the v1 identity-only contract must never grow the
+    // content-bearing fields that belong to the v2 case carrier.
+    for (const lowered of Object.keys(caseProperties)) {
+      if (V1_FORBIDDEN_CONTENT_FIELDS.includes(lowered)) {
+        add(issues, 'VERSION_BOUNDARY', `$.caseSchema.properties.${lowered}`);
+      }
+    }
     const split = record(caseProperties.split);
     const splitEnum = split === null ? null : split.enum;
     if (!deepEquals(splitEnum, CASE_SPLIT_ENUM)) {
@@ -488,6 +675,408 @@ export function verifyAnswerQualityFoundation(
     }
   }
 
+  // --- Case carrier (v2): question/scenario/evidence/answer/evaluation plan --
+  const caseV2Schema = record(inputs.caseV2Schema);
+  const caseV2Id = caseV2Schema === null ? null : caseV2Schema.$id;
+  const caseV2Properties = caseV2Schema === null ? null : record(caseV2Schema.properties);
+  if (caseV2Properties !== null) {
+    if (constOf(caseV2Properties, 'contractVersion') !== CASE_V2_CONTRACT_VERSION) {
+      add(issues, 'VERSION_BOUNDARY', '$.caseV2Schema.properties.contractVersion.const');
+    }
+    if (caseV2Id === CASE_SCHEMA_ID) {
+      add(issues, 'VERSION_BOUNDARY', '$.caseV2Schema.$id');
+    }
+    const question = record(caseV2Properties.question);
+    const questionProps = question === null ? null : propsOf(question);
+    if (questionProps !== null) {
+      if (!deepEquals(enumOf(questionProps, 'intentId'), QUESTION_INTENT_IDS)) {
+        add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.question.properties.intentId.enum');
+      }
+      const textMaxLength = maxLengthOf(questionProps, 'syntheticText');
+      if (textMaxLength === null || textMaxLength > 300 || textMaxLength < 1) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.question.properties.syntheticText.maxLength',
+        );
+      }
+      if (constOf(questionProps, 'syntheticOnly') !== true) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.question.properties.syntheticOnly.const',
+        );
+      }
+      if (constOf(questionProps, 'rawUserPromptExcluded') !== true) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.question.properties.rawUserPromptExcluded.const',
+        );
+      }
+    } else {
+      add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.question');
+    }
+
+    const scenario = record(caseV2Properties.scenario);
+    const scenarioProps = scenario === null ? null : propsOf(scenario);
+    if (scenarioProps !== null) {
+      if (!deepEquals(enumOf(scenarioProps, 'timeReliability'), SCENARIO_TIME_RELIABILITY)) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.scenario.properties.timeReliability.enum',
+        );
+      }
+      if (!deepEquals(enumOf(scenarioProps, 'systemScope'), SCENARIO_SYSTEM_SCOPE)) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.scenario.properties.systemScope.enum',
+        );
+      }
+      const challengeIds = record(scenarioProps.challengeIds);
+      if (
+        challengeIds === null ||
+        !deepEquals(enumOf(challengeIds, 'items'), SCENARIO_CHALLENGE_IDS)
+      ) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.scenario.properties.challengeIds.items.enum',
+        );
+      }
+      if (challengeIds === null || challengeIds.uniqueItems !== true) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.scenario.properties.challengeIds.uniqueItems',
+        );
+      }
+    } else {
+      add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.scenario');
+    }
+
+    const evidenceArtifacts = record(caseV2Properties.evidenceArtifacts);
+    const evidenceItems =
+      evidenceArtifacts === null ? null : propsOf(evidenceArtifacts.items ?? null);
+    if (evidenceArtifacts === null || evidenceItems === null) {
+      add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.evidenceArtifacts.items');
+    } else {
+      if (evidenceArtifacts.uniqueItems !== true) {
+        add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.evidenceArtifacts.uniqueItems');
+      }
+      if (!exactKeys(evidenceItems, ['artifactId', 'artifactKind', 'repoPath', 'digest'])) {
+        add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.evidenceArtifacts.items');
+      }
+      if (!deepEquals(enumOf(evidenceItems, 'artifactKind'), EVIDENCE_ARTIFACT_KINDS)) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.evidenceArtifacts.items.properties.artifactKind',
+        );
+      }
+      const repoPath = record(evidenceItems.repoPath);
+      const repoPattern = repoPath === null ? undefined : repoPath.pattern;
+      if (
+        typeof repoPattern !== 'string' ||
+        repoPattern !== '^evals/fixtures/synthetic/[a-z0-9][a-z0-9._-]*\\.json$'
+      ) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.evidenceArtifacts.items.properties.repoPath',
+        );
+      }
+      const digest = record(evidenceItems.digest);
+      const digestPattern = digest === null ? undefined : digest.pattern;
+      if (typeof digestPattern !== 'string' || !digestPattern.startsWith('^sha256:')) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.evidenceArtifacts.items.properties.digest',
+        );
+      }
+    }
+
+    const answerArtifact = record(caseV2Properties.answerArtifact);
+    const answerArtifactProps = answerArtifact === null ? null : propsOf(answerArtifact);
+    if (answerArtifactProps !== null) {
+      if (
+        !exactKeys(answerArtifactProps, ['artifactId', 'contractVersion', 'repoPath', 'digest'])
+      ) {
+        add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.answerArtifact.properties');
+      }
+      if (constOf(answerArtifactProps, 'contractVersion') !== VISIBLE_CONTRACT_VERSION) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.answerArtifact.properties.contractVersion.const',
+        );
+      }
+      const repoPath = record(answerArtifactProps.repoPath);
+      const repoPattern = repoPath === null ? undefined : repoPath.pattern;
+      if (
+        typeof repoPattern !== 'string' ||
+        repoPattern !== '^evals/corpus/public/career/[a-z0-9][a-z0-9._-]*\\.json$'
+      ) {
+        add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.answerArtifact.properties.repoPath');
+      }
+      const digest = record(answerArtifactProps.digest);
+      const digestPattern = digest === null ? undefined : digest.pattern;
+      if (typeof digestPattern !== 'string' || !digestPattern.startsWith('^sha256:')) {
+        add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.answerArtifact.properties.digest');
+      }
+    } else {
+      add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.answerArtifact');
+    }
+
+    const evaluationPlan = record(caseV2Properties.evaluationPlan);
+    const evaluationPlanProps = evaluationPlan === null ? null : propsOf(evaluationPlan);
+    if (evaluationPlanProps !== null) {
+      // dimensionIds / criticalDimensionIds / boundaryIds use a single-value
+      // enum to pin the exact ordered array; unwrap the enum wrapper.
+      const pinnedArray = (name: string): readonly unknown[] | null => {
+        const values = enumOf(evaluationPlanProps, name);
+        return values !== null && values.length === 1 && Array.isArray(values[0])
+          ? (values[0] as readonly unknown[])
+          : null;
+      };
+      const dimensionIds = pinnedArray('dimensionIds');
+      if (dimensionIds === null || !deepEquals(dimensionIds, ANSWER_QUALITY_DIMENSIONS)) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.evaluationPlan.properties.dimensionIds',
+        );
+      }
+      const criticalIds = pinnedArray('criticalDimensionIds');
+      if (criticalIds === null || !deepEquals(criticalIds, CRITICAL_DIMENSION_IDS)) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.evaluationPlan.properties.criticalDimensionIds',
+        );
+      }
+      const boundaryIds = pinnedArray('boundaryIds');
+      if (boundaryIds === null || !deepEquals(boundaryIds, BOUNDARY_IDS)) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.evaluationPlan.properties.boundaryIds',
+        );
+      }
+      const targetFailureModeIds = record(evaluationPlanProps.targetFailureModeIds);
+      const failureEnum =
+        targetFailureModeIds === null ? null : enumOf(targetFailureModeIds, 'items');
+      if (failureEnum === null || !deepEquals(failureEnum, ANSWER_QUALITY_FAILURE_MODES)) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.evaluationPlan.properties.targetFailureModeIds',
+        );
+      }
+      if (constOf(evaluationPlanProps, 'humanReviewRequired') !== true) {
+        add(
+          issues,
+          'CASE_CARRIER',
+          '$.caseV2Schema.properties.evaluationPlan.properties.humanReviewRequired.const',
+        );
+      }
+    } else {
+      add(issues, 'CASE_CARRIER', '$.caseV2Schema.properties.evaluationPlan');
+    }
+  } else {
+    add(issues, 'CASE_CARRIER', '$.caseV2Schema');
+  }
+
+  // --- Visible-answer artifact: sanitized final prose only -------------------
+  const visibleSchema = record(inputs.visibleArtifactSchema);
+  const visibleProperties = visibleSchema === null ? null : record(visibleSchema.properties);
+  if (visibleProperties !== null) {
+    const visibleText = record(visibleProperties.visibleText);
+    const textMin = visibleText === null ? undefined : visibleText.minLength;
+    const textMax = visibleText === null ? undefined : visibleText.maxLength;
+    if (typeof textMin !== 'number' || textMin < 1) {
+      add(
+        issues,
+        'ANSWER_ARTIFACT_BOUNDARY',
+        '$.visibleArtifactSchema.properties.visibleText.minLength',
+      );
+    }
+    if (typeof textMax !== 'number' || textMax > 12000 || textMax < 1) {
+      add(
+        issues,
+        'ANSWER_ARTIFACT_BOUNDARY',
+        '$.visibleArtifactSchema.properties.visibleText.maxLength',
+      );
+    }
+    if (!deepEquals(enumOf(visibleProperties, 'role'), VISIBLE_ROLES)) {
+      add(issues, 'ANSWER_ARTIFACT_BOUNDARY', '$.visibleArtifactSchema.properties.role.enum');
+    }
+    if (!deepEquals(enumOf(visibleProperties, 'producerClass'), PRODUCER_CLASSES)) {
+      add(
+        issues,
+        'ANSWER_ARTIFACT_BOUNDARY',
+        '$.visibleArtifactSchema.properties.producerClass.enum',
+      );
+    }
+    const pipelineRevision = record(visibleProperties.pipelineRevision);
+    const revisionPattern = pipelineRevision === null ? undefined : pipelineRevision.pattern;
+    if (typeof revisionPattern !== 'string' || revisionPattern !== '^[a-f0-9]{40}$') {
+      add(
+        issues,
+        'ANSWER_ARTIFACT_BOUNDARY',
+        '$.visibleArtifactSchema.properties.pipelineRevision.pattern',
+      );
+    }
+    const sanitization = record(visibleProperties.sanitization);
+    const sanitizationProps = sanitization === null ? null : propsOf(sanitization);
+    if (sanitizationProps === null) {
+      add(issues, 'ANSWER_ARTIFACT_BOUNDARY', '$.visibleArtifactSchema.properties.sanitization');
+    } else {
+      for (const attestation of [
+        'syntheticInputOnly',
+        'rawTranscriptExcluded',
+        'rawPromptExcluded',
+        'modelReasoningExcluded',
+        'personalDataExcluded',
+      ]) {
+        if (constOf(sanitizationProps, attestation) !== true) {
+          add(
+            issues,
+            'ANSWER_ARTIFACT_BOUNDARY',
+            `$.visibleArtifactSchema.properties.sanitization.properties.${attestation}`,
+          );
+        }
+      }
+    }
+    const rulesetRefs = record(visibleProperties.rulesetRefs);
+    if (rulesetRefs === null || rulesetRefs.minItems !== 1 || rulesetRefs.uniqueItems !== true) {
+      add(
+        issues,
+        'ANSWER_ARTIFACT_BOUNDARY',
+        '$.visibleArtifactSchema.properties.rulesetRefs.minItems',
+      );
+    }
+    const sourceArtifactDigests = record(visibleProperties.sourceArtifactDigests);
+    if (
+      sourceArtifactDigests === null ||
+      sourceArtifactDigests.minItems !== 1 ||
+      sourceArtifactDigests.uniqueItems !== true
+    ) {
+      add(
+        issues,
+        'ANSWER_ARTIFACT_BOUNDARY',
+        '$.visibleArtifactSchema.properties.sourceArtifactDigests',
+      );
+    }
+  } else {
+    add(issues, 'ANSWER_ARTIFACT_BOUNDARY', '$.visibleArtifactSchema');
+  }
+
+  // --- Review record: structured, reconciliation-aware, prose-free ----------
+  const reviewSchema = record(inputs.reviewSchema);
+  const reviewAllOf = reviewSchema === null ? null : reviewSchema.allOf;
+  const reviewProperties = reviewSchema === null ? null : record(reviewSchema.properties);
+  if (reviewProperties !== null) {
+    const reviewContractVersion = record(reviewProperties.contractVersion);
+    if (reviewContractVersion === null || reviewContractVersion.const !== REVIEW_CONTRACT_VERSION) {
+      add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema.properties.contractVersion.const');
+    }
+    if (!deepEquals(enumOf(reviewProperties, 'reviewKind'), REVIEW_KINDS)) {
+      add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema.properties.reviewKind.enum');
+    }
+    if (!deepEquals(enumOf(reviewProperties, 'disposition'), REVIEW_DISPOSITIONS)) {
+      add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema.properties.disposition.enum');
+    }
+    const reviewerId = record(reviewProperties.reviewerId);
+    const reviewerPattern = reviewerId === null ? undefined : reviewerId.pattern;
+    if (reviewerPattern !== REVIEWER_ID_PATTERN) {
+      add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema.properties.reviewerId.pattern');
+    }
+    const judgments = record(reviewProperties.judgments);
+    if (judgments === null) {
+      add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema.properties.judgments');
+    } else {
+      const prefixItems = Array.isArray(judgments.prefixItems) ? judgments.prefixItems : [];
+      if (prefixItems.length !== ANSWER_QUALITY_DIMENSIONS.length) {
+        add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema.properties.judgments.prefixItems');
+      } else {
+        prefixItems.forEach((entry, index) => {
+          const entryRecord = record(entry);
+          const entryProperties = entryRecord === null ? null : record(entryRecord.properties);
+          if (entryProperties === null) {
+            add(
+              issues,
+              'REVIEW_RECORD_BOUNDARY',
+              `$.reviewSchema.properties.judgments.prefixItems[${index}]`,
+            );
+            return;
+          }
+          if (constOf(entryProperties, 'dimensionId') !== ANSWER_QUALITY_DIMENSIONS[index]) {
+            add(
+              issues,
+              'REVIEW_RECORD_BOUNDARY',
+              `$.reviewSchema.properties.judgments.prefixItems[${index}].dimensionId`,
+            );
+          }
+          if (!deepEquals(enumOf(entryProperties, 'judgment'), ANSWER_QUALITY_JUDGMENTS)) {
+            add(
+              issues,
+              'REVIEW_RECORD_BOUNDARY',
+              `$.reviewSchema.properties.judgments.prefixItems[${index}].judgment.enum`,
+            );
+          }
+        });
+      }
+      if (judgments.items !== false || judgments.minItems !== 8 || judgments.maxItems !== 8) {
+        add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema.properties.judgments.bounds');
+      }
+    }
+    const failureModeIds = record(reviewProperties.failureModeIds);
+    const failureEnum = failureModeIds === null ? null : enumOf(failureModeIds, 'items');
+    if (failureEnum === null || !deepEquals(failureEnum, ANSWER_QUALITY_FAILURE_MODES)) {
+      add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema.properties.failureModeIds.items.enum');
+    }
+    const boundaryFindingIds = record(reviewProperties.boundaryFindingIds);
+    const boundaryEnum = boundaryFindingIds === null ? null : enumOf(boundaryFindingIds, 'items');
+    if (boundaryEnum === null || !deepEquals(boundaryEnum, BOUNDARY_IDS)) {
+      add(
+        issues,
+        'REVIEW_RECORD_BOUNDARY',
+        '$.reviewSchema.properties.boundaryFindingIds.items.enum',
+      );
+    }
+    const allOf = Array.isArray(reviewAllOf) ? reviewAllOf : [];
+    if (
+      allOf.length !== 2 ||
+      !allOf.every(
+        (entry) =>
+          record(entry) !== null &&
+          record(entry)!.if !== undefined &&
+          record(entry)!.then !== undefined,
+      )
+    ) {
+      add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema.allOf');
+    } else {
+      const allOfText = JSON.stringify(allOf);
+      if (!allOfText.includes('"maxItems":0') || !allOfText.includes('"minItems":2')) {
+        add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema.allOf.sourceReviewIds');
+      }
+    }
+    const sourceReviewIds = record(reviewProperties.sourceReviewIds);
+    if (sourceReviewIds === null || sourceReviewIds.uniqueItems !== true) {
+      add(
+        issues,
+        'REVIEW_RECORD_BOUNDARY',
+        '$.reviewSchema.properties.sourceReviewIds.uniqueItems',
+      );
+    }
+  } else {
+    add(issues, 'REVIEW_RECORD_BOUNDARY', '$.reviewSchema');
+  }
+
   return {
     ok: issues.length === 0,
     dimensionCount: dimensions,
@@ -497,19 +1086,22 @@ export function verifyAnswerQualityFoundation(
   };
 }
 
-// --- CLI: reads only the four committed foundation artifacts -----------------
+// --- CLI: reads only the seven committed foundation artifacts ---------------
 
 const COMMITTED_ARTIFACTS = {
   rubric: 'evals/fixtures/synthetic/iq0a-answer-quality-rubric.json',
   rubricSchema: 'evals/contracts/answer-quality-rubric.schema.json',
   caseSchema: 'evals/contracts/answer-quality-case.schema.json',
   holdoutManifestSchema: 'evals/contracts/sealed-holdout-manifest.schema.json',
+  caseV2Schema: 'evals/contracts/answer-quality-case-v2.schema.json',
+  visibleArtifactSchema: 'evals/contracts/answer-quality-visible-artifact.schema.json',
+  reviewSchema: 'evals/contracts/answer-quality-review.schema.json',
 } as const;
 
 function main(): void {
   if (process.argv.length > 2) {
     process.stderr.write(
-      'Usage: node tools/eval/verify-answer-quality-foundation.ts\nThis verifier takes no arguments; it reads only the four committed foundation artifacts.\n',
+      'Usage: node tools/eval/verify-answer-quality-foundation.ts\nThis verifier takes no arguments; it reads only the seven committed foundation artifacts.\n',
     );
     process.exit(2);
   }
@@ -532,7 +1124,7 @@ function main(): void {
   for (const issue of result.issues) process.stdout.write(`[FAIL] ${issue.code} ${issue.path}\n`);
   if (!result.ok) process.exit(1);
   process.stdout.write(
-    `IQ-0A foundation verified: ${result.dimensionCount} dimensions / ${result.failureModeCount} failure modes / ${result.contractCount} contracts\n`,
+    `IQ-0 foundation verified: ${result.dimensionCount} dimensions / ${result.failureModeCount} failure modes / ${result.contractCount} contracts\n`,
   );
 }
 

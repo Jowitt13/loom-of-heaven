@@ -19,6 +19,9 @@ const RUBRIC_PATH = 'evals/fixtures/synthetic/iq0a-answer-quality-rubric.json';
 const RUBRIC_SCHEMA_PATH = 'evals/contracts/answer-quality-rubric.schema.json';
 const CASE_SCHEMA_PATH = 'evals/contracts/answer-quality-case.schema.json';
 const HOLDOUT_SCHEMA_PATH = 'evals/contracts/sealed-holdout-manifest.schema.json';
+const CASE_V2_SCHEMA_PATH = 'evals/contracts/answer-quality-case-v2.schema.json';
+const VISIBLE_SCHEMA_PATH = 'evals/contracts/answer-quality-visible-artifact.schema.json';
+const REVIEW_SCHEMA_PATH = 'evals/contracts/answer-quality-review.schema.json';
 
 function foundationInputs(): AnswerQualityFoundationInputs {
   return {
@@ -26,6 +29,9 @@ function foundationInputs(): AnswerQualityFoundationInputs {
     rubricSchema: readJson(RUBRIC_SCHEMA_PATH),
     caseSchema: readJson(CASE_SCHEMA_PATH),
     holdoutManifestSchema: readJson(HOLDOUT_SCHEMA_PATH),
+    caseV2Schema: readJson(CASE_V2_SCHEMA_PATH),
+    visibleArtifactSchema: readJson(VISIBLE_SCHEMA_PATH),
+    reviewSchema: readJson(REVIEW_SCHEMA_PATH),
   };
 }
 
@@ -44,7 +50,7 @@ describe('IQ-0A answer-quality foundation', () => {
       ok: true,
       dimensionCount: 8,
       failureModeCount: 10,
-      contractCount: 3,
+      contractCount: 6,
       issues: [],
     });
     expect(verify()).toEqual(result);
@@ -376,5 +382,306 @@ describe('IQ-0A answer-quality foundation', () => {
     expect(rubric.cases).toBeUndefined();
     expect(rubric.caseCount).toBeUndefined();
     expect(rubric.contentDigest).toBeUndefined();
+  });
+});
+
+describe('IQ-0A-R case carrier and review contract correction', () => {
+  const caseV2Schema = () => readJson('evals/contracts/answer-quality-case-v2.schema.json');
+  const visibleSchema = () =>
+    readJson('evals/contracts/answer-quality-visible-artifact.schema.json');
+  const reviewSchema = () => readJson('evals/contracts/answer-quality-review.schema.json');
+
+  it('v1 case schema remains identity-only and unchanged', () => {
+    const v1 = readJson('evals/contracts/answer-quality-case.schema.json') as Record<
+      string,
+      unknown
+    >;
+    expect(v1.$id).toBe('loom:eval/answer-quality-case/v1');
+    const props = Object.keys(v1.properties as Record<string, unknown>);
+    expect(props).toHaveLength(7);
+    expect(props).not.toContain('question');
+    expect(props).not.toContain('scenario');
+    expect(props).not.toContain('evidenceArtifacts');
+    expect(props).not.toContain('answerArtifact');
+    expect(props).not.toContain('evaluationPlan');
+  });
+
+  it('v1 case schema rejects content fields with VERSION_BOUNDARY', () => {
+    const v1 = copy(foundationInputs());
+    const v1Props = (v1.caseSchema as Record<string, unknown>).properties as Record<
+      string,
+      unknown
+    >;
+    v1Props.question = { type: 'object' };
+    expect(issuesWithCode(verify(v1), 'VERSION_BOUNDARY')).toContainEqual({
+      code: 'VERSION_BOUNDARY',
+      path: '$.caseSchema.properties.question',
+    });
+  });
+
+  it('v2 case carrier is the active contract with correct version and identity', () => {
+    const v2 = caseV2Schema();
+    expect(v2.$id).toBe('loom:eval/answer-quality-case/v2');
+    expect(v2.additionalProperties).toBe(false);
+    expect(v2.required).toEqual([
+      'contractVersion',
+      'caseId',
+      'split',
+      'fixtureKind',
+      'topic',
+      'rubricId',
+      'question',
+      'scenario',
+      'evidenceArtifacts',
+      'answerArtifact',
+      'evaluationPlan',
+      'exclusionPolicy',
+    ]);
+    expect((v2.properties as Record<string, unknown>).contractVersion).toEqual({
+      const: 'answer-quality-case/v2',
+    });
+  });
+
+  it('v2 question requires synthetic-only intent with bounded text', () => {
+    const v2 = caseV2Schema();
+    const question = (v2.properties as Record<string, unknown>).question as Record<string, unknown>;
+    const qProps = question.properties as Record<string, unknown>;
+    expect((qProps.intentId as Record<string, unknown>).enum).toEqual([
+      'career-direction',
+      'role-fit',
+      'work-environment',
+      'career-change',
+      'collaboration',
+      'timing-scope',
+      'strengths-and-tradeoffs',
+      'insufficient-evidence',
+    ]);
+    expect((qProps.syntheticText as Record<string, unknown>).maxLength).toBe(300);
+    expect((qProps.syntheticOnly as Record<string, unknown>).const).toBe(true);
+    expect((qProps.rawUserPromptExcluded as Record<string, unknown>).const).toBe(true);
+  });
+
+  it('v2 scenario uses frozen time-reliability, system-scope and challenge registries', () => {
+    const v2 = caseV2Schema();
+    const scenario = (v2.properties as Record<string, unknown>).scenario as Record<string, unknown>;
+    const sProps = scenario.properties as Record<string, unknown>;
+    expect((sProps.timeReliability as Record<string, unknown>).enum).toEqual([
+      'exact',
+      'approximate',
+      'unknown',
+      'not-relevant',
+    ]);
+    expect((sProps.systemScope as Record<string, unknown>).enum).toEqual([
+      'single-system',
+      'multi-system',
+    ]);
+    const challengeIds = sProps.challengeIds as Record<string, unknown>;
+    expect(challengeIds.uniqueItems).toBe(true);
+    expect((challengeIds.items as Record<string, unknown>).enum).toEqual([
+      'ordinary',
+      'source-blocked',
+      'conflicting-signals',
+      'leading-user',
+      'missing-condition',
+      'insufficient-evidence',
+      'presentation-stress',
+    ]);
+  });
+
+  it('v2 evidence artifacts require digests and anchored repo paths', () => {
+    const v2 = caseV2Schema();
+    const ea = (v2.properties as Record<string, unknown>).evidenceArtifacts as Record<
+      string,
+      unknown
+    >;
+    expect(ea.minItems).toBe(1);
+    expect(ea.uniqueItems).toBe(true);
+    const items = ea.items as Record<string, unknown>;
+    expect((items.properties as Record<string, unknown>).digest).toEqual({
+      type: 'string',
+      pattern: '^sha256:[a-f0-9]{64}$',
+    });
+    const repoPath = (items.properties as Record<string, unknown>).repoPath as Record<
+      string,
+      unknown
+    >;
+    const repoPatternStr = String(repoPath.pattern);
+    expect(repoPatternStr).toBe('^evals/fixtures/synthetic/[a-z0-9][a-z0-9._-]*\\.json$');
+  });
+
+  it('v2 answer artifact references the visible-artifact contract and corpus path', () => {
+    const v2 = caseV2Schema();
+    const aa = (v2.properties as Record<string, unknown>).answerArtifact as Record<string, unknown>;
+    const aaProps = aa.properties as Record<string, unknown>;
+    expect((aaProps.contractVersion as Record<string, unknown>).const).toBe(
+      'answer-quality-visible-artifact/v1',
+    );
+    const corpusPatternStr = String((aaProps.repoPath as Record<string, unknown>).pattern);
+    expect(corpusPatternStr).toBe('^evals/corpus/public/career/[a-z0-9][a-z0-9._-]*\\.json$');
+  });
+
+  it('v2 evaluationPlan pins dimensions, critical dimensions, boundary ids and failure modes', () => {
+    const v2 = caseV2Schema();
+    const ep = (v2.properties as Record<string, unknown>).evaluationPlan as Record<string, unknown>;
+    const epProps = ep.properties as Record<string, unknown>;
+    expect((epProps.dimensionIds as Record<string, unknown>).enum).toEqual([
+      ANSWER_QUALITY_DIMENSIONS,
+    ]);
+    expect((epProps.criticalDimensionIds as Record<string, unknown>).enum).toEqual([
+      [
+        'support-and-traceability',
+        'condition-and-caveat-fidelity',
+        'cross-system-integrity',
+        'restraint-and-boundaries',
+      ],
+    ]);
+    expect((epProps.humanReviewRequired as Record<string, unknown>).const).toBe(true);
+  });
+
+  it('visible artifact requires sanitization attestations and bounded visible text', () => {
+    const va = visibleSchema();
+    expect(va.$id).toBe('loom:eval/answer-quality-visible-artifact/v1');
+    expect(va.additionalProperties).toBe(false);
+    const props = va.properties as Record<string, unknown>;
+    expect((props.visibleText as Record<string, unknown>).maxLength).toBe(12000);
+    const sanitization = props.sanitization as Record<string, unknown>;
+    const sProps = sanitization.properties as Record<string, unknown>;
+    for (const key of [
+      'syntheticInputOnly',
+      'rawTranscriptExcluded',
+      'rawPromptExcluded',
+      'modelReasoningExcluded',
+      'personalDataExcluded',
+    ]) {
+      expect((sProps[key] as Record<string, unknown>).const).toBe(true);
+    }
+    const producerClass = props.producerClass as Record<string, unknown>;
+    expect(producerClass.enum).toEqual([
+      'current-pipeline',
+      'human-authored-synthetic',
+      'host-assisted-sanitized',
+    ]);
+    const role = props.role as Record<string, unknown>;
+    expect(role.enum).toEqual(['legacy-baseline', 'candidate', 'accepted-reference', 'regression']);
+    const pipelineRevision = props.pipelineRevision as Record<string, unknown>;
+    expect(pipelineRevision.pattern).toBe('^[a-f0-9]{40}$');
+    expect((props.rulesetRefs as Record<string, unknown>).uniqueItems).toBe(true);
+    expect((props.sourceArtifactDigests as Record<string, unknown>).uniqueItems).toBe(true);
+  });
+
+  it('review record pins exactly 8 judgments in rubric order', () => {
+    const rv = reviewSchema();
+    const judgments = (rv.properties as Record<string, unknown>).judgments as Record<
+      string,
+      unknown
+    >;
+    expect(judgments.minItems).toBe(8);
+    expect(judgments.maxItems).toBe(8);
+    expect(judgments.items).toBe(false);
+    const prefixItems = judgments.prefixItems as Array<Record<string, unknown>>;
+    expect(prefixItems).toHaveLength(8);
+    prefixItems.forEach((entry, i) => {
+      const props = entry.properties as Record<string, unknown>;
+      expect((props.dimensionId as Record<string, unknown>).const).toBe(
+        ANSWER_QUALITY_DIMENSIONS[i],
+      );
+    });
+  });
+
+  it('review record allows only random non-personal reviewer pseudonyms', () => {
+    const rv = reviewSchema();
+    const reviewerId = (rv.properties as Record<string, unknown>).reviewerId as Record<
+      string,
+      unknown
+    >;
+    const pattern = new RegExp(String(reviewerId.pattern));
+    expect(pattern.test('reviewer:anon:0123456789abcdef')).toBe(true);
+    expect(pattern.test('reviewer:john-smith')).toBe(false);
+    expect(pattern.test('alice@example.com')).toBe(false);
+    expect(pattern.test('reviewer:anon:johnsmith')).toBe(false);
+    expect(pattern.test('reviewer:anon:1234')).toBe(false);
+  });
+
+  it('review sourceReviewIds is unique, empty for independent and bounded for reconciliation', () => {
+    const rv = reviewSchema();
+    const allOf = rv.allOf as Array<Record<string, unknown>>;
+    expect(allOf).toHaveLength(2);
+    const independentBranch = allOf[0] as Record<string, unknown>;
+    const independentThen = independentBranch.then as Record<string, unknown>;
+    const independentProps = independentThen.properties as Record<string, unknown>;
+    expect((independentProps.sourceReviewIds as Record<string, unknown>).maxItems).toBe(0);
+    const reconciliationBranch = allOf[1] as Record<string, unknown>;
+    const reconciliationThen = reconciliationBranch.then as Record<string, unknown>;
+    const reconciliationProps = reconciliationThen.properties as Record<string, unknown>;
+    expect((reconciliationProps.sourceReviewIds as Record<string, unknown>).minItems).toBe(2);
+    const reviewProperties = rv.properties as Record<string, unknown>;
+    expect((reviewProperties.sourceReviewIds as Record<string, unknown>).uniqueItems).toBe(true);
+  });
+
+  it('fails closed when anonymous identity, unique review references, or JSON artifact paths drift', () => {
+    const badReviewer = copy(foundationInputs());
+    const badReviewerProperties = (badReviewer.reviewSchema as Record<string, unknown>)
+      .properties as Record<string, unknown>;
+    (badReviewerProperties.reviewerId as Record<string, unknown>).pattern = '^reviewer:.*$';
+    expect(issuesWithCode(verify(badReviewer), 'REVIEW_RECORD_BOUNDARY')).toHaveLength(1);
+
+    const duplicateReviews = copy(foundationInputs());
+    const duplicateReviewProperties = (duplicateReviews.reviewSchema as Record<string, unknown>)
+      .properties as Record<string, unknown>;
+    (duplicateReviewProperties.sourceReviewIds as Record<string, unknown>).uniqueItems = false;
+    expect(issuesWithCode(verify(duplicateReviews), 'REVIEW_RECORD_BOUNDARY')).toHaveLength(1);
+
+    const badEvidencePath = copy(foundationInputs());
+    const evidenceProperties = (
+      (badEvidencePath.caseV2Schema as Record<string, unknown>).properties as Record<
+        string,
+        unknown
+      >
+    ).evidenceArtifacts as Record<string, unknown>;
+    const evidenceItemProperties = (evidenceProperties.items as Record<string, unknown>)
+      .properties as Record<string, unknown>;
+    (evidenceItemProperties.repoPath as Record<string, unknown>).pattern =
+      '^evals/fixtures/synthetic/[a-z0-9][a-z0-9._-]*$';
+    expect(issuesWithCode(verify(badEvidencePath), 'CASE_CARRIER')).toHaveLength(1);
+  });
+
+  it('review record has no prose, score, weight or confidence fields', () => {
+    const rv = reviewSchema();
+    const keys = Object.keys(rv.properties as Record<string, unknown>);
+    for (const key of keys) {
+      expect(/score|weight|percent|confidence|rating/i.test(key), key).toBe(false);
+    }
+    expect(rv.additionalProperties).toBe(false);
+  });
+
+  it('documents the sanitized-visible-answer vs raw-transcript distinction', () => {
+    const doc = readFileSync(join(root, 'docs', 'ANSWER_QUALITY_EVALUATION.md'), 'utf8');
+    expect(doc).toContain('sanitized');
+    expect(doc).toContain('raw');
+    expect(doc).toContain('answer-quality-visible-artifact/v1');
+    expect(doc).toContain('superseded-before-first-case');
+  });
+
+  it('documents that evals/README.md distinguishes sanitized visible answers from raw answers', () => {
+    const readme = readFileSync(join(root, 'evals', 'README.md'), 'utf8');
+    expect(readme).toContain('answer-quality-visible-artifact/v1');
+    expect(readme).toContain('Sanitized visible answer');
+    expect(readme).toContain('No corpus instances exist');
+    expect(readme).toContain('reviewer:anon:<16-hex>');
+  });
+
+  it('documents that corpus verification, not the schema, proves cross-record review independence', () => {
+    const doc = readFileSync(join(root, 'docs', 'ANSWER_QUALITY_EVALUATION.md'), 'utf8');
+    expect(doc).toContain('does not prove that they name independent reviews');
+    expect(doc).toContain('IQ-0B corpus verifier');
+    expect(doc).toContain('review-reference cycle');
+  });
+
+  it('confirms no corpus instances exist', () => {
+    expect(
+      readdirSync(join(root, 'evals', 'fixtures', 'synthetic')).some(
+        (n) => n.includes('case-') || n.includes('visible'),
+      ),
+    ).toBe(false);
   });
 });
