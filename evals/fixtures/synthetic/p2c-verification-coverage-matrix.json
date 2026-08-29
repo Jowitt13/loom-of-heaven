@@ -1,0 +1,371 @@
+{
+  "contractVersion": "verification-coverage-matrix/v1",
+  "suiteId": "coverage-suite:synthetic:interpretation-state-p2c",
+  "fixtureId": "synthetic:bazi-shadow-p0",
+  "mode": "deterministic-local-only",
+  "mutationCatalogDigest": "sha256:0073e3f69bcb2a6ae260584b87c63a5ea1be1353b2cedeee0bf69cbf79f19e37",
+  "rows": [
+    {
+      "riskId": "risk:synthetic:contract-shape",
+      "layer": "contract-shape",
+      "coverageStatus": "partially-covered",
+      "verifierBindings": [
+        {
+          "file": "packages/bazi-rules/src/shadow-state-verify.ts",
+          "exportName": "verifyBaziShadowState"
+        },
+        {
+          "file": "tools/eval/verify-eval-manifest.ts",
+          "exportName": "verifyEvalManifestPair"
+        }
+      ],
+      "positiveTestBindings": [
+        {
+          "file": "packages/bazi-rules/test/shadow-state-verify.test.ts",
+          "testTitle": "accepts the P0-B projection and returns a byte-identical verification result"
+        },
+        {
+          "file": "tools/eval-contracts.test.ts",
+          "testTitle": "accepts the committed synthetic local pair and keeps results byte-identical"
+        }
+      ],
+      "negativeBindings": [
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:state-node-order-swapped"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:integrity-contract-version-drift"
+        },
+        {
+          "kind": "negative-test",
+          "file": "tools/eval-contracts.test.ts",
+          "testTitle": "rejects contract-version, exact-shape, and artifact-linkage drift"
+        }
+      ],
+      "gapIds": ["p0d-contract-no-dedicated-mutation"]
+    },
+    {
+      "riskId": "risk:synthetic:privacy-field-exclusion",
+      "layer": "privacy-field-exclusion",
+      "coverageStatus": "covered",
+      "verifierBindings": [
+        {
+          "file": "packages/bazi-rules/src/shadow-state-verify.ts",
+          "exportName": "verifyBaziShadowState"
+        },
+        {
+          "file": "tools/eval/verify-shadow-state-integrity.ts",
+          "exportName": "verifySyntheticShadowStateIntegrity"
+        },
+        {
+          "file": "tools/eval/verify-conclusion-vector-invalidation.ts",
+          "exportName": "verifyConclusionVectorInvalidationMatrix"
+        },
+        {
+          "file": "tools/eval/verify-shadow-state-lifecycle.ts",
+          "exportName": "verifySyntheticShadowStateLifecycle"
+        },
+        {
+          "file": "tools/eval/verify-verification-mutations.ts",
+          "exportName": "verifySyntheticVerificationMutations"
+        }
+      ],
+      "positiveTestBindings": [
+        {
+          "file": "packages/bazi-rules/test/shadow-state-verify.test.ts",
+          "testTitle": "accepts the P0-B projection and returns a byte-identical verification result"
+        },
+        {
+          "file": "tools/eval-shadow-state-integrity.test.ts",
+          "testTitle": "rebuilds the committed synthetic state with the declared canonical digest"
+        },
+        {
+          "file": "tools/eval-conclusion-vector-invalidation.test.ts",
+          "testTitle": "accepts the committed P0-D/P0-E linkage deterministically"
+        },
+        {
+          "file": "tools/eval-shadow-state-lifecycle.test.ts",
+          "testTitle": "accepts the committed P0-E/P1-A/P1-B/P1-C lifecycle evidence deterministically"
+        },
+        {
+          "file": "tools/eval-verification-mutations.test.ts",
+          "testTitle": "detects every committed fixed mutation deterministically"
+        }
+      ],
+      "negativeBindings": [
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:state-forbidden-field"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:integrity-forbidden-field"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:conclusion-forbidden-field"
+        },
+        {
+          "kind": "negative-test",
+          "file": "packages/bazi-rules/test/shadow-state-verify.test.ts",
+          "testTitle": "rejects raw birth, location, model-reasoning, and answer-layer fields at any depth"
+        },
+        {
+          "kind": "negative-test",
+          "file": "tools/eval-shadow-state-integrity.test.ts",
+          "testTitle": "finds prohibited private or model fields by category and path without echoing their values"
+        },
+        {
+          "kind": "negative-test",
+          "file": "tools/eval-conclusion-vector-invalidation.test.ts",
+          "testTitle": "reports private or model fields by category and path without echoing their values"
+        },
+        {
+          "kind": "negative-test",
+          "file": "tools/eval-shadow-state-lifecycle.test.ts",
+          "testTitle": "reports private or model fields by category and path without echoing their values"
+        },
+        {
+          "kind": "negative-test",
+          "file": "tools/eval-verification-mutations.test.ts",
+          "testTitle": "reports prohibited fields by path without echoing their values"
+        }
+      ],
+      "gapIds": []
+    },
+    {
+      "riskId": "risk:synthetic:baseline-integrity-linkage",
+      "layer": "baseline-integrity-linkage",
+      "coverageStatus": "covered",
+      "verifierBindings": [
+        {
+          "file": "tools/eval/verify-shadow-state-integrity.ts",
+          "exportName": "verifySyntheticShadowStateIntegrity"
+        }
+      ],
+      "positiveTestBindings": [
+        {
+          "file": "tools/eval-shadow-state-integrity.test.ts",
+          "testTitle": "rebuilds the committed synthetic state with the declared canonical digest"
+        },
+        {
+          "file": "tools/eval-shadow-state-integrity.test.ts",
+          "testTitle": "binds the manifest digest to a reproducible P0-B projection, not to opaque identity alone"
+        }
+      ],
+      "negativeBindings": [
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:integrity-digest-drift"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:integrity-chart-scope-drift"
+        }
+      ],
+      "gapIds": []
+    },
+    {
+      "riskId": "risk:synthetic:dependency-collector-linkage",
+      "layer": "dependency-collector-linkage",
+      "coverageStatus": "partially-covered",
+      "verifierBindings": [
+        {
+          "file": "packages/bazi-rules/src/shadow-state-verify.ts",
+          "exportName": "verifyBaziShadowState"
+        }
+      ],
+      "positiveTestBindings": [
+        {
+          "file": "packages/bazi-rules/test/shadow-state-verify.test.ts",
+          "testTitle": "requires the declared derived-structure layer, dependencies, and invalidations"
+        },
+        {
+          "file": "packages/bazi-rules/test/shadow-state-verify.test.ts",
+          "testTitle": "requires the four collector values to share one chart source"
+        },
+        {
+          "file": "packages/bazi-rules/test/shadow-state-verify.test.ts",
+          "testTitle": "requires D2 strength and pattern values to retain their declared D1 links"
+        }
+      ],
+      "negativeBindings": [
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:state-dependency-dropped"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:state-collector-link-drift"
+        }
+      ],
+      "gapIds": ["collector-algorithm-mutation-not-covered"]
+    },
+    {
+      "riskId": "risk:synthetic:invalidation-truth-table",
+      "layer": "invalidation-truth-table",
+      "coverageStatus": "covered",
+      "verifierBindings": [
+        {
+          "file": "tools/eval/verify-shadow-state-integrity.ts",
+          "exportName": "verifySyntheticShadowStateIntegrity"
+        },
+        {
+          "file": "tools/eval/verify-conclusion-vector-invalidation.ts",
+          "exportName": "verifyConclusionVectorInvalidationMatrix"
+        }
+      ],
+      "positiveTestBindings": [
+        {
+          "file": "tools/eval-shadow-state-integrity.test.ts",
+          "testTitle": "locks every chart-affecting cause to all shadow nodes and keeps narration-only causes reusable"
+        },
+        {
+          "file": "tools/eval-conclusion-vector-invalidation.test.ts",
+          "testTitle": "locks the structural, topic/lens, and language/narrator reuse truth table"
+        }
+      ],
+      "negativeBindings": [
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:conclusion-case-reordered"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:conclusion-topic-reuse-flipped"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:lifecycle-cause-omitted"
+        }
+      ],
+      "gapIds": []
+    },
+    {
+      "riskId": "risk:synthetic:conclusion-vector-linkage",
+      "layer": "conclusion-vector-linkage",
+      "coverageStatus": "covered",
+      "verifierBindings": [
+        {
+          "file": "tools/eval/verify-conclusion-vector-invalidation.ts",
+          "exportName": "verifyConclusionVectorInvalidationMatrix"
+        }
+      ],
+      "positiveTestBindings": [
+        {
+          "file": "tools/eval-conclusion-vector-invalidation.test.ts",
+          "testTitle": "binds the P0-D conclusion vector to the actual P0-E state digest and run digest"
+        },
+        {
+          "file": "tools/eval-conclusion-vector-invalidation.test.ts",
+          "testTitle": "uses only declared P0-B shadow-state node ids in every conclusion claim"
+        }
+      ],
+      "negativeBindings": [
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:vector-state-linkage-drift"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:run-vector-digest-drift"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:vector-node-linkage-drift"
+        }
+      ],
+      "gapIds": []
+    },
+    {
+      "riskId": "risk:synthetic:lifecycle-reuse-decision",
+      "layer": "lifecycle-reuse-decision",
+      "coverageStatus": "covered",
+      "verifierBindings": [
+        {
+          "file": "tools/eval/verify-shadow-state-lifecycle.ts",
+          "exportName": "verifySyntheticShadowStateLifecycle"
+        }
+      ],
+      "positiveTestBindings": [
+        {
+          "file": "tools/eval-shadow-state-lifecycle.test.ts",
+          "testTitle": "accepts the committed P0-E/P1-A/P1-B/P1-C lifecycle evidence deterministically"
+        },
+        {
+          "file": "tools/eval-shadow-state-lifecycle.test.ts",
+          "testTitle": "keeps equal state reusable only for no-change and projection-only causes"
+        }
+      ],
+      "negativeBindings": [
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:lifecycle-case-missing"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:lifecycle-case-reordered"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:lifecycle-duplicate-cause"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:lifecycle-variant-unknown"
+        },
+        {
+          "kind": "mutation-case",
+          "caseId": "mutation:synthetic:lifecycle-decision-flipped"
+        }
+      ],
+      "gapIds": []
+    },
+    {
+      "riskId": "risk:synthetic:mutation-detection-evidence",
+      "layer": "mutation-detection-evidence",
+      "coverageStatus": "covered",
+      "verifierBindings": [
+        {
+          "file": "tools/eval/verify-verification-mutations.ts",
+          "exportName": "verifySyntheticVerificationMutations"
+        }
+      ],
+      "positiveTestBindings": [
+        {
+          "file": "tools/eval-verification-mutations.test.ts",
+          "testTitle": "detects every committed fixed mutation deterministically"
+        }
+      ],
+      "negativeBindings": [
+        {
+          "kind": "negative-test",
+          "file": "tools/eval-verification-mutations.test.ts",
+          "testTitle": "rejects a baseline digest drift before reporting mutation success"
+        },
+        {
+          "kind": "negative-test",
+          "file": "tools/eval-verification-mutations.test.ts",
+          "testTitle": "rejects a semantically false expected diagnostic"
+        },
+        {
+          "kind": "negative-test",
+          "file": "tools/eval-verification-mutations.test.ts",
+          "testTitle": "rejects reordered, incomplete, or duplicated catalog entries before injection"
+        }
+      ],
+      "gapIds": []
+    }
+  ],
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-model-provider",
+    "no-raw-answer",
+    "no-persistence",
+    "no-accuracy-percentage",
+    "no-runtime-coverage-api",
+    "no-published-skill-runtime"
+  ]
+}
