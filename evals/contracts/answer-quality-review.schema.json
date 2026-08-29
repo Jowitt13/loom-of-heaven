@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/answer-quality-review/v1",
+  "title": "IQ-0 Structured Human-Review Record",
+  "description": "Structured record of one human review pass over one sanitized visible-answer artifact. Independent reviews cite no other reviews; a reconciliation review structurally cites at least two distinct review ids. A later corpus verifier resolves whether those ids name independent reviews over the same case and artifact. Judgments are exactly the eight rubric dimensions in rubric order with the four independent values. No free-form reviewer notes, reasoning, totals, weights, percentages or confidence are expressible.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "reviewId",
+    "reviewKind",
+    "caseId",
+    "answerArtifactId",
+    "reviewedArtifactDigest",
+    "rubricId",
+    "reviewerId",
+    "reviewRound",
+    "judgments",
+    "failureModeIds",
+    "boundaryFindingIds",
+    "disposition",
+    "sourceReviewIds",
+    "exclusionPolicy"
+  ],
+  "properties": {
+    "contractVersion": { "const": "answer-quality-review/v1" },
+    "reviewId": {
+      "type": "string",
+      "pattern": "^review:synthetic:[a-z0-9][a-z0-9._-]*$"
+    },
+    "reviewKind": {
+      "enum": ["independent", "reconciliation"]
+    },
+    "caseId": {
+      "type": "string",
+      "pattern": "^case:synthetic:career:[a-z0-9][a-z0-9._-]*$"
+    },
+    "answerArtifactId": {
+      "type": "string",
+      "pattern": "^artifact:synthetic:[a-z0-9][a-z0-9._-]*$"
+    },
+    "reviewedArtifactDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "rubricId": { "const": "rubric:answer-quality:career-v1" },
+    "reviewerId": {
+      "type": "string",
+      "pattern": "^reviewer:anon:[a-f0-9]{16}$"
+    },
+    "reviewRound": { "type": "integer", "minimum": 1 },
+    "judgments": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "prefixItems": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dimensionId", "judgment"],
+          "properties": {
+            "dimensionId": { "const": "support-and-traceability" },
+            "judgment": { "enum": ["meets", "needs-review", "does-not-meet", "not-applicable"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dimensionId", "judgment"],
+          "properties": {
+            "dimensionId": { "const": "mechanism-to-implication" },
+            "judgment": { "enum": ["meets", "needs-review", "does-not-meet", "not-applicable"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dimensionId", "judgment"],
+          "properties": {
+            "dimensionId": { "const": "topic-specificity" },
+            "judgment": { "enum": ["meets", "needs-review", "does-not-meet", "not-applicable"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dimensionId", "judgment"],
+          "properties": {
+            "dimensionId": { "const": "condition-and-caveat-fidelity" },
+            "judgment": { "enum": ["meets", "needs-review", "does-not-meet", "not-applicable"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dimensionId", "judgment"],
+          "properties": {
+            "dimensionId": { "const": "cross-system-integrity" },
+            "judgment": { "enum": ["meets", "needs-review", "does-not-meet", "not-applicable"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dimensionId", "judgment"],
+          "properties": {
+            "dimensionId": { "const": "restraint-and-boundaries" },
+            "judgment": { "enum": ["meets", "needs-review", "does-not-meet", "not-applicable"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dimensionId", "judgment"],
+          "properties": {
+            "dimensionId": { "const": "presentation-cleanliness" },
+            "judgment": { "enum": ["meets", "needs-review", "does-not-meet", "not-applicable"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dimensionId", "judgment"],
+          "properties": {
+            "dimensionId": { "const": "usefulness-without-invention" },
+            "judgment": { "enum": ["meets", "needs-review", "does-not-meet", "not-applicable"] }
+          }
+        }
+      ],
+      "items": false
+    },
+    "failureModeIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "vague-prose",
+          "term-dump",
+          "unsupported-fact",
+          "mechanism-leap",
+          "cross-system-consensus-fabrication",
+          "repeated-conclusion",
+          "default-footer-clutter",
+          "missing-material-condition",
+          "jargon-without-concrete-implication",
+          "unsupported-life-verdict"
+        ]
+      }
+    },
+    "boundaryFindingIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "claim-support-resolves",
+          "mechanism-adjacent-to-implication",
+          "topic-scope-respected",
+          "material-caveat-retained",
+          "unrelated-warning-omitted",
+          "cross-system-separation-preserved",
+          "unsupported-life-fact-excluded",
+          "deterministic-verdict-excluded",
+          "default-footer-excluded",
+          "audit-metadata-hidden",
+          "insufficient-evidence-degrades",
+          "automatic-followup-excluded"
+        ]
+      }
+    },
+    "disposition": {
+      "enum": ["accept", "revise", "reject", "reconciliation-required"]
+    },
+    "sourceReviewIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^review:synthetic:[a-z0-9][a-z0-9._-]*$"
+      }
+    },
+    "exclusionPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "reviewKind": { "const": "independent" } } },
+      "then": { "properties": { "sourceReviewIds": { "maxItems": 0 } } }
+    },
+    {
+      "if": { "properties": { "reviewKind": { "const": "reconciliation" } } },
+      "then": { "properties": { "sourceReviewIds": { "minItems": 2 } } }
+    }
+  ]
+}

@@ -117,6 +117,18 @@ part of IQ-0A. See [docs/ANSWER_QUALITY_EVALUATION.md](../docs/ANSWER_QUALITY_EV
 
 - Fixtures must use a `synthetic:` fixture id. Do not put a real name, birth record, location,
   life event, prompt, model transcript, API key, raw answer, or reading draft in this directory.
+- **Raw answer** means a raw model/provider response, an unredacted draft, a full session
+  transcript, or any output carrying internal metadata (token logs, provider details,
+  chain-of-thought). Raw answers are forbidden everywhere in the repository.
+- **Sanitized visible answer**: the final, de-identified user-visible text of one answer,
+  wrapped in `answer-quality-visible-artifact/v1`, may be stored under
+  `evals/corpus/public/career/` once IQ-0B creates cases. No corpus instances exist yet.
+  This allowance does NOT extend to prompts, model reasoning, token logs, provider metadata
+  or raw transcripts.
+- A structured review uses only a randomly assigned `reviewer:anon:<16-hex>` pseudonym;
+  it must never contain a name, email, account id, birth data or a hash of personal data.
+  A reconciliation record structurally cites two distinct review ids, while the future IQ-0B
+  corpus verifier must resolve those references and verify their independence and linkage.
 - A SHA-256 digest is an integrity/reproducibility reference only. It is not anonymization and
   must not be presented as a privacy safeguard.
 - External-host experiments, if separately authorized later, belong in development tooling and
