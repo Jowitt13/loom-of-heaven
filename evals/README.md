@@ -56,6 +56,44 @@ faults are detected. It is not a metaphysical accuracy percentage, a fuzzing int
 self-healing mechanism, or permission to activate a BaZi rule or source profile. Mutated values
 and raw artifacts are never written to the catalog or emitted in diagnostics.
 
+## P2-C boundary
+
+`verification-coverage-matrix/v1` is a development-only, synthetic-only coverage/gap traceability
+matrix for the existing P0/P1/P2 eval verifiers. For eight fixed risk layers it records the real
+verifier exports, positive test titles, and negative or mutation bindings that defend each risk,
+deriving every coverage status from implementer-owned risk specs plus static bindings resolved in
+the actual TypeScript sources. The fixture cannot self-report `covered`: it must match the fixed
+specs item by item, in order, field by field, and a renamed export or test title fails closed with
+`BINDING` until the matrix is updated alongside the code.
+
+It re-runs the P2-B mutation gate against the committed baseline artifacts before accepting any
+coverage claim, and binds the P2-B catalog by its real canonical digest. The matrix deliberately
+records what is covered and what is not: six layers are `covered` and two are `partially-covered`
+(`p0d-contract-no-dedicated-mutation`, `collector-algorithm-mutation-not-covered`). Gap rows carry
+only implementer-owned stable gap ids from the verifier's gap registry — never free-text prose.
+
+This matrix is not a metaphysical accuracy percentage, accuracy score, or prediction measurement;
+it proves nothing about divination, interpretation quality, or real-world correctness. It activates
+no BaZi rule or source profile and adds no runtime, Skill, CLI, cache, or persistence surface.
+
+The coverage check is local-only and composes the committed synthetic artifact set:
+
+```bash
+node tools/eval/verify-verification-coverage.ts \
+  --matrix evals/fixtures/synthetic/p2c-verification-coverage-matrix.json \
+  --catalog evals/fixtures/synthetic/p2b-verification-mutation-matrix.json \
+  --chart evals/fixtures/synthetic/p0e-bazi-shadow-chart.json \
+  --state-manifest evals/fixtures/synthetic/p0e-shadow-state-integrity-manifest.json \
+  --vector evals/fixtures/synthetic/p0d-conclusion-vector.json \
+  --run-manifest evals/fixtures/synthetic/p0d-eval-run-manifest.json \
+  --conclusion-matrix evals/fixtures/synthetic/p0f-conclusion-vector-invalidation-matrix.json \
+  --lifecycle-matrix evals/fixtures/synthetic/p2a-shadow-state-lifecycle-matrix.json
+```
+
+Its counts are traceability counts (risk rows verified 8/8, declared synthetic faults caught
+25/25), not accuracy figures. The CLI accepts only these committed synthetic fixture paths; any
+other value is rejected.
+
 ## Data and storage rules
 
 - Fixtures must use a `synthetic:` fixture id. Do not put a real name, birth record, location,
