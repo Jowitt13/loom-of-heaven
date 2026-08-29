@@ -1,9 +1,10 @@
 # Commander protocol
 
-- Protocol id: `loom-commander-protocol/v1`
+- Protocol id: `loom-commander-protocol/v2`
 - Status: mandatory for all new research, architecture, implementation, integration, and release
   slices
 - Governing roadmap: [Loom product technical roadmap](./PRODUCT_TECHNICAL_ROADMAP.md)
+- Confirmed: 2026-08-29
 
 This protocol keeps Codex, Hermes, GLM, Qoder, and other executors on the same route. It applies
 whether one agent performs the work or a commander gives a copyable prompt to another executor.
@@ -17,11 +18,13 @@ The commander must:
 2. read `AGENTS.md`, the product technical roadmap, this protocol, and every domain ADR or source
    matrix named by the selected phase;
 3. identify the next unblocked roadmap exit criterion;
-4. separate research, architecture, implementation, runtime activation, and release unless the
+4. identify the responsible evidence program—Reliability Lab, Answer Faithfulness & Quality Lab,
+   or Predictive Validity Research—and state what that evidence cannot prove;
+5. separate research, architecture, implementation, runtime activation, and release unless the
    owner has explicitly authorized a combined boundary;
-5. protect unrelated dirty work with an isolated worktree rather than stashing, restoring, or
+6. protect unrelated dirty work with an isolated worktree rather than stashing, restoring, or
    mixing changes;
-6. reject any task that has no roadmap anchor or would skip an unmet prerequisite.
+7. reject any task that has no roadmap anchor or would skip an unmet prerequisite.
 
 ## 2. Required command fields
 
@@ -30,6 +33,7 @@ Every executor prompt must contain these exact headings:
 ```text
 路线锚点
 当前阶段与切片
+验证实验室
 用户价值
 已核验基线
 前置条件
@@ -37,6 +41,7 @@ Every executor prompt must contain these exact headings:
 精确文件白名单
 精确禁止项
 必须保持的不变量
+输出与隐私边界
 测试与验收命令
 停止条件
 GitHub 与发布边界
@@ -52,7 +57,7 @@ not an acceptable scope.
 你是 Loom 当前切片的执行者。先只读核验，条件全部成立后才能写入。
 
 路线锚点
-- roadmap: loom-product-roadmap/v1
+- roadmap: loom-product-roadmap/v2
 - phase: <G0|IQ-0|IQ-1|IQ-2|IQ-3|IQ-4|IQ-5|IQ-6|PLAT-1|DATA-1|EXP-1>
 - exit criterion: <本切片推进的唯一退出条件>
 
@@ -60,6 +65,11 @@ not an acceptable scope.
 - slice id: <稳定编号>
 - slice kind: <research|architecture|implementation|integration|release>
 - why now: <为何它是下一项未阻塞工作>
+
+验证实验室
+- program: <Reliability Lab|Answer Faithfulness & Quality Lab|Predictive Validity Research>
+- proves: <本切片能证明的有界事实>
+- does not prove: <明确不能升级为何种准确率、质量或产品结论>
 
 用户价值
 - <完成后用户能获得什么，或解除什么真实风险>
@@ -84,7 +94,15 @@ not an acceptable scope.
 - 模型不计算命盘；离线、确定性、来源治理、隐私默认关闭持久化
 - 不把不同体系投票或平均；不把测试通过率称为预测准确率
 - 默认回答无固定技术尾巴；心理学与命理、非临床与临床保持隔离
+- AnswerClaimCandidate 未经验证不得叙述；跨体系内容只进入独立 SynthesisRecord
+- 不使用通用 confidence 表示真实性、概率或跨体系共识
 - <本阶段的其他不变量>
+
+输出与隐私边界
+- 专业机制与具体结论相邻；不得显示“讲人话”标签或固定模板
+- 不自动追加敏感项校对、引擎警告、专业依据、声明、免责声明或跟进菜单
+- material caveat 只在影响当前结论时内联；技术审计仅应用户请求提供
+- 不记录真实出生资料、原始问卷、对话、模型推理或 sealed holdout 正文
 
 测试与验收命令
 - <定点测试>
@@ -120,6 +138,12 @@ GitHub 与发布边界
 - Update documentation counts only from a real full run.
 - Preserve raw warnings and provenance internally, but do not expose default warning or evidence
   panels to users.
+- IQ work preserves `AnswerClaimCandidate -> ApprovedAnswerClaim -> NarrativeTrace`; a candidate
+  cannot be narrated, and cross-system content is represented only by a separate `SynthesisRecord`.
+- A sealed holdout stays outside the public repository. Once inspected to guide a fix, it is
+  retired into regression material and replaced; it is never counted again as unseen evidence.
+- Default prose follows the answer-presentation invariant: professional mechanism adjacent to the
+  concrete conclusion, flexible structure, material caveats inline, and no automatic footer.
 - Use the exact state vocabulary: `planned`, `in-progress`, `blocked`, `implemented`, `integrated`,
   `verified`, and `published`. Do not report a later state without its evidence.
 - GitHub flow defaults to commit, push, Draft PR, green CI, Ready, and squash merge when the
@@ -134,7 +158,8 @@ It must:
 1. read the current roadmap state and the previous slice report;
 2. select the earliest unfulfilled, unblocked exit criterion;
 3. report the selected anchor and why later work is not yet admitted;
-4. issue one bounded executor prompt using this protocol.
+4. identify the evidence program and state what its result cannot prove;
+5. issue one bounded executor prompt using this protocol.
 
 If the earliest item is blocked, the commander may advance only a documented parallel bounded
 track or a blocker-removal slice. It may not silently jump to technique expansion, UI, memory, or
@@ -159,3 +184,6 @@ Every completed slice reports:
 6. privacy, source, license, runtime-isolation, and forbidden-path evidence as applicable;
 7. commit, push, PR, CI, Ready, merge, tag, Release, and manifest state;
 8. remaining blocker and the exact next admitted slice.
+
+The report must not upgrade Reliability Lab evidence into answer-quality or predictive-validity
+claims, or upgrade Answer Faithfulness & Quality evidence into scientific prediction claims.

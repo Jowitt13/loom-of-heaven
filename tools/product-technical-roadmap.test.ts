@@ -10,13 +10,16 @@ const ROADMAP = read('docs/PRODUCT_TECHNICAL_ROADMAP.md');
 const ADR = read('docs/adr/0017-product-technical-roadmap-and-execution-governance.md');
 const PROTOCOL = read('docs/COMMANDER_PROTOCOL.md');
 const AGENTS = read('AGENTS.md');
+const NARRATIVE = read('docs/NARRATIVE_OUTPUT_V1.md');
 
 describe('product technical roadmap and commander governance', () => {
-  it('records an owner-confirmed v1 roadmap and accepted ADR', () => {
-    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v1`');
+  it('records an owner-confirmed v2 roadmap and amended accepted ADR', () => {
+    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v2`');
     expect(ROADMAP).toContain('Status: **Accepted and owner-confirmed**');
-    expect(ROADMAP).toContain('Confirmed: 2026-08-28');
+    expect(ROADMAP).toContain('Confirmed: 2026-08-29');
+    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v1`');
     expect(ADR).toContain('Status: Accepted');
+    expect(ADR).toContain('Amended: 2026-08-29');
     expect(ADR).toContain('This ADR changes no current runtime');
   });
 
@@ -44,16 +47,63 @@ describe('product technical roadmap and commander governance', () => {
       'IQ-0 — final-answer quality baseline',
       'IQ-1 — AnswerClaim and NarrativeTrace',
       'IQ-2 — final-answer faithfulness verifier',
-      'IQ-3 — career vertical slice',
-      'IQ-4 — structured clarification and response projection',
+      'IQ-3 — structured clarification and response projection',
+      'IQ-4 — single-system career vertical',
       'IQ-5 — cross-system synthesis',
-      'IQ-6 — optional audit and report delivery',
+      'IQ-6 — stability, optional audit, and report delivery',
     ]) {
       expect(ROADMAP, phase).toContain(phase);
     }
     expect(ROADMAP.indexOf('IQ-4')).toBeLessThan(ROADMAP.indexOf('PLAT-1'));
     expect(ROADMAP.indexOf('PLAT-1')).toBeLessThan(ROADMAP.indexOf('DATA-1'));
     expect(ROADMAP.indexOf('DATA-1')).toBeLessThan(ROADMAP.indexOf('EXP-1'));
+  });
+
+  it('locks phase prerequisites before career and four-system synthesis', () => {
+    const clarification = ROADMAP.indexOf('### IQ-3 — structured clarification');
+    const singleSystemCareer = ROADMAP.indexOf('### IQ-4 — single-system career');
+    const synthesis = ROADMAP.indexOf('### IQ-5 — cross-system synthesis');
+    expect(clarification).toBeGreaterThan(-1);
+    expect(clarification).toBeLessThan(singleSystemCareer);
+    expect(singleSystemCareer).toBeLessThan(synthesis);
+    expect(ROADMAP).toContain('one selected, source-admitted system');
+    expect(ROADMAP).toContain('Only after the single-system career slice passes');
+  });
+
+  it('separates the three evidence programs and their claims', () => {
+    for (const program of [
+      'Reliability Lab',
+      'Answer Faithfulness & Quality Lab',
+      'Predictive Validity Research',
+    ]) {
+      expect(ROADMAP, program).toContain(program);
+      expect(PROTOCOL, program).toContain(program);
+    }
+    expect(ROADMAP).toContain('not a normal product-release gate');
+    expect(PROTOCOL).toContain('does not prove');
+  });
+
+  it('separates candidate claims, approved claims, and synthesis records', () => {
+    for (const boundary of [
+      '`AnswerClaimCandidate`',
+      '`ApprovedAnswerClaim`',
+      '`SynthesisRecord`',
+      '`mechanismRefs`',
+      '`ruleMatchClarity`',
+    ]) {
+      expect(ROADMAP, boundary).toContain(boundary);
+    }
+    expect(ROADMAP).toMatch(/A candidate cannot\s+be narrated/);
+    expect(ROADMAP).toContain('`cross-system` is not a chart-system value');
+    expect(ROADMAP).toMatch(/does\s+not expose a generic `confidence` field/);
+  });
+
+  it('governs public development cases and sealed holdouts separately', () => {
+    expect(ROADMAP).toContain('20–30 cases');
+    expect(ROADMAP).toContain('Controlled off-repository storage');
+    expect(ROADMAP).toContain('retired into the public regression corpus and replaced');
+    expect(ROADMAP).toContain('not metaphysical truth');
+    expect(PROTOCOL).toContain('A sealed holdout stays outside the public repository');
   });
 
   it('requires claim faithfulness without inventing an aggregate accuracy score', () => {
@@ -71,6 +121,12 @@ describe('product technical roadmap and commander governance', () => {
     for (const clutter of ['warning panels', 'a technique card', 'a fixed disclaimer footer']) {
       expect(ROADMAP, clutter).toContain(clutter);
     }
+    for (const clutter of ['讲人话', '敏感项校对', '引擎警告', '专业依据', '声明']) {
+      expect(ROADMAP, clutter).toContain(clutter);
+      expect(NARRATIVE, clutter).toContain(clutter);
+    }
+    expect(NARRATIVE).toContain('Vary paragraph structure, transitions, and emphasis naturally');
+    expect(AGENTS).toMatch(/Never label a\s+section `讲人话`/);
   });
 
   it('keeps persistence opt-in and psychology structurally isolated', () => {
@@ -78,6 +134,9 @@ describe('product technical roadmap and commander governance', () => {
     expect(ROADMAP).toMatch(/explicit opt-in, inspectable,\s+deletable, and retention-bounded/);
     expect(ROADMAP).toContain('Psychology self-report never becomes a fact inferred from a chart');
     expect(ROADMAP).toContain('Clinical screening phases remain paused');
+    expect(ROADMAP).toContain('maintenance mode');
+    expect(ROADMAP).toContain('Zi Wei source governance');
+    expect(ROADMAP).toContain('research-only');
   });
 
   it('keeps BaZi D1/D2 shadow-only and source blockers authoritative', () => {
@@ -89,10 +148,11 @@ describe('product technical roadmap and commander governance', () => {
   });
 
   it('requires every executor prompt to carry the complete admission header set', () => {
-    expect(PROTOCOL).toContain('Protocol id: `loom-commander-protocol/v1`');
+    expect(PROTOCOL).toContain('Protocol id: `loom-commander-protocol/v2`');
     for (const heading of [
       '路线锚点',
       '当前阶段与切片',
+      '验证实验室',
       '用户价值',
       '已核验基线',
       '前置条件',
@@ -100,6 +160,7 @@ describe('product technical roadmap and commander governance', () => {
       '精确文件白名单',
       '精确禁止项',
       '必须保持的不变量',
+      '输出与隐私边界',
       '测试与验收命令',
       '停止条件',
       'GitHub 与发布边界',

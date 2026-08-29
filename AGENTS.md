@@ -16,7 +16,8 @@ The roadmap governs product direction and technical sequence; domain ADRs and so
 govern their narrower subjects. A lower-level prompt may narrow these rules but cannot override
 them. “Continue” means the next unblocked roadmap slice—not whichever feature is easiest to add.
 Changing the route requires the owner decision, ADR, roadmap-version, protocol, and static-gate
-process recorded in the roadmap.
+process recorded in the roadmap. The current authorities are `loom-product-roadmap/v2` and
+`loom-commander-protocol/v2`.
 
 ## What this project is
 
@@ -85,13 +86,16 @@ enter CI, and its absence is intentionally fail-closed. If you change the test c
 
 Release acceptance criteria live in [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md).
 
-## Psychology roadmap (P9 nonclinical Skill only)
+## Psychology roadmap (maintenance mode)
 
 The source tree contains an independently packageable P9 **nonclinical** personality
-self-assessment Skill. It remains unpublished until a separately authorized release; it does
-not add chart/personality mapping, narration integration, or any clinical screening. Psychology-
-informed narration and independent mental-health screening remain planned. Before changing any
-related contract, Skill, questionnaire, scoring, safety, privacy, or user-facing claim, read
+self-assessment Skill. Its source candidate, immutable release evidence, and manifest status remain
+governed by the psychology documents and release records. During the G0/IQ critical path it is
+maintenance-only: security, correctness, privacy, source, documentation, host, and release-
+integrity fixes are admitted, but new psychology capability cannot displace answer-quality work.
+It does not add chart/personality mapping, narration integration, or any clinical screening.
+Before changing any related contract, Skill, questionnaire, scoring, safety, privacy, or user-
+facing claim, read
 [`docs/adr/0014-psychology-and-mental-health-architecture.md`](docs/adr/0014-psychology-and-mental-health-architecture.md),
 [`docs/PSYCHOLOGY_SOURCE_MATRIX.md`](docs/PSYCHOLOGY_SOURCE_MATRIX.md), and
 [`docs/PSYCHOLOGY_IMPLEMENTATION_PLAN.md`](docs/PSYCHOLOGY_IMPLEMENTATION_PLAN.md) completely.
@@ -107,8 +111,11 @@ prediction. Never give deterministic medical, legal, financial, or life-and-deat
 ## Natural narrative delivery (V1)
 
 The default topic answer is continuous, specific prose, not a seven-step report. A professional
-term may appear when its rule mechanism and concrete implication are adjacent. Before writing a
-paragraph, retain its fact evidence, reason, ruleset and relevant caveat internally; the default
-body never prints source ids, rule paths, provenance, warning headings, a fixed disclaimer footer
-or an automatic follow-up menu. Technical detail is shown only when the user asks for it. The
-authoritative delivery contract is [`docs/NARRATIVE_OUTPUT_V1.md`](docs/NARRATIVE_OUTPUT_V1.md).
+term may appear when its rule mechanism and concrete implication are adjacent. Never label a
+section `讲人话`; say the conclusion directly. Vary structure and rhythm naturally instead of
+emitting a fixed template. Before writing a paragraph, retain its fact evidence, reason, ruleset
+and relevant caveat internally; the default body never prints source ids, rule paths, provenance,
+`敏感项校对`, `引擎警告`, `专业依据`, `声明`, a fixed disclaimer footer, or an automatic follow-up
+menu. A material caveat is stated inline only when it changes the current answer. Technical detail
+is shown only when the user asks for it. The authoritative delivery contract is
+[`docs/NARRATIVE_OUTPUT_V1.md`](docs/NARRATIVE_OUTPUT_V1.md).
