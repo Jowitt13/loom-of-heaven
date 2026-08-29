@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/answer-quality-rubric/v1",
+  "title": "IQ-0A Answer Quality Rubric",
+  "description": "Development-only frozen rubric for the IQ-0 answer-quality evaluation foundation. Closed fields only: eight ordered dimensions, ten ordered failure modes, four independent judgments, seven deterministic structural machine checks, and the fixed human-review policy. It contains no accuracy metric, no aggregate score, and no case content.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "rubricId",
+    "phase",
+    "topic",
+    "mode",
+    "dimensions",
+    "failureModes",
+    "judgments",
+    "machineCheckIds",
+    "humanReviewPolicy",
+    "exclusionPolicy"
+  ],
+  "properties": {
+    "contractVersion": { "const": "answer-quality-rubric/v1" },
+    "rubricId": { "const": "rubric:answer-quality:career-v1" },
+    "phase": { "const": "IQ-0" },
+    "topic": { "const": "career" },
+    "mode": { "const": "human-reviewed-with-deterministic-structure" },
+    "dimensions": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    },
+    "failureModes": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    },
+    "judgments": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    },
+    "machineCheckIds": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    },
+    "humanReviewPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minReviewers",
+        "independentJudgmentThenReconcile",
+        "stableIdentifierOnly",
+        "aggregateScoresForbidden",
+        "criticalDimensionNoOffset"
+      ],
+      "properties": {
+        "minReviewers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["development", "adversarial", "sealed-holdout"],
+          "properties": {
+            "development": { "const": 1 },
+            "adversarial": { "const": 2 },
+            "sealed-holdout": { "const": 2 }
+          }
+        },
+        "independentJudgmentThenReconcile": { "const": true },
+        "stableIdentifierOnly": { "const": true },
+        "aggregateScoresForbidden": { "const": true },
+        "criticalDimensionNoOffset": { "const": true }
+      }
+    },
+    "exclusionPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    }
+  }
+}

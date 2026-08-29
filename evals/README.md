@@ -94,6 +94,25 @@ Its counts are traceability counts (risk rows verified 8/8, declared synthetic f
 25/25), not accuracy figures. The CLI accepts only these committed synthetic fixture paths; any
 other value is rejected.
 
+## IQ-0A boundary
+
+`answer-quality-rubric/v1` (with the `answer-quality-case/v1` and
+`sealed-holdout-manifest/v1` contracts) belongs to the **Answer Faithfulness &
+Quality Lab** — a different evidence program from the Reliability Lab sections
+above (P0–P2). It freezes the IQ-0 measuring stick before any case exists: eight
+ordered evaluation dimensions, ten ordered failure modes, four independent
+judgments (`meets` / `needs-review` / `does-not-meet` / `not-applicable`, never
+summed or averaged), the deterministic-assisted versus human-required boundary,
+and the sealed-holdout metadata-only lifecycle with retire-and-replace. The
+committed rubric is checked by `tools/eval/verify-answer-quality-foundation.ts`
+against implementer-owned frozen specs — fixture self-reporting is impossible.
+
+These contracts cannot prove that any answer is semantically correct, natural
+or useful; deterministic checks cover structure and boundaries only, and
+semantic quality judgment is reserved for documented human review. No sealed
+holdout content, no case corpus, no legacy answers and no runtime surface are
+part of IQ-0A. See [docs/ANSWER_QUALITY_EVALUATION.md](../docs/ANSWER_QUALITY_EVALUATION.md).
+
 ## Data and storage rules
 
 - Fixtures must use a `synthetic:` fixture id. Do not put a real name, birth record, location,

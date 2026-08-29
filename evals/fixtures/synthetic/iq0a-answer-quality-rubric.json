@@ -1,0 +1,59 @@
+{
+  "contractVersion": "answer-quality-rubric/v1",
+  "rubricId": "rubric:answer-quality:career-v1",
+  "phase": "IQ-0",
+  "topic": "career",
+  "mode": "human-reviewed-with-deterministic-structure",
+  "dimensions": [
+    "support-and-traceability",
+    "mechanism-to-implication",
+    "topic-specificity",
+    "condition-and-caveat-fidelity",
+    "cross-system-integrity",
+    "restraint-and-boundaries",
+    "presentation-cleanliness",
+    "usefulness-without-invention"
+  ],
+  "failureModes": [
+    "vague-prose",
+    "term-dump",
+    "unsupported-fact",
+    "mechanism-leap",
+    "cross-system-consensus-fabrication",
+    "repeated-conclusion",
+    "default-footer-clutter",
+    "missing-material-condition",
+    "jargon-without-concrete-implication",
+    "unsupported-life-verdict"
+  ],
+  "judgments": ["meets", "needs-review", "does-not-meet", "not-applicable"],
+  "machineCheckIds": [
+    "contract-shape",
+    "id-set-and-order",
+    "privacy-field-exclusion",
+    "public-split-boundary",
+    "holdout-metadata-only",
+    "forbidden-metric-exclusion",
+    "runtime-isolation"
+  ],
+  "humanReviewPolicy": {
+    "minReviewers": {
+      "development": 1,
+      "adversarial": 2,
+      "sealed-holdout": 2
+    },
+    "independentJudgmentThenReconcile": true,
+    "stableIdentifierOnly": true,
+    "aggregateScoresForbidden": true,
+    "criticalDimensionNoOffset": true
+  },
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-model-provider",
+    "no-raw-answer",
+    "no-persistence",
+    "no-accuracy-percentage",
+    "no-holdout-contents",
+    "no-published-skill-runtime"
+  ]
+}
