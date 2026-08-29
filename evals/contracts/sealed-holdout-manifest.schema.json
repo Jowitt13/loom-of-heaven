@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/sealed-holdout-manifest/v1",
+  "title": "IQ-0 Sealed Holdout Metadata Manifest",
+  "description": "Development-only metadata manifest for a sealed holdout set that lives OUTSIDE the repository. It carries counts, digests, lifecycle status and custodian role only — never holdout inputs, expected answers, expected boundary annotations, reviewer notes, access-log contents, or any personal data.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "setId",
+    "version",
+    "topic",
+    "rubricId",
+    "caseCount",
+    "contentDigest",
+    "accessLogDigest",
+    "status",
+    "retiredCaseCount",
+    "custodianRole",
+    "replacementRequired"
+  ],
+  "properties": {
+    "contractVersion": { "const": "sealed-holdout-manifest/v1" },
+    "setId": {
+      "type": "string",
+      "pattern": "^sealed-set:[a-z0-9][a-z0-9._-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "topic": { "const": "career" },
+    "rubricId": { "const": "rubric:answer-quality:career-v1" },
+    "caseCount": { "type": "integer", "minimum": 0 },
+    "contentDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "accessLogDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "status": {
+      "enum": ["planned", "active", "rotated", "retired"]
+    },
+    "retiredCaseCount": { "type": "integer", "minimum": 0 },
+    "custodianRole": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "replacementRequired": { "type": "boolean" }
+  }
+}

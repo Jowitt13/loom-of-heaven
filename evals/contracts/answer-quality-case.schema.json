@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/answer-quality-case/v1",
+  "title": "IQ-0 Public Answer-Quality Case",
+  "description": "Development-only contract for a public answer-quality evaluation case. Public splits only (development, adversarial, regression); the fixture is synthetic-technical and the topic is fixed to career in v1. Sealed-holdout cases are NOT expressible in this contract, and real birth data, raw user prompts, model reasoning and reviewer prose are forbidden fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "caseId",
+    "split",
+    "fixtureKind",
+    "topic",
+    "rubricId",
+    "exclusionPolicy"
+  ],
+  "properties": {
+    "contractVersion": { "const": "answer-quality-case/v1" },
+    "caseId": {
+      "type": "string",
+      "pattern": "^case:synthetic:[a-z0-9][a-z0-9._-]*$"
+    },
+    "split": {
+      "enum": ["development", "adversarial", "regression"]
+    },
+    "fixtureKind": { "const": "synthetic-technical" },
+    "topic": { "const": "career" },
+    "rubricId": { "const": "rubric:answer-quality:career-v1" },
+    "exclusionPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    }
+  }
+}
