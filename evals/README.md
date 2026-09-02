@@ -94,7 +94,7 @@ Its counts are traceability counts (risk rows verified 8/8, declared synthetic f
 25/25), not accuracy figures. The CLI accepts only these committed synthetic fixture paths; any
 other value is rejected.
 
-## IQ-0A boundary
+## IQ-0 structural safeguards and optional Quality-Evidence Track
 
 `answer-quality-rubric/v1` (with the `answer-quality-case/v1` and
 `sealed-holdout-manifest/v1` contracts) belongs to the **Answer Faithfulness &
@@ -107,11 +107,12 @@ and the sealed-holdout metadata-only lifecycle with retire-and-replace. The
 committed rubric is checked by `tools/eval/verify-answer-quality-foundation.ts`
 against implementer-owned frozen specs — fixture self-reporting is impossible.
 
-These contracts cannot prove that any answer is semantically correct, natural
-or useful; deterministic checks cover structure and boundaries only, and
-semantic quality judgment is reserved for documented human review. No sealed
-holdout content, no case corpus, no legacy answers and no runtime surface are
-part of IQ-0A. See [docs/ANSWER_QUALITY_EVALUATION.md](../docs/ANSWER_QUALITY_EVALUATION.md).
+These contracts cannot prove that any answer is semantically correct, natural or useful;
+deterministic checks cover structure and boundaries only. Under roadmap v3, documented human
+review, an active sealed holdout, and a legacy baseline are optional Quality-Evidence Track work,
+not IQ-1 prerequisites. No sealed-holdout content, no human review result, no legacy baseline, and
+no runtime surface are created by the structural safeguards. See
+[docs/ANSWER_QUALITY_EVALUATION.md](../docs/ANSWER_QUALITY_EVALUATION.md).
 
 ## Data and storage rules
 
@@ -128,8 +129,9 @@ part of IQ-0A. See [docs/ANSWER_QUALITY_EVALUATION.md](../docs/ANSWER_QUALITY_EV
   or raw transcripts.
 - A structured review uses only a randomly assigned `reviewer:anon:<16-hex>` pseudonym;
   it must never contain a name, email, account id, birth data or a hash of personal data.
-  A reconciliation record structurally cites two distinct review ids, while the future IQ-0B
-  corpus verifier must resolve those references and verify their independence and linkage.
+  A reconciliation record structurally cites two distinct review ids, while any separately
+  authorized Quality-Evidence Track verifier must resolve those references and verify their
+  independence and linkage.
 - A SHA-256 digest is an integrity/reproducibility reference only. It is not anonymization and
   must not be presented as a privacy safeguard.
 - External-host experiments, if separately authorized later, belong in development tooling and
@@ -234,8 +236,7 @@ Run its offline boundary check with:
 node tools/eval/verify-sealed-holdout-manifest.ts
 ```
 
-Actual sealed content and the access log remain in controlled storage outside
-Git. When an owner later activates a set, the public manifest can record only
-its version, counts and digests. A case inspected to guide a fix must be
-retired into the public regression corpus and replaced; it cannot be counted as
-unseen evidence again.
+If an owner separately activates the optional Quality-Evidence Track, actual sealed content and
+the access log remain in controlled storage outside Git. The public manifest can record only its
+version, counts and digests. A case inspected to guide a fix must be retired into the public
+regression corpus and replaced; it cannot be counted as unseen evidence again.

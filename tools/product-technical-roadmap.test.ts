@@ -7,20 +7,25 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel: string): string => readFileSync(join(root, rel), 'utf8');
 
 const ROADMAP = read('docs/PRODUCT_TECHNICAL_ROADMAP.md');
-const ADR = read('docs/adr/0017-product-technical-roadmap-and-execution-governance.md');
+const GOVERNANCE_ADR = read('docs/adr/0017-product-technical-roadmap-and-execution-governance.md');
+const ROUTE_ADR = read('docs/adr/0018-structural-answer-quality-route.md');
 const PROTOCOL = read('docs/COMMANDER_PROTOCOL.md');
 const AGENTS = read('AGENTS.md');
 const NARRATIVE = read('docs/NARRATIVE_OUTPUT_V1.md');
 
 describe('product technical roadmap and commander governance', () => {
-  it('records an owner-confirmed v2 roadmap and amended accepted ADR', () => {
-    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v2`');
+  it('records an owner-confirmed v3 roadmap and accepted route-change ADR', () => {
+    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v3`');
     expect(ROADMAP).toContain('Status: **Accepted and owner-confirmed**');
-    expect(ROADMAP).toContain('Confirmed: 2026-08-29');
-    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v1`');
-    expect(ADR).toContain('Status: Accepted');
-    expect(ADR).toContain('Amended: 2026-08-29');
-    expect(ADR).toContain('This ADR changes no current runtime');
+    expect(ROADMAP).toContain('Confirmed: 2026-09-03');
+    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v2`');
+    expect(GOVERNANCE_ADR).toContain('Status: Accepted');
+    expect(GOVERNANCE_ADR).toContain('Amended: 2026-08-29');
+    expect(ROUTE_ADR).toContain('Status: Accepted');
+    expect(ROUTE_ADR).toContain('Date: 2026-09-03');
+    expect(ROUTE_ADR).toContain('This ADR changes no runtime');
+    expect(AGENTS).toContain('loom-product-roadmap/v3');
+    expect(AGENTS).toContain('loom-commander-protocol/v3');
   });
 
   it('fixes the product destination on verified reasoning rather than technique count', () => {
@@ -32,19 +37,20 @@ describe('product technical roadmap and commander governance', () => {
     expect(ROADMAP).toContain('does **not** compete on the number of divination techniques');
   });
 
-  it('locks the authoritative phase order with G0 as the active phase', () => {
+  it('locks the authoritative phase order with IQ-0 as the active phase', () => {
     const order =
       'G0 -> IQ-0 -> IQ-1 -> IQ-2 -> IQ-3 -> IQ-4 -> IQ-5 -> IQ-6 -> PLAT-1 -> DATA-1 -> EXP-1';
     expect(ROADMAP).toContain(order);
-    expect(ADR).toContain(order);
+    expect(GOVERNANCE_ADR).toContain(order);
     expect(ROADMAP).toContain('### G0 — governance and security baseline');
+    expect(ROADMAP).toContain('### IQ-0 — structural answer-quality safeguards');
     expect(ROADMAP).toContain('**Current active phase.**');
     expect(ROADMAP).toContain('never use `--no-verify`');
   });
 
   it('prioritizes the final-answer quality loop before platform, memory, or expansion', () => {
     for (const phase of [
-      'IQ-0 — final-answer quality baseline',
+      'IQ-0 — structural answer-quality safeguards',
       'IQ-1 — AnswerClaim and NarrativeTrace',
       'IQ-2 — final-answer faithfulness verifier',
       'IQ-3 — structured clarification and response projection',
@@ -98,12 +104,15 @@ describe('product technical roadmap and commander governance', () => {
     expect(ROADMAP).toMatch(/does\s+not expose a generic `confidence` field/);
   });
 
-  it('governs public development cases and sealed holdouts separately', () => {
-    expect(ROADMAP).toContain('20–30 cases');
-    expect(ROADMAP).toContain('Controlled off-repository storage');
-    expect(ROADMAP).toContain('retired into the public regression corpus and replaced');
-    expect(ROADMAP).toContain('not metaphysical truth');
-    expect(PROTOCOL).toContain('A sealed holdout stays outside the public repository');
+  it('keeps real quality evidence optional while preserving structural non-claim boundaries', () => {
+    expect(ROADMAP).toContain('20–30 synthetic development candidates');
+    expect(ROADMAP).toContain('not prerequisites for IQ-1');
+    expect(ROADMAP).toContain('Optional Quality-Evidence Track');
+    expect(PROTOCOL).toContain('Their absence does not block IQ-1');
+    expect(ROUTE_ADR).toContain('does not validate answer semantics');
+    expect(ROUTE_ADR).toContain('human-validated answer-quality baseline');
+    expect(ROUTE_ADR).toContain('The owner has decided not to create those real evidence assets');
+    expect(ROADMAP).not.toContain('sealed-holdout governance, a legacy baseline');
   });
 
   it('requires claim faithfulness without inventing an aggregate accuracy score', () => {
@@ -148,7 +157,7 @@ describe('product technical roadmap and commander governance', () => {
   });
 
   it('requires every executor prompt to carry the complete admission header set', () => {
-    expect(PROTOCOL).toContain('Protocol id: `loom-commander-protocol/v2`');
+    expect(PROTOCOL).toContain('Protocol id: `loom-commander-protocol/v3`');
     for (const heading of [
       '路线锚点',
       '当前阶段与切片',
@@ -172,7 +181,7 @@ describe('product technical roadmap and commander governance', () => {
 
   it('defines continue as the next unblocked roadmap exit criterion', () => {
     expect(PROTOCOL).toContain('Handling “continue”');
-    expect(PROTOCOL).toContain('earliest unfulfilled, unblocked exit criterion');
+    expect(PROTOCOL).toContain('earliest unfulfilled, unblocked required exit criterion');
     expect(PROTOCOL).toContain('may not silently jump to technique expansion, UI, memory');
     expect(ROADMAP).toContain(
       '“Continue”, “next”, or executor convenience does not authorize route drift',

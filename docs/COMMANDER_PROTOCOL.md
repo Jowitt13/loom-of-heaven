@@ -1,10 +1,10 @@
 # Commander protocol
 
-- Protocol id: `loom-commander-protocol/v2`
+- Protocol id: `loom-commander-protocol/v3`
 - Status: mandatory for all new research, architecture, implementation, integration, and release
   slices
 - Governing roadmap: [Loom product technical roadmap](./PRODUCT_TECHNICAL_ROADMAP.md)
-- Confirmed: 2026-08-29
+- Confirmed: 2026-09-03
 
 This protocol keeps Codex, Hermes, GLM, Qoder, and other executors on the same route. It applies
 whether one agent performs the work or a commander gives a copyable prompt to another executor.
@@ -57,7 +57,7 @@ not an acceptable scope.
 你是 Loom 当前切片的执行者。先只读核验，条件全部成立后才能写入。
 
 路线锚点
-- roadmap: loom-product-roadmap/v2
+- roadmap: loom-product-roadmap/v3
 - phase: <G0|IQ-0|IQ-1|IQ-2|IQ-3|IQ-4|IQ-5|IQ-6|PLAT-1|DATA-1|EXP-1>
 - exit criterion: <本切片推进的唯一退出条件>
 
@@ -140,8 +140,12 @@ GitHub 与发布边界
   panels to users.
 - IQ work preserves `AnswerClaimCandidate -> ApprovedAnswerClaim -> NarrativeTrace`; a candidate
   cannot be narrated, and cross-system content is represented only by a separate `SynthesisRecord`.
-- A sealed holdout stays outside the public repository. Once inspected to guide a fix, it is
-  retired into regression material and replaced; it is never counted again as unseen evidence.
+- If an owner separately activates a sealed holdout, it stays outside the public repository. Once
+  inspected to guide a fix, it is retired into regression material and replaced; it is never
+  counted again as unseen evidence.
+- Human review, an active sealed holdout, and a legacy baseline are optional Quality-Evidence Track
+  work under roadmap v3. Their absence does not block IQ-1, and structural safeguards must never
+  be reported as human-validated answer quality, generalization, or predictive validity.
 - Default prose follows the answer-presentation invariant: professional mechanism adjacent to the
   concrete conclusion, flexible structure, material caveats inline, and no automatic footer.
 - Use the exact state vocabulary: `planned`, `in-progress`, `blocked`, `implemented`, `integrated`,
@@ -156,7 +160,8 @@ When the owner says “继续”, “下一步”, or equivalent, the commander 
 It must:
 
 1. read the current roadmap state and the previous slice report;
-2. select the earliest unfulfilled, unblocked exit criterion;
+2. select the earliest unfulfilled, unblocked required exit criterion; optional Quality-Evidence
+   Track work does not block IQ-1;
 3. report the selected anchor and why later work is not yet admitted;
 4. identify the evidence program and state what its result cannot prove;
 5. issue one bounded executor prompt using this protocol.
