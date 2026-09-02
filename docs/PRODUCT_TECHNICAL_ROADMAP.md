@@ -1,11 +1,12 @@
 # Loom product technical roadmap
 
-- Roadmap id: `loom-product-roadmap/v2`
+- Roadmap id: `loom-product-roadmap/v3`
 - Status: **Accepted and owner-confirmed**
-- Confirmed: 2026-08-29
-- Supersedes: `loom-product-roadmap/v1`
+- Confirmed: 2026-09-03
+- Supersedes: `loom-product-roadmap/v2`
 - Authority: product direction, technical sequencing, and slice admission
-- Related: [ADR 0017](./adr/0017-product-technical-roadmap-and-execution-governance.md),
+- Related: [ADR 0018](./adr/0018-structural-answer-quality-route.md),
+  [ADR 0017](./adr/0017-product-technical-roadmap-and-execution-governance.md),
   [Commander protocol](./COMMANDER_PROTOCOL.md), [ADR 0016](./adr/0016-interpretable-state-and-accuracy-lab.md),
   and [Narrative Output V1](./NARRATIVE_OUTPUT_V1.md)
 
@@ -107,8 +108,10 @@ The project maintains three non-interchangeable evidence programs:
 
 1. **Reliability Lab** — deterministic calculation, rebuild, invalidation, linkage, mutation, host,
    package, and supply-chain behavior.
-2. **Answer Faithfulness & Quality Lab** — approved-claim fidelity, specificity, restraint,
-   material-caveat retention, natural presentation, and human review.
+2. **Answer Faithfulness & Quality Lab** — structural safeguards for approved-claim fidelity,
+   specificity, restraint, material-caveat retention, and natural presentation. Separately
+   authorized human review, active sealed holdouts, and legacy comparisons are optional
+   quality-evidence work; they do not become structural proof of answer quality.
 3. **Predictive Validity Research** — separately authorized, de-identified, out-of-sample research
    into whether a traditional method carries predictive information beyond declared baselines.
 
@@ -124,8 +127,7 @@ visible.
 
 ### G0 — governance and security baseline
 
-**Current active phase.** Finish the verified internal-state laboratory without bypassing repository
-security controls.
+Complete the verified internal-state laboratory without bypassing repository security controls.
 
 Required sequence:
 
@@ -138,24 +140,33 @@ Required sequence:
 Exit criteria: commit path passes without bypass; P2-C fixture, verifier, tests, counts, CI, and
 runtime-isolation checks pass; no public capability claim changes.
 
-### IQ-0 — final-answer quality baseline
+### IQ-0 — structural answer-quality safeguards
 
-Build a de-identified, versioned evaluation corpus for representative user questions, starting
-with career. The first development set is deliberately bounded to 20–30 cases; it grows only after
-the rubric and failure taxonomy stabilize. Record useful answers and failure modes: vague prose,
-term dumping, unsupported facts, mechanism leaps, contradictory systems, repeated conclusions,
-default footer clutter, missing conditions, jargon without a concrete implication, and unsupported
-life verdicts.
+**Current active phase.** Build de-identified structural safeguards for representative user
+questions, starting with career. The public development set remains deliberately bounded to 20–30
+synthetic cases; it grows only after the rubric and failure taxonomy stabilize. Record the
+structural boundaries around vague prose, term dumping, unsupported facts, mechanism leaps,
+contradictory systems, repeated conclusions, default footer clutter, missing conditions, jargon
+without a concrete implication, and unsupported life verdicts.
 
-Public repository material contains the schema, rubric, development and adversarial corpus, and a
-sealed-set manifest plus digest. Controlled off-repository storage contains holdout inputs,
-expected boundaries, reviewer material, and an access log. A holdout case used to guide a fix is
-retired into the public regression corpus and replaced; it is never silently reused as unseen
-evidence. The holdout evaluates answer boundaries and faithfulness—not metaphysical truth.
+The repository contains the schema, rubric, development and adversarial candidate corpus, and a
+planned sealed-set metadata manifest. Deterministic checks enforce only structure, privacy,
+inventory, linkage, candidate status, and runtime isolation. They do not assess prose semantics,
+naturalness, utility, traditional-method correctness, prediction accuracy, or real-world validity.
 
-Exit criteria: bounded rubric, 20–30 development cases, adversarial cases, deterministic structural
-checks, sealed-holdout governance, a legacy baseline, and a documented human-review layer. No claim
-that a heuristic text gate proves interpretation quality.
+Exit criteria: bounded rubric, 20–30 synthetic development candidates, adversarial candidates,
+deterministic structural checks, and explicit non-claim boundaries. Human review, activation of
+controlled sealed-holdout storage, and a legacy baseline are **not prerequisites for IQ-1**. They
+remain an optional, separately owner-authorized Quality-Evidence Track. No structural or heuristic
+gate proves interpretation quality.
+
+#### Optional Quality-Evidence Track
+
+If separately authorized, this track may establish controlled off-repository sealed-holdout
+storage, documented human review, and a legacy comparison baseline. An inspected holdout case must
+be retired into the public regression corpus and replaced; it is never silently reused as unseen
+evidence. This track can produce its own bounded evidence record, but its absence never blocks
+IQ-1 and its presence does not establish metaphysical truth or a generic accuracy percentage.
 
 ### IQ-1 — AnswerClaim and NarrativeTrace
 
@@ -336,6 +347,11 @@ next unblocked slice in this roadmap and prove its admission conditions.
 
 ## 9. Roadmap changelog
 
+- `loom-product-roadmap/v3` — 2026-09-03: changes IQ-0 from a claimed final-answer quality
+  baseline to structural answer-quality safeguards. Human review, activated sealed holdouts, and a
+  legacy baseline become an optional, separately owner-authorized Quality-Evidence Track rather
+  than IQ-1 prerequisites; structural evidence is explicitly prohibited from claiming semantic
+  answer quality, generalization, or predictive validity.
 - `loom-product-roadmap/v2` — 2026-08-29: separates Reliability, Answer Faithfulness & Quality,
   and Predictive Validity evidence; moves clarification/projection before the career vertical;
   proves career in one system before four-system synthesis; freezes candidate/approved claim and

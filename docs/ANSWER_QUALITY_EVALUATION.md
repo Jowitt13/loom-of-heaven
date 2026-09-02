@@ -1,15 +1,27 @@
-# IQ-0A — answer-quality evaluation foundation
+# IQ-0 — structural answer-quality safeguards
 
 - Program: **Answer Faithfulness & Quality Lab** (not the Reliability Lab, not
   Predictive Validity Research)
-- Status: **foundation implemented; IQ-0 overall in-progress**
-- Roadmap anchor: `loom-product-roadmap/v2`, phase IQ-0, slice IQ-0A
+- Status: **structural safeguards implemented; no quality-evidence result claimed**
+- Roadmap anchor: `loom-product-roadmap/v3`, phase IQ-0
 - Related: [ADR 0016](./adr/0016-interpretable-state-and-accuracy-lab.md),
   [NARRATIVE_OUTPUT_V1](./NARRATIVE_OUTPUT_V1.md),
   [ADR 0011](./adr/0011-writing-isolation-and-reading-lint.md),
   [evals/README.md](../evals/README.md)
 
-## Purpose
+## Current v3 route
+
+IQ-0 now admits IQ-1 through structural safeguards only: the bounded rubric, synthetic
+development and adversarial candidates, deterministic boundary checks, and explicit non-claim
+language. A deterministic pass does not establish answer semantics, naturalness, usefulness,
+generalization, traditional-method correctness, prediction accuracy, or real-world validity.
+
+Documented human review, activation of controlled sealed-holdout storage, and a legacy comparison
+baseline are an optional, separately owner-authorized **Quality-Evidence Track**. They are not IQ-1
+prerequisites. The planned manifest and synthetic review-linkage fixture do not activate that track
+and cannot be presented as evidence that a human review, real holdout, or legacy baseline exists.
+
+## Historical purpose of IQ-0A
 
 Before any answer-quality case is written, this slice freezes the measuring
 stick: the evaluation dimensions, the failure taxonomy, the independent
@@ -74,17 +86,17 @@ machine gate in this program:
 
 A deterministic pass is therefore never a statement of answer quality.
 
-## Data tiers
+## Data tiers when the optional Quality-Evidence Track is authorized
 
 - **Public repository**: the rubric, these schemas, development/adversarial/
   regression cases (later slices), sanitized synthetic answer artifacts, and a
   sealed-set **metadata manifest** (counts, digests, lifecycle status,
   custodian role).
-- **Off-repository (controlled storage)**: sealed holdout inputs, expected
-  answers, expected boundary annotations, reviewer material and the access log.
-  These never enter git.
+- **Off-repository (controlled storage, optional)**: sealed holdout inputs,
+  expected answers, expected boundary annotations, reviewer material and the access log. These
+  never enter git.
 
-## Sealed holdout lifecycle
+## Optional sealed holdout lifecycle
 
 A sealed holdout case is evaluated at most once as unseen evidence. Once it has
 been inspected to guide a fix, it is **retired**: it loses its unseen status,
@@ -114,9 +126,9 @@ replaced before it can be represented as unseen again. The deterministic
 IQ-0C1 checker verifies the planned boundary; it does not access controlled
 storage, assess an answer, attest human review or create an active holdout.
 
-## Human-review policy
+## Optional human-review policy
 
-- development cases: at least 1 human reviewer;
+- if this track is authorized, development cases: at least 1 human reviewer;
 - adversarial and sealed-holdout cases: at least 2 independent reviewers,
   judging independently before reconciliation of differences;
 - reviewers use only randomly assigned stable pseudonymous ids; they are never
@@ -124,7 +136,7 @@ storage, assess an answer, attest human review or create an active holdout.
 - no chat transcripts, chain-of-thought or free-form model reasoning is stored;
 - judgments use only the four independent values; no averages, totals or rates.
 
-## Legacy baseline (future protocol)
+## Optional legacy baseline protocol
 
 A legacy baseline compares the current deterministic pipeline output against
 previously accepted answers, collected under the same rubric by human review.
@@ -133,11 +145,11 @@ slice creates none of it.
 
 ## Scope of IQ-0A
 
-This slice freezes the foundation and adds one committed rubric fixture plus
+This historical slice freezes the foundation and adds one committed rubric fixture plus
 the deterministic foundation verifier. It creates **no** development,
 adversarial or regression cases, **no** real sealed-set manifest, and **no**
-legacy answers. IQ-0 remains in-progress. Nothing here changes runtime output
-or claims any accuracy, quality percentage or predictive validity.
+legacy answers. Nothing here changes runtime output or claims any accuracy, quality percentage or
+predictive validity.
 
 ## Contract versions (IQ-0A-R correction)
 
@@ -157,7 +169,8 @@ bounds, evidence-artifact references (digest-anchored, repo-path restricted to
 `evals/fixtures/synthetic/`), a sanitized visible-answer artifact reference
 (digest-anchored, repo-path restricted to `evals/corpus/public/career/`), and
 the frozen evaluation plan (all 8 dimensions, 4 critical dimensions, 12
-boundary findings, target failure modes, mandatory human review).
+boundary findings, target failure modes, and a marker that human review would be required before
+any Quality-Evidence Track result could be claimed).
 
 ### Sanitized visible answer vs raw transcript
 
@@ -192,10 +205,10 @@ instances and therefore cannot yet verify it.
 
 ## Scope of IQ-0A-R
 
-This corrective slice adds the v2 case carrier, the visible-answer artifact
+This corrective historical slice adds the v2 case carrier, the visible-answer artifact
 contract, and the review record contract. It creates **no** case instances,
 **no** visible-answer artifacts, **no** review records, and **no** corpus
-directory. IQ-0 remains in-progress.
+directory.
 
 ## IQ-0B1 public synthetic career corpus
 
@@ -225,8 +238,7 @@ candidate status, coverage of the frozen labels and structural review links.
 It does not rate prose, establish traditional-method correctness, establish
 prediction accuracy, or replace the human-review policy above.
 
-The remaining IQ-0 work is intentionally still material: documented human
-review of candidate cases, activation of controlled sealed-holdout storage, and
-a separately reviewed legacy baseline. IQ-0C1 adds only the planned metadata
-boundary; no active holdout or review result is created or claimed. The corpus
-remains disconnected from runtime, the Skill, the CLI and public contracts.
+The optional Quality-Evidence Track may later add documented human review of candidate cases,
+activation of controlled sealed-holdout storage, and a separately reviewed legacy baseline. IQ-0C1
+adds only the planned metadata boundary; no active holdout or review result is created or claimed.
+The corpus remains disconnected from runtime, the Skill, the CLI and public contracts.
