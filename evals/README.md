@@ -257,3 +257,32 @@ database, process launcher, runtime package, Skill or CLI. Its lexical bindings
 are intentionally not a general semantic parser: a pass is evidence only that
 these fixed synthetic boundaries remain covered, never that arbitrary prose is
 faithful, natural, useful, traditionally correct or predictively valid.
+
+## IQ-2B transient delivery-artifact boundary
+
+`delivery-faithfulness-artifact/v1` records a development-only, synthetic
+template for the _in-memory_ artifact a future delivery adapter must present to
+the final-answer faithfulness checks. The committed instance contains a
+sanitized `visibleText`, approved-claim snapshots, ordered paragraph spans with
+internal `narrative-trace/v1` records, assertion spans and condition spans. It
+contains no raw prompt, transcript, model reasoning, personal data, persistence
+key, score or accuracy field.
+
+Run its local-only structural check with:
+
+```bash
+node tools/eval/verify-delivery-faithfulness.ts
+```
+
+The verifier reconstructs the final delivery from trace-bound paragraphs,
+requires each assertion to resolve to the paragraph's approved single-system
+claim and allowed mechanism, and requires a visible span for each attached
+material condition. It detects linkage, unsupported-claim, wrong-system,
+unsupported-mechanism, missing-condition, footer-leakage and private-field
+failures. It cannot judge arbitrary prose semantics, naturalness, utility,
+traditional-method correctness, prediction accuracy or real-world validity.
+
+The repository currently runs this only on the committed synthetic artifact.
+There is no runtime import, host-model invocation, network call, CLI verb,
+Skill surface, cache or storage behavior. A later runtime-adapter slice must
+remain transient and regenerable, and requires separate roadmap admission.
