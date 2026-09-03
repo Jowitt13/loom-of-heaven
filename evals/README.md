@@ -240,3 +240,20 @@ If an owner separately activates the optional Quality-Evidence Track, actual sea
 the access log remain in controlled storage outside Git. The public manifest can record only its
 version, counts and digests. A case inspected to guide a fix must be retired into the public
 regression corpus and replaced; it cannot be counted as unseen evidence again.
+
+## IQ-2A bounded final-answer faithfulness
+
+`iq2a-answer-faithfulness-fixture.json` is a fixed synthetic career fixture for
+the first final-answer faithfulness slice. It combines sanitized visible text,
+internal approved-claim snapshots, scope/condition boundaries and a bounded
+assertion ledger. `node tools/eval/verify-answer-faithfulness.ts` reports
+supported, unsupported and contradicted factual assertions, plus separate
+diagnostics for an unsupported professional mechanism, mechanism leap, scope
+overreach, omitted material condition and forbidden footer leakage.
+
+The verifier locks the exact synthetic case set and visible text so the fixture
+cannot self-attest success. It is local-only and does not call a model, network,
+database, process launcher, runtime package, Skill or CLI. Its lexical bindings
+are intentionally not a general semantic parser: a pass is evidence only that
+these fixed synthetic boundaries remain covered, never that arbitrary prose is
+faithful, natural, useful, traditionally correct or predictively valid.

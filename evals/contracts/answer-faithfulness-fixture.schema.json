@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/answer-faithfulness-fixture/v1",
+  "title": "IQ-2A Synthetic Final-Answer Faithfulness Fixture",
+  "description": "A development-only, synthetic-only fixture for a bounded lexical claim-faithfulness verifier. It represents sanitized visible text, internal approved-claim snapshots and fixed assertion annotations. It does not carry a raw prompt, transcript, provider response, personal data, model reasoning, a quality score or a prediction claim.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "fixtureId",
+    "fixtureKind",
+    "mode",
+    "topic",
+    "cases",
+    "exclusionPolicy"
+  ],
+  "properties": {
+    "contractVersion": { "const": "answer-faithfulness-fixture/v1" },
+    "fixtureId": { "const": "synthetic:iq2a-final-answer-faithfulness" },
+    "fixtureKind": { "const": "synthetic-technical" },
+    "mode": { "const": "bounded-lexical-claim-faithfulness-only" },
+    "topic": { "const": "career" },
+    "cases": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "caseId",
+          "split",
+          "fixtureKind",
+          "scenarioId",
+          "visibleText",
+          "approvedClaims",
+          "claimBoundaries",
+          "assertions"
+        ],
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "pattern": "^case:synthetic:career:iq2a-[a-z0-9][a-z0-9-]*$"
+          },
+          "split": { "enum": ["development", "adversarial"] },
+          "fixtureKind": { "const": "synthetic-technical" },
+          "scenarioId": {
+            "enum": [
+              "supported-fact",
+              "wrong-chart-swap",
+              "leading-user-contradiction",
+              "invented-professional-term",
+              "causal-jump-and-scope-overreach",
+              "omitted-material-condition",
+              "forbidden-footer-leakage"
+            ]
+          },
+          "visibleText": { "type": "string", "minLength": 1, "maxLength": 2000 },
+          "approvedClaims": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "contractVersion",
+                "claimId",
+                "candidateId",
+                "approval",
+                "system",
+                "topic",
+                "claim",
+                "factRefs",
+                "mechanismRefs",
+                "rulesetRefs",
+                "constraintRefs",
+                "invalidationCauses"
+              ],
+              "properties": {
+                "contractVersion": { "const": "approved-answer-claim/v1" },
+                "claimId": { "type": "string", "pattern": "^approved-claim:fact-[0-9]+$" },
+                "candidateId": { "type": "string", "pattern": "^claim-candidate:fact-[0-9]+$" },
+                "approval": { "const": "deterministic-path-verified" },
+                "system": { "enum": ["western", "bazi", "ziwei", "vedic"] },
+                "topic": { "const": "career" },
+                "claim": { "type": "string", "minLength": 1, "maxLength": 2000 },
+                "factRefs": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "items": { "type": "string", "pattern": "^fact-[0-9]+$" }
+                },
+                "mechanismRefs": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+                },
+                "rulesetRefs": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["id", "version"],
+                    "properties": {
+                      "id": { "type": "string", "minLength": 1 },
+                      "version": { "type": "string", "minLength": 1 }
+                    }
+                  }
+                },
+                "constraintRefs": {
+                  "type": "array",
+                  "maxItems": 20,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["kind", "index"],
+                    "properties": {
+                      "kind": { "enum": ["disclaimer", "caveat", "warning"] },
+                      "index": { "type": "integer", "minimum": 0 }
+                    }
+                  }
+                },
+                "invalidationCauses": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "enum": [
+                      "input-chart",
+                      "settings",
+                      "engine-provider",
+                      "ruleset",
+                      "source-profile",
+                      "topic-lens",
+                      "language-narrator"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "claimBoundaries": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["claimId", "allowedScope", "materialConditionText"],
+              "properties": {
+                "claimId": { "type": "string", "pattern": "^approved-claim:fact-[0-9]+$" },
+                "allowedScope": { "type": "string", "minLength": 1, "maxLength": 120 },
+                "materialConditionText": { "type": ["string", "null"], "maxLength": 300 }
+              }
+            }
+          },
+          "assertions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 6,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "assertionId",
+                "kind",
+                "text",
+                "claimId",
+                "assertedSystem",
+                "mechanismRef",
+                "assertedScope"
+              ],
+              "properties": {
+                "assertionId": {
+                  "type": "string",
+                  "pattern": "^assertion:synthetic:iq2a-[a-z0-9][a-z0-9-]*$"
+                },
+                "kind": {
+                  "enum": ["factual", "professional-mechanism", "mechanism-to-implication"]
+                },
+                "text": { "type": "string", "minLength": 1, "maxLength": 600 },
+                "claimId": {
+                  "type": ["string", "null"],
+                  "pattern": "^approved-claim:fact-[0-9]+$"
+                },
+                "assertedSystem": {
+                  "type": ["string", "null"],
+                  "enum": ["western", "bazi", "ziwei", "vedic", null]
+                },
+                "mechanismRef": { "type": ["string", "null"], "maxLength": 300 },
+                "assertedScope": { "type": ["string", "null"], "maxLength": 120 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "exclusionPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    }
+  }
+}
