@@ -37,6 +37,14 @@ architecture directions only: they do not add a state CLI, public contract, acti
 runtime dependency, or user-visible technical appendix. The governing boundary is
 [ADR 0016](adr/0016-interpretable-state-and-accuracy-lab.md).
 
+## Clarification and response-projection direction
+
+IQ-3's [ADR 0019](adr/0019-clarification-and-response-projection-boundary.md) fixes an
+architecture-only boundary for a future in-memory clarification plan and response view. It does not
+alter `answer-plan/v2`, add a command or public schema, activate a narrator, or change default
+delivery. A later implementation must keep material settings explicit, fail closed or degrade when
+they are unanswered, and retain material caveats in the projected response.
+
 ## Dependency direction
 
 ```text
