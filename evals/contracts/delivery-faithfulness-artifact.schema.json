@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/delivery-faithfulness-artifact/v1",
+  "title": "IQ-2B Transient Delivery Faithfulness Artifact",
+  "description": "A development-only contract template for a transient, regenerable delivery artifact. The committed instance is synthetic only. It binds already-visible prose to internal NarrativeTrace and ApprovedAnswerClaim records without retaining raw prompts, transcripts, model reasoning, personal data, scores, or a runtime surface.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "artifactId",
+    "fixtureKind",
+    "mode",
+    "topic",
+    "transient",
+    "regenerable",
+    "visibleText",
+    "approvedClaims",
+    "paragraphs",
+    "assertionSpans",
+    "conditionSpans",
+    "exclusionPolicy"
+  ],
+  "properties": {
+    "contractVersion": { "const": "delivery-faithfulness-artifact/v1" },
+    "artifactId": {
+      "type": "string",
+      "pattern": "^synthetic:iq2b-delivery-artifact-[a-z0-9-]+$"
+    },
+    "fixtureKind": { "const": "synthetic-technical" },
+    "mode": { "const": "transient-delivery-linkage-only" },
+    "topic": { "const": "career" },
+    "transient": { "const": true },
+    "regenerable": { "const": true },
+    "visibleText": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "approvedClaims": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "contractVersion",
+          "claimId",
+          "candidateId",
+          "approval",
+          "system",
+          "topic",
+          "claim",
+          "factRefs",
+          "mechanismRefs",
+          "rulesetRefs",
+          "constraintRefs",
+          "invalidationCauses"
+        ],
+        "properties": {
+          "contractVersion": { "const": "approved-answer-claim/v1" },
+          "claimId": { "type": "string", "pattern": "^approved-claim:fact-[0-9]+$" },
+          "candidateId": { "type": "string", "pattern": "^claim-candidate:fact-[0-9]+$" },
+          "approval": { "const": "deterministic-path-verified" },
+          "system": { "enum": ["western", "bazi", "ziwei", "vedic"] },
+          "topic": { "const": "career" },
+          "claim": { "type": "string", "minLength": 1, "maxLength": 2000 },
+          "factRefs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": { "type": "string", "pattern": "^fact-[0-9]+$" }
+          },
+          "mechanismRefs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+          },
+          "rulesetRefs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "version"],
+              "properties": {
+                "id": { "type": "string", "minLength": 1, "maxLength": 160 },
+                "version": { "type": "string", "minLength": 1, "maxLength": 80 }
+              }
+            }
+          },
+          "constraintRefs": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind", "index"],
+              "properties": {
+                "kind": { "enum": ["disclaimer", "caveat", "warning"] },
+                "index": { "type": "integer", "minimum": 0 }
+              }
+            }
+          },
+          "invalidationCauses": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 7,
+            "items": {
+              "enum": [
+                "input-chart",
+                "settings",
+                "engine-provider",
+                "ruleset",
+                "source-profile",
+                "topic-lens",
+                "language-narrator"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "paragraphs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["paragraphId", "start", "end", "trace"],
+        "properties": {
+          "paragraphId": { "type": "string", "pattern": "^paragraph-[0-9]+$" },
+          "start": { "type": "integer", "minimum": 0 },
+          "end": { "type": "integer", "minimum": 1 },
+          "trace": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "contractVersion",
+              "traceId",
+              "paragraphId",
+              "topic",
+              "approvedClaimIds",
+              "factRefs",
+              "mechanismRefs",
+              "constraintRefs",
+              "invalidationCauses",
+              "visibleText",
+              "transient",
+              "regenerable"
+            ],
+            "properties": {
+              "contractVersion": { "const": "narrative-trace/v1" },
+              "traceId": { "type": "string", "pattern": "^narrative-trace:paragraph-[0-9]+$" },
+              "paragraphId": { "type": "string", "pattern": "^paragraph-[0-9]+$" },
+              "topic": { "const": "career" },
+              "approvedClaimIds": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": { "type": "string", "pattern": "^approved-claim:fact-[0-9]+$" }
+              },
+              "factRefs": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": { "type": "string", "pattern": "^fact-[0-9]+$" }
+              },
+              "mechanismRefs": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+              },
+              "constraintRefs": {
+                "type": "array",
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["kind", "index"],
+                  "properties": {
+                    "kind": { "enum": ["disclaimer", "caveat", "warning"] },
+                    "index": { "type": "integer", "minimum": 0 }
+                  }
+                }
+              },
+              "invalidationCauses": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 7,
+                "items": {
+                  "enum": [
+                    "input-chart",
+                    "settings",
+                    "engine-provider",
+                    "ruleset",
+                    "source-profile",
+                    "topic-lens",
+                    "language-narrator"
+                  ]
+                }
+              },
+              "visibleText": { "type": "string", "minLength": 1, "maxLength": 2000 },
+              "transient": { "const": true },
+              "regenerable": { "const": true }
+            }
+          }
+        }
+      }
+    },
+    "assertionSpans": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 48,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assertionId",
+          "paragraphId",
+          "start",
+          "end",
+          "claimId",
+          "assertedSystem",
+          "kind",
+          "mechanismRef"
+        ],
+        "properties": {
+          "assertionId": {
+            "type": "string",
+            "pattern": "^assertion:synthetic:iq2b-[a-z0-9][a-z0-9-]*$"
+          },
+          "paragraphId": { "type": "string", "pattern": "^paragraph-[0-9]+$" },
+          "start": { "type": "integer", "minimum": 0 },
+          "end": { "type": "integer", "minimum": 1 },
+          "claimId": { "type": "string", "pattern": "^approved-claim:fact-[0-9]+$" },
+          "assertedSystem": { "enum": ["western", "bazi", "ziwei", "vedic"] },
+          "kind": { "enum": ["factual", "professional-mechanism", "mechanism-to-implication"] },
+          "mechanismRef": { "type": ["string", "null"], "maxLength": 300 }
+        }
+      }
+    },
+    "conditionSpans": {
+      "type": "array",
+      "maxItems": 48,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["conditionId", "paragraphId", "start", "end", "claimId", "kind", "index"],
+        "properties": {
+          "conditionId": {
+            "type": "string",
+            "pattern": "^condition:synthetic:iq2b-[a-z0-9][a-z0-9-]*$"
+          },
+          "paragraphId": { "type": "string", "pattern": "^paragraph-[0-9]+$" },
+          "start": { "type": "integer", "minimum": 0 },
+          "end": { "type": "integer", "minimum": 1 },
+          "claimId": { "type": "string", "pattern": "^approved-claim:fact-[0-9]+$" },
+          "kind": { "enum": ["disclaimer", "caveat", "warning"] },
+          "index": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "exclusionPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    }
+  }
+}

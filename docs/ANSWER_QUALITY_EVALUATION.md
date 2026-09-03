@@ -295,3 +295,30 @@ real-world validity. It creates no narrator/runtime/CLI/Skill surface and does
 not authorize candidates as production output. A later, separately admitted
 runtime slice must supply a transient delivery artifact before this verifier
 can inspect text actually shown to a user.
+
+## IQ-2B transient delivery-artifact boundary
+
+IQ-2B defines the development-only shape that a future, separately admitted
+narration adapter must provide before final delivered text can be inspected. The
+committed artifact is synthetic and has no runtime caller. It contains only a
+sanitized visible delivery text, its internal `ApprovedAnswerClaim` snapshots,
+ordered paragraph spans with one transient `NarrativeTrace` each, assertion
+spans, and material-condition spans.
+
+`node tools/eval/verify-delivery-faithfulness.ts` verifies that paragraph spans
+cover every non-whitespace portion of the visible text; that every trace's
+visible fragment is exact; that the existing IQ-1 trace verifier resolves only
+the attached approved claims; that assertion spans name the matching claim,
+system and mechanism; and that every trace-bound constraint has a visible
+condition span. It separately rejects unsupported or wrong-system assertions,
+unsupported professional mechanisms, forbidden default-footers and private
+field drift.
+
+This remains a structural, span-and-linkage boundary. A span proves which text
+was submitted for checking, not the Chinese-language meaning of every phrase or
+the quality, usefulness, traditional-method correctness, predictive accuracy
+or real-world validity of an answer. It does not persist a user delivery,
+create a runtime API, allow a host model to self-approve, or activate a
+narrator, CLI, Skill or public contract. Any future runtime use must be a
+separately admitted slice that keeps the artifact transient and regenerable in
+memory, never as default retained user data.

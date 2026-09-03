@@ -1,0 +1,139 @@
+{
+  "contractVersion": "delivery-faithfulness-artifact/v1",
+  "artifactId": "synthetic:iq2b-delivery-artifact-career",
+  "fixtureKind": "synthetic-technical",
+  "mode": "transient-delivery-linkage-only",
+  "topic": "career",
+  "transient": true,
+  "regenerable": true,
+  "visibleText": "合成八字线索提示，工作安排宜保留可复盘的迭代空间；具体岗位比较前需核验技能、作品和机会。\n\n合成西方线索提示，职业选择需结合现实资源与反馈再调整。",
+  "approvedClaims": [
+    {
+      "contractVersion": "approved-answer-claim/v1",
+      "claimId": "approved-claim:fact-11",
+      "candidateId": "claim-candidate:fact-11",
+      "approval": "deterministic-path-verified",
+      "system": "bazi",
+      "topic": "career",
+      "claim": "合成八字线索提示：工作安排宜保留可复盘的迭代空间。",
+      "factRefs": ["fact-11"],
+      "mechanismRefs": ["bazi-rule/synthetic/iteration"],
+      "rulesetRefs": [{ "id": "bazi-synthetic-evaluation", "version": "v1" }],
+      "constraintRefs": [{ "kind": "caveat", "index": 0 }],
+      "invalidationCauses": ["input-chart", "ruleset", "topic-lens"]
+    },
+    {
+      "contractVersion": "approved-answer-claim/v1",
+      "claimId": "approved-claim:fact-12",
+      "candidateId": "claim-candidate:fact-12",
+      "approval": "deterministic-path-verified",
+      "system": "western",
+      "topic": "career",
+      "claim": "合成西方线索提示：职业选择需结合现实资源与反馈再调整。",
+      "factRefs": ["fact-12"],
+      "mechanismRefs": ["western-rule/synthetic/angle"],
+      "rulesetRefs": [{ "id": "western-synthetic-evaluation", "version": "v1" }],
+      "constraintRefs": [],
+      "invalidationCauses": ["input-chart", "ruleset", "topic-lens"]
+    }
+  ],
+  "paragraphs": [
+    {
+      "paragraphId": "paragraph-1",
+      "start": 0,
+      "end": 44,
+      "trace": {
+        "contractVersion": "narrative-trace/v1",
+        "traceId": "narrative-trace:paragraph-1",
+        "paragraphId": "paragraph-1",
+        "topic": "career",
+        "approvedClaimIds": ["approved-claim:fact-11"],
+        "factRefs": ["fact-11"],
+        "mechanismRefs": ["bazi-rule/synthetic/iteration"],
+        "constraintRefs": [{ "kind": "caveat", "index": 0 }],
+        "invalidationCauses": [
+          "input-chart",
+          "settings",
+          "engine-provider",
+          "ruleset",
+          "source-profile",
+          "topic-lens",
+          "language-narrator"
+        ],
+        "visibleText": "合成八字线索提示，工作安排宜保留可复盘的迭代空间；具体岗位比较前需核验技能、作品和机会。",
+        "transient": true,
+        "regenerable": true
+      }
+    },
+    {
+      "paragraphId": "paragraph-2",
+      "start": 46,
+      "end": 73,
+      "trace": {
+        "contractVersion": "narrative-trace/v1",
+        "traceId": "narrative-trace:paragraph-2",
+        "paragraphId": "paragraph-2",
+        "topic": "career",
+        "approvedClaimIds": ["approved-claim:fact-12"],
+        "factRefs": ["fact-12"],
+        "mechanismRefs": ["western-rule/synthetic/angle"],
+        "constraintRefs": [],
+        "invalidationCauses": [
+          "input-chart",
+          "settings",
+          "engine-provider",
+          "ruleset",
+          "source-profile",
+          "topic-lens",
+          "language-narrator"
+        ],
+        "visibleText": "合成西方线索提示，职业选择需结合现实资源与反馈再调整。",
+        "transient": true,
+        "regenerable": true
+      }
+    }
+  ],
+  "assertionSpans": [
+    {
+      "assertionId": "assertion:synthetic:iq2b-bazi-iteration",
+      "paragraphId": "paragraph-1",
+      "start": 0,
+      "end": 24,
+      "claimId": "approved-claim:fact-11",
+      "assertedSystem": "bazi",
+      "kind": "mechanism-to-implication",
+      "mechanismRef": "bazi-rule/synthetic/iteration"
+    },
+    {
+      "assertionId": "assertion:synthetic:iq2b-western-adjustment",
+      "paragraphId": "paragraph-2",
+      "start": 46,
+      "end": 73,
+      "claimId": "approved-claim:fact-12",
+      "assertedSystem": "western",
+      "kind": "mechanism-to-implication",
+      "mechanismRef": "western-rule/synthetic/angle"
+    }
+  ],
+  "conditionSpans": [
+    {
+      "conditionId": "condition:synthetic:iq2b-bazi-caveat",
+      "paragraphId": "paragraph-1",
+      "start": 25,
+      "end": 43,
+      "claimId": "approved-claim:fact-11",
+      "kind": "caveat",
+      "index": 0
+    }
+  ],
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-raw-prompt",
+    "no-raw-transcript",
+    "no-model-reasoning",
+    "no-personal-data",
+    "no-persistence",
+    "no-runtime-input",
+    "no-score-or-accuracy-claim"
+  ]
+}
