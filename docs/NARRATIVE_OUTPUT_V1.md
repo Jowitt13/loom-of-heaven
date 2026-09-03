@@ -37,21 +37,42 @@ limitation absent from this trace.
 
 ## Source trace format
 
-Maintain one record per visible paragraph. The record is an implementation/audit structure, not
-user-visible prose.
+IQ-1A defines the following internal record for one visible paragraph. It is an
+implementation/audit structure, never user-visible prose. The foundation is not
+connected to the default narrator yet: it establishes the allowed linkage shape
+without changing any live answer surface.
 
 ```ts
 type NarrativeTrace = {
-  paragraphId: string;
+  contractVersion: 'narrative-trace/v1';
+  traceId: `narrative-trace:paragraph-${number}`;
+  paragraphId: `paragraph-${number}`;
+  topic: InterpretationTopic;
   visibleText: string;
-  factRefs: string[]; // InterpretationFact.evidence[].ref
-  ruleRefs: string[]; // e.g. bazi-rule/... when supplied by the engine
-  rulesets: Array<{ id: string; version: string }>;
-  mechanism: string; // controlled summary of fact.reason
-  limitations: string[]; // relevant caveat / warning effects
-  allowedClaims: string[];
+  approvedClaimIds: Array<`approved-claim:fact-${number}`>;
+  factRefs: Array<`fact-${number}`>;
+  mechanismRefs: string[]; // InterpretationFact.evidence[].ref
+  constraintRefs: Array<{ kind: 'disclaimer' | 'caveat' | 'warning'; index: number }>;
+  invalidationCauses: Array<
+    | 'input-chart'
+    | 'settings'
+    | 'engine-provider'
+    | 'ruleset'
+    | 'source-profile'
+    | 'topic-lens'
+    | 'language-narrator'
+  >;
+  transient: true;
+  regenerable: true;
 };
 ```
+
+`approvedClaimIds` must resolve to deterministic, single-system approved claims;
+candidate claims are deliberately not traceable to narration. Ruleset provenance
+is carried by each approved claim, and an individual claim may only bind the
+declared namespace slice for its own system. A trace proves record linkage and
+freshness dependencies, not that its visible wording is semantically faithful.
+Semantic-faithfulness evaluation remains an IQ-2 concern.
 
 Source priority is fixed:
 
@@ -107,7 +128,7 @@ do not append a universal footer.
 follow-up menus, empty talk, strong consultant jargon, repetition and unsupported deterministic
 claims. It does not establish semantic correctness. A test or review must additionally confirm:
 
-- each core paragraph has a `NarrativeTrace`;
+- after a trace-aware runtime is separately admitted, each core paragraph has a `NarrativeTrace`;
 - every source reference resolves in the associated engine output or ruleset;
 - any visible limitation corresponds to the current question;
 - a technical-detail request can reveal traces without altering the original conclusion.
