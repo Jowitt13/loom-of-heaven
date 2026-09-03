@@ -1,0 +1,305 @@
+{
+  "contractVersion": "answer-faithfulness-fixture/v1",
+  "fixtureId": "synthetic:iq2a-final-answer-faithfulness",
+  "fixtureKind": "synthetic-technical",
+  "mode": "bounded-lexical-claim-faithfulness-only",
+  "topic": "career",
+  "cases": [
+    {
+      "caseId": "case:synthetic:career:iq2a-supported-fact",
+      "split": "development",
+      "fixtureKind": "synthetic-technical",
+      "scenarioId": "supported-fact",
+      "visibleText": "合成八字线索支持把工作拆成可复盘的小阶段，以便稳定推进节奏。",
+      "approvedClaims": [
+        {
+          "contractVersion": "approved-answer-claim/v1",
+          "claimId": "approved-claim:fact-1",
+          "candidateId": "claim-candidate:fact-1",
+          "approval": "deterministic-path-verified",
+          "system": "bazi",
+          "topic": "career",
+          "claim": "合成八字线索支持把工作拆成可复盘的小阶段，以便稳定推进节奏。",
+          "factRefs": ["fact-1"],
+          "mechanismRefs": ["bazi-rule/synthetic/iteration"],
+          "rulesetRefs": [{ "id": "bazi-synthetic-evaluation", "version": "v1" }],
+          "constraintRefs": [],
+          "invalidationCauses": ["input-chart", "ruleset", "topic-lens"]
+        }
+      ],
+      "claimBoundaries": [
+        {
+          "claimId": "approved-claim:fact-1",
+          "allowedScope": "work-arrangement",
+          "materialConditionText": null
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "assertion:synthetic:iq2a-supported-fact",
+          "kind": "factual",
+          "text": "合成八字线索支持把工作拆成可复盘的小阶段，以便稳定推进节奏。",
+          "claimId": "approved-claim:fact-1",
+          "assertedSystem": "bazi",
+          "mechanismRef": null,
+          "assertedScope": "work-arrangement"
+        }
+      ]
+    },
+    {
+      "caseId": "case:synthetic:career:iq2a-wrong-chart-swap",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "scenarioId": "wrong-chart-swap",
+      "visibleText": "合成西方线索支持把工作拆成可复盘的小阶段，以便稳定推进节奏。",
+      "approvedClaims": [
+        {
+          "contractVersion": "approved-answer-claim/v1",
+          "claimId": "approved-claim:fact-2",
+          "candidateId": "claim-candidate:fact-2",
+          "approval": "deterministic-path-verified",
+          "system": "bazi",
+          "topic": "career",
+          "claim": "合成八字线索支持把工作拆成可复盘的小阶段，以便稳定推进节奏。",
+          "factRefs": ["fact-2"],
+          "mechanismRefs": ["bazi-rule/synthetic/iteration"],
+          "rulesetRefs": [{ "id": "bazi-synthetic-evaluation", "version": "v1" }],
+          "constraintRefs": [],
+          "invalidationCauses": ["input-chart", "ruleset", "topic-lens"]
+        }
+      ],
+      "claimBoundaries": [
+        {
+          "claimId": "approved-claim:fact-2",
+          "allowedScope": "work-arrangement",
+          "materialConditionText": null
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "assertion:synthetic:iq2a-wrong-chart-swap",
+          "kind": "factual",
+          "text": "合成西方线索支持把工作拆成可复盘的小阶段，以便稳定推进节奏。",
+          "claimId": "approved-claim:fact-2",
+          "assertedSystem": "western",
+          "mechanismRef": null,
+          "assertedScope": "work-arrangement"
+        }
+      ]
+    },
+    {
+      "caseId": "case:synthetic:career:iq2a-leading-user-contradiction",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "scenarioId": "leading-user-contradiction",
+      "visibleText": "你已经证明自己只适合独立工作，因此不需要再收集协作反馈。",
+      "approvedClaims": [
+        {
+          "contractVersion": "approved-answer-claim/v1",
+          "claimId": "approved-claim:fact-3",
+          "candidateId": "claim-candidate:fact-3",
+          "approval": "deterministic-path-verified",
+          "system": "bazi",
+          "topic": "career",
+          "claim": "合成线索只支持比较协作方式，不能确认用户预设的唯一工作模式。",
+          "factRefs": ["fact-3"],
+          "mechanismRefs": ["bazi-rule/synthetic/leading-user-boundary"],
+          "rulesetRefs": [{ "id": "bazi-synthetic-evaluation", "version": "v1" }],
+          "constraintRefs": [],
+          "invalidationCauses": ["input-chart", "ruleset", "topic-lens"]
+        }
+      ],
+      "claimBoundaries": [
+        {
+          "claimId": "approved-claim:fact-3",
+          "allowedScope": "work-arrangement",
+          "materialConditionText": null
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "assertion:synthetic:iq2a-leading-user-contradiction",
+          "kind": "factual",
+          "text": "你已经证明自己只适合独立工作，因此不需要再收集协作反馈。",
+          "claimId": null,
+          "assertedSystem": null,
+          "mechanismRef": null,
+          "assertedScope": "work-arrangement"
+        }
+      ]
+    },
+    {
+      "caseId": "case:synthetic:career:iq2a-invented-professional-term",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "scenarioId": "invented-professional-term",
+      "visibleText": "合成结构属于杀印相生，所以现在适合扩大职业判断。",
+      "approvedClaims": [
+        {
+          "contractVersion": "approved-answer-claim/v1",
+          "claimId": "approved-claim:fact-4",
+          "candidateId": "claim-candidate:fact-4",
+          "approval": "deterministic-path-verified",
+          "system": "bazi",
+          "topic": "career",
+          "claim": "合成八字线索只支持讨论可复盘的工作安排。",
+          "factRefs": ["fact-4"],
+          "mechanismRefs": ["bazi-rule/synthetic/iteration"],
+          "rulesetRefs": [{ "id": "bazi-synthetic-evaluation", "version": "v1" }],
+          "constraintRefs": [],
+          "invalidationCauses": ["input-chart", "ruleset", "topic-lens"]
+        }
+      ],
+      "claimBoundaries": [
+        {
+          "claimId": "approved-claim:fact-4",
+          "allowedScope": "work-arrangement",
+          "materialConditionText": null
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "assertion:synthetic:iq2a-invented-professional-term",
+          "kind": "professional-mechanism",
+          "text": "合成结构属于杀印相生，所以现在适合扩大职业判断。",
+          "claimId": "approved-claim:fact-4",
+          "assertedSystem": "bazi",
+          "mechanismRef": "bazi-rule/synthetic/invented-term",
+          "assertedScope": "career-judgment"
+        }
+      ]
+    },
+    {
+      "caseId": "case:synthetic:career:iq2a-causal-jump-and-scope-overreach",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "scenarioId": "causal-jump-and-scope-overreach",
+      "visibleText": "因为任务边界较清晰，所以你天生适合做产品经理，其他行业都不适合。",
+      "approvedClaims": [
+        {
+          "contractVersion": "approved-answer-claim/v1",
+          "claimId": "approved-claim:fact-5",
+          "candidateId": "claim-candidate:fact-5",
+          "approval": "deterministic-path-verified",
+          "system": "bazi",
+          "topic": "career",
+          "claim": "合成线索只支持讨论清晰任务边界下的工作安排。",
+          "factRefs": ["fact-5"],
+          "mechanismRefs": ["bazi-rule/synthetic/clear-task-boundary"],
+          "rulesetRefs": [{ "id": "bazi-synthetic-evaluation", "version": "v1" }],
+          "constraintRefs": [],
+          "invalidationCauses": ["input-chart", "ruleset", "topic-lens"]
+        }
+      ],
+      "claimBoundaries": [
+        {
+          "claimId": "approved-claim:fact-5",
+          "allowedScope": "work-arrangement",
+          "materialConditionText": null
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "assertion:synthetic:iq2a-causal-jump-and-scope-overreach",
+          "kind": "mechanism-to-implication",
+          "text": "因为任务边界较清晰，所以你天生适合做产品经理，其他行业都不适合。",
+          "claimId": "approved-claim:fact-5",
+          "assertedSystem": "bazi",
+          "mechanismRef": "bazi-rule/synthetic/clear-task-boundary",
+          "assertedScope": "career-name"
+        }
+      ]
+    },
+    {
+      "caseId": "case:synthetic:career:iq2a-omitted-material-condition",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "scenarioId": "omitted-material-condition",
+      "visibleText": "可以先把工作拆成小阶段，再观察推进节奏。",
+      "approvedClaims": [
+        {
+          "contractVersion": "approved-answer-claim/v1",
+          "claimId": "approved-claim:fact-6",
+          "candidateId": "claim-candidate:fact-6",
+          "approval": "deterministic-path-verified",
+          "system": "bazi",
+          "topic": "career",
+          "claim": "合成线索支持以小阶段推进工作，但具体岗位比较前需核验技能、作品和机会。",
+          "factRefs": ["fact-6"],
+          "mechanismRefs": ["bazi-rule/synthetic/iteration"],
+          "rulesetRefs": [{ "id": "bazi-synthetic-evaluation", "version": "v1" }],
+          "constraintRefs": [{ "kind": "caveat", "index": 0 }],
+          "invalidationCauses": ["input-chart", "ruleset", "topic-lens"]
+        }
+      ],
+      "claimBoundaries": [
+        {
+          "claimId": "approved-claim:fact-6",
+          "allowedScope": "work-arrangement",
+          "materialConditionText": "需先核验技能、作品和机会"
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "assertion:synthetic:iq2a-omitted-material-condition",
+          "kind": "factual",
+          "text": "可以先把工作拆成小阶段，再观察推进节奏。",
+          "claimId": "approved-claim:fact-6",
+          "assertedSystem": "bazi",
+          "mechanismRef": null,
+          "assertedScope": "work-arrangement"
+        }
+      ]
+    },
+    {
+      "caseId": "case:synthetic:career:iq2a-forbidden-footer-leakage",
+      "split": "adversarial",
+      "fixtureKind": "synthetic-technical",
+      "scenarioId": "forbidden-footer-leakage",
+      "visibleText": "合成八字线索支持先整理一份成果样本，再判断下一步。\n\n声明：以上仅供参考。",
+      "approvedClaims": [
+        {
+          "contractVersion": "approved-answer-claim/v1",
+          "claimId": "approved-claim:fact-7",
+          "candidateId": "claim-candidate:fact-7",
+          "approval": "deterministic-path-verified",
+          "system": "bazi",
+          "topic": "career",
+          "claim": "合成八字线索支持先整理一份成果样本，再判断下一步。",
+          "factRefs": ["fact-7"],
+          "mechanismRefs": ["bazi-rule/synthetic/evidence-sample"],
+          "rulesetRefs": [{ "id": "bazi-synthetic-evaluation", "version": "v1" }],
+          "constraintRefs": [],
+          "invalidationCauses": ["input-chart", "ruleset", "topic-lens"]
+        }
+      ],
+      "claimBoundaries": [
+        {
+          "claimId": "approved-claim:fact-7",
+          "allowedScope": "work-arrangement",
+          "materialConditionText": null
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "assertion:synthetic:iq2a-forbidden-footer-leakage",
+          "kind": "factual",
+          "text": "合成八字线索支持先整理一份成果样本，再判断下一步。",
+          "claimId": "approved-claim:fact-7",
+          "assertedSystem": "bazi",
+          "mechanismRef": null,
+          "assertedScope": "work-arrangement"
+        }
+      ]
+    }
+  ],
+  "exclusionPolicy": [
+    "no-real-birth-input",
+    "no-raw-prompt",
+    "no-raw-transcript",
+    "no-model-reasoning",
+    "no-personal-data",
+    "no-runtime-input",
+    "no-score-or-accuracy-claim"
+  ]
+}

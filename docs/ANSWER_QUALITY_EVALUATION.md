@@ -257,3 +257,41 @@ The optional Quality-Evidence Track may later add documented human review of can
 activation of controlled sealed-holdout storage, and a separately reviewed legacy baseline. IQ-0C1
 adds only the planned metadata boundary; no active holdout or review result is created or claimed.
 The corpus remains disconnected from runtime, the Skill, the CLI and public contracts.
+
+## IQ-2A bounded final-answer faithfulness fixtures
+
+IQ-2A begins the roadmap's final-answer faithfulness work with seven fixed,
+synthetic career cases. Each case contains sanitized visible text, internal
+`approved-answer-claim/v1` snapshots, declared scope and material-condition
+boundaries, and a small assertion ledger. The offline verifier uses those
+bounded records to distinguish three factual-assertion states:
+
+- `supported`: the assertion names the same single-system approved claim;
+- `unsupported`: the assertion has no approved-claim binding; and
+- `contradicted`: the assertion names a different chart system from its bound
+  approved claim.
+
+It separately reports an unsupported professional mechanism, a
+mechanism-to-implication leap, scope overreach, omitted material condition and
+forbidden default-footer leakage. The adversarial inventory therefore covers
+the IQ-2 exit examples: wrong-chart swap, leading-user contradiction, invented
+professional term, unsupported causal jump, omitted material condition and
+forbidden footer.
+
+The fixture is locked against implementer-owned case ids, order, sanitized
+visible text and expected bounded findings. A case cannot self-declare a pass,
+and all result categories are named diagnostics rather than a score, rate or
+accuracy claim. Run it locally with:
+
+```bash
+node tools/eval/verify-answer-faithfulness.ts
+```
+
+This is deliberately a **bounded lexical and linkage verifier**, not general
+Chinese-language semantic understanding. It does not establish that arbitrary
+free-form prose is faithful, natural, useful or professionally sound; it does
+not establish traditional-method correctness, prediction accuracy or
+real-world validity. It creates no narrator/runtime/CLI/Skill surface and does
+not authorize candidates as production output. A later, separately admitted
+runtime slice must supply a transient delivery artifact before this verifier
+can inspect text actually shown to a user.
