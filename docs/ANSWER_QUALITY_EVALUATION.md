@@ -21,6 +21,21 @@ baseline are an optional, separately owner-authorized **Quality-Evidence Track**
 prerequisites. The planned manifest and synthetic review-linkage fixture do not activate that track
 and cannot be presented as evidence that a human review, real holdout, or legacy baseline exists.
 
+## IQ-1A internal claim-chain foundation
+
+IQ-1A introduces internal-only contracts for a deterministic path from an already-public,
+topic-scoped fact to a candidate claim, then to an approved claim, and finally to a transient,
+regenerable paragraph trace. Each candidate binds exactly one chart system, the selected fact,
+its evidence references, the matching ruleset namespace slice, relevant plan constraints, and
+typed invalidation causes. A candidate cannot be narrated; only an exact deterministic projection
+can be approved, and a trace can cite approved claims only.
+
+This foundation is deliberately disconnected from the CLI, Skill, orchestrator, default output,
+and public runtime contracts. It does not produce a new answer, judge whether prose faithfully
+expresses a claim, establish naturalness or usefulness, synthesize systems, or claim any
+traditional-method, predictive, or real-world correctness. Those are separately admitted future
+work, beginning with IQ-2 semantic faithfulness.
+
 ## Historical purpose of IQ-0A
 
 Before any answer-quality case is written, this slice freezes the measuring
