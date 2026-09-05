@@ -2,7 +2,8 @@
 
 - Architecture record: `clarification-response-projection/v1`
 - Roadmap anchor: `loom-product-roadmap/v3`, IQ-3
-- Status: architecture boundary only — no active machine surface
+- Status: one package-layer machine surface active in `@loom/orchestrator` — no runtime entry, no
+  default-output change
 
 This document fixes the information shape that a later IQ-3 implementation must use. It is not a
 new command, prompt format, or default response template.
@@ -99,11 +100,28 @@ the professional mechanism is adjacent to the concrete implication, caveats appe
 they matter, and technical evidence remains outside default delivery. There is no automatic
 `敏感项校对`, `引擎警告`, `专业依据`, `声明`, disclaimer, citation block, or follow-up menu.
 
+## Versioned machine surface (IQ-3D)
+
+The separately admitted IQ-3D integration slice wires the two records into exactly one
+package-layer machine surface: `@loom/orchestrator`'s `clarified-response` module.
+`buildClarifiedResponseView` runs the materiality planner and refuses to produce any view while a
+material setting is unanswered (`CLARIFICATION_REQUIRED`), so an unconfirmed default can never
+reach delivery through the surface. `verifyClarifiedResponseView` rebuilds the expected projection
+from the same bounded input, so a delivered view cannot conceal a material caveat or drift from
+its plan.
+
+The surface adds no command, no public schema file, no narrator, no model call, no persistence, no
+cache, and no default-output change. `answer-plan/v2`, `public-result/v2`, the CLI, the Skill, the
+bundle, and every runtime entry point remain unchanged, and the records stay transient and
+regenerable. The package-level surface does not by itself prove prose semantics, naturalness, or
+predictive validity.
+
 ## Boundaries for later slices
 
-IQ-3B may implement deterministic contracts, the materiality registry, synthetic tests, and an
-internal planner. IQ-3C may propose one integration surface after separate admission. Neither slice
-may alter the legacy `answer-plan/v2` semantics, activate cross-system synthesis, pass raw user
+IQ-3B implemented the deterministic contracts, the materiality registry, synthetic tests, and the
+internal planner; IQ-3C implemented the internal projection; the separately admitted IQ-3D
+integration slice shipped the one package-layer machine surface above. No slice may alter the
+legacy `answer-plan/v2` semantics, activate cross-system synthesis, pass raw user
 questions to the engine, persist a delivery artifact, or use model self-approval.
 
 This record cannot prove that a host's language is semantically faithful, natural, useful,

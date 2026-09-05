@@ -14,14 +14,37 @@ describe('IQ-3 clarification and response-projection architecture gate', () => {
   it('records an accepted architecture-only IQ-3 boundary with no runtime activation', () => {
     expect(ADR).toContain('Status: Accepted — architecture only; no runtime behavior enabled');
     expect(ADR).toContain('IQ-3 clarification materiality and response-view boundary');
-    expect(SPEC).toContain('Status: architecture boundary only — no active machine surface');
+    expect(SPEC).toContain(
+      'Status: one package-layer machine surface active in `@loom/orchestrator` — no runtime entry, no',
+    );
+    expect(SPEC).toContain('default-output change');
     expect(ARCHITECTURE).toContain("IQ-3's [ADR 0019]");
+  });
+
+  it('exposes exactly one package-layer machine surface with no runtime entry wiring', () => {
+    expect(SPEC).toContain('## Versioned machine surface (IQ-3D)');
+    expect(SPEC).toContain('`buildClarifiedResponseView`');
+    expect(SPEC).toContain('`verifyClarifiedResponseView`');
+    const facade = read('packages/orchestrator/src/clarified-response.ts');
+    expect(facade).toContain('clarification-plan/v1');
+    expect(facade).toContain('response-view/v1');
+    expect(read('packages/orchestrator/src/index.ts')).toContain('./clarified-response.ts');
+    for (const relative of [
+      'packages/orchestrator/src/engine-entry.ts',
+      'packages/orchestrator/src/interpret.ts',
+      'packages/contracts/src/index.ts',
+      'packages/interpret/src/index.ts',
+      'skills/xuan-ji-yu-heng/scripts/loom-chart.mjs',
+      'skills/xuan-ji-yu-heng/SKILL.md',
+    ]) {
+      expect(read(relative), relative).not.toContain('clarified-response');
+    }
   });
 
   it('keeps the existing answer-plan public contract stable until a separate integration slice', () => {
     expect(ADR).toContain('leaves `answer-plan/v2`, `public-result/v2`, the existing CLI');
     expect(ADR).toContain('may not mutate `answer-plan/v2`');
-    expect(SPEC).toMatch(/Neither slice\s+may alter the legacy `answer-plan\/v2` semantics/);
+    expect(SPEC).toMatch(/No\s+slice\s+may\s+alter\s+the\s+legacy\s+`answer-plan\/v2`\s+semantics/);
   });
 
   it('uses a closed clarification vocabulary and requires explicit material-setting resolution', () => {
