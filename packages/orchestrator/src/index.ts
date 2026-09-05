@@ -9,3 +9,6 @@ export * from './doctor.ts';
 export * from './compare.ts';
 export * from './render.ts';
 export * from './verify.ts';
+// IQ-3D package-layer machine surface (clarification-plan/v1 -> response-view/v1).
+// Deliberately not re-exported by engine-entry: it wires no CLI verb and no runtime path.
+export * from './clarified-response.ts';

@@ -43,7 +43,10 @@ IQ-3's [ADR 0019](adr/0019-clarification-and-response-projection-boundary.md) fi
 architecture-only boundary for a future in-memory clarification plan and response view. It does not
 alter `answer-plan/v2`, add a command or public schema, activate a narrator, or change default
 delivery. A later implementation must keep material settings explicit, fail closed or degrade when
-they are unanswered, and retain material caveats in the projected response.
+they are unanswered, and retain material caveats in the projected response. The IQ-3D integration
+slice exposes one package-layer machine surface in `@loom/orchestrator` that chains the planner and
+projection with fail-closed semantics and deterministic rebuild verification; it adds no command,
+CLI verb, Skill, bundle, or default-output change.
 
 ## Dependency direction
 
