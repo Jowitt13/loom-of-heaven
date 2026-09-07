@@ -142,3 +142,17 @@ claims. It does not establish semantic correctness. A test or review must additi
 4. A user who asks “why?” receives the corresponding fact, rule and limitation trace separately.
 5. The same input may vary in phrasing, but its traced fact set, rules, limitations and allowed
    claims remain unchanged.
+
+## Dual-source career composition (planned — no runtime implements this)
+
+A future career layer (roadmap §5 C-track, ADR 0020) composes answers from separately
+provenanced units: traditional structure (admitted structural facts and traditional-culture
+background only), user-stated reality (the only source of career advice and action
+experiments), and — after separate per-instrument admission — optional non-diagnostic
+reflection. Every unit carries one layer tag with resolvable provenance; traditional
+background may sit adjacent to reality-based advice but must never be presented as its source,
+and clinical content never enters. The delivery rules above apply unchanged: the professional
+mechanism stays beside its concrete implication, caveats sit inline next to the sentences they
+qualify, structure varies naturally, and no fixed templates, footer blocks, or 讲人话 labels
+appear. Until traditional career text claims pass source admission, the traditional side
+contributes structural records and background only.

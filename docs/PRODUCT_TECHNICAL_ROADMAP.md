@@ -297,6 +297,27 @@ Critical calculation regressions, dependency vulnerabilities, license issues, se
 breakage, and release integrity may interrupt the phase order. Maintenance does not authorize a
 new capability or a product-direction change.
 
+### Dual-source career layer (C-track)
+
+Per the owner's 2026-09-07 decision and [ADR 0020](adr/0020-dual-provenance-career-layer.md),
+career guidance is composed from separately provenanced sources: a TraditionalStructureLayer
+(admitted structural facts and traditional-culture background only; today zero admitted visible
+text claims), a CareerRealityLayer (only reality the user actively states — roles, skills,
+goals, constraints, preferences — and the only source of career advice), and an optional future
+CareerReflectionLayer (non-diagnostic, admitted per instrument by separate owner
+authorization). Clinical assessment remains a fully separate capability and is never an input
+to the career layer.
+
+Governance: composition units carry a single layer tag with resolvable provenance; the
+composition grammar forbids deriving career advice from traditional structure, forbids
+mixed-source paragraphs, and forbids any clinical edge. C-1 (reality clarification contract)
+and C-2 (composition/provenance contract) are admitted internal slices; C-3 (wiring the
+traditional layer into career composition) is paused until separate owner authorization and
+admitted visible traditional text claims exist; C-4 and C-5 need separate owner
+authorization. This track does not alter the phase order, does not change the IQ-4 exit, and
+does not lift IQ-4's `BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples. Promotion to a
+user-facing capability requires a future roadmap version change under §8.
+
 ## 6. Patterns deliberately adopted and rejected
 
 Patterns approved for Loom, implemented independently and only in their named phases:
@@ -347,6 +368,11 @@ next unblocked slice in this roadmap and prove its admission conditions.
 
 ## 9. Roadmap changelog
 
+- `loom-product-roadmap/v3` — 2026-09-07 amendment: adds the dual-source career layer C-track
+  ([ADR 0020](adr/0020-dual-provenance-career-layer.md)) as a parallel bounded track. The phase
+  order, product destination, and IQ-4's `BLOCKED_SOURCE_ADMISSION` for
+  reviewed-answer-examples are unchanged; promotion to a user-facing capability requires a
+  future roadmap version change (§8).
 - `loom-product-roadmap/v3` — 2026-09-03: changes IQ-0 from a claimed final-answer quality
   baseline to structural answer-quality safeguards. Human review, activated sealed holdouts, and a
   legacy baseline become an optional, separately owner-authorized Quality-Evidence Track rather
