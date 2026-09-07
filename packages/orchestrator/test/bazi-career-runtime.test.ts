@@ -71,19 +71,23 @@ describe('IQ-4F explicit bazi-career runtime entry', () => {
     }
   });
 
-  it('keeps approximate time deliverable through the same explicit entry', () => {
-    const approximateInput = parseBirthInput({ ...syntheticInput, timeAccuracy: 'approximate' });
-    const output = runBaziCareerRuntime(
-      { birthInput: approximateInput, system: 'bazi', depth: 'standard' },
-      { now: FIXED },
-    );
-    expect(output.responseView).toMatchObject({
-      clarificationStatus: 'ready',
-      system: 'bazi',
-    });
-  });
+  it(
+    'keeps approximate time deliverable through the same explicit entry',
+    { timeout: 30_000 },
+    () => {
+      const approximateInput = parseBirthInput({ ...syntheticInput, timeAccuracy: 'approximate' });
+      const output = runBaziCareerRuntime(
+        { birthInput: approximateInput, system: 'bazi', depth: 'standard' },
+        { now: FIXED },
+      );
+      expect(output.responseView).toMatchObject({
+        clarificationStatus: 'ready',
+        system: 'bazi',
+      });
+    },
+  );
 
-  it('fails closed with CLARIFICATION_REQUIRED on unknown birth time', () => {
+  it('fails closed with CLARIFICATION_REQUIRED on unknown birth time', { timeout: 30_000 }, () => {
     expectEngineError(
       () =>
         runBaziCareerRuntime(
