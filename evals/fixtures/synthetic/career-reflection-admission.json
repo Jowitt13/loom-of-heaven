@@ -1,0 +1,66 @@
+{
+  "admissionId": "career-reflection-admission/v1",
+  "fixtureKind": "synthetic-technical",
+  "syntheticNotice": "治理记录 fixture：仅定义准入分类与同意生命周期规则，不含任何卡片内容、题目、用户数据或实现。",
+  "admission": {
+    "toolId": "career-reflection-cards",
+    "toolVersion": "v1",
+    "toolClass": "owner-authored",
+    "classification": {
+      "ownerAuthored": true,
+      "nonPsychometric": true,
+      "nonClinical": true,
+      "scoreless": true
+    },
+    "contentState": "no-items-defined",
+    "externalDependencies": [],
+    "allowedUseCategories": ["reflection-question", "decision-framework", "action-experiment"],
+    "forbiddenOutputs": [
+      "score",
+      "norm",
+      "percentile",
+      "matching",
+      "occupation-recommendation",
+      "personality-label",
+      "diagnosis",
+      "clinical-screening",
+      "prediction",
+      "bazi-derived-recommendation",
+      "astrology-derived-recommendation"
+    ],
+    "unblocksIq4": false,
+    "runtimeReady": false,
+    "note": "Owner-selected category (C-4A): owner-authored, non-psychometric, scoreless career reflection / decision cards. No items, questions, cards, scoring, or user flows exist or may be built under this record. C-4A external candidates were evaluated and not adopted."
+  },
+  "consentLifecycle": {
+    "contractVersion": "career-reflection-consent-lifecycle/v1",
+    "consentScope": "career-reflection",
+    "noticeId": "career-reflection-notice/v1",
+    "defaultState": "not-started",
+    "states": ["not-started", "consented", "active", "deleted"],
+    "allowedTransitions": [
+      { "from": "not-started", "to": "consented", "trigger": "explicit-consent" },
+      { "from": "consented", "to": "active", "trigger": "first-use" },
+      { "from": "active", "to": "deleted", "trigger": "user-delete" },
+      { "from": "consented", "to": "deleted", "trigger": "user-delete" }
+    ],
+    "requirements": {
+      "skippable": true,
+      "withdrawable": true,
+      "minimalCollection": true,
+      "localOnly": true,
+      "deletable": true
+    },
+    "forbiddenFields": [
+      "userId",
+      "email",
+      "rawAnswer",
+      "score",
+      "clinicalData",
+      "hostChat",
+      "filePath",
+      "sessionId"
+    ],
+    "clinicalArtifactAdmissible": false
+  }
+}
