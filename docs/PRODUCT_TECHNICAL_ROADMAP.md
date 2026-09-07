@@ -314,8 +314,11 @@ mixed-source paragraphs, and forbids any clinical edge. C-1 (reality clarificati
 implemented as an internal-only, transient, deterministic contract: it accepts only
 user-confirmed reality facts and emits fixed clarifying questions or a bounded
 ready-for-composition marker — it produces no advice and unlocks nothing by itself. C-2
-(composition/provenance contract) is the next admitted internal slice; C-3 (wiring the
-traditional layer into career composition) is paused until separate owner authorization and
+(composition/provenance contract) is implemented as an internal-only, text-free,
+structure-bound composition skeleton: it consumes only ready-for-composition plans, binds
+units exclusively to user-confirmed fact ids, and emits no prose or advice — it completes the
+composition/provenance skeleton only and unlocks nothing by itself. C-3 (wiring the
+traditional layer into career composition) remains paused until separate owner authorization and
 admitted visible traditional text claims exist; C-4 and C-5 need separate owner
 authorization. This track does not alter the phase order, does not change the IQ-4 exit, and
 does not lift IQ-4's `BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples. Promotion to a
