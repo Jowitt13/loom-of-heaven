@@ -71,5 +71,16 @@ success probability, personality assessment, score derivation, match percentage)
 text, card wording, items, or user flows are defined, and `contentState` remains
 `no-items-defined`. Consent stays governed by `career-reflection-consent-lifecycle/v1`
 (C-4B); card governance is not integrated with C-1 plans or the C-2 composition. The C-4A
-external candidates remain unadopted. C-4D (local lifecycle implementation) requires separate
-owner authorization.
+external candidates remain unadopted.
+
+## Local consent lifecycle (C-4D — implemented, no user flow)
+
+The lifecycle rules frozen above are now materialized by an internal-only module
+(`career-reflection-consent`, local-only): one fixed consent file
+(`consent.json`, `career-reflection-consent/v1`, scope `career-reflection`, notice
+`career-reflection-notice/v1`) inside a caller-provided state directory; atomic writes;
+traversal/relative/control-character directories fail closed; deletion removes only that
+file. `active` records that the local consent state is currently valid — cards still do not
+exist (`no-items-defined`), nothing is runtime-ready, and no advice can be delivered. This
+module is not exported from the package index and is not wired into any CLI, Skill, bundle,
+or host flow; exposing it to users requires separate owner authorization.
