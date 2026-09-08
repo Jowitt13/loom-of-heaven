@@ -1,0 +1,127 @@
+{
+  "governanceId": "career-reflection-card-governance/v1",
+  "fixtureKind": "synthetic-technical",
+  "syntheticNotice": "治理规格 fixture：仅定义未来卡片的意图级结构与禁止推断；不含任何卡片内容、题目、提问文案、示例回答、用户数据或实现。",
+  "contractVersion": "career-reflection-card-governance/v1",
+  "admissionBinding": {
+    "admissionId": "career-reflection-admission/v1",
+    "toolId": "career-reflection-cards",
+    "toolVersion": "v1",
+    "classification": {
+      "ownerAuthored": true,
+      "nonPsychometric": true,
+      "nonClinical": true,
+      "scoreless": true
+    }
+  },
+  "contentState": "no-items-defined",
+  "runtimeReady": false,
+  "archetypes": [
+    {
+      "archetypeId": "reality-inventory",
+      "allowedInputCategories": [
+        "current-role",
+        "skills",
+        "goals",
+        "constraints",
+        "preferences",
+        "opportunities"
+      ],
+      "allowedPromptActs": ["request-clarification", "request-confirmation"],
+      "forbiddenInferenceKinds": [
+        "trait-inference",
+        "career-fit-judgment",
+        "occupation-recommendation",
+        "industry-recommendation",
+        "success-probability",
+        "personality-assessment",
+        "score-derivation",
+        "match-percentage"
+      ]
+    },
+    {
+      "archetypeId": "decision-criteria",
+      "allowedInputCategories": ["goals", "constraints", "preferences"],
+      "allowedPromptActs": ["request-listing", "request-prioritization"],
+      "forbiddenInferenceKinds": [
+        "trait-inference",
+        "career-fit-judgment",
+        "occupation-recommendation",
+        "industry-recommendation",
+        "success-probability",
+        "personality-assessment",
+        "score-derivation",
+        "match-percentage"
+      ]
+    },
+    {
+      "archetypeId": "tradeoff-review",
+      "allowedInputCategories": ["goals", "constraints", "preferences", "opportunities"],
+      "allowedPromptActs": ["request-comparison", "request-reflection"],
+      "forbiddenInferenceKinds": [
+        "trait-inference",
+        "career-fit-judgment",
+        "occupation-recommendation",
+        "industry-recommendation",
+        "success-probability",
+        "personality-assessment",
+        "score-derivation",
+        "match-percentage"
+      ]
+    },
+    {
+      "archetypeId": "evidence-check",
+      "allowedInputCategories": ["current-role", "skills", "opportunities"],
+      "allowedPromptActs": ["request-known-facts", "request-unknowns", "request-verification-plan"],
+      "forbiddenInferenceKinds": [
+        "trait-inference",
+        "career-fit-judgment",
+        "occupation-recommendation",
+        "industry-recommendation",
+        "success-probability",
+        "personality-assessment",
+        "score-derivation",
+        "match-percentage"
+      ]
+    },
+    {
+      "archetypeId": "reversible-action-plan",
+      "allowedInputCategories": ["goals", "constraints", "skills"],
+      "allowedPromptActs": ["request-user-proposed-action", "request-reversibility-check"],
+      "forbiddenInferenceKinds": [
+        "trait-inference",
+        "career-fit-judgment",
+        "occupation-recommendation",
+        "industry-recommendation",
+        "success-probability",
+        "personality-assessment",
+        "score-derivation",
+        "match-percentage"
+      ]
+    },
+    {
+      "archetypeId": "review-checkpoint",
+      "allowedInputCategories": ["goals", "constraints"],
+      "allowedPromptActs": ["request-review-criteria", "request-review-timing"],
+      "forbiddenInferenceKinds": [
+        "trait-inference",
+        "career-fit-judgment",
+        "occupation-recommendation",
+        "industry-recommendation",
+        "success-probability",
+        "personality-assessment",
+        "score-derivation",
+        "match-percentage"
+      ]
+    }
+  ],
+  "consent": {
+    "governedBy": "career-reflection-consent-lifecycle/v1",
+    "scope": "career-reflection",
+    "implemented": false
+  },
+  "composition": {
+    "consumesC1Plans": false,
+    "integratedWithC2": false
+  }
+}
