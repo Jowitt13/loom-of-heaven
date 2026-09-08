@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loom:eval/career-reflection-card-governance/v1",
+  "title": "C-4C card content governance record",
+  "description": "Governance record for the owner-authored, non-psychometric, non-clinical, scoreless career reflection / decision cards admitted in career-reflection-admission/v1. It freezes the six allowed card archetypes as intent-level structures only: no question text, no card content, no items, no scoring, no user flow, and no runtime. The consent lifecycle stays governed by career-reflection-consent-lifecycle/v1 and is not implemented here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "admissionBinding",
+    "contentState",
+    "runtimeReady",
+    "archetypes",
+    "consent",
+    "composition"
+  ],
+  "properties": {
+    "contractVersion": { "const": "career-reflection-card-governance/v1" },
+    "admissionBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["admissionId", "toolId", "toolVersion", "classification"],
+      "properties": {
+        "admissionId": { "const": "career-reflection-admission/v1" },
+        "toolId": { "const": "career-reflection-cards" },
+        "toolVersion": { "const": "v1" },
+        "classification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ownerAuthored", "nonPsychometric", "nonClinical", "scoreless"],
+          "properties": {
+            "ownerAuthored": { "const": true },
+            "nonPsychometric": { "const": true },
+            "nonClinical": { "const": true },
+            "scoreless": { "const": true }
+          }
+        }
+      }
+    },
+    "contentState": { "const": "no-items-defined" },
+    "runtimeReady": { "const": false },
+    "archetypes": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "prefixItems": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "archetypeId",
+            "allowedInputCategories",
+            "allowedPromptActs",
+            "forbiddenInferenceKinds"
+          ],
+          "properties": {
+            "archetypeId": { "const": "reality-inventory" },
+            "allowedInputCategories": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 6,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "current-role",
+                  "skills",
+                  "goals",
+                  "constraints",
+                  "preferences",
+                  "opportunities"
+                ]
+              }
+            },
+            "allowedPromptActs": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true,
+              "items": { "enum": ["request-clarification", "request-confirmation"] }
+            },
+            "forbiddenInferenceKinds": {
+              "$ref": "#/$defs/forbiddenInferenceKinds"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "archetypeId",
+            "allowedInputCategories",
+            "allowedPromptActs",
+            "forbiddenInferenceKinds"
+          ],
+          "properties": {
+            "archetypeId": { "const": "decision-criteria" },
+            "allowedInputCategories": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": { "enum": ["goals", "constraints", "preferences"] }
+            },
+            "allowedPromptActs": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true,
+              "items": { "enum": ["request-listing", "request-prioritization"] }
+            },
+            "forbiddenInferenceKinds": {
+              "$ref": "#/$defs/forbiddenInferenceKinds"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "archetypeId",
+            "allowedInputCategories",
+            "allowedPromptActs",
+            "forbiddenInferenceKinds"
+          ],
+          "properties": {
+            "archetypeId": { "const": "tradeoff-review" },
+            "allowedInputCategories": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 4,
+              "uniqueItems": true,
+              "items": { "enum": ["goals", "constraints", "preferences", "opportunities"] }
+            },
+            "allowedPromptActs": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true,
+              "items": { "enum": ["request-comparison", "request-reflection"] }
+            },
+            "forbiddenInferenceKinds": {
+              "$ref": "#/$defs/forbiddenInferenceKinds"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "archetypeId",
+            "allowedInputCategories",
+            "allowedPromptActs",
+            "forbiddenInferenceKinds"
+          ],
+          "properties": {
+            "archetypeId": { "const": "evidence-check" },
+            "allowedInputCategories": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": { "enum": ["current-role", "skills", "opportunities"] }
+            },
+            "allowedPromptActs": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": ["request-known-facts", "request-unknowns", "request-verification-plan"]
+              }
+            },
+            "forbiddenInferenceKinds": {
+              "$ref": "#/$defs/forbiddenInferenceKinds"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "archetypeId",
+            "allowedInputCategories",
+            "allowedPromptActs",
+            "forbiddenInferenceKinds"
+          ],
+          "properties": {
+            "archetypeId": { "const": "reversible-action-plan" },
+            "allowedInputCategories": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": { "enum": ["goals", "constraints", "skills"] }
+            },
+            "allowedPromptActs": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true,
+              "items": { "enum": ["request-user-proposed-action", "request-reversibility-check"] }
+            },
+            "forbiddenInferenceKinds": {
+              "$ref": "#/$defs/forbiddenInferenceKinds"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "archetypeId",
+            "allowedInputCategories",
+            "allowedPromptActs",
+            "forbiddenInferenceKinds"
+          ],
+          "properties": {
+            "archetypeId": { "const": "review-checkpoint" },
+            "allowedInputCategories": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true,
+              "items": { "enum": ["goals", "constraints"] }
+            },
+            "allowedPromptActs": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true,
+              "items": { "enum": ["request-review-criteria", "request-review-timing"] }
+            },
+            "forbiddenInferenceKinds": {
+              "$ref": "#/$defs/forbiddenInferenceKinds"
+            }
+          }
+        }
+      ],
+      "items": false
+    },
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["governedBy", "scope", "implemented"],
+      "properties": {
+        "governedBy": { "const": "career-reflection-consent-lifecycle/v1" },
+        "scope": { "const": "career-reflection" },
+        "implemented": { "const": false }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consumesC1Plans", "integratedWithC2"],
+      "properties": {
+        "consumesC1Plans": { "const": false },
+        "integratedWithC2": { "const": false }
+      }
+    }
+  },
+  "$defs": {
+    "forbiddenInferenceKinds": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "trait-inference",
+          "career-fit-judgment",
+          "occupation-recommendation",
+          "industry-recommendation",
+          "success-probability",
+          "personality-assessment",
+          "score-derivation",
+          "match-percentage"
+        ]
+      }
+    }
+  }
+}

@@ -57,3 +57,19 @@ source, an input, an export, or a composition source.
   standardized instruments were evaluated and not adopted, not copied, and not introduced).
 - Career advice, once the R layer exists, originates only from user-stated reality facts
   (C-1/C-2 chain); the F layer produces reflection framing only.
+
+## Card content governance (C-4C — frozen spec, no content defined)
+
+The governance record `career-reflection-card-governance/v1`
+([schema](contracts/career-reflection-card-governance.schema.json),
+[fixture](fixtures/synthetic/career-reflection-card-governance.json)) freezes the six allowed
+card archetypes as intent-level structures only: `reality-inventory`, `decision-criteria`,
+`tradeoff-review`, `evidence-check`, `reversible-action-plan`, `review-checkpoint`. Each
+archetype declares its admissible input categories, allowed prompt acts, and the forbidden
+inference kinds (trait inference, career-fit judgment, occupation/industry recommendations,
+success probability, personality assessment, score derivation, match percentage). No question
+text, card wording, items, or user flows are defined, and `contentState` remains
+`no-items-defined`. Consent stays governed by `career-reflection-consent-lifecycle/v1`
+(C-4B); card governance is not integrated with C-1 plans or the C-2 composition. The C-4A
+external candidates remain unadopted. C-4D (local lifecycle implementation) requires separate
+owner authorization.

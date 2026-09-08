@@ -323,8 +323,9 @@ admitted visible traditional text claims exist. For the future F layer, the owne
 category "owner-authored, non-psychometric, scoreless career reflection / decision cards"
 (C-4A research; no external instrument adopted) and C-4B froze its admission record and
 consent-lifecycle rules (`docs/CAREER_REFLECTION_ADMISSION.md`, content state
-`no-items-defined`); C-4C (card content governance) and C-4D (local lifecycle
-implementation) need separate owner authorization. C-5 needs separate owner
+`no-items-defined`); C-4C froze the card content governance record
+(`career-reflection-card-governance/v1` — six intent-level archetypes, no card content)
+with C-4D (local lifecycle implementation) needing separate owner authorization. C-5 needs separate owner
 authorization. This track does not alter the phase order, does not change the IQ-4 exit, and
 does not lift IQ-4's `BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples. Promotion to a
 user-facing capability requires a future roadmap version change under §8.
