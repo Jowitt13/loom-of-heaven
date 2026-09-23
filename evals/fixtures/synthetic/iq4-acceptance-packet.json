@@ -32,7 +32,7 @@
     }
   },
   "fixedNow": 1767225600000,
-  "expectedViewClaimIds": ["approved-claim:fact-7", "approved-claim:fact-96"],
+  "expectedViewClaimIds": ["approved-claim:fact-8"],
   "runtimeEntry": {
     "sourceCommit": "84f51027826ba138dcf219136a606653aa02d15e",
     "command": "node scripts/loom-chart.mjs bazi-career --input-file bazi-career-input.json --system bazi --depth standard --now 2026-01-01T00:00:00Z",

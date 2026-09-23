@@ -4,6 +4,7 @@ import {
   industryFinding,
   marriageTimingFinding,
   elementsByRelation,
+  TEN_GOD_MEANINGS,
   type Element,
 } from '@loom/bazi-rules';
 import { interpretWestern } from '@loom/western-rules';
@@ -174,25 +175,27 @@ function characterFacts(
   return out;
 }
 
-function careerFacts(bundle: ChartBundle, rules: BaziInterpretation | null): InterpretationFact[] {
+function careerFacts(bundle: ChartBundle): InterpretationFact[] {
   const out: InterpretationFact[] = [];
   const b = bundle.bazi;
   if (b) {
+    // ADR 0021: career body gets the ten-god display only. Pattern text must
+    // never ride along in this claim (IQ-4H source gate).
     const officers = [b.pillars.year, b.pillars.month, b.pillars.day, b.pillars.hour]
       .filter((p): p is NonNullable<typeof p> => p !== null)
       .map((p) => p.tenGod)
       .filter((g): g is string => g === '正官' || g === '七杀');
-    const pattern = baziRuleClaim(rules, 'pattern');
-    if (officers.length > 0 || pattern) {
+    if (officers.length > 0) {
+      const names = [...new Set(officers)];
       out.push(
         fact(
           'career',
-          `事业相关十神（官杀）：${officers.length > 0 ? [...new Set(officers)].join('、') : '未透干'}${pattern ? `；${pattern}` : ''}`,
-          [
-            ev('bazi', 'bazi.pillars.*.tenGod', [...new Set(officers)].join('、') || '无'),
-            ...(rules ? [ev('bazi-rule', 'bazi-rule/pattern', pattern ?? '')] : []),
-          ],
-          { caveat: '官杀仅示事业/责任倾向的结构，非职业预言。' },
+          `事业相关十神（官杀）：${names.join('、')}`,
+          [ev('bazi', 'bazi.pillars.*.tenGod', names.join('、'))],
+          {
+            reason: names.map((g) => TEN_GOD_MEANINGS[g] ?? g).join(' '),
+            caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+          },
         ),
       );
     }
@@ -510,6 +513,20 @@ function usefulGodFacts(rules: BaziInterpretation | null): InterpretationFact[] 
   ];
 }
 
+/**
+ * Pattern (格局) is Channel-A technical only. ADR 0021 / IQ-4H: never a default
+ * career-body claim and never mixed into the ten-god career fact.
+ */
+function patternTechnicalFacts(rules: BaziInterpretation | null): InterpretationFact[] {
+  const pattern = baziRuleClaim(rules, 'pattern');
+  if (!pattern) return [];
+  return [
+    fact('general', pattern, [ev('bazi-rule', 'bazi-rule/pattern', pattern)], {
+      caveat: '格局名称是结构分类，不表示成格，也不构成职业判断。',
+    }),
+  ];
+}
+
 /** Fortune (吉凶) facts: 刑冲合害 / 神煞 / 大运吉凶, each carrying polarity + reason. */
 function fortuneFacts(rules: BaziInterpretation | null): InterpretationFact[] {
   const out: InterpretationFact[] = [];
@@ -545,10 +562,11 @@ function followupFacts(bundle: ChartBundle, focusYear: number): InterpretationFa
   if (!b) return out;
   const gender = bundle.originalInput.ruleGender;
 
-  // 适合行业 (喜用五行→行业大类).
+  // 适合行业 (喜用五行→行业大类). ADR 0021: technical follow-up only — never
+  // a default career-body claim (IQ-4H source gate).
   const ind = industryFinding(b);
   out.push(
-    fact('career', ind.claim, [ev('bazi-rule', `bazi-rule/${ind.ruleId}`, ind.claim)], {
+    fact('general', ind.claim, [ev('bazi-rule', `bazi-rule/${ind.ruleId}`, ind.claim)], {
       reason: ind.reason,
       caveat: '行业为参考方向，非唯一；需结合兴趣与现实。',
     }),
@@ -718,7 +736,8 @@ export function buildInterpretationFacts(
   const facts: InterpretationFact[] = [
     ...characterFacts(bundle, baziRules),
     ...usefulGodFacts(baziRules),
-    ...careerFacts(bundle, baziRules),
+    ...patternTechnicalFacts(baziRules),
+    ...careerFacts(bundle),
     ...wealthFacts(bundle),
     ...marriageFacts(bundle),
     ...studiesFacts(bundle),

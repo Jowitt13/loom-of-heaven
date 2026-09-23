@@ -56657,22 +56657,22 @@ function characterFacts(bundle, rules) {
   }
   return out;
 }
-function careerFacts(bundle, rules) {
+function careerFacts(bundle) {
   const out = [];
   const b = bundle.bazi;
   if (b) {
     const officers = [b.pillars.year, b.pillars.month, b.pillars.day, b.pillars.hour].filter((p) => p !== null).map((p) => p.tenGod).filter((g) => g === "\u6B63\u5B98" || g === "\u4E03\u6740");
-    const pattern = baziRuleClaim(rules, "pattern");
-    if (officers.length > 0 || pattern) {
+    if (officers.length > 0) {
+      const names = [...new Set(officers)];
       out.push(
         fact(
           "career",
-          `\u4E8B\u4E1A\u76F8\u5173\u5341\u795E\uFF08\u5B98\u6740\uFF09\uFF1A${officers.length > 0 ? [...new Set(officers)].join("\u3001") : "\u672A\u900F\u5E72"}${pattern ? `\uFF1B${pattern}` : ""}`,
-          [
-            ev("bazi", "bazi.pillars.*.tenGod", [...new Set(officers)].join("\u3001") || "\u65E0"),
-            ...rules ? [ev("bazi-rule", "bazi-rule/pattern", pattern ?? "")] : []
-          ],
-          { caveat: "\u5B98\u6740\u4EC5\u793A\u4E8B\u4E1A/\u8D23\u4EFB\u503E\u5411\u7684\u7ED3\u6784\uFF0C\u975E\u804C\u4E1A\u9884\u8A00\u3002" }
+          `\u4E8B\u4E1A\u76F8\u5173\u5341\u795E\uFF08\u5B98\u6740\uFF09\uFF1A${names.join("\u3001")}`,
+          [ev("bazi", "bazi.pillars.*.tenGod", names.join("\u3001"))],
+          {
+            reason: names.map((g) => TEN_GOD_MEANINGS[g] ?? g).join(" "),
+            caveat: "\u5B98\u6740\u4EC5\u793A\u4E8B\u4E1A/\u8D23\u4EFB\u503E\u5411\u7684\u7ED3\u6784\uFF0C\u975E\u804C\u4E1A\u9884\u8A00\u3002"
+          }
         )
       );
     }
@@ -56960,6 +56960,15 @@ function usefulGodFacts(rules) {
     })
   ];
 }
+function patternTechnicalFacts(rules) {
+  const pattern = baziRuleClaim(rules, "pattern");
+  if (!pattern) return [];
+  return [
+    fact("general", pattern, [ev("bazi-rule", "bazi-rule/pattern", pattern)], {
+      caveat: "\u683C\u5C40\u540D\u79F0\u662F\u7ED3\u6784\u5206\u7C7B\uFF0C\u4E0D\u8868\u793A\u6210\u683C\uFF0C\u4E5F\u4E0D\u6784\u6210\u804C\u4E1A\u5224\u65AD\u3002"
+    })
+  ];
+}
 function fortuneFacts(rules) {
   const out = [];
   for (const topic of ["relations", "shensha", "fortune"]) {
@@ -56988,7 +56997,7 @@ function followupFacts(bundle, focusYear) {
   const gender = bundle.originalInput.ruleGender;
   const ind = industryFinding(b);
   out.push(
-    fact("career", ind.claim, [ev("bazi-rule", `bazi-rule/${ind.ruleId}`, ind.claim)], {
+    fact("general", ind.claim, [ev("bazi-rule", `bazi-rule/${ind.ruleId}`, ind.claim)], {
       reason: ind.reason,
       caveat: "\u884C\u4E1A\u4E3A\u53C2\u8003\u65B9\u5411\uFF0C\u975E\u552F\u4E00\uFF1B\u9700\u7ED3\u5408\u5174\u8DA3\u4E0E\u73B0\u5B9E\u3002"
     })
@@ -57107,7 +57116,8 @@ function buildInterpretationFacts(bundle, options = {}) {
   const facts = [
     ...characterFacts(bundle, baziRules),
     ...usefulGodFacts(baziRules),
-    ...careerFacts(bundle, baziRules),
+    ...patternTechnicalFacts(baziRules),
+    ...careerFacts(bundle),
     ...wealthFacts(bundle),
     ...marriageFacts(bundle),
     ...studiesFacts(bundle),

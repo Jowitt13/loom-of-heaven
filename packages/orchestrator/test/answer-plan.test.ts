@@ -210,4 +210,49 @@ describe('public result and answer plan', () => {
     ).toBe(false);
     expect(() => runAnswerPlan(syntheticInput, {} as never)).toThrow();
   });
+
+  it('keeps pattern and industry out of the default career claim set (ADR 0021)', () => {
+    const { answerPlan, publicResult } = runAnswerPlan(syntheticInput, {
+      now: FIXED,
+      topic: 'career',
+    });
+    const claims = answerPlan.selectedFacts.map((fact) => fact.claim).join('\n');
+    for (const blocked of ['格局', '阳刃', '建禄', '喜用', '适合行业', '行业方向']) {
+      expect(claims, blocked).not.toContain(blocked);
+    }
+    for (const fact of answerPlan.selectedFacts) {
+      for (const evidence of fact.evidence) {
+        expect(evidence.ref).not.toContain('bazi-rule/pattern');
+        expect(evidence.ref).not.toContain('bazi-rule/industry');
+        expect(evidence.ref).not.toContain('bazi-rule/useful-god');
+      }
+    }
+    // The mixed claim is split: pattern may exist as a technical fact only.
+    const patternFacts = publicResult.facts.filter((fact) =>
+      fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/pattern'),
+    );
+    for (const fact of patternFacts) {
+      expect(fact.topic).not.toBe('career');
+    }
+    const industryFacts = publicResult.facts.filter((fact) =>
+      fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/industry/wu-xing'),
+    );
+    for (const fact of industryFacts) {
+      expect(fact.topic).not.toBe('career');
+    }
+  });
+
+  it('offers at most one ten-god cultural reference with its non-prophecy caveat', () => {
+    const { answerPlan } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
+    const tenGodFacts = answerPlan.selectedFacts.filter((fact) =>
+      fact.evidence.some((evidence) => evidence.ref === 'bazi.pillars.*.tenGod'),
+    );
+    expect(tenGodFacts.length).toBeLessThanOrEqual(1);
+    for (const fact of tenGodFacts) {
+      expect(fact.claim).toMatch(/事业相关十神（官杀）：/);
+      expect(fact.claim).not.toMatch(/格/);
+      expect(fact.caveat).toContain('非职业预言');
+      expect(fact.reason ?? '').toContain('七杀');
+    }
+  });
 });

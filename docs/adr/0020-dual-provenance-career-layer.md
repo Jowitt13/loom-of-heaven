@@ -92,7 +92,8 @@ provenance.
 - No fixed "讲人话"-style templates: composition ordering stays flexible while every unit
   keeps its provenance; where a traditional term appears, its conditional meaning must be
   adjacent — but this ADR grants **no new traditional-term visibility** (that remains governed
-  by source admission).
+  by source admission). The only later exception is the narrow frozen ten-god cultural reference
+  in [ADR 0021](0021-ten-god-cultural-reference.md); pattern, useful-god, and industry stay out.
 - Career action recommendations must never carry BaZi provenance.
 
 ### 5. Current state and staged plan

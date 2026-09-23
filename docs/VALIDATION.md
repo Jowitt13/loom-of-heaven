@@ -1,7 +1,7 @@
-# Validation strategy
+﻿# Validation strategy
 
 Goal: prove that for a given input and ruleset, results are stable, match the ruleset, and are
-source-traceable �?not that divination predicts anything (handoff §9).
+source-traceable 锟?not that divination predicts anything (handoff 搂9).
 
 ## Gate (enforced now)
 
@@ -43,48 +43,48 @@ file; run `pnpm run format` to auto-fix before pushing.
 
 ## Deferred to Phase 6 (declared, not yet enforced)
 
-These items appear in the QODER_HANDOFF §9.1 long-term minimum bar but have no runnable
+These items appear in the QODER_HANDOFF 搂9.1 long-term minimum bar but have no runnable
 enforcement yet; they are intentionally excluded from `verify:cloud` and CI until implemented
 (also tracked in STATUS). No not-yet-ready scanner is wired into the gate.
 
-- Broader ESLint ruleset (style / type-aware rules) �?only the import-boundary gate
+- Broader ESLint ruleset (style / type-aware rules) 锟?only the import-boundary gate
   (`eslint.config.js`, in `verify:cloud`) is enforced today; `typecheck` remains the other static gate.
 - Dedicated / expanded HTML-injection suite beyond the template CSP, no-`<script>`, and
   no-network checks already run by `validate:skill`.
 
 ## Current results (2026-07-26)
 
-The test count below comes from one real `pnpm run test` run �?the single source of truth shared with
+The test count below comes from one real `pnpm run test` run 锟?the single source of truth shared with
 the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not hand-edit it to
 resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
 re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
 
-- Typecheck: clean. Tests: **1215 tests / 89 files �?all passing**. The Western provider
-  (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 �?�?gate two ways: wrapper-consistency
-  (vs astronomy-engine's own output) plus an **independent JPL Horizons golden** (10 bodies × 3
+- Typecheck: clean. Tests: **1217 tests / 89 files 锟?all passing**. The Western provider
+  (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 锟?锟?gate two ways: wrapper-consistency
+  (vs astronomy-engine's own output) plus an **independent JPL Horizons golden** (10 bodies 脳 3
   technical epochs fetched from the NASA/JPL Horizons service, query recorded in
-  `packages/western/goldens/jpl-horizons.json`; worst deviation 0.20�?; the sidereal zodiac (Lahiri), true node
+  `packages/western/goldens/jpl-horizons.json`; worst deviation 0.20锟?; the sidereal zodiac (Lahiri), true node
   and asteroids have a dedicated **approximate** regression (continuity / sign-plausibility, not the
-  �?�?gate); angles/houses are validated against the MC=RAMC and eastern-horizon oracles, the Zi Wei
-  dynamic chart (运限�? is regression-anchored, the sourced BaZi interpretation rules (incl.
-  刑冲合害/神煞/大运吉凶 `polarity`) are covered, and the cross-system interpretation-facts layer is
+  锟?锟?gate); angles/houses are validated against the MC=RAMC and eastern-horizon oracles, the Zi Wei
+  dynamic chart (杩愰檺锟? is regression-anchored, the sourced BaZi interpretation rules (incl.
+  鍒戝啿鍚堝/绁炵厼/澶ц繍鍚夊嚩 `polarity`) are covered, and the cross-system interpretation-facts layer is
   checked for topic coverage, grounded evidence, `followupOffers`, de-identification and honest
   caveats. Skill validate: **40/40** (incl. the scripts/ no-stray-files guard, both SBOM checks and the validate-answer/lint-reading gate-workflow doc checks). Reading-example
   static validate: **36/36** (topic example libraries + output-spec structure + the Channel B
-  V1 natural-delivery boundary + source trace; offline, no LLM �?it proves the spec/sample structure, **not** that a host
+  V1 natural-delivery boundary + source trace; offline, no LLM 锟?it proves the spec/sample structure, **not** that a host
   model follows the style 100% of the time). Docs-consistency `validate:docs` passes (four full hosts /
-  render disabled / no wrong-ephemeris attribution / dev Node �?24 vs run Node �?22, with positive+negative
+  render disabled / no wrong-ephemeris attribution / dev Node 锟?24 vs run Node 锟?22, with positive+negative
   self-tests). Host packages are verified by extracting the REAL candidate zips (single top-level dir, no
   double-nesting, doctor/verify/calculate byte-identical to canonical). The same V1 delivery gate ships as `loom-chart.mjs lint-reading`
   (ADR 0011), which can lint a REAL produced report (`--channel topic [--simple]`) and exit non-zero on
-  leaked delivery artifacts, generic consultant jargon, empty talk, repetition or unsupported claims �?still a static text gate, not a guarantee of host-model wording. Round 9 (ADR 0012) added an 空话 (vagueness) check: abstract judgements in default delivery must carry a concrete
-  action/scene/observable/result nearby, and three REAL reports (male, 1990-06-15 14:20, 示例城市; 事业/感情/
-  财运, saved unpolished to `docs/round9-acceptance/`) lint to 0 error (test #8 reads them). The detector is a
+  leaked delivery artifacts, generic consultant jargon, empty talk, repetition or unsupported claims 锟?still a static text gate, not a guarantee of host-model wording. Round 9 (ADR 0012) added an 绌鸿瘽 (vagueness) check: abstract judgements in default delivery must carry a concrete
+  action/scene/observable/result nearby, and three REAL reports (male, 1990-06-15 14:20, 绀轰緥鍩庡競; 浜嬩笟/鎰熸儏/
+  璐㈣繍, saved unpolished to `docs/round9-acceptance/`) lint to 0 error (test #8 reads them). The detector is a
   nearby-concreteness heuristic, not a meaning judge. The `validate-answer` gate is a **deterministic
   structure-and-wording gate** over a host's ReadingDraft. Its ONLY public entry accepts UNKNOWN raw
   input: every call runs a bounded preflight (object-key counts/lengths, all array/text caps and
   whole-draft budgets, with static no-echo diagnostics) plus the full runtime schema before any
-  content check �?malformed, over-limit or wrong-version input yields a stable not-ok result, never a
+  content check 锟?malformed, over-limit or wrong-version input yields a stable not-ok result, never a
   crash. Legacy `reading-draft/v1` is REJECTED at runtime (a v0.2.0 breaking change; migration is a
   documented path, since accepting caller-selected v1 would re-enable the removed section-id fact
   exemption); results are emitted as `validation-result/v2` (breaking vs v1). Checks: fact-citation
@@ -92,10 +92,10 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   while every provided sourceFactId is unconditionally checked against `allowedFactIds`; a
   clause-anchored canonical safety-disclaimer mask (no free spans; double-negation prefixes,
   adversatives and line breaks never enter a mask); a normalized high-risk scan over **every heading
-  and paragraph** in one shared pipeline (heading/text fields are plain text — HTML/entity/Markdown
+  and paragraph** in one shared pipeline (heading/text fields are plain text 鈥?HTML/entity/Markdown
   structural characters are rejected by `CONTAINS_MARKUP` before the scan; the scan strips Unicode
   `\p{Default_Ignorable_Code_Point}` and case-folds); caveat/warning consistency between `constraintRefs` and the attestation arrays; and
-  per-item disclaimer coverage �?EVERY plan disclaimer must be referenced (error severity, explicit
+  per-item disclaimer coverage 锟?EVERY plan disclaimer must be referenced (error severity, explicit
   contract, no implicit ok). Violations carry only closed-set locators (sectionIndex / field /
   paragraphIndex / fixed patternKey values / itemIndex), never caller text, and are capped at
   `MAX_VIOLATIONS`. It **cannot** prove that a paragraph's meaning actually follows from its cited
@@ -103,45 +103,45 @@ re-runs the suite and fails if either doc's `N tests / M files` count drifts fro
   not-supported budget only verifies "short and fact-free" across headings+paragraphs), and its
   regex scan and canonical mask are bounded heuristics that cannot
   recognize every semantic paraphrase or deeper encoding; the resource limits bound the
-  parse+validation stages only �?the CLI additionally caps the input file size before reading. It is
+  parse+validation stages only 锟?the CLI additionally caps the input file size before reading. It is
   a necessary wording gate, not a semantic-correctness proof. The dependency **license** gate (`scan:licenses`) enforces the
   LICENSE_AUDIT allowlist offline and cross-checks the committed SBOM license claims; `build` emits both a CycloneDX
   and an SPDX 2.3 SBOM (byte-stable, committed). Clean-dir offline
-  smoke: **10/10**. Clean-dir forward test: **41/41** �?8 realistic requests (incl. a horoscope, an
-  interpret and a multi-person 合婚 synastry) across the CLI, and that `render` is disabled (exit 3,
+  smoke: **10/10**. Clean-dir forward test: **41/41** 锟?8 realistic requests (incl. a horoscope, an
+  interpret and a multi-person 鍚堝 synastry) across the CLI, and that `render` is disabled (exit 3,
   no report file). Format:
   clean. `pnpm run verify:cloud` is the CI gate. `pnpm run verify:all` is only green in a controlled
   environment with the private incident-token file; without it, the expected result is fail-closed.
 
-## Boundary fixtures (36; �?0 required for Phase 1)
+## Boundary fixtures (36; 锟?0 required for Phase 1)
 
-`packages/test-fixtures` �?each fixture records why its expectation is trustworthy (documented
-IANA transition dates, standard offsets, or plain wall↔UTC arithmetic), never an engine snapshot.
+`packages/test-fixtures` 锟?each fixture records why its expectation is trustworthy (documented
+IANA transition dates, standard offsets, or plain wall鈫擴TC arithmetic), never an engine snapshot.
 
 Covered: standard offsets incl. 30/45-min zones (Kolkata, Kathmandu, Eucla, Yangon); date line
 (Kiritimati +14, Samoa 2011-12-30 skip); DST fall-back ambiguity + earlier/later resolution
 (NY, London, Berlin, Sydney); spring-forward gaps; China historical DST (1988 summer UTC+9 vs
-winter UTC+8); different longitudes �?different mean solar time; near day/zi-hour boundaries;
+winter UTC+8); different longitudes 锟?different mean solar time; near day/zi-hour boundaries;
 unknown & approximate time; out-of-range years; unknown timezone; lunar-not-yet.
 
-Property tests: wall↔UTC round-trip invariant; equation-of-time bounds; apparent = mean + EoT;
+Property tests: wall鈫擴TC round-trip invariant; equation-of-time bounds; apparent = mean + EoT;
 canonical-JSON order independence; deterministic hashing; calculate determinism.
 
 ## Golden-sample requirements (Phase 2+)
 
 - Each fixture: source URL/citation, collection date, ruleset, expected result, tolerance, and
   why it is trustworthy.
-- Western: at least one set cross-checked against JPL/Swiss; main-body positions within �?
+- Western: at least one set cross-checked against JPL/Swiss; main-body positions within 锟?
   arc-minute; discrete classifications (sign/house changes) must match exactly. (Planetary
   longitudes: met via the JPL Horizons golden; house cusps: met via the Swiss Ephemeris house golden.)
 - BaZi/Zi Wei: sourced references, NOT another wrapper of the same core library.
 - Snapshots guard against regressions only; they never become ground truth.
-- Minimum targets: time/location 30 (met: 36), Western 20 (met: 55 �?JPL Horizons golden
+- Minimum targets: time/location 30 (met: 36), Western 20 (met: 55 锟?JPL Horizons golden
   longitudes + 25 Swiss Ephemeris house-cusp sets), BaZi 40, Zi Wei 20.
 
 ## Must-test boundaries (tracked to Phase 2)
 
-Solar-term crossings ±120 s; 23:00/00:00 and zi-hour day-change rules; leap month & lunar
+Solar-term crossings 卤120 s; 23:00/00:00 and zi-hour day-change rules; leap month & lunar
 conversion; multiple luck-cycle-start algorithms; high-latitude house-system failure; planet
 sign/house/aspect/retrograde-station edges; Chinese-vs-English triggers and non-chart "star
 chart" negative triggers; HTML injection/CSP; offline run; no-source-workspace install.

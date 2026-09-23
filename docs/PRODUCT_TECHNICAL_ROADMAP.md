@@ -382,6 +382,14 @@ next unblocked slice in this roadmap and prove its admission conditions.
 
 ## 9. Roadmap changelog
 
+- `loom-product-roadmap/v3` — 2026-09-08 amendment: admits a **narrow ten-god cultural reference**
+  for the default career body ([ADR 0021](adr/0021-ten-god-cultural-reference.md)). Frozen ten-god
+  display may appear once with a brief 《渊海子平》 symbolism gloss as traditional-culture background;
+  pattern naming, useful-god, five-element industry matching, and chart-derived career advice remain
+  excluded. Mixed ten-god+pattern claims must be split before any visibility. IQ-4's
+  `BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples is unchanged. Default career delivery is
+  reality-first when the user states work facts; birth-only answers ask one key question and invent
+  no career direction.
 - `loom-product-roadmap/v3` — 2026-09-07 amendment: adds the dual-source career layer C-track
   ([ADR 0020](adr/0020-dual-provenance-career-layer.md)) as a parallel bounded track. The phase
   order, product destination, and IQ-4's `BLOCKED_SOURCE_ADMISSION` for
