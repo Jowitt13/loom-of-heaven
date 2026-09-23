@@ -176,11 +176,11 @@ function characterFacts(
 
 /**
  * ADR 0021 career-only short glosses. Deliberately NOT the full
- * `TEN_GOD_MEANINGS` strings (no 需制化为权, no 女命之夫星, no spouse/wealth
- * themes). Each gloss is traditional-culture background only.
+ * `TEN_GOD_MEANINGS` strings (no 需制化为权, no 女命之夫星). Words are subsets of
+ * the frozen 《渊海子平》 lines in `ten-gods.ts`.
  */
 const CAREER_TEN_GOD_GLOSS: Record<string, string> = {
-  正官: '责任、规范、地位',
+  正官: '责任、自律、地位',
   七杀: '权威、压力、竞争',
 };
 

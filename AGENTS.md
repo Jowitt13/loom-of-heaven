@@ -16,7 +16,7 @@ The roadmap governs product direction and technical sequence; domain ADRs and so
 govern their narrower subjects. A lower-level prompt may narrow these rules but cannot override
 them. “Continue” means the next unblocked roadmap slice—not whichever feature is easiest to add.
 Changing the route requires the owner decision, ADR, roadmap-version, protocol, and static-gate
-process recorded in the roadmap. The current authorities are `loom-product-roadmap/v3` and
+process recorded in the roadmap. The current authorities are `loom-product-roadmap/v3.1` and
 `loom-commander-protocol/v3`.
 
 ## What this project is

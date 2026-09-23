@@ -9,6 +9,7 @@ import {
   type AnswerViolation,
 } from '../../contracts/src/validate-answer.ts';
 import { validateAnswer } from '../../interpret/src/validate-answer.ts';
+import { isTimeSensitiveFact } from '../../interpret/src/answer-plan.ts';
 import { runBaziCareerJourney } from './bazi-career-journey.ts';
 import { verifyBaziCareerNarrative } from './bazi-career-narrative.ts';
 
@@ -70,8 +71,10 @@ export function verifyBaziCareerAnswer(
 
   // Scoped validation context, derived from the journey itself: only the
   // facts behind the delivered view claims may ground the answer, with the
-  // matching caveats; time-profile warnings qualify every chart-derived
-  // claim and stay required.
+  // matching caveats. Warning materiality follows the same “does it affect
+  // this answer?” rule (ADR 0021 / v3.1): TIME_UNKNOWN and NEAR_BOUNDARY stay
+  // required, but an unrelated SOLAR_TIME_APPROXIMATE does not force a tip on
+  // a body that only uses a non-time-sensitive ten-god reference.
   const scopedClaimIds = new Set(journey.responseView.approvedClaimIds);
   const scopedFacts = journey.answerPlan.selectedFacts.filter((fact) =>
     scopedClaimIds.has(`approved-claim:${fact.id}`),
@@ -83,11 +86,23 @@ export function verifyBaziCareerAnswer(
         .filter((caveat): caveat is string => caveat !== undefined),
     ),
   ];
+  const hasTimeSensitiveFact = scopedFacts.some(isTimeSensitiveFact);
+  const requiredWarningCodes = journey.answerPlan.requiredWarningCodes.filter((code) => {
+    if (code === 'TIME_UNKNOWN' || code === 'NEAR_BOUNDARY') return true;
+    if (
+      code === 'SOLAR_TIME_APPROXIMATE' ||
+      code === 'TIME_ACCURACY_APPROXIMATE' ||
+      code === 'DST_AMBIGUOUS_RESOLVED'
+    ) {
+      return hasTimeSensitiveFact;
+    }
+    return true;
+  });
   const validation: AnswerValidationResult = validateAnswer({
     answerPlan: {
       allowedFactIds: scopedFacts.map((fact) => fact.id),
       requiredCaveats: scopedCaveats,
-      requiredWarningCodes: journey.answerPlan.requiredWarningCodes,
+      requiredWarningCodes,
       guardrails: journey.answerPlan.guardrails,
       answerability: journey.answerPlan.answerability,
       request: journey.answerPlan.request,

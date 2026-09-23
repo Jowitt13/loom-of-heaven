@@ -74,13 +74,10 @@ function journeyInput(birthInput: BirthInput, overrides: Parameters<typeof plann
 
 // Birth-only positive example: one cultural reference + non-prophecy caveat.
 // No action advice — practices require user-stated reality (ADR 0021).
+// No unrelated solar-time tip: the scoped ten-god claim is not time-sensitive.
 const OFFICER_PARAGRAPH =
   '命盘里有「七杀」这一传统十神，传统上常联到权威、压力、竞争一类主题，只作文化背景。' +
   '官杀说的是事业倾向的结构，不是职业预言。';
-
-const WARNING_PARAGRAPH =
-  '需要说明：当前时间按真太阳时近似处理，涉及时辰的结论可能有小幅变化；' +
-  '如能提供更精确的出生时间，时柱相关的部分可以重新计算后再看。';
 
 const CAVEAT_FACT_8 = '官杀仅示事业/责任倾向的结构，非职业预言。';
 
@@ -142,21 +139,11 @@ function answerDraft(): ReturnType<typeof ReadingDraft.parse> {
             sourceFactIds: ['fact-8'],
             constraintRefs: [{ kind: 'caveat', index: 0 }],
           },
-          {
-            text: WARNING_PARAGRAPH,
-            sourceFactIds: [],
-            // The plan records SOLAR_TIME_APPROXIMATE once per qualifying
-            // system, so the disclosure references every recorded entry.
-            constraintRefs: [
-              { kind: 'warning', index: 0 },
-              { kind: 'warning', index: 1 },
-            ],
-          },
         ],
       },
     ],
     caveatsExpressed: [CAVEAT_FACT_8],
-    warningsDisclosed: ['SOLAR_TIME_APPROXIMATE'],
+    warningsDisclosed: [],
   });
 }
 

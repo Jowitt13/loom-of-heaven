@@ -1,7 +1,7 @@
 // Synthetic fixture - fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
 import { AnswerRequest, canonicalJson, parseBirthInput } from '@loom/contracts';
-import { buildAnswerPlan } from '@loom/interpret';
+import { buildAnswerPlan, isTimeSensitiveFact } from '@loom/interpret';
 import { runAnswerPlan, runInterpret } from '@loom/orchestrator';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
@@ -173,6 +173,99 @@ describe('public result and answer plan', () => {
     expect(plan.responseRequirements.contentOrder).not.toContain('disclaimer');
   });
 
+  it('drops unrelated SOLAR_TIME_APPROXIMATE when selected facts are not time-sensitive', () => {
+    const { publicResult } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
+    const tenGodOnly = {
+      ...publicResult,
+      facts: publicResult.facts.filter((fact) =>
+        fact.evidence.some((evidence) => evidence.ref === 'bazi.pillars.*.tenGod'),
+      ),
+    };
+    expect(tenGodOnly.facts.length).toBeGreaterThan(0);
+    for (const fact of tenGodOnly.facts) {
+      expect(isTimeSensitiveFact(fact)).toBe(false);
+    }
+    const plan = buildAnswerPlan(tenGodOnly, { topic: 'career' });
+    expect(plan.requiredWarningCodes).not.toContain('SOLAR_TIME_APPROXIMATE');
+    expect(plan.requiredWarningCodes).not.toContain('TIME_ACCURACY_APPROXIMATE');
+  });
+
+  it('keeps TIME_UNKNOWN and NEAR_BOUNDARY always material, and time warnings when facts are time-sensitive', () => {
+    const timeFact = {
+      id: 'fact-1',
+      topic: 'career' as const,
+      claim: '西方中天（MC）位于Capricorn',
+      evidence: [{ kind: 'western' as const, ref: 'western.angles.mc.sign' }],
+      caveat: '需确切出生时间方有宫位。',
+    };
+    const plainFact = {
+      id: 'fact-2',
+      topic: 'career' as const,
+      claim: '命盘里有「七杀」这一传统十神',
+      evidence: [
+        { kind: 'bazi' as const, ref: 'bazi.pillars.*.tenGod' },
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+    };
+    const alwaysWarnings = [
+      {
+        code: 'TIME_UNKNOWN' as const,
+        severity: 'warning' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+      {
+        code: 'NEAR_BOUNDARY' as const,
+        severity: 'info' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+      {
+        code: 'SOLAR_TIME_APPROXIMATE' as const,
+        severity: 'info' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+    ];
+    const plainOnly = buildAnswerPlan(
+      {
+        contractVersion: 'public-result/v2',
+        engineVersion: '0.4.0',
+        sourceSchemaVersion: '0.1.0',
+        systems: [{ system: 'bazi', status: 'computed' }],
+        inputReliability: { timeAccuracy: 'exact', birthTimeKnown: true },
+        warnings: alwaysWarnings,
+        facts: [plainFact],
+        rulesets: [],
+        disclaimers: [],
+        followupOffers: [],
+      },
+      { topic: 'career' },
+    );
+    expect(plainOnly.requiredWarningCodes).toEqual(['TIME_UNKNOWN', 'NEAR_BOUNDARY']);
+    const timeScoped = buildAnswerPlan(
+      {
+        contractVersion: 'public-result/v2',
+        engineVersion: '0.4.0',
+        sourceSchemaVersion: '0.1.0',
+        systems: [{ system: 'western', status: 'computed' }],
+        inputReliability: { timeAccuracy: 'exact', birthTimeKnown: true },
+        warnings: alwaysWarnings,
+        facts: [timeFact],
+        rulesets: [],
+        disclaimers: [],
+        followupOffers: [],
+      },
+      { topic: 'career' },
+    );
+    expect(timeScoped.requiredWarningCodes).toContain('SOLAR_TIME_APPROXIMATE');
+    expect(timeScoped.requiredWarningCodes).toContain('TIME_UNKNOWN');
+  });
+
   it('uses fixed public warning copy and removes exact dynamic target dates', () => {
     const output = runAnswerPlan(syntheticInput, {
       now: FIXED,
@@ -257,6 +350,9 @@ describe('public result and answer plan', () => {
       expect(fact.reason ?? '').not.toContain('需制化为权');
       expect(fact.reason ?? '').not.toContain('女命之夫星');
       expect(fact.reason ?? '').not.toContain('妻星');
+      expect(fact.reason ?? '').not.toContain('规范');
+      // Gloss words stay inside the frozen TEN_GOD_MEANINGS vocabulary.
+      expect(fact.reason ?? '').toMatch(/权威|压力|竞争|责任|自律|地位/);
       // The gloss is rule-backed, not only a provider-fact reason.
       expect(fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/ten-gods/xiang-yi')).toBe(
         true,

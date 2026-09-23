@@ -56658,7 +56658,7 @@ function characterFacts(bundle, rules) {
   return out;
 }
 var CAREER_TEN_GOD_GLOSS = {
-  \u6B63\u5B98: "\u8D23\u4EFB\u3001\u89C4\u8303\u3001\u5730\u4F4D",
+  \u6B63\u5B98: "\u8D23\u4EFB\u3001\u81EA\u5F8B\u3001\u5730\u4F4D",
   \u4E03\u6740: "\u6743\u5A01\u3001\u538B\u529B\u3001\u7ADE\u4E89"
 };
 function selectCareerOfficerLabel(tenGods) {
@@ -57368,16 +57368,31 @@ function evidenceSystem(kind) {
       return "time";
   }
 }
+var ALWAYS_MATERIAL_WARNING_CODES = /* @__PURE__ */ new Set([
+  "TIME_UNKNOWN",
+  "NEAR_BOUNDARY"
+]);
+var TIME_SENSITIVE_CAVEAT_RE = /出生时间|时辰|宫位|时刻|真太阳时|时间误差|时间未知|需确切|time of day|birth time/i;
+var TIME_SENSITIVE_EVIDENCE_RE = /hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
+function isTimeSensitiveFact(fact2) {
+  if (fact2.caveat !== void 0 && TIME_SENSITIVE_CAVEAT_RE.test(fact2.caveat)) return true;
+  return fact2.evidence.some(
+    (evidence) => evidence.kind === "time" || TIME_SENSITIVE_EVIDENCE_RE.test(evidence.ref)
+  );
+}
 function materialWarningCodes(warnings, selectedFacts) {
   const factSystems = /* @__PURE__ */ new Set();
-  let hasTimeSensitiveCaveat = false;
+  const hasTimeSensitiveFact = selectedFacts.some(isTimeSensitiveFact);
   for (const fact2 of selectedFacts) {
-    if (fact2.caveat !== void 0) hasTimeSensitiveCaveat = true;
     for (const evidence of fact2.evidence) factSystems.add(evidenceSystem(evidence.kind));
   }
   return warnings.filter((warning) => {
+    if (ALWAYS_MATERIAL_WARNING_CODES.has(warning.code)) return true;
     if (warning.system === "time") {
-      return factSystems.has("time") || hasTimeSensitiveCaveat;
+      return factSystems.has("time") || hasTimeSensitiveFact;
+    }
+    if (warning.code === "SOLAR_TIME_APPROXIMATE" || warning.code === "TIME_ACCURACY_APPROXIMATE" || warning.code === "DST_AMBIGUOUS_RESOLVED") {
+      return factSystems.has(warning.system) && hasTimeSensitiveFact;
     }
     return factSystems.has(warning.system);
   }).map((warning) => warning.code);

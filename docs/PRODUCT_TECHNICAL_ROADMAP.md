@@ -1,9 +1,9 @@
 # Loom product technical roadmap
 
-- Roadmap id: `loom-product-roadmap/v3`
+- Roadmap id: `loom-product-roadmap/v3.1`
 - Status: **Accepted and owner-confirmed**
-- Confirmed: 2026-09-03
-- Supersedes: `loom-product-roadmap/v2`
+- Confirmed: 2026-09-09
+- Supersedes: `loom-product-roadmap/v3`
 - Authority: product direction, technical sequencing, and slice admission
 - Related: [ADR 0018](./adr/0018-structural-answer-quality-route.md),
   [ADR 0017](./adr/0017-product-technical-roadmap-and-execution-governance.md),
@@ -383,14 +383,14 @@ next unblocked slice in this roadmap and prove its admission conditions.
 
 ## 9. Roadmap changelog
 
-- `loom-product-roadmap/v3` — 2026-09-08 amendment: admits a **narrow ten-god cultural reference**
-  for the default career body ([ADR 0021](adr/0021-ten-god-cultural-reference.md)). Frozen ten-god
-  display may appear once with a brief 《渊海子平》 symbolism gloss as traditional-culture background;
-  pattern naming, useful-god, five-element industry matching, and chart-derived career advice remain
-  excluded. Mixed ten-god+pattern claims must be split before any visibility. IQ-4's
-  `BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples is unchanged. Default career delivery is
-  reality-first when the user states work facts; birth-only answers ask one key question and invent
-  no career direction.
+- `loom-product-roadmap/v3.1` — 2026-09-09: **version change** (not a v3 amendment) for the
+  default career output surface ([ADR 0021](adr/0021-ten-god-cultural-reference.md)). One frozen
+  ten-god cultural reference with a short gloss is admitted; pattern/useful-god/industry and
+  chart-derived career advice stay excluded. Warning materiality is per selected fact: unrelated
+  SOLAR_TIME_APPROXIMATE tips leave the default body; TIME_UNKNOWN and NEAR_BOUNDARY stay always
+  material. Career practices cite only user-stated reality; birth-only answers invent no work
+  history and carry no action advice. IQ-4 `BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples
+  is unchanged. Commander protocol and static gates updated in the same change.
 - `loom-product-roadmap/v3` — 2026-09-07 amendment: adds the dual-source career layer C-track
   ([ADR 0020](adr/0020-dual-provenance-career-layer.md)) as a parallel bounded track. The phase
   order, product destination, and IQ-4's `BLOCKED_SOURCE_ADMISSION` for

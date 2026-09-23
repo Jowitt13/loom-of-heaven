@@ -57,7 +57,7 @@ not an acceptable scope.
 你是 Loom 当前切片的执行者。先只读核验，条件全部成立后才能写入。
 
 路线锚点
-- roadmap: loom-product-roadmap/v3
+- roadmap: loom-product-roadmap/v3.1
 - phase: <G0|IQ-0|IQ-1|IQ-2|IQ-3|IQ-4|IQ-5|IQ-6|PLAT-1|DATA-1|EXP-1>
 - exit criterion: <本切片推进的唯一退出条件>
 

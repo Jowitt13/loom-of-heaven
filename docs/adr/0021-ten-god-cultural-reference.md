@@ -33,7 +33,7 @@ Nothing else in this ADR is admitted.**
 2. Immediately adjacent, a **brief** cultural gloss — only these frozen short themes, never the
    full `TEN_GOD_MEANINGS` strings:
    - `七杀` → 权威、压力、竞争 (exclude 需制化为权 and any fate/remedy clause)
-   - `正官` → 责任、规范、地位 (exclude 女命之夫星 and any spouse/wealth clause)
+   - `正官` → 责任、自律、地位 (subset of the frozen 贵气/地位/自律/责任 words; exclude 女命之夫星 and any spouse/wealth clause)
      Stated as traditional-culture background (《渊海子平》 ten-god symbolism, `FROZEN_LEGACY`),
      not as a job, industry, or outcome claim.
 3. The gloss must carry resolvable rule evidence (`bazi-rule/ten-gods/xiang-yi`) beside the
