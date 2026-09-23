@@ -56657,20 +56657,34 @@ function characterFacts(bundle, rules) {
   }
   return out;
 }
+var CAREER_TEN_GOD_GLOSS = {
+  \u6B63\u5B98: "\u8D23\u4EFB\u3001\u89C4\u8303\u3001\u5730\u4F4D",
+  \u4E03\u6740: "\u6743\u5A01\u3001\u538B\u529B\u3001\u7ADE\u4E89"
+};
+function selectCareerOfficerLabel(tenGods) {
+  const names = [...new Set(tenGods)].filter((g) => g === "\u6B63\u5B98" || g === "\u4E03\u6740");
+  return names.length === 1 ? names[0] : null;
+}
 function careerFacts(bundle) {
   const out = [];
   const b = bundle.bazi;
   if (b) {
     const officers = [b.pillars.year, b.pillars.month, b.pillars.day, b.pillars.hour].filter((p) => p !== null).map((p) => p.tenGod).filter((g) => g === "\u6B63\u5B98" || g === "\u4E03\u6740");
-    if (officers.length > 0) {
-      const names = [...new Set(officers)];
+    const label = selectCareerOfficerLabel(officers);
+    if (label !== null) {
+      const gloss = CAREER_TEN_GOD_GLOSS[label] ?? label;
       out.push(
         fact(
           "career",
-          `\u4E8B\u4E1A\u76F8\u5173\u5341\u795E\uFF08\u5B98\u6740\uFF09\uFF1A${names.join("\u3001")}`,
-          [ev("bazi", "bazi.pillars.*.tenGod", names.join("\u3001"))],
+          `\u547D\u76D8\u91CC\u6709\u300C${label}\u300D\u8FD9\u4E00\u4F20\u7EDF\u5341\u795E`,
+          [
+            ev("bazi", "bazi.pillars.*.tenGod", label),
+            // The short gloss is rule-backed (渊海子平 十神象义, FROZEN_LEGACY).
+            // Recording only the provider tenGod would hide that dependency.
+            ev("bazi-rule", "bazi-rule/ten-gods/xiang-yi", gloss)
+          ],
           {
-            reason: names.map((g) => TEN_GOD_MEANINGS[g] ?? g).join(" "),
+            reason: `\u4F20\u7EDF\u4E0A\u5E38\u8054\u5230${gloss}`,
             caveat: "\u5B98\u6740\u4EC5\u793A\u4E8B\u4E1A/\u8D23\u4EFB\u503E\u5411\u7684\u7ED3\u6784\uFF0C\u975E\u804C\u4E1A\u9884\u8A00\u3002"
           }
         )

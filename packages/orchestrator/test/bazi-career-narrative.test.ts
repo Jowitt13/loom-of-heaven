@@ -85,7 +85,7 @@ function journeyClaims(): ApprovedAnswerClaim[] {
 }
 
 const OFFICER_PARAGRAPH =
-  '这个盘的事业相关十神是七杀，传统上它常联到权威、压力、竞争一类主题，只作文化背景。' +
+  '命盘里有「七杀」这一传统十神，传统上常联到权威、压力、竞争一类主题，只作文化背景。' +
   '官杀说的是事业倾向的结构，不是职业预言。';
 
 const TRACE_INVALIDATION_CAUSES = [
@@ -204,19 +204,19 @@ describe('IQ-4C bazi career narrative trace linkage', () => {
   });
 
   it(
-    'keeps the chart-derived ten-god claim narratable under an unavailable rule profile',
+    'cannot narrate when the rule profile is unavailable (cultural gloss is rule-backed)',
     { timeout: 30_000 },
     () => {
-      const [officer] = journeyClaims();
-      const result = verifyBaziCareerNarrative(
-        [traceFor(officer!, 1, OFFICER_PARAGRAPH)],
-        journeyInput(syntheticInput, {
-          rulesetVariantSensitiveClaims: true,
-          rulesetVariant: 'unavailable',
-        }),
-        { now: FIXED },
-      );
-      expect(result).toEqual({ ok: true, issues: [] });
+      const run = () =>
+        verifyBaziCareerNarrative(
+          [],
+          journeyInput(syntheticInput, {
+            rulesetVariantSensitiveClaims: true,
+            rulesetVariant: 'unavailable',
+          }),
+          { now: FIXED },
+        );
+      expect(run).toThrow(ResponseViewPlanningError);
       expect(() =>
         projectBaziCareerJourney(journeyInput(syntheticInput), { now: FIXED }),
       ).not.toThrow();

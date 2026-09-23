@@ -35,6 +35,7 @@
   "expectedViewClaimIds": ["approved-claim:fact-8"],
   "runtimeEntry": {
     "sourceCommit": "84f51027826ba138dcf219136a606653aa02d15e",
+    "sourceCommitSemantics": "IQ-4F bazi-career runtime-entry introduction commit — stable anchor for the command shape, not a claim that this SHA is the current candidate source identity. Host EXECUTED records must carry the sourceCommit of the exact installed candidate they ran; do not pre-fill a squash SHA that does not exist yet.",
     "command": "node scripts/loom-chart.mjs bazi-career --input-file bazi-career-input.json --system bazi --depth standard --now 2026-01-01T00:00:00Z",
     "depth": "standard",
     "system": "bazi",
@@ -46,14 +47,14 @@
   "iq4Exit": {
     "status": "BLOCKED_SOURCE_ADMISSION",
     "criterion": "reviewed-answer-examples",
-    "reason": "当前不存在任何 source-admitted 的可见 BaZi career claim：现有文本 claim 依赖格局（bazi-rule/pattern）与喜用神行业匹配（bazi-rule/industry/wu-xing）等未经来源准入的规则内容，运行时入口也因此只输出结构化记录。reviewed-answer-examples 退出条件被来源门禁阻断；四宿主技术验收与本状态无关，不能解除它。解除需要 owner 的来源准入裁决及其后的独立准入切片，而非对任何现有答案的评审。"
+    "reason": "ADR 0021 仅窄准入一条冻结十神文化参考（短释 + 非职业预言 caveat），这不是完整职业答案，也不等于 reviewed-answer-examples 已通过。格局（bazi-rule/pattern）与喜用神行业匹配（bazi-rule/industry/wu-xing）等仍未准入；bazi-career 运行时入口仍只输出结构化记录。reviewed-answer-examples 保持 BLOCKED_SOURCE_ADMISSION；四宿主技术验收与本状态无关，不能解除它。解除需要针对完整职业答案的来源准入裁决及其后的独立准入切片。"
   },
   "hostAcceptance": {
     "status": "NOT_EXECUTED",
     "statusVocabulary": ["NOT_EXECUTED", "EXECUTED"],
     "packageCommand": "pnpm run package:hosts",
     "verifyCommand": "pnpm run verify:hosts",
-    "evidenceRule": "EXECUTED requires, per host: sourceCommit equal to runtimeEntry.sourceCommit, candidateSha256 of the exact installed ZIP copied from the candidate SHA256SUMS.txt, inputDigest equal to runtimeEntry.inputDigest, outputDigest equal to the verifier-recomputed stdout digest of the bazi-career command, exitCode 0, an ISO date, and notes. Rebuilding candidates invalidates earlier host evidence (release checklist A4). Host acceptance is independent technical evidence: even when all four hosts are EXECUTED, the packet's iq4Exit stays BLOCKED_SOURCE_ADMISSION and the reviewed-answer-examples criterion remains blocked.",
+    "evidenceRule": "EXECUTED requires, per host: sourceCommit equal to runtimeEntry.sourceCommit (the IQ-4F entry-introduction anchor — see sourceCommitSemantics; the current verifier still enforces this equality), candidateSha256 of the exact installed ZIP copied from the candidate SHA256SUMS.txt, inputDigest equal to runtimeEntry.inputDigest, outputDigest equal to the verifier-recomputed stdout digest of the bazi-career command, exitCode 0, an ISO date, and notes. Rebuilding candidates invalidates earlier host evidence (release checklist A4). Host acceptance is independent technical evidence: even when all four hosts are EXECUTED, the packet's iq4Exit stays BLOCKED_SOURCE_ADMISSION and the reviewed-answer-examples criterion remains blocked.",
     "reviewQuestions": [
       "bazi-career 是否退出码 0 且输出 digest 与重算期望一致",
       "输出是否只含 clarification-plan/v1 + response-view/v1 且 system 为 bazi",

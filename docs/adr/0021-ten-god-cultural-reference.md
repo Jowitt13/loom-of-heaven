@@ -28,16 +28,24 @@ Nothing else in this ADR is admitted.**
 ### What is allowed in the default career body
 
 1. At most **one** traditional term from provider ten-god display (e.g. `七杀` / `正官`), never
-   rewritten as a pattern name (`七杀格`, `阳刃格`, …).
-2. Immediately adjacent, a **brief** cultural gloss taken from frozen `TEN_GOD_MEANINGS`
-   (《渊海子平》 ten-god symbolism, `FROZEN_LEGACY`) — e.g. for 七杀 the themes 权威、魄力、压力、竞争 —
-   stated as traditional-culture background, not as a job, industry, or outcome claim.
-3. The existing structural caveat in substance: 官杀 only marks 事业/责任 structural tendency and is
+   rewritten as a pattern name (`七杀格`, `阳刃格`, …). When 正官 and 七杀 co-occur, **omit** the
+   cultural reference rather than pick an arbitrary winner.
+2. Immediately adjacent, a **brief** cultural gloss — only these frozen short themes, never the
+   full `TEN_GOD_MEANINGS` strings:
+   - `七杀` → 权威、压力、竞争 (exclude 需制化为权 and any fate/remedy clause)
+   - `正官` → 责任、规范、地位 (exclude 女命之夫星 and any spouse/wealth clause)
+     Stated as traditional-culture background (《渊海子平》 ten-god symbolism, `FROZEN_LEGACY`),
+     not as a job, industry, or outcome claim.
+3. The gloss must carry resolvable rule evidence (`bazi-rule/ten-gods/xiang-yi`) beside the
+   provider `bazi.pillars.*.tenGod` fact. It is not enough to hide the gloss in a provider-fact
+   `reason`. Because the gloss is rule-backed, an unavailable rule profile **degrades** this
+   reference instead of delivering a provider-only cultural reading.
+4. The existing structural caveat in substance: 官杀 only marks 事业/责任 structural tendency and is
    not a career prophecy.
-4. When the user states work reality, **advice and practices come only from those statements**.
+5. When the user states work reality, **advice and practices come only from those statements**.
    Traditional background may sit beside them and must never be presented as their source
-   (ADR 0020 T⊣R adjacency).
-5. When only birth data is present: state the brief cultural reference and ask **one** key reality
+   (ADR 0020 T⊣R adjacency). Birth-only answers contain **no** action advice.
+6. When only birth data is present: state the brief cultural reference and ask **one** key reality
    question. Never invent work history, role, or career direction.
 
 ### What remains excluded (unchanged)
@@ -48,6 +56,8 @@ Nothing else in this ADR is admitted.**
 - Any career fit, industry fit, personality verdict, or action directive derived from the chart.
 - Multi-system synthesis in the default career body.
 - IQ-4H `BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples — this ADR does **not** lift it.
+  One narrow cultural reference is not a complete career answer and is not a passed
+  reviewed-answer-example.
 
 ### Source-boundary handling (required before runtime change)
 
@@ -55,7 +65,8 @@ A mixed claim that concatenates ten-god display with pattern text must be **spli
 acceptable to substring `七杀` out of a pattern-bearing claim and treat that substring as admitted.
 After the split:
 
-- the ten-god claim cites only `bazi.pillars.*.tenGod` (+ frozen symbolism as reason);
+- the ten-god claim cites `bazi.pillars.*.tenGod` **and** `bazi-rule/ten-gods/xiang-yi`, with only
+  the ADR short gloss (not full `TEN_GOD_MEANINGS`);
 - pattern remains a separate non-career technical record and never enters the default career body.
 
 ## Trade-offs

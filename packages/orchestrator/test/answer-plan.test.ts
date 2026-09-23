@@ -249,10 +249,29 @@ describe('public result and answer plan', () => {
     );
     expect(tenGodFacts.length).toBeLessThanOrEqual(1);
     for (const fact of tenGodFacts) {
-      expect(fact.claim).toMatch(/事业相关十神（官杀）：/);
+      expect(fact.claim).toMatch(/命盘里有「.+」这一传统十神/);
       expect(fact.claim).not.toMatch(/格/);
       expect(fact.caveat).toContain('非职业预言');
-      expect(fact.reason ?? '').toContain('七杀');
+      // Short gloss only — never the full TEN_GOD_MEANINGS strings.
+      expect(fact.reason ?? '').toContain('传统上常联到');
+      expect(fact.reason ?? '').not.toContain('需制化为权');
+      expect(fact.reason ?? '').not.toContain('女命之夫星');
+      expect(fact.reason ?? '').not.toContain('妻星');
+      // The gloss is rule-backed, not only a provider-fact reason.
+      expect(fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/ten-gods/xiang-yi')).toBe(
+        true,
+      );
     }
+  });
+
+  it('omits the cultural reference when 正官 and 七杀 co-occur (no arbitrary winner)', async () => {
+    const { selectCareerOfficerLabel } = await import('@loom/interpret');
+    expect(selectCareerOfficerLabel(['七杀'])).toBe('七杀');
+    expect(selectCareerOfficerLabel(['正官'])).toBe('正官');
+    expect(selectCareerOfficerLabel(['七杀', '七杀'])).toBe('七杀');
+    expect(selectCareerOfficerLabel(['正官', '七杀'])).toBeNull();
+    expect(selectCareerOfficerLabel(['七杀', '正官', '正官'])).toBeNull();
+    expect(selectCareerOfficerLabel([])).toBeNull();
+    expect(selectCareerOfficerLabel(['正财'])).toBeNull();
   });
 });

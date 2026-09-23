@@ -214,30 +214,37 @@ describe('IQ-4A internal bazi career journey', () => {
   );
 
   it(
-    'keeps the chart-derived ten-god claim when the rule profile is unavailable',
+    'omits the cultural reference when the rule profile is unavailable',
     { timeout: 30_000 },
     () => {
-      // ADR 0021: the default career claim is the provider ten-god display
-      // (+ frozen gloss), not a bazi-rule mechanism. Pattern/industry stay out
-      // of career facts, so an unresolved rule profile no longer empties the
-      // whole career class.
-      const { clarificationPlan, responseView } = projectBaziCareerJourney(
-        journeyInput(syntheticInput, {
-          rulesetVariantSensitiveClaims: true,
-          rulesetVariant: 'unavailable',
-        }),
-        { now: FIXED },
+      // ADR 0021: the short gloss cites bazi-rule/ten-gods/xiang-yi. An
+      // unresolved rule profile therefore degrades that claim class instead of
+      // silently delivering a provider-only cultural reading.
+      let caught: unknown;
+      try {
+        projectBaziCareerJourney(
+          journeyInput(syntheticInput, {
+            rulesetVariantSensitiveClaims: true,
+            rulesetVariant: 'unavailable',
+          }),
+          { now: FIXED },
+        );
+      } catch (error) {
+        caught = error;
+      }
+      expect(caught).toBeInstanceOf(ResponseViewPlanningError);
+      expect((caught as ResponseViewPlanningError).code).toBe('NO_ELIGIBLE_APPROVED_CLAIMS');
+      const degradedPlan = planClarificationMateriality(
+        planningInput({ rulesetVariantSensitiveClaims: true, rulesetVariant: 'unavailable' }),
       );
-      expect(clarificationPlan.status).toBe('degraded');
-      expect(clarificationPlan.clarificationNoteCodes).toEqual(['ruleset-variant-unavailable']);
-      expect(clarificationPlan.degradationCodes).toEqual(['omit-ruleset-variant-sensitive-claims']);
-      expect(responseView.clarificationStatus).toBe('degraded');
-      expect(responseView.approvedClaimIds).toEqual(['approved-claim:fact-8']);
+      expect(degradedPlan.status).toBe('degraded');
+      expect(degradedPlan.clarificationNoteCodes).toEqual(['ruleset-variant-unavailable']);
+      expect(degradedPlan.degradationCodes).toEqual(['omit-ruleset-variant-sensitive-claims']);
     },
   );
 
   it(
-    'delivers the same chart-derived ten-god claim once the rule profile is explicitly confirmed',
+    'delivers the cultural reference once the rule profile is explicitly confirmed',
     { timeout: 30_000 },
     () => {
       const { clarificationPlan, responseView } = projectBaziCareerJourney(

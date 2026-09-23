@@ -4,7 +4,6 @@ import {
   industryFinding,
   marriageTimingFinding,
   elementsByRelation,
-  TEN_GOD_MEANINGS,
   type Element,
 } from '@loom/bazi-rules';
 import { interpretWestern } from '@loom/western-rules';
@@ -175,25 +174,51 @@ function characterFacts(
   return out;
 }
 
+/**
+ * ADR 0021 career-only short glosses. Deliberately NOT the full
+ * `TEN_GOD_MEANINGS` strings (no 需制化为权, no 女命之夫星, no spouse/wealth
+ * themes). Each gloss is traditional-culture background only.
+ */
+const CAREER_TEN_GOD_GLOSS: Record<string, string> = {
+  正官: '责任、规范、地位',
+  七杀: '权威、压力、竞争',
+};
+
+/**
+ * At most one ten-god label (ADR 0021). When 正官 and 七杀 co-occur there is
+ * no principled single winner — omit the cultural reference rather than pick.
+ * Non-officer ten-gods never qualify.
+ */
+export function selectCareerOfficerLabel(tenGods: readonly string[]): string | null {
+  const names = [...new Set(tenGods)].filter((g) => g === '正官' || g === '七杀');
+  return names.length === 1 ? names[0]! : null;
+}
+
 function careerFacts(bundle: ChartBundle): InterpretationFact[] {
   const out: InterpretationFact[] = [];
   const b = bundle.bazi;
   if (b) {
-    // ADR 0021: career body gets the ten-god display only. Pattern text must
-    // never ride along in this claim (IQ-4H source gate).
+    // ADR 0021: career body gets one ten-god cultural reference only. Pattern
+    // text must never ride along in this claim (IQ-4H source gate).
     const officers = [b.pillars.year, b.pillars.month, b.pillars.day, b.pillars.hour]
       .filter((p): p is NonNullable<typeof p> => p !== null)
       .map((p) => p.tenGod)
       .filter((g): g is string => g === '正官' || g === '七杀');
-    if (officers.length > 0) {
-      const names = [...new Set(officers)];
+    const label = selectCareerOfficerLabel(officers);
+    if (label !== null) {
+      const gloss = CAREER_TEN_GOD_GLOSS[label] ?? label;
       out.push(
         fact(
           'career',
-          `事业相关十神（官杀）：${names.join('、')}`,
-          [ev('bazi', 'bazi.pillars.*.tenGod', names.join('、'))],
+          `命盘里有「${label}」这一传统十神`,
+          [
+            ev('bazi', 'bazi.pillars.*.tenGod', label),
+            // The short gloss is rule-backed (渊海子平 十神象义, FROZEN_LEGACY).
+            // Recording only the provider tenGod would hide that dependency.
+            ev('bazi-rule', 'bazi-rule/ten-gods/xiang-yi', gloss),
+          ],
           {
-            reason: names.map((g) => TEN_GOD_MEANINGS[g] ?? g).join(' '),
+            reason: `传统上常联到${gloss}`,
             caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
           },
         ),

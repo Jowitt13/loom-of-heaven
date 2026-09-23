@@ -12,6 +12,7 @@ const ROUTE_ADR = read('docs/adr/0018-structural-answer-quality-route.md');
 const PROTOCOL = read('docs/COMMANDER_PROTOCOL.md');
 const AGENTS = read('AGENTS.md');
 const NARRATIVE = read('docs/NARRATIVE_OUTPUT_V1.md');
+const TEN_GOD_ADR = read('docs/adr/0021-ten-god-cultural-reference.md');
 
 describe('product technical roadmap and commander governance', () => {
   it('records an owner-confirmed v3 roadmap and accepted route-change ADR', () => {
@@ -26,6 +27,24 @@ describe('product technical roadmap and commander governance', () => {
     expect(ROUTE_ADR).toContain('This ADR changes no runtime');
     expect(AGENTS).toContain('loom-product-roadmap/v3');
     expect(AGENTS).toContain('loom-commander-protocol/v3');
+  });
+
+  it('locks the ADR 0021 ten-god cultural-reference bounds as a v3 amendment static gate', () => {
+    expect(TEN_GOD_ADR).toContain('Status: Accepted');
+    expect(TEN_GOD_ADR).toContain('ADR 0021');
+    expect(TEN_GOD_ADR).toContain('七杀');
+    expect(TEN_GOD_ADR).toContain('正官');
+    // Short gloss only — full TEN_GOD_MEANINGS clauses stay out of the career body.
+    expect(TEN_GOD_ADR).toContain('exclude 需制化为权');
+    expect(TEN_GOD_ADR).toContain('exclude 女命之夫星');
+    expect(TEN_GOD_ADR).toContain('omit');
+    expect(TEN_GOD_ADR).toContain('bazi-rule/ten-gods/xiang-yi');
+    expect(ROADMAP).toContain('ADR 0021');
+    expect(ROADMAP).toContain('2026-09-08 amendment');
+    expect(ROADMAP).toContain('exactly one narrow');
+    expect(PROTOCOL).toContain('ADR 0021');
+    expect(AGENTS).toContain('ADR 0021');
+    expect(NARRATIVE).toContain('ADR 0021');
   });
 
   it('fixes the product destination on verified reasoning rather than technique count', () => {

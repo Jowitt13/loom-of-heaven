@@ -42,6 +42,9 @@ CLI. **The model never computes a chart itself.**
 - **No fabricated verdicts.** Interpretation is source-cited. Preserve every warning for audit;
   in a topic reading, state only the practical effect that materially changes the answer, in
   natural language — never a raw warning code or a warning panel.
+- **Career body (ADR 0021).** At most one frozen ten-god cultural reference with its short gloss
+  and non-prophecy caveat. Never pattern/useful-god/industry or chart-derived career fit. Career
+  practices cite only user-stated reality; birth-only answers contain no action advice.
 - **De-identified.** Never write a real name, birth time, or location into logs, fixtures, or git.
 
 ## How to run the Skill (the only supported entry point)

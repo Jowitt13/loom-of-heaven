@@ -72,10 +72,11 @@ function journeyInput(birthInput: BirthInput, overrides: Parameters<typeof plann
   return { birthInput, planningInput: planningInput(overrides) };
 }
 
+// Birth-only positive example: one cultural reference + non-prophecy caveat.
+// No action advice — practices require user-stated reality (ADR 0021).
 const OFFICER_PARAGRAPH =
-  '这个盘的事业相关十神是七杀，传统上它常联到权威、压力、竞争一类主题，只作文化背景。' +
-  '官杀说的是事业倾向的结构，不是职业预言。可以把手头的事按「规则清晰」和「需要自己定规则」' +
-  '分成两列，各写三件具体的事，看看哪一列做完更有成就感，再决定下一段时间的投入。';
+  '命盘里有「七杀」这一传统十神，传统上常联到权威、压力、竞争一类主题，只作文化背景。' +
+  '官杀说的是事业倾向的结构，不是职业预言。';
 
 const WARNING_PARAGRAPH =
   '需要说明：当前时间按真太阳时近似处理，涉及时辰的结论可能有小幅变化；' +
@@ -290,7 +291,7 @@ describe('IQ-4D bazi career answer verification', () => {
   });
 
   it(
-    'fails closed on degraded unknown-time journeys and keeps the chart claim under an unavailable rule profile',
+    'fails closed on degraded unknown-time journeys and on an unavailable rule profile',
     { timeout: 30_000 },
     () => {
       const { answer, traces } = readyExamples();
@@ -302,18 +303,20 @@ describe('IQ-4D bazi career answer verification', () => {
           { now: FIXED },
         ),
       ).toThrow(ResponseViewPlanningError);
-      // ADR 0021: the ten-god chart claim is not rule-profile sensitive, so an
-      // unavailable rule profile no longer refuses the whole answer path.
-      const degraded = verifyBaziCareerAnswer(
-        answer,
-        traces,
-        journeyInput(syntheticInput, {
-          rulesetVariantSensitiveClaims: true,
-          rulesetVariant: 'unavailable',
-        }),
-        { now: FIXED },
-      );
-      expect(degraded.ok).toBe(true);
+      // The ADR 0021 short gloss cites bazi-rule/ten-gods/xiang-yi, so an
+      // unavailable rule profile degrades the cultural reference instead of
+      // pretending it is provider-only.
+      expect(() =>
+        verifyBaziCareerAnswer(
+          answer,
+          traces,
+          journeyInput(syntheticInput, {
+            rulesetVariantSensitiveClaims: true,
+            rulesetVariant: 'unavailable',
+          }),
+          { now: FIXED },
+        ),
+      ).toThrow(ResponseViewPlanningError);
       expect(() =>
         verifyBaziCareerAnswer(
           answer,

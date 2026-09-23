@@ -301,8 +301,9 @@ new capability or a product-direction change.
 
 Per the owner's 2026-09-07 decision and [ADR 0020](adr/0020-dual-provenance-career-layer.md),
 career guidance is composed from separately provenanced sources: a TraditionalStructureLayer
-(admitted structural facts and traditional-culture background only; today zero admitted visible
-text claims), a CareerRealityLayer (only reality the user actively states — roles, skills,
+(admitted structural facts and traditional-culture background only; today exactly one narrow
+ADR 0021 ten-god cultural reference — pattern/useful-god/industry remain unadmitted), a
+CareerRealityLayer (only reality the user actively states — roles, skills,
 goals, constraints, preferences — and the only source of career advice), and an optional future
 CareerReflectionLayer (non-diagnostic, admitted per instrument by separate owner
 authorization). Clinical assessment remains a fully separate capability and is never an input
