@@ -12,20 +12,42 @@ const ROUTE_ADR = read('docs/adr/0018-structural-answer-quality-route.md');
 const PROTOCOL = read('docs/COMMANDER_PROTOCOL.md');
 const AGENTS = read('AGENTS.md');
 const NARRATIVE = read('docs/NARRATIVE_OUTPUT_V1.md');
+const TEN_GOD_ADR = read('docs/adr/0021-ten-god-cultural-reference.md');
 
 describe('product technical roadmap and commander governance', () => {
-  it('records an owner-confirmed v3 roadmap and accepted route-change ADR', () => {
-    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v3`');
+  it('records an owner-confirmed v3.1 roadmap and accepted route-change ADR', () => {
+    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v3.1`');
     expect(ROADMAP).toContain('Status: **Accepted and owner-confirmed**');
-    expect(ROADMAP).toContain('Confirmed: 2026-09-03');
-    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v2`');
+    expect(ROADMAP).toContain('Confirmed: 2026-09-09');
+    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v3`');
+    expect(ROADMAP).toContain('`loom-product-roadmap/v3.1` — 2026-09-09: **version change**');
     expect(GOVERNANCE_ADR).toContain('Status: Accepted');
     expect(GOVERNANCE_ADR).toContain('Amended: 2026-08-29');
     expect(ROUTE_ADR).toContain('Status: Accepted');
     expect(ROUTE_ADR).toContain('Date: 2026-09-03');
     expect(ROUTE_ADR).toContain('This ADR changes no runtime');
-    expect(AGENTS).toContain('loom-product-roadmap/v3');
+    expect(AGENTS).toContain('loom-product-roadmap/v3.1');
     expect(AGENTS).toContain('loom-commander-protocol/v3');
+    expect(PROTOCOL).toContain('roadmap: loom-product-roadmap/v3.1');
+  });
+
+  it('locks the ADR 0021 ten-god cultural-reference bounds as a v3.1 static gate', () => {
+    expect(TEN_GOD_ADR).toContain('Status: Accepted');
+    expect(TEN_GOD_ADR).toContain('ADR 0021');
+    expect(TEN_GOD_ADR).toContain('七杀');
+    expect(TEN_GOD_ADR).toContain('正官');
+    // Short gloss only — full TEN_GOD_MEANINGS clauses stay out of the career body.
+    expect(TEN_GOD_ADR).toContain('exclude 需制化为权');
+    expect(TEN_GOD_ADR).toContain('exclude 女命之夫星');
+    expect(TEN_GOD_ADR).toContain('责任、自律、地位');
+    expect(TEN_GOD_ADR).toContain('omit');
+    expect(TEN_GOD_ADR).toContain('bazi-rule/ten-gods/xiang-yi');
+    expect(ROADMAP).toContain('ADR 0021');
+    expect(ROADMAP).toContain('`loom-product-roadmap/v3.1` — 2026-09-09: **version change**');
+    expect(ROADMAP).toContain('One frozen');
+    expect(PROTOCOL).toContain('ADR 0021');
+    expect(AGENTS).toContain('ADR 0021');
+    expect(NARRATIVE).toContain('ADR 0021');
   });
 
   it('fixes the product destination on verified reasoning rather than technique count', () => {

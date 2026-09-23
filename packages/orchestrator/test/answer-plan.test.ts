@@ -1,7 +1,12 @@
 // Synthetic fixture - fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
 import { AnswerRequest, canonicalJson, parseBirthInput } from '@loom/contracts';
-import { buildAnswerPlan } from '@loom/interpret';
+import {
+  buildAnswerPlan,
+  careerOfficerEvidence,
+  isTimeSensitiveFact,
+  materialWarningCodes,
+} from '@loom/interpret';
 import { runAnswerPlan, runInterpret } from '@loom/orchestrator';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
@@ -173,6 +178,196 @@ describe('public result and answer plan', () => {
     expect(plan.responseRequirements.contentOrder).not.toContain('disclaimer');
   });
 
+  it('drops unrelated SOLAR_TIME_APPROXIMATE when selected facts are not time-sensitive', () => {
+    const { publicResult } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
+    const tenGodOnly = {
+      ...publicResult,
+      facts: publicResult.facts.filter((fact) =>
+        fact.evidence.some((evidence) =>
+          /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/.test(evidence.ref),
+        ),
+      ),
+    };
+    expect(tenGodOnly.facts.length).toBeGreaterThan(0);
+    for (const fact of tenGodOnly.facts) {
+      expect(isTimeSensitiveFact(fact)).toBe(false);
+    }
+    const plan = buildAnswerPlan(tenGodOnly, { topic: 'career' });
+    expect(plan.requiredWarningCodes).not.toContain('SOLAR_TIME_APPROXIMATE');
+    expect(plan.requiredWarningCodes).not.toContain('TIME_ACCURACY_APPROXIMATE');
+  });
+
+  it('resolves career officer evidence to actual pillars and hour-pillar time sensitivity', () => {
+    const hourOnly = careerOfficerEvidence([
+      { pillar: 'year', tenGod: '正财' },
+      { pillar: 'month', tenGod: '劫财' },
+      { pillar: 'day', tenGod: null },
+      { pillar: 'hour', tenGod: '七杀' },
+    ]);
+    expect(hourOnly).toEqual({ label: '七杀', refs: ['bazi.pillars.hour.tenGod'] });
+
+    const nonHourOnly = careerOfficerEvidence([
+      { pillar: 'year', tenGod: '七杀' },
+      { pillar: 'month', tenGod: '正财' },
+      { pillar: 'day', tenGod: null },
+      { pillar: 'hour', tenGod: '偏财' },
+    ]);
+    expect(nonHourOnly).toEqual({ label: '七杀', refs: ['bazi.pillars.year.tenGod'] });
+
+    const mixedSameLabel = careerOfficerEvidence([
+      { pillar: 'year', tenGod: '七杀' },
+      { pillar: 'month', tenGod: '正财' },
+      { pillar: 'day', tenGod: null },
+      { pillar: 'hour', tenGod: '七杀' },
+    ]);
+    expect(mixedSameLabel).toEqual({
+      label: '七杀',
+      refs: ['bazi.pillars.year.tenGod', 'bazi.pillars.hour.tenGod'],
+    });
+
+    const dualLabels = careerOfficerEvidence([
+      { pillar: 'year', tenGod: '七杀' },
+      { pillar: 'hour', tenGod: '正官' },
+    ]);
+    expect(dualLabels).toEqual({ label: null, refs: [] });
+
+    const toFact = (refs: string[]) => ({
+      id: 'fact-1' as const,
+      topic: 'career' as const,
+      claim: '命盘里有「七杀」这一传统十神',
+      evidence: [
+        ...refs.map((ref) => ({ kind: 'bazi' as const, ref })),
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+    });
+    expect(isTimeSensitiveFact(toFact(hourOnly.refs))).toBe(true);
+    expect(isTimeSensitiveFact(toFact(nonHourOnly.refs))).toBe(false);
+    expect(isTimeSensitiveFact(toFact(mixedSameLabel.refs))).toBe(true);
+
+    const approximateWarnings = [
+      {
+        code: 'TIME_ACCURACY_APPROXIMATE' as const,
+        severity: 'info' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+      {
+        code: 'SOLAR_TIME_APPROXIMATE' as const,
+        severity: 'info' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+      {
+        code: 'TIME_UNKNOWN' as const,
+        severity: 'warning' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+      {
+        code: 'NEAR_BOUNDARY' as const,
+        severity: 'info' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+    ];
+    const hourOnlyCodes = materialWarningCodes(approximateWarnings, [toFact(hourOnly.refs)]);
+    expect(hourOnlyCodes).toContain('TIME_ACCURACY_APPROXIMATE');
+    expect(hourOnlyCodes).toContain('SOLAR_TIME_APPROXIMATE');
+    expect(hourOnlyCodes).toContain('TIME_UNKNOWN');
+    expect(hourOnlyCodes).toContain('NEAR_BOUNDARY');
+
+    const nonHourCodes = materialWarningCodes(approximateWarnings, [toFact(nonHourOnly.refs)]);
+    expect(nonHourCodes).not.toContain('TIME_ACCURACY_APPROXIMATE');
+    expect(nonHourCodes).not.toContain('SOLAR_TIME_APPROXIMATE');
+    expect(nonHourCodes).toContain('TIME_UNKNOWN');
+    expect(nonHourCodes).toContain('NEAR_BOUNDARY');
+
+    const mixedCodes = materialWarningCodes(approximateWarnings, [toFact(mixedSameLabel.refs)]);
+    expect(mixedCodes).toContain('TIME_ACCURACY_APPROXIMATE');
+    expect(mixedCodes).toContain('SOLAR_TIME_APPROXIMATE');
+  });
+
+  it('keeps TIME_UNKNOWN and NEAR_BOUNDARY always material, and time warnings when facts are time-sensitive', () => {
+    const timeFact = {
+      id: 'fact-1',
+      topic: 'career' as const,
+      claim: '西方中天（MC）位于Capricorn',
+      evidence: [{ kind: 'western' as const, ref: 'western.angles.mc.sign' }],
+      caveat: '需确切出生时间方有宫位。',
+    };
+    const plainFact = {
+      id: 'fact-2',
+      topic: 'career' as const,
+      claim: '命盘里有「七杀」这一传统十神',
+      evidence: [
+        { kind: 'bazi' as const, ref: 'bazi.pillars.year.tenGod' },
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+    };
+    const alwaysWarnings = [
+      {
+        code: 'TIME_UNKNOWN' as const,
+        severity: 'warning' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+      {
+        code: 'NEAR_BOUNDARY' as const,
+        severity: 'info' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+      {
+        code: 'SOLAR_TIME_APPROXIMATE' as const,
+        severity: 'info' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+    ];
+    const plainOnly = buildAnswerPlan(
+      {
+        contractVersion: 'public-result/v2',
+        engineVersion: '0.4.0',
+        sourceSchemaVersion: '0.1.0',
+        systems: [{ system: 'bazi', status: 'computed' }],
+        inputReliability: { timeAccuracy: 'exact', birthTimeKnown: true },
+        warnings: alwaysWarnings,
+        facts: [plainFact],
+        rulesets: [],
+        disclaimers: [],
+        followupOffers: [],
+      },
+      { topic: 'career' },
+    );
+    expect(plainOnly.requiredWarningCodes).toEqual(['TIME_UNKNOWN', 'NEAR_BOUNDARY']);
+    const timeScoped = buildAnswerPlan(
+      {
+        contractVersion: 'public-result/v2',
+        engineVersion: '0.4.0',
+        sourceSchemaVersion: '0.1.0',
+        systems: [{ system: 'western', status: 'computed' }],
+        inputReliability: { timeAccuracy: 'exact', birthTimeKnown: true },
+        warnings: alwaysWarnings,
+        facts: [timeFact],
+        rulesets: [],
+        disclaimers: [],
+        followupOffers: [],
+      },
+      { topic: 'career' },
+    );
+    expect(timeScoped.requiredWarningCodes).toContain('SOLAR_TIME_APPROXIMATE');
+    expect(timeScoped.requiredWarningCodes).toContain('TIME_UNKNOWN');
+  });
+
   it('uses fixed public warning copy and removes exact dynamic target dates', () => {
     const output = runAnswerPlan(syntheticInput, {
       now: FIXED,
@@ -209,5 +404,74 @@ describe('public result and answer plan', () => {
       }).success,
     ).toBe(false);
     expect(() => runAnswerPlan(syntheticInput, {} as never)).toThrow();
+  });
+
+  it('keeps pattern and industry out of the default career claim set (ADR 0021)', () => {
+    const { answerPlan, publicResult } = runAnswerPlan(syntheticInput, {
+      now: FIXED,
+      topic: 'career',
+    });
+    const claims = answerPlan.selectedFacts.map((fact) => fact.claim).join('\n');
+    for (const blocked of ['格局', '阳刃', '建禄', '喜用', '适合行业', '行业方向']) {
+      expect(claims, blocked).not.toContain(blocked);
+    }
+    for (const fact of answerPlan.selectedFacts) {
+      for (const evidence of fact.evidence) {
+        expect(evidence.ref).not.toContain('bazi-rule/pattern');
+        expect(evidence.ref).not.toContain('bazi-rule/industry');
+        expect(evidence.ref).not.toContain('bazi-rule/useful-god');
+      }
+    }
+    // The mixed claim is split: pattern may exist as a technical fact only.
+    const patternFacts = publicResult.facts.filter((fact) =>
+      fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/pattern'),
+    );
+    for (const fact of patternFacts) {
+      expect(fact.topic).not.toBe('career');
+    }
+    const industryFacts = publicResult.facts.filter((fact) =>
+      fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/industry/wu-xing'),
+    );
+    for (const fact of industryFacts) {
+      expect(fact.topic).not.toBe('career');
+    }
+  });
+
+  it('offers at most one ten-god cultural reference with its non-prophecy caveat', () => {
+    const { answerPlan } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
+    const tenGodFacts = answerPlan.selectedFacts.filter((fact) =>
+      fact.evidence.some((evidence) =>
+        /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/.test(evidence.ref),
+      ),
+    );
+    expect(tenGodFacts.length).toBeLessThanOrEqual(1);
+    for (const fact of tenGodFacts) {
+      expect(fact.claim).toMatch(/命盘里有「.+」这一传统十神/);
+      expect(fact.claim).not.toMatch(/格/);
+      expect(fact.caveat).toContain('非职业预言');
+      // Short gloss only — never the full TEN_GOD_MEANINGS strings.
+      expect(fact.reason ?? '').toContain('传统上常联到');
+      expect(fact.reason ?? '').not.toContain('需制化为权');
+      expect(fact.reason ?? '').not.toContain('女命之夫星');
+      expect(fact.reason ?? '').not.toContain('妻星');
+      expect(fact.reason ?? '').not.toContain('规范');
+      // Gloss words stay inside the frozen TEN_GOD_MEANINGS vocabulary.
+      expect(fact.reason ?? '').toMatch(/权威|压力|竞争|责任|自律|地位/);
+      // The gloss is rule-backed, not only a provider-fact reason.
+      expect(fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/ten-gods/xiang-yi')).toBe(
+        true,
+      );
+    }
+  });
+
+  it('omits the cultural reference when 正官 and 七杀 co-occur (no arbitrary winner)', async () => {
+    const { selectCareerOfficerLabel } = await import('@loom/interpret');
+    expect(selectCareerOfficerLabel(['七杀'])).toBe('七杀');
+    expect(selectCareerOfficerLabel(['正官'])).toBe('正官');
+    expect(selectCareerOfficerLabel(['七杀', '七杀'])).toBe('七杀');
+    expect(selectCareerOfficerLabel(['正官', '七杀'])).toBeNull();
+    expect(selectCareerOfficerLabel(['七杀', '正官', '正官'])).toBeNull();
+    expect(selectCareerOfficerLabel([])).toBeNull();
+    expect(selectCareerOfficerLabel(['正财'])).toBeNull();
   });
 });

@@ -80,6 +80,16 @@ To keep results consistent across models, the **calculation** workflow is mandat
      `allowedFactIds`; do not read or attach `chart.json` / `interpretation.json`. The body shows
      **only the facts relevant to that topic**. There is no requirement to display all four raw
      charts or the full fact set in a topic report.
+   - **事业 Channel B（ADR 0021）默认正文：**连续短文，一眼能读。用户若说了工作现实（岗位、困扰、
+     目标），**先回答现实困扰**；可执行做法只基于用户自述的具体处境，**不要**写“这些做法只来自你
+     刚才说的…和命盘无关”之类的内部审计句。命盘至多一条简短传统参考：形如「命盘里有『七杀』这一
+     传统十神」，紧邻冻结短释（七杀→权威、压力、竞争；正官→责任、自律、地位），并立刻说明只是
+     文化背景、非职业预言。**禁止**展开 TEN_GOD_MEANINGS 整段（如“需制化为权”“女命之夫星”）。
+     正官与七杀同现时**省略**该参考，不得任选其一。**禁止**把格局/格局成败、喜用神、五行行业表写
+     进正文，**禁止**由命盘推出职业适配或行业方向，**禁止**把七杀写成七杀格。只有出生信息时：说明
+     现有信息能支持的十神参考，并只问一个最关键的现实问题，**不给行动建议**，不编造工作经历或
+     职业方向。多体系综合不进事业默认正文。**不要**另起与当前结论无关的真太阳时/技术提示尾段；只
+     有 `requiredWarningCodes` 中真正影响所选事实的 warning 才就地自然说明。
    - Per-topic loading: use the **自然叙述规范 v1** in `references/reading-style.md`; 事业 → `+ references/examples-career.md`; 感情 → `+ references/examples-love.md`; 财运 → `+ references/examples-wealth.md`; 学业/流年不加载无关案例文件。
    - **Channel B 的内部链路与默认交付：**先保留每条选中事实的 `id` / `reason` /
      `evidence.ref` / `caveat`，再按“事实 → 规则机制 → 现实含义 → 条件”写成连续自然段。
@@ -92,7 +102,7 @@ To keep results consistent across models, the **calculation** workflow is mandat
      它输出 `{ ok, violations:[{section,term,category,severity,line,replacementHint}] }`。默认不带 `--technical-details`；只有用户明确要求来源或计算细节时才加该开关，它会放行来源标识但仍检查空话、重复与越界。工作流：①先把报告写入临时草稿 → ②跑 lint-reading → ③按 violations 重写（最多 2 次）→ ④通过（ok:true）才展示 → ⑤仍不过则改用更短更通俗的版本（可加 `--simple`），**绝不把未通过草稿发给用户**。检查器只指出问题，由你重写（不要机械删词，以免病句）。
    - **空话检测（category 空话）:** 凡抽象判断（如“逐步提升竞争力/把握机会/稳中求进/需要边界/加强沟通/发挥优势/安全感”），必须在**同一句**用具体动作或可观察表现讲清楚；数字和生活名词只是辅助、不能单独算具体。检查器会标出这类句子。
    - **不得换词重复（category 重复，warning）:** 同一个判断不能换词重复；每段都要提供新信息，高度相似的连续年份要合并。
-   - **事实边界（category 越界，error）:** ① facts 只支持“责任/职位机会”时不得扩写成“升职、加薪”，只有输入 facts 明确含收入/薪资变化才可写加薪；不能把“机会增加”写成“结果一定发生”。② facts 无群体比较数据时禁用“比同龄人/比大多数人/比别人更强”；性格倾向不得扩写成“肯定能做好/一定做得出来”，须区分“愿意做/可能擅长”与“实际能否完成”。③ 引擎不知用户现实经历，第3部分场景必须用“例如/可能出现/如果以后/常见表现可能是”等条件表达，不得认定用户已上班/创业/合伙/结婚/异地/买房/负债。④ 事业正文给“参考方向”时最多 3 类、每类最多 3 个普通人熟悉的岗位例子，并注明“只是参考、非唯一”；完整五行行业映射只放第 6 部分。
+   - **事实边界（category 越界，error）:** ① facts 只支持“责任/职位机会”时不得扩写成“升职、加薪”，只有输入 facts 明确含收入/薪资变化才可写加薪；不能把“机会增加”写成“结果一定发生”。② facts 无群体比较数据时禁用“比同龄人/比大多数人/比别人更强”；性格倾向不得扩写成“肯定能做好/一定做得出来”，须区分“愿意做/可能擅长”与“实际能否完成”。③ 引擎不知用户现实经历，第3部分场景必须用“例如/可能出现/如果以后/常见表现可能是”等条件表达，不得认定用户已上班/创业/合伙/结婚/异地/买房/负债；用户已自述的现实可直接引用，但仍不得写成命盘证明。④ 事业默认正文不给行业/岗位映射表；不展示五行行业或喜用推荐（ADR 0021）。
    - **不得靠删内容逃避检查:** 不得压缩成几句空洞短句、不得删掉与问题相关的风险、时间或现实建议，也不得用另一批同义抽象词替换黑话。限制只在它确实影响当前结论时自然说明；用户明确要求技术细节时，才另行展示来源与盘面依据。
 5. **Channel A — full raw charts** from `chart.json`, verbatim (never omit, round away, or re-derive):
    - **西方占星 (Western):** ascendant + MC (when time known), then every planet with `sign`,

@@ -12,10 +12,12 @@
 
 ## Context
 
-IQ-4H records `BLOCKED_SOURCE_ADMISSION` for the reviewed-answer-examples criterion: today
-there is no source-admitted visible BaZi career claim, because the existing text claims depend
-on rule content (pattern 格局, useful-god industry matching) that has not passed source
-admission. The bazi-career runtime entry therefore emits structured records only. Separately,
+IQ-4H records `BLOCKED_SOURCE_ADMISSION` for the reviewed-answer-examples criterion: the
+existing full career text claims depend on rule content (pattern 格局, useful-god industry
+matching) that has not passed source admission. ADR 0021 later admitted exactly one narrow
+frozen ten-god cultural reference for the default career body — that is not a complete career
+answer and does not lift the reviewed-answer-examples block. The bazi-career runtime entry
+therefore emits structured records only. Separately,
 the owner has confirmed a product direction: career guidance for users must exist eventually,
 but it must never be presented as derived from BaZi structure, and clinical or screening
 capabilities must never feed it.
@@ -34,7 +36,8 @@ provenance.
 
 1. **T — TraditionalStructureLayer.** Inputs: provider-derived chart facts and admitted
    traditional structural claims or traditional-culture background only (today: the structured
-   bazi-career records; zero admitted visible text claims). Allowed outputs: structural
+   bazi-career records; one narrow ADR 0021 ten-god cultural reference only — no pattern,
+   useful-god, or industry text claims). Allowed outputs: structural
    statements and traditional-culture background. Forbidden outputs: career advice, career or
    industry fit, personality or tendency statements, strong/weak or pattern judgments, any
    prediction or action directive.
@@ -92,7 +95,8 @@ provenance.
 - No fixed "讲人话"-style templates: composition ordering stays flexible while every unit
   keeps its provenance; where a traditional term appears, its conditional meaning must be
   adjacent — but this ADR grants **no new traditional-term visibility** (that remains governed
-  by source admission).
+  by source admission). The only later exception is the narrow frozen ten-god cultural reference
+  in [ADR 0021](0021-ten-god-cultural-reference.md); pattern, useful-god, and industry stay out.
 - Career action recommendations must never carry BaZi provenance.
 
 ### 5. Current state and staged plan
