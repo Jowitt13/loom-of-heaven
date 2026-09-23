@@ -16,7 +16,7 @@ import {
   projectAnswerClaimCandidates,
 } from '../../interpret/src/answer-claim-chain.ts';
 import { ResponseViewPlanningError } from '../../interpret/src/response-view.ts';
-import { verifyBaziCareerAnswer } from '../src/bazi-career-answer.ts';
+import { scopedRequiredWarningCodes, verifyBaziCareerAnswer } from '../src/bazi-career-answer.ts';
 import { runAnswerPlan } from '../src/interpret.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
@@ -314,6 +314,51 @@ describe('IQ-4D bazi career answer verification', () => {
       ).toThrow();
     },
   );
+
+  it('keeps hour-pillar officer facts time-sensitive in answer warning scope', () => {
+    const codes = [
+      'TIME_ACCURACY_APPROXIMATE',
+      'SOLAR_TIME_APPROXIMATE',
+      'TIME_UNKNOWN',
+      'NEAR_BOUNDARY',
+      'BAZI_GENDER_REQUIRED',
+    ];
+    const hourOnly = {
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+      evidence: [
+        { kind: 'bazi' as const, ref: 'bazi.pillars.hour.tenGod' },
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+    };
+    const nonHourOnly = {
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+      evidence: [
+        { kind: 'bazi' as const, ref: 'bazi.pillars.year.tenGod' },
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+    };
+    const mixedSameLabel = {
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+      evidence: [
+        { kind: 'bazi' as const, ref: 'bazi.pillars.year.tenGod' },
+        { kind: 'bazi' as const, ref: 'bazi.pillars.hour.tenGod' },
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+    };
+    const hourScoped = scopedRequiredWarningCodes(codes, [hourOnly]);
+    expect(hourScoped).toEqual([
+      'TIME_ACCURACY_APPROXIMATE',
+      'SOLAR_TIME_APPROXIMATE',
+      'TIME_UNKNOWN',
+      'NEAR_BOUNDARY',
+      'BAZI_GENDER_REQUIRED',
+    ]);
+    const nonHourScoped = scopedRequiredWarningCodes(codes, [nonHourOnly]);
+    expect(nonHourScoped).toEqual(['TIME_UNKNOWN', 'NEAR_BOUNDARY', 'BAZI_GENDER_REQUIRED']);
+    const mixedScoped = scopedRequiredWarningCodes(codes, [mixedSameLabel]);
+    expect(mixedScoped).toContain('TIME_ACCURACY_APPROXIMATE');
+    expect(mixedScoped).toContain('SOLAR_TIME_APPROXIMATE');
+  });
 
   it('is deterministic for a fixed clock', () => {
     const { answer, traces } = readyExamples();

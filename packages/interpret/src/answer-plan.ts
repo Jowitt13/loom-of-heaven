@@ -273,10 +273,13 @@ const TIME_SENSITIVE_CAVEAT_RE =
   /出生时间|时辰|宫位|时刻|真太阳时|时间误差|时间未知|需确切|time of day|birth time/i;
 
 const TIME_SENSITIVE_EVIDENCE_RE =
-  /hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
+  /bazi\.pillars\.hour\.|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
 
 /** Whether a selected fact's conclusion can move when time/solar input shifts. */
-export function isTimeSensitiveFact(fact: PublicFact): boolean {
+export function isTimeSensitiveFact(fact: {
+  caveat?: string | undefined;
+  evidence: readonly { kind?: string; ref: string }[];
+}): boolean {
   if (fact.caveat !== undefined && TIME_SENSITIVE_CAVEAT_RE.test(fact.caveat)) return true;
   return fact.evidence.some(
     (evidence) => evidence.kind === 'time' || TIME_SENSITIVE_EVIDENCE_RE.test(evidence.ref),

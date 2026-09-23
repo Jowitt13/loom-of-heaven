@@ -41,6 +41,37 @@ export interface BaziCareerAnswerVerificationResult {
   violations: readonly AnswerViolation[];
 }
 
+/**
+ * Warning codes that still qualify the answer being verified. TIME_UNKNOWN
+ * and NEAR_BOUNDARY stay always material; solar/DST/time-accuracy codes are
+ * required only when a scoped fact is time-sensitive (e.g. hour-pillar ten-god).
+ */
+export function scopedRequiredWarningCodes(
+  requiredWarningCodes: readonly string[],
+  scopedFacts: readonly { caveat?: string; evidence: readonly { ref: string }[] }[],
+): string[] {
+  const hasTimeSensitiveFact = scopedFacts.some((fact) =>
+    isTimeSensitiveFact({
+      caveat: fact.caveat,
+      evidence: fact.evidence.map((evidence) => ({
+        kind: 'bazi' as const,
+        ref: evidence.ref,
+      })),
+    }),
+  );
+  return requiredWarningCodes.filter((code) => {
+    if (code === 'TIME_UNKNOWN' || code === 'NEAR_BOUNDARY') return true;
+    if (
+      code === 'SOLAR_TIME_APPROXIMATE' ||
+      code === 'TIME_ACCURACY_APPROXIMATE' ||
+      code === 'DST_AMBIGUOUS_RESOLVED'
+    ) {
+      return hasTimeSensitiveFact;
+    }
+    return true;
+  });
+}
+
 export function verifyBaziCareerAnswer(
   rawAnswer: unknown,
   rawTraces: readonly unknown[],
@@ -86,18 +117,10 @@ export function verifyBaziCareerAnswer(
         .filter((caveat): caveat is string => caveat !== undefined),
     ),
   ];
-  const hasTimeSensitiveFact = scopedFacts.some(isTimeSensitiveFact);
-  const requiredWarningCodes = journey.answerPlan.requiredWarningCodes.filter((code) => {
-    if (code === 'TIME_UNKNOWN' || code === 'NEAR_BOUNDARY') return true;
-    if (
-      code === 'SOLAR_TIME_APPROXIMATE' ||
-      code === 'TIME_ACCURACY_APPROXIMATE' ||
-      code === 'DST_AMBIGUOUS_RESOLVED'
-    ) {
-      return hasTimeSensitiveFact;
-    }
-    return true;
-  });
+  const requiredWarningCodes = scopedRequiredWarningCodes(
+    journey.answerPlan.requiredWarningCodes,
+    scopedFacts,
+  );
   const validation: AnswerValidationResult = validateAnswer({
     answerPlan: {
       allowedFactIds: scopedFacts.map((fact) => fact.id),

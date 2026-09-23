@@ -194,25 +194,48 @@ export function selectCareerOfficerLabel(tenGods: readonly string[]): string | n
   return names.length === 1 ? names[0]! : null;
 }
 
+export type CareerOfficerPillar = 'year' | 'month' | 'day' | 'hour';
+
+/**
+ * Pillar-resolved officer evidence for the ADR 0021 career reference.
+ * Emits one `bazi.pillars.<pillar>.tenGod` ref per supporting pillar so
+ * time-sensitivity can see an hour-pillar basis (never a `*` wildcard).
+ */
+export function careerOfficerEvidence(
+  placements: ReadonlyArray<{ pillar: CareerOfficerPillar; tenGod: string | null }>,
+): { label: string | null; refs: string[] } {
+  const officers = placements.filter(
+    (p): p is { pillar: CareerOfficerPillar; tenGod: string } =>
+      p.tenGod === '正官' || p.tenGod === '七杀',
+  );
+  const label = selectCareerOfficerLabel(officers.map((p) => p.tenGod));
+  if (label === null) return { label: null, refs: [] };
+  const refs = officers
+    .filter((p) => p.tenGod === label)
+    .map((p) => `bazi.pillars.${p.pillar}.tenGod`);
+  return { label, refs };
+}
+
 function careerFacts(bundle: ChartBundle): InterpretationFact[] {
   const out: InterpretationFact[] = [];
   const b = bundle.bazi;
   if (b) {
     // ADR 0021: career body gets one ten-god cultural reference only. Pattern
     // text must never ride along in this claim (IQ-4H source gate).
-    const officers = [b.pillars.year, b.pillars.month, b.pillars.day, b.pillars.hour]
-      .filter((p): p is NonNullable<typeof p> => p !== null)
-      .map((p) => p.tenGod)
-      .filter((g): g is string => g === '正官' || g === '七杀');
-    const label = selectCareerOfficerLabel(officers);
-    if (label !== null) {
+    const { label, refs } = careerOfficerEvidence([
+      { pillar: 'year', tenGod: b.pillars.year?.tenGod ?? null },
+      { pillar: 'month', tenGod: b.pillars.month?.tenGod ?? null },
+      { pillar: 'day', tenGod: b.pillars.day?.tenGod ?? null },
+      { pillar: 'hour', tenGod: b.pillars.hour?.tenGod ?? null },
+    ]);
+    if (label !== null && refs.length > 0) {
       const gloss = CAREER_TEN_GOD_GLOSS[label] ?? label;
       out.push(
         fact(
           'career',
           `命盘里有「${label}」这一传统十神`,
           [
-            ev('bazi', 'bazi.pillars.*.tenGod', label),
+            ...refs.map((ref) => ev('bazi', ref, label)),
             // The short gloss is rule-backed (渊海子平 十神象义, FROZEN_LEGACY).
             // Recording only the provider tenGod would hide that dependency.
             ev('bazi-rule', 'bazi-rule/ten-gods/xiang-yi', gloss),

@@ -56665,20 +56665,33 @@ function selectCareerOfficerLabel(tenGods) {
   const names = [...new Set(tenGods)].filter((g) => g === "\u6B63\u5B98" || g === "\u4E03\u6740");
   return names.length === 1 ? names[0] : null;
 }
+function careerOfficerEvidence(placements) {
+  const officers = placements.filter(
+    (p) => p.tenGod === "\u6B63\u5B98" || p.tenGod === "\u4E03\u6740"
+  );
+  const label = selectCareerOfficerLabel(officers.map((p) => p.tenGod));
+  if (label === null) return { label: null, refs: [] };
+  const refs = officers.filter((p) => p.tenGod === label).map((p) => `bazi.pillars.${p.pillar}.tenGod`);
+  return { label, refs };
+}
 function careerFacts(bundle) {
   const out = [];
   const b = bundle.bazi;
   if (b) {
-    const officers = [b.pillars.year, b.pillars.month, b.pillars.day, b.pillars.hour].filter((p) => p !== null).map((p) => p.tenGod).filter((g) => g === "\u6B63\u5B98" || g === "\u4E03\u6740");
-    const label = selectCareerOfficerLabel(officers);
-    if (label !== null) {
+    const { label, refs } = careerOfficerEvidence([
+      { pillar: "year", tenGod: b.pillars.year?.tenGod ?? null },
+      { pillar: "month", tenGod: b.pillars.month?.tenGod ?? null },
+      { pillar: "day", tenGod: b.pillars.day?.tenGod ?? null },
+      { pillar: "hour", tenGod: b.pillars.hour?.tenGod ?? null }
+    ]);
+    if (label !== null && refs.length > 0) {
       const gloss = CAREER_TEN_GOD_GLOSS[label] ?? label;
       out.push(
         fact(
           "career",
           `\u547D\u76D8\u91CC\u6709\u300C${label}\u300D\u8FD9\u4E00\u4F20\u7EDF\u5341\u795E`,
           [
-            ev("bazi", "bazi.pillars.*.tenGod", label),
+            ...refs.map((ref) => ev("bazi", ref, label)),
             // The short gloss is rule-backed (渊海子平 十神象义, FROZEN_LEGACY).
             // Recording only the provider tenGod would hide that dependency.
             ev("bazi-rule", "bazi-rule/ten-gods/xiang-yi", gloss)
@@ -57373,7 +57386,7 @@ var ALWAYS_MATERIAL_WARNING_CODES = /* @__PURE__ */ new Set([
   "NEAR_BOUNDARY"
 ]);
 var TIME_SENSITIVE_CAVEAT_RE = /出生时间|时辰|宫位|时刻|真太阳时|时间误差|时间未知|需确切|time of day|birth time/i;
-var TIME_SENSITIVE_EVIDENCE_RE = /hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
+var TIME_SENSITIVE_EVIDENCE_RE = /bazi\.pillars\.hour\.|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
 function isTimeSensitiveFact(fact2) {
   if (fact2.caveat !== void 0 && TIME_SENSITIVE_CAVEAT_RE.test(fact2.caveat)) return true;
   return fact2.evidence.some(
