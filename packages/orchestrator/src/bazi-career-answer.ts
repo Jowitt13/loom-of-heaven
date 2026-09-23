@@ -44,17 +44,22 @@ export interface BaziCareerAnswerVerificationResult {
 /**
  * Warning codes that still qualify the answer being verified. TIME_UNKNOWN
  * and NEAR_BOUNDARY stay always material; solar/DST/time-accuracy codes are
- * required only when a scoped fact is time-sensitive (e.g. hour-pillar ten-god).
+ * required only when a scoped fact is time-sensitive (e.g. hour-pillar ten-god
+ * or kind: time evidence).
  */
 export function scopedRequiredWarningCodes(
   requiredWarningCodes: readonly string[],
-  scopedFacts: readonly { caveat?: string; evidence: readonly { ref: string }[] }[],
+  scopedFacts: readonly {
+    caveat?: string;
+    evidence: readonly { kind?: string; ref: string }[];
+  }[],
 ): string[] {
   const hasTimeSensitiveFact = scopedFacts.some((fact) =>
     isTimeSensitiveFact({
       caveat: fact.caveat,
+      // Keep the original evidence kind so kind: 'time' stays time-sensitive.
       evidence: fact.evidence.map((evidence) => ({
-        kind: 'bazi' as const,
+        kind: evidence.kind,
         ref: evidence.ref,
       })),
     }),

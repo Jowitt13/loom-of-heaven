@@ -360,6 +360,35 @@ describe('IQ-4D bazi career answer verification', () => {
     expect(mixedScoped).toContain('SOLAR_TIME_APPROXIMATE');
   });
 
+  it('preserves kind: time evidence as time-sensitive even without hour/house refs', () => {
+    const codes = [
+      'TIME_ACCURACY_APPROXIMATE',
+      'SOLAR_TIME_APPROXIMATE',
+      'TIME_UNKNOWN',
+      'NEAR_BOUNDARY',
+      'BAZI_GENDER_REQUIRED',
+    ];
+    const timeKindFact = {
+      evidence: [{ kind: 'time' as const, ref: 'input.ruleGender' }],
+    };
+    const plainBaziFact = {
+      evidence: [
+        { kind: 'bazi' as const, ref: 'bazi.pillars.year.tenGod' },
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+    };
+    // Positive: kind: time counts as time-sensitive even when the ref has no
+    // hour/house keyword (regression: kind must not be forced to bazi).
+    expect(scopedRequiredWarningCodes(codes, [timeKindFact])).toEqual(codes);
+    // Negative: non-time-sensitive ten-god fact still drops solar/time-accuracy.
+    expect(scopedRequiredWarningCodes(codes, [plainBaziFact])).toEqual([
+      'TIME_UNKNOWN',
+      'NEAR_BOUNDARY',
+      'BAZI_GENDER_REQUIRED',
+    ]);
+  });
+
   it('is deterministic for a fixed clock', () => {
     const { answer, traces } = readyExamples();
     expect(
