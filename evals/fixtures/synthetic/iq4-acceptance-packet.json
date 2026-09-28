@@ -50,7 +50,7 @@
     "reason": "ADR 0021 仅窄准入一条冻结十神文化参考（短释 + 非职业预言 caveat），这不是完整职业答案，也不等于 reviewed-answer-examples 已通过。格局（bazi-rule/pattern）与喜用神行业匹配（bazi-rule/industry/wu-xing）等仍未准入；bazi-career 运行时入口仍只输出结构化记录。reviewed-answer-examples 保持 BLOCKED_SOURCE_ADMISSION；四宿主技术验收与本状态无关，不能解除它。解除需要针对完整职业答案的来源准入裁决及其后的独立准入切片。"
   },
   "hostAcceptance": {
-    "status": "NOT_EXECUTED",
+    "status": "EXECUTED",
     "statusVocabulary": ["NOT_EXECUTED", "EXECUTED"],
     "packageCommand": "pnpm run package:hosts",
     "verifyCommand": "pnpm run verify:hosts",
@@ -85,47 +85,47 @@
       },
       {
         "hostId": "qoder",
-        "status": "NOT_EXECUTED",
+        "status": "EXECUTED",
         "engineSelfCheck": "node scripts/loom-chart.mjs verify",
         "result": {
-          "exitCode": null,
-          "outputDigest": null,
-          "executedAtISO": null,
-          "notes": "",
-          "sourceCommit": null,
+          "exitCode": 0,
+          "outputDigest": "sha256:fed1bcebb409f25799f85a1fa7c67e777629e0f2e5db4bb04b446cb55daae263",
+          "executedAtISO": "2026-09-28",
+          "notes": "Qoder Skill tool loaded the installed candidate after local migrate. The installed 21-file tree matched the pinned ZIP byte for byte; verify and bazi-career exited 0 with empty stderr. Raw evidence is retained outside Git under iq4-host-evidence/qoder-v4-20260928T171811Z. An initial installed-tree hash check ran from the wrong directory, then passed 21/21 from the correct directory. This is technical host acceptance only.",
+          "sourceCommit": "84f51027826ba138dcf219136a606653aa02d15e",
           "candidateSourceCommit": null,
-          "candidateSha256": null,
-          "inputDigest": null
+          "candidateSha256": "sha256:4a220d5659023a23ecaa4031baa0c8986ce6c6ff8626f8638a2af65567b3984b",
+          "inputDigest": "sha256:a684a27ed7bfa4d5a5770afe806b1c391dc63318ae0862af3c84f77adb40952d"
         }
       },
       {
         "hostId": "workbuddy",
-        "status": "NOT_EXECUTED",
+        "status": "EXECUTED",
         "engineSelfCheck": "node scripts/loom-chart.mjs verify",
         "result": {
-          "exitCode": null,
-          "outputDigest": null,
-          "executedAtISO": null,
-          "notes": "",
-          "sourceCommit": null,
+          "exitCode": 0,
+          "outputDigest": "sha256:fed1bcebb409f25799f85a1fa7c67e777629e0f2e5db4bb04b446cb55daae263",
+          "executedAtISO": "2026-09-28",
+          "notes": "WorkBuddy Skill was triggered in its desktop session. The installed 21-file tree matched the pinned ZIP byte for byte; verify and bazi-career exited 0 with empty stderr. The first local migrate failed with EPERM and rolled back; an unchanged retry succeeded, leaving no backup or staging residue. The documented migrate fallback was used because native ZIP import was unavailable. Raw evidence, including both install attempts, is retained outside Git under iq4-host-evidence/workbuddy-v4-20260929T011656. This is technical host acceptance only.",
+          "sourceCommit": "84f51027826ba138dcf219136a606653aa02d15e",
           "candidateSourceCommit": null,
-          "candidateSha256": null,
-          "inputDigest": null
+          "candidateSha256": "sha256:fecd2ba0ac7a2a097073f650f998fd8d9a25fbcde29585264699939ddb57573d",
+          "inputDigest": "sha256:a684a27ed7bfa4d5a5770afe806b1c391dc63318ae0862af3c84f77adb40952d"
         }
       },
       {
         "hostId": "doubao",
-        "status": "NOT_EXECUTED",
+        "status": "EXECUTED",
         "engineSelfCheck": "node scripts/loom-chart.mjs verify",
         "result": {
-          "exitCode": null,
-          "outputDigest": null,
-          "executedAtISO": null,
-          "notes": "",
-          "sourceCommit": null,
+          "exitCode": 0,
+          "outputDigest": "sha256:fed1bcebb409f25799f85a1fa7c67e777629e0f2e5db4bb04b446cb55daae263",
+          "executedAtISO": "2026-09-28",
+          "notes": "The owner confirms this acceptance was performed in a logged-in Doubao host session. The candidate was extracted into the user skills directory, and the installed 21-file tree matched the pinned ZIP byte for byte. Direct Node CLI capture from that installation produced verify and bazi-career exit 0 with empty stderr and the expected stdout digest. The original metadata says the desktop GUI import was not used or observed; this record does not claim GUI import or a separately logged Skill-tool invocation. An initial PowerShell capture added BOM and CRLF, so raw bytes were recaptured with Node. Raw evidence is retained outside Git under iq4-host-evidence/doubao-v4-20260929-011811. This is owner-attested technical host acceptance only.",
+          "sourceCommit": "84f51027826ba138dcf219136a606653aa02d15e",
           "candidateSourceCommit": null,
-          "candidateSha256": null,
-          "inputDigest": null
+          "candidateSha256": "sha256:c2eb6a7a0fa14905764aefd03b7783f85ff18d272e3df1281a06b998084a2394",
+          "inputDigest": "sha256:a684a27ed7bfa4d5a5770afe806b1c391dc63318ae0862af3c84f77adb40952d"
         }
       }
     ]
