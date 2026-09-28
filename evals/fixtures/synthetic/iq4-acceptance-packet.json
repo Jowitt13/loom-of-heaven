@@ -60,7 +60,7 @@
       "workbuddy": "sha256:fecd2ba0ac7a2a097073f650f998fd8d9a25fbcde29585264699939ddb57573d",
       "doubao": "sha256:c2eb6a7a0fa14905764aefd03b7783f85ff18d272e3df1281a06b998084a2394"
     },
-    "evidenceRule": "Every EXECUTED record copies the IQ-4F entry anchor into result.sourceCommit and binds the synthetic input, recomputed stdout, exit code 0, date, and notes. Codex, whose install mode is repo, must bind result.candidateSourceCommit to the verified checkout and leave candidateSha256 null. Qoder, WorkBuddy, and Doubao must bind result.candidateSha256 to their pinned installed ZIP digest and leave candidateSourceCommit null. Rebuilding candidates invalidates earlier host evidence (release checklist A4). Four-host technical acceptance cannot lift BLOCKED_SOURCE_ADMISSION.",
+    "evidenceRule": "Every EXECUTED record copies the IQ-4F entry anchor into result.sourceCommit and binds the synthetic input, recomputed stdout, exit code 0, date, and notes. Codex, whose install mode is repo, must bind result.candidateSourceCommit to the verified checkout and leave candidateSha256 null. Qoder, WorkBuddy, and Doubao must bind result.candidateSha256 to their pinned installed ZIP digest and leave candidateSourceCommit null. The aggregate status remains NOT_EXECUTED until all four host records are evidenced. Rebuilding candidates invalidates earlier host evidence (release checklist A4). Four-host technical acceptance cannot lift BLOCKED_SOURCE_ADMISSION.",
     "reviewQuestions": [
       "bazi-career 是否退出码 0 且输出 digest 与重算期望一致",
       "输出是否只含 clarification-plan/v1 + response-view/v1 且 system 为 bazi",
@@ -70,17 +70,17 @@
     "records": [
       {
         "hostId": "codex",
-        "status": "NOT_EXECUTED",
+        "status": "EXECUTED",
         "engineSelfCheck": "node scripts/loom-chart.mjs verify",
         "result": {
-          "exitCode": null,
-          "outputDigest": null,
-          "executedAtISO": null,
-          "notes": "",
-          "sourceCommit": null,
-          "candidateSourceCommit": null,
+          "exitCode": 0,
+          "outputDigest": "sha256:fed1bcebb409f25799f85a1fa7c67e777629e0f2e5db4bb04b446cb55daae263",
+          "executedAtISO": "2026-09-28",
+          "notes": "Codex desktop task on Windows, Node v24.15.0. Verified the candidate built from commit 0473a93; verify and bazi-career both exited 0 with empty stderr. Raw stdout, stderr, and execution metadata are retained outside Git under iq4-host-evidence/codex-0473a93-20260928. This is technical CLI acceptance, not a prose or career-outcome assessment.",
+          "sourceCommit": "84f51027826ba138dcf219136a606653aa02d15e",
+          "candidateSourceCommit": "0473a93beda05739d257a6870e19d1ece43f4c97",
           "candidateSha256": null,
-          "inputDigest": null
+          "inputDigest": "sha256:a684a27ed7bfa4d5a5770afe806b1c391dc63318ae0862af3c84f77adb40952d"
         }
       },
       {
