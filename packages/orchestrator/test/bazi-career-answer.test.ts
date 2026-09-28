@@ -16,7 +16,7 @@ import {
   projectAnswerClaimCandidates,
 } from '../../interpret/src/answer-claim-chain.ts';
 import { ResponseViewPlanningError } from '../../interpret/src/response-view.ts';
-import { verifyBaziCareerAnswer } from '../src/bazi-career-answer.ts';
+import { scopedRequiredWarningCodes, verifyBaziCareerAnswer } from '../src/bazi-career-answer.ts';
 import { runAnswerPlan } from '../src/interpret.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
@@ -72,24 +72,14 @@ function journeyInput(birthInput: BirthInput, overrides: Parameters<typeof plann
   return { birthInput, planningInput: planningInput(overrides) };
 }
 
+// Birth-only positive example: one cultural reference + non-prophecy caveat.
+// No action advice — practices require user-stated reality (ADR 0021).
+// No unrelated solar-time tip: the scoped ten-god claim is not time-sensitive.
 const OFFICER_PARAGRAPH =
-  '这个盘的官杀比较集中，通常意味着规则、责任和体制类的工作主题更容易落在你身上。' +
-  '官杀说的是事业倾向的结构，不是职业预言；它更像一个背景条件：当你接的任务边界清楚、' +
-  '有明确的交付标准时，这类结构往往更容易发挥。可以把手头的事按「规则清晰」和「需要自己定规则」' +
-  '分成两列，各写三件具体的事，看看哪一列做完更有成就感，再决定下一段时间往管理协调还是专业深耕多投入。';
+  '命盘里有「七杀」这一传统十神，传统上常联到权威、压力、竞争一类主题，只作文化背景。' +
+  '官杀说的是事业倾向的结构，不是职业预言。';
 
-const INDUSTRY_PARAGRAPH =
-  '行业大类上，规则按喜用五行给出的参考方向，更适合当作筛选条件而不是答案：' +
-  '它不决定你能做什么，也不替你预测行情。具体可以这样用——列出你接触过的三到五个领域，' +
-  '把和参考方向重合的挑出来，再各自找一个真实在做的人聊半小时，问问他们日常一半时间在处理什么；' +
-  '聊完之后哪一行让你还想继续追问，就先投一份简历或接一个小项目试试，用真实反馈修正方向。';
-
-const WARNING_PARAGRAPH =
-  '需要说明：当前时间按真太阳时近似处理，涉及时辰的结论可能有小幅变化；' +
-  '如能提供更精确的出生时间，时柱相关的部分可以重新计算后再看。';
-
-const CAVEAT_FACT_7 = '官杀仅示事业/责任倾向的结构，非职业预言。';
-const CAVEAT_FACT_96 = '行业为参考方向，非唯一；需结合兴趣与现实。';
+const CAVEAT_FACT_8 = '官杀仅示事业/责任倾向的结构，非职业预言。';
 
 function journeyClaims(): ApprovedAnswerClaim[] {
   const { publicResult, answerPlan } = runAnswerPlan(syntheticInput, {
@@ -146,29 +136,14 @@ function answerDraft(): ReturnType<typeof ReadingDraft.parse> {
         paragraphs: [
           {
             text: OFFICER_PARAGRAPH,
-            sourceFactIds: ['fact-7'],
+            sourceFactIds: ['fact-8'],
             constraintRefs: [{ kind: 'caveat', index: 0 }],
-          },
-          {
-            text: INDUSTRY_PARAGRAPH,
-            sourceFactIds: ['fact-96'],
-            constraintRefs: [{ kind: 'caveat', index: 1 }],
-          },
-          {
-            text: WARNING_PARAGRAPH,
-            sourceFactIds: [],
-            // The plan records SOLAR_TIME_APPROXIMATE once per qualifying
-            // system, so the disclosure references every recorded entry.
-            constraintRefs: [
-              { kind: 'warning', index: 0 },
-              { kind: 'warning', index: 1 },
-            ],
           },
         ],
       },
     ],
-    caveatsExpressed: [CAVEAT_FACT_7, CAVEAT_FACT_96],
-    warningsDisclosed: ['SOLAR_TIME_APPROXIMATE'],
+    caveatsExpressed: [CAVEAT_FACT_8],
+    warningsDisclosed: [],
   });
 }
 
@@ -176,10 +151,10 @@ function readyExamples(): {
   answer: ReturnType<typeof ReadingDraft.parse>;
   traces: NarrativeTraceValue[];
 } {
-  const [officer, industry] = journeyClaims();
+  const [officer] = journeyClaims();
   return {
     answer: answerDraft(),
-    traces: [traceFor(officer!, 1, OFFICER_PARAGRAPH), traceFor(industry!, 2, INDUSTRY_PARAGRAPH)],
+    traces: [traceFor(officer!, 1, OFFICER_PARAGRAPH)],
   };
 }
 
@@ -201,9 +176,9 @@ describe('IQ-4D bazi career answer verification', () => {
   it('rejects an answer grounded in a cross-system fact outside the single-system view', () => {
     const { traces } = readyExamples();
     const crossSystem = answerDraft();
-    crossSystem.sections[0]!.paragraphs[1] = {
-      text: INDUSTRY_PARAGRAPH,
-      sourceFactIds: ['fact-8'],
+    crossSystem.sections[0]!.paragraphs[0] = {
+      text: OFFICER_PARAGRAPH,
+      sourceFactIds: ['fact-9'],
     };
     const result = verifyBaziCareerAnswer(crossSystem, traces, journeyInput(syntheticInput), {
       now: FIXED,
@@ -216,11 +191,11 @@ describe('IQ-4D bazi career answer verification', () => {
   it('rejects an answer that drops a material caveat of a delivered claim', () => {
     const { traces } = readyExamples();
     const incomplete = answerDraft();
-    incomplete.sections[0]!.paragraphs[1] = {
-      text: INDUSTRY_PARAGRAPH,
-      sourceFactIds: ['fact-96'],
+    incomplete.sections[0]!.paragraphs[0] = {
+      text: OFFICER_PARAGRAPH,
+      sourceFactIds: ['fact-8'],
     };
-    incomplete.caveatsExpressed = [CAVEAT_FACT_7];
+    incomplete.caveatsExpressed = [];
     const result = verifyBaziCareerAnswer(incomplete, traces, journeyInput(syntheticInput), {
       now: FIXED,
     });
@@ -233,7 +208,11 @@ describe('IQ-4D bazi career answer verification', () => {
   it('rejects a declared caveat that no paragraph actually expresses', () => {
     const { traces } = readyExamples();
     const unbacked = answerDraft();
-    unbacked.sections[0]!.paragraphs[1] = { text: INDUSTRY_PARAGRAPH, sourceFactIds: ['fact-96'] };
+    unbacked.sections[0]!.paragraphs[0] = {
+      text: OFFICER_PARAGRAPH,
+      sourceFactIds: ['fact-8'],
+    };
+    unbacked.caveatsExpressed = [CAVEAT_FACT_8];
     const result = verifyBaziCareerAnswer(unbacked, traces, journeyInput(syntheticInput), {
       now: FIXED,
     });
@@ -244,18 +223,19 @@ describe('IQ-4D bazi career answer verification', () => {
   });
 
   it('rejects a paragraph whose conclusion is not backed by any trace', () => {
-    const [officer] = journeyClaims();
     const { answer } = readyExamples();
-    const result = verifyBaziCareerAnswer(
-      answer,
-      [traceFor(officer!, 1, OFFICER_PARAGRAPH)],
-      journeyInput(syntheticInput),
-      { now: FIXED },
-    );
+    answer.sections[0]!.paragraphs[0] = {
+      text: `${OFFICER_PARAGRAPH}另加一句没核过的话。`,
+      sourceFactIds: ['fact-8'],
+      constraintRefs: [{ kind: 'caveat', index: 0 }],
+    };
+    const result = verifyBaziCareerAnswer(answer, [], journeyInput(syntheticInput), {
+      now: FIXED,
+    });
     expect(result.ok).toBe(false);
     expect(result.issues).toContainEqual({
       code: 'UNSUPPORTED_PARAGRAPH',
-      path: '$.readingDraft.sections[0].paragraphs[1]',
+      path: '$.readingDraft.sections[0].paragraphs[0]',
     });
   });
 
@@ -284,7 +264,7 @@ describe('IQ-4D bazi career answer verification', () => {
     const draft = answerDraft();
     draft.sections[0]!.paragraphs[0] = {
       text: '专业依据\n官杀见于月柱。',
-      sourceFactIds: ['fact-7'],
+      sourceFactIds: ['fact-8'],
       constraintRefs: [{ kind: 'caveat', index: 0 }],
     };
     const result = verifyBaziCareerAnswer(draft, [leak], journeyInput(syntheticInput), {
@@ -297,35 +277,116 @@ describe('IQ-4D bazi career answer verification', () => {
     });
   });
 
-  it('fails closed on degraded and unresolved journeys', { timeout: 30_000 }, () => {
-    const { answer, traces } = readyExamples();
-    expect(() =>
-      verifyBaziCareerAnswer(
-        answer,
-        traces,
-        journeyInput(unknownTimeInput, { birthTimeReliability: 'unavailable' }),
-        { now: FIXED },
-      ),
-    ).toThrow(ResponseViewPlanningError);
-    expect(() =>
-      verifyBaziCareerAnswer(
-        answer,
-        traces,
-        journeyInput(syntheticInput, {
-          rulesetVariantSensitiveClaims: true,
-          rulesetVariant: 'unavailable',
-        }),
-        { now: FIXED },
-      ),
-    ).toThrow(ResponseViewPlanningError);
-    expect(() =>
-      verifyBaziCareerAnswer(
-        answer,
-        traces,
-        journeyInput(syntheticInput, { requestedDepth: null }),
-        { now: FIXED },
-      ),
-    ).toThrow();
+  it(
+    'fails closed on degraded unknown-time journeys and on an unavailable rule profile',
+    { timeout: 30_000 },
+    () => {
+      const { answer, traces } = readyExamples();
+      expect(() =>
+        verifyBaziCareerAnswer(
+          answer,
+          traces,
+          journeyInput(unknownTimeInput, { birthTimeReliability: 'unavailable' }),
+          { now: FIXED },
+        ),
+      ).toThrow(ResponseViewPlanningError);
+      // The ADR 0021 short gloss cites bazi-rule/ten-gods/xiang-yi, so an
+      // unavailable rule profile degrades the cultural reference instead of
+      // pretending it is provider-only.
+      expect(() =>
+        verifyBaziCareerAnswer(
+          answer,
+          traces,
+          journeyInput(syntheticInput, {
+            rulesetVariantSensitiveClaims: true,
+            rulesetVariant: 'unavailable',
+          }),
+          { now: FIXED },
+        ),
+      ).toThrow(ResponseViewPlanningError);
+      expect(() =>
+        verifyBaziCareerAnswer(
+          answer,
+          traces,
+          journeyInput(syntheticInput, { requestedDepth: null }),
+          { now: FIXED },
+        ),
+      ).toThrow();
+    },
+  );
+
+  it('keeps hour-pillar officer facts time-sensitive in answer warning scope', () => {
+    const codes = [
+      'TIME_ACCURACY_APPROXIMATE',
+      'SOLAR_TIME_APPROXIMATE',
+      'TIME_UNKNOWN',
+      'NEAR_BOUNDARY',
+      'BAZI_GENDER_REQUIRED',
+    ];
+    const hourOnly = {
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+      evidence: [
+        { kind: 'bazi' as const, ref: 'bazi.pillars.hour.tenGod' },
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+    };
+    const nonHourOnly = {
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+      evidence: [
+        { kind: 'bazi' as const, ref: 'bazi.pillars.year.tenGod' },
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+    };
+    const mixedSameLabel = {
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+      evidence: [
+        { kind: 'bazi' as const, ref: 'bazi.pillars.year.tenGod' },
+        { kind: 'bazi' as const, ref: 'bazi.pillars.hour.tenGod' },
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+    };
+    const hourScoped = scopedRequiredWarningCodes(codes, [hourOnly]);
+    expect(hourScoped).toEqual([
+      'TIME_ACCURACY_APPROXIMATE',
+      'SOLAR_TIME_APPROXIMATE',
+      'TIME_UNKNOWN',
+      'NEAR_BOUNDARY',
+      'BAZI_GENDER_REQUIRED',
+    ]);
+    const nonHourScoped = scopedRequiredWarningCodes(codes, [nonHourOnly]);
+    expect(nonHourScoped).toEqual(['TIME_UNKNOWN', 'NEAR_BOUNDARY', 'BAZI_GENDER_REQUIRED']);
+    const mixedScoped = scopedRequiredWarningCodes(codes, [mixedSameLabel]);
+    expect(mixedScoped).toContain('TIME_ACCURACY_APPROXIMATE');
+    expect(mixedScoped).toContain('SOLAR_TIME_APPROXIMATE');
+  });
+
+  it('preserves kind: time evidence as time-sensitive even without hour/house refs', () => {
+    const codes = [
+      'TIME_ACCURACY_APPROXIMATE',
+      'SOLAR_TIME_APPROXIMATE',
+      'TIME_UNKNOWN',
+      'NEAR_BOUNDARY',
+      'BAZI_GENDER_REQUIRED',
+    ];
+    const timeKindFact = {
+      evidence: [{ kind: 'time' as const, ref: 'input.ruleGender' }],
+    };
+    const plainBaziFact = {
+      evidence: [
+        { kind: 'bazi' as const, ref: 'bazi.pillars.year.tenGod' },
+        { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+      ],
+      caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+    };
+    // Positive: kind: time counts as time-sensitive even when the ref has no
+    // hour/house keyword (regression: kind must not be forced to bazi).
+    expect(scopedRequiredWarningCodes(codes, [timeKindFact])).toEqual(codes);
+    // Negative: non-time-sensitive ten-god fact still drops solar/time-accuracy.
+    expect(scopedRequiredWarningCodes(codes, [plainBaziFact])).toEqual([
+      'TIME_UNKNOWN',
+      'NEAR_BOUNDARY',
+      'BAZI_GENDER_REQUIRED',
+    ]);
   });
 
   it('is deterministic for a fixed clock', () => {

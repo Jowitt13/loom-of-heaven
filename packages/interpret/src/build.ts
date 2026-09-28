@@ -174,25 +174,76 @@ function characterFacts(
   return out;
 }
 
-function careerFacts(bundle: ChartBundle, rules: BaziInterpretation | null): InterpretationFact[] {
+/**
+ * ADR 0021 career-only short glosses. Deliberately NOT the full
+ * `TEN_GOD_MEANINGS` strings (no 需制化为权, no 女命之夫星). Words are subsets of
+ * the frozen 《渊海子平》 lines in `ten-gods.ts`.
+ */
+const CAREER_TEN_GOD_GLOSS: Record<string, string> = {
+  正官: '责任、自律、地位',
+  七杀: '权威、压力、竞争',
+};
+
+/**
+ * At most one ten-god label (ADR 0021). When 正官 and 七杀 co-occur there is
+ * no principled single winner — omit the cultural reference rather than pick.
+ * Non-officer ten-gods never qualify.
+ */
+export function selectCareerOfficerLabel(tenGods: readonly string[]): string | null {
+  const names = [...new Set(tenGods)].filter((g) => g === '正官' || g === '七杀');
+  return names.length === 1 ? names[0]! : null;
+}
+
+export type CareerOfficerPillar = 'year' | 'month' | 'day' | 'hour';
+
+/**
+ * Pillar-resolved officer evidence for the ADR 0021 career reference.
+ * Emits one `bazi.pillars.<pillar>.tenGod` ref per supporting pillar so
+ * time-sensitivity can see an hour-pillar basis (never a `*` wildcard).
+ */
+export function careerOfficerEvidence(
+  placements: ReadonlyArray<{ pillar: CareerOfficerPillar; tenGod: string | null }>,
+): { label: string | null; refs: string[] } {
+  const officers = placements.filter(
+    (p): p is { pillar: CareerOfficerPillar; tenGod: string } =>
+      p.tenGod === '正官' || p.tenGod === '七杀',
+  );
+  const label = selectCareerOfficerLabel(officers.map((p) => p.tenGod));
+  if (label === null) return { label: null, refs: [] };
+  const refs = officers
+    .filter((p) => p.tenGod === label)
+    .map((p) => `bazi.pillars.${p.pillar}.tenGod`);
+  return { label, refs };
+}
+
+function careerFacts(bundle: ChartBundle): InterpretationFact[] {
   const out: InterpretationFact[] = [];
   const b = bundle.bazi;
   if (b) {
-    const officers = [b.pillars.year, b.pillars.month, b.pillars.day, b.pillars.hour]
-      .filter((p): p is NonNullable<typeof p> => p !== null)
-      .map((p) => p.tenGod)
-      .filter((g): g is string => g === '正官' || g === '七杀');
-    const pattern = baziRuleClaim(rules, 'pattern');
-    if (officers.length > 0 || pattern) {
+    // ADR 0021: career body gets one ten-god cultural reference only. Pattern
+    // text must never ride along in this claim (IQ-4H source gate).
+    const { label, refs } = careerOfficerEvidence([
+      { pillar: 'year', tenGod: b.pillars.year?.tenGod ?? null },
+      { pillar: 'month', tenGod: b.pillars.month?.tenGod ?? null },
+      { pillar: 'day', tenGod: b.pillars.day?.tenGod ?? null },
+      { pillar: 'hour', tenGod: b.pillars.hour?.tenGod ?? null },
+    ]);
+    if (label !== null && refs.length > 0) {
+      const gloss = CAREER_TEN_GOD_GLOSS[label] ?? label;
       out.push(
         fact(
           'career',
-          `事业相关十神（官杀）：${officers.length > 0 ? [...new Set(officers)].join('、') : '未透干'}${pattern ? `；${pattern}` : ''}`,
+          `命盘里有「${label}」这一传统十神`,
           [
-            ev('bazi', 'bazi.pillars.*.tenGod', [...new Set(officers)].join('、') || '无'),
-            ...(rules ? [ev('bazi-rule', 'bazi-rule/pattern', pattern ?? '')] : []),
+            ...refs.map((ref) => ev('bazi', ref, label)),
+            // The short gloss is rule-backed (渊海子平 十神象义, FROZEN_LEGACY).
+            // Recording only the provider tenGod would hide that dependency.
+            ev('bazi-rule', 'bazi-rule/ten-gods/xiang-yi', gloss),
           ],
-          { caveat: '官杀仅示事业/责任倾向的结构，非职业预言。' },
+          {
+            reason: `传统上常联到${gloss}`,
+            caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+          },
         ),
       );
     }
@@ -510,6 +561,20 @@ function usefulGodFacts(rules: BaziInterpretation | null): InterpretationFact[] 
   ];
 }
 
+/**
+ * Pattern (格局) is Channel-A technical only. ADR 0021 / IQ-4H: never a default
+ * career-body claim and never mixed into the ten-god career fact.
+ */
+function patternTechnicalFacts(rules: BaziInterpretation | null): InterpretationFact[] {
+  const pattern = baziRuleClaim(rules, 'pattern');
+  if (!pattern) return [];
+  return [
+    fact('general', pattern, [ev('bazi-rule', 'bazi-rule/pattern', pattern)], {
+      caveat: '格局名称是结构分类，不表示成格，也不构成职业判断。',
+    }),
+  ];
+}
+
 /** Fortune (吉凶) facts: 刑冲合害 / 神煞 / 大运吉凶, each carrying polarity + reason. */
 function fortuneFacts(rules: BaziInterpretation | null): InterpretationFact[] {
   const out: InterpretationFact[] = [];
@@ -545,10 +610,11 @@ function followupFacts(bundle: ChartBundle, focusYear: number): InterpretationFa
   if (!b) return out;
   const gender = bundle.originalInput.ruleGender;
 
-  // 适合行业 (喜用五行→行业大类).
+  // 适合行业 (喜用五行→行业大类). ADR 0021: technical follow-up only — never
+  // a default career-body claim (IQ-4H source gate).
   const ind = industryFinding(b);
   out.push(
-    fact('career', ind.claim, [ev('bazi-rule', `bazi-rule/${ind.ruleId}`, ind.claim)], {
+    fact('general', ind.claim, [ev('bazi-rule', `bazi-rule/${ind.ruleId}`, ind.claim)], {
       reason: ind.reason,
       caveat: '行业为参考方向，非唯一；需结合兴趣与现实。',
     }),
@@ -718,7 +784,8 @@ export function buildInterpretationFacts(
   const facts: InterpretationFact[] = [
     ...characterFacts(bundle, baziRules),
     ...usefulGodFacts(baziRules),
-    ...careerFacts(bundle, baziRules),
+    ...patternTechnicalFacts(baziRules),
+    ...careerFacts(bundle),
     ...wealthFacts(bundle),
     ...marriageFacts(bundle),
     ...studiesFacts(bundle),

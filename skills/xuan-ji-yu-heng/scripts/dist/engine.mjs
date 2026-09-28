@@ -56657,22 +56657,49 @@ function characterFacts(bundle, rules) {
   }
   return out;
 }
-function careerFacts(bundle, rules) {
+var CAREER_TEN_GOD_GLOSS = {
+  \u6B63\u5B98: "\u8D23\u4EFB\u3001\u81EA\u5F8B\u3001\u5730\u4F4D",
+  \u4E03\u6740: "\u6743\u5A01\u3001\u538B\u529B\u3001\u7ADE\u4E89"
+};
+function selectCareerOfficerLabel(tenGods) {
+  const names = [...new Set(tenGods)].filter((g) => g === "\u6B63\u5B98" || g === "\u4E03\u6740");
+  return names.length === 1 ? names[0] : null;
+}
+function careerOfficerEvidence(placements) {
+  const officers = placements.filter(
+    (p) => p.tenGod === "\u6B63\u5B98" || p.tenGod === "\u4E03\u6740"
+  );
+  const label = selectCareerOfficerLabel(officers.map((p) => p.tenGod));
+  if (label === null) return { label: null, refs: [] };
+  const refs = officers.filter((p) => p.tenGod === label).map((p) => `bazi.pillars.${p.pillar}.tenGod`);
+  return { label, refs };
+}
+function careerFacts(bundle) {
   const out = [];
   const b = bundle.bazi;
   if (b) {
-    const officers = [b.pillars.year, b.pillars.month, b.pillars.day, b.pillars.hour].filter((p) => p !== null).map((p) => p.tenGod).filter((g) => g === "\u6B63\u5B98" || g === "\u4E03\u6740");
-    const pattern = baziRuleClaim(rules, "pattern");
-    if (officers.length > 0 || pattern) {
+    const { label, refs } = careerOfficerEvidence([
+      { pillar: "year", tenGod: b.pillars.year?.tenGod ?? null },
+      { pillar: "month", tenGod: b.pillars.month?.tenGod ?? null },
+      { pillar: "day", tenGod: b.pillars.day?.tenGod ?? null },
+      { pillar: "hour", tenGod: b.pillars.hour?.tenGod ?? null }
+    ]);
+    if (label !== null && refs.length > 0) {
+      const gloss = CAREER_TEN_GOD_GLOSS[label] ?? label;
       out.push(
         fact(
           "career",
-          `\u4E8B\u4E1A\u76F8\u5173\u5341\u795E\uFF08\u5B98\u6740\uFF09\uFF1A${officers.length > 0 ? [...new Set(officers)].join("\u3001") : "\u672A\u900F\u5E72"}${pattern ? `\uFF1B${pattern}` : ""}`,
+          `\u547D\u76D8\u91CC\u6709\u300C${label}\u300D\u8FD9\u4E00\u4F20\u7EDF\u5341\u795E`,
           [
-            ev("bazi", "bazi.pillars.*.tenGod", [...new Set(officers)].join("\u3001") || "\u65E0"),
-            ...rules ? [ev("bazi-rule", "bazi-rule/pattern", pattern ?? "")] : []
+            ...refs.map((ref) => ev("bazi", ref, label)),
+            // The short gloss is rule-backed (渊海子平 十神象义, FROZEN_LEGACY).
+            // Recording only the provider tenGod would hide that dependency.
+            ev("bazi-rule", "bazi-rule/ten-gods/xiang-yi", gloss)
           ],
-          { caveat: "\u5B98\u6740\u4EC5\u793A\u4E8B\u4E1A/\u8D23\u4EFB\u503E\u5411\u7684\u7ED3\u6784\uFF0C\u975E\u804C\u4E1A\u9884\u8A00\u3002" }
+          {
+            reason: `\u4F20\u7EDF\u4E0A\u5E38\u8054\u5230${gloss}`,
+            caveat: "\u5B98\u6740\u4EC5\u793A\u4E8B\u4E1A/\u8D23\u4EFB\u503E\u5411\u7684\u7ED3\u6784\uFF0C\u975E\u804C\u4E1A\u9884\u8A00\u3002"
+          }
         )
       );
     }
@@ -56960,6 +56987,15 @@ function usefulGodFacts(rules) {
     })
   ];
 }
+function patternTechnicalFacts(rules) {
+  const pattern = baziRuleClaim(rules, "pattern");
+  if (!pattern) return [];
+  return [
+    fact("general", pattern, [ev("bazi-rule", "bazi-rule/pattern", pattern)], {
+      caveat: "\u683C\u5C40\u540D\u79F0\u662F\u7ED3\u6784\u5206\u7C7B\uFF0C\u4E0D\u8868\u793A\u6210\u683C\uFF0C\u4E5F\u4E0D\u6784\u6210\u804C\u4E1A\u5224\u65AD\u3002"
+    })
+  ];
+}
 function fortuneFacts(rules) {
   const out = [];
   for (const topic of ["relations", "shensha", "fortune"]) {
@@ -56988,7 +57024,7 @@ function followupFacts(bundle, focusYear) {
   const gender = bundle.originalInput.ruleGender;
   const ind = industryFinding(b);
   out.push(
-    fact("career", ind.claim, [ev("bazi-rule", `bazi-rule/${ind.ruleId}`, ind.claim)], {
+    fact("general", ind.claim, [ev("bazi-rule", `bazi-rule/${ind.ruleId}`, ind.claim)], {
       reason: ind.reason,
       caveat: "\u884C\u4E1A\u4E3A\u53C2\u8003\u65B9\u5411\uFF0C\u975E\u552F\u4E00\uFF1B\u9700\u7ED3\u5408\u5174\u8DA3\u4E0E\u73B0\u5B9E\u3002"
     })
@@ -57107,7 +57143,8 @@ function buildInterpretationFacts(bundle, options = {}) {
   const facts = [
     ...characterFacts(bundle, baziRules),
     ...usefulGodFacts(baziRules),
-    ...careerFacts(bundle, baziRules),
+    ...patternTechnicalFacts(baziRules),
+    ...careerFacts(bundle),
     ...wealthFacts(bundle),
     ...marriageFacts(bundle),
     ...studiesFacts(bundle),
@@ -57344,16 +57381,31 @@ function evidenceSystem(kind) {
       return "time";
   }
 }
+var ALWAYS_MATERIAL_WARNING_CODES = /* @__PURE__ */ new Set([
+  "TIME_UNKNOWN",
+  "NEAR_BOUNDARY"
+]);
+var TIME_SENSITIVE_CAVEAT_RE = /出生时间|时辰|宫位|时刻|真太阳时|时间误差|时间未知|需确切|time of day|birth time/i;
+var TIME_SENSITIVE_EVIDENCE_RE = /bazi\.pillars\.hour\.|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
+function isTimeSensitiveFact(fact2) {
+  if (fact2.caveat !== void 0 && TIME_SENSITIVE_CAVEAT_RE.test(fact2.caveat)) return true;
+  return fact2.evidence.some(
+    (evidence) => evidence.kind === "time" || TIME_SENSITIVE_EVIDENCE_RE.test(evidence.ref)
+  );
+}
 function materialWarningCodes(warnings, selectedFacts) {
   const factSystems = /* @__PURE__ */ new Set();
-  let hasTimeSensitiveCaveat = false;
+  const hasTimeSensitiveFact = selectedFacts.some(isTimeSensitiveFact);
   for (const fact2 of selectedFacts) {
-    if (fact2.caveat !== void 0) hasTimeSensitiveCaveat = true;
     for (const evidence of fact2.evidence) factSystems.add(evidenceSystem(evidence.kind));
   }
   return warnings.filter((warning) => {
+    if (ALWAYS_MATERIAL_WARNING_CODES.has(warning.code)) return true;
     if (warning.system === "time") {
-      return factSystems.has("time") || hasTimeSensitiveCaveat;
+      return factSystems.has("time") || hasTimeSensitiveFact;
+    }
+    if (warning.code === "SOLAR_TIME_APPROXIMATE" || warning.code === "TIME_ACCURACY_APPROXIMATE" || warning.code === "DST_AMBIGUOUS_RESOLVED") {
+      return factSystems.has(warning.system) && hasTimeSensitiveFact;
     }
     return factSystems.has(warning.system);
   }).map((warning) => warning.code);

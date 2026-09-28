@@ -106,11 +106,8 @@ describe('IQ-4A internal bazi career journey', () => {
         topic: 'career',
         requestedDepth: 'standard',
         system: 'bazi',
-        approvedClaimIds: ['approved-claim:fact-7', 'approved-claim:fact-96'],
-        materialCaveatIds: [
-          'claim-constraint:approved-claim:fact-7:caveat:0',
-          'claim-constraint:approved-claim:fact-96:caveat:3',
-        ],
+        approvedClaimIds: ['approved-claim:fact-8'],
+        materialCaveatIds: ['claim-constraint:approved-claim:fact-8:caveat:0'],
         allowedContentCategories: [
           'conclusion',
           'mechanism-and-implication',
@@ -186,7 +183,7 @@ describe('IQ-4A internal bazi career journey', () => {
         ),
       ).toBe(true);
       expect(responseView.materialCaveatIds).toContain(
-        'claim-constraint:approved-claim:fact-7:caveat:0',
+        'claim-constraint:approved-claim:fact-8:caveat:0',
       );
     },
   );
@@ -217,9 +214,12 @@ describe('IQ-4A internal bazi career journey', () => {
   );
 
   it(
-    'removes the rule-derived claim class when the rule profile is unavailable and refuses delivery',
+    'omits the cultural reference when the rule profile is unavailable',
     { timeout: 30_000 },
     () => {
+      // ADR 0021: the short gloss cites bazi-rule/ten-gods/xiang-yi. An
+      // unresolved rule profile therefore degrades that claim class instead of
+      // silently delivering a provider-only cultural reading.
       let caught: unknown;
       try {
         projectBaziCareerJourney(
@@ -234,8 +234,6 @@ describe('IQ-4A internal bazi career journey', () => {
       }
       expect(caught).toBeInstanceOf(ResponseViewPlanningError);
       expect((caught as ResponseViewPlanningError).code).toBe('NO_ELIGIBLE_APPROVED_CLAIMS');
-      // Every bazi career claim cites a bazi-rule mechanism, so the recorded
-      // degradation removes the whole class instead of standing in a default.
       const degradedPlan = planClarificationMateriality(
         planningInput({ rulesetVariantSensitiveClaims: true, rulesetVariant: 'unavailable' }),
       );
@@ -246,7 +244,7 @@ describe('IQ-4A internal bazi career journey', () => {
   );
 
   it(
-    'delivers the rule-derived claims once the rule profile is explicitly confirmed',
+    'delivers the cultural reference once the rule profile is explicitly confirmed',
     { timeout: 30_000 },
     () => {
       const { clarificationPlan, responseView } = projectBaziCareerJourney(
@@ -258,10 +256,7 @@ describe('IQ-4A internal bazi career journey', () => {
       );
       expect(clarificationPlan.status).toBe('ready');
       expect(responseView.clarificationStatus).toBe('ready');
-      expect(responseView.approvedClaimIds).toEqual([
-        'approved-claim:fact-7',
-        'approved-claim:fact-96',
-      ]);
+      expect(responseView.approvedClaimIds).toEqual(['approved-claim:fact-8']);
     },
   );
 
@@ -327,12 +322,10 @@ describe('IQ-4A internal bazi career journey', () => {
       };
       const subset = {
         ...responseView,
-        approvedClaimIds: responseView.approvedClaimIds.slice(0, 1),
-        materialCaveatIds: responseView.materialCaveatIds.filter((caveatId) =>
-          caveatId.includes('fact-7'),
-        ),
+        approvedClaimIds: ['approved-claim:fact-7'],
+        materialCaveatIds: ['claim-constraint:approved-claim:fact-7:caveat:0'],
       };
-      expect(subset.approvedClaimIds.length).toBeGreaterThan(0);
+      expect(responseView.approvedClaimIds.length).toBeGreaterThan(0);
       expect(verifyClarifiedResponseView(subset, surfaceInput)).toEqual({
         ok: false,
         issues: [{ code: 'VIEW_LINKAGE', path: '$.responseView' }],

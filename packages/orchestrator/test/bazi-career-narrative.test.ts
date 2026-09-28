@@ -85,16 +85,8 @@ function journeyClaims(): ApprovedAnswerClaim[] {
 }
 
 const OFFICER_PARAGRAPH =
-  '这个盘的官杀比较集中，通常意味着规则、责任和体制类的工作主题更容易落在你身上。' +
-  '官杀说的是事业倾向的结构，不是职业预言；它更像一个背景条件：当你接的任务边界清楚、' +
-  '有明确的交付标准时，这类结构往往更容易发挥。可以把手头的事按「规则清晰」和「需要自己定规则」' +
-  '分成两列，各写三件具体的事，看看哪一列做完更有成就感，再决定下一段时间往管理协调还是专业深耕多投入。';
-
-const INDUSTRY_PARAGRAPH =
-  '行业大类上，规则按喜用五行给出的参考方向，更适合当作筛选条件而不是答案：' +
-  '它不决定你能做什么，也不替你预测行情。具体可以这样用——列出你接触过的三到五个领域，' +
-  '把和参考方向重合的挑出来，再各自找一个真实在做的人聊半小时，问问他们日常一半时间在处理什么；' +
-  '聊完之后哪一行让你还想继续追问，就先投一份简历或接一个小项目试试，用真实反馈修正方向。';
+  '命盘里有「七杀」这一传统十神，传统上常联到权威、压力、竞争一类主题，只作文化背景。' +
+  '官杀说的是事业倾向的结构，不是职业预言。';
 
 const TRACE_INVALIDATION_CAUSES = [
   'input-chart',
@@ -132,11 +124,8 @@ describe('IQ-4C bazi career narrative trace linkage', () => {
     'verifies ready-journey examples whose traces cover every claim and caveat',
     { timeout: 30_000 },
     () => {
-      const [officer, industry] = journeyClaims();
-      const traces = [
-        traceFor(officer!, 1, OFFICER_PARAGRAPH),
-        traceFor(industry!, 2, INDUSTRY_PARAGRAPH),
-      ];
+      const [officer] = journeyClaims();
+      const traces = [traceFor(officer!, 1, OFFICER_PARAGRAPH)];
       expect(
         verifyBaziCareerNarrative(traces, journeyInput(syntheticInput), { now: FIXED }),
       ).toEqual({ ok: true, issues: [] });
@@ -144,12 +133,7 @@ describe('IQ-4C bazi career narrative trace linkage', () => {
   );
 
   it('flags a paragraph set that leaves a delivered claim without a trace', () => {
-    const [officer] = journeyClaims();
-    const result = verifyBaziCareerNarrative(
-      [traceFor(officer!, 1, OFFICER_PARAGRAPH)],
-      journeyInput(syntheticInput),
-      { now: FIXED },
-    );
+    const result = verifyBaziCareerNarrative([], journeyInput(syntheticInput), { now: FIXED });
     expect(result.ok).toBe(false);
     expect(result.issues).toContainEqual({
       code: 'CLAIM_COVERAGE',
@@ -219,30 +203,29 @@ describe('IQ-4C bazi career narrative trace linkage', () => {
     expect(run).toThrow(ResponseViewPlanningError);
   });
 
-  it('cannot narrate a ruleset-unavailable journey', { timeout: 30_000 }, () => {
-    const run = () =>
-      verifyBaziCareerNarrative(
-        [],
-        journeyInput(syntheticInput, {
-          rulesetVariantSensitiveClaims: true,
-          rulesetVariant: 'unavailable',
-        }),
-        { now: FIXED },
-      );
-    expect(run).toThrow(ResponseViewPlanningError);
-    // The ready journey itself still delivers, so the refusal is the
-    // degraded state, not the narrative verifier.
-    expect(() =>
-      projectBaziCareerJourney(journeyInput(syntheticInput), { now: FIXED }),
-    ).not.toThrow();
-  });
+  it(
+    'cannot narrate when the rule profile is unavailable (cultural gloss is rule-backed)',
+    { timeout: 30_000 },
+    () => {
+      const run = () =>
+        verifyBaziCareerNarrative(
+          [],
+          journeyInput(syntheticInput, {
+            rulesetVariantSensitiveClaims: true,
+            rulesetVariant: 'unavailable',
+          }),
+          { now: FIXED },
+        );
+      expect(run).toThrow(ResponseViewPlanningError);
+      expect(() =>
+        projectBaziCareerJourney(journeyInput(syntheticInput), { now: FIXED }),
+      ).not.toThrow();
+    },
+  );
 
   it('is deterministic for a fixed clock', () => {
-    const [officer, industry] = journeyClaims();
-    const traces = [
-      traceFor(officer!, 1, OFFICER_PARAGRAPH),
-      traceFor(industry!, 2, INDUSTRY_PARAGRAPH),
-    ];
+    const [officer] = journeyClaims();
+    const traces = [traceFor(officer!, 1, OFFICER_PARAGRAPH)];
     expect(verifyBaziCareerNarrative(traces, journeyInput(syntheticInput), { now: FIXED })).toEqual(
       verifyBaziCareerNarrative(traces, journeyInput(syntheticInput), { now: FIXED }),
     );

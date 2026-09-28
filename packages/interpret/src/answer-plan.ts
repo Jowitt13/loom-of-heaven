@@ -259,22 +259,55 @@ function evidenceSystem(kind: PublicFact['evidence'][number]['kind']): EngineWar
  * Default delivery only needs a warning when it qualifies a fact used for the
  * user's current topic. The full public result retains every warning for audit
  * and technical detail on request.
+ *
+ * Materiality is per selected fact, not “any caveat at all”: a non-time caveat
+ * (e.g. 官杀非职业预言) must not force an unrelated SOLAR_TIME_APPROXIMATE tip.
+ * TIME_UNKNOWN and NEAR_BOUNDARY stay always material when present.
  */
-function materialWarningCodes(
+const ALWAYS_MATERIAL_WARNING_CODES = new Set<PublicWarning['code']>([
+  'TIME_UNKNOWN',
+  'NEAR_BOUNDARY',
+]);
+
+const TIME_SENSITIVE_CAVEAT_RE =
+  /出生时间|时辰|宫位|时刻|真太阳时|时间误差|时间未知|需确切|time of day|birth time/i;
+
+const TIME_SENSITIVE_EVIDENCE_RE =
+  /bazi\.pillars\.hour\.|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
+
+/** Whether a selected fact's conclusion can move when time/solar input shifts. */
+export function isTimeSensitiveFact(fact: {
+  caveat?: string | undefined;
+  evidence: readonly { kind?: string; ref: string }[];
+}): boolean {
+  if (fact.caveat !== undefined && TIME_SENSITIVE_CAVEAT_RE.test(fact.caveat)) return true;
+  return fact.evidence.some(
+    (evidence) => evidence.kind === 'time' || TIME_SENSITIVE_EVIDENCE_RE.test(evidence.ref),
+  );
+}
+
+export function materialWarningCodes(
   warnings: PublicWarning[],
   selectedFacts: PublicFact[],
 ): PublicWarning['code'][] {
   const factSystems = new Set<EngineWarning['system']>();
-  let hasTimeSensitiveCaveat = false;
+  const hasTimeSensitiveFact = selectedFacts.some(isTimeSensitiveFact);
   for (const fact of selectedFacts) {
-    if (fact.caveat !== undefined) hasTimeSensitiveCaveat = true;
     for (const evidence of fact.evidence) factSystems.add(evidenceSystem(evidence.kind));
   }
 
   return warnings
     .filter((warning) => {
+      if (ALWAYS_MATERIAL_WARNING_CODES.has(warning.code)) return true;
       if (warning.system === 'time') {
-        return factSystems.has('time') || hasTimeSensitiveCaveat;
+        return factSystems.has('time') || hasTimeSensitiveFact;
+      }
+      if (
+        warning.code === 'SOLAR_TIME_APPROXIMATE' ||
+        warning.code === 'TIME_ACCURACY_APPROXIMATE' ||
+        warning.code === 'DST_AMBIGUOUS_RESOLVED'
+      ) {
+        return factSystems.has(warning.system) && hasTimeSensitiveFact;
       }
       return factSystems.has(warning.system);
     })

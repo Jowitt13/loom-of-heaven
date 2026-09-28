@@ -143,6 +143,15 @@ claims. It does not establish semantic correctness. A test or review must additi
 5. The same input may vary in phrasing, but its traced fact set, rules, limitations and allowed
    claims remain unchanged.
 
+## Career body bounds (ADR 0021)
+
+The default career body may include at most one frozen ten-god cultural reference (for example
+`七杀`) with an immediately adjacent brief 《渊海子平》 gloss, stated as traditional-culture
+background and never as career or industry fit. Pattern names, useful-god, five-element industry
+tables, and chart-derived career advice stay out of the default body. When the user states work
+reality, practices cite only those statements; when only birth data is present, ask one key reality
+question and invent no work history or career direction.
+
 ## Dual-source career composition (planned — no runtime implements this)
 
 A future career layer (roadmap §5 C-track, ADR 0020) composes answers from separately
