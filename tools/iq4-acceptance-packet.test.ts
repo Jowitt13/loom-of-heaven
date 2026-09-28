@@ -48,15 +48,23 @@ const EXPECTED_STDOUT_DIGEST = (() => {
 const RUNTIME_SOURCE_COMMIT = (
   (loadIq4AcceptancePacket() as Record<string, unknown>).runtimeEntry as Record<string, unknown>
 ).sourceCommit as string;
+const HOST_ACCEPTANCE = (loadIq4AcceptancePacket() as Record<string, unknown>)
+  .hostAcceptance as Record<string, unknown>;
+const CODEX_CANDIDATE_COMMIT = HOST_ACCEPTANCE.codexCandidateSourceCommit as string;
+const CANDIDATE_ZIP_SHA256 = HOST_ACCEPTANCE.candidateZipSha256 as Record<string, string>;
 
-function executedResult(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+function executedResult(
+  hostId: string,
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
   return {
     exitCode: 0,
     outputDigest: EXPECTED_STDOUT_DIGEST,
     executedAtISO: '2026-09-07',
     notes: 'host acceptance run',
     sourceCommit: RUNTIME_SOURCE_COMMIT,
-    candidateSha256: 'sha256:' + 'a'.repeat(64),
+    candidateSourceCommit: hostId === 'codex' ? CODEX_CANDIDATE_COMMIT : null,
+    candidateSha256: hostId === 'codex' ? null : CANDIDATE_ZIP_SHA256[hostId],
     inputDigest: INPUT_DIGEST,
     ...overrides,
   };
@@ -68,7 +76,7 @@ function allHostsExecuted(packet: Record<string, unknown>): void {
   >;
   for (const record of records) {
     record.status = 'EXECUTED';
-    record.result = executedResult();
+    record.result = executedResult(record.hostId as string);
   }
   (packet.hostAcceptance as Record<string, unknown>).status = 'EXECUTED';
 }
@@ -123,9 +131,9 @@ const RETIRED_TRACES = [
 ];
 
 describe('IQ-4H acceptance packet (strict source gate)', () => {
-  it('ships a v3 packet with no reviewable artifacts and a green verification', () => {
+  it('ships a v4 packet with host-specific candidate identity and no reviewable artifacts', () => {
     const packet = loadIq4AcceptancePacket() as Record<string, unknown>;
-    expect(packet.packetId).toBe('iq4-acceptance-packet/v3');
+    expect(packet.packetId).toBe('iq4-acceptance-packet/v4');
     expect(packet.traces).toBeUndefined();
     expect(packet.answerDraft).toBeUndefined();
     const result = verifyIq4AcceptancePacket(packet);
@@ -227,7 +235,7 @@ describe('IQ-4H acceptance packet (strict source gate)', () => {
         Record<string, unknown>
       >;
       records[0]!.status = 'EXECUTED';
-      records[0]!.result = executedResult({
+      records[0]!.result = executedResult('codex', {
         outputDigest: `sha256:${createHash('sha256').update('generic career demo').digest('hex')}`,
       });
     });
@@ -248,7 +256,7 @@ describe('IQ-4H acceptance packet (strict source gate)', () => {
         Record<string, unknown>
       >;
       records[0]!.status = 'EXECUTED';
-      records[0]!.result = executedResult({ sourceCommit: '0'.repeat(40) });
+      records[0]!.result = executedResult('codex', { sourceCommit: '0'.repeat(40) });
     });
     expect(verifyIq4AcceptancePacket(wrongCommit).ok).toBe(false);
 
@@ -257,9 +265,72 @@ describe('IQ-4H acceptance packet (strict source gate)', () => {
         Record<string, unknown>
       >;
       records[0]!.status = 'EXECUTED';
-      records[0]!.result = executedResult({ inputDigest: 'sha256:' + 'b'.repeat(64) });
+      records[0]!.result = executedResult('codex', { inputDigest: 'sha256:' + 'b'.repeat(64) });
     });
     expect(verifyIq4AcceptancePacket(wrongInput).ok).toBe(false);
+  });
+
+  it('binds Codex only to the verified repository commit, not a ZIP claim', () => {
+    const wrongCommit = tampered((packet) => {
+      const record = (
+        (packet.hostAcceptance as Record<string, unknown>).records as Array<Record<string, unknown>>
+      )[0]!;
+      record.status = 'EXECUTED';
+      record.result = executedResult('codex', { candidateSourceCommit: '0'.repeat(40) });
+    });
+    expect(verifyIq4AcceptancePacket(wrongCommit).ok).toBe(false);
+
+    const falseZipClaim = tampered((packet) => {
+      const record = (
+        (packet.hostAcceptance as Record<string, unknown>).records as Array<Record<string, unknown>>
+      )[0]!;
+      record.status = 'EXECUTED';
+      record.result = executedResult('codex', { candidateSha256: `sha256:${'a'.repeat(64)}` });
+    });
+    expect(verifyIq4AcceptancePacket(falseZipClaim).ok).toBe(false);
+  });
+
+  it('binds each release-asset host to its exact ZIP digest, not just a digest shape', () => {
+    for (const hostId of ['qoder', 'workbuddy', 'doubao']) {
+      const wrongZip = tampered((packet) => {
+        const records = (packet.hostAcceptance as Record<string, unknown>).records as Array<
+          Record<string, unknown>
+        >;
+        const record = records.find((entry) => entry.hostId === hostId)!;
+        record.status = 'EXECUTED';
+        record.result = executedResult(hostId, { candidateSha256: `sha256:${'a'.repeat(64)}` });
+      });
+      expect(verifyIq4AcceptancePacket(wrongZip).ok, hostId).toBe(false);
+
+      const falseRepoClaim = tampered((packet) => {
+        const records = (packet.hostAcceptance as Record<string, unknown>).records as Array<
+          Record<string, unknown>
+        >;
+        const record = records.find((entry) => entry.hostId === hostId)!;
+        record.status = 'EXECUTED';
+        record.result = executedResult(hostId, { candidateSourceCommit: CODEX_CANDIDATE_COMMIT });
+      });
+      expect(verifyIq4AcceptancePacket(falseRepoClaim).ok, hostId).toBe(false);
+    }
+  });
+
+  it('rejects candidate identity changes in the packet itself', () => {
+    const wrongCodex = tampered((packet) => {
+      (packet.hostAcceptance as Record<string, unknown>).codexCandidateSourceCommit = '0'.repeat(
+        40,
+      );
+    });
+    expect(verifyIq4AcceptancePacket(wrongCodex).ok).toBe(false);
+
+    const wrongZip = tampered((packet) => {
+      (
+        (packet.hostAcceptance as Record<string, unknown>).candidateZipSha256 as Record<
+          string,
+          string
+        >
+      ).qoder = `sha256:${'a'.repeat(64)}`;
+    });
+    expect(verifyIq4AcceptancePacket(wrongZip).ok).toBe(false);
   });
 
   it(

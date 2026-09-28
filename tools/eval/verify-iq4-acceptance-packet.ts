@@ -7,15 +7,15 @@ import { HOSTS } from '../lib/host-config.ts';
 import { runBaziCareerJourney } from '../../packages/orchestrator/src/bazi-career-journey.ts';
 
 /**
- * IQ-4H acceptance-packet verifier (packet v3, strict source gate). There is
- * currently NO source-admitted visible BaZi career claim: every existing text
- * claim depends on rule content (pattern, useful-god industry matching) that
- * has not passed source admission. The packet therefore carries no reviewable
- * narrative, trace, answer draft, or artifact digest at all, and the
+ * IQ-4 acceptance-packet verifier (packet v4, strict source gate). ADR 0021
+ * admits one narrow ten-god cultural reference, but not a complete reviewable
+ * BaZi career answer; pattern and useful-god industry matching remain blocked.
+ * The packet therefore carries no reviewable narrative, trace, answer draft,
+ * or artifact digest, and the
  * reviewed-answer-examples exit criterion is recorded as
  * BLOCKED_SOURCE_ADMISSION — a governance state that four-host technical
  * acceptance cannot lift. Host records still bind the IQ-4F bazi-career
- * evidence cryptographically (source commit, candidate ZIP digest, input
+ * evidence cryptographically (entry anchor, host-specific candidate identity, input
  * digest, and a stdout digest the verifier recomputes from the journey);
  * pending is never pass, and any injected legacy artifact, REVIEWED status,
  * or "IQ-4 passed" claim fails closed.
@@ -32,6 +32,12 @@ const PACKET_PATH = join(root, 'evals', 'fixtures', 'synthetic', 'iq4-acceptance
 const SHA256_PATTERN = /^sha256:[0-9a-f]{64}$/;
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const COMMIT_PATTERN = /^[0-9a-f]{40}$/;
+const CANDIDATE_SOURCE_COMMIT = '0473a93beda05739d257a6870e19d1ece43f4c97';
+const CANDIDATE_ZIP_SHA256: Record<string, string> = {
+  qoder: 'sha256:4a220d5659023a23ecaa4031baa0c8986ce6c6ff8626f8638a2af65567b3984b',
+  workbuddy: 'sha256:fecd2ba0ac7a2a097073f650f998fd8d9a25fbcde29585264699939ddb57573d',
+  doubao: 'sha256:c2eb6a7a0fa14905764aefd03b7783f85ff18d272e3df1281a06b998084a2394',
+};
 
 export interface PacketCheck {
   name: string;
@@ -80,11 +86,20 @@ function checkHostRecord(
     if (result.sourceCommit !== runtimeEntry.sourceCommit) {
       return `sourceCommit does not match the packet's runtime entry`;
     }
-    if (
-      typeof result.candidateSha256 !== 'string' ||
-      !SHA256_PATTERN.test(result.candidateSha256)
-    ) {
-      return `EXECUTED record lacks the installed candidate ZIP sha256`;
+    if (hostId === 'codex') {
+      if (result.candidateSourceCommit !== CANDIDATE_SOURCE_COMMIT) {
+        return `Codex candidate source commit does not match the verified checkout`;
+      }
+      if (result.candidateSha256 !== null) {
+        return `Codex repo installation must not claim a release-asset ZIP digest`;
+      }
+    } else {
+      if (result.candidateSha256 !== CANDIDATE_ZIP_SHA256[hostId]) {
+        return `installed candidate ZIP digest does not match the pinned host asset`;
+      }
+      if (result.candidateSourceCommit !== null) {
+        return `release-asset host must not claim a Codex repo installation`;
+      }
     }
     if (typeof result.inputDigest !== 'string' || result.inputDigest !== expectedInputDigest) {
       return `inputDigest does not match the packet's synthetic input`;
@@ -117,7 +132,7 @@ export function verifyIq4AcceptancePacket(packet: unknown): {
     add('packet is a JSON object', false);
     return { ok: false, checks };
   }
-  add('packet id is iq4-acceptance-packet/v3', packet.packetId === 'iq4-acceptance-packet/v3');
+  add('packet id is iq4-acceptance-packet/v4', packet.packetId === 'iq4-acceptance-packet/v4');
 
   // IQ-4F explicit runtime entry binding: the acceptance target is the
   // bazi-career command at a pinned source commit over the packet input.
@@ -196,6 +211,16 @@ export function verifyIq4AcceptancePacket(packet: unknown): {
     add(
       'host acceptance status is within the recorded vocabulary',
       hostAcceptance.status === 'NOT_EXECUTED' || hostAcceptance.status === 'EXECUTED',
+    );
+    const pinnedZipDigests = hostAcceptance.candidateZipSha256;
+    add(
+      'host acceptance pins the verified Codex checkout and three candidate ZIPs',
+      hostAcceptance.codexCandidateSourceCommit === CANDIDATE_SOURCE_COMMIT &&
+        isRecord(pinnedZipDigests) &&
+        Object.keys(pinnedZipDigests).length === 3 &&
+        Object.entries(CANDIDATE_ZIP_SHA256).every(
+          ([hostId, digest]) => pinnedZipDigests[hostId] === digest,
+        ),
     );
     const configuredIds = HOSTS.map((host) => host.id);
     const recordIds = hostAcceptance.records.map((record) =>
