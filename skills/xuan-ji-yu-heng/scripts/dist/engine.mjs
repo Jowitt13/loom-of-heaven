@@ -57490,9 +57490,20 @@ function buildPublicResult(bundle, interpretation, warnings = bundle.warnings) {
     followupOffers: interpretation.followupOffers.map(sanitizePublicText)
   });
 }
-function selectFacts(facts, topic) {
-  if (topic === "general") return facts;
-  return facts.filter((fact2) => fact2.topic === topic);
+function selectFacts(facts, request) {
+  if (request.topic === "general") return facts;
+  const topicFacts = facts.filter((fact2) => fact2.topic === request.topic);
+  if (request.topic !== "career" || request.lens === "explain") return topicFacts;
+  if (request.lens === "timing") return [];
+  const pillarRef = /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/;
+  const references = topicFacts.filter(
+    (fact2) => fact2.evidence.some((e) => e.kind === "bazi" && pillarRef.test(e.ref)) && fact2.evidence.some(
+      (e) => e.kind === "bazi-rule" && e.ref === "bazi-rule/ten-gods/xiang-yi"
+    ) && fact2.evidence.every(
+      (e) => e.kind === "bazi" && pillarRef.test(e.ref) || e.kind === "bazi-rule" && e.ref === "bazi-rule/ten-gods/xiang-yi"
+    )
+  );
+  return references.length === 1 ? references : [];
 }
 var LIMITING_WARNING_CODES = /* @__PURE__ */ new Set([
   "TIME_ACCURACY_APPROXIMATE",
@@ -57580,7 +57591,7 @@ function materialWarningCodes(warnings, selectedFacts) {
 }
 function buildAnswerPlan(publicResult, requestInput) {
   const request = AnswerRequest.parse(requestInput);
-  const selectedFacts = selectFacts(publicResult.facts, request.topic);
+  const selectedFacts = selectFacts(publicResult.facts, request);
   const requiredWarningCodes = materialWarningCodes(publicResult.warnings, selectedFacts);
   const hasLimitation = requiredWarningCodes.some((code) => LIMITING_WARNING_CODES.has(code)) || selectedFacts.some((fact2) => fact2.caveat !== void 0);
   const answerability = selectedFacts.length === 0 ? "not-supported" : hasLimitation ? "limited" : "grounded";
@@ -57597,7 +57608,9 @@ function buildAnswerPlan(publicResult, requestInput) {
     requiredWarningCodes,
     guardrails: ANSWER_GUARDRAILS,
     responseRequirements: {
-      contentOrder: contentOrder(request.lens),
+      // This engine input contains no user-stated work reality. A chart-only
+      // plan must not request practical career advice from its cultural facts.
+      contentOrder: request.topic === "career" && request.lens !== "explain" ? ["summary", "plain-language-explanation", "uncertainty"] : contentOrder(request.lens),
       citeSelectedFactIds: selectedFacts.map((fact2) => fact2.id),
       onlyUseSelectedFacts: true,
       explainInPlainLanguage: true,

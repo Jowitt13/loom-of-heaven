@@ -51,7 +51,11 @@ describe('public v2 hard cut (P4)', () => {
       ruleGender: 'female',
       settings: { systems: ['vedic'] },
     });
-    const { publicResult, answerPlan } = runAnswerPlan(input, { now: FIXED, topic: 'career' });
+    const { publicResult, answerPlan } = runAnswerPlan(input, {
+      now: FIXED,
+      topic: 'career',
+      lens: 'explain',
+    });
     expect(publicResult.systems).toHaveLength(4);
     expect(publicResult.systems.map((s) => s.system)).toEqual([
       'western',

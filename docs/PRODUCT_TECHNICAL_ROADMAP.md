@@ -389,7 +389,12 @@ single working optimization list; the product destination, phase order and sourc
 Progress — 2026-10-23: item 1's source repair is committed as `a80a161`, with real-CLI
 filesystem-failure tests and core verification passed. The branch is pushed and
 [Draft PR #101](https://github.com/Jowitt13/loom-of-heaven/pull/101) is open; CI and integration
-remain pending. No installed host has been changed. Item 2 has not started.
+are distinct: both CI jobs have passed, and integration remains pending. No installed host has
+been changed. Item 2's material projection now narrows ordinary career answers to the ADR 0021
+reference and its own constraints; explicit technical explanation keeps multi-system facts, and
+unsupported career timing returns no substitute natal verdict. Reality-source representation in
+the draft contract is still unimplemented; item 2 is not complete. No new draft fields or source
+permissions are introduced by this repair.
 
 Execution rules:
 

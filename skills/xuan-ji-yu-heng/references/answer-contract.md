@@ -31,6 +31,18 @@ or missing topic.
 overview | strengths | risks | timing | advice | explain
 ```
 
+For ordinary `career` answers, `selectedFacts` contains at most the one ADR 0021 ten-god
+cultural reference. Its caveat and material warnings are derived from that same set; unrelated
+systems' conditions do not become mandatory prose. All warnings remain in `publicResult.warnings`
+for audit. The plan contains no user-stated work reality and therefore does not request practical
+career advice. Do not borrow a chart fact id or a constraint reference for a reality-based advice
+paragraph; the current `reading-draft/v2` contract does not yet represent that separate source.
+
+`career --lens timing` currently returns `not-supported`: natal cultural themes are not evidence
+for promotion, job-change or other career timing. `--lens explain` retains topic-scoped technical
+facts from all systems for an explicit request for technical explanation, not for default career
+prose or career fit. `calculate` and `interpret` remain the full technical-chart entry points.
+
 The command never accepts a free-form user question. The host maps the question to a bounded
 topic/lens, or asks a clarification question when it cannot do so reliably. Do not put a user's
 question text into a command-line argument, output artifact, filename or log.

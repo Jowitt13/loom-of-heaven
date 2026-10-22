@@ -191,9 +191,31 @@ export function buildPublicResult(
   });
 }
 
-function selectFacts(facts: PublicFact[], topic: InterpretationTopic): PublicFact[] {
-  if (topic === 'general') return facts;
-  return facts.filter((fact) => fact.topic === topic);
+function selectFacts(facts: PublicFact[], request: AnswerPlan['request']): PublicFact[] {
+  if (request.topic === 'general') return facts;
+  const topicFacts = facts.filter((fact) => fact.topic === request.topic);
+  if (request.topic !== 'career' || request.lens === 'explain') return topicFacts;
+
+  // ADR 0021 admits one narrow cultural reference for ordinary career prose,
+  // not every system's career placement. Derive both narration material and
+  // validation constraints from this same set; technical detail remains opt-in.
+  // No admitted career-timing inference exists: do not substitute natal themes.
+  if (request.lens === 'timing') return [];
+  const pillarRef = /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/;
+  const references = topicFacts.filter(
+    (fact) =>
+      fact.evidence.some((e) => e.kind === 'bazi' && pillarRef.test(e.ref)) &&
+      fact.evidence.some(
+        (e) => e.kind === 'bazi-rule' && e.ref === 'bazi-rule/ten-gods/xiang-yi',
+      ) &&
+      fact.evidence.every(
+        (e) =>
+          (e.kind === 'bazi' && pillarRef.test(e.ref)) ||
+          (e.kind === 'bazi-rule' && e.ref === 'bazi-rule/ten-gods/xiang-yi'),
+      ),
+  );
+  // Ambiguous or duplicated cultural candidates are not resolved by picking one.
+  return references.length === 1 ? references : [];
 }
 
 const LIMITING_WARNING_CODES = new Set<PublicWarning['code']>([
@@ -323,7 +345,7 @@ export function buildAnswerPlan(
   requestInput: { topic: InterpretationTopic; lens?: AnswerLens },
 ): AnswerPlan {
   const request = AnswerRequestSchema.parse(requestInput);
-  const selectedFacts = selectFacts(publicResult.facts, request.topic);
+  const selectedFacts = selectFacts(publicResult.facts, request);
   const requiredWarningCodes = materialWarningCodes(publicResult.warnings, selectedFacts);
   const hasLimitation =
     requiredWarningCodes.some((code) => LIMITING_WARNING_CODES.has(code)) ||
@@ -349,7 +371,12 @@ export function buildAnswerPlan(
     requiredWarningCodes,
     guardrails: ANSWER_GUARDRAILS,
     responseRequirements: {
-      contentOrder: contentOrder(request.lens),
+      // This engine input contains no user-stated work reality. A chart-only
+      // plan must not request practical career advice from its cultural facts.
+      contentOrder:
+        request.topic === 'career' && request.lens !== 'explain'
+          ? ['summary', 'plain-language-explanation', 'uncertainty']
+          : contentOrder(request.lens),
       citeSelectedFactIds: selectedFacts.map((fact) => fact.id),
       onlyUseSelectedFacts: true,
       explainInPlainLanguage: true,
