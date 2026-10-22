@@ -62,6 +62,14 @@ interface VersionOut {
   legacy: boolean;
   doubleNested: boolean;
   reason?: string;
+  contentIdentity: {
+    scope: string;
+    normalization: string;
+    status: 'available' | 'unavailable';
+    sha256: string | null;
+    fileCount: number;
+    unavailableFiles: string[];
+  };
 }
 interface MigrateOut {
   ok: boolean;
@@ -426,6 +434,93 @@ describe('loom-chart migrate: target allowlist (security gate)', () => {
 });
 
 describe('loom-chart version: real installed-version report', () => {
+  it.each(['SKILL.md', 'references/reading-style.md', 'scripts/dist/engine.mjs'])(
+    'distinguishes same-version installs after a change to %s',
+    (relativePath) => {
+      const work = mkdtempSync(join(tmpdir(), 'ming-ver-content-'));
+      try {
+        const pkg = makeCandidate(work);
+        const before = version(pkg).json;
+        expect(before.contentIdentity.status).toBe('available');
+        expect(before.contentIdentity.sha256).toMatch(/^[a-f0-9]{64}$/);
+        writeFileSync(
+          join(pkg, relativePath),
+          `${readFileSync(join(pkg, relativePath), 'utf8')}\nchanged\n`,
+        );
+        const after = version(pkg).json;
+        expect(after.releaseTag).toBe(before.releaseTag);
+        expect(after.engineVersion).toBe(before.engineVersion);
+        expect(after.contentIdentity.sha256).not.toBe(before.contentIdentity.sha256);
+        expect(version(pkg).json.contentIdentity).toEqual(after.contentIdentity);
+      } finally {
+        rmSync(work, { recursive: true, force: true });
+      }
+    },
+  );
+
+  it('normalizes text line endings and excludes host metadata and user output', () => {
+    const work = mkdtempSync(join(tmpdir(), 'ming-ver-normalized-'));
+    try {
+      const pkg = makeCandidate(work);
+      const before = version(pkg).json.contentIdentity;
+      const skill = join(pkg, 'SKILL.md');
+      const text = readFileSync(skill, 'utf8').replace(/\r\n?/g, '\n');
+      writeFileSync(skill, text.replace(/\n/g, '\r\n'));
+      writeFileSync(join(pkg, 'INSTALL.md'), 'host-specific install instructions');
+      writeFileSync(
+        join(pkg, 'BUILD_MANIFEST.json'),
+        JSON.stringify({ ...CANDIDATE_MANIFEST, host: 'doubao' }),
+      );
+      writeFileSync(
+        join(pkg, 'user-private-output.json'),
+        'synthetic private sentinel - not identity material',
+      );
+      expect(version(pkg).json.contentIdentity).toEqual(before);
+      writeFileSync(skill, text.replace(/\n/g, '\r'));
+      expect(version(pkg).json.contentIdentity).toEqual(before);
+    } finally {
+      rmSync(work, { recursive: true, force: true });
+    }
+  });
+
+  it('reports unavailable identity rather than claiming a complete build with missing engine', () => {
+    const work = mkdtempSync(join(tmpdir(), 'ming-ver-incomplete-'));
+    try {
+      const pkg = makeCandidate(work);
+      rmSync(join(pkg, 'scripts/dist/engine.mjs'));
+      const result = version(pkg);
+      expect(result.code).toBe(0);
+      expect(result.json.releaseTag).toBe(CANDIDATE_MANIFEST.releaseTag);
+      expect(result.json.contentIdentity.status).toBe('unavailable');
+      expect(result.json.contentIdentity.sha256).toBeNull();
+      expect(result.json.contentIdentity.unavailableFiles).toContain('scripts/dist/engine.mjs');
+    } finally {
+      rmSync(work, { recursive: true, force: true });
+    }
+  });
+
+  (CAN_SYMLINK ? it : it.skip)('does not follow a linked reference tree outside the Skill', () => {
+    const work = mkdtempSync(join(tmpdir(), 'ming-ver-linked-'));
+    try {
+      const pkg = makeCandidate(work);
+      const outside = join(work, 'outside');
+      mkdirSync(outside);
+      writeFileSync(join(outside, 'private.md'), 'synthetic private sentinel');
+      symlinkSync(
+        outside,
+        join(pkg, 'references/linked'),
+        process.platform === 'win32' ? 'junction' : 'dir',
+      );
+      const result = version(pkg).json.contentIdentity;
+      expect(result.status).toBe('unavailable');
+      expect(result.sha256).toBeNull();
+      expect(result.unavailableFiles).toContain('references/linked');
+      expect(JSON.stringify(result)).not.toContain('private.md');
+    } finally {
+      rmSync(work, { recursive: true, force: true });
+    }
+  });
+
   it('detects legacy schema + double-nesting when run from a nested legacy layout', () => {
     const work = mkdtempSync(join(tmpdir(), 'ming-ver-legacy-'));
     try {
@@ -457,6 +552,8 @@ describe('loom-chart version: real installed-version report', () => {
       expect(v.code).toBe(0);
       expect(v.json.ok).toBe(false);
       expect(v.json.reason).toMatch(/no BUILD_MANIFEST/);
+      expect(v.json.contentIdentity.status).toBe('available');
+      expect(v.json.contentIdentity.sha256).toMatch(/^[a-f0-9]{64}$/);
     } finally {
       rmSync(work, { recursive: true, force: true });
     }

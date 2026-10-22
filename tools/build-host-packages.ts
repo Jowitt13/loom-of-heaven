@@ -132,7 +132,7 @@ function readingLiteSkillMd(): string {
     '- `references/privacy.md` — 隐私说明',
     '- `references/sources-and-limitations.md` — 来源与限制',
     '',
-    '完全离线,不上传出生信息。涉及医疗、法律、投资或重大人生决定时，不给确定性判断。',
+    '本辅助包不自行发起网络请求，但宿主聊天可能发送消息或工具输出；须先确认用户知情同意。涉及医疗、法律、投资或重大人生决定时，不给确定性判断。',
   ];
   return fm.join('\n') + '\n' + body.join('\n') + '\n';
 }
@@ -155,7 +155,7 @@ function installMd(
   L.push(`- 导入格式:${h.format}`);
   L.push('');
   L.push(
-    '> 本包完全离线运行,不会把你的出生信息上传到网络。运行需本机 Node.js ≥ 22（无需 pnpm/Git/源码构建）。',
+    '> 引擎在本地离线计算、不遥测；宿主聊天可能向模型服务商发送消息、附件或工具输出，须先确认隐私设置和用户同意。运行需本机 Node.js ≥ 22（无需 pnpm/Git/源码构建）。',
   );
   L.push('');
   if (isLite) {
@@ -170,9 +170,9 @@ function installMd(
     L.push('3. 首次使用请先阅读 `references/reading-lite-input.md` 了解如何提供 facts。');
   } else if (h.id === 'codex') {
     L.push(
-      '1. 克隆仓库 `git clone https://github.com/Jowitt13/loom-of-heaven.git`(或下载 ZIP 解压)。',
+      '1. 解压当前已选定并校验的 ZIP，保持单层 `xuan-ji-yu-heng/`，不要改用另一个仓库快照冒充本包。',
     );
-    L.push('2. 宿主读取仓库根目录的 `AGENTS.md` 与 `skills/xuan-ji-yu-heng/`。');
+    L.push('2. 在支持本地 Skill 的宿主中加载该目录的 `SKILL.md`；先确认不会覆盖已有本地改动。');
     L.push('3. 直接对话触发。');
   } else if (h.id === 'qoder') {
     // Qoder Desktop / Qoder CN: the built-in Agent performs the FILE install itself.
@@ -232,7 +232,7 @@ function installMd(
     L.push('## 检查已装版本（读本地清单,不靠猜）');
     L.push('');
     L.push(
-      '说「检查 Loom of Heaven 版本」:Agent 运行 `node scripts/loom-chart.mjs version` 读取本包同级 `BUILD_MANIFEST.json`,输出真实本地版本(engineVersion / releaseVersion / releaseTag / 是否 legacy / 是否双层目录 / 读取路径)。这是“当前已装版本”,不等于“线上最新版本”。',
+      '说「检查 Loom of Heaven 版本」:Agent 在实际技能目录运行 `node scripts/loom-chart.mjs version`，读取本地标签和 `contentIdentity.sha256`。同号不代表同内容；老包缺少指纹时明确说未知。指纹覆盖 Skill、CLI、引擎、smoke fixture 和 references Markdown（LF 规范化），不覆盖本宿主 INSTALL/BUILD_MANIFEST 或用户文件，不代替 ZIP SHA-256，也不证明线上最新。',
     );
     L.push('');
   }
@@ -254,7 +254,7 @@ function installMd(
     );
   } else {
     L.push(
-      '`verify` 返回 ok:true,或排一张盘能返回三盘(西方/八字/紫微)数据与解读,即安装成功;若提示找不到 `node`,请先安装 Node.js ≥ 22。',
+      '确认宿主实际加载技能，并运行 `verify` 得到 exit 0、ok:true。事业演示按 `answer-plan → reading-draft/v2 → validate-answer → lint-reading` 返回自然短答，不要求展示完整命盘；只有明确请求原始数据才展示。若找不到 `node`，先安装 Node.js ≥ 22。',
     );
   }
   L.push('');
@@ -275,7 +275,7 @@ function installMd(
     );
     if (h.id === 'workbuddy') {
       L.push(
-        '   若 WorkBuddy 必须经 Skills 管理界面:先只删旧 Loom of Heaven 再导入新版,不碰其它技能;升级后只保留一个可触发 `xuan-ji-yu-heng`。',
+        '   若 WorkBuddy 必须经 Skills 管理界面：使用能保留或恢复旧包的原生替换；做不到就停止说明，不先删旧包，不碰其它技能。升级后只保留一个可触发 `xuan-ji-yu-heng`。',
       );
     }
     L.push(
@@ -292,7 +292,7 @@ function installMd(
   L.push('');
   L.push(`- ${h.notes}`);
   L.push('- 仅供传统文化、娱乐与自我反思,非科学预测;不构成医疗/法律/投资/人生重大决策建议。');
-  L.push('- 完全离线,不上传出生信息。');
+  L.push('- 本地引擎离线不等于宿主聊天离线；发送敏感资料或派生结果前先确认用户知情同意。');
   L.push('');
   return L.join('\n');
 }
