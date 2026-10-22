@@ -419,6 +419,18 @@ Local `verify:cloud` passed, including call-count regressions for one normalizat
 journey per combined verification. Remote CI, integration and installed-host updates remain
 separate states; this repair does not declare any of the latter complete.
 
+Item 5 ([Draft PR #104](https://github.com/Jowitt13/loom-of-heaven/pull/104)) consolidates
+installation guidance around the existing protocol and platform installers.
+Engine self-checks no longer require full-chart output for an ordinary career demo. The existing
+`version` command additionally fingerprints local Skill/CLI/engine/fixture/reference content;
+this is not a ZIP checksum, authentication, a publication claim or a host-execution claim. Host
+chat privacy is explicit and separate from the offline engine. The optimization queue ends here;
+integration, installation and publication still require their own authorized actions.
+Local `verify:cloud` passed with real version/packaging regressions: same-label content changes
+are distinguishable, line endings are normalized and four host packages share the same scoped
+core identity. This completes source implementation of the five-item queue, not main integration,
+installed-host acceptance, publication or IQ-4 exit. No additional optimization track starts.
+
 Execution rules:
 
 - Use this order for the owner's optimization work. One coherent repair can cover adjacent items;
