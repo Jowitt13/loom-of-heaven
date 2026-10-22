@@ -41006,6 +41006,8 @@ var MAX_PARAGRAPHS_PER_SECTION = 50;
 var MAX_SOURCE_FACT_IDS_PER_PARAGRAPH = 50;
 var MAX_CONSTRAINT_REFS_PER_PARAGRAPH = 10;
 var MAX_TOTAL_SOURCE_FACT_IDS = 1e3;
+var MAX_CAREER_REALITY_FACTS = 24;
+var MAX_CAREER_REALITY_STATEMENT_CHARS = 500;
 var MAX_FACT_ID_CHARS = 200;
 var MAX_CAVEATS_EXPRESSED = 100;
 var MAX_CAVEAT_ENTRY_CHARS = 500;
@@ -41027,6 +41029,31 @@ var PlanConstraintRef = external_exports.strictObject({
   kind: PlanConstraintKind,
   index: external_exports.number().int().min(0)
 });
+var CareerRealityFactId = external_exports.string().max(MAX_FACT_ID_CHARS).regex(/^career-fact:[a-z0-9][a-z0-9._-]*$/);
+var CareerRealitySource = external_exports.strictObject({
+  layer: external_exports.literal("career-reality"),
+  factIds: external_exports.array(CareerRealityFactId).min(1).max(MAX_SOURCE_FACT_IDS_PER_PARAGRAPH).refine((ids) => new Set(ids).size === ids.length)
+});
+var CareerRealityContext = external_exports.strictObject({
+  confirmedFacts: external_exports.array(
+    external_exports.strictObject({
+      factId: CareerRealityFactId,
+      source: external_exports.literal("user-stated"),
+      confirmedByUser: external_exports.literal(true),
+      category: external_exports.enum([
+        "current-role",
+        "skills",
+        "goals",
+        "constraints",
+        "preferences",
+        "opportunities"
+      ]),
+      statement: external_exports.string().trim().min(1).max(MAX_CAREER_REALITY_STATEMENT_CHARS)
+    })
+  ).max(MAX_CAREER_REALITY_FACTS).refine((facts) => new Set(facts.map((fact2) => fact2.factId)).size === facts.length),
+  transient: external_exports.literal(true),
+  noPersistence: external_exports.literal(true)
+});
 var ReadingParagraph = external_exports.strictObject({
   text: external_exports.string().min(1).max(MAX_PARAGRAPH_TEXT_CHARS),
   /** Fact IDs from the AnswerPlan that ground this paragraph. */
@@ -41036,7 +41063,10 @@ var ReadingParagraph = external_exports.strictObject({
    * warnings, or an explicitly requested disclaimer) instead of new factual claims; such paragraphs are
    * fact-exempt only when every reference resolves to a real plan entry.
    */
-  constraintRefs: external_exports.array(PlanConstraintRef).max(MAX_CONSTRAINT_REFS_PER_PARAGRAPH).optional()
+  constraintRefs: external_exports.array(PlanConstraintRef).max(MAX_CONSTRAINT_REFS_PER_PARAGRAPH).optional(),
+  /** Additive v2 input extension: an R-only paragraph, never mixed with chart
+   * citations or plan constraints. References resolve in careerReality below. */
+  realitySource: CareerRealitySource.optional()
 });
 var ReadingSection = external_exports.strictObject({
   id: external_exports.string().min(1).max(MAX_SECTION_ID_CHARS),
@@ -41058,7 +41088,7 @@ var ReadingDraft = external_exports.strictObject({
     totalText += section.heading.length;
     for (const para of section.paragraphs) {
       totalText += para.text.length;
-      totalFactIds += para.sourceFactIds.length;
+      totalFactIds += para.sourceFactIds.length + (para.realitySource?.factIds.length ?? 0);
     }
   }
   if (totalText > MAX_TOTAL_TEXT_CHARS) {
@@ -41123,9 +41153,8 @@ var ViolationCode = external_exports.enum([
   "CONTAINS_MARKUP",
   // heading or paragraph text contains HTML/entity/Markdown syntax
   // Guardrail violations
-  // Reserved: not currently emitted. Mapping answerPlan.guardrails to checks without
-  // changing the public AnswerPlan contract is a follow-up design item; we do not
-  // fabricate a fake guardrail validation just to "use" this code.
+  // Emitted for mixed career-reality/chart sources or non-career reality input.
+  // This does not claim general semantic enforcement of every plan guardrail.
   "GUARDRAIL_VIOLATED",
   // Resource-boundary violations
   "RESOURCE_LIMIT_EXCEEDED"
@@ -41154,7 +41183,8 @@ var AnswerViolation = external_exports.strictObject({
   patternKey: external_exports.string().optional(),
   /**
    * Index of the offending item in the relevant array, keyed by `code`:
-   * UNKNOWN_FACT_ID → paragraph.sourceFactIds; MISSING_REQUIRED_CAVEAT →
+   * UNKNOWN_FACT_ID → paragraph.sourceFactIds (or realitySource.factIds when
+   * patternKey is career-reality.factIds); MISSING_REQUIRED_CAVEAT →
    * answerPlan.requiredCaveats; MISSING_REQUIRED_WARNING → answerPlan.requiredWarningCodes.
    */
   itemIndex: external_exports.number().int().min(0).optional(),
@@ -41174,6 +41204,7 @@ var AnswerValidationResult = external_exports.strictObject({
   violationsTruncated: external_exports.boolean()
 });
 var ValidateAnswerInput = external_exports.strictObject({
+  careerReality: CareerRealityContext.optional(),
   answerPlan: external_exports.object({
     allowedFactIds: external_exports.array(external_exports.string().max(MAX_FACT_ID_CHARS)).max(MAX_ALLOWED_FACT_IDS),
     requiredCaveats: external_exports.array(external_exports.string().max(MAX_CAVEAT_ENTRY_CHARS)).max(MAX_REQUIRED_CAVEATS),
@@ -57920,6 +57951,17 @@ function runValidateAnswer(input) {
     violations.push(v);
   };
   const allowedIds = new Set(answerPlan.allowedFactIds);
+  const realityIds = new Set(input.careerReality?.confirmedFacts.map((fact2) => fact2.factId) ?? []);
+  const realityBound = (para) => readingDraft.topic === "career" && answerPlan.request.topic === "career" && para.realitySource !== void 0 && para.sourceFactIds.length === 0 && (para.constraintRefs?.length ?? 0) === 0 && para.realitySource.factIds.every((id) => realityIds.has(id));
+  if (input.careerReality !== void 0 && answerPlan.request.topic !== "career") {
+    push({
+      code: "GUARDRAIL_VIOLATED",
+      severity: "error",
+      patternKey: "career-reality.topic",
+      detail: "\u7528\u6237\u73B0\u5B9E\u6765\u6E90\u4EC5\u9002\u7528\u4E8E\u4E8B\u4E1A\u4E3B\u9898\u3002",
+      remediation: "\u4E0D\u8981\u5411\u5176\u4ED6\u4E3B\u9898\u4F20\u5165\u4E8B\u4E1A\u73B0\u5B9E\u4FE1\u606F\u3002"
+    });
+  }
   if (readingDraft.topic !== answerPlan.request.topic) {
     push({
       code: "CROSS_TOPIC",
@@ -57934,7 +57976,7 @@ function runValidateAnswer(input) {
     for (const section of readingDraft.sections) {
       contentChars += section.heading.trim().length;
       for (const para of section.paragraphs) {
-        contentChars += para.text.trim().length;
+        if (!realityBound(para)) contentChars += para.text.trim().length;
         if (para.sourceFactIds.length > 0) citesFacts = true;
       }
     }
@@ -57942,8 +57984,8 @@ function runValidateAnswer(input) {
       push({
         code: "UNSUPPORTED_TOPIC",
         severity: "error",
-        detail: "AnswerPlan \u6807\u8BB0\u4E3A not-supported\uFF0C\u4F46\u8349\u7A3F\u5F15\u7528\u4E86 fact\uFF0C\u6216\u5168\u90E8\u53EF\u89C1\u6587\u672C\uFF08\u6807\u9898+\u6BB5\u843D\uFF09\u8D85\u51FA\u7B80\u77ED\u8BF4\u660E\u7684\u9884\u7B97\u3002",
-        remediation: "\u5F53 answerability \u4E3A not-supported \u65F6\uFF0C\u53EA\u80FD\u7528\u4E0D\u5F15\u7528\u4EFB\u4F55 fact \u7684\u7B80\u77ED\u8BF4\u660E\uFF08\u6240\u6709\u6807\u9898\u4E0E\u6BB5\u843D\u5408\u8BA1\u4E0D\u8D85\u8FC7 MAX_NOT_SUPPORTED_TEXT_CHARS\uFF09\u89E3\u91CA\u5F15\u64CE\u65E0\u6CD5\u63D0\u4F9B\u8BE5\u4E3B\u9898\u7684\u4E8B\u5B9E\uFF0C\u5E76\u5EFA\u8BAE\u6362\u4E00\u4E2A\u4E3B\u9898\u3002"
+        detail: "AnswerPlan \u6807\u8BB0\u4E3A not-supported\uFF0C\u4F46\u8349\u7A3F\u5F15\u7528\u4E86\u547D\u76D8 fact\uFF0C\u6216\u672A\u72EC\u7ACB\u7ED1\u5B9A\u73B0\u5B9E\u6765\u6E90\u7684\u6587\u672C\u8D85\u51FA\u7B80\u77ED\u8BF4\u660E\u9884\u7B97\u3002",
+        remediation: "\u65E0\u6CD5\u652F\u6301\u7684\u547D\u76D8\u63A8\u65AD\u53EA\u7ED9\u4E0D\u5F15\u7528\u547D\u76D8 fact \u7684\u7B80\u77ED\u8BF4\u660E\uFF1B\u72EC\u7ACB\u7684\u73B0\u5B9E\u8BA8\u8BBA\u5FC5\u987B\u7ED1\u5B9A\u7528\u6237\u81EA\u8FF0\u3002\u5176\u4F59\u53EF\u89C1\u6587\u672C\u53D7 MAX_NOT_SUPPORTED_TEXT_CHARS \u7EA6\u675F\u3002"
       });
     }
   }
@@ -57981,6 +58023,48 @@ function runValidateAnswer(input) {
     }
     for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
       const para = section.paragraphs[pIdx];
+      if (para.realitySource !== void 0) {
+        if (/八字|命盘|星盘|十神|官杀|七杀|正官|格局|喜用|用神|五行|紫微|吠陀|\b(?:bazi|astrology|horoscope|vedic|ziwei)\b/i.test(
+          normalizeSafetyText(`${section.heading} ${para.text}`)
+        )) {
+          push({
+            code: "GUARDRAIL_VIOLATED",
+            severity: "error",
+            sectionIndex: sIdx,
+            field: "paragraph",
+            paragraphIndex: pIdx,
+            patternKey: "career-reality.traditional-content",
+            detail: "\u73B0\u5B9E\u5EFA\u8BAE\u6BB5\u843D\u542B\u4F20\u7EDF\u547D\u76D8\u672F\u8BED\uFF0C\u4E0D\u80FD\u7528\u73B0\u5B9E\u6765\u6E90\u5305\u88C5\u547D\u76D8\u5185\u5BB9\u3002",
+            remediation: "\u5C06\u6587\u5316\u53C2\u8003\u79FB\u5230\u72EC\u7ACB\u547D\u76D8\u6BB5\u843D\uFF1B\u73B0\u5B9E\u5EFA\u8BAE\u53EA\u8BA8\u8BBA\u7528\u6237\u660E\u786E\u9648\u8FF0\u7684\u5DE5\u4F5C\u60C5\u51B5\u3002"
+          });
+        }
+        if (para.sourceFactIds.length > 0 || (para.constraintRefs?.length ?? 0) > 0 || readingDraft.topic !== "career" || answerPlan.request.topic !== "career") {
+          push({
+            code: "GUARDRAIL_VIOLATED",
+            severity: "error",
+            sectionIndex: sIdx,
+            field: "paragraph",
+            paragraphIndex: pIdx,
+            patternKey: "career-reality.single-layer",
+            detail: "\u73B0\u5B9E\u5EFA\u8BAE\u6BB5\u843D\u4E0D\u5F97\u6DF7\u7528\u547D\u76D8\u4E8B\u5B9E\u6216\u8BA1\u5212\u7EA6\u675F\uFF0C\u4E14\u5FC5\u987B\u5C5E\u4E8E\u4E8B\u4E1A\u4E3B\u9898\u3002",
+            remediation: "\u73B0\u5B9E\u6BB5\u843D\u53EA\u5F15\u7528\u7528\u6237\u81EA\u8FF0\uFF1B\u547D\u76D8\u53C2\u8003\u548C\u76F8\u5173\u9650\u5236\u653E\u5728\u5404\u81EA\u7684\u76F8\u90BB\u6BB5\u843D\u3002"
+          });
+        }
+        for (const [index, id] of para.realitySource.factIds.entries()) {
+          if (!realityIds.has(id))
+            push({
+              code: "UNKNOWN_FACT_ID",
+              severity: "error",
+              sectionIndex: sIdx,
+              field: "paragraph",
+              paragraphIndex: pIdx,
+              itemIndex: index,
+              patternKey: "career-reality.factIds",
+              detail: "\u73B0\u5B9E\u6765\u6E90\u5F15\u7528\u672A\u7ED1\u5B9A\u5230\u7528\u6237\u5DF2\u786E\u8BA4\u7684\u4E8B\u5B9E\u3002",
+              remediation: "\u4EC5\u5F15\u7528\u672C\u6B21 careerReality.confirmedFacts \u4E2D\u5B58\u5728\u7684\u4E8B\u5B9E\uFF0C\u4E0D\u80FD\u7F16\u9020\u6216\u501F\u7528\u547D\u76D8 ID\u3002"
+            });
+        }
+      }
       if (MARKUP_STRUCTURAL_CHARS_RE.test(para.text)) {
         push({
           code: "CONTAINS_MARKUP",
@@ -58021,7 +58105,7 @@ function runValidateAnswer(input) {
       const exemptFromMissingFactCheck = (
         // not-supported drafts must be fact-free; the UNSUPPORTED_TOPIC gate
         // above governs them instead of the citation requirement.
-        answerPlan.answerability === "not-supported" || refsValid
+        answerPlan.answerability === "not-supported" || refsValid || realityBound(para)
       );
       if (!exemptFromMissingFactCheck && para.sourceFactIds.length === 0) {
         push({
@@ -58031,7 +58115,7 @@ function runValidateAnswer(input) {
           field: "paragraph",
           paragraphIndex: pIdx,
           detail: "\u6BB5\u843D\u672A\u58F0\u660E\u4EFB\u4F55 sourceFactIds\uFF0C\u5185\u5BB9\u7F3A\u5C11\u4E8B\u5B9E\u4F9D\u636E\u58F0\u660E\u3002",
-          remediation: "\u6BCF\u4E2A\u975E\u7EA6\u675F\u8868\u8FBE\u6BB5\u843D\u5FC5\u987B\u5F15\u7528\u81F3\u5C11\u4E00\u4E2A allowedFactIds \u4E2D\u7684 fact ID\uFF1B\u8868\u8FBE\u514D\u8D23/caveat/warning \u7684\u6BB5\u843D\u5FC5\u987B\u901A\u8FC7 constraintRefs \u5F15\u7528\u771F\u5B9E\u5B58\u5728\u7684 AnswerPlan \u7EA6\u675F\u3002"
+          remediation: "\u547D\u76D8\u6BB5\u843D\u5F15\u7528 allowedFactIds\uFF0C\u73B0\u5B9E\u5EFA\u8BAE\u6BB5\u843D\u7528\u72EC\u7ACB realitySource \u7ED1\u5B9A\u7528\u6237\u81EA\u8FF0\uFF1B\u8868\u8FBE\u8BA1\u5212\u7EA6\u675F\u65F6\u7528 constraintRefs \u5F15\u7528\u771F\u5B9E\u7EA6\u675F\u3002"
         });
       }
       for (let fIdx = 0; fIdx < para.sourceFactIds.length; fIdx++) {
@@ -58160,12 +58244,64 @@ function requireStringEntriesWithin(entries, maxChars, limitKey) {
     if (entry.length > maxChars) boundedReject(limitKey);
   }
 }
+function requireRealityObject(raw, fields) {
+  const object2 = requireBoundedObject(raw);
+  if (Object.keys(object2).some((key) => !fields.includes(key))) boundedReject();
+  for (const field of fields) requireOwnField(object2, field);
+  return object2;
+}
 function parseValidateAnswerInputBounded(raw) {
   const root = requireBoundedObject(raw);
   requireOwnField(root, "answerPlan");
   requireOwnField(root, "readingDraft");
   const plan = requireBoundedObject(root.answerPlan);
   const draft = requireBoundedObject(root.readingDraft);
+  let careerReality;
+  if (Object.hasOwn(root, "careerReality")) {
+    requireOwnField(root, "careerReality");
+    if (root.careerReality !== void 0) {
+      const context = requireRealityObject(root.careerReality, [
+        "confirmedFacts",
+        "transient",
+        "noPersistence"
+      ]);
+      const facts = requireArrayWithin(
+        context.confirmedFacts,
+        MAX_CAREER_REALITY_FACTS,
+        "MAX_CAREER_REALITY_FACTS"
+      );
+      careerReality = {
+        transient: context.transient,
+        noPersistence: context.noPersistence,
+        confirmedFacts: facts.map((rawFact) => {
+          const fact2 = requireRealityObject(rawFact, [
+            "factId",
+            "source",
+            "confirmedByUser",
+            "category",
+            "statement"
+          ]);
+          requireStringEntriesWithin(
+            [fact2.factId, fact2.source, fact2.category],
+            MAX_FACT_ID_CHARS,
+            "MAX_FACT_ID_CHARS"
+          );
+          requireStringEntriesWithin(
+            [fact2.statement],
+            MAX_CAREER_REALITY_STATEMENT_CHARS,
+            "MAX_CAREER_REALITY_STATEMENT_CHARS"
+          );
+          return {
+            factId: fact2.factId,
+            source: fact2.source,
+            confirmedByUser: fact2.confirmedByUser,
+            category: fact2.category,
+            statement: fact2.statement
+          };
+        })
+      };
+    }
+  }
   requireOwnField(plan, "request");
   const planRequest = requireBoundedObject(plan.request);
   if (typeof planRequest.topic !== "string" || planRequest.topic.length > 50) boundedReject();
@@ -58240,6 +58376,20 @@ function parseValidateAnswerInputBounded(raw) {
       );
       requireStringEntriesWithin(factIds, MAX_FACT_ID_CHARS, "MAX_FACT_ID_CHARS");
       totalFactIds += factIds.length;
+      if (Object.hasOwn(para, "realitySource")) {
+        requireOwnField(para, "realitySource");
+        if (para.realitySource !== void 0) {
+          const source = requireRealityObject(para.realitySource, ["layer", "factIds"]);
+          requireStringEntriesWithin([source.layer], MAX_FACT_ID_CHARS, "MAX_FACT_ID_CHARS");
+          const ids = requireArrayWithin(
+            source.factIds,
+            MAX_SOURCE_FACT_IDS_PER_PARAGRAPH,
+            "MAX_SOURCE_FACT_IDS_PER_PARAGRAPH"
+          );
+          requireStringEntriesWithin(ids, MAX_FACT_ID_CHARS, "MAX_FACT_ID_CHARS");
+          totalFactIds += ids.length;
+        }
+      }
       if (totalFactIds > MAX_TOTAL_SOURCE_FACT_IDS) boundedReject("MAX_TOTAL_SOURCE_FACT_IDS");
       if (para.constraintRefs !== void 0) {
         const refs = requireArrayWithin(
@@ -58252,6 +58402,7 @@ function parseValidateAnswerInputBounded(raw) {
     }
   }
   const projected = {
+    ...careerReality === void 0 ? {} : { careerReality },
     answerPlan: {
       allowedFactIds: plan.allowedFactIds,
       requiredCaveats: plan.requiredCaveats,
@@ -60779,6 +60930,8 @@ export {
   JARGON_SOFT,
   JARGON_STRONG,
   MAX_ALLOWED_FACT_IDS,
+  MAX_CAREER_REALITY_FACTS,
+  MAX_CAREER_REALITY_STATEMENT_CHARS,
   MAX_CAVEATS_EXPRESSED,
   MAX_CAVEAT_ENTRY_CHARS,
   MAX_CONSTRAINT_REFS_PER_PARAGRAPH,

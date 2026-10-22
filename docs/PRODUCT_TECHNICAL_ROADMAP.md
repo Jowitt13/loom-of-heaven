@@ -392,9 +392,13 @@ filesystem-failure tests and core verification passed. The branch is pushed and
 are distinct: both CI jobs have passed, and integration remains pending. No installed host has
 been changed. Item 2's material projection now narrows ordinary career answers to the ADR 0021
 reference and its own constraints; explicit technical explanation keeps multi-system facts, and
-unsupported career timing returns no substitute natal verdict. Reality-source representation in
-the draft contract is still unimplemented; item 2 is not complete. No new draft fields or source
-permissions are introduced by this repair.
+unsupported career timing returns no substitute natal verdict. Item 2 now also binds R-only
+paragraphs to optional, bounded user-confirmed career facts through an additive v2 input extension.
+Legacy drafts and validation-result output stay compatible; chart/reality mixing, unresolved
+sources and absent confirmation remain invalid. Truthful confirmation is the host's responsibility.
+This is record linkage, not semantic proof of
+advice or an activation of the C-track composition modules. Verification and remote integration
+status are recorded in the existing PR #102; no source permission or IQ-4 exit state is changed.
 
 Execution rules:
 
