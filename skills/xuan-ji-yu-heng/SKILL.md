@@ -23,8 +23,9 @@ asked topic's facts), retain warnings honestly for audit, and narrate only from 
 - Pass arguments via the flags below (arrays/files only). Never build a shell string from
   user text.
 - 旺衰强弱 / 格局 / 喜用神 / 神煞 / 刑冲合害 / 吉凶 come from the **`interpret`** command, not from
-  `calculate` / `chart.json`. Always run `interpret` and display them; **never** claim this engine
-  version "does not output" them, and never hand-compute a substitute.
+  `calculate` / `chart.json`. Show the full set only in Channel A; ordinary questions use
+  `answerPlan.selectedFacts` and the topic bounds below. Never hand-compute a substitute or confuse
+  an omitted topic fact with an engine capability being absent.
 - **No fated verdicts.** When narrating, never write 天生/注定/必须/只能/不能-style life destiny.
   Explicitly forbidden: “天生不能打工 / 必须创业 / 不适合大厂或体制 / 必须主动求变”. Give **multiple viable
   paths + conditions + a qualitative trend (NOT a probability %)**; use only the facts' own
@@ -60,9 +61,9 @@ per-system rule settings (Western `zodiac: tropical|sidereal`, `ayanamsha`, `ast
 
 ## Workflow — identical for EVERY host model (do not shortcut)
 
-To keep results consistent across models, the **calculation** workflow is mandatory: skipping
-`calculate`/`interpret`, a system's computation, or collecting any `warnings` is a **failed run**. The
-**display** of the full four-system chart is now conditional — see step 4 (topic-first).
+Use the calculation path in step 3: `answer-plan` for ordinary questions, or `calculate` plus
+`interpret` for full technical charts. Do not replace calculation with model guesses or discard
+warnings. Computing all four systems does not require displaying all four — see step 4.
 
 1. Confirm inputs and restate the local time, place, latitude/longitude, IANA timezone,
    calendar/leap month, rule gender and ruleset. Explicitly flag when the time is approximate,
@@ -90,6 +91,8 @@ To keep results consistent across models, the **calculation** workflow is mandat
      现有信息能支持的十神参考，并只问一个最关键的现实问题，**不给行动建议**，不编造工作经历或
      职业方向。多体系综合不进事业默认正文。**不要**另起与当前结论无关的真太阳时/技术提示尾段；只
      有 `requiredWarningCodes` 中真正影响所选事实的 warning 才就地自然说明。
+     示例只示范信息边界和清楚的表达，不是逐字套用的开场白；不重复用户整段提问，也不把同一限制
+     换几个说法再讲一遍。详见 `references/examples-career.md` 中分开的正文与内部说明。
    - Per-topic loading: use the **自然叙述规范 v1** in `references/reading-style.md`; 事业 → `+ references/examples-career.md`; 感情 → `+ references/examples-love.md`; 财运 → `+ references/examples-wealth.md`; 学业/流年不加载无关案例文件。
    - **Channel B 的内部链路与默认交付：**先保留每条选中事实的 `id` / `reason` /
      `evidence.ref` / `caveat`，再按“事实 → 规则机制 → 现实含义 → 条件”写成连续自然段。

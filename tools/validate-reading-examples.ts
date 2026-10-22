@@ -17,7 +17,8 @@ const stylePath = join(refDir, 'reading-style.md');
 
 const EXAMPLE_FILES = ['examples-career.md', 'examples-love.md', 'examples-wealth.md'];
 const FATE_WORDS = ['注定在一起', '必分手', '必然分手', '一定分手', '必然结婚', '一定结婚'];
-const TERM_RE = /月令|日主|官杀|中天|MC|官禄宫|夫妻宫|第七宫主星|日支|财星|劫财|财帛宫|金星/;
+const TERM_RE =
+  /月令|日主|官杀|七杀|正官|中天|MC|官禄宫|夫妻宫|第七宫主星|日支|财星|劫财|财帛宫|金星/;
 
 interface Check {
   name: string;
@@ -74,6 +75,17 @@ for (const file of EXAMPLE_FILES) {
 
   const fate = FATE_WORDS.filter((word) => delivery.includes(word));
   add(`${file}: 无命定关系断言`, fate.length === 0, fate.join('、'));
+
+  if (file === 'examples-career.md') {
+    const birthOnly = sectionAfter(md, '仅出生信息示例');
+    add(`${file}: 仅出生信息示例存在`, birthOnly.length > 0);
+    const birthLint = lintReading(birthOnly, { channel: 'topic' });
+    add(
+      `${file}: 仅出生信息示例独立通过 lint-reading`,
+      birthOnly.length > 0 && birthLint.ok,
+      birthLint.violations.map((v) => `${v.term}@${v.line}`).join('、'),
+    );
+  }
 }
 
 if (existsSync(stylePath)) {

@@ -92,6 +92,11 @@ describe('reading-lint: V1 retained safety checks', () => {
         r.violations.filter((v) => v.severity === 'error'),
         file,
       ).toEqual([]);
+      if (file === 'examples-career.md') {
+        const birthOnly = md.match(/### 仅出生信息示例\n([\s\S]*?)(?=\n### |$)/);
+        expect(birthOnly, file).not.toBeNull();
+        expect(lintReading(birthOnly![1]!).violations).toEqual([]);
+      }
     }
   });
 });
