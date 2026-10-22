@@ -33,7 +33,15 @@ export function verifyBaziCareerNarrative(
   // Degraded or blocked journeys never reach a view, so no complete-looking
   // narrative can be verified against them: the runner's fail-closed throws
   // propagate unchanged.
-  const { responseView, baziClaims } = runBaziCareerJourney(rawJourneyInput, options);
+  const journey = runBaziCareerJourney(rawJourneyInput, options);
+  return verifyBaziCareerNarrativeForJourney(rawTraces, journey);
+}
+
+/** @internal Reuse only the result computed in this call; never accept it from a host. */
+export function verifyBaziCareerNarrativeForJourney(
+  rawTraces: readonly unknown[],
+  { responseView, baziClaims }: ReturnType<typeof runBaziCareerJourney>,
+): BaziCareerNarrativeVerificationResult {
   const issues: BaziCareerNarrativeIssue[] = [];
 
   const parsedTraces: NarrativeTrace[] = [];

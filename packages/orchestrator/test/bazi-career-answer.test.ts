@@ -9,7 +9,7 @@ import {
 } from '../../contracts/src/answer-claim.ts';
 import { ReadingDraft } from '../../contracts/src/validate-answer.ts';
 import { parseBirthInput, type BirthInput } from '@loom/contracts';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ClarificationPlanningInput } from '../../contracts/src/clarification-plan.ts';
 import {
   approveAnswerClaimCandidates,
@@ -18,6 +18,8 @@ import {
 import { ResponseViewPlanningError } from '../../interpret/src/response-view.ts';
 import { scopedRequiredWarningCodes, verifyBaziCareerAnswer } from '../src/bazi-career-answer.ts';
 import { runAnswerPlan } from '../src/interpret.ts';
+import * as journeyModule from '../src/bazi-career-journey.ts';
+import { verifyBaziCareerNarrative } from '../src/bazi-career-narrative.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const read = (relativePath: string): string => readFileSync(join(root, relativePath), 'utf8');
@@ -159,6 +161,44 @@ function readyExamples(): {
 }
 
 describe('IQ-4D bazi career answer verification', () => {
+  it('computes one journey per combined verification without skipping narrative checks', () => {
+    const { answer, traces } = readyExamples();
+    const input = journeyInput(syntheticInput);
+    const runner = vi.spyOn(journeyModule, 'runBaziCareerJourney');
+    try {
+      for (const candidateTraces of [
+        traces,
+        [{ ...traces[0]!, mechanismRefs: ['bazi-rule/synthetic/tampered'] }],
+        [],
+      ]) {
+        runner.mockClear();
+        const combined = verifyBaziCareerAnswer(answer, candidateTraces, input, { now: FIXED });
+        expect(runner).toHaveBeenCalledTimes(1);
+        runner.mockClear();
+        const standalone = verifyBaziCareerNarrative(candidateTraces, input, { now: FIXED });
+        expect(runner).toHaveBeenCalledTimes(1);
+        expect(combined.issues.slice(0, standalone.issues.length)).toEqual(standalone.issues);
+        expect(combined.ok).toBe(standalone.ok);
+      }
+      // A later request must compute afresh; nothing is retained across calls.
+      runner.mockClear();
+      expect(() =>
+        verifyBaziCareerAnswer(
+          answer,
+          traces,
+          journeyInput(syntheticInput, { requestedDepth: null }),
+          { now: FIXED },
+        ),
+      ).toThrow();
+      expect(runner).toHaveBeenCalledTimes(1);
+    } finally {
+      runner.mockRestore();
+    }
+    expect(read('packages/orchestrator/src/index.ts')).not.toContain(
+      'verifyBaziCareerNarrativeForJourney',
+    );
+  });
+
   it(
     'verifies a complete synthetic answer bound to journey, view, traces, claims, and caveats',
     { timeout: 30_000 },
