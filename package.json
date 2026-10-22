@@ -36,7 +36,6 @@
     "verify:published-release": "node tools/verify-published-release.ts",
     "verify:hosts": "node tools/verify-host-packages.ts",
     "verify:install": "node tools/verify-install-manifest.ts",
-    "check:doc-counts": "node tools/check-doc-counts.ts",
     "scan:deps": "pnpm audit --prod --json | node tools/scan-deps.ts --audit-stdin",
     "scan:licenses": "pnpm licenses list --prod --json | node tools/scan-licenses.ts --licenses-stdin",
     "scan:secrets": "node tools/scan-secrets.ts",
@@ -45,8 +44,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint packages",
-    "verify:cloud": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run validate:provenance && pnpm run validate:skill && pnpm run validate:psychology-skill && pnpm run validate:reading && pnpm run validate:docs && pnpm run smoke && pnpm run forward:test && pnpm run package:psychology-skill && pnpm run verify:psychology-skill && pnpm run package:psychology-hosts && pnpm run verify:psychology-hosts && pnpm run package:hosts && pnpm run verify:hosts && pnpm run verify:install && pnpm run check:doc-counts && pnpm run scan:deps && pnpm run scan:licenses && pnpm run validate:sbom && pnpm run validate:psychology-sbom && pnpm run scan:secrets",
-    "verify:all": "pnpm run verify:cloud && pnpm run scan:incident"
+    "verify:cloud": "pnpm run check && pnpm run build:psychology-skill && pnpm run validate:psychology-skill && pnpm run package:psychology-skill && pnpm run verify:psychology-skill && pnpm run package:psychology-hosts && pnpm run verify:psychology-hosts && pnpm run validate:psychology-sbom",
+    "verify:all": "pnpm run verify:cloud && pnpm run scan:incident",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && node tools/build-skill.ts && pnpm run validate:provenance && pnpm run validate:skill && pnpm run validate:reading && pnpm run validate:docs && pnpm run smoke && pnpm run forward:test && pnpm run package:hosts && pnpm run verify:hosts && pnpm run verify:install && pnpm run scan:deps && pnpm run scan:licenses && pnpm run validate:sbom && pnpm run scan:secrets"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

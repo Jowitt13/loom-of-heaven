@@ -178,27 +178,12 @@ describe('product technical roadmap and commander governance', () => {
     }
   });
 
-  it('requires every executor prompt to carry the complete admission header set', () => {
+  it('keeps ordinary tasks bounded with the short owner-authorized protocol', () => {
     expect(PROTOCOL).toContain('Protocol id: `loom-commander-protocol/v3`');
-    for (const heading of [
-      '路线锚点',
-      '当前阶段与切片',
-      '验证实验室',
-      '用户价值',
-      '已核验基线',
-      '前置条件',
-      '本切片目标',
-      '精确文件白名单',
-      '精确禁止项',
-      '必须保持的不变量',
-      '输出与隐私边界',
-      '测试与验收命令',
-      '停止条件',
-      'GitHub 与发布边界',
-      '交付报告格式',
-    ]) {
-      expect(PROTOCOL, heading).toContain(heading);
-    }
+    expect(PROTOCOL).toContain('goal, changed-file scope, validation, and result');
+    expect(PROTOCOL).toContain('one full test run');
+    expect(PROTOCOL).toContain('Ordinary wording fixes and bug fixes do not need a new');
+    expect(PROTOCOL).not.toContain('Every executor prompt must contain these exact headings');
   });
 
   it('defines continue as the next unblocked roadmap exit criterion', () => {

@@ -1,30 +1,9 @@
 name: verify
-
-# Enforcement entry point for the declared gate.
-#
-# Node 24 job runs the non-sensitive cloud gate `pnpm run verify:cloud`:
-#   format:check -> lint -> typecheck -> test -> build -> validate:provenance ->
-#   validate:skill -> validate:reading -> validate:docs -> smoke -> forward:test ->
-#   package:hosts -> verify:hosts -> verify:install -> check:doc-counts ->
-#   scan:deps -> scan:licenses -> validate:sbom -> scan:secrets
-#
-# The full local gate is `pnpm run verify:all = verify:cloud + scan:incident`.  Its precise
-# incident tokens intentionally live only in a controlled local file and must never be copied to
-# GitHub Actions.  Missing tokens fail closed locally; CI therefore does not claim to run it.
-#
-# Node 22 job proves the RUNTIME floor: it builds the candidate host packages and runs
-# doctor/verify/calculate/interpret from a REAL extracted zip via `verify:zip-runtime`. It does
-# NOT run the monorepo build (dev tooling needs Node 24); it only exercises the shipped engine
-# bundle, which must run on Node >= 22 (the declared runtime floor for installed Skills).
-#
-# `lint` is the ESLint import-boundary gate. Supply-chain hardening (scan:deps / scan:secrets)
-# runs inside verify:cloud (incl. scan:deps + scan:licenses + scan:secrets).
-# scan:incident is NOT in CI — it requires a local-only private token file (fail-closed by design).
-# Dependency audit is CI-strict (DEPENDENCY_AUDIT_STRICT=1): unreachable service = CI failure.
+# Core/full checks include validate:provenance, scan:licenses and validate:sbom.
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
 
 permissions:
@@ -37,50 +16,65 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.scope.outputs.mode }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        # Version is read from the root package.json `packageManager` field.
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js (dev toolchain)
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Select checks
+        id: scope
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          mode=full
+          if [[ "$EVENT" == pull_request ]]; then
+            mode=docs
+            paths=$(git diff --name-only "$BASE" HEAD)
+            while IFS= read -r path; do
+              case "$path" in
+                docs/*|README.md|README.en.md) ;;
+                packages/personality-assessment/*|packages/psychology-contracts/*|skills/psychology-self-assessment/*|tools/*psychology*|packages/contracts/*|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.github/*|tools/*|AGENTS.md|tsconfig*|eslint*) mode=full; break ;;
+                packages/*|skills/xuan-ji-yu-heng/*|evals/*|examples/*) mode=core ;;
+                *) mode=full; break ;;
+              esac
+            done <<< "$paths"
+          fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run cloud gate (verify:cloud)
+      - run: pnpm install --frozen-lockfile
+      - name: Run selected checks
         env:
+          MODE: ${{ steps.scope.outputs.mode }}
           DEPENDENCY_AUDIT_STRICT: '1'
-        run: pnpm run verify:cloud
+        shell: bash
+        run: |
+          case "$MODE" in
+            docs) pnpm run format:check && pnpm run validate:docs ;;
+            core) pnpm run check ;;
+            full) pnpm run verify:cloud ;;
+            *) exit 1 ;;
+          esac
 
   runtime-node22:
-    # The installed Skill's declared runtime floor is Node >= 22. This job runs the shipped
-    # engine bundle from a REAL extracted candidate zip on Node 22 — no monorepo build.
+    needs: verify
+    if: needs.verify.outputs.mode != 'docs'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js 22 (runtime floor)
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
-
-      - name: Install dependencies (engines not strict; dev deps target Node 24)
-        run: pnpm install --frozen-lockfile --config.engine-strict=false
-
-      - name: Build candidate host packages (uses committed engine.mjs; no engine rebuild)
+      - run: pnpm install --frozen-lockfile --config.engine-strict=false
+      - name: Build candidate host packages
         run: node --experimental-strip-types tools/build-host-packages.ts
-
-      - name: Runtime smoke of a real extracted zip (doctor/verify/calculate/interpret)
+      - name: Runtime smoke of a real extracted zip
         run: node --experimental-strip-types tools/verify-zip-runtime.ts

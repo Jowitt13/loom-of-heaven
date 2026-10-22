@@ -46,13 +46,14 @@ describe('incident guard: example data declared synthetic (no real PII)', () => 
       scripts?: Record<string, string>;
     };
     const cloud = pkg.scripts?.['verify:cloud'] ?? '';
+    const core = pkg.scripts?.check ?? '';
+    const composedCloud = cloud + ' && ' + core;
     const full = pkg.scripts?.['verify:all'] ?? '';
     const requiredCloudStages = [
       'format:check',
       'lint',
       'typecheck',
       'test',
-      'build',
       'validate:provenance',
       'validate:skill',
       'validate:reading',
@@ -62,17 +63,20 @@ describe('incident guard: example data declared synthetic (no real PII)', () => 
       'package:hosts',
       'verify:hosts',
       'verify:install',
-      'check:doc-counts',
       'scan:deps',
       'scan:secrets',
     ];
 
-    for (const stage of requiredCloudStages) expect(cloud).toContain(`pnpm run ${stage}`);
-    expect(cloud).not.toContain('scan:incident');
+    for (const stage of requiredCloudStages) expect(composedCloud).toContain(`pnpm run ${stage}`);
+    expect(cloud).toContain('pnpm run check');
+    expect(core).toContain('node tools/build-skill.ts');
+    expect(composedCloud.match(/pnpm run test\b/g)).toHaveLength(1);
+    expect(composedCloud).not.toContain('check:doc-counts');
+    expect(composedCloud).not.toContain('scan:incident');
     expect(full).toBe('pnpm run verify:cloud && pnpm run scan:incident');
 
     const workflow = readFileSync(join(root, '.github/workflows/verify.yml'), 'utf8');
-    expect(workflow).toContain('run: pnpm run verify:cloud');
+    expect(workflow).toContain('full) pnpm run verify:cloud');
     expect(workflow).not.toMatch(/INCIDENT_TOKENS|incident-tokens\.txt/);
   });
 });

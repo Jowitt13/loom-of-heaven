@@ -136,7 +136,7 @@
     {
       "name": "moment",
       "SPDXID": "SPDXRef-Package-moment",
-      "versionInfo": "2.30.1",
+      "versionInfo": "2.31.0",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "MIT",
@@ -145,7 +145,7 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/moment@2.30.1"
+          "referenceLocator": "pkg:npm/moment@2.31.0"
         }
       ]
     },

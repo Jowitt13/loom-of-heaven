@@ -409,3 +409,11 @@ next unblocked slice in this roadmap and prove its admission conditions.
 - `loom-product-roadmap/v1` — 2026-08-28: establishes verified-reasoning positioning, freezes the
   G0-to-EXP-1 phase order, adopts selected workflow lessons, and makes the commander protocol
   mandatory.
+
+### Development workflow maintenance — 2026-10-22
+
+Owner-authorized simplification: ordinary tasks use goal, scope, validation and result rather
+than the long commander template. Documentation checks are lightweight; core changes use
+`pnpm run check`; shared/psychology/unknown changes and main use `verify:cloud`. Tests run once,
+and CI reports current totals without a documentation-count gate. This changes execution cost,
+not product direction, source admission, privacy, output contracts or release acceptance.

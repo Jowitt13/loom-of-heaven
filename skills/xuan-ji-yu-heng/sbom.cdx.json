@@ -110,8 +110,8 @@
     {
       "type": "library",
       "name": "moment",
-      "version": "2.30.1",
-      "purl": "pkg:npm/moment@2.30.1",
+      "version": "2.31.0",
+      "purl": "pkg:npm/moment@2.31.0",
       "licenses": [
         {
           "license": {
