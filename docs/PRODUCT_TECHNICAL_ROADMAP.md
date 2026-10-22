@@ -387,8 +387,9 @@ single working optimization list; the product destination, phase order and sourc
 | 5     | Make the intended build identifiable and usable. Consolidate conflicting install instructions, distinguish engine-offline from host-chat privacy, and expose content identity as well as version labels.                                                                    | Instructions no longer demand full charts for a short career demo; version checking distinguishes packages whose Skill/reference content differs. Source changes, built candidates, installed content and published releases are reported separately. A release/manifest promotion happens only after explicit owner authorization and the existing release checklist. |
 
 Progress — 2026-10-23: item 1's source repair is committed as `a80a161`, with real-CLI
-filesystem-failure tests and core verification passed. Remote delivery is pending; no installed
-host has been changed. Item 2 has not started.
+filesystem-failure tests and core verification passed. The branch is pushed and
+[Draft PR #101](https://github.com/Jowitt13/loom-of-heaven/pull/101) is open; CI and integration
+remain pending. No installed host has been changed. Item 2 has not started.
 
 Execution rules:
 
