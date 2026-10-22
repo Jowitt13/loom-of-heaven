@@ -475,7 +475,6 @@ pnpm run lint
 pnpm run typecheck
 pnpm run test
 pnpm run validate:docs
-pnpm run check:doc-counts
 pnpm run verify:cloud
 git diff --check
 git status --short

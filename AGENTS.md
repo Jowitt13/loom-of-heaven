@@ -9,8 +9,8 @@ repository. The user-facing capability is the **`xuan-ji-yu-heng`** Skill under
 Before planning, researching, or editing, read
 [`docs/PRODUCT_TECHNICAL_ROADMAP.md`](docs/PRODUCT_TECHNICAL_ROADMAP.md) and
 [`docs/COMMANDER_PROTOCOL.md`](docs/COMMANDER_PROTOCOL.md) completely. Every task must name a
-roadmap phase and one exit criterion, then use the commander's required scope, invariants,
-acceptance evidence, and stop conditions. A task with no roadmap anchor is not admitted.
+roadmap phase and one exit criterion, then record its goal, scope,
+validation, and result using the short commander protocol. A task with no roadmap anchor is not admitted.
 
 The roadmap governs product direction and technical sequence; domain ADRs and source matrices
 govern their narrower subjects. A lower-level prompt may narrow these rules but cannot override
@@ -80,12 +80,12 @@ pnpm run verify:all   # controlled local full gate; scan:incident fails closed w
 pnpm run build        # rebuild scripts/dist/engine.mjs + sbom.cdx.json (commit the result)
 ```
 
-`verify:cloud` runs the reproducible, non-sensitive stages: `format:check → lint → typecheck → test
-→ build → validate:provenance → validate:skill → validate:reading → validate:docs → smoke →
-forward:test → package:hosts → verify:hosts → verify:install → check:doc-counts → scan:deps →
-scan:licenses → validate:sbom → scan:secrets`. `verify:all` then adds `scan:incident`; its precise token file is ignored, must never
-enter CI, and its absence is intentionally fail-closed. If you change the test count, update
-`docs/STATUS.md` and `docs/VALIDATION.md` from a real run (never by hand).
+`pnpm run check` runs core verification with one full test run. `verify:cloud` adds the
+independent psychology build/package checks, and `verify:all` adds controlled incident scanning.
+Documentation-only PRs run formatting and document validation; core PRs run `check`; shared,
+psychology, unknown-scope changes and main run `verify:cloud`. Node 22 package smoke runs for
+non-document PRs and main. Test totals live in CI reports rather than manually synchronized docs.
+Supply-chain checks include scan:deps → scan:licenses → validate:sbom → scan:secrets.
 
 Release acceptance criteria live in [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md).
 

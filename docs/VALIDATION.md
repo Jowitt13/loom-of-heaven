@@ -5,13 +5,11 @@ source-traceable 锟?not that divination predicts anything (handoff 搂9).
 
 ## Gate (enforced now)
 
-There are two explicit gates:
-
-- `pnpm run verify:cloud` is the GitHub Actions gate. It runs every reproducible, non-sensitive
-  check through `scan:secrets`; CI runs exactly this command.
-- `pnpm run verify:all` is the controlled local gate: `verify:cloud` followed by
-  `scan:incident`. The precise incident-token file is ignored and must never enter CI. If it is
-  absent, the command fails closed instead of reporting a clean result.
+PR checks follow scope: documentation runs format and document validation; core changes run
+`pnpm run check`; shared, psychology, workflow and unknown changes run `pnpm run verify:cloud`.
+Main always runs `verify:cloud`. Both commands run the full test suite only once. Node 22 package
+smoke runs for non-document changes. `verify:all` adds controlled incident scanning; private
+incident tokens remain outside CI.
 
 Before a release or a visibility change, run `pnpm run verify:all` and
 `pnpm run scan:incident:history` in a controlled environment.
@@ -31,7 +29,6 @@ Before a release or a visibility change, run `pnpm run verify:all` and
 | Forward test     | `pnpm run forward:test`                           | Clean-dir, zero-install, offline SKILL workflow for 5 realistic requests.                              |
 | Host packages    | `pnpm run package:hosts && pnpm run verify:hosts` | Candidate ZIP structure and runtime behavior remain reproducible.                                      |
 | Install state    | `pnpm run verify:install`                         | Root published state, immutable Release URL/SHA-256, and candidate boundary are honest and consistent. |
-| Doc counts       | `pnpm run check:doc-counts`                       | Re-runs the suite; fails if a doc's `N tests / M files` drifts from the run.                           |
 | Dep vuln scan    | `pnpm run scan:deps`                              | Local: WARN + exit 0 if offline. CI: `DEPENDENCY_AUDIT_STRICT=1` fails closed on unreachable/parse.    |
 | License scan     | `pnpm run scan:licenses`                          | Offline `pnpm licenses` policy gate (LICENSE_AUDIT allowlist) + SBOM license cross-check; fail-closed. |
 | SBOM validate    | `pnpm run validate:sbom`                          | Fresh esbuild bundle closure vs both committed SBOMs; any drift/ghost/byte diff fails closed.          |
@@ -54,10 +51,8 @@ enforcement yet; they are intentionally excluded from `verify:cloud` and CI unti
 
 ## Current results (2026-07-26)
 
-The test count below comes from one real `pnpm run test` run 锟?the single source of truth shared with
-the identical table in [STATUS.md](./STATUS.md) ("Commands & results"). Do not hand-edit it to
-resolve a disagreement; re-run the suite and copy the actual count. `pnpm run check:doc-counts`
-re-runs the suite and fails if either doc's `N tests / M files` count drifts from the real run.
+Current test totals are published by CI. The historical results below are snapshots;
+no extra test run is required to synchronize prose counts.
 
 - Typecheck: clean. Tests: **1227 tests / 89 files 锟?all passing**. The Western provider
   (astronomy-engine, VSOP87 + NOVAS) passes the ADR-0003 锟?锟?gate two ways: wrapper-consistency
