@@ -6,6 +6,7 @@ import {
   careerOfficerEvidence,
   isTimeSensitiveFact,
   materialWarningCodes,
+  validateAnswer,
 } from '@loom/interpret';
 import { runAnswerPlan, runInterpret } from '@loom/orchestrator';
 
@@ -131,7 +132,7 @@ describe('public result and answer plan', () => {
     expect(answerPlan.answerability).toBe('limited');
   });
 
-  it('marks approximate and boundary-sensitive input as limited even for info warnings', () => {
+  it('keeps approximate-time warnings for explicit time-sensitive technical facts', () => {
     const approximateTime = parseBirthInput({
       ...syntheticInput,
       timeAccuracy: 'approximate',
@@ -139,6 +140,7 @@ describe('public result and answer plan', () => {
     const { answerPlan } = runAnswerPlan(approximateTime, {
       now: FIXED,
       topic: 'career',
+      lens: 'explain',
     });
     expect(answerPlan.requiredWarningCodes).toContain('TIME_ACCURACY_APPROXIMATE');
     expect(answerPlan.answerability).toBe('limited');
@@ -153,7 +155,10 @@ describe('public result and answer plan', () => {
           ...publicResult.facts[0]!,
           topic: 'career' as const,
           caveat: undefined,
-          evidence: [{ kind: 'bazi' as const, ref: 'bazi.test' }],
+          evidence: [
+            { kind: 'bazi' as const, ref: 'bazi.pillars.year.tenGod' },
+            { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
+          ],
         },
       ],
       warnings: [
@@ -362,7 +367,7 @@ describe('public result and answer plan', () => {
         disclaimers: [],
         followupOffers: [],
       },
-      { topic: 'career' },
+      { topic: 'career', lens: 'explain' },
     );
     expect(timeScoped.requiredWarningCodes).toContain('SOLAR_TIME_APPROXIMATE');
     expect(timeScoped.requiredWarningCodes).toContain('TIME_UNKNOWN');
@@ -434,6 +439,122 @@ describe('public result and answer plan', () => {
     );
     for (const fact of industryFacts) {
       expect(fact.topic).not.toBe('career');
+    }
+  });
+
+  it('shares one eligible career fact set between the narrator and answer validator', () => {
+    const technical = runAnswerPlan(syntheticInput, {
+      now: FIXED,
+      topic: 'career',
+      lens: 'explain',
+    });
+    const { publicResult, answerPlan } = runAnswerPlan(syntheticInput, {
+      now: FIXED,
+      topic: 'career',
+      lens: 'advice',
+    });
+    expect(answerPlan.selectedFacts).toHaveLength(1);
+    expect(publicResult.facts).toEqual(answerPlan.selectedFacts);
+    const fact = answerPlan.selectedFacts[0]!;
+    expect(fact.evidence.some((e) => e.kind === 'bazi')).toBe(true);
+    expect(answerPlan.requiredCaveats).toEqual([fact.caveat]);
+    expect(answerPlan.requiredWarningCodes).not.toContain('SOLAR_TIME_APPROXIMATE');
+    expect(answerPlan.responseRequirements.contentOrder).not.toContain('practical-options');
+    // Keep the complete warning record for audit, without forcing it into prose.
+    expect(publicResult.warnings).toEqual(technical.publicResult.warnings);
+    expect(technical.answerPlan.selectedFacts.length).toBeGreaterThan(1);
+
+    const draft = {
+      contractVersion: 'reading-draft/v2',
+      topic: 'career',
+      sections: [
+        {
+          id: 'body',
+          heading: '',
+          paragraphs: [
+            {
+              text: `${fact.claim}。${fact.reason}，仅作传统文化参考，不是职业预言。`,
+              sourceFactIds: [fact.id],
+              constraintRefs: [{ kind: 'caveat', index: 0 }],
+            },
+          ],
+        },
+      ],
+      caveatsExpressed: answerPlan.requiredCaveats,
+      warningsDisclosed: [],
+    };
+    expect(validateAnswer({ answerPlan, readingDraft: draft }).ok).toBe(true);
+    const foreignFact = technical.answerPlan.selectedFacts.find((f) => f.id !== fact.id)!;
+    const changedDraft = structuredClone(draft);
+    changedDraft.sections[0]!.paragraphs[0]!.sourceFactIds = [foreignFact.id];
+    expect(
+      validateAnswer({ answerPlan, readingDraft: changedDraft }).violations.some(
+        (v) => v.code === 'UNKNOWN_FACT_ID',
+      ),
+    ).toBe(true);
+  });
+
+  it('does not answer a career timing request with generic natal themes', () => {
+    const { answerPlan, publicResult } = runAnswerPlan(syntheticInput, {
+      now: FIXED,
+      topic: 'career',
+      lens: 'timing',
+    });
+    expect(answerPlan.answerability).toBe('not-supported');
+    expect(answerPlan.noEvidenceReason).toBe('NO_TOPIC_FACTS');
+    expect(answerPlan.selectedFacts).toEqual([]);
+    expect(answerPlan.allowedFactIds).toEqual([]);
+    expect(publicResult.facts).toEqual([]);
+    expect(answerPlan.requiredCaveats).toEqual([]);
+    expect(answerPlan.responseRequirements.contentOrder).not.toContain('practical-options');
+  });
+
+  it('rejects mixed, unbacked and ambiguous career references instead of trimming them', () => {
+    const { publicResult } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
+    const reference = publicResult.facts[0]!;
+    for (const facts of [
+      [{ ...reference, evidence: reference.evidence.filter((e) => e.kind !== 'bazi-rule') }],
+      [
+        {
+          ...reference,
+          evidence: [
+            ...reference.evidence,
+            {
+              kind: 'bazi-rule' as const,
+              ref: 'bazi-rule/pattern',
+            },
+          ],
+        },
+      ],
+      [
+        {
+          ...reference,
+          evidence: [
+            ...reference.evidence,
+            {
+              kind: 'western' as const,
+              ref: 'western.angles.mc.sign',
+            },
+          ],
+        },
+      ],
+      [reference, { ...reference, id: 'fact-999' }],
+    ]) {
+      const plan = buildAnswerPlan({ ...publicResult, facts }, { topic: 'career' });
+      expect(plan.answerability).toBe('not-supported');
+      expect(plan.selectedFacts).toEqual([]);
+    }
+  });
+
+  it('does not narrow other topics or the explicitly requested technical overview', () => {
+    const { publicResult } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'general' });
+    expect(buildAnswerPlan(publicResult, { topic: 'general' }).selectedFacts).toEqual(
+      publicResult.facts,
+    );
+    for (const topic of ['character', 'wealth', 'marriage', 'studies', 'health'] as const) {
+      expect(buildAnswerPlan(publicResult, { topic }).selectedFacts).toEqual(
+        publicResult.facts.filter((fact) => fact.topic === topic),
+      );
     }
   });
 

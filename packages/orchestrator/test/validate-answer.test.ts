@@ -12,6 +12,8 @@ import {
 } from '@loom/interpret';
 import {
   MAX_ALLOWED_FACT_IDS,
+  MAX_CAREER_REALITY_FACTS,
+  MAX_CAREER_REALITY_STATEMENT_CHARS,
   MAX_CAVEATS_EXPRESSED,
   MAX_NOT_SUPPORTED_TEXT_CHARS,
   MAX_PARAGRAPH_TEXT_CHARS,
@@ -96,6 +98,292 @@ function runValidated(
 }
 
 describe('validate-answer — fact boundary and safety layer', () => {
+  describe('optional user-stated career provenance (synthetic only)', () => {
+    const context = () => ({
+      confirmedFacts: [
+        {
+          factId: 'career-fact:role',
+          source: 'user-stated' as const,
+          confirmedByUser: true as const,
+          category: 'current-role' as const,
+          statement: '合成示例：目前做项目交付，需求反复，希望节奏稳定。',
+        },
+      ],
+      transient: true as const,
+      noPersistence: true as const,
+    });
+    const realityDraft = (text = '需求反复时，可以先和需求方确认变更入口与排期规则。') =>
+      makeDraft({
+        sections: [
+          {
+            id: 'body',
+            heading: '',
+            paragraphs: [
+              {
+                text,
+                sourceFactIds: [],
+                realitySource: { layer: 'career-reality', factIds: ['career-fact:role'] },
+              },
+            ],
+          },
+        ],
+        caveatsExpressed: [],
+        warningsDisclosed: [],
+      });
+    const envelope = () => ({
+      answerPlan: makePlan({ requiredCaveats: [], requiredWarningCodes: [] }),
+      readingDraft: realityDraft(),
+      careerReality: context(),
+    });
+
+    it('accepts R-only advice without a borrowed chart fact or constraint exemption', () => {
+      const input = envelope();
+      expect(ValidateAnswerInputSchema.safeParse(input).success).toBe(true);
+      expect(validateAnswer(input)).toEqual({
+        contractVersion: 'validation-result/v2',
+        ok: true,
+        violations: [],
+        violationsTruncated: false,
+      });
+      expect(JSON.stringify(validateAnswer(input))).not.toContain(
+        input.careerReality.confirmedFacts[0]!.statement,
+      );
+    });
+
+    it('keeps chart and reality paragraphs adjacent but independently sourced', () => {
+      const input = envelope();
+      input.answerPlan.requiredCaveats = ['仅作传统文化参考，不是职业预言。'];
+      input.readingDraft.sections.push({
+        id: 'culture',
+        heading: '',
+        paragraphs: [
+          {
+            text: '七杀传统上常联到权威、压力、竞争，仅作文化参考，不是职业预言。',
+            sourceFactIds: ['fact-1'],
+            constraintRefs: [{ kind: 'caveat', index: 0 }],
+          },
+        ],
+      });
+      input.readingDraft.caveatsExpressed = input.answerPlan.requiredCaveats;
+      expect(validateAnswer(input).ok).toBe(true);
+      input.readingDraft.caveatsExpressed = [];
+      input.readingDraft.sections.pop();
+      expect(
+        validateAnswer(input).violations.some((v) => v.code === 'MISSING_REQUIRED_CAVEAT'),
+      ).toBe(true);
+    });
+
+    it('rejects missing context, unresolved references and an empty source', () => {
+      const input = envelope();
+      expect(
+        validateAnswer({
+          answerPlan: input.answerPlan,
+          readingDraft: input.readingDraft,
+        }).violations.some((v) => v.code === 'UNKNOWN_FACT_ID'),
+      ).toBe(true);
+      input.readingDraft.sections[0]!.paragraphs[0]!.realitySource!.factIds = [
+        'career-fact:missing',
+      ];
+      expect(
+        validateAnswer(input).violations.some(
+          (v) => v.code === 'UNKNOWN_FACT_ID' && v.patternKey === 'career-reality.factIds',
+        ),
+      ).toBe(true);
+      input.readingDraft.sections[0]!.paragraphs[0]!.realitySource!.factIds = [];
+      expect(validateAnswer(input).violations[0]!.code).toBe('MALFORMED_INPUT');
+    });
+
+    it('does not let an unused context exempt unsupported birth-only prose', () => {
+      const input = envelope();
+      delete input.readingDraft.sections[0]!.paragraphs[0]!.realitySource;
+      expect(validateAnswer(input).violations.some((v) => v.code === 'MISSING_SOURCE_FACTS')).toBe(
+        true,
+      );
+    });
+
+    it('rejects mixed R/chart and R/constraint paragraphs', () => {
+      const input = envelope();
+      const paragraph = input.readingDraft.sections[0]!.paragraphs[0]!;
+      paragraph.sourceFactIds = ['fact-1'];
+      expect(
+        validateAnswer(input).violations.some(
+          (v) => v.patternKey === 'career-reality.single-layer',
+        ),
+      ).toBe(true);
+      paragraph.sourceFactIds = ['fact-999'];
+      expect(validateAnswer(input).violations.some((v) => v.code === 'UNKNOWN_FACT_ID')).toBe(true);
+      paragraph.sourceFactIds = [];
+      paragraph.constraintRefs = [{ kind: 'disclaimer', index: 0 }];
+      expect(
+        validateAnswer(input).violations.some(
+          (v) => v.patternKey === 'career-reality.single-layer',
+        ),
+      ).toBe(true);
+    });
+
+    it('rejects unconfirmed, inferred, duplicate, unknown-layer and injected source records', () => {
+      for (const patch of [
+        { confirmedByUser: false },
+        { source: 'chart-derived' },
+        { category: 'diagnosis' },
+        { score: 20 },
+        { bazi: {} },
+        { statement: '   ' },
+      ]) {
+        const input = envelope();
+        Object.assign(input.careerReality.confirmedFacts[0]!, patch);
+        expect(validateAnswer(input).violations[0]!.code).toBe('MALFORMED_INPUT');
+      }
+      const duplicate = envelope();
+      duplicate.careerReality.confirmedFacts.push({
+        ...duplicate.careerReality.confirmedFacts[0]!,
+      });
+      expect(validateAnswer(duplicate).violations[0]!.code).toBe('MALFORMED_INPUT');
+      const layer = envelope();
+      Object.assign(layer.readingDraft.sections[0]!.paragraphs[0]!.realitySource!, {
+        layer: 'traditional-structure',
+      });
+      expect(validateAnswer(layer).violations[0]!.code).toBe('MALFORMED_INPUT');
+    });
+
+    it('rejects non-career contexts even if their references resolve', () => {
+      const input = envelope();
+      input.answerPlan.request.topic = 'wealth';
+      input.readingDraft.topic = 'wealth';
+      expect(validateAnswer(input).violations.some((v) => v.code === 'GUARDRAIL_VIOLATED')).toBe(
+        true,
+      );
+    });
+
+    it('keeps high-risk and markup checks active for reality advice', () => {
+      for (const [text, code] of [
+        ['建议买入股票，保证赚不赔。', 'HIGH_RISK_INVESTMENT'],
+        ['你命中注定不可能成功。', 'HIGH_RISK_DETERMINISTIC_FATE'],
+        ['根据这些情况，建议服药治疗抑郁症。', 'HIGH_RISK_MEDICAL'],
+        ['<b>建议</b>', 'CONTAINS_MARKUP'],
+      ]) {
+        const input = envelope();
+        input.readingDraft = realityDraft(text);
+        expect(validateAnswer(input).violations.some((v) => v.code === code)).toBe(true);
+      }
+    });
+
+    it('does not let unsupported chart inference veto independently grounded reality discussion', () => {
+      const input = envelope();
+      input.answerPlan.answerability = 'not-supported';
+      input.answerPlan.allowedFactIds = [];
+      input.readingDraft = realityDraft('合成现实讨论。'.repeat(80));
+      expect(validateAnswer(input).ok).toBe(true);
+      input.readingDraft.sections[0]!.paragraphs[0]!.realitySource!.factIds = [
+        'career-fact:missing',
+      ];
+      expect(validateAnswer(input).violations.some((v) => v.code === 'UNSUPPORTED_TOPIC')).toBe(
+        true,
+      );
+    });
+
+    it('bounds source records and counts reality references in the shared whole-draft budget', () => {
+      const input = envelope();
+      input.careerReality.confirmedFacts[0]!.statement = '安'.repeat(
+        MAX_CAREER_REALITY_STATEMENT_CHARS + 1,
+      );
+      expect(validateAnswer(input).violations[0]!.patternKey).toBe(
+        'MAX_CAREER_REALITY_STATEMENT_CHARS',
+      );
+      const many = envelope();
+      many.careerReality.confirmedFacts = Array.from(
+        { length: MAX_CAREER_REALITY_FACTS + 1 },
+        (_, i) => ({ ...context().confirmedFacts[0]!, factId: `career-fact:f-${i}` }),
+      );
+      expect(validateAnswer(many).violations[0]!.patternKey).toBe('MAX_CAREER_REALITY_FACTS');
+      const budget = envelope();
+      const paragraph = budget.readingDraft.sections[0]!.paragraphs[0]!;
+      paragraph.realitySource!.factIds = Array.from({ length: 24 }, (_, i) => `career-fact:f-${i}`);
+      budget.readingDraft.sections[0]!.paragraphs = Array.from({ length: 42 }, () =>
+        structuredClone(paragraph),
+      );
+      expect(validateAnswer(budget).violations[0]!.patternKey).toBe('MAX_TOTAL_SOURCE_FACT_IDS');
+    });
+
+    it('never echoes private source values or invokes a source getter', () => {
+      const input = envelope();
+      const sentinel = 'SYNTHETIC-PRIVATE-REALITY-SENTINEL';
+      input.careerReality.confirmedFacts[0]!.statement = sentinel;
+      input.readingDraft.sections[0]!.paragraphs[0]!.realitySource!.factIds = [
+        'career-fact:unknown-sentinel',
+      ];
+      expect(JSON.stringify(validateAnswer(input))).not.toContain(sentinel);
+      let reads = 0;
+      Object.defineProperty(input.careerReality.confirmedFacts[0]!, 'statement', {
+        get: () => {
+          reads++;
+          throw new Error(sentinel);
+        },
+      });
+      const result = validateAnswer(input);
+      expect(result.violations[0]!.code).toBe('MALFORMED_INPUT');
+      expect(reads).toBe(0);
+      expect(JSON.stringify(result)).not.toContain(sentinel);
+    });
+
+    it('rejects persistence flags and duplicate paragraph references', () => {
+      const input = envelope();
+      Object.assign(input.careerReality, { noPersistence: false });
+      expect(validateAnswer(input).violations[0]!.code).toBe('MALFORMED_INPUT');
+      const repeated = envelope();
+      repeated.readingDraft.sections[0]!.paragraphs[0]!.realitySource!.factIds.push(
+        'career-fact:role',
+      );
+      expect(validateAnswer(repeated).violations[0]!.code).toBe('MALFORMED_INPUT');
+    });
+
+    it('rejects traditional terms smuggled into an R-only paragraph or heading', () => {
+      const input = envelope();
+      input.readingDraft = realityDraft('按七杀的配置，你应该选择高竞争岗位。');
+      expect(
+        validateAnswer(input).violations.some(
+          (v) => v.patternKey === 'career-reality.traditional-content',
+        ),
+      ).toBe(true);
+      input.readingDraft = realityDraft('本命盘不构成医疗诊断。');
+      expect(
+        validateAnswer(input).violations.some(
+          (v) => v.patternKey === 'career-reality.traditional-content',
+        ),
+      ).toBe(true);
+      input.readingDraft = realityDraft();
+      input.readingDraft.sections[0]!.heading = '八字事业建议';
+      expect(
+        validateAnswer(input).violations.some(
+          (v) => v.patternKey === 'career-reality.traditional-content',
+        ),
+      ).toBe(true);
+    });
+
+    it('validates the optional context through the real bundled CLI without echoing it', () => {
+      const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+      const temp = join(root, '.tmp', 'validate-answer-tests');
+      mkdirSync(temp, { recursive: true });
+      const inputFile = join(temp, 'synthetic-career-reality.json');
+      const input = envelope();
+      writeFileSync(inputFile, JSON.stringify(input));
+      const run = spawnSync(
+        process.execPath,
+        [
+          join(root, 'skills/xuan-ji-yu-heng/scripts/loom-chart.mjs'),
+          'validate-answer',
+          '--input-file',
+          inputFile,
+        ],
+        { encoding: 'utf8' },
+      );
+      expect(run.status).toBe(0);
+      expect(JSON.parse(run.stdout).ok).toBe(true);
+      expect(`${run.stdout}${run.stderr}`).not.toContain(
+        input.careerReality.confirmedFacts[0]!.statement,
+      );
+    });
+  });
   // --- HAPPY PATH ---
   it('passes a valid draft that cites only allowed facts and expresses all caveats', () => {
     const result = validateAnswer({ answerPlan: makePlan(), readingDraft: makeDraft() });
@@ -1888,6 +2176,8 @@ describe('validate-answer — fact boundary and safety layer', () => {
         'MAX_SOURCE_FACT_IDS_PER_PARAGRAPH',
         'MAX_CONSTRAINT_REFS_PER_PARAGRAPH',
         'MAX_TOTAL_SOURCE_FACT_IDS',
+        'MAX_CAREER_REALITY_FACTS',
+        'MAX_CAREER_REALITY_STATEMENT_CHARS',
         'MAX_TOTAL_TEXT_CHARS',
         'MAX_NOT_SUPPORTED_TEXT_CHARS',
         'MAX_VIOLATIONS',

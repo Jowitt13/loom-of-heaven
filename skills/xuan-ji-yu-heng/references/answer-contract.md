@@ -31,6 +31,18 @@ or missing topic.
 overview | strengths | risks | timing | advice | explain
 ```
 
+For ordinary `career` answers, `selectedFacts` contains at most the one ADR 0021 ten-god
+cultural reference. Its caveat and material warnings are derived from that same set; unrelated
+systems' conditions do not become mandatory prose. All warnings remain in `publicResult.warnings`
+for audit. The plan contains no user-stated work reality and therefore does not request practical
+career advice. Reality-based paragraphs use the separate optional source binding below, never
+a borrowed chart fact id or constraint exemption.
+
+`career --lens timing` currently returns `not-supported`: natal cultural themes are not evidence
+for promotion, job-change or other career timing. `--lens explain` retains topic-scoped technical
+facts from all systems for an explicit request for technical explanation, not for default career
+prose or career fit. `calculate` and `interpret` remain the full technical-chart entry points.
+
 The command never accepts a free-form user question. The host maps the question to a bounded
 topic/lens, or asks a clarification question when it cannot do so reliably. Do not put a user's
 question text into a command-line argument, output artifact, filename or log.
@@ -130,7 +142,8 @@ The input file is one JSON object: `{ "answerPlan": { … }, "readingDraft": { �
 }
 ```
 
-- Every paragraph must either cite `sourceFactIds` from `allowedFactIds`, or carry
+- Every paragraph must cite `sourceFactIds` from `allowedFactIds`, use the independent
+  `realitySource` binding below for career reality, or carry
   `constraintRefs` that ALL resolve to real plan entries (`kind` selects
   `disclaimers` / `requiredCaveats` / `requiredWarningCodes`; `index` is the array index).
   A section id such as `disclaimer` grants NO exemption by itself. Exception: when
@@ -197,3 +210,61 @@ conclusively failed, fix the reported violations, and re-run — never display i
   truly expressed by the surrounding prose, and its pattern scan cannot recognize every
   semantic paraphrase. It complements — never replaces — `lint-reading` and the host
   writing rules.
+
+### Optional user-stated career source (backward-compatible v2 input extension)
+
+Old v2 drafts and `validation-result/v2` output are unchanged. For a career answer based on
+reality the user explicitly stated, add `careerReality` alongside `answerPlan` and `readingDraft`:
+
+```json
+{
+  "confirmedFacts": [
+    {
+      "factId": "career-fact:changes",
+      "source": "user-stated",
+      "confirmedByUser": true,
+      "category": "constraints",
+      "statement": "合成示例：项目需求经常变动，希望工作节奏稳定。"
+    }
+  ],
+  "transient": true,
+  "noPersistence": true
+}
+```
+
+The example is the value of `careerReality`, not a new command or a questionnaire. Copy only
+relevant, de-identified reality the user actively supplied; do not infer it from a chart, invent
+confirmation, copy a whole conversation, or include health/clinical content. Categories are
+`current-role`, `skills`, `goals`, `constraints`, `preferences`, `opportunities`. Up to 24 unique
+facts, each with a nonblank statement of at most 500 characters; no names, birth details,
+assessment records or extra fields. The host is responsible for truthful declarations and for
+excluding sensitive out-of-scope content; shape validation cannot establish those semantics.
+
+An R-only paragraph references those facts as follows:
+
+```json
+{
+  "text": "需求反复时，可以先和需求方确认变更入口与排期规则。",
+  "sourceFactIds": [],
+  "realitySource": {
+    "layer": "career-reality",
+    "factIds": ["career-fact:changes"]
+  }
+}
+```
+
+Keep chart reference and reality-based practice in separate adjacent paragraphs. A reality
+paragraph cannot also cite chart facts or `constraintRefs`; the chart paragraph must still
+express its own caveats and material warnings. Missing/unconfirmed/duplicate sources, unknown
+ids, other layers and non-career uses fail. An unused context does not exempt any paragraph.
+Known chart terms in an R paragraph or its heading also fail as a narrow source-smuggling
+backstop; this wording check cannot recognize every semantic paraphrase.
+Unsupported chart inference remains unsupported; independently bound reality discussion is not
+a substitute chart verdict. All paragraphs retain safety, plain-text and shared resource checks.
+
+This adds no model, store, scoring, automatic advice or clinical capability. Validation proves
+source-record linkage, not whether an advice sentence follows semantically or will be useful.
+Keep metadata internal: the visible answer must not add an audit sentence explaining its source.
+Use a temporary local input file and remove it after validation; do not put real statements in
+the repository, logs or fixtures. The validator does not store or transmit them. A host chat's
+own retention and remote-model policies remain separate from the local engine.

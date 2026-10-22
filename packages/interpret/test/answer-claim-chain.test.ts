@@ -62,7 +62,9 @@ function context(): ClaimChainContext {
     disclaimers: [],
     followupOffers: [],
   });
-  const answerPlan = buildAnswerPlan(fullPublicResult, { topic: 'career', lens: 'advice' });
+  // This synthetic fixture exercises multi-system technical linkage, not the
+  // ADR 0021 ordinary-career body. Keep every linkage/negative assertion intact.
+  const answerPlan = buildAnswerPlan(fullPublicResult, { topic: 'career', lens: 'explain' });
   return {
     publicResult: { ...fullPublicResult, facts: answerPlan.selectedFacts },
     answerPlan,

@@ -9,7 +9,8 @@
  *
  * Checks (after parsing):
  * 1. Fact boundary: a paragraph may skip the "at least one fact" requirement
- *    ONLY when its `constraintRefs` all resolve to real AnswerPlan constraints;
+ *    when its `constraintRefs` all resolve to real AnswerPlan constraints, or
+ *    its single-layer `realitySource` resolves to confirmed user-stated facts;
  *    a free section id never grants exemption, and every provided sourceFactId
  *    is ALWAYS checked against allowedFactIds regardless of exemption.
  *    (Citation presence is structural — it does NOT prove the paragraph's
@@ -49,6 +50,8 @@ import type {
 } from '@loom/contracts';
 import {
   MAX_ALLOWED_FACT_IDS,
+  MAX_CAREER_REALITY_FACTS,
+  MAX_CAREER_REALITY_STATEMENT_CHARS,
   MAX_CAVEAT_ENTRY_CHARS,
   MAX_CAVEATS_EXPRESSED,
   MAX_CONSTRAINT_REFS_PER_PARAGRAPH,
@@ -531,6 +534,26 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
   };
 
   const allowedIds = new Set(answerPlan.allowedFactIds);
+  const realityIds = new Set(input.careerReality?.confirmedFacts.map((fact) => fact.factId) ?? []);
+  const realityBound = (
+    para: ValidateAnswerInput['readingDraft']['sections'][number]['paragraphs'][number],
+  ): boolean =>
+    readingDraft.topic === 'career' &&
+    answerPlan.request.topic === 'career' &&
+    para.realitySource !== undefined &&
+    para.sourceFactIds.length === 0 &&
+    (para.constraintRefs?.length ?? 0) === 0 &&
+    para.realitySource.factIds.every((id) => realityIds.has(id));
+
+  if (input.careerReality !== undefined && answerPlan.request.topic !== 'career') {
+    push({
+      code: 'GUARDRAIL_VIOLATED',
+      severity: 'error',
+      patternKey: 'career-reality.topic',
+      detail: '用户现实来源仅适用于事业主题。',
+      remediation: '不要向其他主题传入事业现实信息。',
+    });
+  }
 
   // 1. Topic consistency check
   if (readingDraft.topic !== answerPlan.request.topic) {
@@ -542,19 +565,20 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
     });
   }
 
-  // 2. Answerability gate: not-supported allows only a brief, fact-free
-  // explanation. Section ids are deliberately ignored here — content cannot be
-  // smuggled past this gate by choosing a particular id. ALL visible text
-  // (headings + paragraphs) counts against one shared budget. This verifies
-  // "short and fact-free" only; it cannot prove the text semantically just
-  // explains the limitation.
+  // 2. Unsupported chart inference allows only a brief, chart-fact-free
+  // limitation. Independently bound R-only paragraphs have their own source;
+  // all remaining text, including headings, shares the limitation budget.
+  // Section ids never grant exemptions. This is not a semantic-faithfulness test.
   if (answerPlan.answerability === 'not-supported') {
     let contentChars = 0;
     let citesFacts = false;
     for (const section of readingDraft.sections) {
       contentChars += section.heading.trim().length;
       for (const para of section.paragraphs) {
-        contentChars += para.text.trim().length;
+        // Unsupported chart inference does not invalidate independently bound
+        // user-reality discussion. All text still has the normal global budget
+        // and safety scan; unbound/mixed paragraphs keep the limitation budget.
+        if (!realityBound(para)) contentChars += para.text.trim().length;
         if (para.sourceFactIds.length > 0) citesFacts = true;
       }
     }
@@ -563,16 +587,15 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
         code: 'UNSUPPORTED_TOPIC',
         severity: 'error',
         detail:
-          'AnswerPlan 标记为 not-supported，但草稿引用了 fact，或全部可见文本（标题+段落）超出简短说明的预算。',
+          'AnswerPlan 标记为 not-supported，但草稿引用了命盘 fact，或未独立绑定现实来源的文本超出简短说明预算。',
         remediation:
-          '当 answerability 为 not-supported 时，只能用不引用任何 fact 的简短说明（所有标题与段落合计不超过 MAX_NOT_SUPPORTED_TEXT_CHARS）解释引擎无法提供该主题的事实，并建议换一个主题。',
+          '无法支持的命盘推断只给不引用命盘 fact 的简短说明；独立的现实讨论必须绑定用户自述。其余可见文本受 MAX_NOT_SUPPORTED_TEXT_CHARS 约束。',
       });
     }
   }
 
-  // 3 + 4. Per-section checks. Fact-count exemption requires valid
-  // constraintRefs on the paragraph — nothing else. The high-risk scan (4)
-  // covers every heading and paragraph regardless.
+  // 3 + 4. Per-section checks. Source binding and real plan constraints are
+  // separate paths. The high-risk scan covers every heading and paragraph.
   const referencedCaveats = new Set<number>();
   const referencedWarnings = new Set<number>();
 
@@ -615,6 +638,59 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
 
     for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
       const para = section.paragraphs[pIdx]!;
+
+      if (para.realitySource !== undefined) {
+        // A narrow wording backstop for known source-smuggling tokens, not a
+        // semantic proof: cultural discussion belongs in its separate T unit.
+        if (
+          /八字|命盘|星盘|十神|官杀|七杀|正官|格局|喜用|用神|五行|紫微|吠陀|\b(?:bazi|astrology|horoscope|vedic|ziwei)\b/i.test(
+            normalizeSafetyText(`${section.heading} ${para.text}`),
+          )
+        ) {
+          push({
+            code: 'GUARDRAIL_VIOLATED',
+            severity: 'error',
+            sectionIndex: sIdx,
+            field: 'paragraph',
+            paragraphIndex: pIdx,
+            patternKey: 'career-reality.traditional-content',
+            detail: '现实建议段落含传统命盘术语，不能用现实来源包装命盘内容。',
+            remediation: '将文化参考移到独立命盘段落；现实建议只讨论用户明确陈述的工作情况。',
+          });
+        }
+        if (
+          para.sourceFactIds.length > 0 ||
+          (para.constraintRefs?.length ?? 0) > 0 ||
+          readingDraft.topic !== 'career' ||
+          answerPlan.request.topic !== 'career'
+        ) {
+          push({
+            code: 'GUARDRAIL_VIOLATED',
+            severity: 'error',
+            sectionIndex: sIdx,
+            field: 'paragraph',
+            paragraphIndex: pIdx,
+            patternKey: 'career-reality.single-layer',
+            detail: '现实建议段落不得混用命盘事实或计划约束，且必须属于事业主题。',
+            remediation: '现实段落只引用用户自述；命盘参考和相关限制放在各自的相邻段落。',
+          });
+        }
+        for (const [index, id] of para.realitySource.factIds.entries()) {
+          if (!realityIds.has(id))
+            push({
+              code: 'UNKNOWN_FACT_ID',
+              severity: 'error',
+              sectionIndex: sIdx,
+              field: 'paragraph',
+              paragraphIndex: pIdx,
+              itemIndex: index,
+              patternKey: 'career-reality.factIds',
+              detail: '现实来源引用未绑定到用户已确认的事实。',
+              remediation:
+                '仅引用本次 careerReality.confirmedFacts 中存在的事实，不能编造或借用命盘 ID。',
+            });
+        }
+      }
 
       // 3.0 Plain-text contract: reject markup in paragraph text.
       if (MARKUP_STRUCTURAL_CHARS_RE.test(para.text)) {
@@ -664,7 +740,7 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
       const exemptFromMissingFactCheck =
         // not-supported drafts must be fact-free; the UNSUPPORTED_TOPIC gate
         // above governs them instead of the citation requirement.
-        answerPlan.answerability === 'not-supported' || refsValid;
+        answerPlan.answerability === 'not-supported' || refsValid || realityBound(para);
 
       // 3a. Must have at least one sourceFactId (unless constraint-exempt).
       if (!exemptFromMissingFactCheck && para.sourceFactIds.length === 0) {
@@ -676,7 +752,7 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
           paragraphIndex: pIdx,
           detail: '段落未声明任何 sourceFactIds，内容缺少事实依据声明。',
           remediation:
-            '每个非约束表达段落必须引用至少一个 allowedFactIds 中的 fact ID；表达免责/caveat/warning 的段落必须通过 constraintRefs 引用真实存在的 AnswerPlan 约束。',
+            '命盘段落引用 allowedFactIds，现实建议段落用独立 realitySource 绑定用户自述；表达计划约束时用 constraintRefs 引用真实约束。',
         });
       }
 
@@ -852,6 +928,15 @@ function requireStringEntriesWithin(entries: unknown[], maxChars: number, limitK
   }
 }
 
+/** New source objects are strict, bounded own-data records. Never traverse an
+ * unknown value or invoke a getter while projecting a user's local context. */
+function requireRealityObject(raw: unknown, fields: readonly string[]): Record<string, unknown> {
+  const object = requireBoundedObject(raw);
+  if (Object.keys(object).some((key) => !fields.includes(key))) boundedReject();
+  for (const field of fields) requireOwnField(object, field);
+  return object;
+}
+
 /**
  * Bounded parsing facade for ValidateAnswerInput: a shallow preflight caps every
  * object's own-key count and key lengths and confirms every array/text length
@@ -869,6 +954,52 @@ export function parseValidateAnswerInputBounded(raw: unknown): ValidateAnswerInp
   requireOwnField(root, 'readingDraft');
   const plan = requireBoundedObject(root.answerPlan);
   const draft = requireBoundedObject(root.readingDraft);
+  let careerReality: unknown;
+  if (Object.hasOwn(root, 'careerReality')) {
+    requireOwnField(root, 'careerReality');
+    if (root.careerReality !== undefined) {
+      const context = requireRealityObject(root.careerReality, [
+        'confirmedFacts',
+        'transient',
+        'noPersistence',
+      ]);
+      const facts = requireArrayWithin(
+        context.confirmedFacts,
+        MAX_CAREER_REALITY_FACTS,
+        'MAX_CAREER_REALITY_FACTS',
+      );
+      careerReality = {
+        transient: context.transient,
+        noPersistence: context.noPersistence,
+        confirmedFacts: facts.map((rawFact) => {
+          const fact = requireRealityObject(rawFact, [
+            'factId',
+            'source',
+            'confirmedByUser',
+            'category',
+            'statement',
+          ]);
+          requireStringEntriesWithin(
+            [fact.factId, fact.source, fact.category],
+            MAX_FACT_ID_CHARS,
+            'MAX_FACT_ID_CHARS',
+          );
+          requireStringEntriesWithin(
+            [fact.statement],
+            MAX_CAREER_REALITY_STATEMENT_CHARS,
+            'MAX_CAREER_REALITY_STATEMENT_CHARS',
+          );
+          return {
+            factId: fact.factId,
+            source: fact.source,
+            confirmedByUser: fact.confirmedByUser,
+            category: fact.category,
+            statement: fact.statement,
+          };
+        }),
+      };
+    }
+  }
 
   // Plan-side: request must be a bounded own-property object with topic.
   requireOwnField(plan, 'request');
@@ -949,6 +1080,20 @@ export function parseValidateAnswerInputBounded(raw: unknown): ValidateAnswerInp
       );
       requireStringEntriesWithin(factIds, MAX_FACT_ID_CHARS, 'MAX_FACT_ID_CHARS');
       totalFactIds += factIds.length;
+      if (Object.hasOwn(para, 'realitySource')) {
+        requireOwnField(para, 'realitySource');
+        if (para.realitySource !== undefined) {
+          const source = requireRealityObject(para.realitySource, ['layer', 'factIds']);
+          requireStringEntriesWithin([source.layer], MAX_FACT_ID_CHARS, 'MAX_FACT_ID_CHARS');
+          const ids = requireArrayWithin(
+            source.factIds,
+            MAX_SOURCE_FACT_IDS_PER_PARAGRAPH,
+            'MAX_SOURCE_FACT_IDS_PER_PARAGRAPH',
+          );
+          requireStringEntriesWithin(ids, MAX_FACT_ID_CHARS, 'MAX_FACT_ID_CHARS');
+          totalFactIds += ids.length;
+        }
+      }
       if (totalFactIds > MAX_TOTAL_SOURCE_FACT_IDS) boundedReject('MAX_TOTAL_SOURCE_FACT_IDS');
       if (para.constraintRefs !== undefined) {
         const refs = requireArrayWithin(
@@ -964,6 +1109,7 @@ export function parseValidateAnswerInputBounded(raw: unknown): ValidateAnswerInp
   // Whitelist projection: build a clean shallow copy so that unknown deep
   // getters/Proxies in the original `raw` never reach Zod's internal traversal.
   const projected = {
+    ...(careerReality === undefined ? {} : { careerReality }),
     answerPlan: {
       allowedFactIds: plan.allowedFactIds,
       requiredCaveats: plan.requiredCaveats,

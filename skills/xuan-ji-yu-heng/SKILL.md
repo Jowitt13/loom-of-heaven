@@ -95,7 +95,7 @@ To keep results consistent across models, the **calculation** workflow is mandat
      `evidence.ref` / `caveat`，再按“事实 → 规则机制 → 现实含义 → 条件”写成连续自然段。
      专业术语可以出现，但术语、机制与具体处境必须紧邻；不得将原始 id、ref、ruleId、
      ruleset、provenance 或 warning 数据写入默认正文。
-   - **结构与措辞门禁（validate-answer，先于成文）:** 把通俗中间层整理成 `reading-draft/v2` JSON（每段带 `sourceFactIds`；与当前结论直接相关的 caveat/warning 段落用 `constraintRefs` 引用 AnswerPlan 约束；disclaimer 保留为内部可审计字段，仅在用户要求技术细节或当前问题确有必要时引用；legacy `reading-draft/v1` 已在运行时被拒绝），与 `answerPlan` 一起送检：`node scripts/loom-chart.mjs validate-answer --input-file validate-input.json`（输入/输出结构、退出码与限制见 `references/answer-contract.md`）。普通问题的完整门禁顺序：**answer-plan → 写 reading-draft/v2 → validate-answer → 用完全相同的可见文本成文 Markdown → lint-reading → 两个门禁都 ok 才展示；任何重写都必须重新跑两个门禁**。
+   - **结构与措辞门禁（validate-answer，先于成文）:** 把通俗中间层整理成 `reading-draft/v2` JSON：命盘段落用 `sourceFactIds`，相关 caveat/warning 用 `constraintRefs`；事业现实建议段落用独立 `realitySource` 引用同时提交的 `careerReality.confirmedFacts`，只记录用户明确自述，不借命盘 ID、不混合来源段落。没有现实自述就不生成现实建议；来源元数据不进正文。disclaimer 仅在确有必要时引用，legacy v1 仍拒绝。与 `answerPlan` 一起送检：`node scripts/loom-chart.mjs validate-answer --input-file validate-input.json`（可选现实来源的完整格式、临时文件隐私要求及限制见 `references/answer-contract.md`）。顺序不变：**answer-plan → 写 reading-draft/v2 → validate-answer → 用完全相同的可见文本成文 Markdown → lint-reading → 两个门禁都 ok 才展示；任何重写都必须重新跑两个门禁**。
    - **交付面与真实检查（lint-reading）:** 默认正文不得含章节模板、`专业依据`、`敏感项校对`、
      `引擎警告`、`声明`、免责声明页脚、原始来源标识或自动追问菜单。用随 Skill 发布的确定性检查器验证草稿：
      `node scripts/loom-chart.mjs lint-reading --input-file draft.md --channel topic [--simple] [--technical-details]`
