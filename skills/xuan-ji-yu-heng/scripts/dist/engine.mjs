@@ -57209,13 +57209,6 @@ function fortuneFacts(rules) {
   }
   return out;
 }
-var SPOUSE_TRAIT = {
-  \u91D1: "\u679C\u65AD\u91CD\u4E49\u3001\u8F6E\u5ED3\u5206\u660E\u3001\u8BB2\u539F\u5219",
-  \u6728: "\u4EC1\u539A\u6587\u96C5\u3001\u8EAB\u5F62\u633A\u62D4\u3001\u7231\u6210\u957F",
-  \u6C34: "\u806A\u6167\u7075\u6D3B\u3001\u5706\u878D\u5584\u53D8\u3001\u91CD\u611F\u53D7",
-  \u706B: "\u70ED\u60C5\u5F00\u6717\u3001\u5916\u5411\u8868\u8FBE\u3001\u8282\u594F\u5FEB",
-  \u571F: "\u7A33\u91CD\u52A1\u5B9E\u3001\u6566\u539A\u53EF\u9760\u3001\u604B\u5BB6"
-};
 function followupFacts(bundle, focusYear) {
   const out = [];
   const b = bundle.bazi;
@@ -57236,37 +57229,6 @@ function followupFacts(bundle, focusYear) {
         reason: mt.reason,
         caveat: "\u5E94\u671F\u662F\u673A\u4F1A\u7A97\u53E3\uFF0C\u975E\u201C\u51E0\u5C81\u5FC5\u5A5A\u201D\uFF1B\u80FD\u5426\u6210\u5A5A\u9700\u53CC\u65B9\u4E0E\u73B0\u5B9E\u914D\u5408\u3002"
       })
-    );
-  }
-  if (gender === "male" || gender === "female") {
-    const el = elementsByRelation(b.dayMaster.element);
-    const spouseEl = gender === "male" ? el.wealth : el.officer;
-    const parts = [
-      `\u914D\u5076\u661F\u4E94\u884C\u4E3A${spouseEl}\u2192${SPOUSE_TRAIT[spouseEl]}`,
-      `\u592B\u59BB\u5BAB(\u65E5\u652F)\u4E3A${b.pillars.day.branch}`
-    ];
-    const spousePalace = ziweiPalace(bundle.ziwei, "\u592B\u59BB\u5BAB");
-    if (bundle.ziwei && spousePalace) parts.push(`\u7D2B\u5FAE\u592B\u59BB\u5BAB\u4E3B\u661F\uFF1A${starNames(spousePalace)}`);
-    const desc = bundle.western?.angles?.descendant;
-    if (desc) parts.push(`\u897F\u65B9\u4E0B\u964D\u70B9\u5728${desc.sign}`);
-    const venus = westernPlanet(bundle.western, "Venus");
-    if (venus) parts.push(`\u91D1\u661F\u5728${venus.sign}`);
-    const descR = bundle.western?.angles?.descendant;
-    const rbody = descR ? SIGN_RULER[descR.sign] : void 0;
-    const ruler7 = rbody ? westernPlanet(bundle.western, rbody) : void 0;
-    if (ruler7 && rbody)
-      parts.push(
-        `\u4E03\u5BAB\u4E3B${PLANET_CN[rbody] ?? rbody}\u5728${SIGN_CN[ruler7.sign] ?? ruler7.sign}${ruler7.retrograde ? "(\u9006)" : ""}`
-      );
-    out.push(
-      fact(
-        "marriage",
-        `\u914D\u5076\u753B\u50CF(\u503E\u5411\u53C2\u8003)\uFF1A${parts.join("\uFF1B")}`,
-        [ev("bazi", "bazi.spouseStar", spouseEl)],
-        {
-          caveat: "\u4F53\u8C8C/\u6027\u683C\u4E3A\u503E\u5411\u6027\u53C2\u8003\uFF0C\u975E\u7CBE\u786E\u65AD\u4EBA\uFF1B\u4E0D\u636E\u6B64\u5BF9\u53F7\u5165\u5EA7\u6216\u6392\u9664\u3002"
-        }
-      )
     );
   }
   return out;

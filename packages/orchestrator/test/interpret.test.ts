@@ -113,20 +113,46 @@ describe('cross-system interpretation facts (handoff §8 layer 2)', () => {
     const interp = interpret();
     const claims = interp.facts.map((f) => f.claim).join(' ');
     expect(claims).toContain('紫微官禄宫');
-    expect(claims).toContain('紫微夫妻宫主星');
+    expect(claims).toContain('紫微夫妻宫（');
   });
 
-  it('emits the Western 7th-house ruler (七宫主星) + relationship aspects, folded into 配偶画像', () => {
+  it('keeps the Western 7th-house ruler and relationship aspects as separate sourced structures', () => {
     const interp = interpret();
     const claims = interp.facts.map((f) => f.claim);
     // 下降星座之古典主星及其状态.
     expect(claims.some((c) => c.includes('第七宫主星'))).toBe(true);
     // 关系相位（月/金/火/土与七宫主）事实出现.
     expect(claims.some((c) => c.includes('西方关系相位'))).toBe(true);
-    // 配偶画像 并入七宫主.
-    const portrait = claims.find((c) => c.includes('配偶画像'));
-    expect(portrait).toBeDefined();
-    expect(portrait!).toContain('七宫主');
+    expect(claims.some((c) => c.includes('配偶画像'))).toBe(false);
+    const ruler = interp.facts.find((f) => f.claim.includes('第七宫主星'))!;
+    expect(ruler.evidence.every((e) => e.kind === 'western')).toBe(true);
+    expect(ruler.evidence.some((e) => e.ref.startsWith('western.7thRuler['))).toBe(true);
+  });
+
+  it('never presents multiple systems or invented spouse traits under a single source', () => {
+    const interp = interpret();
+    const marriage = interp.facts.filter((f) => f.topic === 'marriage');
+    expect(marriage.some((f) => f.evidence.some((e) => e.kind === 'bazi'))).toBe(true);
+    expect(marriage.some((f) => f.evidence.some((e) => e.kind === 'western'))).toBe(true);
+    expect(marriage.some((f) => f.evidence.some((e) => e.kind === 'ziwei'))).toBe(true);
+    for (const f of marriage) {
+      const systems = new Set(
+        f.evidence.filter((e) => e.kind !== 'time').map((e) => e.kind.replace(/-.*$/, '')),
+      );
+      expect(systems.size, f.claim).toBe(1);
+      expect(f.evidence.some((e) => e.ref === 'bazi.spouseStar')).toBe(false);
+    }
+    const claims = marriage.map((f) => f.claim).join(' ');
+    for (const unsupported of ['轮廓分明', '身形挺拔', '敦厚可靠', '配偶画像']) {
+      expect(claims).not.toContain(unsupported);
+    }
+  });
+
+  it('keeps independent Western relationship facts when BaZi is not requested', () => {
+    const interp = interpret({ settings: { systems: ['western'] } });
+    const marriage = interp.facts.filter((f) => f.topic === 'marriage');
+    expect(marriage.some((f) => f.claim.includes('第七宫主星'))).toBe(true);
+    expect(marriage.flatMap((f) => f.evidence).every((e) => e.kind === 'western')).toBe(true);
   });
 
   it('is deterministic (byte-identical across runs)', () => {

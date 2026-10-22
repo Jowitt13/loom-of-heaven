@@ -27,8 +27,9 @@ asked topic's facts), retain warnings honestly for audit, and narrate only from 
   `answerPlan.selectedFacts` and the topic bounds below. Never hand-compute a substitute or confuse
   an omitted topic fact with an engine capability being absent.
 - **No fated verdicts.** When narrating, never write 天生/注定/必须/只能/不能-style life destiny.
-  Explicitly forbidden: “天生不能打工 / 必须创业 / 不适合大厂或体制 / 必须主动求变”. Give **multiple viable
-  paths + conditions + a qualitative trend (NOT a probability %)**; use only the facts' own
+  Explicitly forbidden: “天生不能打工 / 必须创业 / 不适合大厂或体制 / 必须主动求变”. Give paths,
+  conditions or timing **only when the returned facts actually support them (NOT a probability %)**;
+  do not invent extra options or a trend to fill a template. Use only the facts' own
   `reason`/`evidence` (no invented 命理 mechanisms). 十神象义不可错位（财=回报/客户/资源/责任，技能
   与产品化看食伤；财格需真实权责与合理回报，非只靠成果；官杀藏≠排斥组织）。Keep each system's terms
   inside that system (紫微星 ≠ 八字十神); relay brightness/dignity verbatim (Zi Wei “不/平” ≠ “陷”;
