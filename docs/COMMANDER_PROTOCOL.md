@@ -49,3 +49,11 @@ admission require an explicit owner decision. A direction change follows roadmap
 
 Select the earliest unfulfilled, unblocked required exit criterion; execution
 may not silently jump to technique expansion, UI, memory or publication.
+
+For the owner's current optimization work, use the single fixed list in
+[roadmap section 7](PRODUCT_TECHNICAL_ROADMAP.md#current-optimization-order--owner-confirmed-2026-10-23):
+safe updates, aligned short answers, truthful content, less duplicate work, then identifiable
+delivery. Name the item and its done condition in the ordinary four-field task. Do not create a
+parallel optimization roadmap or new phase ids. Freeze/plan approval does not itself authorize
+runtime implementation, incompatible contracts, installed-host changes or publication; retain the
+requested delivery scope. Once the list is complete, stop until a real usage issue or owner request.

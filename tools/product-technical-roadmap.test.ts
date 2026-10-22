@@ -59,14 +59,14 @@ describe('product technical roadmap and commander governance', () => {
     expect(ROADMAP).toContain('does **not** compete on the number of divination techniques');
   });
 
-  it('locks the authoritative phase order with IQ-0 as the active phase', () => {
+  it('locks the authoritative phase order and the current IQ-4 repair focus', () => {
     const order =
       'G0 -> IQ-0 -> IQ-1 -> IQ-2 -> IQ-3 -> IQ-4 -> IQ-5 -> IQ-6 -> PLAT-1 -> DATA-1 -> EXP-1';
     expect(ROADMAP).toContain(order);
     expect(GOVERNANCE_ADR).toContain(order);
     expect(ROADMAP).toContain('### G0 — governance and security baseline');
     expect(ROADMAP).toContain('### IQ-0 — structural answer-quality safeguards');
-    expect(ROADMAP).toContain('**Current active phase.**');
+    expect(ROADMAP).toContain('**Current active phase.** IQ-4 usability and answer-path repair');
     expect(ROADMAP).toContain('never use `--no-verify`');
   });
 

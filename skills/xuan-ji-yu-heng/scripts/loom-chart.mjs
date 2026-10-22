@@ -733,6 +733,14 @@ function runMigrate(args) {
   const ts = Date.now();
   const backup = `${target}.bak-${ts}`;
   const staged = `${target}.new-${ts}`;
+  const discardStaging = () => {
+    try {
+      rmSync(staged, { recursive: true, force: true });
+      return {};
+    } catch (err) {
+      return { stagingCleanupError: String(err) };
+    }
+  };
 
   // 3. stage a clean copy (fail BEFORE touching the target).
   try {
@@ -753,6 +761,21 @@ function runMigrate(args) {
   // 4-6. back up the old target, then atomically swap in the new package; roll back on any error.
   //      Only ever touches `target` (+ its own .bak/.new siblings) — never the parent skills dir.
   let backedUp = false;
+  const restorePrevious = (removeInstalled) => {
+    try {
+      // Only delete a target installed by THIS invocation, never an old target
+      // whose backup rename failed or a target encountered after a failed swap.
+      if (removeInstalled) rmSync(target, { recursive: true, force: true });
+      if (backedUp) renameSync(backup, target);
+      return { rolledBack: backedUp };
+    } catch (err) {
+      return {
+        rolledBack: false,
+        rollbackError: String(err),
+        ...(backedUp ? { backupPath: backup } : {}),
+      };
+    }
+  };
   try {
     if (existsSync(target)) {
       renameSync(target, backup);
@@ -760,14 +783,14 @@ function runMigrate(args) {
     }
     renameSync(staged, target);
   } catch (err) {
-    rmSync(target, { recursive: true, force: true });
-    rmSync(staged, { recursive: true, force: true });
-    if (backedUp) renameSync(backup, target);
+    const recovery = restorePrevious(false);
+    const cleanup = discardStaging();
     emitJson({
       ok: false,
       step: 'replace',
       error: String(err),
-      rolledBack: backedUp,
+      ...recovery,
+      ...cleanup,
       before,
       target,
     });
@@ -782,13 +805,12 @@ function runMigrate(args) {
     !afterNested &&
     afterFound.manifest.releaseTag === srcManifest.releaseTag;
   if (!afterOk) {
-    rmSync(target, { recursive: true, force: true });
-    if (backedUp) renameSync(backup, target);
+    const recovery = restorePrevious(true);
     emitJson({
       ok: false,
       step: 'verify-after',
-      error: 'post-replace verification failed; rolled back',
-      rolledBack: backedUp,
+      error: 'post-replace verification failed',
+      ...recovery,
       before,
       target,
     });
@@ -796,9 +818,17 @@ function runMigrate(args) {
   }
 
   // 8. success — drop the backup (removes any legacy double-nested residue it held).
-  if (backedUp) rmSync(backup, { recursive: true, force: true });
+  let cleanupWarning;
+  if (backedUp) {
+    try {
+      rmSync(backup, { recursive: true, force: true });
+    } catch {
+      cleanupWarning = { code: 'BACKUP_CLEANUP_FAILED', backupPath: backup };
+    }
+  }
   emitJson({
     ok: true,
+    ...(cleanupWarning ? { warnings: [cleanupWarning] } : {}),
     target,
     before,
     after: {

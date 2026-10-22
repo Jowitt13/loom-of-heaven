@@ -137,8 +137,12 @@ describe('IQ-4F explicit bazi-career runtime entry', () => {
     expect(entryExport).toBe(runBaziCareerRuntime);
   });
 
-  it('leaves the generic career path and its multi-system facts unchanged', () => {
-    const { publicResult } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
+  it('retains multi-system career facts for explicitly requested technical explanation', () => {
+    const { publicResult } = runAnswerPlan(syntheticInput, {
+      now: FIXED,
+      topic: 'career',
+      lens: 'explain',
+    });
     const systems = new Set(
       publicResult.facts.flatMap((fact) => fact.evidence.map((evidence) => evidence.kind)),
     );

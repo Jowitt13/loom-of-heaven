@@ -12,7 +12,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, parse } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 /**
@@ -71,6 +71,10 @@ interface MigrateOut {
   before: VersionOut | null;
   after?: VersionOut;
   source?: VersionOut;
+  rolledBack?: boolean;
+  rollbackError?: string;
+  backupPath?: string;
+  warnings?: Array<{ code: string; backupPath: string }>;
 }
 
 /** A real candidate package = canonical skill + a candidate BUILD_MANIFEST (single-layer). */
@@ -112,11 +116,52 @@ function legacyIntact(target: string): boolean {
   return JSON.parse(readFileSync(bm, 'utf8')).releaseTag === 'v0.1.0-rc.1';
 }
 
-function migrate(homeDir: string, args: string[]): { code: number; out: MigrateOut } {
-  const res = spawnSync(process.execPath, [CLI, 'migrate', ...args], {
-    encoding: 'utf8',
-    env: { ...process.env, HOME: homeDir, USERPROFILE: homeDir },
-  });
+type Fault = 'backup' | 'replace' | 'rollback' | 'verify' | 'cleanup';
+
+function migrate(
+  homeDir: string,
+  args: string[],
+  fault?: Fault,
+): { code: number; out: MigrateOut } {
+  const preload = join(homeDir, 'fault.mjs');
+  if (fault) {
+    // Fault injection lives only in the test subprocess, not in the shipped CLI.
+    writeFileSync(
+      preload,
+      `
+      import fs from 'node:fs';
+      import { syncBuiltinESMExports } from 'node:module';
+      import { join } from 'node:path';
+      const fault = ${JSON.stringify(fault)};
+      const rename = fs.renameSync, remove = fs.rmSync, copy = fs.cpSync;
+      fs.renameSync = (from, to) => {
+        if ((fault === 'backup' && String(to).includes('.bak-')) ||
+            (['replace', 'rollback'].includes(fault) && String(from).includes('.new-')) ||
+            (fault === 'rollback' && String(from).includes('.bak-'))) {
+          throw new Error('synthetic rename failure');
+        }
+        return rename(from, to);
+      };
+      fs.rmSync = (path, options) => {
+        if (fault === 'cleanup' && String(path).includes('.bak-')) throw new Error('synthetic cleanup failure');
+        return remove(path, options);
+      };
+      fs.cpSync = (from, to, options) => {
+        copy(from, to, options);
+        if (fault === 'verify') fs.writeFileSync(join(to, 'BUILD_MANIFEST.json'), '{}');
+      };
+      syncBuiltinESMExports();
+    `,
+    );
+  }
+  const res = spawnSync(
+    process.execPath,
+    [...(fault ? ['--import', pathToFileURL(preload).href] : []), CLI, 'migrate', ...args],
+    {
+      encoding: 'utf8',
+      env: { ...process.env, HOME: homeDir, USERPROFILE: homeDir },
+    },
+  );
   let out = {} as MigrateOut;
   try {
     out = JSON.parse(res.stdout ?? '') as MigrateOut;
@@ -228,6 +273,53 @@ describe('loom-chart migrate: legacy RC -> candidate (allowed host targets)', ()
       rmSync(home, { recursive: true, force: true });
     }
   });
+});
+
+describe('loom-chart migrate: filesystem failure recovery', () => {
+  it.each(['backup', 'replace', 'verify', 'rollback', 'cleanup'] as const)(
+    'preserves recoverable installation data on %s failure',
+    (fault) => {
+      const home = mkdtempSync(join(tmpdir(), 'ming-home-fault-'));
+      try {
+        const skills = join(home, '.qoder', 'skills');
+        mkdirSync(skills, { recursive: true });
+        const target = installLegacy(skills);
+        const other = installUnrelated(skills);
+        const { code, out } = migrate(
+          home,
+          ['--host', 'qoder', '--source', shared.candidate],
+          fault,
+        );
+        expect(readFileSync(join(other, 'SKILL.md'), 'utf8')).toContain('keep me');
+        expect(residueOf(skills).filter((name) => name.includes('.new-'))).toEqual([]);
+        if (fault === 'cleanup') {
+          expect(code).toBe(0);
+          expect(out.ok).toBe(true);
+          expect(out.after?.releaseTag).toBe(CANDIDATE_MANIFEST.releaseTag);
+          expect(out.warnings).toHaveLength(1);
+          expect(out.warnings![0]!.code).toBe('BACKUP_CLEANUP_FAILED');
+          expect(legacyIntact(out.warnings![0]!.backupPath)).toBe(true);
+          expect(version(target).json.releaseTag).toBe(CANDIDATE_MANIFEST.releaseTag);
+        } else {
+          expect(code).toBe(1);
+          expect(out.ok).toBe(false);
+          expect(out.step).toBe(fault === 'verify' ? 'verify-after' : 'replace');
+          if (fault === 'rollback') {
+            expect(out.rolledBack).toBe(false);
+            expect(out.rollbackError).toContain('synthetic rename failure');
+            expect(legacyIntact(out.backupPath!)).toBe(true);
+            expect(existsSync(target)).toBe(false);
+          } else {
+            expect(legacyIntact(target)).toBe(true);
+            expect(out.rolledBack).toBe(fault !== 'backup');
+            expect(residueOf(skills)).toEqual([]);
+          }
+        }
+      } finally {
+        rmSync(home, { recursive: true, force: true });
+      }
+    },
+  );
 });
 
 describe('loom-chart migrate: source validation still enforced', () => {

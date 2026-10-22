@@ -8,7 +8,8 @@ import { AnswerGuardrail } from './answer-plan.ts';
  * This is deliberately separate from lint-reading (language quality).
  * It is a DETERMINISTIC STRUCTURE-AND-WORDING GATE over a host's ReadingDraft:
  * 1. Every paragraph outside the minimal fact-exempt sections must declare
- *    sourceFactIds that exist in allowedFactIds.
+ *    sourceFactIds that exist in allowedFactIds, or independently bind a
+ *    career-reality paragraph to the optional user-stated context.
  * 2. The draft must not cross topic boundaries.
  * 3. High-risk expression patterns (medical, legal, investment, fate, life-death,
  *    manipulation) are blocked in ALL visible text: every heading and every
@@ -71,6 +72,9 @@ export const MAX_SOURCE_FACT_IDS_PER_PARAGRAPH = 50;
 export const MAX_CONSTRAINT_REFS_PER_PARAGRAPH = 10;
 /** Max fact IDs cited across the whole draft (bounds set-lookup and violation volume). */
 export const MAX_TOTAL_SOURCE_FACT_IDS = 1_000;
+/** Session-local, explicitly user-stated career facts; never chart-derived. */
+export const MAX_CAREER_REALITY_FACTS = 24;
+export const MAX_CAREER_REALITY_STATEMENT_CHARS = 500;
 /** Max characters in a single fact ID (engine fact IDs are short slugs). */
 export const MAX_FACT_ID_CHARS = 200;
 /** Max entries in caveatsExpressed (plans require only a few caveats). */
@@ -139,6 +143,47 @@ export const PlanConstraintRef = z.strictObject({
 });
 export type PlanConstraintRef = z.infer<typeof PlanConstraintRef>;
 
+const CareerRealityFactId = z
+  .string()
+  .max(MAX_FACT_ID_CHARS)
+  .regex(/^career-fact:[a-z0-9][a-z0-9._-]*$/);
+
+const CareerRealitySource = z.strictObject({
+  layer: z.literal('career-reality'),
+  factIds: z
+    .array(CareerRealityFactId)
+    .min(1)
+    .max(MAX_SOURCE_FACT_IDS_PER_PARAGRAPH)
+    .refine((ids) => new Set(ids).size === ids.length),
+});
+
+/** Optional local validation context. The host must copy only reality the user
+ * explicitly stated; these declarations do not independently prove that history.
+ * This is source binding, not a questionnaire, chart fact, or persistence API. */
+const CareerRealityContext = z.strictObject({
+  confirmedFacts: z
+    .array(
+      z.strictObject({
+        factId: CareerRealityFactId,
+        source: z.literal('user-stated'),
+        confirmedByUser: z.literal(true),
+        category: z.enum([
+          'current-role',
+          'skills',
+          'goals',
+          'constraints',
+          'preferences',
+          'opportunities',
+        ]),
+        statement: z.string().trim().min(1).max(MAX_CAREER_REALITY_STATEMENT_CHARS),
+      }),
+    )
+    .max(MAX_CAREER_REALITY_FACTS)
+    .refine((facts) => new Set(facts.map((fact) => fact.factId)).size === facts.length),
+  transient: z.literal(true),
+  noPersistence: z.literal(true),
+});
+
 /** A single paragraph within a reading section. */
 export const ReadingParagraph = z.strictObject({
   text: z.string().min(1).max(MAX_PARAGRAPH_TEXT_CHARS),
@@ -150,6 +195,9 @@ export const ReadingParagraph = z.strictObject({
    * fact-exempt only when every reference resolves to a real plan entry.
    */
   constraintRefs: z.array(PlanConstraintRef).max(MAX_CONSTRAINT_REFS_PER_PARAGRAPH).optional(),
+  /** Additive v2 input extension: an R-only paragraph, never mixed with chart
+   * citations or plan constraints. References resolve in careerReality below. */
+  realitySource: CareerRealitySource.optional(),
 });
 export type ReadingParagraph = z.infer<typeof ReadingParagraph>;
 
@@ -163,7 +211,8 @@ export type ReadingSection = z.infer<typeof ReadingSection>;
 
 /**
  * Structured draft produced by a host/LLM before final rendering.
- * Every visible content paragraph must cite sourceFactIds.
+ * Every visible content paragraph must cite chart facts or a separate,
+ * resolvable career-reality source; plan constraints retain their own references.
  */
 export const ReadingDraft = z
   .strictObject({
@@ -182,7 +231,7 @@ export const ReadingDraft = z
       totalText += section.heading.length;
       for (const para of section.paragraphs) {
         totalText += para.text.length;
-        totalFactIds += para.sourceFactIds.length;
+        totalFactIds += para.sourceFactIds.length + (para.realitySource?.factIds.length ?? 0);
       }
     }
     if (totalText > MAX_TOTAL_TEXT_CHARS) {
@@ -241,9 +290,8 @@ export const ViolationCode = z.enum([
   'CONTAINS_MARKUP', // heading or paragraph text contains HTML/entity/Markdown syntax
 
   // Guardrail violations
-  // Reserved: not currently emitted. Mapping answerPlan.guardrails to checks without
-  // changing the public AnswerPlan contract is a follow-up design item; we do not
-  // fabricate a fake guardrail validation just to "use" this code.
+  // Emitted for mixed career-reality/chart sources or non-career reality input.
+  // This does not claim general semantic enforcement of every plan guardrail.
   'GUARDRAIL_VIOLATED',
 
   // Resource-boundary violations
@@ -279,7 +327,8 @@ export const AnswerViolation = z.strictObject({
   patternKey: z.string().optional(),
   /**
    * Index of the offending item in the relevant array, keyed by `code`:
-   * UNKNOWN_FACT_ID → paragraph.sourceFactIds; MISSING_REQUIRED_CAVEAT →
+   * UNKNOWN_FACT_ID → paragraph.sourceFactIds (or realitySource.factIds when
+   * patternKey is career-reality.factIds); MISSING_REQUIRED_CAVEAT →
    * answerPlan.requiredCaveats; MISSING_REQUIRED_WARNING → answerPlan.requiredWarningCodes.
    */
   itemIndex: z.number().int().min(0).optional(),
@@ -308,6 +357,7 @@ export type AnswerValidationResult = z.infer<typeof AnswerValidationResult>;
  * arrays carry the same protective caps as the draft (the validator iterates them).
  */
 export const ValidateAnswerInput = z.strictObject({
+  careerReality: CareerRealityContext.optional(),
   answerPlan: z.object({
     allowedFactIds: z.array(z.string().max(MAX_FACT_ID_CHARS)).max(MAX_ALLOWED_FACT_IDS),
     requiredCaveats: z.array(z.string().max(MAX_CAVEAT_ENTRY_CHARS)).max(MAX_REQUIRED_CAVEATS),
