@@ -386,6 +386,10 @@ single working optimization list; the product destination, phase order and sourc
 | 4     | Remove redundant work in the existing process. Use doctor for installation/update/diagnosis, avoid an extra normalize before an already-normalizing answer path, and reuse trusted in-process journey results inside combined verification.                                 | The ordinary path performs no duplicate preparation or avoidable journey rebuild; input validation, material warnings, determinism and fail-closed behavior remain. Narrow the explicit BaZi calculation only if claim identity and public status meaning remain correct; do not change generic defaults incidentally.                                                 |
 | 5     | Make the intended build identifiable and usable. Consolidate conflicting install instructions, distinguish engine-offline from host-chat privacy, and expose content identity as well as version labels.                                                                    | Instructions no longer demand full charts for a short career demo; version checking distinguishes packages whose Skill/reference content differs. Source changes, built candidates, installed content and published releases are reported separately. A release/manifest promotion happens only after explicit owner authorization and the existing release checklist. |
 
+Progress — 2026-10-23: item 1's source repair is committed as `a80a161`, with real-CLI
+filesystem-failure tests and core verification passed. Remote delivery is pending; no installed
+host has been changed. Item 2 has not started.
+
 Execution rules:
 
 - Use this order for the owner's optimization work. One coherent repair can cover adjacent items;
