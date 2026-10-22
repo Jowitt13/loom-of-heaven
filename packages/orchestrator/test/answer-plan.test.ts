@@ -1,5 +1,6 @@
 // Synthetic fixture - fictional data only; not a real person.
-import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { describe, expect, it, vi } from 'vitest';
 import { AnswerRequest, canonicalJson, parseBirthInput } from '@loom/contracts';
 import {
   buildAnswerPlan,
@@ -9,6 +10,8 @@ import {
   validateAnswer,
 } from '@loom/interpret';
 import { runAnswerPlan, runInterpret } from '@loom/orchestrator';
+import * as calculation from '../src/calculate.ts';
+import * as timeLocation from '@loom/time-location';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
 
@@ -30,6 +33,28 @@ const syntheticInput = parseBirthInput({
 });
 
 describe('public result and answer plan', () => {
+  it('normalizes within a direct ordinary answer without standalone preparation', () => {
+    const normalize = vi.spyOn(timeLocation, 'normalizeBirthData');
+    const standalone = vi.spyOn(calculation, 'runNormalize');
+    try {
+      const result = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
+      expect(normalize).toHaveBeenCalledTimes(1);
+      expect(standalone).not.toHaveBeenCalled();
+      expect(result.answerPlan.allowedFactIds).toEqual(['fact-8']);
+      expect(result.publicResult.systems.every((system) => system.status === 'computed')).toBe(
+        true,
+      );
+    } finally {
+      normalize.mockRestore();
+      standalone.mockRestore();
+    }
+    const skill = readFileSync('skills/xuan-ji-yu-heng/SKILL.md', 'utf8');
+    expect(skill).toContain('directly to `answer-plan`');
+    expect(skill).toContain('not before every question');
+    expect(skill).toContain('do not run it as extra preparation for `answer-plan`');
+    expect(skill).not.toContain('Run `doctor`, then `normalize`');
+  });
+
   it('forces all systems internally without changing the private calculate contract', () => {
     const { publicResult } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
     expect(publicResult.systems).toEqual([

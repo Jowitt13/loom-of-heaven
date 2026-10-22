@@ -11,7 +11,7 @@ import {
 import { validateAnswer } from '../../interpret/src/validate-answer.ts';
 import { isTimeSensitiveFact } from '../../interpret/src/answer-plan.ts';
 import { runBaziCareerJourney } from './bazi-career-journey.ts';
-import { verifyBaziCareerNarrative } from './bazi-career-narrative.ts';
+import { verifyBaziCareerNarrativeForJourney } from './bazi-career-narrative.ts';
 
 /**
  * IQ-4D internal answer verification for the bazi career journey. A visible
@@ -89,7 +89,7 @@ export function verifyBaziCareerAnswer(
   const journey = runBaziCareerJourney(rawJourneyInput, options);
   const issues: BaziCareerAnswerIssue[] = [];
 
-  const narrative = verifyBaziCareerNarrative(rawTraces, rawJourneyInput, options);
+  const narrative = verifyBaziCareerNarrativeForJourney(rawTraces, journey);
   issues.push(...narrative.issues);
 
   const parsedTraces: NarrativeTraceValue[] = [];

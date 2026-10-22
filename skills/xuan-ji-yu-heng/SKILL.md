@@ -70,7 +70,11 @@ warnings. Computing all four systems does not require displaying all four — se
    calendar/leap month, rule gender and ruleset. Explicitly flag when the time is approximate,
    near a day/hour/solar-term boundary, or when historical DST makes the local time ambiguous.
 2. Build `birth-input.json` (see `references/input-contract.md`).
-3. Run `doctor`, then `normalize`. For a **full technical chart**, run BOTH `calculate --systems all`
+3. For an **ordinary question**, pass the confirmed `birth-input.json` directly to `answer-plan`:
+   it validates and normalizes the input itself. Use `doctor` when installing/updating or diagnosing
+   a runtime problem, not before every question. Use standalone `normalize` only when normalized
+   time data is explicitly needed; do not run it as extra preparation for `answer-plan`.
+   For a **full technical chart**, run BOTH `calculate --systems all`
    and `interpret`. For an **ordinary question**, run `answer-plan --topic <bounded-topic>` instead:
    it always computes all four systems internally, then returns only a de-identified `publicResult`
    and a topic-scoped `answerPlan`. Do not create or attach raw chart artifacts for an ordinary
@@ -150,6 +154,7 @@ When the user uploads **1-5 people** and asks about a relationship (合婚/配�
 ## Commands
 
 Arguments are passed as an array; input and output go through JSON files.
+These are independent commands, not a sequence to run before every answer.
 
 ```text
 node scripts/loom-chart.mjs doctor

@@ -408,6 +408,17 @@ placement, and examples exercise the existing draft/trace contracts. Local verif
 remote integration remain separate. The core check passed locally (including rebuilt engine,
 example/draft/trace regressions and isolated CLI smoke); no installed host or publication is changed.
 
+Item 4 ([Draft PR #103](https://github.com/Jowitt13/loom-of-heaven/pull/103)) removes
+per-question doctor/standalone-normalize preparation from the Skill workflow
+and reuses the current in-process journey inside combined narrative/answer verification. The
+standalone verifier still builds and validates its own journey; no host-supplied precomputed
+result, persistent cache or new public option is accepted. Explicit BaZi calculation keeps the
+existing all-system internal calculation: narrowing it would change fact numbering and system
+status semantics, so it is not bundled into this repair. Generic defaults remain unchanged.
+Local `verify:cloud` passed, including call-count regressions for one normalization and one
+journey per combined verification. Remote CI, integration and installed-host updates remain
+separate states; this repair does not declare any of the latter complete.
+
 Execution rules:
 
 - Use this order for the owner's optimization work. One coherent repair can cover adjacent items;

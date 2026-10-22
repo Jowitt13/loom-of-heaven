@@ -54,7 +54,9 @@ an array and JSON via files — never build a shell string from user text.
 
 ```bash
 cd skills/xuan-ji-yu-heng
+# Installation/update/diagnosis only; not a required preflight for every answer.
 node scripts/loom-chart.mjs doctor
+# Optional standalone time-data inspection; answer-plan normalizes its own input.
 node scripts/loom-chart.mjs normalize  --input-file birth-input.json --output-file normalized.json
 node scripts/loom-chart.mjs calculate  --input-file birth-input.json --systems all --output-file chart.json
 node scripts/loom-chart.mjs compare    --input-file birth-input.json --profiles default,apparent-solar --output-file comparison.json
