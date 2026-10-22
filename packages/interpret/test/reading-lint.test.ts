@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { lintReading } from '../src/index.ts';
+import { PublicResult } from '@loom/contracts';
+import { buildAnswerPlan } from '../src/answer-plan.ts';
+import { validateAnswer } from '../src/validate-answer.ts';
+import {
+  approveAnswerClaimCandidates,
+  projectAnswerClaimCandidates,
+  verifyNarrativeTrace,
+} from '../src/answer-claim-chain.ts';
 
 /**
  * V1 regression: the final delivery is natural prose. Professional vocabulary is
@@ -92,6 +100,141 @@ describe('reading-lint: V1 retained safety checks', () => {
         r.violations.filter((v) => v.severity === 'error'),
         file,
       ).toEqual([]);
+      if (file === 'examples-career.md') {
+        const birthOnly = md.match(/### 仅出生信息示例\n([\s\S]*?)(?=\n### |$)/);
+        expect(birthOnly, file).not.toBeNull();
+        expect(lintReading(birthOnly![1]!).violations).toEqual([]);
+      }
+    }
+  });
+
+  it('binds the love and wealth example bodies through the existing draft and trace contracts', () => {
+    // Synthetic technical records only. This proves the example linkage shape,
+    // not a new source admission or semantic faithfulness of its prose.
+    for (const sample of [
+      {
+        file: 'examples-love.md',
+        topic: 'marriage' as const,
+        system: 'western' as const,
+        profile: 'western-tropical-placidus',
+        facts: [
+          {
+            id: 'fact-1',
+            topic: 'marriage' as const,
+            claim: '西方第七宫主星为水星',
+            evidence: [{ kind: 'western' as const, ref: 'western.7thRuler[Mercury]' }],
+            caveat: '七宫主星示关系相处方式的倾向，非精确断人。',
+          },
+          {
+            id: 'fact-2',
+            topic: 'marriage' as const,
+            claim: '第七宫主星与土星存在本命相位记录',
+            evidence: [{ kind: 'western' as const, ref: 'western.aspects' }],
+            caveat: '相位为能量互动倾向，非事件断言。',
+          },
+        ],
+      },
+      {
+        file: 'examples-wealth.md',
+        topic: 'wealth' as const,
+        system: 'ziwei' as const,
+        profile: 'ziwei-rules@0.1.0',
+        facts: [
+          {
+            id: 'fact-1',
+            topic: 'wealth' as const,
+            claim: '财帛宫主星武曲：理财能力强，善于积累',
+            evidence: [
+              { kind: 'ziwei' as const, ref: 'ziwei.palaces[财帛宫]' },
+              { kind: 'ziwei-rule' as const, ref: 'ziwei-rule/palace-star/wealth-武曲' },
+            ],
+            reason: '财帛宫主星决定理财风格与进财方式',
+          },
+        ],
+      },
+    ]) {
+      const md = readFileSync(
+        join(process.cwd(), 'skills/xuan-ji-yu-heng/references', sample.file),
+        'utf8',
+      );
+      const body = md.match(/### 可交付示例\n([\s\S]*?)(?=\n### |$)/)![1]!.trim();
+      const publicResult = PublicResult.parse({
+        contractVersion: 'public-result/v2',
+        engineVersion: 'synthetic',
+        sourceSchemaVersion: 'synthetic',
+        systems: ['western', 'bazi', 'ziwei', 'vedic'].map((system) => ({
+          system,
+          status: system === sample.system ? 'computed' : 'unavailable',
+        })),
+        inputReliability: { timeAccuracy: 'exact', birthTimeKnown: true },
+        warnings: [],
+        facts: sample.facts,
+        rulesets: [{ id: sample.profile, version: '0.1.0' }],
+        disclaimers: [],
+        followupOffers: [],
+      });
+      const answerPlan = buildAnswerPlan(publicResult, { topic: sample.topic });
+      const context = { publicResult, answerPlan };
+      const projected = projectAnswerClaimCandidates(context);
+      expect(projected.issues, sample.file).toEqual([]);
+      const approval = approveAnswerClaimCandidates(context, projected.candidates);
+      expect(approval.issues, sample.file).toEqual([]);
+      const refs = answerPlan.requiredCaveats.map((_, index) => ({
+        kind: 'caveat' as const,
+        index,
+      }));
+      const paragraphs = body.split(/\n\s*\n/).map((text) => ({
+        text,
+        sourceFactIds: answerPlan.allowedFactIds,
+        constraintRefs: refs,
+      }));
+      expect(
+        validateAnswer({
+          answerPlan,
+          readingDraft: {
+            contractVersion: 'reading-draft/v2',
+            topic: sample.topic,
+            sections: [{ id: 'body', heading: '', paragraphs }],
+            caveatsExpressed: answerPlan.requiredCaveats,
+            warningsDisclosed: [],
+          },
+        }).ok,
+        sample.file,
+      ).toBe(true);
+      const mechanisms = [
+        ...new Set(approval.approvedClaims.flatMap((claim) => claim.mechanismRefs)),
+      ];
+      for (const ref of mechanisms) expect(md, sample.file).toContain(ref);
+      for (const [index, paragraph] of paragraphs.entries()) {
+        expect(
+          verifyNarrativeTrace(
+            {
+              contractVersion: 'narrative-trace/v1',
+              traceId: `narrative-trace:paragraph-${index + 1}`,
+              paragraphId: `paragraph-${index + 1}`,
+              topic: sample.topic,
+              visibleText: paragraph.text,
+              approvedClaimIds: approval.approvedClaims.map((claim) => claim.claimId),
+              factRefs: answerPlan.allowedFactIds,
+              mechanismRefs: mechanisms,
+              constraintRefs: refs,
+              invalidationCauses: [
+                'input-chart',
+                'settings',
+                'engine-provider',
+                'ruleset',
+                'source-profile',
+                'topic-lens',
+                'language-narrator',
+              ],
+              transient: true,
+              regenerable: true,
+            },
+            approval.approvedClaims,
+          ).ok,
+          sample.file,
+        ).toBe(true);
+      }
     }
   });
 });

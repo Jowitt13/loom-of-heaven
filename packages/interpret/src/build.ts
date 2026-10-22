@@ -3,8 +3,6 @@ import {
   missingElements,
   industryFinding,
   marriageTimingFinding,
-  elementsByRelation,
-  type Element,
 } from '@loom/bazi-rules';
 import { interpretWestern } from '@loom/western-rules';
 import { interpretZiwei as interpretZiweiRules } from '@loom/ziwei-rules';
@@ -591,18 +589,9 @@ function fortuneFacts(rules: BaziInterpretation | null): InterpretationFact[] {
   return out;
 }
 
-/** Five-element tendency of the spouse star, for a hedged 配偶画像 (never a precise verdict). */
-const SPOUSE_TRAIT: Record<Element, string> = {
-  金: '果断重义、轮廓分明、讲原则',
-  木: '仁厚文雅、身形挺拔、爱成长',
-  水: '聪慧灵活、圆融善变、重感受',
-  火: '热情开朗、外向表达、节奏快',
-  土: '稳重务实、敦厚可靠、恋家',
-};
-
 /**
- * Follow-up-question facts (常见追问支撑): 适合行业、婚姻/正缘应期、配偶画像。
- * All grounded in the chart; the reading-style playbook narrates them with discipline.
+ * Technical industry records and sourced marriage timing. Independent marriage
+ * structures stay in marriageFacts; no multi-system spouse portrait is inferred.
  */
 function followupFacts(bundle: ChartBundle, focusYear: number): InterpretationFact[] {
   const out: InterpretationFact[] = [];
@@ -632,38 +621,9 @@ function followupFacts(bundle: ChartBundle, focusYear: number): InterpretationFa
     );
   }
 
-  // 配偶画像 (倾向参考): 配偶星五行 + 紫微夫妻宫 + 西方下降/金星.
-  if (gender === 'male' || gender === 'female') {
-    const el = elementsByRelation(b.dayMaster.element as Element);
-    const spouseEl = gender === 'male' ? el.wealth : el.officer;
-    const parts = [
-      `配偶星五行为${spouseEl}→${SPOUSE_TRAIT[spouseEl]}`,
-      `夫妻宫(日支)为${b.pillars.day.branch}`,
-    ];
-    const spousePalace = ziweiPalace(bundle.ziwei, '夫妻宫');
-    if (bundle.ziwei && spousePalace) parts.push(`紫微夫妻宫主星：${starNames(spousePalace)}`);
-    const desc = bundle.western?.angles?.descendant;
-    if (desc) parts.push(`西方下降点在${desc.sign}`);
-    const venus = westernPlanet(bundle.western, 'Venus');
-    if (venus) parts.push(`金星在${venus.sign}`);
-    const descR = bundle.western?.angles?.descendant;
-    const rbody = descR ? SIGN_RULER[descR.sign] : undefined;
-    const ruler7 = rbody ? westernPlanet(bundle.western, rbody) : undefined;
-    if (ruler7 && rbody)
-      parts.push(
-        `七宫主${PLANET_CN[rbody] ?? rbody}在${SIGN_CN[ruler7.sign] ?? ruler7.sign}${ruler7.retrograde ? '(逆)' : ''}`,
-      );
-    out.push(
-      fact(
-        'marriage',
-        `配偶画像(倾向参考)：${parts.join('；')}`,
-        [ev('bazi', 'bazi.spouseStar', spouseEl)],
-        {
-          caveat: '体貌/性格为倾向性参考，非精确断人；不据此对号入座或排除。',
-        },
-      ),
-    );
-  }
+  // A spouse-star element is not evidence of a partner's physique/personality.
+  // Nor can a BaZi ref stand in for Zi Wei / Western positions. Omit the old
+  // aggregate rather than relabel unsupported wording as sourced narration.
   return out;
 }
 

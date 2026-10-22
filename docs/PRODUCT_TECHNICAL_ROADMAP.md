@@ -400,6 +400,14 @@ This is record linkage, not semantic proof of
 advice or an activation of the C-track composition modules. Verification and remote integration
 status are recorded in the existing PR #102; no source permission or IQ-4 exit state is changed.
 
+Item 3 continues in the existing [PR #100](https://github.com/Jowitt13/loom-of-heaven/pull/100),
+reusing its wording work on top of item 2. The unbound mixed-system spouse portrait is removed
+while independent structures remain. Love and wealth examples no longer infer mutual attraction
+from one chart or manufacture multi-system agreement. No new meaning is inferred from a raw
+placement, and examples exercise the existing draft/trace contracts. Local verification and
+remote integration remain separate. The core check passed locally (including rebuilt engine,
+example/draft/trace regressions and isolated CLI smoke); no installed host or publication is changed.
+
 Execution rules:
 
 - Use this order for the owner's optimization work. One coherent repair can cover adjacent items;

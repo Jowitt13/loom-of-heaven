@@ -3,6 +3,12 @@
 - Status: Accepted
 - Date: 2026-07-25
 
+> Maintenance correction (2026-10-23, roadmap optimization item 3): the later mixed-system
+> spouse-portrait aggregate is withdrawn. It combined BaZi, Zi Wei and Western positions under
+> a single BaZi reference and added unbound element-to-physique/personality hints. Independent
+> seventh-house-ruler, relationship-aspect, spouse-star and palace records remain available;
+> the historical “folded into 配偶画像” wording below does not authorize recreating that aggregate.
+
 ## Context
 
 A single-person 婚姻 reading surfaced three fact-level "硬伤" plus several narration
