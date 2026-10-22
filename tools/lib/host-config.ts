@@ -158,11 +158,11 @@ export const HOSTS: HostConfig[] = [
     releaseAsset: 'loom-of-heaven-workbuddy.zip',
     needsUserAuth: true,
     updateHint:
-      '说「帮我更新 Loom of Heaven」：读线上 manifest→下载校验→migrate 迁移替换旧包（或经 Skills 管理先删旧再导入）→回报 before→after。',
+      '说「帮我更新 Loom of Heaven」：读线上 manifest→下载校验→migrate 迁移替换旧包（或原生安全替换，不能先删旧包）→复核标签和内容指纹。',
     uninstallHint: '说「帮我卸载 Loom of Heaven」，或在「Skills 管理」中删除该技能。',
     label: '腾讯 WorkBuddy（桌面端 / OpenClaw）',
     format:
-      'OpenClaw 技能 zip（SKILL.md + scripts/ 位于压缩包根目录），在「Claw 设置 → Skills 管理」本地上传',
+      '单层 xuan-ji-yu-heng/ 技能 zip（目录内有 SKILL.md + scripts/），在「Claw 设置 → Skills 管理」本地上传',
     scriptExecution: true,
     runtime: 'Node.js ≥ 22（OpenClaw 运行脚本所需）',
     capability: 'full',
@@ -171,7 +171,7 @@ export const HOSTS: HostConfig[] = [
     engineSelfCheck: ENGINE_SELF_CHECK,
     userDemoPrompt: USER_DEMO_PROMPT,
     notes:
-      'OpenClaw 调用技能时会启动独立进程运行 scripts/ 下脚本（Node/Python/Bash），故可跑完整引擎；终端机器需有 Node。真机确认：上传 zip 导入到 ~/.workbuddy/skills/xuan-ji-yu-heng/，三盘 + 63 条解读事实正常，engine.mjs 与 canonical byte-identical；zip 内不含 .git/tests/node_modules/源码。更新用 migrate 原子替换 ~/.workbuddy/skills/xuan-ji-yu-heng（清理 legacy RC 双层、失败回滚），或经 Skills 管理先删旧 Loom of Heaven 再导入新版、不碰其它技能；升级后只保留一个可触发 xuan-ji-yu-heng。',
+      '历史真机检查确认本地 Node 引擎可运行，不能代替当前 candidate 验收。更新用 migrate 原子替换 ~/.workbuddy/skills/xuan-ji-yu-heng（清理 legacy RC 双层、失败回滚），或使用能保留/恢复旧包的原生替换；不能先删旧包，不碰其它技能；只保留一个可触发 xuan-ji-yu-heng。',
   },
   // Doubao is full (real-device confirmed it imports the Skill AND runs the Node engine).
   // reading-lite is retained as the designated pattern for any FUTURE script-less host

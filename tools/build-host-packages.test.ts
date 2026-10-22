@@ -14,6 +14,7 @@ import { describe, expect, it } from 'vitest';
 import { buildHostZips } from './build-host-packages.ts';
 import { assertDistinctReleaseTags, CANDIDATE_ENGINE_VERSION } from './lib/host-config.ts';
 import { ENGINE_VERSION } from '../packages/contracts/src/version.ts';
+import { spawnSync } from 'node:child_process';
 import {
   assertSingleTopDir,
   isTextEntry,
@@ -99,6 +100,7 @@ describe('cross-platform reproducible host packaging (real build path)', () => {
       const work = mkdtempSync(join(tmpdir(), 'ming-struct-'));
       try {
         const built = buildHostZips(srcSkill, join(work, 'out'));
+        const identities = new Set<string>();
         for (const b of built) {
           const entries = listZipEntries(b.zip);
           const struct = assertSingleTopDir(entries, b.host.packageName);
@@ -107,7 +109,25 @@ describe('cross-platform reproducible host packaging (real build path)', () => {
           expect(
             entries.some((e) => e.startsWith(`${b.host.packageName}/${b.host.packageName}/`)),
           ).toBe(false);
+          const installed = join(work, 'out', b.host.id, b.host.packageName);
+          const check = spawnSync(
+            process.execPath,
+            [join(installed, 'scripts/loom-chart.mjs'), 'version'],
+            { encoding: 'utf8' },
+          );
+          expect(check.status).toBe(0);
+          const identity = JSON.parse(check.stdout).contentIdentity;
+          expect(identity.status).toBe('available');
+          expect(identity.sha256).toMatch(/^[a-f0-9]{64}$/);
+          identities.add(identity.sha256);
+          const guide = readFileSync(join(installed, 'INSTALL.md'), 'utf8');
+          expect(guide).toContain('contentIdentity.sha256');
+          expect(guide).toContain('宿主聊天');
+          expect(guide).toContain('不要求展示完整命盘');
+          expect(guide).not.toContain('返回三盘');
+          expect(guide).not.toContain('先只删旧');
         }
+        expect(identities.size).toBe(1);
       } finally {
         rmSync(work, { recursive: true, force: true });
       }

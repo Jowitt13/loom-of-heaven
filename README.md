@@ -71,7 +71,7 @@ AI Agent 会先辨认自己所在的平台，并读取 [`install-manifest.json`]
 - 🔒 **同一刻，回到同一张盘** — 星历（astronomy-engine·VSOP87+NOVAS）、时区（IANA）与历法全部内置。相同输入 + 相同版本 → **字节级一致**的 canonical JSON。
 - 📚 **每一条解释，都留着来处** — 八字解读引用《子平真诠》《滴天髓》《渊海子平》等公版古籍；每条结论在引擎内部保留规则与出处链，明确要求时才展开技术依据。
 - 🕵️ **先校准，再开口** — 西方主星体与五种宫制均经独立 JPL Horizons／Swiss Ephemeris 金标交叉校验，覆盖范围和例外见 [`docs/VALIDATION.md`](docs/VALIDATION.md)；真交点与小行星为 approximate 级别，不受此门禁约束。
-- 🔐 **把私密留在本地** — 解读事实层脱敏，不含姓名/经历/自由文本地名；不联网、不遥测。
+- 🔐 **计算离线，聊天另行确认** — 引擎不联网、不遥测，事实层最小化直接标识；宿主聊天可能发送消息、附件或工具输出，需先确认设置和知情同意。
 - 🗣️ **让语言有边界** — 专业术语可以出现，但会紧接规则机制、现实含义和适用条件；默认不附原始 ID、来源面板、警告区块、固定声明或追问菜单。`lint-reading` 离线检查空话、重复、越界预测和这类默认交付泄漏；它是可复现的启发式检查，不保证宿主模型 100% 合规。
 - 🧩 **一份 Skill，随行而用** — 一份 `SKILL.md` + 打包好的引擎，所有主流 Agent 通用。
 
@@ -111,14 +111,15 @@ flowchart LR
 git clone https://github.com/Jowitt13/loom-of-heaven.git
 cd loom-of-heaven/skills/xuan-ji-yu-heng
 
-# 1) 环境自检
+# 安装/更新后自检（无需出生资料）
 node scripts/loom-chart.mjs doctor
+node scripts/loom-chart.mjs verify
+node scripts/loom-chart.mjs version
 
-# 2) 准备一个 birth-input.json（见下方示例），然后计算四体系命盘
-node scripts/loom-chart.mjs calculate --input-file birth-input.json --systems all --output-file chart.json
-
-# 3) 需要解读时，生成跨体系解读事实，供宿主按阅读规范组织答案
-node scripts/loom-chart.mjs interpret --input-file birth-input.json --output-file interpretation.json
+# 普通事业问题：准备 birth-input.json，直接生成当前主题的计划
+node scripts/loom-chart.mjs answer-plan --input-file birth-input.json --topic career --output-file answer-plan.json
+# 宿主随后按 Skill 生成 draft，并经 validate-answer、lint-reading 后交付自然短答。
+# 只有明确要求完整命盘/原始数据时，才另用 calculate / interpret。
 # （注：render 生成 HTML/SVG 报告的功能已暂时关闭，返回禁用提示并以退出码 3 退出）
 ```
 
@@ -237,7 +238,7 @@ The full charting capability and real-device compatibility records for all four 
 - 🔒 **Fully offline + deterministic** — ephemeris (astronomy-engine·VSOP87+NOVAS), timezones (IANA) and calendars are all bundled. Same input + same version → **byte-identical** canonical JSON.
 - 📚 **Traceable sources** — BaZi readings cite the public-domain classics 《子平真诠》《滴天髓》《渊海子平》 and related works; the engine retains a rule-and-source chain for every conclusion, expanded only when explicitly requested.
 - 🕵️ **Precision gates (two independent layers)** — Western primary bodies and five house systems are cross-checked against independent JPL Horizons/Swiss Ephemeris goldens. Coverage and exceptions are in [`docs/VALIDATION.md`](docs/VALIDATION.md); true nodes and asteroids remain approximate and are outside this gate.
-- 🔐 **Privacy first** — the reading fact layer is de-identified: no names/biographies/free-text place names; no network, no telemetry.
+- 🔐 **Offline engine, separate chat privacy** — calculation has no network or telemetry. The host may send messages, attachments or tool output to its provider; check settings and informed consent before sharing sensitive data.
 - 🗣️ **A firewall over reading output** — professional terms may appear, but sit next to their mechanism, practical implication and relevant condition. By default there are no raw IDs, source panels, warning blocks, fixed declarations or follow-up menus. The offline `lint-reading` check catches empty talk, repetition, out-of-bounds predictions and this kind of default-delivery leakage; it is reproducible but cannot guarantee 100% host-model compliance.
 - 🧩 **One Skill, ready to travel** — one `SKILL.md` + packaged engine works across mainstream AI agents.
 
@@ -272,14 +273,15 @@ flowchart LR
 git clone https://github.com/Jowitt13/loom-of-heaven.git
 cd loom-of-heaven/skills/xuan-ji-yu-heng
 
-# 1) Environment self-check
+# Install/update checks (no birth data required)
 node scripts/loom-chart.mjs doctor
+node scripts/loom-chart.mjs verify
+node scripts/loom-chart.mjs version
 
-# 2) Prepare a birth-input.json (see the example below), then compute all four chart systems
-node scripts/loom-chart.mjs calculate --input-file birth-input.json --systems all --output-file chart.json
-
-# 3) When a reading is needed, generate cross-system facts for the host to organize under the reading contract
-node scripts/loom-chart.mjs interpret --input-file birth-input.json --output-file interpretation.json
+# Ordinary career question: pass confirmed input directly to the topic planner
+node scripts/loom-chart.mjs answer-plan --input-file birth-input.json --topic career --output-file answer-plan.json
+# The host follows SKILL.md: draft -> validate-answer -> lint-reading -> natural topic answer.
+# Use calculate / interpret separately only for explicitly requested full charts or raw data.
 # (Note: the render command for HTML/SVG reports is temporarily disabled; it returns a disabled notice and exits with code 3)
 ```
 

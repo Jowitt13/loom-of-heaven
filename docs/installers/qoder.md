@@ -12,7 +12,7 @@
    - 下载 / 校验 / 解压 / 写入任一步失败都**失败不覆盖旧版**（保留已装好的上一版本）；
    - 用户无需手动复制文件、无需找目录、无需理解任何安装命令。
 5. 刷新 / 重载 Skills，确认 `xuan-ji-yu-heng` 可见；若 Qoder Desktop 无刷新能力，则提示用户重启 Qoder 或新开一个对话一次。
-6. 运行安装自检（`node scripts/loom-chart.mjs verify`，由 Agent 执行），返回 `ok:true` 即引擎就绪。
+6. 运行安装自检（`node scripts/loom-chart.mjs verify`，由 Agent 执行），确认 exit 0 且 `ok:true`。下方事业演示可选，不要求展示完整命盘。
 7. 一句话反馈成功。
 
 > 完整排盘真实依赖本机 Node.js ≥ 22。若缺 Node：明确告知“完整排盘需要 Node.js ≥ 22”，给一个简短动作（到 nodejs.org 安装）；不要安装任何命令行工具、不做全局 npm 安装、也不静默降级为只解读版。
@@ -33,7 +33,7 @@
 
 ## 检查版本
 
-- 说“检查 Loom of Heaven 版本”：AI 运行 `node scripts/loom-chart.mjs version` 读取 `~/.qoder/skills/xuan-ji-yu-heng/BUILD_MANIFEST.json`，回报真实已装版本（engineVersion / releaseVersion / releaseTag / 是否 legacy / 是否双层目录），不靠猜、不等于“线上最新”。
+- 说“检查 Loom of Heaven 版本”：AI 在实际安装目录运行 `node scripts/loom-chart.mjs version`，报告版本标签与 `contentIdentity.sha256`，不猜“线上最新”。同号不等于同内容；老包缺少指纹则明确说未知，范围见 [统一指南](../INSTALL_BY_PLATFORM.md)。
 
 ## 更新 / 卸载
 

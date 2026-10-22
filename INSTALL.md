@@ -33,7 +33,7 @@
 6. **按宿主原生方式安装**：严格遵循对应的安装器指令文件（见 `installer` 字段，即 `docs/installers/<host>.md`）。不要把复杂步骤、终端命令或路径抛给用户。
 7. **最小权限**：仅在确有需要时，向用户申请**一次**最小权限（如允许运行本地 `node`、允许导入技能）；不要反复索权，也不要索取无关权限。
 8. **刷新技能**：安装后刷新 / 重载宿主的 Skill 列表，确认技能可见。
-9. **自检**：full 版跑 `engineSelfCheck`（`node scripts/loom-chart.mjs verify`，返回 `ok:true`，无需出生资料、不猜坐标）；如需演示可用 `userDemoPrompt`（已含完整时区/经纬度）。reading-lite 版确认可接收 facts 并生成解读。
+9. **自检**：full 版跑 `engineSelfCheck`（`node scripts/loom-chart.mjs verify`，确认 exit 0 且 `ok:true`，无需出生资料、不猜坐标）；可选事业演示按 Skill 的 `answer-plan` 工作流给自然短答，不要求完整三盘或四盘。reading-lite 版确认可接收 facts 并生成解读。
 10. **一句话反馈**：告诉用户四件事——是否安装成功；装的是**完整排盘版**还是 **reading-lite（解读辅助版）**；如何调用；如何卸载。
 
 用户可见流程最多为：发一句安装请求 →（仅在已发布且确有需要时）至多确认一次权限 → AI 如实回复“已安装，可直接使用”或“安装包尚未发布”。
@@ -74,6 +74,13 @@
 ---
 
 ## 当前分发状态
+
+本地检查还应读取 `version` 的 `contentIdentity.sha256`：同版本号的候选包可能有不同内容，
+没有指纹的旧包要如实说“内容身份未知”。该指纹不代替 ZIP SHA-256，也不证明公开发布或宿主
+已实际加载；覆盖范围、源码目录无 BUILD_MANIFEST 的情况见 [统一指南](docs/INSTALL_BY_PLATFORM.md)。
+
+引擎计算离线、不遥测；**宿主聊天可能向模型服务商发送消息、附件或工具输出并保留记录**。
+发送敏感资料或派生结果前应确认宿主设置及用户知情同意，不能把“引擎离线”说成“聊天绝不上传”。
 
 根清单当前为 `status: "published"`：安装包来自 GitHub Release `v0.4.0`，已提供 Qoder / WorkBuddy / 豆包电脑版的 ZIP、不可变下载地址与 SHA-256。安装器必须先检查所选平台的 `published`，再下载和校验；不能引用历史下载地址或要求用户手动寻找旧包。
 

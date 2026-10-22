@@ -8,6 +8,10 @@ little of it as possible (handoff §10).
 - **Local & offline by default.** All calculation happens in the bundled CLI. No network
   request is made during calculation; the engine bundle contains no network APIs (the Skill
   validator asserts this).
+- **Host chat is a separate boundary.** A cloud host may send the user's messages, attachments,
+  tool output or derived facts to its model provider and retain chat history under its own settings.
+  Engine-offline does not mean chat-offline. Explain this before sending sensitive data, obtain
+  informed consent, and minimize the material sent; do not promise that nothing ever leaves the device.
 - **No name or life events.** They are never required and never sent to the engine. They do
   not affect any calculation.
 - **Geocoding is opt-in.** Turning a place name into coordinates would need a network call

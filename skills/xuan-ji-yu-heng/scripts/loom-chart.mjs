@@ -23,14 +23,16 @@
  *        lint-reading → show the answer only when BOTH gates pass; re-run BOTH after any rewrite)
  *   node scripts/loom-chart.mjs render     [DISABLED] visualization reports are temporarily off; use calculate/interpret JSON (exit 3)
  *   node scripts/loom-chart.mjs verify     [--fixture fixtures/smoke.json]
- *   node scripts/loom-chart.mjs version    (reads the sibling BUILD_MANIFEST.json of THIS installed package)
+ *   node scripts/loom-chart.mjs version    (local BUILD_MANIFEST labels plus scoped contentIdentity SHA-256)
  *   node scripts/loom-chart.mjs migrate    --source <extracted new pkg> [--host qoder|workbuddy | --target <dir>] [--dry-run]
  */
 import {
   cpSync,
   existsSync,
+  lstatSync,
   mkdirSync,
   readFileSync,
+  readdirSync,
   realpathSync,
   renameSync,
   rmSync,
@@ -40,6 +42,7 @@ import {
 import { basename, dirname, join, resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const PKG_NAME = 'xuan-ji-yu-heng';
 const ANSWER_TOPICS = new Set([
@@ -620,17 +623,74 @@ function checkMigrateTarget(target, host) {
   };
 }
 
-/** `version`: report the REAL locally-installed package from its BUILD_MANIFEST (never guessed). */
+/** Local content identity, not a Release signature or ZIP checksum. No user artifacts are read. */
+function readContentIdentity(pkgDir) {
+  const files = [
+    'SKILL.md',
+    'scripts/loom-chart.mjs',
+    'scripts/dist/engine.mjs',
+    'scripts/fixtures/smoke.json',
+  ];
+  const unavailableFiles = [];
+  function references(relativeDir) {
+    try {
+      if (!lstatSync(join(pkgDir, relativeDir)).isDirectory()) throw new Error('not a directory');
+      const entries = readdirSync(join(pkgDir, relativeDir), { withFileTypes: true });
+      for (const entry of entries) {
+        const relativePath = `${relativeDir}/${entry.name}`;
+        if (entry.isDirectory()) references(relativePath);
+        else if (entry.isFile() && entry.name.endsWith('.md')) files.push(relativePath);
+        else if (entry.isSymbolicLink()) unavailableFiles.push(relativePath);
+      }
+      if (relativeDir === 'references' && !files.some((file) => file.startsWith('references/'))) {
+        unavailableFiles.push(relativeDir);
+      }
+    } catch {
+      unavailableFiles.push(relativeDir);
+    }
+  }
+  references('references');
+  const entries = [];
+  for (const file of files.sort()) {
+    try {
+      if (!lstatSync(join(pkgDir, file)).isFile()) throw new Error('not a regular file');
+      const bytes = readFileSync(join(pkgDir, file));
+      // Match package text normalization; preserve binary/NUL-containing bytes.
+      const normalized = bytes.includes(0)
+        ? bytes
+        : Buffer.from(bytes.toString('latin1').replace(/\r\n?/g, '\n'), 'latin1');
+      entries.push([file, createHash('sha256').update(normalized).digest('hex')]);
+    } catch {
+      unavailableFiles.push(file);
+    }
+  }
+  return {
+    scope: 'skill-cli-engine-fixture-reference-markdown/v1',
+    normalization: 'utf8-lf',
+    status: unavailableFiles.length ? 'unavailable' : 'available',
+    sha256: unavailableFiles.length
+      ? null
+      : createHash('sha256')
+          .update(`${JSON.stringify(entries)}\n`)
+          .digest('hex'),
+    fileCount: entries.length,
+    unavailableFiles: unavailableFiles.sort(),
+  };
+}
+
+/** `version`: report local labels AND content, never infer the latest published version. */
 function runVersion() {
   const pkgDir = resolve(scriptDir, '..');
   const doubleNested = isDoubleNested(pkgDir);
   const found = readBuildManifest(pkgDir);
+  const contentIdentity = readContentIdentity(pkgDir);
   if (!found) {
     emitJson({
       ok: false,
       reason: 'no BUILD_MANIFEST (not a packaged install)',
       doubleNested,
       checkedDir: pkgDir,
+      contentIdentity,
     });
     return;
   }
@@ -639,6 +699,7 @@ function runVersion() {
     ...describeManifest(found.manifest),
     doubleNested,
     manifestPath: found.path,
+    contentIdentity,
   });
 }
 
