@@ -125,6 +125,10 @@ Research-only or shadow-only work may run in parallel when it cannot change runt
 not displace the active phase. A later phase may not be pulled forward because it is easier or more
 visible.
 
+**Current active phase.** IQ-4 usability and answer-path repair, with correctness and installation
+maintenance allowed under section 5. Follow the fixed optimization order in section 7 below. This
+is an execution focus, not a declaration that IQ-4's blocked exit criteria have passed.
+
 ### G0 — governance and security baseline
 
 Complete the verified internal-state laboratory without bypassing repository security controls.
@@ -142,7 +146,7 @@ runtime-isolation checks pass; no public capability claim changes.
 
 ### IQ-0 — structural answer-quality safeguards
 
-**Current active phase.** Build de-identified structural safeguards for representative user
+Foundation scope: build de-identified structural safeguards for representative user
 questions, starting with career. The public development set remains deliberately bounded to 20–30
 synthetic cases; it grows only after the rubric and failure taxonomy stabilize. Record the
 structural boundaries around vague prose, term dumping, unsupported facts, mechanism leaps,
@@ -366,6 +370,52 @@ them.
 runtime path is wired. “Verified” means all named gates passed with real evidence. “Published”
 means an owner-authorized immutable release and manifest promotion exist. These states are never
 used interchangeably.
+
+### Current optimization order — owner-confirmed 2026-10-23
+
+**Goal:** a user asks an ordinary question, receives a direct, readable answer from the material
+actually available, and can reliably install the intended version. Repair the existing path;
+do not turn this queue into another product, phase hierarchy, or evaluation program. This is the
+single working optimization list; the product destination, phase order and source policy stay v3.1.
+
+| Order | Work                                                                                                                                                                                                                                                                        | Done when                                                                                                                                                                                                                                                                                                                                                              |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | Make updates safe. Separate failure before backup, failed replacement, and successful replacement with backup-cleanup trouble.                                                                                                                                              | A failed backup never deletes the old installation; a failed replacement preserves/restores it; cleanup failure reports successful installation plus a retained-backup warning. Exercise these paths in the existing installer tests.                                                                                                                                  |
+| 2     | Align the short-answer path. The narrator and validator use the same eligible facts and relevant caveats/warnings; user-stated reality is distinct from chart evidence. Respond to the actual question rather than treating each lens as the same generic report.           | A career answer using one admitted cultural reference does not inherit unrelated systems' caveats; reality-based advice has an honest user-stated source, not a borrowed chart id or constraint exemption. Birth-only input invents no work history or action advice; an unavailable timing inference is not replaced by a generic verdict.                            |
+| 3     | Remove misleading content and instruction drift. Repair mixed-source spouse portraits and the love/wealth examples; do not force raw positions into unsupported life meanings, multiple options or trends. Reuse the wording work in PR #100 rather than starting it again. | Ordinary prose does not describe two people's attraction from one person's chart or imply independent systems prove the same claim. Each chart-derived meaning has its own admitted support; unsupported material is omitted or kept as explicitly requested technical structure. Examples and the real draft/trace contract agree.                                    |
+| 4     | Remove redundant work in the existing process. Use doctor for installation/update/diagnosis, avoid an extra normalize before an already-normalizing answer path, and reuse trusted in-process journey results inside combined verification.                                 | The ordinary path performs no duplicate preparation or avoidable journey rebuild; input validation, material warnings, determinism and fail-closed behavior remain. Narrow the explicit BaZi calculation only if claim identity and public status meaning remain correct; do not change generic defaults incidentally.                                                 |
+| 5     | Make the intended build identifiable and usable. Consolidate conflicting install instructions, distinguish engine-offline from host-chat privacy, and expose content identity as well as version labels.                                                                    | Instructions no longer demand full charts for a short career demo; version checking distinguishes packages whose Skill/reference content differs. Source changes, built candidates, installed content and published releases are reported separately. A release/manifest promotion happens only after explicit owner authorization and the existing release checklist. |
+
+Progress — 2026-10-23: item 1's source repair is committed as `a80a161`, with real-CLI
+filesystem-failure tests and core verification passed. The branch is pushed and
+[Draft PR #101](https://github.com/Jowitt13/loom-of-heaven/pull/101) is open; CI and integration
+remain pending. No installed host has been changed. Item 2 has not started.
+
+Execution rules:
+
+- Use this order for the owner's optimization work. One coherent repair can cover adjacent items;
+  do not split routine edits into new lettered phases, preliminary frameworks or mandatory reports.
+  Record a completion PR and bounded evidence here rather than duplicating progress across new docs.
+- Start from the real failing path. A missing `reason` field alone is not proof of an invalid fact;
+  a raw placement alone is not permission to invent an interpretation. Adding a caveat never
+  licenses unsupported advice. Preserve ADR 0021, input/time limits and truthful provenance.
+- This freezes the plan, not a public-contract migration, new rule admission, privacy change or
+  publication. If a repair needs an incompatible contract or a new output permission, identify the
+  smallest decision and obtain it under section 8; do not silently weaken validation or construct a
+  parallel career system. A blocker does not authorize an expanding chain of preparatory projects.
+- Validate proportionally using the commander protocol and existing tests. Check representative
+  reality-provided/birth-only, time-limited and source-blocked answers without creating a new score,
+  percentage, model-judge requirement, fixed prose length or another acceptance-packet format.
+  Technical checks do not prove naturalness, semantic faithfulness or career effectiveness.
+- No new C-4 cards/questionnaires, clinical connection, cross-system synthesis, default persistence,
+  remote service, model SDK, generic runtime, large UI or technique expansion. Do not delete isolated
+  research modules merely to reduce file count. Defer bundle splitting, persistent caching and
+  output-contract changes solely to save duplicate payload bytes until a measured need exists.
+- Preserve unrelated worktrees and evidence. Old host evidence remains bound to its original
+  candidate; a rebuild or wording change is not a new real-host run. IQ-4
+  `BLOCKED_SOURCE_ADMISSION` remains unchanged. Completion of this queue is not IQ-4 exit.
+- Stop when these repairs are complete. Further optimization requires an observed usage problem
+  or an explicit owner request, not more infrastructure for its own sake.
 
 ## 8. Roadmap change control
 
