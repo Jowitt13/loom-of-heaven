@@ -57,9 +57,9 @@ AI Agent 会先辨认自己所在的平台，并读取 [`install-manifest.json`]
 | ----------- | ------------------------------ | ----------------------------------------------------- |
 | Codex       | 可从公开仓库使用完整排盘 Skill | 克隆或下载本仓库后打开项目；不依赖 GitHub Release     |
 | Claude Code | 可通过本仓库的插件市场安装     | 执行下方的 `/plugin` 命令                             |
-| Qoder       | 已发布 GitHub Release `v0.4.0` | 发送上方安装链接；Agent 下载、校验后安装              |
-| WorkBuddy   | 已发布 GitHub Release `v0.4.0` | 发送上方安装链接；Agent 下载、校验后按 Agent 流程导入 |
-| 豆包电脑版  | 已发布 GitHub Release `v0.4.0` | 发送上方安装链接；Agent 下载、校验后按 Agent 流程导入 |
+| Qoder       | 已发布 GitHub Release `v0.4.1` | 发送上方安装链接；Agent 下载、校验后安装              |
+| WorkBuddy   | 已发布 GitHub Release `v0.4.1` | 发送上方安装链接；Agent 下载、校验后按 Agent 流程导入 |
+| 豆包电脑版  | 已发布 GitHub Release `v0.4.1` | 发送上方安装链接；Agent 下载、校验后按 Agent 流程导入 |
 
 各 Agent 的完整排盘能力与兼容性记录仍见下方文档；可下载性始终以清单的 `published` 字段为准，下载 URL 与 SHA-256 以 [`install-manifest.json`](install-manifest.json) 和 [`SHA256SUMS.txt`](SHA256SUMS.txt) 为准。
 
@@ -224,9 +224,9 @@ The AI Agent first detects the platform and reads the `published` status in [`in
 | -------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
 | Codex          | Full charting Skill usable from the public repo        | Clone or download this repo and open the project; no GitHub Release needed                |
 | Claude Code    | Available through this repository's plugin marketplace | Run the `/plugin` commands below                                                          |
-| Qoder          | Published on GitHub Release `v0.4.0`                   | Send the install link above; the Agent downloads, verifies and installs                   |
-| WorkBuddy      | Published on GitHub Release `v0.4.0`                   | Send the install link above; the Agent downloads, verifies and imports via the Agent flow |
-| Doubao desktop | Published on GitHub Release `v0.4.0`                   | Send the install link above; the Agent downloads, verifies and imports via the Agent flow |
+| Qoder          | Published on GitHub Release `v0.4.1`                   | Send the install link above; the Agent downloads, verifies and installs                   |
+| WorkBuddy      | Published on GitHub Release `v0.4.1`                   | Send the install link above; the Agent downloads, verifies and imports via the Agent flow |
+| Doubao desktop | Published on GitHub Release `v0.4.1`                   | Send the install link above; the Agent downloads, verifies and imports via the Agent flow |
 
 The full charting capability and real-device compatibility records for all four platforms are documented below; downloadability always follows the manifest's `published` field. Download URLs and SHA-256 hashes are authoritative in [`install-manifest.json`](install-manifest.json) and [`SHA256SUMS.txt`](SHA256SUMS.txt).
 

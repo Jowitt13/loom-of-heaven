@@ -6,7 +6,7 @@
 
 AI 按 [INSTALL.md](../INSTALL.md) 识别平台、读取根清单，只有所选平台 `published: true`
 才下载不可变 tag 的包并校验 SHA-256。需要本机 Node.js ≥ 22，不需要 pnpm、构建源码或安装 MCP。
-当前根清单对应安装包来自 GitHub Release `v0.4.0`；实际可用性与目标包始终以清单为准，
+当前根清单对应安装包来自 GitHub Release `v0.4.1`；实际可用性与目标包始终以清单为准，
 不猜“最新版”，不把本地 candidate 当作公开发布。
 
 ## 平台差异
