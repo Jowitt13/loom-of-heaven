@@ -1,8 +1,9 @@
 # Commander protocol
 
 - Protocol id: `loom-commander-protocol/v3`
-- Governing roadmap: `roadmap: loom-product-roadmap/v3.1`
+- Governing roadmap: `roadmap: loom-product-roadmap/v3.2`
 - Maintenance update: 2026-10-22, owner-authorized workflow simplification.
+- Route alignment: 2026-10-29, owner-confirmed correctness and natal-answer focus.
 
 ## Ordinary work
 
@@ -51,9 +52,20 @@ Select the earliest unfulfilled, unblocked required exit criterion; execution
 may not silently jump to technique expansion, UI, memory or publication.
 
 For the owner's current optimization work, use the single fixed list in
-[roadmap section 7](PRODUCT_TECHNICAL_ROADMAP.md#current-optimization-order--owner-confirmed-2026-10-23):
-safe updates, aligned short answers, truthful content, less duplicate work, then identifiable
-delivery. Name the item and its done condition in the ordinary four-field task. Do not create a
-parallel optimization roadmap or new phase ids. Freeze/plan approval does not itself authorize
-runtime implementation, incompatible contracts, installed-host changes or publication; retain the
-requested delivery scope. Once the list is complete, stop until a real usage issue or owner request.
+[roadmap section 7](PRODUCT_TECHNICAL_ROADMAP.md#current-optimization-direction--owner-confirmed-2026-10-29):
+proven correctness and evidence-identity repairs, bounded answer-path repairs, then one readable
+natal-answer loop from already-admitted material. The first implementation scope is real
+Gregorian-date validation plus ruleset-version authenticity. Career's source blocker does not
+block these tasks and is not lifted by them; cross-system synthesis remains deferred.
+
+Name the item, affected user behavior, and its done condition in the ordinary four-field task.
+Add the failing synthetic regression beside its fix instead of creating a separate baseline
+project. Follow actual technical dependencies, not completion of every review work package.
+Use the existing checks; do not add phase ids, general frameworks, routine ADRs or model judges
+for ordinary bugs. The 2026-10-23 queue is completed history, not the current work list.
+
+Freeze/plan approval does not itself authorize runtime implementation, incompatible contracts,
+new rule admission, installed-host changes or publication; retain the requested delivery scope.
+An unresolved source or design question blocks only its dependent work, not unrelated fixes.
+Once the named work is complete, stop until a real usage issue or owner request. The external
+review and its WP-00 through WP-14 are evidence and suggestions, not a second authority.

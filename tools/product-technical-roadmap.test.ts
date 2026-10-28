@@ -15,20 +15,23 @@ const NARRATIVE = read('docs/NARRATIVE_OUTPUT_V1.md');
 const TEN_GOD_ADR = read('docs/adr/0021-ten-god-cultural-reference.md');
 
 describe('product technical roadmap and commander governance', () => {
-  it('records an owner-confirmed v3.1 roadmap and accepted route-change ADR', () => {
-    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v3.1`');
+  it('records an owner-confirmed v3.2 roadmap and accepted route-change ADR', () => {
+    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v3.2`');
     expect(ROADMAP).toContain('Status: **Accepted and owner-confirmed**');
-    expect(ROADMAP).toContain('Confirmed: 2026-09-09');
-    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v3`');
-    expect(ROADMAP).toContain('`loom-product-roadmap/v3.1` — 2026-09-09: **version change**');
+    expect(ROADMAP).toContain('Confirmed: 2026-10-29');
+    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v3.1`');
+    expect(ROADMAP).toContain('`loom-product-roadmap/v3.2` — 2026-10-29: **version change**');
     expect(GOVERNANCE_ADR).toContain('Status: Accepted');
     expect(GOVERNANCE_ADR).toContain('Amended: 2026-08-29');
+    expect(GOVERNANCE_ADR).toContain('Amended: 2026-10-29');
+    expect(GOVERNANCE_ADR).toContain('## Owner-confirmed focus change — 2026-10-29');
+    expect(GOVERNANCE_ADR).toContain('The current freeze changes no runtime');
     expect(ROUTE_ADR).toContain('Status: Accepted');
     expect(ROUTE_ADR).toContain('Date: 2026-09-03');
     expect(ROUTE_ADR).toContain('This ADR changes no runtime');
-    expect(AGENTS).toContain('loom-product-roadmap/v3.1');
+    expect(AGENTS).toContain('loom-product-roadmap/v3.2');
     expect(AGENTS).toContain('loom-commander-protocol/v3');
-    expect(PROTOCOL).toContain('roadmap: loom-product-roadmap/v3.1');
+    expect(PROTOCOL).toContain('roadmap: loom-product-roadmap/v3.2');
   });
 
   it('locks the ADR 0021 ten-god cultural-reference bounds as a v3.1 static gate', () => {
@@ -59,14 +62,14 @@ describe('product technical roadmap and commander governance', () => {
     expect(ROADMAP).toContain('does **not** compete on the number of divination techniques');
   });
 
-  it('locks the authoritative phase order and the current IQ-4 repair focus', () => {
+  it('locks the phase labels and the owner-confirmed IQ-4 correctness and natal focus', () => {
     const order =
       'G0 -> IQ-0 -> IQ-1 -> IQ-2 -> IQ-3 -> IQ-4 -> IQ-5 -> IQ-6 -> PLAT-1 -> DATA-1 -> EXP-1';
     expect(ROADMAP).toContain(order);
     expect(GOVERNANCE_ADR).toContain(order);
     expect(ROADMAP).toContain('### G0 — governance and security baseline');
     expect(ROADMAP).toContain('### IQ-0 — structural answer-quality safeguards');
-    expect(ROADMAP).toContain('**Current active phase.** IQ-4 usability and answer-path repair');
+    expect(ROADMAP).toContain('**Current active phase.** IQ-4 correctness repair and natal-answer');
     expect(ROADMAP).toContain('never use `--no-verify`');
   });
 
@@ -76,7 +79,7 @@ describe('product technical roadmap and commander governance', () => {
       'IQ-1 — AnswerClaim and NarrativeTrace',
       'IQ-2 — final-answer faithfulness verifier',
       'IQ-3 — structured clarification and response projection',
-      'IQ-4 — single-system career vertical',
+      'IQ-4 — correctness repair and natal-answer usability',
       'IQ-5 — cross-system synthesis',
       'IQ-6 — stability, optional audit, and report delivery',
     ]) {
@@ -87,15 +90,48 @@ describe('product technical roadmap and commander governance', () => {
     expect(ROADMAP.indexOf('DATA-1')).toBeLessThan(ROADMAP.indexOf('EXP-1'));
   });
 
-  it('locks phase prerequisites before career and four-system synthesis', () => {
+  it('retains career acceptance without blocking the natal loop or activating synthesis', () => {
     const clarification = ROADMAP.indexOf('### IQ-3 — structured clarification');
-    const singleSystemCareer = ROADMAP.indexOf('### IQ-4 — single-system career');
+    const currentIq4 = ROADMAP.indexOf('### IQ-4 — correctness repair and natal-answer');
+    const singleSystemCareer = ROADMAP.indexOf('#### Retained single-system career vertical');
     const synthesis = ROADMAP.indexOf('### IQ-5 — cross-system synthesis');
     expect(clarification).toBeGreaterThan(-1);
-    expect(clarification).toBeLessThan(singleSystemCareer);
+    expect(clarification).toBeLessThan(currentIq4);
+    expect(currentIq4).toBeLessThan(singleSystemCareer);
     expect(singleSystemCareer).toBeLessThan(synthesis);
     expect(ROADMAP).toContain('one selected, source-admitted system');
     expect(ROADMAP).toContain('Only after the single-system career slice passes');
+    expect(ROADMAP).toContain('do not wait for career');
+    expect(GOVERNANCE_ADR).toContain('Career is no longer the sole prerequisite');
+    expect(GOVERNANCE_ADR).toContain('IQ-5 synthesis remains deferred');
+  });
+
+  it('freezes one bounded work list with date and ruleset authenticity as its first scope', () => {
+    const correctness = ROADMAP.indexOf('#### 1. Correctness and evidence identity');
+    const answerPath = ROADMAP.indexOf('#### 2. Existing answer-path repairs');
+    const natalLoop = ROADMAP.indexOf('#### 3. Readable natal-answer loop');
+    expect(correctness).toBeGreaterThan(-1);
+    expect(correctness).toBeLessThan(answerPath);
+    expect(answerPath).toBeLessThan(natalLoop);
+    expect(ROADMAP).toContain('真实公历日期校验 + 规则版本真实性');
+    expect(ROADMAP).toContain('WP-00 through WP-14');
+    expect(ROADMAP).toContain('#### Previous optimization queue — completed history');
+    expect(PROTOCOL).toContain('#current-optimization-direction--owner-confirmed-2026-10-29');
+    expect(PROTOCOL).toContain('Add the failing synthetic regression beside its fix');
+    expect(PROTOCOL).toContain('not a second authority');
+    expect(PROTOCOL).not.toContain('#current-optimization-order--owner-confirmed-2026-10-23');
+  });
+
+  it('does not turn direction approval into runtime permission or a new infrastructure program', () => {
+    expect(ROADMAP).toContain('方向批准不等于 blanket implementation');
+    expect(ROADMAP).toContain('确定性渲染是原样转写，不是固定答案模板');
+    expect(ROADMAP).toContain('不新增 ADR、阶段编号、前置治理工程');
+    expect(ROADMAP).toContain('C-4卡片或问卷用户流');
+    expect(ROADMAP).toContain('未验证不标成算法已错');
+    expect(ROADMAP).toContain('先用一个真实宿主和固定内容身份运行合成案例');
+    expect(PROTOCOL).toContain('Freeze/plan approval does not itself authorize runtime');
+    expect(GOVERNANCE_ADR).toContain('source/school');
+    expect(GOVERNANCE_ADR).toContain('BLOCKED_SOURCE_ADMISSION');
   });
 
   it('separates the three evidence programs and their claims', () => {
