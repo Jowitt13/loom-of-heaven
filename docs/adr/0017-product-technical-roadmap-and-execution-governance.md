@@ -3,6 +3,7 @@
 - Status: Accepted
 - Date: 2026-08-28
 - Amended: 2026-08-29 — roadmap v2 sequencing and evaluation boundaries
+- Amended: 2026-10-29 — roadmap v3.2 correctness and natal-answer optimization direction
 - Scope: product positioning, technical sequence, command admission, and roadmap change control
 - Related: [Product technical roadmap](../PRODUCT_TECHNICAL_ROADMAP.md),
   [Commander protocol](../COMMANDER_PROTOCOL.md), [ADR 0016](./0016-interpretable-state-and-accuracy-lab.md),
@@ -73,8 +74,62 @@ Shadow-only and research-only tracks may run in parallel only when they cannot a
 and do not displace the active product phase. Urgent calculation, privacy, security, supply-chain,
 host, or release-integrity maintenance may interrupt the sequence but may not expand capability.
 
-Every future command names its roadmap anchor, user value, prerequisites, exact scope, invariants,
-acceptance evidence, stop conditions, and delivery authority. A task with no anchor is not admitted.
+Ordinary tasks use the commander protocol's four short fields: goal, changed-file scope,
+validation, and result. Name the roadmap anchor, affected behavior, and authorized delivery
+boundary within those fields; do not recreate a long admission template for routine work.
+A task with no anchor is not admitted.
+
+## Owner-confirmed focus change — 2026-10-29
+
+The owner accepted the independent-review discussion and requested a durable, bounded optimization
+direction rather than adoption of its 15 work packages. Roadmap `loom-product-roadmap/v3.2`
+supersedes v3.1 for the active focus and section 7 work list. The normal phase labels remain;
+IQ-4 now includes correctness repair and a readable natal-answer loop alongside the retained
+BaZi career vertical. Career is no longer the sole prerequisite for maintenance or natal-answer
+work. Its original acceptance evidence is not renamed, waived, or declared complete.
+
+The destination remains an understandable, source-governed four-system traditional-reading Skill,
+not just a chart auditor and not a generic advice assistant decorated with a cultural reference.
+Four systems are the capability scope, not four compulsory sections or independent votes in every
+answer. Existing default system selection is unchanged by this decision.
+
+The single current sequence is:
+
+1. Repair reproduced calculation and evidence-identity defects. Start with real Gregorian-date
+   validation and ruleset-version authenticity, then address BaZi solar-term/luck-cycle time bases,
+   Western sidereal whole-sign houses, target-date propagation, and unknown/missing-state errors.
+2. Repair existing answer eligibility, unresolved-state propagation, plan/chart binding, truthful
+   failure reasons, and equality of checked versus displayed text. Independent fixes need not wait
+   for a comprehensive state engine, uncertainty contract, or all review work packages.
+3. Deliver one readable natal-answer loop from already-admitted and implemented material, first
+   in one real host using synthetic data. It must explain the relevant mechanism and limits,
+   support a grounded follow-up, and distinguish source insufficiency from missing user input.
+
+Roadmap section 7 records concrete bounds and completion evidence. No rule family or system is
+preselected as admitted merely by choosing the natal use case. If existing material is too thin,
+report the exact gap; any new rule or output permission needs its own smallest owner decision.
+Do not silently open pattern formation, useful-god arbitration, industry matching, or four-system
+synthesis to make the example look complete. IQ-5 synthesis remains deferred.
+
+The trade-off is to prioritize evidenced wrong results and a usable existing-content loop over
+more governance infrastructure, career-only prerequisite chains, or premature capability breadth.
+The rejected alternatives are wording-only optimization over incorrect inputs; treating one
+cultural reference plus generic reality advice as the final product; and implementing every
+external work package before showing a useful answer. This is one route amendment, not a reason
+to require a new ADR for each ordinary bug fix.
+
+ADR 0021, the career `BLOCKED_SOURCE_ADMISSION` criterion, three-lab separation, source/school
+admission, offline calculation, privacy defaults, psychology isolation, and release authority
+remain unchanged. C-track cards and user flows do not become active. Existing isolated research
+modules are not deleted merely to reduce file count.
+
+This is approval of direction and scope, not a claim that any listed defect is fixed and not
+blanket implementation, incompatible-contract, host-installation, merge, or release authority.
+The current freeze changes no runtime, public contract, ruleset, Skill, CLI, bundle, package
+version, manifest, installed host, or persisted user data.
+The review branch is not mainline activation: normal verification and merge are still required
+before this route directs implementation. A failing baseline security check is recorded separately,
+not bypassed or silently repaired by widening this documentation task.
 
 ## Precedence
 
@@ -92,8 +147,9 @@ A lower-level prompt may narrow higher-level rules but cannot silently override 
 
 - Interpretation quality becomes the next product investment after G0, rather than technique
   count or a new UI shell.
-- Clarification and response projection precede the single-system career vertical; cross-system
-  synthesis follows only after that vertical is proven.
+- Clarification and response projection retain their role before user-facing interpretation.
+  The v3.2 natal-answer loop and correctness maintenance do not wait for career's source blocker;
+  cross-system synthesis is not activated by this focus change.
 - Candidate claims cannot be narrated; approved single-system claims and cross-system synthesis
   remain separate internal records.
 - Public development cases and sealed holdout evidence have separate storage and retirement rules.

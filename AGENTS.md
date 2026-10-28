@@ -16,8 +16,16 @@ The roadmap governs product direction and technical sequence; domain ADRs and so
 govern their narrower subjects. A lower-level prompt may narrow these rules but cannot override
 them. “Continue” means the next unblocked roadmap slice—not whichever feature is easiest to add.
 Changing the route requires the owner decision, ADR, roadmap-version, protocol, and static-gate
-process recorded in the roadmap. The current authorities are `loom-product-roadmap/v3.1` and
+process recorded in the roadmap. The current authorities are `loom-product-roadmap/v3.2` and
 `loom-commander-protocol/v3`.
+
+The owner-confirmed optimization direction is roadmap section 7 (2026-10-29): repair proven
+calculation and evidence-identity defects, repair the existing answer path, then deliver one
+readable natal-answer loop using already-admitted material. The first implementation scope is
+real Gregorian-date validation plus ruleset-version authenticity. Career keeps ADR 0021's bounds
+and its blocked acceptance state; it is not the sole prerequisite for maintenance or natal-answer
+work. Do not restart the completed 2026-10-23 queue or adopt the external review's 15 work packages
+as an implementation mandate. A direction freeze is not runtime, installation, or release approval.
 
 ## What this project is
 

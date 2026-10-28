@@ -1,9 +1,9 @@
 # Loom product technical roadmap
 
-- Roadmap id: `loom-product-roadmap/v3.1`
+- Roadmap id: `loom-product-roadmap/v3.2`
 - Status: **Accepted and owner-confirmed**
-- Confirmed: 2026-09-09
-- Supersedes: `loom-product-roadmap/v3`
+- Confirmed: 2026-10-29
+- Supersedes: `loom-product-roadmap/v3.1`
 - Authority: product direction, technical sequencing, and slice admission
 - Related: [ADR 0018](./adr/0018-structural-answer-quality-route.md),
   [ADR 0017](./adr/0017-product-technical-roadmap-and-execution-governance.md),
@@ -37,6 +37,16 @@ resolved input
 The final product should feel simple to the user while remaining inspectable internally. A default
 answer explains the relevant mechanism beside the practical conclusion. It does not expose raw
 ids, warning panels, a technique card, a fixed disclaimer footer, or a standard follow-up menu.
+
+**Owner-confirmed destination (2026-10-29):** an understandable four-system traditional-reading
+Skill, not merely an expert chart auditor and not a generic reality-advice assistant decorated
+with one cultural reference. The current narrow career permission is a delivery boundary, not
+the final product destination. Depth comes from supported mechanisms, conditions, and limits,
+not more terminology, longer prose, or stronger predictions. Calculation reliability, rule
+fidelity, answer fidelity, and real-world predictive validity remain different claims.
+
+给用户的目标：提供必要的出生资料和具体问题，就能得到看得懂、能追问、有明确传统规则依据的解读；
+四体系各按真实能力贡献信息，不强行统一，不用现实建议冒充命盘推导。保留离线、小运行时和隐私默认。
 
 ## 2. Positioning and explicit trade-off
 
@@ -125,9 +135,10 @@ Research-only or shadow-only work may run in parallel when it cannot change runt
 not displace the active phase. A later phase may not be pulled forward because it is easier or more
 visible.
 
-**Current active phase.** IQ-4 usability and answer-path repair, with correctness and installation
-maintenance allowed under section 5. Follow the fixed optimization order in section 7 below. This
-is an execution focus, not a declaration that IQ-4's blocked exit criteria have passed.
+**Current active phase.** IQ-4 correctness repair and natal-answer usability, alongside the retained
+BaZi career vertical. The owner-confirmed v3.2 focus is the single work list in section 7. Proven
+correctness defects and the existing-content natal-answer loop do not wait for career's source
+blocker. This does not pass or waive career acceptance and does not activate IQ-5 synthesis.
 
 ### G0 — governance and security baseline
 
@@ -205,7 +216,20 @@ to the current topic and requested depth.
 Exit criteria: no hidden default changes; unanswered material settings fail closed or degrade;
 projection cannot conceal a material caveat; full internal evidence remains auditable.
 
-### IQ-4 — single-system career vertical
+### IQ-4 — correctness repair and natal-answer usability
+
+The v3.2 current milestone is to repair evidenced wrong results and deliver one understandable
+natal-answer loop from already-admitted, implemented material. The first user task is: explain
+the few chart features most relevant to the question, how their traditional mechanisms are
+interpreted, and what conditions limit them. Do not preselect a theme or a system as admitted
+merely because a field, a dictionary, or a source title exists.
+
+Section 7 fixes the concrete queue and completion evidence. Work follows actual dependencies:
+the affected input/calculation/state path must be trustworthy before its explanation is shown,
+but unrelated repairs and existing-content work need not wait for every review item. Default
+system selection, output permissions and source/school admission do not change by implication.
+
+#### Retained single-system career vertical
 
 Prove one complete user journey in one selected, source-admitted system before expanding to four-
 system synthesis: clarify the question, calculate the chart, project only relevant evidence, form
@@ -215,8 +239,10 @@ without requiring medical or clinical inference.
 
 Exit criteria: the selected system has representative exact/approximate/unknown-time cases,
 source-blocked cases, contradiction cases, four-host acceptance, and reviewed answer examples. The
-result must be specific without claiming fate or scientific prediction. Other systems remain
-unchanged and cannot be used to repair missing evidence.
+result must be specific without claiming fate or scientific prediction. Within this career
+vertical, other systems cannot be used to repair missing evidence. ADR 0021 and
+`BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples remain in force. Completing the natal
+milestone does not complete this career criterion or admit IQ-5.
 
 ### IQ-5 — cross-system synthesis
 
@@ -371,91 +397,93 @@ runtime path is wired. “Verified” means all named gates passed with real evi
 means an owner-authorized immutable release and manifest promotion exist. These states are never
 used interchangeably.
 
-### Current optimization order — owner-confirmed 2026-10-23
+### Current optimization direction — owner-confirmed 2026-10-29
 
-**Goal:** a user asks an ordinary question, receives a direct, readable answer from the material
-actually available, and can reliably install the intended version. Repair the existing path;
-do not turn this queue into another product, phase hierarchy, or evaluation program. This is the
-single working optimization list; the product destination, phase order and source policy stay v3.1.
+**单一工作依据。** Owner 已确认“修复已证实的错误 + 做好本命问答”的方向。外部独立审查及其
+WP-00 through WP-14 是问题证据与建议，不是第二份执行路线，也不整体立项。下列事项目前均为
+待实施；路线固化不代表代码修复、规则准入、宿主更新或发布已经完成。
 
-| Order | Work                                                                                                                                                                                                                                                                        | Done when                                                                                                                                                                                                                                                                                                                                                              |
-| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | Make updates safe. Separate failure before backup, failed replacement, and successful replacement with backup-cleanup trouble.                                                                                                                                              | A failed backup never deletes the old installation; a failed replacement preserves/restores it; cleanup failure reports successful installation plus a retained-backup warning. Exercise these paths in the existing installer tests.                                                                                                                                  |
-| 2     | Align the short-answer path. The narrator and validator use the same eligible facts and relevant caveats/warnings; user-stated reality is distinct from chart evidence. Respond to the actual question rather than treating each lens as the same generic report.           | A career answer using one admitted cultural reference does not inherit unrelated systems' caveats; reality-based advice has an honest user-stated source, not a borrowed chart id or constraint exemption. Birth-only input invents no work history or action advice; an unavailable timing inference is not replaced by a generic verdict.                            |
-| 3     | Remove misleading content and instruction drift. Repair mixed-source spouse portraits and the love/wealth examples; do not force raw positions into unsupported life meanings, multiple options or trends. Reuse the wording work in PR #100 rather than starting it again. | Ordinary prose does not describe two people's attraction from one person's chart or imply independent systems prove the same claim. Each chart-derived meaning has its own admitted support; unsupported material is omitted or kept as explicitly requested technical structure. Examples and the real draft/trace contract agree.                                    |
-| 4     | Remove redundant work in the existing process. Use doctor for installation/update/diagnosis, avoid an extra normalize before an already-normalizing answer path, and reuse trusted in-process journey results inside combined verification.                                 | The ordinary path performs no duplicate preparation or avoidable journey rebuild; input validation, material warnings, determinism and fail-closed behavior remain. Narrow the explicit BaZi calculation only if claim identity and public status meaning remain correct; do not change generic defaults incidentally.                                                 |
-| 5     | Make the intended build identifiable and usable. Consolidate conflicting install instructions, distinguish engine-offline from host-chat privacy, and expose content identity as well as version labels.                                                                    | Instructions no longer demand full charts for a short career demo; version checking distinguishes packages whose Skill/reference content differs. Source changes, built candidates, installed content and published releases are reported separately. A release/manifest promotion happens only after explicit owner authorization and the existing release checklist. |
+#### 1. Correctness and evidence identity — repair first
 
-Progress — 2026-10-23: item 1's source repair is committed as `a80a161`, with real-CLI
-filesystem-failure tests and core verification passed. The branch is pushed and
-[Draft PR #101](https://github.com/Jowitt13/loom-of-heaven/pull/101) is open; CI and integration
-are distinct: both CI jobs have passed, and integration remains pending. No installed host has
-been changed. Item 2's material projection now narrows ordinary career answers to the ADR 0021
-reference and its own constraints; explicit technical explanation keeps multi-system facts, and
-unsupported career timing returns no substitute natal verdict. Item 2 now also binds R-only
-paragraphs to optional, bounded user-confirmed career facts through an additive v2 input extension.
-Legacy drafts and validation-result output stay compatible; chart/reality mixing, unresolved
-sources and absent confirmation remain invalid. Truthful confirmation is the host's responsibility.
-This is record linkage, not semantic proof of
-advice or an activation of the C-track composition modules. Verification and remote integration
-status are recorded in the existing PR #102; no source permission or IQ-4 exit state is changed.
+| 顺序                | 具体内容与最小边界                                                                                                                                                       | 完成标准                                                                                                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1（第一项实施范围） | 真实公历日期校验 + 规则版本真实性。拒绝不存在的日期和虚构/退休规则版本，只接受实际实现的有限规则集合；不建设插件或通用注册框架。农历按自身规则单独验证，不套用公历修补。 | 非闰年2月29日、非法月日明确拒绝且不自动进位；合法日期保持正确；四体系合法版本通过、虚构版本拒绝，结果/计算/解释溯源记录实际执行版本，包含八字解释规则。错误不回显敏感输入；源码与 bundle 同步。 |
+| 2                   | 八字节气比较与起运的时标。分离真实瞬间与日/时柱的规则钟面，不把所有柱统一改成北京时间，不借修复更换流派或历法库。                                                        | 独立交节参考前后，同一 UTC 在多时区表达时年/月符合选定交节约定；日/时仍按各自规则钟面，起运间隔有独立对照；覆盖太阳时模式与 DST。                                                               |
+| 3                   | Western 恒星黄道整宫。按恒星上升所在星座建立宫头，再按同一宫头归宫，不只修显示。                                                                                         | 宫头为星座起点，水星/土星反例正确；覆盖12星座和0/360边界，热带整宫、等宫、象限制无意外回归；不外推为 Vedic 同样有错。                                                                           |
+| 4                   | 请求目标时间与未知/缺失状态。目标年份独立传递；午锚不当确定出生时刻，未提供字段不当零值或“不存在”。                                                                      | 明确 `at=2036` 时，不因紫微可用性改成2026；未知时不输出可被合法补全反驳的全称否定或单点确定结论，同时保留确有依据的可用内容。                                                                   |
 
-Item 3 continues in the existing [PR #100](https://github.com/Jowitt13/loom-of-heaven/pull/100),
-reusing its wording work on top of item 2. The unbound mixed-system spouse portrait is removed
-while independent structures remain. Love and wealth examples no longer infer mutual attraction
-from one chart or manufacture multi-system agreement. No new meaning is inferred from a raw
-placement, and examples exercise the existing draft/trace contracts. Local verification and
-remote integration remain separate. The core check passed locally (including rebuilt engine,
-example/draft/trace regressions and isolated CLI smoke); no installed host or publication is changed.
+每个失败案例直接成为对应修复的合成回归，不先建设独立基线工程。上述顺序不要求把所有
+事项合进一个 PR；八字时标与 Western 宫位等独立算法分别核验。不能靠免责声明、删反例、
+放宽期望或清空全部正常结果通过。无法获得独立参考时，精确保留未证范围，不自行生成金标准。
 
-Item 4 ([Draft PR #103](https://github.com/Jowitt13/loom-of-heaven/pull/103)) removes
-per-question doctor/standalone-normalize preparation from the Skill workflow
-and reuses the current in-process journey inside combined narrative/answer verification. The
-standalone verifier still builds and validates its own journey; no host-supplied precomputed
-result, persistent cache or new public option is accepted. Explicit BaZi calculation keeps the
-existing all-system internal calculation: narrowing it would change fact numbering and system
-status semantics, so it is not bundled into this repair. Generic defaults remain unchanged.
-Local `verify:cloud` passed, including call-count regressions for one normalization and one
-journey per combined verification. Remote CI, integration and installed-host updates remain
-separate states; this repair does not declare any of the latter complete.
+#### 2. Existing answer-path repairs — bounded parallel work
 
-Item 5 ([Draft PR #104](https://github.com/Jowitt13/loom-of-heaven/pull/104)) consolidates
-installation guidance around the existing protocol and platform installers.
-Engine self-checks no longer require full-chart output for an ordinary career demo. The existing
-`version` command additionally fingerprints local Skill/CLI/engine/fixture/reference content;
-this is not a ZIP checksum, authentication, a publication claim or a host-execution claim. Host
-chat privacy is explicit and separate from the offline engine. The optimization queue ends here;
-integration, installation and publication still require their own authorized actions.
-Local `verify:cloud` passed with real version/packaging regressions: same-label content changes
-are distinguishable, line endings are normalized and four host packages share the same scoped
-core identity. This completes source implementation of the five-item queue, not main integration,
-installed-host acceptance, publication or IQ-4 exit. No additional optimization track starts.
+| 内容                   | 边界与完成标准                                                                                                                                                                                                                                        |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 材料准入与状态传播     | `general` 不是技术内容通行证；主题与输出权限分开。未定 finding 不能变为肯定结论，但正确的否定/未定陈述不能因 `matched=false` 被一律删除。相关条件、四化与 material caveat 一起进入主题投影；错误来源不能靠换书名或 caveat 洗成获准规则。              |
+| 本次计划与最终文本绑定 | 修对象/输入修订/目标时间/规则与草稿意外错配；不能只凭 `fact-1` 存在。优先复用瞬态编排与现有契约，不建默认存储、签名服务或第三套验证器。摘要只用于一致性，不是认证或出生资料匿名化。展示文字与已检查草稿同文；确定性渲染是原样转写，不是固定答案模板。 |
+| 问题能力与失败恢复     | 本命背景不冒充 timing 证据；区分缺输入、未实现、来源未准入、局部不可用和内部失败。补时间无用时不诱导继续补隐私资料。局部失败与字段级候选如需改变公开契约，先明确最小迁移决定；不得暗换宫制或降低必要披露。                                            |
 
-Execution rules:
+只按真实依赖排序：相关基础必须先修，独立的年份传递、general 过滤等不等待完整未知时间
+引擎或全部审查事项。保留现有结构与措辞检查，但不声称其证明语义蕴含；蓝杯式反例是已知
+边界，不能用更多正则或模型评委宣称已全面解决。
 
-- Use this order for the owner's optimization work. One coherent repair can cover adjacent items;
-  do not split routine edits into new lettered phases, preliminary frameworks or mandatory reports.
-  Record a completion PR and bounded evidence here rather than duplicating progress across new docs.
-- Start from the real failing path. A missing `reason` field alone is not proof of an invalid fact;
-  a raw placement alone is not permission to invent an interpretation. Adding a caveat never
-  licenses unsupported advice. Preserve ADR 0021, input/time limits and truthful provenance.
-- This freezes the plan, not a public-contract migration, new rule admission, privacy change or
-  publication. If a repair needs an incompatible contract or a new output permission, identify the
-  smallest decision and obtain it under section 8; do not silently weaken validation or construct a
-  parallel career system. A blocker does not authorize an expanding chain of preparatory projects.
-- Validate proportionally using the commander protocol and existing tests. Check representative
-  reality-provided/birth-only, time-limited and source-blocked answers without creating a new score,
-  percentage, model-judge requirement, fixed prose length or another acceptance-packet format.
-  Technical checks do not prove naturalness, semantic faithfulness or career effectiveness.
-- No new C-4 cards/questionnaires, clinical connection, cross-system synthesis, default persistence,
-  remote service, model SDK, generic runtime, large UI or technique expansion. Do not delete isolated
-  research modules merely to reduce file count. Defer bundle splitting, persistent caching and
-  output-contract changes solely to save duplicate payload bytes until a measured need exists.
-- Preserve unrelated worktrees and evidence. Old host evidence remains bound to its original
-  candidate; a rebuild or wording change is not a new real-host run. IQ-4
-  `BLOCKED_SOURCE_ADMISSION` remains unchanged. Completion of this queue is not IQ-4 exit.
-- Stop when these repairs are complete. Further optimization requires an observed usage problem
-  or an explicit owner request, not more infrastructure for its own sake.
+#### 3. Readable natal-answer loop — the next user milestone
+
+首个用户任务：“根据我的出生资料，讲清楚命盘里最值得理解的几个特点，以及这些解释有什么条件。”
+
+- 先选已有来源准入、已经实现、能支持具体解释的一小组材料，不预先放行某一整个主题或体系。
+  若只有结构值、没有获准含义，诚实报告缺口，不让模型补推断；新规则另作最小准入决定。
+- 自然输入，只确认影响本问题的资料；未知或约估时间明确受影响部分，不反复索取无法补充的时间。
+  地点联网查询仍需明确同意；规则含义类问题不强迫收集出生资料。
+- 正文直接回答问题，术语与机制、具体含义相邻，material 限制就地表达，技术依据按需展开。
+  不用术语数量、字数、四体系齐全或固定段落模板定义深度；不靠现实咨询装饰命盘内容。
+- 四体系是能力范围，不是四段等长答案或四份独立证明。默认体系选择保持现状；显式单体系
+  投影、四体系汇合/冲突/不可比实现及新动态/关系能力，均不因本目标自动准入。
+- 先用一个真实宿主和固定内容身份运行合成案例，检查准确时间、未知/边界输入、同对象追问
+  与切换对象的最终回答。相关主张和必要限制可追溯，实际展示与检查文本一致，无法回答时
+  下一步真实可行。再按需求扩宿主与内容；不要求重建整套四宿主包才能修一个文案或代码问题。
+- 实际回答是否易懂、切题与忠实单独说明；测试全绿、用户“觉得准”、技术宿主验收不等于
+  现实预测有效。人工/模型评审可提供有界证据，不新增强制评分、封闭集或模型评委项目。
+
+#### Deferred work and preserved boundaries
+
+- 后续维护而非当前统一前置：历史秒级时区至少诚实类型化拒绝（不得静默取整）；相位入相、
+  近边界与误差来源说明、规则变体回退、紫微相关条件投影、合盘去计数/人物方向/关系类型、
+  安装并发与旧双根入口、doctor/usage/隐私责任文档。按真实影响与证据做独立小修，不扩能力。
+- 需进一步证据或最小设计决定：紫微闰月/晚子、Dasha实际误差、极区收敛范围、未知时间完整
+  稳定/候选/不可用契约及近似区间、海外农历口径、局部失败返回形态。未验证不标成算法已错，
+  未设计不全局封死其他修复；分钟采样也不自动等于连续区间稳定性的数学证明。
+- 暂不做：第五种术法、综合分数/匹配排名/四体系投票、出生时间反推、C-4卡片或问卷用户流、
+  临床接入、默认档案/记忆、账号/数据库/常驻服务、模型SDK、大UI、通用DAG/知识图谱。
+  性能先测完整链路，不能从局部计时直接引入缓存、服务或裁剪默认计算。
+- ADR 0021、C-track 隔离、D1/D2 shadow、来源/流派/权利阻断、隐私默认均不改变。格局成立、
+  喜用仲裁、五行行业匹配不是首个本命样板的默认选题；career
+  `BLOCKED_SOURCE_ADMISSION` 不因本命闭环、技术安装或本路线固化而解除。
+
+#### Execution and stop conditions
+
+每项仍只记录 goal, scope, validation, result，指出本节具体事项、用户行为和完成标准。
+一项 coherent repair 一个可审查改动，复用现有测试与 commander protocol 的分级验证；
+普通 bug 不新增 ADR、阶段编号、前置治理工程、重复计数或验收包格式。
+
+方向批准不等于 blanket implementation, incompatible-contract, installation, merge, or release
+approval。后续指令只在其授权交付范围内执行；新输出权限/来源规则/公开不兼容契约/隐私或
+架构变化按第8节最小决定处理。阻断只约束依赖它的工作，不扩大成一串准备项目。
+保留旧 worktree、真实宿主证据和用户数据；未修事项明确写未修，不重放旧证据冒充新结果。
+完成本清单后停止，后续工作由实际使用问题或 owner 新请求驱动，不自动进入 IQ-5、平台或扩展。
+
+#### Previous optimization queue — completed history
+
+2026-10-23 的五项队列（安全更新、短答对齐、误导内容、重复工作、内容身份）已进入 main：
+[PR #101](https://github.com/Jowitt13/loom-of-heaven/pull/101)、
+[PR #102](https://github.com/Jowitt13/loom-of-heaven/pull/102)、
+[PR #100](https://github.com/Jowitt13/loom-of-heaven/pull/100)、
+[PR #103](https://github.com/Jowitt13/loom-of-heaven/pull/103)、
+[PR #104](https://github.com/Jowitt13/loom-of-heaven/pull/104)。
+[PR #105](https://github.com/Jowitt13/loom-of-heaven/pull/105) 的 v0.4.1 发布记录与 manifest
+promotion 已在基线 `49157172c1673a07e6ca402f4c6c8d3818a4b650`。旧 Draft/pending 叙述不是当前状态。
+这些是已完成交付历史，不重新执行；其技术证据不升级为回答语义证明或 IQ-4 career exit。
 
 ## 8. Roadmap change control
 
@@ -473,6 +501,14 @@ next unblocked slice in this roadmap and prove its admission conditions.
 
 ## 9. Roadmap changelog
 
+- `loom-product-roadmap/v3.2` — 2026-10-29: **version change** for the owner-confirmed
+  optimization direction (amended ADR 0017). Preserve the four-system traditional-reading
+  destination; broaden the current IQ-4 focus to proven correctness repair and one readable,
+  already-admitted natal-answer loop alongside the retained career vertical. Replace the completed
+  five-item queue with one bounded section 7 work list. First scope: real Gregorian-date validation
+  plus ruleset-version authenticity. Career source admission, default systems, runtime contracts,
+  privacy, IQ-5 synthesis, installation and release authority are unchanged. Freeze is not
+  implementation or evidence of fixed defects; protocol, AGENTS and the existing static gate align.
 - `loom-product-roadmap/v3.1` — 2026-09-09: **version change** (not a v3 amendment) for the
   default career output surface ([ADR 0021](adr/0021-ten-god-cultural-reference.md)). One frozen
   ten-god cultural reference with a short gloss is admitted; pattern/useful-god/industry and
