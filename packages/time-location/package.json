@@ -13,7 +13,7 @@
   "dependencies": {
     "@loom/contracts": "workspace:*",
     "moment-timezone": "^0.6.3",
-    "zod": "^4.4.3"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@loom/test-fixtures": "workspace:*"

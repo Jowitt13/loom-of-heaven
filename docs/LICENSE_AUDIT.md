@@ -16,6 +16,15 @@
 
 ## Bundled into the published engine (`scripts/dist/engine.mjs`)
 
+> **Version scope.** The dated verification above and the table below are the historical
+> `2026-07-21` audit and the third-party set bundled into the published `v0.4.1` engine; they are
+> not a live mirror of the source tree. The current source build closure bundles **zod `4.6.6`**,
+> the first version patched for GHSA-mrhx-c7xc-m3w5. For any source build, the authoritative
+> versions are the committed `sbom.cdx.json` and `sbom.spdx.json` beside that build. Merging a
+> source change does not update the published `v0.4.1` package, existing installations, or remote
+> release assets; those change only through a separately authorized release and manifest
+> promotion.
+
 | Package          | Version | License | Code license | Data license                        | Notes                                                                                              |
 | ---------------- | ------- | ------- | ------------ | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
 | zod              | 4.4.3   | MIT     | MIT          | —                                   | Zero dependencies.                                                                                 |
