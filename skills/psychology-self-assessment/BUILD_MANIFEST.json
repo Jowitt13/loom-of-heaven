@@ -6,7 +6,7 @@
   "runtime": "node >=22",
   "engine": {
     "file": "scripts/dist/psychology-engine.mjs",
-    "sha256": "4425f62630e3a12db2e0e06ac67f87fc675eca78408364eb29e87e2dafcbcf5b"
+    "sha256": "8efce81bf544242fb6152399c40fcfde6c63d50d9032f8aed6165cfe5b7472e3"
   },
   "capabilities": [
     "doctor",

@@ -20,7 +20,7 @@
     "@loom/vedic": "workspace:*",
     "@loom/western": "workspace:*",
     "@loom/ziwei": "workspace:*",
-    "zod": "^4.4.3"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@loom/test-fixtures": "workspace:*",

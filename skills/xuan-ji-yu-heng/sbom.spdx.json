@@ -184,7 +184,7 @@
     {
       "name": "zod",
       "SPDXID": "SPDXRef-Package-zod",
-      "versionInfo": "4.4.3",
+      "versionInfo": "4.6.6",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "MIT",
@@ -193,7 +193,7 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/zod@4.4.3"
+          "referenceLocator": "pkg:npm/zod@4.6.6"
         }
       ]
     }

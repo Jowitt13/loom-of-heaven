@@ -19,8 +19,8 @@
     {
       "type": "library",
       "name": "zod",
-      "version": "4.4.3",
-      "purl": "pkg:npm/zod@4.4.3",
+      "version": "4.6.6",
+      "purl": "pkg:npm/zod@4.6.6",
       "licenses": [
         {
           "license": {
