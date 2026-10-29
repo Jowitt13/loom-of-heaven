@@ -45577,7 +45577,8 @@ var WesternSettings = external_exports.strictObject({
   /** Include the five asteroids (Chiron/Ceres/Pallas/Juno/Vesta); approximate precision. */
   asteroids: external_exports.boolean().default(true)
 });
-var BAZI_RULESET_CURRENT = "bazi-standard@0.1.0";
+var BAZI_RULESET_CURRENT = "bazi-standard@0.1.1";
+var BAZI_RULESET_RETIRED = ["bazi-standard@0.1.0"];
 var BaziSettings = external_exports.strictObject({
   rulesetId: external_exports.string().default(BAZI_RULESET_CURRENT),
   /** Which time base feeds the pillars. Solar-time modes only apply here, never to Western. */
@@ -45634,7 +45635,7 @@ var CURRENT_RULESETS = {
 };
 var RETIRED_RULESETS = {
   western: WESTERN_RULESET_RETIRED,
-  bazi: [],
+  bazi: BAZI_RULESET_RETIRED,
   ziwei: [],
   vedic: []
 };
@@ -54611,6 +54612,7 @@ var TYME4TS_VERSION = "1.5.2";
 var PROVIDER = { id: "tyme4ts", version: TYME4TS_VERSION, license: "MIT" };
 var YANG_STEMS = /* @__PURE__ */ new Set(["\u7532", "\u4E19", "\u620A", "\u5E9A", "\u58EC"]);
 var MAJOR_CYCLE_COUNT = 8;
+var TYME4TS_TERM_OFFSET_MS = 8 * 60 * 60 * 1e3;
 function pad22(n) {
   return String(n).padStart(2, "0");
 }
@@ -54624,6 +54626,20 @@ function partsFromSolarIso(iso) {
   const [y, mo, d] = datePart.split("-").map((v) => Number.parseInt(v, 10));
   const [h, mi, s] = timePart.split(":").map((v) => Number.parseInt(v, 10));
   return { y, mo, d, h, mi, s };
+}
+function partsFromInstant(utcInstantMs) {
+  const d = new Date(utcInstantMs + TYME4TS_TERM_OFFSET_MS);
+  return {
+    y: d.getUTCFullYear(),
+    mo: d.getUTCMonth() + 1,
+    d: d.getUTCDate(),
+    h: d.getUTCHours(),
+    mi: d.getUTCMinutes(),
+    s: d.getUTCSeconds()
+  };
+}
+function solarTimeFrom(parts) {
+  return SolarTime.fromYmdHms(parts.y, parts.mo, parts.d, parts.h, parts.mi, parts.s);
 }
 function pillarFrom(cycle, dayMasterStem, isDayPillar, includeZodiac) {
   const stem = cycle.getHeavenStem();
@@ -54687,16 +54703,18 @@ function computeBazi(normalized, settings, ruleGender) {
       )
     );
   }
-  const solarTime = SolarTime.fromYmdHms(parts.y, parts.mo, parts.d, parts.h, parts.mi, parts.s);
+  const solarTime = solarTimeFrom(parts);
   const eightChar = solarTime.getLunarHour().getEightChar();
   const dayMasterStem = eightChar.getDay().getHeavenStem();
+  const termTime = normalized.timeKnown ? solarTimeFrom(partsFromInstant(normalized.utcInstantMs)) : solarTime;
+  const termEightChar = termTime.getLunarHour().getEightChar();
   const pillars2 = {
-    year: pillarFrom(eightChar.getYear(), dayMasterStem, false, true),
-    month: pillarFrom(eightChar.getMonth(), dayMasterStem, false, false),
+    year: pillarFrom(termEightChar.getYear(), dayMasterStem, false, true),
+    month: pillarFrom(termEightChar.getMonth(), dayMasterStem, false, false),
     day: pillarFrom(eightChar.getDay(), dayMasterStem, true, false),
     hour: normalized.timeKnown ? pillarFrom(eightChar.getHour(), dayMasterStem, false, false) : null
   };
-  const luckCycle = computeLuckCycle(solarTime, normalized, ruleGender, warnings);
+  const luckCycle = computeLuckCycle(termTime, normalized, ruleGender, warnings);
   const result = {
     rulesetId: BAZI_RULESET_CURRENT,
     provider: PROVIDER,
@@ -54712,7 +54730,7 @@ function computeBazi(normalized, settings, ruleGender) {
   };
   return { result, warnings };
 }
-function computeLuckCycle(solarTime, normalized, ruleGender, warnings) {
+function computeLuckCycle(termTime, normalized, ruleGender, warnings) {
   if (!normalized.timeKnown) return null;
   if (ruleGender !== "male" && ruleGender !== "female") {
     warnings.push(
@@ -54726,10 +54744,11 @@ function computeLuckCycle(solarTime, normalized, ruleGender, warnings) {
     return null;
   }
   const childLimit = ChildLimit.fromSolarTime(
-    solarTime,
+    termTime,
     ruleGender === "male" ? Gender.MAN : Gender.WOMAN
   );
-  const startDay = childLimit.getStartTime().getSolarDay();
+  const startDay = childLimit.getEndTime().getSolarDay();
+  const startYear = startDay.getYear();
   const majorCycles = [];
   let fortune = childLimit.getStartDecadeFortune();
   for (let index = 0; index < MAJOR_CYCLE_COUNT; index++) {
@@ -54738,7 +54757,7 @@ function computeLuckCycle(solarTime, normalized, ruleGender, warnings) {
       index,
       startAge: fortune.getStartAge(),
       endAge: fortune.getEndAge(),
-      startYear: fortune.getStartLunarYear().getYear(),
+      startYear: startYear + index * 10,
       stem: cycle.getHeavenStem().getName(),
       branch: cycle.getEarthBranch().getName(),
       naYin: cycle.getSound().getName()

@@ -12,7 +12,7 @@ import { runAnswerPlan } from './interpret.ts';
 
 /**
  * IQ-4A internal career journey for the owner-selected single system (bazi).
- * It composes only already-admitted pieces: the frozen `bazi-standard@0.1.0` /
+ * It composes only already-admitted pieces: the current `bazi-standard@0.1.1` /
  * `bazi-rules-ziping@0.1.0` rulesets through `runAnswerPlan`, the IQ-1 claim
  * chain, and the IQ-3D clarified-response surface. It adds no rule, no
  * contract version, no narration, no runtime entry, and no cross-system

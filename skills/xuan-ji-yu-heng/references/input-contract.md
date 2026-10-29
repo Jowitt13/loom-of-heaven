@@ -33,7 +33,7 @@ The CLI accepts a single JSON object. Unknown top-level keys are rejected. JavaS
       "asteroids": true, // include Chiron/Ceres/Pallas/Juno/Vesta (approximate precision)
     },
     "bazi": {
-      "rulesetId": "bazi-standard@0.1.0",
+      "rulesetId": "bazi-standard@0.1.1",
       "solarTimeMode": "civil", // "civil" | "mean" | "apparent" (never applied to Western)
       "dayBoundary": "zi-hour", // "midnight" | "zi-hour"
       "earlyLateZi": "late", // "early" | "late"
