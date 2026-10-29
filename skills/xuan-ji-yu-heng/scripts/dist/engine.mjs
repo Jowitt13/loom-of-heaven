@@ -45577,7 +45577,8 @@ var WesternSettings = external_exports.strictObject({
   /** Include the five asteroids (Chiron/Ceres/Pallas/Juno/Vesta); approximate precision. */
   asteroids: external_exports.boolean().default(true)
 });
-var BAZI_RULESET_CURRENT = "bazi-standard@0.1.0";
+var BAZI_RULESET_CURRENT = "bazi-standard@0.1.1";
+var BAZI_RULESET_RETIRED = ["bazi-standard@0.1.0"];
 var BaziSettings = external_exports.strictObject({
   rulesetId: external_exports.string().default(BAZI_RULESET_CURRENT),
   /** Which time base feeds the pillars. Solar-time modes only apply here, never to Western. */
@@ -45634,7 +45635,7 @@ var CURRENT_RULESETS = {
 };
 var RETIRED_RULESETS = {
   western: WESTERN_RULESET_RETIRED,
-  bazi: [],
+  bazi: BAZI_RULESET_RETIRED,
   ziwei: [],
   vedic: []
 };
@@ -54747,6 +54748,7 @@ function computeLuckCycle(termTime, normalized, ruleGender, warnings) {
     ruleGender === "male" ? Gender.MAN : Gender.WOMAN
   );
   const startDay = childLimit.getEndTime().getSolarDay();
+  const startYear = startDay.getYear();
   const majorCycles = [];
   let fortune = childLimit.getStartDecadeFortune();
   for (let index = 0; index < MAJOR_CYCLE_COUNT; index++) {
@@ -54755,7 +54757,7 @@ function computeLuckCycle(termTime, normalized, ruleGender, warnings) {
       index,
       startAge: fortune.getStartAge(),
       endAge: fortune.getEndAge(),
-      startYear: fortune.getStartLunarYear().getYear(),
+      startYear: startYear + index * 10,
       stem: cycle.getHeavenStem().getName(),
       branch: cycle.getEarthBranch().getName(),
       naYin: cycle.getSound().getName()

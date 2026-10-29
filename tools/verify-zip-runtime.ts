@@ -214,7 +214,7 @@ function main(): void {
         leap.code === 0 &&
         leapBundle?.normalizedTime?.localCivil === '2000-02-29T08:30:00+08:00' &&
         leapBundle.normalizedTime.utcInstant === '2000-02-29T00:30:00Z' &&
-        leapBundle.bazi?.rulesetId === 'bazi-standard@0.1.0',
+        leapBundle.bazi?.rulesetId === 'bazi-standard@0.1.1',
       detail: `exit ${leap.code}`,
     });
 

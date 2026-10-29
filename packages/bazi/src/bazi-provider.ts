@@ -227,6 +227,10 @@ function computeLuckCycle(
   // ChildLimit spans birth -> 起运: getStartTime() is the birth moment and
   // getEndTime() is when the luck cycle begins.
   const startDay = childLimit.getEndTime().getSolarDay();
+  // getStartLunarYear() returns a lunar-year label that can be one year behind
+  // the 起运 date's Gregorian year. Annual facts compare Gregorian target years,
+  // so the first cycle is anchored on the 起运 date's Gregorian year.
+  const startYear = startDay.getYear();
 
   const majorCycles: BaziMajorCycle[] = [];
   let fortune = childLimit.getStartDecadeFortune();
@@ -236,7 +240,7 @@ function computeLuckCycle(
       index,
       startAge: fortune.getStartAge(),
       endAge: fortune.getEndAge(),
-      startYear: fortune.getStartLunarYear().getYear(),
+      startYear: startYear + index * 10,
       stem: cycle.getHeavenStem().getName(),
       branch: cycle.getEarthBranch().getName(),
       naYin: cycle.getSound().getName(),

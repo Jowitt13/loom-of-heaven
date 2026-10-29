@@ -14,7 +14,7 @@
     "bazi": {
       "dayBoundary": "zi-hour",
       "earlyLateZi": "late",
-      "rulesetId": "bazi-standard@0.1.0",
+      "rulesetId": "bazi-standard@0.1.1",
       "solarTimeMode": "civil"
     },
     "systems": [

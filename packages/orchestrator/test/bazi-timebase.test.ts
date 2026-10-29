@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import { canonicalJson, parseBirthInput } from '@loom/contracts';
 import type { BaziChartResult, BirthInputRaw } from '@loom/contracts';
-import { calculate, runAnswerPlan } from '../src/index.ts';
+import { calculate, runAnswerPlan, runInterpret } from '../src/index.ts';
 
 const NOW = Date.parse('2026-01-01T00:00:00Z');
 
@@ -190,11 +190,15 @@ describe('BaZi 起运 chain', () => {
     expect(b.luckCycle!.forward).toBe(true);
     expect(b.luckCycle!.startAfter).toEqual({ years: 9, months: 10, days: 26 });
     expect(b.luckCycle!.startSolarDate).toBe('2033-12-31');
+    // Year labels are Gregorian and anchored on the 起运 date, not the library's
+    // lunar-year name (2032 for this case).
+    expect(b.luckCycle!.majorCycles[0]!.startYear).toBe(2033);
+    expect(b.luckCycle!.majorCycles[1]!.startYear).toBe(2043);
+    expect(b.luckCycle!.majorCycles[0]!.startYear - 2024 + 1).toBe(
+      b.luckCycle!.majorCycles[0]!.startAge,
+    );
     expect(b.luckCycle!.majorCycles[0]!.stem + b.luckCycle!.majorCycles[0]!.branch).toBe('丁卯');
     expect(b.luckCycle!.majorCycles[1]!.stem + b.luckCycle!.majorCycles[1]!.branch).toBe('戊辰');
-    expect(b.luckCycle!.majorCycles[1]!.startYear - b.luckCycle!.majorCycles[0]!.startYear).toBe(
-      10,
-    );
   });
 
   it('takes the backward interval from the previous 節 and reports the 起运 date', () => {
@@ -203,11 +207,47 @@ describe('BaZi 起运 chain', () => {
     expect(b.luckCycle!.forward).toBe(false);
     expect(b.luckCycle!.startAfter).toEqual({ years: 0, months: 0, days: 2 });
     expect(b.luckCycle!.startSolarDate).toBe('2024-02-07');
+    // 2024-02-07 is still lunar year 2023 (CNY 2024 is 02-10); the label must be 2024.
+    expect(b.luckCycle!.majorCycles[0]!.startYear).toBe(2024);
+    expect(b.luckCycle!.majorCycles[1]!.startYear).toBe(2034);
+    expect(b.luckCycle!.majorCycles[0]!.startYear - 2024 + 1).toBe(
+      b.luckCycle!.majorCycles[0]!.startAge,
+    );
     expect(b.luckCycle!.majorCycles[0]!.stem + b.luckCycle!.majorCycles[0]!.branch).toBe('乙丑');
     expect(b.luckCycle!.majorCycles[1]!.stem + b.luckCycle!.majorCycles[1]!.branch).toBe('甲子');
-    expect(b.luckCycle!.majorCycles[1]!.startYear - b.luckCycle!.majorCycles[0]!.startYear).toBe(
-      10,
+  });
+
+  it('labels a 起运 date that crosses both the Gregorian and lunar year', () => {
+    // Birth 2024-02-04 16:30 HKT is 3 minutes after 立春; the forward interval to
+    // 驚蟄 starts the luck cycle on 2034-01-03 (Gregorian 2034, lunar 2033).
+    const b = bazi({ localTime: '16:30:00' });
+    expect(b.luckCycle!.forward).toBe(true);
+    expect(b.luckCycle!.startSolarDate).toBe('2034-01-03');
+    expect(b.luckCycle!.majorCycles[0]!.startYear).toBe(2034);
+    expect(b.luckCycle!.majorCycles[1]!.startYear).toBe(2044);
+    expect(b.luckCycle!.majorCycles[0]!.startYear - 2024 + 1).toBe(
+      b.luckCycle!.majorCycles[0]!.startAge,
     );
+  });
+
+  it('does not apply the first 大运 to a target year before the 起运 date', () => {
+    const before = runInterpret(parseBirthInput(base), {
+      now: NOW,
+      at: { solarDate: '2032-06-01', timeIndex: 6 },
+    }).interpretation;
+    const firstYear = before.facts.find((f) => f.claim.startsWith('2032('));
+    expect(firstYear).toBeDefined();
+    expect(firstYear!.claim).not.toContain('大运');
+
+    const inside = runInterpret(parseBirthInput(base), {
+      now: NOW,
+      at: { solarDate: '2042-06-01', timeIndex: 6 },
+    }).interpretation;
+    const lastYear = inside.facts.find((f) => f.claim.startsWith('2042('));
+    expect(lastYear).toBeDefined();
+    expect(lastYear!.claim).toContain('合大运卯');
+    const label = inside.facts.find((f) => f.claim.includes('丁卯大运'));
+    expect(label!.claim).toContain('2033年起');
   });
 
   it('is deterministic and unaffected by other locations computed in between', () => {
