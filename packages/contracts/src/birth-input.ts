@@ -7,6 +7,22 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 /** HH:mm or HH:mm:ss (24h wall clock). */
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 
+/**
+ * True iff `value` names a real date in the proleptic Gregorian calendar.
+ * Calendar shape is checked separately; lunar dates must not use this predicate.
+ */
+export function isRealGregorianDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (match === null) return false;
+  const year = Number.parseInt(match[1]!, 10);
+  const month = Number.parseInt(match[2]!, 10);
+  const day = Number.parseInt(match[3]!, 10);
+  if (month < 1 || month > 12 || day < 1) return false;
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const monthLengths = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day <= monthLengths[month - 1]!;
+}
+
 export const CalendarSystem = z.enum(['gregorian', 'lunar']);
 export type CalendarSystem = z.infer<typeof CalendarSystem>;
 
@@ -51,9 +67,12 @@ export const WesternSettings = z.strictObject({
 });
 export type WesternSettings = z.infer<typeof WesternSettings>;
 
+/** The only implemented BaZi calculation ruleset. */
+export const BAZI_RULESET_CURRENT = 'bazi-standard@0.1.0';
+
 /** BaZi disputed points are versioned, not scattered booleans (handoff §5.2). */
 export const BaziSettings = z.strictObject({
-  rulesetId: z.string().default('bazi-standard@0.1.0'),
+  rulesetId: z.string().default(BAZI_RULESET_CURRENT),
   /** Which time base feeds the pillars. Solar-time modes only apply here, never to Western. */
   solarTimeMode: z.enum(['civil', 'mean', 'apparent']).default('civil'),
   dayBoundary: z.enum(['midnight', 'zi-hour']).default('zi-hour'),
@@ -61,9 +80,12 @@ export const BaziSettings = z.strictObject({
 });
 export type BaziSettings = z.infer<typeof BaziSettings>;
 
+/** The only implemented Zi Wei calculation ruleset. */
+export const ZIWEI_RULESET_CURRENT = 'iztro-default@0.1.0';
+
 /** Zi Wei defaults follow a named iztro ruleset (handoff §5.3). */
 export const ZiweiSettings = z.strictObject({
-  rulesetId: z.string().default('iztro-default@0.1.0'),
+  rulesetId: z.string().default(ZIWEI_RULESET_CURRENT),
   useApparentSolarTime: z.boolean().default(false),
 });
 export type ZiweiSettings = z.infer<typeof ZiweiSettings>;
@@ -107,6 +129,10 @@ export const BirthInput = z
   .refine((v) => v.timeAccuracy === 'unknown' || v.localTime !== undefined, {
     error: 'localTime is required unless timeAccuracy is "unknown"',
     path: ['localTime'],
+  })
+  .refine((v) => v.calendar !== 'gregorian' || isRealGregorianDate(v.localDate), {
+    error: 'localDate must be a real Gregorian calendar date',
+    path: ['localDate'],
   });
 
 /** Parsed BirthInput (defaults applied). */

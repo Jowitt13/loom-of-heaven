@@ -5,6 +5,7 @@ import {
   SUPPORTED_YEAR_MAX,
   SUPPORTED_YEAR_MIN,
   WARNING_CODES,
+  isRealGregorianDate,
   makeWarning,
 } from '@loom/contracts';
 import type {
@@ -39,6 +40,14 @@ export function normalizeBirthData(input: BirthInput): NormalizedBirthData {
       ERROR_CODES.LUNAR_CONVERSION_UNAVAILABLE,
       'Lunar calendar input requires the calendar provider (Phase 2). Convert to a Gregorian date first or supply calendar="gregorian".',
       { calendar: input.calendar },
+    );
+  }
+
+  if (!isRealGregorianDate(input.localDate)) {
+    throw new EngineError(
+      ERROR_CODES.INPUT_VALIDATION_FAILED,
+      'localDate must be a real Gregorian calendar date.',
+      { field: 'localDate' },
     );
   }
 

@@ -14,8 +14,10 @@ import { luckCycleFortuneFindings, luckClashFindings, annualTimelineFindings } f
 
 /** Pinned rules-package version (mirrors this package's version). */
 export const BAZI_RULES_VERSION = '0.1.0';
+/** The stable ruleset name recorded on every interpretation. */
+export const BAZI_RULES_RULESET_NAME = 'bazi-rules-ziping';
 /** The versioned ruleset id recorded on every interpretation. */
-export const BAZI_RULES_RULESET_ID = `bazi-rules-ziping@${BAZI_RULES_VERSION}`;
+export const BAZI_RULES_RULESET_ID = `${BAZI_RULES_RULESET_NAME}@${BAZI_RULES_VERSION}`;
 const PROVIDER: ProviderRef = { id: 'bazi-rules', version: BAZI_RULES_VERSION, license: 'MIT' };
 
 /**
