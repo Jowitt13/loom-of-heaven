@@ -37,8 +37,8 @@ function context(): ClaimChainContext {
         topic: 'career',
         claim: '合成八字结构提示：工作安排宜保留可复盘的迭代空间。',
         evidence: [
-          { kind: 'bazi-rule', ref: 'bazi-rule/synthetic/iteration' },
-          { kind: 'bazi', ref: 'bazi.synthetic.dayMaster' },
+          { kind: 'bazi-rule', ref: 'bazi-rule/strength' },
+          { kind: 'bazi', ref: 'bazi.dayMaster' },
         ],
         caveat: '这是合成技术样本，不构成对真实职业结果的判断。',
       },
@@ -46,13 +46,13 @@ function context(): ClaimChainContext {
         id: 'fact-2',
         topic: 'career',
         claim: '合成西方结构提示：职业选择需结合现实资源与反馈再调整。',
-        evidence: [{ kind: 'western-rule', ref: 'western-rule/synthetic/angle' }],
+        evidence: [{ kind: 'western-rule', ref: 'western-rule/planet-sign/sun-pisces' }],
       },
       {
         id: 'fact-3',
         topic: 'general',
         claim: '不在当前主题内的合成事实。',
-        evidence: [{ kind: 'vedic-rule', ref: 'vedic-rule/synthetic/general' }],
+        evidence: [{ kind: 'vedic-rule', ref: 'vedic-rule/nakshatra/moon' }],
       },
     ],
     rulesets: [

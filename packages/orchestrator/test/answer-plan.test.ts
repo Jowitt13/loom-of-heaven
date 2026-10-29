@@ -452,18 +452,18 @@ describe('public result and answer plan', () => {
         expect(evidence.ref).not.toContain('bazi-rule/useful-god');
       }
     }
-    // The mixed claim is split: pattern may exist as a technical fact only.
-    const patternFacts = publicResult.facts.filter((fact) =>
-      fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/pattern'),
+    // Technical interpret retains these records; the default public context does not.
+    const technicalRefs = runInterpret(syntheticInput, { now: FIXED }).interpretation.facts.flatMap(
+      (fact) => fact.evidence.map((evidence) => evidence.ref),
     );
-    for (const fact of patternFacts) {
-      expect(fact.topic).not.toBe('career');
+    for (const ref of ['bazi-rule/pattern', 'bazi-rule/industry/wu-xing', 'bazi-rule/useful-god']) {
+      expect(technicalRefs).toContain(ref);
     }
-    const industryFacts = publicResult.facts.filter((fact) =>
-      fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/industry/wu-xing'),
+    const publicRefs = publicResult.facts.flatMap((fact) =>
+      fact.evidence.map((evidence) => evidence.ref),
     );
-    for (const fact of industryFacts) {
-      expect(fact.topic).not.toBe('career');
+    for (const ref of ['bazi-rule/pattern', 'bazi-rule/industry/wu-xing', 'bazi-rule/useful-god']) {
+      expect(publicRefs).not.toContain(ref);
     }
   });
 

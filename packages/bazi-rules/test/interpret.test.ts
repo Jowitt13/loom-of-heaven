@@ -277,6 +277,19 @@ describe('BaZi rules on a synthetic male chart (1990-06-15, fictional — not a 
     expect(ind.reason ?? '').toContain('参考');
   });
 
+  it('balanced strength keeps useful-god and industry undetermined, not affirmative', () => {
+    const chart = fakeChart({ dayElement: '木', monthQiElement: '水', monthQiGod: '正印' });
+    const interp = interpretBazi(chart);
+    const useful = find(interp.findings, 'useful-god');
+    expect(useful.matched).toBe(false);
+    expect(useful.claim).toContain('不妄断');
+
+    const industry = industryFinding(chart);
+    expect(industry.matched).toBe(false);
+    expect(industry.claim).toContain('喜用未定');
+    expect(industry.claim).not.toMatch(/金融|地产|能源|文教|贸易/);
+  });
+
   it('crossBranchRelation：在六合/冲/害/破之外增出三合(半合)与相刑', () => {
     // 六合/冲 base cases still classify.
     expect(crossBranchRelation('子', '丑')?.kind).toBe('合');

@@ -98,11 +98,23 @@ export function runAnswerPlan(
     },
   };
   const run = runInterpretation(allSystemsInput, options);
-  const fullPublicResult = buildPublicResult(run.bundle, run.interpretation, run.warnings);
-  const answerPlan = buildAnswerPlan(fullPublicResult, {
-    topic: options.topic,
-    lens: options.lens,
-  });
+  // The annual target-year timeline is default-answer material only when the
+  // caller explicitly supplied `at`; otherwise it stays in the technical view.
+  const materialOptions = { includeFortuneTimeline: options.at !== undefined };
+  const fullPublicResult = buildPublicResult(
+    run.bundle,
+    run.interpretation,
+    run.warnings,
+    materialOptions,
+  );
+  const answerPlan = buildAnswerPlan(
+    fullPublicResult,
+    {
+      topic: options.topic,
+      lens: options.lens,
+    },
+    materialOptions,
+  );
   // The intermediate result exists only in-process so the planner can select a
   // topic. Callers receive a topic-scoped result: non-selected facts never cross
   // the engine/host boundary beside the AnswerPlan instructions.

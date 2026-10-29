@@ -61360,14 +61360,24 @@ var INDUSTRY = {
 };
 function industryFinding(bazi) {
   const s = assessStrength(bazi);
+  if (s.verdict === "balanced") {
+    return {
+      ruleId: "industry/wu-xing",
+      topic: "useful-god",
+      matched: false,
+      claim: "\u9002\u5408\u884C\u4E1A\u65B9\u5411\uFF1A\u65E5\u4E3B\u4E2D\u548C\uFF0C\u559C\u7528\u672A\u5B9A\uFF0C\u884C\u4E1A\u65B9\u5411\u987B\u7ED3\u5408\u683C\u5C40\u4E0E\u8C03\u5019\u53E6\u5B9A\uFF08\u672C\u89C4\u5219\u4E0D\u5984\u65AD\uFF09",
+      source: { text: "\u4E09\u547D\u901A\u4F1A", chapter: "\u8BBA\u4E94\u884C" },
+      reason: "\u65E5\u4E3B\u4E2D\u548C\uFF0C\u6276\u6291\u4E0D\u8DB3\u4EE5\u5355\u5B9A\u559C\u7528\uFF1B\u884C\u4E1A\u65B9\u5411\u987B\u7ED3\u5408\u683C\u5C40\u4E0E\u8C03\u5019\u53E6\u5B9A\uFF0C\u672C\u89C4\u5219\u4E0D\u5984\u65AD\u3002"
+    };
+  }
   const el = elementsByRelation(bazi.dayMaster.element);
-  const favored = s.verdict === "strong" ? [el.output, el.wealth, el.officer] : s.verdict === "weak" ? [el.resource, el.same] : [el.output, el.resource];
+  const favored = s.verdict === "strong" ? [el.output, el.wealth, el.officer] : [el.resource, el.same];
   const uniq = [...new Set(favored)];
   const list = uniq.map((e) => `${e}(${INDUSTRY[e]})`).join("\uFF1B");
   return {
     ruleId: "industry/wu-xing",
     topic: "useful-god",
-    matched: s.verdict !== "balanced",
+    matched: true,
     claim: `\u9002\u5408\u884C\u4E1A\u65B9\u5411(\u6309\u559C\u7528\u4E94\u884C)\uFF1A${list}`,
     source: { text: "\u4E09\u547D\u901A\u4F1A", chapter: "\u8BBA\u4E94\u884C" },
     reason: `\u4EE5\u559C\u7528\u795E\u4E94\u884C\u53D6\u884C\u4E1A\u5927\u7C7B\uFF1A${uniq.join("\u3001")}\u76F8\u5173\u9886\u57DF\u8F83\u76F8\u5408\uFF1B\u8FD8\u9700\u7ED3\u5408\u98DF\u4F24(\u4E13\u4E1A\u8F93\u51FA/\u6280\u80FD)\u3001\u5B98\u6740(\u4F53\u5236/\u7BA1\u7406)\u4E0E\u73B0\u5B9E\u5174\u8DA3\uFF0C\u5C5E\u53C2\u8003\u65B9\u5411\u800C\u975E\u552F\u4E00\u7B54\u6848\u3002`
@@ -62632,6 +62642,80 @@ function buildInterpretationFacts(bundle, options = {}) {
   };
 }
 
+// packages/interpret/src/material-admission.ts
+var WITHHELD_BAZI_RULE_PREFIXES = [
+  "bazi-rule/pattern",
+  "bazi-rule/useful-god",
+  "bazi-rule/industry",
+  "bazi-rule/relations",
+  "bazi-rule/shensha",
+  "bazi-rule/marriage-timing"
+];
+var ADMITTED_RULE_PREFIXES = [
+  "bazi-rule/strength",
+  "bazi-rule/ten-gods/xiang-yi",
+  "western-rule/planet-sign",
+  "western-rule/planet-house",
+  "western-rule/angle",
+  "western-rule/aspect",
+  "western-rule/dignity",
+  "ziwei-rule/main-star",
+  "ziwei-rule/palace-star",
+  "ziwei-rule/sihua",
+  "ziwei-rule/brightness",
+  "vedic-rule/nakshatra",
+  "vedic-rule/bhava",
+  "vedic-rule/panchanga",
+  "vedic-rule/vimshottari"
+];
+var ADMITTED_PROVIDER_PREFIXES = [
+  "bazi.pillars.",
+  "bazi.dayMaster",
+  "western.planets[",
+  "western.angles.",
+  "western.aspects",
+  "western.7thRuler[",
+  "ziwei.palaces[",
+  "ziwei-horoscope.yearly",
+  "vedic.derived.",
+  "vedic.unknownTimeStable.",
+  "input.ruleGender",
+  "engine.disclaimer",
+  "time."
+];
+function hasPrefix(ref, prefix) {
+  return ref === prefix || ref.startsWith(`${prefix}/`);
+}
+function isRuleEvidence(evidence) {
+  return evidence.kind.endsWith("-rule");
+}
+function isWithheldRule(evidence) {
+  return WITHHELD_BAZI_RULE_PREFIXES.some((prefix) => hasPrefix(evidence.ref, prefix));
+}
+var CONDITIONAL_TIMING_RULE_PREFIXES = ["bazi-rule/fortune"];
+function isAdmittedRule(evidence) {
+  return ADMITTED_RULE_PREFIXES.some((prefix) => hasPrefix(evidence.ref, prefix));
+}
+function isConditionalTimingRule(evidence) {
+  return CONDITIONAL_TIMING_RULE_PREFIXES.some((prefix) => hasPrefix(evidence.ref, prefix));
+}
+function isAdmittedProviderPath(evidence) {
+  return ADMITTED_PROVIDER_PREFIXES.some((prefix) => evidence.ref.startsWith(prefix));
+}
+function isDefaultAnswerFact(fact2, options = {}) {
+  return fact2.evidence.every((evidence) => {
+    if (isRuleEvidence(evidence)) {
+      if (isWithheldRule(evidence)) return false;
+      if (evidence.ref === "bazi-rule/ten-gods/xiang-yi") return fact2.topic === "career";
+      if (isConditionalTimingRule(evidence)) {
+        return fact2.topic === "general" && options.includeFortuneTimeline === true;
+      }
+      return isAdmittedRule(evidence);
+    }
+    return isAdmittedProviderPath(evidence);
+  });
+}
+
 // packages/interpret/src/answer-plan.ts
 var SYSTEMS = ["western", "bazi", "ziwei", "vedic"];
 var ANSWER_GUARDRAILS = [
@@ -62750,7 +62834,7 @@ function dedupeStrings(values) {
     ...new Set(values.filter((value) => value !== void 0 && value !== ""))
   ];
 }
-function buildPublicResult(bundle, interpretation, warnings = bundle.warnings) {
+function buildPublicResult(bundle, interpretation, warnings = bundle.warnings, materialOptions = {}) {
   return PublicResult.parse({
     contractVersion: PUBLIC_RESULT_CONTRACT_VERSION,
     engineVersion: bundle.engineVersion,
@@ -62761,15 +62845,20 @@ function buildPublicResult(bundle, interpretation, warnings = bundle.warnings) {
       birthTimeKnown: bundle.originalInput.timeAccuracy !== "unknown"
     },
     warnings: toPublicWarnings(warnings),
-    facts: toPublicFacts(interpretation),
+    // Keep the original stable fact ids (gaps are intentional) before filtering,
+    // so an admitted fact that downstream traces already reference does not move.
+    facts: toPublicFacts(interpretation).filter(
+      (fact2) => isDefaultAnswerFact(fact2, materialOptions)
+    ),
     rulesets: interpretation.rulesets,
     disclaimers: interpretation.disclaimers.map(sanitizePublicText),
     followupOffers: interpretation.followupOffers.map(sanitizePublicText)
   });
 }
-function selectFacts(facts, request) {
-  if (request.topic === "general") return facts;
-  const topicFacts = facts.filter((fact2) => fact2.topic === request.topic);
+function selectFacts(facts, request, materialOptions) {
+  const admittedFacts = facts.filter((fact2) => isDefaultAnswerFact(fact2, materialOptions));
+  if (request.topic === "general") return admittedFacts;
+  const topicFacts = admittedFacts.filter((fact2) => fact2.topic === request.topic);
   if (request.topic !== "career" || request.lens === "explain") return topicFacts;
   if (request.lens === "timing") return [];
   const pillarRef = /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/;
@@ -62866,9 +62955,9 @@ function materialWarningCodes(warnings, selectedFacts) {
     return factSystems.has(warning.system);
   }).map((warning) => warning.code);
 }
-function buildAnswerPlan(publicResult, requestInput) {
+function buildAnswerPlan(publicResult, requestInput, materialOptions = {}) {
   const request = AnswerRequest.parse(requestInput);
-  const selectedFacts = selectFacts(publicResult.facts, request);
+  const selectedFacts = selectFacts(publicResult.facts, request, materialOptions);
   const requiredWarningCodes = materialWarningCodes(publicResult.warnings, selectedFacts);
   const hasLimitation = requiredWarningCodes.some((code) => LIMITING_WARNING_CODES.has(code)) || selectedFacts.some((fact2) => fact2.caveat !== void 0);
   const answerability = selectedFacts.length === 0 ? "not-supported" : hasLimitation ? "limited" : "grounded";
@@ -64296,11 +64385,21 @@ function runAnswerPlan(input2, options) {
     }
   };
   const run = runInterpretation(allSystemsInput, options);
-  const fullPublicResult = buildPublicResult(run.bundle, run.interpretation, run.warnings);
-  const answerPlan = buildAnswerPlan(fullPublicResult, {
-    topic: options.topic,
-    lens: options.lens
-  });
+  const materialOptions = { includeFortuneTimeline: options.at !== void 0 };
+  const fullPublicResult = buildPublicResult(
+    run.bundle,
+    run.interpretation,
+    run.warnings,
+    materialOptions
+  );
+  const answerPlan = buildAnswerPlan(
+    fullPublicResult,
+    {
+      topic: options.topic,
+      lens: options.lens
+    },
+    materialOptions
+  );
   const publicResult = {
     ...fullPublicResult,
     facts: answerPlan.selectedFacts

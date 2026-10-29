@@ -17,6 +17,7 @@ import type {
   PublicResult,
   PublicWarning,
 } from '@loom/contracts';
+import { isDefaultAnswerFact, type DefaultAnswerMaterialOptions } from './material-admission.ts';
 
 /** P4 v2 hard cut: public answer plans report every first-class system. */
 const SYSTEMS: ChartSystem[] = ['western', 'bazi', 'ziwei', 'vedic'];
@@ -173,6 +174,7 @@ export function buildPublicResult(
   bundle: ChartBundle,
   interpretation: InterpretationFacts,
   warnings: EngineWarning[] = bundle.warnings,
+  materialOptions: DefaultAnswerMaterialOptions = {},
 ): PublicResult {
   return PublicResultSchema.parse({
     contractVersion: PUBLIC_RESULT_CONTRACT_VERSION,
@@ -184,16 +186,27 @@ export function buildPublicResult(
       birthTimeKnown: bundle.originalInput.timeAccuracy !== 'unknown',
     },
     warnings: toPublicWarnings(warnings),
-    facts: toPublicFacts(interpretation),
+    // Keep the original stable fact ids (gaps are intentional) before filtering,
+    // so an admitted fact that downstream traces already reference does not move.
+    facts: toPublicFacts(interpretation).filter((fact) =>
+      isDefaultAnswerFact(fact, materialOptions),
+    ),
     rulesets: interpretation.rulesets,
     disclaimers: interpretation.disclaimers.map(sanitizePublicText),
     followupOffers: interpretation.followupOffers.map(sanitizePublicText),
   });
 }
 
-function selectFacts(facts: PublicFact[], request: AnswerPlan['request']): PublicFact[] {
-  if (request.topic === 'general') return facts;
-  const topicFacts = facts.filter((fact) => fact.topic === request.topic);
+function selectFacts(
+  facts: PublicFact[],
+  request: AnswerPlan['request'],
+  materialOptions: DefaultAnswerMaterialOptions,
+): PublicFact[] {
+  // Topic selects relevance; admission decides whether a fact may be narrated
+  // at all. `general` is therefore broad admitted context, not every record.
+  const admittedFacts = facts.filter((fact) => isDefaultAnswerFact(fact, materialOptions));
+  if (request.topic === 'general') return admittedFacts;
+  const topicFacts = admittedFacts.filter((fact) => fact.topic === request.topic);
   if (request.topic !== 'career' || request.lens === 'explain') return topicFacts;
 
   // ADR 0021 admits one narrow cultural reference for ordinary career prose,
@@ -343,9 +356,10 @@ export function materialWarningCodes(
 export function buildAnswerPlan(
   publicResult: PublicResult,
   requestInput: { topic: InterpretationTopic; lens?: AnswerLens },
+  materialOptions: DefaultAnswerMaterialOptions = {},
 ): AnswerPlan {
   const request = AnswerRequestSchema.parse(requestInput);
-  const selectedFacts = selectFacts(publicResult.facts, request);
+  const selectedFacts = selectFacts(publicResult.facts, request, materialOptions);
   const requiredWarningCodes = materialWarningCodes(publicResult.warnings, selectedFacts);
   const hasLimitation =
     requiredWarningCodes.some((code) => LIMITING_WARNING_CODES.has(code)) ||
