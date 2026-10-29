@@ -40,10 +40,23 @@ function dedupeWarnings(warnings: EngineWarning[]): EngineWarning[] {
   });
 }
 
+/**
+ * The requested target year, derived from the same `at.solarDate` the CLI already
+ * validated. Kept independent of the Zi Wei run: an unavailable 运限盘 must not
+ * silently move per-year facts back to the run year.
+ */
+function targetYearFrom(at: HoroscopeOptions | undefined): number | undefined {
+  if (!at) return undefined;
+  const year = new Date(at.solarDate).getUTCFullYear();
+  return Number.isFinite(year) ? year : undefined;
+}
+
 function runInterpretation(input: BirthInput, options: InterpretOptions): InterpretationRun {
   const bundle = calculate(input, { now: options.now });
   const horoscopeRun = options.at ? runHoroscope(input, options.at) : null;
+  const targetYear = targetYearFrom(options.at);
   const interpretation = buildInterpretationFacts(bundle, {
+    ...(targetYear !== undefined ? { targetYear } : {}),
     horoscope: horoscopeRun?.horoscope ?? null,
   });
   return {

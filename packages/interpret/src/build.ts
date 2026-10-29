@@ -49,6 +49,12 @@ const FOLLOWUP_OFFERS: string[] = [
 ];
 
 export interface InterpretOptions {
+  /**
+   * Requested target year for per-year facts, independent of whether the Zi Wei
+   * dynamic chart could be computed. An explicit target must not be lost merely
+   * because Zi Wei lacks a birth time or a gender rule.
+   */
+  targetYear?: number;
   /** Optional Zi Wei dynamic chart (运限盘) to enrich time-sensitive topics. */
   horoscope?: ZiweiHoroscopeResult | null;
 }
@@ -720,11 +726,13 @@ export function buildInterpretationFacts(
   bundle: ChartBundle,
   options: InterpretOptions = {},
 ): InterpretationFacts {
-  // Anchor the per-year 流年 timeline on the horoscope target year, else the run's "now"
-  // (bundle.calculatedAt) — deterministic given --now/--at.
-  const focusYear = options.horoscope
-    ? new Date(options.horoscope.targetSolarDate).getUTCFullYear()
-    : new Date(bundle.calculatedAt).getUTCFullYear();
+  // An explicit target year wins. The horoscope is only a legacy fallback for
+  // callers that never pass one; its availability must not decide the year.
+  const focusYear =
+    options.targetYear ??
+    (options.horoscope
+      ? new Date(options.horoscope.targetSolarDate).getUTCFullYear()
+      : new Date(bundle.calculatedAt).getUTCFullYear());
   const baziRules = bundle.bazi ? interpretBazi(bundle.bazi, { focusYear }) : null;
   const westernRules = bundle.western ? interpretWestern(bundle.western) : null;
   const ziweiRules = bundle.ziwei ? interpretZiweiRules(bundle.ziwei) : null;

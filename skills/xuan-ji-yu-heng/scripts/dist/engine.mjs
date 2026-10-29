@@ -62543,7 +62543,7 @@ function vedicRuleFacts(rules) {
   });
 }
 function buildInterpretationFacts(bundle, options = {}) {
-  const focusYear = options.horoscope ? new Date(options.horoscope.targetSolarDate).getUTCFullYear() : new Date(bundle.calculatedAt).getUTCFullYear();
+  const focusYear = options.targetYear ?? (options.horoscope ? new Date(options.horoscope.targetSolarDate).getUTCFullYear() : new Date(bundle.calculatedAt).getUTCFullYear());
   const baziRules = bundle.bazi ? interpretBazi(bundle.bazi, { focusYear }) : null;
   const westernRules = bundle.western ? interpretWestern(bundle.western) : null;
   const ziweiRules = bundle.ziwei ? interpretZiwei(bundle.ziwei) : null;
@@ -64237,10 +64237,17 @@ function dedupeWarnings(warnings) {
     return true;
   });
 }
+function targetYearFrom(at) {
+  if (!at) return void 0;
+  const year = new Date(at.solarDate).getUTCFullYear();
+  return Number.isFinite(year) ? year : void 0;
+}
 function runInterpretation(input2, options) {
   const bundle = calculate(input2, { now: options.now });
   const horoscopeRun = options.at ? runHoroscope(input2, options.at) : null;
+  const targetYear = targetYearFrom(options.at);
   const interpretation = buildInterpretationFacts(bundle, {
+    ...targetYear !== void 0 ? { targetYear } : {},
     horoscope: horoscopeRun?.horoscope ?? null
   });
   return {
