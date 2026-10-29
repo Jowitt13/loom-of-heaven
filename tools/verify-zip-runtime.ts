@@ -254,6 +254,46 @@ function main(): void {
         lunarPayload.warnings?.some((warning) => warning.code === 'LUNAR_CONVERTED') === true,
       detail: `exit ${lunar.code}`,
     });
+
+    const siderealFile = writeInput('integrity-sidereal-whole-sign.json', {
+      calendar: 'gregorian',
+      localDate: '1991-02-03',
+      localTime: '04:05:06',
+      timeAccuracy: 'exact',
+      timezone: 'Asia/Shanghai',
+      location: { latitude: 31.23, longitude: 121.47, source: 'user' },
+      settings: {
+        systems: ['western'],
+        western: { zodiac: 'sidereal', houseSystem: 'whole-sign', asteroids: false },
+      },
+    });
+    const sidereal = run(pkgRoot, [
+      'scripts/loom-chart.mjs',
+      'calculate',
+      '--input-file',
+      siderealFile,
+      '--now',
+      FIXED_NOW,
+    ]);
+    const siderealWestern = (
+      JSON.parse(sidereal.stdout) as {
+        bundle?: {
+          western?: {
+            houses?: Array<{ cuspLongitudeDeg?: number }>;
+            planets?: Array<{ body?: string; house?: number | null }>;
+          };
+        };
+      }
+    ).bundle?.western;
+    results.push({
+      name: 'sidereal whole-sign cusps and placement corrected',
+      ok:
+        sidereal.code === 0 &&
+        siderealWestern?.houses?.[0]?.cuspLongitudeDeg === 240 &&
+        siderealWestern.planets?.find((planet) => planet.body === 'Mercury')?.house === 2 &&
+        siderealWestern.planets?.find((planet) => planet.body === 'Saturn')?.house === 2,
+      detail: `exit ${sidereal.code}`,
+    });
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

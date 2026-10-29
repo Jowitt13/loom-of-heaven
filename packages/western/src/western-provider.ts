@@ -25,7 +25,7 @@ import {
   type PointPlacement,
 } from './ephemeris.ts';
 import { ayanamshaDegrees, dignityOf, signFromLongitude } from './zodiac.ts';
-import { computeHouseCusps, houseOfLongitude } from './houses.ts';
+import { computeHouseCusps, houseOfLongitude, wholeSignCusps } from './houses.ts';
 import { computeAspects, type AspectPoint } from './aspects.ts';
 
 /** Pinned astronomy-engine version (authoritative record is sbom.cdx.json, regenerated at build). */
@@ -45,9 +45,9 @@ function round6(n: number): number {
  * Compute the Western natal chart from the normalized UTC instant + coordinates.
  * Sun–Pluto come from astronomy-engine (VSOP87 + NOVAS, ≤1′ wrapper-consistency gate); the true node and the five
  * asteroids are self-computed and marked precision:'approximate'. Sidereal charts shift
- * every displayed longitude by the ayanamsha (house membership is shift-invariant, so it
- * is decided on the tropical longitudes). Unknown birth time still places planets by date
- * but fabricates no ascendant/houses (handoff §7.2).
+ * every displayed longitude by the ayanamsha. Whole-sign cusps are rebuilt from the
+ * sidereal Ascendant's sign; the same cusp ring drives both output and placement. Unknown
+ * birth time still places planets by date but fabricates no ascendant/houses (handoff §7.2).
  */
 export function computeWestern(
   normalized: NormalizedBirthData,
@@ -79,13 +79,18 @@ export function computeWestern(
     return { longitudeDeg: round6(lon), sign: signFromLongitude(lon).sign };
   };
 
-  // Angles + house cusps require a known birth time. House membership is computed on the
-  // TROPICAL longitudes (a uniform sidereal shift does not change which house a point is in).
+  // Angles + house cusps require a known birth time. Cusps are stored in the same
+  // zodiac frame as the displayed planet longitudes, so one ring drives both output
+  // and placement. A shifted tropical whole-sign ring is NOT a sidereal whole-sign
+  // ring: rebuild that one from the sidereal Ascendant's sign.
   let cusps: number[] | null = null;
   let angles: WesternChartResult['angles'] = null;
   if (normalized.timeKnown) {
     const house = computeHouseCusps(settings.houseSystem, dateMs, latitude, longitudeEast);
-    cusps = house.cusps;
+    cusps =
+      sidereal && settings.houseSystem === 'whole-sign'
+        ? wholeSignCusps(proj(house.ascendant))
+        : house.cusps.map(proj);
     angles = {
       ascendant: angleFrom(house.ascendant),
       mc: angleFrom(house.mc),
@@ -111,7 +116,7 @@ export function computeWestern(
   const planets: WesternPlanet[] = [];
   const aspectPoints: AspectPoint[] = [];
 
-  /** Build a WesternPlanet from a tropical placement (house on tropical, display on proj). */
+  /** Build a WesternPlanet from a tropical placement (house on the shared display-frame cusps). */
   const makePlanet = (
     body: string,
     p: PointPlacement,
@@ -121,7 +126,7 @@ export function computeWestern(
   ): void => {
     const displayLon = proj(p.longitudeDeg);
     const { sign, signDeg } = signFromLongitude(displayLon);
-    const houseIndex = cusps ? houseOfLongitude(cusps, p.longitudeDeg) : null;
+    const houseIndex = cusps ? houseOfLongitude(cusps, displayLon) : null;
     const dignity = dignityOf(body, sign);
     const planet: WesternPlanet = {
       body,
@@ -208,10 +213,11 @@ export function computeWestern(
   }
 
   const houses: WesternHouse[] = cusps
-    ? cusps.map((cusp, i) => {
-        const lon = proj(cusp);
-        return { index: i + 1, cuspLongitudeDeg: round6(lon), sign: signFromLongitude(lon).sign };
-      })
+    ? cusps.map((cusp, i) => ({
+        index: i + 1,
+        cuspLongitudeDeg: round6(cusp),
+        sign: signFromLongitude(cusp).sign,
+      }))
     : [];
 
   const aspects = computeAspects(aspectPoints);
