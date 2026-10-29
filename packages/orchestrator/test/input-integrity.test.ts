@@ -120,7 +120,7 @@ describe('ruleset version authenticity', () => {
     expect(bundle.vedic?.rulesetId).toBe(VEDIC_RULESET_CURRENT);
     expect(bundle.provenance.rulesets).toEqual(
       expect.arrayContaining([
-        { id: 'western-tropical-placidus', version: '0.2.0' },
+        { id: 'western-tropical-placidus', version: '0.2.1' },
         { id: 'bazi-standard', version: '0.1.1' },
         { id: 'iztro-default', version: '0.1.0' },
         { id: 'vedic-parashara-lahiri', version: '0.1.0' },

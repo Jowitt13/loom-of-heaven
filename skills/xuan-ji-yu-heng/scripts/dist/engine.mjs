@@ -45565,8 +45565,11 @@ var GeoLocation = external_exports.strictObject({
   /** Where the coordinates came from; geocoder use requires separate consent. */
   source: external_exports.enum(["user", "geocoder", "import"])
 });
-var WESTERN_RULESET_CURRENT = "western-tropical-placidus@0.2.0";
-var WESTERN_RULESET_RETIRED = ["western-tropical-placidus@0.1.0"];
+var WESTERN_RULESET_CURRENT = "western-tropical-placidus@0.2.1";
+var WESTERN_RULESET_RETIRED = [
+  "western-tropical-placidus@0.2.0",
+  "western-tropical-placidus@0.1.0"
+];
 var WesternSettings = external_exports.strictObject({
   rulesetId: external_exports.string().default(WESTERN_RULESET_CURRENT),
   zodiac: external_exports.enum(["tropical", "sidereal"]).default("tropical"),
@@ -57683,6 +57686,10 @@ function raToLambda(ra, eps) {
 function forwardArc(a, b) {
   return norm360(b - a);
 }
+function wholeSignCusps(ascendantDeg) {
+  const signStart = Math.floor(norm360(ascendantDeg) / 30) * 30;
+  return Array.from({ length: 12 }, (_, index) => norm360(signStart + index * 30));
+}
 function computeHouseCusps(system, dateMs, latDeg, lonEastDeg) {
   const eps = meanObliquityDeg(dateMs);
   const ramc = ramcDeg(dateMs, lonEastDeg);
@@ -57697,8 +57704,8 @@ function computeHouseCusps(system, dateMs, latDeg, lonEastDeg) {
   cusps[9] = mc;
   switch (system) {
     case "whole-sign": {
-      const signStart = Math.floor(ascendant / 30) * 30;
-      for (let i = 0; i < 12; i++) cusps[i] = norm360(signStart + i * 30);
+      const signCusps = wholeSignCusps(ascendant);
+      for (let i = 0; i < 12; i++) cusps[i] = signCusps[i];
       break;
     }
     case "equal": {
@@ -57839,7 +57846,7 @@ function computeWestern(normalized, settings) {
   let angles2 = null;
   if (normalized.timeKnown) {
     const house = computeHouseCusps(settings.houseSystem, dateMs, latitude, longitudeEast);
-    cusps = house.cusps;
+    cusps = sidereal && settings.houseSystem === "whole-sign" ? wholeSignCusps(proj(house.ascendant)) : house.cusps.map(proj);
     angles2 = {
       ascendant: angleFrom(house.ascendant),
       mc: angleFrom(house.mc),
@@ -57862,7 +57869,7 @@ function computeWestern(normalized, settings) {
   const makePlanet = (body, p, precision, source, forAspects) => {
     const displayLon = proj(p.longitudeDeg);
     const { sign, signDeg } = signFromLongitude(displayLon);
-    const houseIndex2 = cusps ? houseOfLongitude(cusps, p.longitudeDeg) : null;
+    const houseIndex2 = cusps ? houseOfLongitude(cusps, displayLon) : null;
     const dignity = dignityOf(body, sign);
     const planet = {
       body,
@@ -57938,10 +57945,11 @@ function computeWestern(normalized, settings) {
       )
     );
   }
-  const houses = cusps ? cusps.map((cusp, i) => {
-    const lon = proj(cusp);
-    return { index: i + 1, cuspLongitudeDeg: round6(lon), sign: signFromLongitude(lon).sign };
-  }) : [];
+  const houses = cusps ? cusps.map((cusp, i) => ({
+    index: i + 1,
+    cuspLongitudeDeg: round6(cusp),
+    sign: signFromLongitude(cusp).sign
+  })) : [];
   const aspects = computeAspects(aspectPoints);
   const result = {
     rulesetId: WESTERN_RULESET_CURRENT,

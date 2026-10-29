@@ -20,7 +20,7 @@ In this engine version, normalization (the UTC instant) is invariant to these ru
 so `compare` reports identical normalized time and any chart-level difference is attributable to
 the selected settings, not an invented time conversion.
 
-## Western defaults (`western-tropical-placidus@0.2.0`)
+## Western defaults (`western-tropical-placidus@0.2.1`)
 
 Tropical zodiac, geocentric, Placidus houses, true node, and the five asteroids on by default.
 Also selectable: whole-sign, equal, koch, porphyry; `sidereal` with a Lahiri / Fagan-Bradley
@@ -30,9 +30,15 @@ and asteroids (Chiron/Ceres/Pallas/Juno/Vesta) are self-computed from public-dom
 elements and reported `precision: approximate`. At high latitude a quadrant house system that
 cannot be computed must raise `HOUSE_SYSTEM_UNAVAILABLE` — never silently switch.
 
-`western-tropical-placidus@0.1.0` is retired because its Koch-house calculation was corrected.
-It returns `RULESET_UNSUPPORTED`; remove `rulesetId` to use the current default or select
-`western-tropical-placidus@0.2.0` explicitly.
+`western-tropical-placidus@0.2.1` corrects sidereal + whole-sign: cusps start at the sidereal
+Ascendant's sign and the same ring places every point; Asc/MC keep their true longitudes.
+Tropical and other house systems are unchanged, and the ayanamsha model gains no new precision
+claim. A source fix does not mean a published package or installed host has been updated.
+
+`western-tropical-placidus@0.2.0` is retired because its sidereal whole-sign partition was
+incorrect; `western-tropical-placidus@0.1.0` remains retired because its Koch-house calculation
+was corrected. Both return `RULESET_UNSUPPORTED`; remove `rulesetId` to use the current default or
+select `western-tropical-placidus@0.2.1` explicitly.
 
 ## BaZi disputed points (`bazi-standard@0.1.1`)
 

@@ -254,6 +254,83 @@ function main(): void {
         lunarPayload.warnings?.some((warning) => warning.code === 'LUNAR_CONVERTED') === true,
       detail: `exit ${lunar.code}`,
     });
+
+    const siderealInput = {
+      calendar: 'gregorian',
+      localDate: '1991-02-03',
+      localTime: '04:05:06',
+      timeAccuracy: 'exact',
+      timezone: 'Asia/Shanghai',
+      location: { latitude: 31.23, longitude: 121.47, source: 'user' },
+      settings: {
+        systems: ['western'],
+        western: { zodiac: 'sidereal', houseSystem: 'whole-sign', asteroids: false },
+      },
+    };
+    const siderealFile = writeInput('integrity-sidereal-whole-sign.json', siderealInput);
+    const sidereal = run(pkgRoot, [
+      'scripts/loom-chart.mjs',
+      'calculate',
+      '--input-file',
+      siderealFile,
+      '--now',
+      FIXED_NOW,
+    ]);
+    const siderealBundle = (
+      JSON.parse(sidereal.stdout) as {
+        bundle?: {
+          western?: {
+            rulesetId?: string;
+            houses?: Array<{ cuspLongitudeDeg?: number }>;
+            planets?: Array<{ body?: string; house?: number | null }>;
+          };
+          provenance?: { rulesets?: Array<{ id?: string; version?: string }> };
+        };
+      }
+    ).bundle;
+    const siderealWestern = siderealBundle?.western;
+    results.push({
+      name: 'sidereal whole-sign cusps, placement, and current version corrected',
+      ok:
+        sidereal.code === 0 &&
+        siderealWestern?.rulesetId === 'western-tropical-placidus@0.2.1' &&
+        siderealBundle?.provenance?.rulesets?.some(
+          (ruleset) => ruleset.id === 'western-tropical-placidus' && ruleset.version === '0.2.1',
+        ) === true &&
+        siderealWestern.houses?.[0]?.cuspLongitudeDeg === 240 &&
+        siderealWestern.planets?.find((planet) => planet.body === 'Mercury')?.house === 2 &&
+        siderealWestern.planets?.find((planet) => planet.body === 'Saturn')?.house === 2,
+      detail: `exit ${sidereal.code}`,
+    });
+
+    for (const retired of ['0.2.0', '0.1.0']) {
+      const retiredFile = writeInput(`integrity-western-retired-${retired}.json`, {
+        ...siderealInput,
+        settings: {
+          systems: ['western'],
+          western: {
+            zodiac: 'sidereal',
+            houseSystem: 'whole-sign',
+            rulesetId: `western-tropical-placidus@${retired}`,
+          },
+        },
+      });
+      const retiredResult = run(pkgRoot, [
+        'scripts/loom-chart.mjs',
+        'calculate',
+        '--input-file',
+        retiredFile,
+      ]);
+      results.push({
+        name: `retired western ${retired} rejected (exit 10, current 0.2.1)`,
+        ok:
+          retiredResult.code === 10 &&
+          /"code":\s*"RULESET_UNSUPPORTED"/.test(retiredResult.stdout) &&
+          retiredResult.stdout.includes(`western-tropical-placidus@${retired}`) &&
+          retiredResult.stdout.includes('western-tropical-placidus@0.2.1'),
+        detail: `exit ${retiredResult.code}`,
+      });
+    }
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

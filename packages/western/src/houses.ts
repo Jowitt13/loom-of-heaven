@@ -80,6 +80,16 @@ function forwardArc(a: number, b: number): number {
   return norm360(b - a);
 }
 
+/**
+ * Twelve whole-sign cusps: 0° of the sign containing the given Ascendant, then
+ * consecutive 30° boundaries. Longitudes are taken in the same zodiac frame as
+ * the supplied Ascendant.
+ */
+export function wholeSignCusps(ascendantDeg: number): number[] {
+  const signStart = Math.floor(norm360(ascendantDeg) / 30) * 30;
+  return Array.from({ length: 12 }, (_, index) => norm360(signStart + index * 30));
+}
+
 /** Compute the four angles plus the requested house system. */
 export function computeHouseCusps(
   system: HouseSystemId,
@@ -102,8 +112,8 @@ export function computeHouseCusps(
 
   switch (system) {
     case 'whole-sign': {
-      const signStart = Math.floor(ascendant / 30) * 30;
-      for (let i = 0; i < 12; i++) cusps[i] = norm360(signStart + i * 30);
+      const signCusps = wholeSignCusps(ascendant);
+      for (let i = 0; i < 12; i++) cusps[i] = signCusps[i]!;
       break;
     }
     case 'equal': {

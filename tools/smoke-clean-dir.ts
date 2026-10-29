@@ -368,6 +368,7 @@ try {
         bazi?: { rulesetId?: string };
         ziwei?: { rulesetId?: string };
         vedic?: { rulesetId?: string };
+        provenance?: { rulesets?: Array<{ id?: string; version?: string }> };
       };
     }
   ).bundle;
@@ -381,12 +382,86 @@ try {
   record(
     'calculate records only the implemented rulesets',
     validCalculate.code === 0 &&
-      validBundle?.western?.rulesetId === 'western-tropical-placidus@0.2.0' &&
+      validBundle?.western?.rulesetId === 'western-tropical-placidus@0.2.1' &&
       validBundle.bazi?.rulesetId === 'bazi-standard@0.1.1' &&
       validBundle.ziwei?.rulesetId === 'iztro-default@0.1.0' &&
       validBundle.vedic?.rulesetId === 'vedic-parashara-lahiri@0.1.0' &&
+      validBundle.provenance?.rulesets?.some(
+        (ruleset) => ruleset.id === 'western-tropical-placidus' && ruleset.version === '0.2.1',
+      ) === true &&
       !validCalculate.stdout.includes('review-nonexistent'),
   );
+
+  const explicitCurrentFile = writeIntegrity('integrity-western-current.json', {
+    ...integrityBase,
+    settings: {
+      systems: ['western'],
+      western: {
+        zodiac: 'sidereal',
+        houseSystem: 'whole-sign',
+        rulesetId: 'western-tropical-placidus@0.2.1',
+      },
+    },
+  });
+  const explicitCurrent = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'calculate',
+    '--input-file',
+    explicitCurrentFile,
+    '--now',
+    FIXED_NOW,
+  ]);
+  const explicitCurrentWestern = (
+    JSON.parse(explicitCurrent.stdout) as {
+      bundle?: {
+        western?: { rulesetId?: string };
+        provenance?: { rulesets?: Array<{ id?: string; version?: string }> };
+      };
+    }
+  ).bundle;
+  record(
+    'explicit western 0.2.1 is accepted and recorded as current',
+    explicitCurrent.code === 0 &&
+      explicitCurrentWestern?.western?.rulesetId === 'western-tropical-placidus@0.2.1' &&
+      explicitCurrentWestern.provenance?.rulesets?.some(
+        (ruleset) => ruleset.id === 'western-tropical-placidus' && ruleset.version === '0.2.1',
+      ) === true,
+  );
+
+  for (const retired of ['0.2.0', '0.1.0']) {
+    for (const timeAccuracy of ['exact', 'unknown'] as const) {
+      const retiredFile = writeIntegrity(
+        `integrity-western-retired-${retired}-${timeAccuracy}.json`,
+        {
+          ...integrityBase,
+          localDate: '1990-06-15',
+          localTime: timeAccuracy === 'unknown' ? undefined : '08:30',
+          timeAccuracy,
+          settings: {
+            systems: ['western'],
+            western: {
+              zodiac: 'sidereal',
+              houseSystem: 'whole-sign',
+              rulesetId: `western-tropical-placidus@${retired}`,
+            },
+          },
+        },
+      );
+      const result = runNode(tempSkill, [
+        'scripts/loom-chart.mjs',
+        'calculate',
+        '--input-file',
+        retiredFile,
+      ]);
+      record(
+        `calculate rejects retired western ${retired} (${timeAccuracy}, exit 10)`,
+        result.code === 10 &&
+          /"code":\s*"RULESET_UNSUPPORTED"/.test(result.stdout) &&
+          result.stdout.includes(`western-tropical-placidus@${retired}`) &&
+          result.stdout.includes('western-tropical-placidus@0.2.1'),
+      );
+    }
+  }
 
   const validLeapNormalize = runNode(tempSkill, [
     'scripts/loom-chart.mjs',
@@ -472,6 +547,59 @@ try {
   record(
     'synastry still accepts a valid pair',
     synastryValid.code === 0 && /"ok":\s*true/.test(synastryValid.stdout),
+  );
+
+  const siderealWholeSignFile = writeIntegrity('integrity-sidereal-whole-sign.json', {
+    calendar: 'gregorian',
+    localDate: '1991-02-03',
+    localTime: '04:05:06',
+    timeAccuracy: 'exact',
+    timezone: 'Asia/Shanghai',
+    location: { latitude: 31.23, longitude: 121.47, source: 'user' },
+    settings: {
+      systems: ['western'],
+      western: { zodiac: 'sidereal', houseSystem: 'whole-sign', asteroids: false },
+    },
+  });
+  const siderealCalc = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'calculate',
+    '--input-file',
+    siderealWholeSignFile,
+    '--now',
+    FIXED_NOW,
+  ]);
+  const siderealWestern = (
+    JSON.parse(siderealCalc.stdout) as {
+      bundle?: {
+        western?: {
+          houses?: Array<{ cuspLongitudeDeg?: number }>;
+          planets?: Array<{ body?: string; longitudeDeg?: number; house?: number | null }>;
+          angles?: { ascendant?: { longitudeDeg?: number } };
+        };
+      };
+    }
+  ).bundle?.western;
+  const siderealFirstCusp = siderealWestern?.houses?.[0]?.cuspLongitudeDeg;
+  const siderealBody = (body: string) =>
+    siderealWestern?.planets?.find((planet) => planet.body === body);
+  const siderealPartitionOk =
+    siderealFirstCusp !== undefined &&
+    siderealWestern?.planets?.every(
+      (planet) =>
+        typeof planet.house === 'number' &&
+        typeof planet.longitudeDeg === 'number' &&
+        planet.house ===
+          1 + Math.floor(((((planet.longitudeDeg - siderealFirstCusp) % 360) + 360) % 360) / 30),
+    ) === true;
+  record(
+    'sidereal whole-sign cusps start at the sidereal Asc sign and regroup every point',
+    siderealCalc.code === 0 &&
+      siderealFirstCusp === 240 &&
+      siderealBody('Mercury')?.house === 2 &&
+      siderealBody('Saturn')?.house === 2 &&
+      siderealWestern?.angles?.ascendant?.longitudeDeg === 246.288575 &&
+      siderealPartitionOk,
   );
 
   // render is temporarily disabled (visualization reports off): it must emit a
