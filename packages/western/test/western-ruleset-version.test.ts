@@ -77,6 +77,21 @@ describe('western ruleset version lifecycle', () => {
     expect(message).not.toContain('WESTERN_RULESET_RETIRED');
   });
 
+  it('unknown western rulesets are stably rejected', () => {
+    const settings = WesternSettings.parse({ rulesetId: 'review-nonexistent@9.9.9' });
+    let thrown: unknown;
+    try {
+      computeWestern(SYNTHETIC_INPUT, settings);
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(EngineError);
+    const err = thrown as EngineError;
+    expect(err.code).toBe(ERROR_CODES.RULESET_UNSUPPORTED);
+    expect(err.message).toContain(WESTERN_RULESET_CURRENT);
+    expect(err.message).not.toMatch(/\.ts:|at \w+|node_modules/);
+  });
+
   it('WESTERN_RULESET_RETIRED contains 0.1.0', () => {
     expect(WESTERN_RULESET_RETIRED).toContain('western-tropical-placidus@0.1.0');
   });

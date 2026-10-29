@@ -45354,8 +45354,9 @@ var Provenance = external_exports.object({
 });
 
 // packages/contracts/src/vedic.ts
+var VEDIC_RULESET_CURRENT = "vedic-parashara-lahiri@0.1.0";
 var VedicSettings = external_exports.strictObject({
-  rulesetId: external_exports.string().default("vedic-parashara-lahiri@0.1.0"),
+  rulesetId: external_exports.string().default(VEDIC_RULESET_CURRENT),
   /** Rahu node model. The product default is the owner-confirmed mean-node convention. */
   nodes: external_exports.enum(["mean", "true"]).default("mean"),
   /** Owner-confirmed P3B default; future models require new ruleset versions. */
@@ -45541,6 +45542,17 @@ var VedicChartResult = external_exports.strictObject({
 // packages/contracts/src/birth-input.ts
 var DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 var TIME_RE = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
+function isRealGregorianDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (match === null) return false;
+  const year = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10);
+  const day = Number.parseInt(match[3], 10);
+  if (month < 1 || month > 12 || day < 1) return false;
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const monthLengths = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day <= monthLengths[month - 1];
+}
 var CalendarSystem = external_exports.enum(["gregorian", "lunar"]);
 var TimeAccuracy = external_exports.enum(["exact", "approximate", "unknown"]);
 var ChartSystem = external_exports.enum(["western", "bazi", "ziwei", "vedic"]);
@@ -45565,15 +45577,17 @@ var WesternSettings = external_exports.strictObject({
   /** Include the five asteroids (Chiron/Ceres/Pallas/Juno/Vesta); approximate precision. */
   asteroids: external_exports.boolean().default(true)
 });
+var BAZI_RULESET_CURRENT = "bazi-standard@0.1.0";
 var BaziSettings = external_exports.strictObject({
-  rulesetId: external_exports.string().default("bazi-standard@0.1.0"),
+  rulesetId: external_exports.string().default(BAZI_RULESET_CURRENT),
   /** Which time base feeds the pillars. Solar-time modes only apply here, never to Western. */
   solarTimeMode: external_exports.enum(["civil", "mean", "apparent"]).default("civil"),
   dayBoundary: external_exports.enum(["midnight", "zi-hour"]).default("zi-hour"),
   earlyLateZi: external_exports.enum(["early", "late"]).default("late")
 });
+var ZIWEI_RULESET_CURRENT = "iztro-default@0.1.0";
 var ZiweiSettings = external_exports.strictObject({
-  rulesetId: external_exports.string().default("iztro-default@0.1.0"),
+  rulesetId: external_exports.string().default(ZIWEI_RULESET_CURRENT),
   useApparentSolarTime: external_exports.boolean().default(false)
 });
 var CalculationSettings = external_exports.strictObject({
@@ -45603,9 +45617,42 @@ var BirthInput = external_exports.strictObject({
 }).refine((v) => v.timeAccuracy === "unknown" || v.localTime !== void 0, {
   error: 'localTime is required unless timeAccuracy is "unknown"',
   path: ["localTime"]
+}).refine((v) => v.calendar !== "gregorian" || isRealGregorianDate(v.localDate), {
+  error: "localDate must be a real Gregorian calendar date",
+  path: ["localDate"]
 });
 function parseBirthInput(value) {
   return BirthInput.parse(value);
+}
+
+// packages/contracts/src/ruleset-support.ts
+var CURRENT_RULESETS = {
+  western: WESTERN_RULESET_CURRENT,
+  bazi: BAZI_RULESET_CURRENT,
+  ziwei: ZIWEI_RULESET_CURRENT,
+  vedic: VEDIC_RULESET_CURRENT
+};
+var RETIRED_RULESETS = {
+  western: WESTERN_RULESET_RETIRED,
+  bazi: [],
+  ziwei: [],
+  vedic: []
+};
+function assertSupportedRuleset(system, requested) {
+  const current = CURRENT_RULESETS[system];
+  if (requested === current) return;
+  if (RETIRED_RULESETS[system].includes(requested)) {
+    throw new EngineError(
+      ERROR_CODES.RULESET_UNSUPPORTED,
+      `Ruleset "${requested}" has been retired. Use ${current}.`,
+      { requestedRuleset: requested, currentRuleset: current }
+    );
+  }
+  throw new EngineError(
+    ERROR_CODES.RULESET_UNSUPPORTED,
+    `Ruleset "${requested}" is not implemented for ${system}. Use ${current}.`,
+    { requestedRuleset: requested, currentRuleset: current }
+  );
 }
 
 // packages/contracts/src/normalized.ts
@@ -46643,6 +46690,13 @@ function normalizeBirthData(input2) {
       ERROR_CODES.LUNAR_CONVERSION_UNAVAILABLE,
       'Lunar calendar input requires the calendar provider (Phase 2). Convert to a Gregorian date first or supply calendar="gregorian".',
       { calendar: input2.calendar }
+    );
+  }
+  if (!isRealGregorianDate(input2.localDate)) {
+    throw new EngineError(
+      ERROR_CODES.INPUT_VALIDATION_FAILED,
+      "localDate must be a real Gregorian calendar date.",
+      { field: "localDate" }
     );
   }
   const year = Number.parseInt(input2.localDate.slice(0, 4), 10);
@@ -54602,6 +54656,7 @@ function pillarFrom(cycle, dayMasterStem, isDayPillar, includeZodiac) {
   return pillar;
 }
 function computeBazi(normalized, settings, ruleGender) {
+  assertSupportedRuleset("bazi", settings.rulesetId);
   const warnings = [];
   let solarTimeApplied = settings.solarTimeMode;
   let parts;
@@ -54643,7 +54698,7 @@ function computeBazi(normalized, settings, ruleGender) {
   };
   const luckCycle = computeLuckCycle(solarTime, normalized, ruleGender, warnings);
   const result = {
-    rulesetId: settings.rulesetId,
+    rulesetId: BAZI_RULESET_CURRENT,
     provider: PROVIDER,
     solarTimeApplied,
     dayBoundaryApplied: "zi-hour/late (tyme4ts default)",
@@ -54758,6 +54813,7 @@ function birthTimeIndex(normalized, settings) {
   return timeIndexFromHour(Number.parseInt(normalized.localTime.slice(0, 2), 10));
 }
 function computeZiwei(normalized, settings, ruleGender) {
+  assertSupportedRuleset("ziwei", settings.rulesetId);
   const { astrolabe, warnings, useApparent } = buildAstrolabe(normalized, settings, ruleGender);
   if (astrolabe === null) return { result: null, warnings };
   const palaces = astrolabe.palaces.map((palace) => {
@@ -54786,7 +54842,7 @@ function computeZiwei(normalized, settings, ruleGender) {
     };
   });
   const result = {
-    rulesetId: settings.rulesetId,
+    rulesetId: ZIWEI_RULESET_CURRENT,
     provider: PROVIDER2,
     gender: ruleGender === "male" ? "\u7537" : "\u5973",
     useApparentSolarTime: useApparent,
@@ -54816,11 +54872,12 @@ function mapHoroscopeItem(item) {
   return out;
 }
 function computeZiweiHoroscope(normalized, settings, ruleGender, target) {
+  assertSupportedRuleset("ziwei", settings.rulesetId);
   const { astrolabe, warnings } = buildAstrolabe(normalized, settings, ruleGender);
   if (astrolabe === null) return { result: null, warnings };
   const h = astrolabe.horoscope(target.solarDate, target.timeIndex);
   const result = {
-    rulesetId: settings.rulesetId,
+    rulesetId: ZIWEI_RULESET_CURRENT,
     provider: PROVIDER2,
     targetSolarDate: target.solarDate,
     targetTimeIndex: target.timeIndex,
@@ -57737,13 +57794,7 @@ function round6(n) {
   return Math.round(n * 1e6) / 1e6;
 }
 function computeWestern(normalized, settings) {
-  if (WESTERN_RULESET_RETIRED.includes(settings.rulesetId)) {
-    throw new EngineError(
-      ERROR_CODES.RULESET_UNSUPPORTED,
-      `Ruleset "${settings.rulesetId}" has been retired. Migrate to western-tropical-placidus@0.2.0 (see INSTALL.md migration notes). Historical results from v0.1.x releases remain available in those published releases.`,
-      { requestedRuleset: settings.rulesetId, currentRuleset: "western-tropical-placidus@0.2.0" }
-    );
-  }
+  assertSupportedRuleset("western", settings.rulesetId);
   const warnings = [];
   const dateMs = normalized.utcInstantMs;
   const latitude = normalized.location.latitude;
@@ -57874,7 +57925,7 @@ function computeWestern(normalized, settings) {
   }) : [];
   const aspects = computeAspects(aspectPoints);
   const result = {
-    rulesetId: settings.rulesetId,
+    rulesetId: WESTERN_RULESET_CURRENT,
     provider: PROVIDER3,
     zodiac: settings.zodiac,
     ayanamsha: sidereal ? settings.ayanamsha : null,
@@ -60021,6 +60072,7 @@ function stableUnknownTimeVedicFacts(normalized) {
   };
 }
 function computeVedic(normalized, settings) {
+  assertSupportedRuleset("vedic", settings.rulesetId);
   const positions = computeVedicP2Positions({
     utcInstantMs: normalized.utcInstantMs,
     latitudeDeg: normalized.location.latitude,
@@ -60074,7 +60126,7 @@ function computeVedic(normalized, settings) {
     );
   }
   const result = {
-    rulesetId: settings.rulesetId,
+    rulesetId: VEDIC_RULESET_CURRENT,
     provider: PROVIDER4,
     ayanamsha: { id: "lahiri-iae-1985", swissReferenceMode: "SE_SIDM_LAHIRI" },
     grahas: GRAHAS2.map(([graha]) => ({ graha, longitudeDeg: positions.grahas[graha] })),
@@ -61297,7 +61349,8 @@ function industryFinding(bazi) {
 
 // packages/bazi-rules/src/interpret.ts
 var BAZI_RULES_VERSION = "0.1.0";
-var BAZI_RULES_RULESET_ID = `bazi-rules-ziping@${BAZI_RULES_VERSION}`;
+var BAZI_RULES_RULESET_NAME = "bazi-rules-ziping";
+var BAZI_RULES_RULESET_ID = `${BAZI_RULES_RULESET_NAME}@${BAZI_RULES_VERSION}`;
 var PROVIDER5 = { id: "bazi-rules", version: BAZI_RULES_VERSION, license: "MIT" };
 function interpretBazi(bazi, opts = {}) {
   const findings = [
@@ -62542,6 +62595,7 @@ function buildInterpretationFacts(bundle, options = {}) {
     facts,
     rulesets: [
       ...bundle.provenance.rulesets,
+      ...baziRules ? [{ id: BAZI_RULES_RULESET_NAME, version: baziRules.provider.version }] : [],
       ...westernRules ? [{ id: westernRules.rulesetId, version: westernRules.provider.version }] : [],
       ...ziweiRules ? [{ id: ziweiRules.rulesetId, version: ziweiRules.provider.version }] : [],
       ...vedicRules ? [{ id: "vedic-rules-parashara", version: vedicRules.provider.version }] : []

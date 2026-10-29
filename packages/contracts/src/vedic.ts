@@ -9,6 +9,9 @@ import { ProviderRef } from './provenance.ts';
  * value (unknown time, polar no-sunrise, or a reserved future dasha model).
  */
 
+/** The only implemented Vedic calculation ruleset. */
+export const VEDIC_RULESET_CURRENT = 'vedic-parashara-lahiri@0.1.0';
+
 /**
  * Vedic settings. The owner-confirmed Rahu convention defaults to the mean node;
  * callers may still explicitly select the true node. The P3B Vimshottari model
@@ -22,7 +25,7 @@ import { ProviderRef } from './provenance.ts';
  * refraction at sea level (ADR 0013 §9).
  */
 export const VedicSettings = z.strictObject({
-  rulesetId: z.string().default('vedic-parashara-lahiri@0.1.0'),
+  rulesetId: z.string().default(VEDIC_RULESET_CURRENT),
   /** Rahu node model. The product default is the owner-confirmed mean-node convention. */
   nodes: z.enum(['mean', 'true']).default('mean'),
   /** Owner-confirmed P3B default; future models require new ruleset versions. */

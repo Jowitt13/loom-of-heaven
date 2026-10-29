@@ -1,5 +1,10 @@
 import { astro } from 'iztro';
-import { WARNING_CODES, makeWarning } from '@loom/contracts';
+import {
+  WARNING_CODES,
+  ZIWEI_RULESET_CURRENT,
+  assertSupportedRuleset,
+  makeWarning,
+} from '@loom/contracts';
 import type {
   EngineWarning,
   NormalizedBirthData,
@@ -114,6 +119,7 @@ export function computeZiwei(
   settings: ZiweiSettings,
   ruleGender: 'male' | 'female' | 'unspecified' | undefined,
 ): { result: ZiweiChartResult | null; warnings: EngineWarning[] } {
+  assertSupportedRuleset('ziwei', settings.rulesetId);
   const { astrolabe, warnings, useApparent } = buildAstrolabe(normalized, settings, ruleGender);
   if (astrolabe === null) return { result: null, warnings };
 
@@ -144,7 +150,7 @@ export function computeZiwei(
   });
 
   const result: ZiweiChartResult = {
-    rulesetId: settings.rulesetId,
+    rulesetId: ZIWEI_RULESET_CURRENT,
     provider: PROVIDER,
     gender: ruleGender === 'male' ? '男' : '女',
     useApparentSolarTime: useApparent,
@@ -187,12 +193,13 @@ export function computeZiweiHoroscope(
   ruleGender: 'male' | 'female' | 'unspecified' | undefined,
   target: { solarDate: string; timeIndex: number },
 ): { result: ZiweiHoroscopeResult | null; warnings: EngineWarning[] } {
+  assertSupportedRuleset('ziwei', settings.rulesetId);
   const { astrolabe, warnings } = buildAstrolabe(normalized, settings, ruleGender);
   if (astrolabe === null) return { result: null, warnings };
 
   const h = astrolabe.horoscope(target.solarDate, target.timeIndex);
   const result: ZiweiHoroscopeResult = {
-    rulesetId: settings.rulesetId,
+    rulesetId: ZIWEI_RULESET_CURRENT,
     provider: PROVIDER,
     targetSolarDate: target.solarDate,
     targetTimeIndex: target.timeIndex,

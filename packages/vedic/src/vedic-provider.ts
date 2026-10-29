@@ -1,6 +1,11 @@
 import { Engine } from 'caelus';
 import { embeddedData } from 'caelus/data-embedded';
-import { WARNING_CODES, makeWarning } from '@loom/contracts';
+import {
+  VEDIC_RULESET_CURRENT,
+  WARNING_CODES,
+  assertSupportedRuleset,
+  makeWarning,
+} from '@loom/contracts';
 import type {
   EngineWarning,
   NormalizedBirthData,
@@ -159,6 +164,7 @@ export function computeVedic(
   normalized: NormalizedBirthData,
   settings: VedicSettings,
 ): { result: VedicChartResult; warnings: EngineWarning[] } {
+  assertSupportedRuleset('vedic', settings.rulesetId);
   const positions = computeVedicP2Positions({
     utcInstantMs: normalized.utcInstantMs,
     latitudeDeg: normalized.location.latitude,
@@ -212,7 +218,7 @@ export function computeVedic(
     );
   }
   const result: VedicChartResult = {
-    rulesetId: settings.rulesetId,
+    rulesetId: VEDIC_RULESET_CURRENT,
     provider: PROVIDER,
     ayanamsha: { id: 'lahiri-iae-1985', swissReferenceMode: 'SE_SIDM_LAHIRI' },
     grahas: GRAHAS.map(([graha]) => ({ graha, longitudeDeg: positions.grahas[graha] })),

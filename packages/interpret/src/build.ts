@@ -1,4 +1,5 @@
 import {
+  BAZI_RULES_RULESET_NAME,
   interpretBazi,
   missingElements,
   industryFinding,
@@ -782,6 +783,7 @@ export function buildInterpretationFacts(
     facts,
     rulesets: [
       ...bundle.provenance.rulesets,
+      ...(baziRules ? [{ id: BAZI_RULES_RULESET_NAME, version: baziRules.provider.version }] : []),
       ...(westernRules
         ? [{ id: westernRules.rulesetId, version: westernRules.provider.version }]
         : []),
