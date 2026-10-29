@@ -22,6 +22,13 @@ const PROVIDER: ProviderRef = { id: 'tyme4ts', version: TYME4TS_VERSION, license
 /** Heaven stems whose polarity is yang (阳); the rest are yin (阴). */
 const YANG_STEMS = new Set(['甲', '丙', '戊', '庚', '壬']);
 const MAJOR_CYCLE_COUNT = 8;
+/**
+ * tyme4ts evaluates solar terms on a China Standard Time (UTC+8) wall clock and
+ * exposes no timezone parameter. Placing the true instant in that same frame
+ * keeps the year/month boundary identical for every birth location; the chosen
+ * local rule clock below still supplies the day and hour pillars.
+ */
+const TYME4TS_TERM_OFFSET_MS = 8 * 60 * 60 * 1000;
 
 function pad2(n: number): string {
   return String(n).padStart(2, '0');
@@ -47,6 +54,23 @@ function partsFromSolarIso(iso: string): WallParts {
   const [y, mo, d] = datePart!.split('-').map((v) => Number.parseInt(v, 10));
   const [h, mi, s] = timePart!.split(':').map((v) => Number.parseInt(v, 10));
   return { y: y!, mo: mo!, d: d!, h: h!, mi: mi!, s: s! };
+}
+
+/** The true instant expressed on tyme4ts's solar-term clock (UTC+8). */
+function partsFromInstant(utcInstantMs: number): WallParts {
+  const d = new Date(utcInstantMs + TYME4TS_TERM_OFFSET_MS);
+  return {
+    y: d.getUTCFullYear(),
+    mo: d.getUTCMonth() + 1,
+    d: d.getUTCDate(),
+    h: d.getUTCHours(),
+    mi: d.getUTCMinutes(),
+    s: d.getUTCSeconds(),
+  };
+}
+
+function solarTimeFrom(parts: WallParts): SolarTime {
+  return SolarTime.fromYmdHms(parts.y, parts.mo, parts.d, parts.h, parts.mi, parts.s);
 }
 
 function pillarFrom(
@@ -138,20 +162,27 @@ export function computeBazi(
     );
   }
 
-  const solarTime = SolarTime.fromYmdHms(parts.y, parts.mo, parts.d, parts.h, parts.mi, parts.s);
+  const solarTime = solarTimeFrom(parts);
   const eightChar = solarTime.getLunarHour().getEightChar();
   const dayMasterStem = eightChar.getDay().getHeavenStem();
 
+  // Year/month and 起运 follow the solar-term instant; only a known birth time has
+  // a real instant, so an unknown time keeps the existing local noon anchor.
+  const termTime = normalized.timeKnown
+    ? solarTimeFrom(partsFromInstant(normalized.utcInstantMs))
+    : solarTime;
+  const termEightChar = termTime.getLunarHour().getEightChar();
+
   const pillars = {
-    year: pillarFrom(eightChar.getYear(), dayMasterStem, false, true),
-    month: pillarFrom(eightChar.getMonth(), dayMasterStem, false, false),
+    year: pillarFrom(termEightChar.getYear(), dayMasterStem, false, true),
+    month: pillarFrom(termEightChar.getMonth(), dayMasterStem, false, false),
     day: pillarFrom(eightChar.getDay(), dayMasterStem, true, false),
     hour: normalized.timeKnown
       ? pillarFrom(eightChar.getHour(), dayMasterStem, false, false)
       : null,
   };
 
-  const luckCycle = computeLuckCycle(solarTime, normalized, ruleGender, warnings);
+  const luckCycle = computeLuckCycle(termTime, normalized, ruleGender, warnings);
 
   const result: BaziChartResult = {
     rulesetId: BAZI_RULESET_CURRENT,
@@ -171,7 +202,7 @@ export function computeBazi(
 }
 
 function computeLuckCycle(
-  solarTime: SolarTime,
+  termTime: SolarTime,
   normalized: NormalizedBirthData,
   ruleGender: 'male' | 'female' | 'unspecified' | undefined,
   warnings: EngineWarning[],
@@ -190,10 +221,12 @@ function computeLuckCycle(
   }
 
   const childLimit = ChildLimit.fromSolarTime(
-    solarTime,
+    termTime,
     ruleGender === 'male' ? Gender.MAN : Gender.WOMAN,
   );
-  const startDay = childLimit.getStartTime().getSolarDay();
+  // ChildLimit spans birth -> 起运: getStartTime() is the birth moment and
+  // getEndTime() is when the luck cycle begins.
+  const startDay = childLimit.getEndTime().getSolarDay();
 
   const majorCycles: BaziMajorCycle[] = [];
   let fortune = childLimit.getStartDecadeFortune();
