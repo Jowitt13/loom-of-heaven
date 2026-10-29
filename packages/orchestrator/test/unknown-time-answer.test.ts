@@ -2,6 +2,8 @@
 import { describe, expect, it } from 'vitest';
 import { canonicalJson, parseBirthInput } from '@loom/contracts';
 import type { BirthInputRaw } from '@loom/contracts';
+import * as interpretationFacade from '@loom/interpret';
+import { buildInterpretationFacts } from '@loom/interpret';
 import { calculate, runAnswerPlan, runInterpret } from '../src/index.ts';
 
 const NOW = Date.parse('2026-01-01T00:00:00Z');
@@ -59,6 +61,46 @@ function assertNoPlaceholderDerivedFacts(facts: readonly FactLike[]): void {
 }
 
 describe('unknown-time default answer material', () => {
+  it('preserves both existing stable producer contracts and their caveats', () => {
+    const known = bundle({ timeAccuracy: 'exact', localTime: '06:00:00' }).vedic!;
+    const unknown = bundle();
+    const moon = known.derived!.grahas.find((placement) => placement.graha === 'Moon')!;
+    const panchanga = known.derived!.panchanga;
+    // Synthetic producer-contract fixture only: this does not claim these
+    // classifications really stay constant on the fixture's civil day.
+    unknown.vedic!.unknownTimeStable = {
+      moonNakshatra: moon.nakshatra,
+      panchanga: {
+        tithi: panchanga.tithi,
+        yoga: panchanga.yoga,
+        karana: panchanga.karana,
+      },
+    };
+    const facts = buildInterpretationFacts(unknown).facts;
+    for (const ruleRef of [
+      'vedic-rule/nakshatra/moon-day-stable',
+      'vedic-rule/panchanga/day-stable',
+    ]) {
+      const stable = facts.find((fact) => fact.evidence.some((entry) => entry.ref === ruleRef));
+      expect(stable, ruleRef).toBeDefined();
+      expect(stable!.caveat).toContain('Birth time is unknown');
+      expect(stable!.evidence.some((entry) => entry.kind === 'vedic')).toBe(true);
+    }
+  });
+
+  it('does not let a legacy extra option disable the public reliability boundary', () => {
+    const legacyOptions = {
+      now: NOW,
+      targetYear: 2036,
+      withholdUnstableUnknownTimeFacts: false,
+      topic: 'general' as const,
+    };
+    assertNoPlaceholderDerivedFacts(runInterpret(input(), legacyOptions).interpretation.facts);
+    assertNoPlaceholderDerivedFacts(runAnswerPlan(input(), legacyOptions).publicResult.facts);
+    assertNoPlaceholderDerivedFacts(buildInterpretationFacts(bundle(), legacyOptions).facts);
+    expect(interpretationFacade).not.toHaveProperty('buildBaziCareerDegradationFacts');
+  });
+
   it('withholds the five-element absence and its positive inferences', { timeout: 30_000 }, () => {
     const { interpretation, warnings } = interpret();
     assertNoPlaceholderDerivedFacts(interpretation.facts);

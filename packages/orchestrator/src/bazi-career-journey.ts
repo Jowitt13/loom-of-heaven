@@ -1,14 +1,17 @@
 import { parseBirthInput } from '@loom/contracts';
+import type { BirthInput } from '@loom/contracts';
 import { ClarificationPlanningInput } from '../../contracts/src/clarification-plan.ts';
 import { z } from 'zod';
 import { planClarificationMateriality } from '../../interpret/src/clarification-materiality.ts';
-import { buildAnswerPlan } from '../../interpret/src/answer-plan.ts';
+import { buildAnswerPlan, buildPublicResult } from '../../interpret/src/answer-plan.ts';
+import { buildBaziCareerDegradationFacts } from '../../interpret/src/build.ts';
 import {
   approveAnswerClaimCandidates,
   projectAnswerClaimCandidates,
 } from '../../interpret/src/answer-claim-chain.ts';
 import { buildClarifiedResponseView } from './clarified-response.ts';
 import { runAnswerPlan } from './interpret.ts';
+import { calculate } from './calculate.ts';
 
 /**
  * IQ-4A internal career journey for the owner-selected single system (bazi).
@@ -31,6 +34,21 @@ export class BaziCareerJourneyError extends Error {
     super(code);
     this.name = 'BaziCareerJourneyError';
   }
+}
+
+/** Private pre-projection material, only for the already-planned degradation. */
+function unknownTimeCareerDegradationPlan(birthInput: BirthInput, now: number) {
+  const bundle = calculate(
+    {
+      ...birthInput,
+      settings: { ...birthInput.settings, systems: ['western', 'bazi', 'ziwei', 'vedic'] },
+    },
+    { now },
+  );
+  const interpretation = buildBaziCareerDegradationFacts(bundle);
+  const result = buildPublicResult(bundle, interpretation);
+  const answerPlan = buildAnswerPlan(result, { topic: 'career' });
+  return { publicResult: { ...result, facts: answerPlan.selectedFacts }, answerPlan };
 }
 
 const BaziCareerJourneyInput = z.strictObject({
@@ -93,14 +111,15 @@ export function runBaziCareerJourney(
     throw new BaziCareerJourneyError('CLARIFICATION_REQUIRED');
   }
 
-  const { publicResult, answerPlan } = runAnswerPlan(birthInput, {
-    now: options.now,
-    topic: 'career',
-    // The journey owns the recorded unknown-time degradation: it projects the
-    // material and omits the whole chart-derived claim class through the
-    // clarification contract, so it needs the facts before that omission.
-    withholdUnstableUnknownTimeFacts: false,
-  });
+  // Only this private journey path may construct pre-degradation candidates.
+  // The normal facade never exposes an option to turn reliability checks off.
+  const unknownTime = birthInput.timeAccuracy === 'unknown';
+  if (unknownTime && !clarificationPlan.degradationCodes.includes('omit-time-sensitive-claims')) {
+    throw new BaziCareerJourneyError('SETTING_CONFLICT');
+  }
+  const { publicResult, answerPlan } = unknownTime
+    ? unknownTimeCareerDegradationPlan(birthInput, options.now)
+    : runAnswerPlan(birthInput, { now: options.now, topic: 'career' });
   const context = { publicResult, answerPlan };
   const approval = approveAnswerClaimCandidates(
     context,
