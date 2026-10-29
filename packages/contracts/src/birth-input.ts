@@ -70,8 +70,10 @@ export const WesternSettings = z.strictObject({
 });
 export type WesternSettings = z.infer<typeof WesternSettings>;
 
-/** The only implemented BaZi calculation ruleset. */
-export const BAZI_RULESET_CURRENT = 'bazi-standard@0.1.0';
+/** The current BaZi calculation ruleset (solar-term instant timebase correction). */
+export const BAZI_RULESET_CURRENT = 'bazi-standard@0.1.1';
+/** Retired BaZi calculation ruleset ids (returns RULESET_UNSUPPORTED). */
+export const BAZI_RULESET_RETIRED = ['bazi-standard@0.1.0'] as const;
 
 /** BaZi disputed points are versioned, not scattered booleans (handoff §5.2). */
 export const BaziSettings = z.strictObject({

@@ -8,7 +8,8 @@ roadmap.
 
 ## Versioning policy
 
-- Ruleset ids are `name@semver`, e.g. `western-tropical-placidus@0.2.1`, `bazi-standard@0.1.0`,
+- Ruleset ids are `name@semver`, e.g. `western-tropical-placidus@0.2.1`,
+  `bazi-standard@0.1.1`,
   `iztro-default@0.1.0`.
 - Any change that can alter output bumps the ruleset version; the previous id keeps its meaning.
 - The four-transformations table, star-brightness table and solar-term source each carry their
@@ -39,12 +40,20 @@ was corrected. Both return `RULESET_UNSUPPORTED`. Current inputs must omit `rule
 `western-tropical-placidus@0.2.1` explicitly; neither old id silently keeps an alternative
 calculation.
 
-## BaZi — `bazi-standard@0.1.0`
+## BaZi — `bazi-standard@0.1.1` (default)
 
 Versioned disputed points: solar-term boundaries for year/month pillars; time base
 (civil/mean/apparent); day boundary (midnight/zi-hour); early/late 子时; luck-cycle direction and
 起运 algorithm. MVP computes only reproducible calendar/structure; 格局/强弱/喜用神 are
 interpretation rules that must carry an explicit source + version.
+
+`0.1.1` corrects the solar-term timebase: year/month pillars and 起运 compare the true instant on
+tyme4ts's UTC+8 solar-term clock, day/hour pillars keep the configured civil/mean/apparent local
+clock, and 起运/大运 year labels follow the Gregorian year of the start date. This is a
+calculation-defect correction, not a new school or new interpretation capability.
+`bazi-standard@0.1.0` is retired: current inputs must omit `rulesetId` or pass
+`bazi-standard@0.1.1`; the old id returns `RULESET_UNSUPPORTED`. The interpretation ruleset
+`bazi-rules-ziping@0.1.0` is unchanged.
 
 ## Zi Wei — `iztro-default@0.1.0`
 

@@ -40,13 +40,18 @@ incorrect; `western-tropical-placidus@0.1.0` remains retired because its Koch-ho
 was corrected. Both return `RULESET_UNSUPPORTED`; remove `rulesetId` to use the current default or
 select `western-tropical-placidus@0.2.1` explicitly.
 
-## BaZi disputed points (`bazi-standard@0.1.0`)
+## BaZi disputed points (`bazi-standard@0.1.1`)
 
 Versioned toggles: solar-term boundaries for year/month pillars; time base
 (`civil | mean | apparent`); day boundary (`midnight | zi-hour`); early/late 子时
 (`early | late`); luck-cycle direction and 起运 algorithm. 格局, 强弱 and 喜用神 are interpretation
 rules (see below): they always carry an explicit source + version and a reason chain — never a
 single "correct answer".
+
+`0.1.1` corrected the solar-term timebase: year/month and 起运 use the true instant on the
+provider's UTC+8 solar-term clock, day/hour keep the selected local clock, and 起运/大运 year
+labels are Gregorian. The retired `bazi-standard@0.1.0` returns `RULESET_UNSUPPORTED`; omit
+`rulesetId` for the current default. `bazi-rules-ziping@0.1.0` is unchanged.
 
 ## Interpretation rules (`interpret`)
 

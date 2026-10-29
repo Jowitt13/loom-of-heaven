@@ -1,6 +1,7 @@
 import { EngineError, ERROR_CODES } from './errors.ts';
 import {
   BAZI_RULESET_CURRENT,
+  BAZI_RULESET_RETIRED,
   WESTERN_RULESET_CURRENT,
   WESTERN_RULESET_RETIRED,
   ZIWEI_RULESET_CURRENT,
@@ -20,7 +21,7 @@ const CURRENT_RULESETS: Readonly<Record<RulesetSystem, string>> = {
 /** Retired ids are rejection/diagnosis inputs only, never executable. */
 const RETIRED_RULESETS: Readonly<Record<RulesetSystem, readonly string[]>> = {
   western: WESTERN_RULESET_RETIRED,
-  bazi: [],
+  bazi: BAZI_RULESET_RETIRED,
   ziwei: [],
   vedic: [],
 };

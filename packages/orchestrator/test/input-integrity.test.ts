@@ -83,6 +83,34 @@ describe('ruleset version authenticity', () => {
     }
   });
 
+  it('rejects the retired bazi-standard@0.1.0 before time/gender early returns', () => {
+    for (const overrides of [
+      {},
+      { localTime: undefined, timeAccuracy: 'unknown', ruleGender: undefined },
+    ]) {
+      const input = parseBirthInput({
+        ...raw,
+        ...overrides,
+        settings: settingsFor('bazi', 'bazi-standard@0.1.0'),
+      });
+      const err = thrownBy(() => calculate(input, { now: FIXED }));
+      expect(err.code).toBe(ERROR_CODES.RULESET_UNSUPPORTED);
+      expect(err.exitCode).toBe(10);
+      expect(err.message).toContain('retired');
+      expect(err.detail).toMatchObject({
+        requestedRuleset: 'bazi-standard@0.1.0',
+        currentRuleset: BAZI_RULESET_CURRENT,
+      });
+    }
+  });
+
+  it('accepts the default and explicit bazi-standard@0.1.1', () => {
+    for (const settings of [{ systems: ['bazi'] }, settingsFor('bazi', 'bazi-standard@0.1.1')]) {
+      const bundle = calculate(parseBirthInput({ ...raw, settings }), { now: FIXED });
+      expect(bundle.bazi?.rulesetId).toBe('bazi-standard@0.1.1');
+    }
+  });
+
   it('accepts the implemented version of every system and records only that version', () => {
     const input = parseBirthInput({ ...raw, settings: { systems: [...ALL_SYSTEMS] } });
     const bundle = calculate(input, { now: FIXED });
@@ -93,7 +121,7 @@ describe('ruleset version authenticity', () => {
     expect(bundle.provenance.rulesets).toEqual(
       expect.arrayContaining([
         { id: 'western-tropical-placidus', version: '0.2.1' },
-        { id: 'bazi-standard', version: '0.1.0' },
+        { id: 'bazi-standard', version: '0.1.1' },
         { id: 'iztro-default', version: '0.1.0' },
         { id: 'vedic-parashara-lahiri', version: '0.1.0' },
       ]),
@@ -120,7 +148,7 @@ describe('BaZi interpretation ruleset provenance', () => {
     const withBazi = runInterpret(parseBirthInput({ ...raw, settings: { systems: ['bazi'] } }), {
       now: FIXED,
     }).interpretation;
-    expect(withBazi.rulesets).toContainEqual({ id: 'bazi-standard', version: '0.1.0' });
+    expect(withBazi.rulesets).toContainEqual({ id: 'bazi-standard', version: '0.1.1' });
     expect(withBazi.rulesets).toContainEqual({ id: 'bazi-rules-ziping', version: '0.1.0' });
 
     const westernOnly = runInterpret(

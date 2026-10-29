@@ -383,7 +383,7 @@ try {
     'calculate records only the implemented rulesets',
     validCalculate.code === 0 &&
       validBundle?.western?.rulesetId === 'western-tropical-placidus@0.2.1' &&
-      validBundle.bazi?.rulesetId === 'bazi-standard@0.1.0' &&
+      validBundle.bazi?.rulesetId === 'bazi-standard@0.1.1' &&
       validBundle.ziwei?.rulesetId === 'iztro-default@0.1.0' &&
       validBundle.vedic?.rulesetId === 'vedic-parashara-lahiri@0.1.0' &&
       validBundle.provenance?.rulesets?.some(
@@ -532,7 +532,7 @@ try {
         (ruleset) => ruleset.id === 'bazi-rules-ziping' && ruleset.version === '0.1.0',
       ) === true &&
       interpretationRulesets?.some(
-        (ruleset) => ruleset.id === 'bazi-standard' && ruleset.version === '0.1.0',
+        (ruleset) => ruleset.id === 'bazi-standard' && ruleset.version === '0.1.1',
       ) === true,
   );
 
