@@ -3,7 +3,7 @@ import { canonicalJson, EngineError, parseBirthInput, type BirthInput } from '@l
 import { describe, expect, it } from 'vitest';
 import { runBaziCareerRuntime } from '../src/bazi-career-runtime.ts';
 import { runBaziCareerRuntime as entryExport } from '../src/engine-entry.ts';
-import { runAnswerPlan } from '../src/interpret.ts';
+import { runAnswerPlan, runInterpret } from '../src/interpret.ts';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
 
@@ -137,18 +137,32 @@ describe('IQ-4F explicit bazi-career runtime entry', () => {
     expect(entryExport).toBe(runBaziCareerRuntime);
   });
 
-  it('retains multi-system career facts for explicitly requested technical explanation', () => {
-    const { publicResult } = runAnswerPlan(syntheticInput, {
-      now: FIXED,
-      topic: 'career',
-      lens: 'explain',
-    });
+  it('retains multi-system technical facts without granting explain extra career permission', () => {
+    const { interpretation } = runInterpret(
+      parseBirthInput({
+        ...syntheticInput,
+        settings: { ...syntheticInput.settings, systems: ['western', 'bazi', 'ziwei', 'vedic'] },
+      }),
+      { now: FIXED },
+    );
     const systems = new Set(
-      publicResult.facts.flatMap((fact) => fact.evidence.map((evidence) => evidence.kind)),
+      interpretation.facts
+        .filter((fact) => fact.topic === 'career')
+        .flatMap((fact) => fact.evidence.map((evidence) => evidence.kind)),
     );
     expect(systems.has('bazi')).toBe(true);
     expect(systems.has('western')).toBe(true);
     expect(systems.has('ziwei')).toBe(true);
     expect(systems.has('vedic')).toBe(true);
+    const { answerPlan } = runAnswerPlan(syntheticInput, {
+      now: FIXED,
+      topic: 'career',
+      lens: 'explain',
+    });
+    expect(
+      answerPlan.selectedFacts.every((fact) =>
+        fact.evidence.every((e) => e.kind === 'bazi' || e.kind === 'bazi-rule'),
+      ),
+    ).toBe(true);
   });
 });

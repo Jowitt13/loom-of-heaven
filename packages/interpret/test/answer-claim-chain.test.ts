@@ -34,8 +34,8 @@ function context(): ClaimChainContext {
     facts: [
       {
         id: 'fact-1',
-        topic: 'career',
-        claim: '合成八字结构提示：工作安排宜保留可复盘的迭代空间。',
+        topic: 'character',
+        claim: '合成八字结构事实：用于测试单体系证据链接。',
         evidence: [
           { kind: 'bazi-rule', ref: 'bazi-rule/strength' },
           { kind: 'bazi', ref: 'bazi.dayMaster' },
@@ -44,8 +44,8 @@ function context(): ClaimChainContext {
       },
       {
         id: 'fact-2',
-        topic: 'career',
-        claim: '合成西方结构提示：职业选择需结合现实资源与反馈再调整。',
+        topic: 'character',
+        claim: '合成西方结构事实：用于测试另一个体系的证据链接。',
         evidence: [{ kind: 'western-rule', ref: 'western-rule/planet-sign/sun-pisces' }],
       },
       {
@@ -62,9 +62,9 @@ function context(): ClaimChainContext {
     disclaimers: [],
     followupOffers: [],
   });
-  // This synthetic fixture exercises multi-system technical linkage, not the
-  // ADR 0021 ordinary-career body. Keep every linkage/negative assertion intact.
-  const answerPlan = buildAnswerPlan(fullPublicResult, { topic: 'career', lens: 'explain' });
+  // Multi-system linkage stays outside the ADR 0021 career-only cultural slice;
+  // explain is a presentation choice, not a permission to bypass admission.
+  const answerPlan = buildAnswerPlan(fullPublicResult, { topic: 'character', lens: 'explain' });
   return {
     publicResult: { ...fullPublicResult, facts: answerPlan.selectedFacts },
     answerPlan,
@@ -98,7 +98,7 @@ describe('IQ-1A internal answer claim chain', () => {
       [{ id: 'bazi-synthetic-evaluation', version: 'v1' }],
       [{ id: 'western-synthetic-evaluation', version: 'v1' }],
     ]);
-    expect(candidates.every((candidate) => candidate.topic === 'career')).toBe(true);
+    expect(candidates.every((candidate) => candidate.topic === 'character')).toBe(true);
     expect(candidates[0]!.constraintRefs).toEqual([{ kind: 'caveat', index: 0 }]);
     expect(candidates[1]!.constraintRefs).toEqual([]);
     expect(verifyAnswerClaimCandidates(chainContext, candidates)).toEqual({ ok: true, issues: [] });
@@ -197,7 +197,7 @@ describe('IQ-1A internal answer claim chain', () => {
       contractVersion: 'narrative-trace/v1',
       traceId: 'narrative-trace:paragraph-1',
       paragraphId: 'paragraph-1',
-      topic: 'career',
+      topic: 'character',
       approvedClaimIds: approvedClaims.map((claim) => claim.claimId),
       factRefs: approvedClaims.flatMap((claim) => claim.factRefs),
       mechanismRefs: approvedClaims.flatMap((claim) => claim.mechanismRefs),
@@ -224,7 +224,7 @@ describe('IQ-1A internal answer claim chain', () => {
       contractVersion: 'narrative-trace/v1',
       traceId: 'narrative-trace:paragraph-1',
       paragraphId: 'paragraph-1',
-      topic: 'career',
+      topic: 'character',
       approvedClaimIds: approvedClaims.map((claim) => claim.claimId),
       factRefs: approvedClaims.flatMap((claim) => claim.factRefs),
       mechanismRefs: approvedClaims.flatMap((claim) => claim.mechanismRefs),

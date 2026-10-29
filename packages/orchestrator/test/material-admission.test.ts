@@ -2,8 +2,9 @@
 import { describe, expect, it } from 'vitest';
 import { parseBirthInput } from '@loom/contracts';
 import type { AnswerLens, InterpretationTopic, PublicFact, PublicResult } from '@loom/contracts';
-import { buildAnswerPlan } from '@loom/interpret';
-import { runAnswerPlan, runInterpret } from '@loom/orchestrator';
+import { buildAnswerPlan, buildInterpretationFacts } from '@loom/interpret';
+import { calculate, runAnswerPlan, runInterpret } from '@loom/orchestrator';
+import { industryFinding, interpretBazi } from '../../bazi-rules/src/index.ts';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
 const input = parseBirthInput({
@@ -24,6 +25,7 @@ const WITHHELD_PREFIXES = [
   'bazi-rule/relations',
   'bazi-rule/shensha',
   'bazi-rule/marriage-timing',
+  'bazi-rule/fortune',
 ] as const;
 
 function hasWithheldMechanism(fact: PublicFact | { evidence: Array<{ ref: string }> }): boolean {
@@ -58,7 +60,7 @@ describe('default-answer material admission', () => {
       publicResult.facts.map((fact) => fact.id),
     );
 
-    // The annual timeline is technical by default and appears only with explicit `at`.
+    // An explicit target controls technical chronology, never source admission.
     const publicRefs = publicResult.facts.flatMap((fact) =>
       fact.evidence.map((evidence) => evidence.ref),
     );
@@ -80,7 +82,7 @@ describe('default-answer material admission', () => {
     }
   });
 
-  it('admits the annual timeline only when the caller supplies an explicit target', () => {
+  it('does not use an explicit target as permission for withheld timing material', () => {
     const withoutAt = runAnswerPlan(input, { now: FIXED, topic: 'general' }).publicResult;
     expect(
       withoutAt.facts.some((fact) =>
@@ -97,11 +99,16 @@ describe('default-answer material admission', () => {
       withAt.facts.some((fact) =>
         fact.evidence.some((evidence) => evidence.ref.startsWith('bazi-rule/fortune/')),
       ),
-    ).toBe(true);
-    const years = withAt.facts
+    ).toBe(false);
+    const technical = runInterpret(input, {
+      now: FIXED,
+      at: { solarDate: '2036-05-20', timeIndex: 7 },
+    }).interpretation;
+    const years = technical.facts
       .map((fact) => /^(\d{4})\(/.exec(fact.claim)?.[1])
       .filter((year): year is string => year !== undefined);
     expect(years[0]).toBe('2036');
+    expect(years).not.toContain('2026');
   });
 
   it('keeps withheld material out for every topic and lens', () => {
@@ -176,6 +183,24 @@ describe('default-answer material admission', () => {
         { kind: 'bazi-rule', ref: 'bazi-rule/ten-gods/xiang-yi' },
         { kind: 'bazi', ref: 'bazi.pillars.year.tenGod' },
       ]),
+      syntheticFact('fact-908', [
+        { kind: 'western', ref: 'western.planets[NotARealPlanet].unimplemented' },
+      ]),
+      syntheticFact('fact-909', [
+        { kind: 'bazi-rule', ref: 'bazi-rule/ten-gods/xiang-yi/unadmitted-child' },
+      ]),
+      syntheticFact('fact-910', [
+        { kind: 'bazi-rule', ref: 'western-rule/planet-sign/sun-pisces' },
+      ]),
+      syntheticFact('fact-911', []),
+      syntheticFact('fact-912', [
+        { kind: 'bazi-rule', ref: 'bazi-rule/strength/unadmitted-child' },
+      ]),
+      syntheticFact('fact-913', [{ kind: 'vedic-rule', ref: 'vedic-rule/bhava/whole-sign-13' }]),
+      syntheticFact('fact-914', [
+        { kind: 'western-rule', ref: 'western-rule/planet-sign/sun-unknown' },
+      ]),
+      syntheticFact('fact-915', [{ kind: 'time', ref: 'time.invented' }]),
     ];
     const admittedProbe = syntheticFact('fact-906', [
       { kind: 'western-rule', ref: 'western-rule/planet-sign/sun-pisces' },
@@ -208,10 +233,42 @@ describe('default-answer material admission', () => {
       topic: 'career',
       lens: 'explain',
     }).answerPlan;
-    expect(explain.selectedFacts.length).toBeGreaterThanOrEqual(career.selectedFacts.length);
+    expect(explain.selectedFacts).toEqual(career.selectedFacts);
     for (const fact of explain.selectedFacts) {
       expect(fact.topic).toBe('career');
       expect(hasWithheldMechanism(fact)).toBe(false);
     }
+    const general = runAnswerPlan(input, { now: FIXED, topic: 'general' }).answerPlan;
+    expect(general.selectedFacts.filter((fact) => fact.topic === 'career')).toEqual(
+      career.selectedFacts,
+    );
+  });
+
+  it('consumes an unmatched industry finding without changing the frozen rule', () => {
+    // Synthetic mechanism fixture, not an astronomical/chart correctness claim.
+    const bundle = calculate(input, { now: FIXED });
+    const bazi = bundle.bazi!;
+    bazi.dayMaster = { stem: '甲', element: '木', yinYang: '阳' };
+    for (const pillar of Object.values(bazi.pillars)) {
+      if (!pillar) continue;
+      pillar.tenGod = null;
+      pillar.hiddenStems = [{ stem: '丁', element: '火', tenGod: '伤官', primary: true }];
+    }
+    bazi.pillars.month.hiddenStems = [{ stem: '壬', element: '水', tenGod: '偏印', primary: true }];
+    const finding = industryFinding(bazi);
+    expect(finding.matched).toBe(false);
+    // The existing versioned producer remains byte-for-byte unchanged; its
+    // unmatched proposal is deliberately not a delivered affirmative finding.
+    expect(finding.claim).toContain('适合行业方向(按喜用五行)');
+    const useful = interpretBazi(bazi).findings.find((f) => f.topic === 'useful-god')!;
+    expect(useful.matched).toBe(false);
+    expect(useful.claim).toContain('不妄断');
+    const technical = buildInterpretationFacts(bundle);
+    const industry = technical.facts.find((fact) =>
+      fact.evidence.some((e) => e.ref === 'bazi-rule/industry/wu-xing'),
+    )!;
+    expect(industry.claim).toBe('行业规则未命中，未提供行业结论。');
+    expect(industry.reason).toContain('matched=false');
+    expect(JSON.stringify(industry)).not.toMatch(/金融|地产|能源|文教|贸易/);
   });
 });

@@ -18,27 +18,19 @@ const INDUSTRY: Record<Element, string> = {
 
 export function industryFinding(bazi: BaziChartResult): BaziRuleFinding {
   const s = assessStrength(bazi);
-  // Balanced strength does not name a useful-god direction; do not turn an
-  // unmatched finding into an affirmative industry list.
-  if (s.verdict === 'balanced') {
-    return {
-      ruleId: 'industry/wu-xing',
-      topic: 'useful-god',
-      matched: false,
-      claim: '适合行业方向：日主中和，喜用未定，行业方向须结合格局与调候另定（本规则不妄断）',
-      source: { text: '三命通会', chapter: '论五行' },
-      reason: '日主中和，扶抑不足以单定喜用；行业方向须结合格局与调候另定，本规则不妄断。',
-    };
-  }
   const el = elementsByRelation(bazi.dayMaster.element as Element);
   const favored: Element[] =
-    s.verdict === 'strong' ? [el.output, el.wealth, el.officer] : [el.resource, el.same];
+    s.verdict === 'strong'
+      ? [el.output, el.wealth, el.officer]
+      : s.verdict === 'weak'
+        ? [el.resource, el.same]
+        : [el.output, el.resource];
   const uniq = [...new Set(favored)];
   const list = uniq.map((e) => `${e}(${INDUSTRY[e]})`).join('；');
   return {
     ruleId: 'industry/wu-xing',
     topic: 'useful-god',
-    matched: true,
+    matched: s.verdict !== 'balanced',
     claim: `适合行业方向(按喜用五行)：${list}`,
     source: { text: '三命通会', chapter: '论五行' },
     reason:

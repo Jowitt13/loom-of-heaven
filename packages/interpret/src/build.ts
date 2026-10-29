@@ -609,9 +609,12 @@ function followupFacts(bundle: ChartBundle, focusYear: number): InterpretationFa
   // 适合行业 (喜用五行→行业大类). ADR 0021: technical follow-up only — never
   // a default career-body claim (IQ-4H source gate).
   const ind = industryFinding(b);
+  // The frozen finding can carry a proposal even when matched=false. Consume
+  // its state, not that proposal; do not silently revise the versioned rule.
+  const industryClaim = ind.matched ? ind.claim : '行业规则未命中，未提供行业结论。';
   out.push(
-    fact('general', ind.claim, [ev('bazi-rule', `bazi-rule/${ind.ruleId}`, ind.claim)], {
-      reason: ind.reason,
+    fact('general', industryClaim, [ev('bazi-rule', `bazi-rule/${ind.ruleId}`, industryClaim)], {
+      reason: ind.matched ? ind.reason : 'matched=false；不将未命中规则的候选文本作为肯定结论。',
       caveat: '行业为参考方向，非唯一；需结合兴趣与现实。',
     }),
   );
