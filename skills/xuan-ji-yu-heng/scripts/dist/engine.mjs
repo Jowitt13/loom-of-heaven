@@ -45565,8 +45565,11 @@ var GeoLocation = external_exports.strictObject({
   /** Where the coordinates came from; geocoder use requires separate consent. */
   source: external_exports.enum(["user", "geocoder", "import"])
 });
-var WESTERN_RULESET_CURRENT = "western-tropical-placidus@0.2.0";
-var WESTERN_RULESET_RETIRED = ["western-tropical-placidus@0.1.0"];
+var WESTERN_RULESET_CURRENT = "western-tropical-placidus@0.2.1";
+var WESTERN_RULESET_RETIRED = [
+  "western-tropical-placidus@0.2.0",
+  "western-tropical-placidus@0.1.0"
+];
 var WesternSettings = external_exports.strictObject({
   rulesetId: external_exports.string().default(WESTERN_RULESET_CURRENT),
   zodiac: external_exports.enum(["tropical", "sidereal"]).default("tropical"),

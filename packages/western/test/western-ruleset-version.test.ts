@@ -1,7 +1,8 @@
 // Tests for the western-tropical-placidus ruleset version lifecycle:
-// - Default rulesetId is 0.2.0
-// - Explicit 0.2.0 works
-// - Retired 0.1.0 is rejected with RULESET_UNSUPPORTED
+// - Default rulesetId is 0.2.1
+// - Explicit 0.2.1 works
+// - Retired 0.2.0 and 0.1.0 are rejected with RULESET_UNSUPPORTED
+// - The retirement check also runs on the unknown-time path
 // - Error message structure is stable and does not leak internals
 import { describe, expect, it } from 'vitest';
 import {
@@ -33,22 +34,29 @@ const SYNTHETIC_INPUT = NormalizedBirthData.parse({
   tzdb: { version: '2024a', source: 'moment-timezone' },
 });
 
+/** Same instant with an unknown birth time; no angles/houses are produced. */
+const UNKNOWN_TIME_INPUT = NormalizedBirthData.parse({
+  ...SYNTHETIC_INPUT,
+  timeAccuracy: 'unknown',
+  timeKnown: false,
+});
+
 describe('western ruleset version lifecycle', () => {
-  it('default rulesetId is western-tropical-placidus@0.2.0', () => {
+  it('default rulesetId is western-tropical-placidus@0.2.1', () => {
     const parsed = WesternSettings.parse({});
-    expect(parsed.rulesetId).toBe('western-tropical-placidus@0.2.0');
+    expect(parsed.rulesetId).toBe('western-tropical-placidus@0.2.1');
     expect(parsed.rulesetId).toBe(WESTERN_RULESET_CURRENT);
   });
 
-  it('explicit western-tropical-placidus@0.2.0 computes successfully', () => {
-    const settings = WesternSettings.parse({ rulesetId: 'western-tropical-placidus@0.2.0' });
+  it('explicit western-tropical-placidus@0.2.1 computes successfully', () => {
+    const settings = WesternSettings.parse({ rulesetId: 'western-tropical-placidus@0.2.1' });
     const { result } = computeWestern(SYNTHETIC_INPUT, settings);
     expect(result).not.toBeNull();
-    expect(result!.rulesetId).toBe('western-tropical-placidus@0.2.0');
+    expect(result!.rulesetId).toBe('western-tropical-placidus@0.2.1');
   });
 
-  it('retired western-tropical-placidus@0.1.0 is stably rejected', () => {
-    const settings = WesternSettings.parse({ rulesetId: 'western-tropical-placidus@0.1.0' });
+  it.each(WESTERN_RULESET_RETIRED)('retired %s is stably rejected', (retired) => {
+    const settings = WesternSettings.parse({ rulesetId: retired });
     let thrown: unknown;
     try {
       computeWestern(SYNTHETIC_INPUT, settings);
@@ -58,13 +66,29 @@ describe('western ruleset version lifecycle', () => {
     expect(thrown).toBeInstanceOf(EngineError);
     const err = thrown as EngineError;
     expect(err.code).toBe(ERROR_CODES.RULESET_UNSUPPORTED);
-    // Error includes migration guidance
-    expect(err.message).toContain('0.2.0');
+    expect(err.message).toContain(retired);
+    expect(err.message).toContain(WESTERN_RULESET_CURRENT);
     expect(err.message).toContain('retired');
   });
 
-  it('error from retired ruleset does not leak internal implementation details', () => {
-    const settings = WesternSettings.parse({ rulesetId: 'western-tropical-placidus@0.1.0' });
+  it('retired versions are rejected before the unknown-time path', () => {
+    for (const retired of WESTERN_RULESET_RETIRED) {
+      const settings = WesternSettings.parse({ rulesetId: retired });
+      let thrown: unknown;
+      try {
+        computeWestern(UNKNOWN_TIME_INPUT, settings);
+      } catch (e) {
+        thrown = e;
+      }
+      expect(thrown).toBeInstanceOf(EngineError);
+      expect((thrown as EngineError).code).toBe(ERROR_CODES.RULESET_UNSUPPORTED);
+    }
+  });
+
+  it('error from a retired ruleset does not leak internal implementation details', () => {
+    const settings = WesternSettings.parse({
+      rulesetId: 'western-tropical-placidus@0.2.0',
+    });
     let message = '';
     try {
       computeWestern(SYNTHETIC_INPUT, settings);
@@ -92,7 +116,8 @@ describe('western ruleset version lifecycle', () => {
     expect(err.message).not.toMatch(/\.ts:|at \w+|node_modules/);
   });
 
-  it('WESTERN_RULESET_RETIRED contains 0.1.0', () => {
+  it('WESTERN_RULESET_RETIRED contains 0.2.0 and 0.1.0', () => {
+    expect(WESTERN_RULESET_RETIRED).toContain('western-tropical-placidus@0.2.0');
     expect(WESTERN_RULESET_RETIRED).toContain('western-tropical-placidus@0.1.0');
   });
 });

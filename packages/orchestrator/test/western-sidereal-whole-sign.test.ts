@@ -1,6 +1,13 @@
 // Synthetic fixture — fictional data only; not a real person.
 import { describe, expect, it } from 'vitest';
-import { canonicalJson, parseBirthInput } from '@loom/contracts';
+import {
+  ERROR_CODES,
+  EngineError,
+  WESTERN_RULESET_CURRENT,
+  WESTERN_RULESET_RETIRED,
+  canonicalJson,
+  parseBirthInput,
+} from '@loom/contracts';
 import type { BirthInputRaw, WesternSettings } from '@loom/contracts';
 import { calculate, runAnswerPlan, runInterpret } from '@loom/orchestrator';
 
@@ -42,6 +49,7 @@ describe('sidereal whole-sign houses', () => {
     const w = chart();
     expect(w.zodiac).toBe('sidereal');
     expect(w.houseSystem).toBe('whole-sign');
+    expect(w.rulesetId).toBe('western-tropical-placidus@0.2.1');
     expect(w.angles!.ascendant.longitudeDeg).toBeCloseTo(246.288575, 3);
     expect(w.houses[0]!.cuspLongitudeDeg).toBe(240);
     for (let i = 0; i < 12; i++) {
@@ -56,6 +64,50 @@ describe('sidereal whole-sign houses', () => {
     // The true angles stay at their real longitudes; only the cusps are sign-anchored.
     expect(w.angles!.ascendant.longitudeDeg).not.toBe(w.houses[0]!.cuspLongitudeDeg);
     expect(w.angles!.mc.longitudeDeg).not.toBe(w.houses[9]!.cuspLongitudeDeg);
+  });
+
+  it('records the migrated ruleset in result and provenance', () => {
+    const bundle = calculate(parseBirthInput(base), { now: FIXED });
+    expect(bundle.western?.rulesetId).toBe(WESTERN_RULESET_CURRENT);
+    expect(WESTERN_RULESET_CURRENT).toBe('western-tropical-placidus@0.2.1');
+    expect(bundle.provenance.rulesets).toContainEqual({
+      id: 'western-tropical-placidus',
+      version: '0.2.1',
+    });
+
+    const explicit = chart({ rulesetId: 'western-tropical-placidus@0.2.1' });
+    expect(explicit.rulesetId).toBe('western-tropical-placidus@0.2.1');
+    expect(explicit.houses[0]!.cuspLongitudeDeg).toBe(240);
+  });
+
+  it('rejects both retired Western versions, including with unknown time', () => {
+    for (const retired of WESTERN_RULESET_RETIRED) {
+      for (const timeAccuracy of ['exact', 'unknown'] as const) {
+        const input = parseBirthInput({
+          ...base,
+          timeAccuracy,
+          localTime: timeAccuracy === 'unknown' ? undefined : base.localTime,
+          settings: {
+            ...base.settings,
+            western: {
+              ...(base.settings!.western as object),
+              rulesetId: retired,
+            },
+          },
+        });
+        let thrown: unknown;
+        try {
+          calculate(input, { now: FIXED });
+        } catch (e) {
+          thrown = e;
+        }
+        expect(thrown).toBeInstanceOf(EngineError);
+        const err = thrown as EngineError;
+        expect(err.code).toBe(ERROR_CODES.RULESET_UNSUPPORTED);
+        expect(err.message).toContain(retired);
+        expect(err.message).toContain(WESTERN_RULESET_CURRENT);
+      }
+    }
   });
 
   it('assigns every plotted point with the same whole-sign ring', () => {

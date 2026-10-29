@@ -8,7 +8,7 @@ roadmap.
 
 ## Versioning policy
 
-- Ruleset ids are `name@semver`, e.g. `western-tropical-placidus@0.2.0`, `bazi-standard@0.1.0`,
+- Ruleset ids are `name@semver`, e.g. `western-tropical-placidus@0.2.1`, `bazi-standard@0.1.0`,
   `iztro-default@0.1.0`.
 - Any change that can alter output bumps the ruleset version; the previous id keeps its meaning.
 - The four-transformations table, star-brightness table and solar-term source each carry their
@@ -21,15 +21,23 @@ instant, so `compare` reports identical normalized time and any chart-level diff
 attributable to the selected settings, not an invented time conversion. Implemented in
 `packages/orchestrator/src/compare.ts`.
 
-## Western — `western-tropical-placidus@0.2.0` (default)
+## Western — `western-tropical-placidus@0.2.1` (default)
 
 Tropical, geocentric, Placidus, true node. Configurable: house system (whole-sign/equal/koch/
 porphyry), sidereal + ayanamsha, mean node, aspect set + orb (Phase 2). High-latitude
 quadrant-house failure must raise `HOUSE_SYSTEM_UNAVAILABLE`, never a silent switch.
 
-`western-tropical-placidus@0.1.0` is retired because its Koch-house calculation was corrected.
-Current inputs must omit `rulesetId` or pass `western-tropical-placidus@0.2.0`; the old id
-returns `RULESET_UNSUPPORTED` instead of silently changing its historical meaning.
+`western-tropical-placidus@0.2.1` corrects sidereal + whole-sign: the twelve cusps are anchored
+to the sidereal Ascendant's sign, and the same ring places every plotted point; Asc/MC keep their
+true longitudes. Tropical and the other house systems are unchanged by this correction, and the
+ayanamsha model gains no new precision claim. A source fix does not by itself update a published
+package or an installed host.
+
+`western-tropical-placidus@0.2.0` is retired because its sidereal whole-sign partition was
+incorrect; `western-tropical-placidus@0.1.0` remains retired because its Koch-house calculation
+was corrected. Both return `RULESET_UNSUPPORTED`. Current inputs must omit `rulesetId` or pass
+`western-tropical-placidus@0.2.1` explicitly; neither old id silently keeps an alternative
+calculation.
 
 ## BaZi — `bazi-standard@0.1.0`
 

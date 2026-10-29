@@ -249,7 +249,7 @@
           "ayanamsha": "lahiri",
           "houseSystem": "placidus",
           "nodes": "true",
-          "rulesetId": "western-tropical-placidus@0.2.0",
+          "rulesetId": "western-tropical-placidus@0.2.1",
           "zodiac": "tropical"
         },
         "ziwei": {
@@ -291,7 +291,7 @@
       "rulesets": [
         {
           "id": "western-tropical-placidus",
-          "version": "0.2.0"
+          "version": "0.2.1"
         },
         {
           "id": "bazi-standard",
@@ -311,7 +311,7 @@
         "version": "2026c"
       }
     },
-    "requestId": "req_b723b87d35913162",
+    "requestId": "req_a4bc583f4210655b",
     "schemaVersion": "0.1.0",
     "vedic": {
       "ayanamsha": {
@@ -1417,7 +1417,7 @@
         "license": "MIT",
         "version": "2.1.19"
       },
-      "rulesetId": "western-tropical-placidus@0.2.0",
+      "rulesetId": "western-tropical-placidus@0.2.1",
       "zodiac": "tropical"
     },
     "ziwei": {

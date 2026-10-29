@@ -52,9 +52,12 @@ export const GeoLocation = z.strictObject({
 export type GeoLocation = z.infer<typeof GeoLocation>;
 
 /** Western defaults: tropical zodiac, Placidus houses, true node (handoff §5.1). */
-export const WESTERN_RULESET_CURRENT = 'western-tropical-placidus@0.2.0';
+export const WESTERN_RULESET_CURRENT = 'western-tropical-placidus@0.2.1';
 /** Retired ruleset ids that are no longer computed (returns RULESET_UNSUPPORTED). */
-export const WESTERN_RULESET_RETIRED = ['western-tropical-placidus@0.1.0'] as const;
+export const WESTERN_RULESET_RETIRED = [
+  'western-tropical-placidus@0.2.0',
+  'western-tropical-placidus@0.1.0',
+] as const;
 export const WesternSettings = z.strictObject({
   rulesetId: z.string().default(WESTERN_RULESET_CURRENT),
   zodiac: z.enum(['tropical', 'sidereal']).default('tropical'),
