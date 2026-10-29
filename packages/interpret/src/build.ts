@@ -50,6 +50,15 @@ const FOLLOWUP_OFFERS: string[] = [
 
 export interface InterpretOptions {
   /**
+   * Unknown-time reliability boundary (default on): facts computed from the
+   * internal noon placeholder are withheld unless their evidence is
+   * whole-day-stable, because a legal time-of-day completion could overturn
+   * them. The IQ-4A career journey opts out: it owns the recorded
+   * unknown-time degradation that projects the material and then omits the
+   * whole claim class through the clarification contract.
+   */
+  withholdUnstableUnknownTimeFacts?: boolean;
+  /**
    * Requested target year for per-year facts, independent of whether the Zi Wei
    * dynamic chart could be computed. An explicit target must not be lost merely
    * because Zi Wei lacks a birth time or a gender rule.
@@ -721,6 +730,22 @@ function vedicRuleFacts(rules: VedicInterpretation | null): InterpretationFact[]
   });
 }
 
+/**
+ * A fact may enter an unknown-time reading only when every evidence item is
+ * either a non-chart limitation note or an explicit whole-day-stable marker.
+ * The Vedic layer emits `unknownTimeStable` markers exactly for that purpose;
+ * BaZi and Western facts are derived from the internal noon placeholder and
+ * carry no such marker, so they are withheld instead of presented as certain.
+ */
+function isWholeDayStableFact(fact: InterpretationFact): boolean {
+  return fact.evidence.every(
+    (evidence) =>
+      evidence.kind === 'time' ||
+      evidence.ref.includes('unknownTimeStable') ||
+      /(?:^|\/)day-stable$/.test(evidence.ref),
+  );
+}
+
 /** Build the topic-organized, evidence-grounded interpretation facts for a chart. */
 export function buildInterpretationFacts(
   bundle: ChartBundle,
@@ -779,6 +804,18 @@ export function buildInterpretationFacts(
     );
   }
 
+  // Unknown-time reliability boundary: the BaZi/Western layers computed this chart
+  // from the internal noon placeholder, so none of their facts carry whole-day
+  // stability evidence and a legal time-of-day completion could overturn them.
+  // Only facts whose evidence is itself whole-day-stable (the Vedic
+  // `unknownTimeStable` markers) or non-chart limitation notes survive; accurate
+  // and approximate times keep every existing fact.
+  const readingFacts =
+    bundle.originalInput.timeAccuracy === 'unknown' &&
+    options.withholdUnstableUnknownTimeFacts !== false
+      ? facts.filter(isWholeDayStableFact)
+      : facts;
+
   return {
     schemaVersion: bundle.schemaVersion,
     engineVersion: bundle.engineVersion,
@@ -788,7 +825,7 @@ export function buildInterpretationFacts(
       timezone: bundle.originalInput.timezone,
       calendar: bundle.originalInput.calendar,
     },
-    facts,
+    facts: readingFacts,
     rulesets: [
       ...bundle.provenance.rulesets,
       ...(baziRules ? [{ id: BAZI_RULES_RULESET_NAME, version: baziRules.provider.version }] : []),

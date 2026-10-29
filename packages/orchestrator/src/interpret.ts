@@ -15,6 +15,14 @@ export interface InterpretOptions {
   now?: number;
   /** Optional target solar date + double-hour to also compute the Zi Wei 运限盘. */
   at?: HoroscopeOptions;
+  /**
+   * Unknown-time reliability boundary (default on): facts computed from the
+   * internal noon placeholder are withheld unless their evidence is
+   * whole-day-stable. The IQ-4A career journey opts out because it owns the
+   * recorded unknown-time degradation that projects the material and then
+   * omits the whole claim class through the clarification contract.
+   */
+  withholdUnstableUnknownTimeFacts?: boolean;
 }
 
 export interface AnswerPlanOptions extends InterpretOptions {
@@ -58,6 +66,9 @@ function runInterpretation(input: BirthInput, options: InterpretOptions): Interp
   const interpretation = buildInterpretationFacts(bundle, {
     ...(targetYear !== undefined ? { targetYear } : {}),
     horoscope: horoscopeRun?.horoscope ?? null,
+    ...(options.withholdUnstableUnknownTimeFacts === false
+      ? { withholdUnstableUnknownTimeFacts: false }
+      : {}),
   });
   return {
     bundle,

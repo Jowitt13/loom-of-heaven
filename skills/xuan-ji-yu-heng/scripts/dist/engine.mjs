@@ -62569,6 +62569,11 @@ function vedicRuleFacts(rules) {
     );
   });
 }
+function isWholeDayStableFact(fact2) {
+  return fact2.evidence.every(
+    (evidence) => evidence.kind === "time" || evidence.ref.includes("unknownTimeStable") || /(?:^|\/)day-stable$/.test(evidence.ref)
+  );
+}
 function buildInterpretationFacts(bundle, options = {}) {
   const focusYear = options.targetYear ?? (options.horoscope ? new Date(options.horoscope.targetSolarDate).getUTCFullYear() : new Date(bundle.calculatedAt).getUTCFullYear());
   const baziRules = bundle.bazi ? interpretBazi(bundle.bazi, { focusYear }) : null;
@@ -62610,6 +62615,7 @@ function buildInterpretationFacts(bundle, options = {}) {
       )
     );
   }
+  const readingFacts = bundle.originalInput.timeAccuracy === "unknown" && options.withholdUnstableUnknownTimeFacts !== false ? facts.filter(isWholeDayStableFact) : facts;
   return {
     schemaVersion: bundle.schemaVersion,
     engineVersion: bundle.engineVersion,
@@ -62619,7 +62625,7 @@ function buildInterpretationFacts(bundle, options = {}) {
       timezone: bundle.originalInput.timezone,
       calendar: bundle.originalInput.calendar
     },
-    facts,
+    facts: readingFacts,
     rulesets: [
       ...bundle.provenance.rulesets,
       ...baziRules ? [{ id: BAZI_RULES_RULESET_NAME, version: baziRules.provider.version }] : [],
@@ -64275,7 +64281,8 @@ function runInterpretation(input2, options) {
   const targetYear = targetYearFrom(options.at);
   const interpretation = buildInterpretationFacts(bundle, {
     ...targetYear !== void 0 ? { targetYear } : {},
-    horoscope: horoscopeRun?.horoscope ?? null
+    horoscope: horoscopeRun?.horoscope ?? null,
+    ...options.withholdUnstableUnknownTimeFacts === false ? { withholdUnstableUnknownTimeFacts: false } : {}
   });
   return {
     bundle,
@@ -65205,7 +65212,11 @@ function runBaziCareerJourney(rawInput, options) {
   }
   const { publicResult, answerPlan } = runAnswerPlan(birthInput, {
     now: options.now,
-    topic: "career"
+    topic: "career",
+    // The journey owns the recorded unknown-time degradation: it projects the
+    // material and omits the whole chart-derived claim class through the
+    // clarification contract, so it needs the facts before that omission.
+    withholdUnstableUnknownTimeFacts: false
   });
   const context = { publicResult, answerPlan };
   const approval = approveAnswerClaimCandidates(

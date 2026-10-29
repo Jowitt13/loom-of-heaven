@@ -96,6 +96,10 @@ export function runBaziCareerJourney(
   const { publicResult, answerPlan } = runAnswerPlan(birthInput, {
     now: options.now,
     topic: 'career',
+    // The journey owns the recorded unknown-time degradation: it projects the
+    // material and omits the whole chart-derived claim class through the
+    // clarification contract, so it needs the facts before that omission.
+    withholdUnstableUnknownTimeFacts: false,
   });
   const context = { publicResult, answerPlan };
   const approval = approveAnswerClaimCandidates(
