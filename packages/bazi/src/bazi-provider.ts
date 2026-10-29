@@ -1,5 +1,10 @@
 import { ChildLimit, Gender, HeavenStem, SixtyCycle, SolarTime } from 'tyme4ts';
-import { WARNING_CODES, makeWarning } from '@loom/contracts';
+import {
+  BAZI_RULESET_CURRENT,
+  WARNING_CODES,
+  assertSupportedRuleset,
+  makeWarning,
+} from '@loom/contracts';
 import type {
   BaziChartResult,
   BaziMajorCycle,
@@ -93,6 +98,7 @@ export function computeBazi(
   settings: BaziSettings,
   ruleGender: 'male' | 'female' | 'unspecified' | undefined,
 ): { result: BaziChartResult; warnings: EngineWarning[] } {
+  assertSupportedRuleset('bazi', settings.rulesetId);
   const warnings: EngineWarning[] = [];
 
   // Choose the local time base. Solar modes only apply when the time is known.
@@ -148,7 +154,7 @@ export function computeBazi(
   const luckCycle = computeLuckCycle(solarTime, normalized, ruleGender, warnings);
 
   const result: BaziChartResult = {
-    rulesetId: settings.rulesetId,
+    rulesetId: BAZI_RULESET_CURRENT,
     provider: PROVIDER,
     solarTimeApplied,
     dayBoundaryApplied: 'zi-hour/late (tyme4ts default)',

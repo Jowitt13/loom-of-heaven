@@ -277,6 +277,203 @@ try {
     dynamicAnswer.code === 0 && !dynamicAnswer.stdout.includes(targetDate),
   );
 
+  // Input-date and ruleset-version integrity through the real CLI entry.
+  const integrityBase = {
+    calendar: 'gregorian',
+    localDate: '2000-02-29',
+    localTime: '08:30',
+    timeAccuracy: 'exact',
+    timezone: 'Asia/Shanghai',
+    location: { latitude: 31.23, longitude: 121.47, source: 'user' },
+    ruleGender: 'male',
+    settings: { systems: ['western', 'bazi', 'ziwei', 'vedic'] },
+  };
+  const writeIntegrity = (name: string, value: unknown): string => {
+    writeFileSync(join(tempSkill, name), JSON.stringify(value));
+    return name;
+  };
+  const invalidDate = '2023-02-29';
+  const invalidDateFile = writeIntegrity('integrity-invalid-date.json', {
+    ...integrityBase,
+    localDate: invalidDate,
+  });
+  const fakeRulesetFile = writeIntegrity('integrity-fake-ruleset.json', {
+    ...integrityBase,
+    localDate: '1990-06-15',
+    settings: { systems: ['bazi'], bazi: { rulesetId: 'review-nonexistent@9.9.9' } },
+  });
+  const validLeapFile = writeIntegrity('integrity-valid-leap.json', integrityBase);
+  const lunarFile = writeIntegrity('integrity-lunar.json', {
+    ...integrityBase,
+    calendar: 'lunar',
+    localDate: '2023-02-30',
+    lunarLeapMonth: false,
+  });
+  const synastryPersonB = {
+    label: 'B',
+    relation: 'friend',
+    input: { ...integrityBase, localDate: '1990-06-15' },
+  };
+  const synastryValidFile = writeIntegrity('integrity-synastry-valid.json', {
+    people: [{ label: 'A', relation: 'friend', input: integrityBase }, synastryPersonB],
+  });
+  const synastryInvalidFile = writeIntegrity('integrity-synastry-invalid.json', {
+    people: [
+      { label: 'A', relation: 'friend', input: integrityBase },
+      {
+        ...synastryPersonB,
+        input: { ...integrityBase, localDate: invalidDate },
+      },
+    ],
+  });
+
+  const invalidDateCommands: ReadonlyArray<readonly [string, string, ...string[]]> = [
+    ['normalize', invalidDateFile],
+    ['calculate', invalidDateFile],
+    ['interpret', invalidDateFile],
+    ['answer-plan', invalidDateFile, '--topic', 'general'],
+    ['synastry', synastryInvalidFile],
+  ];
+  for (const [command, file, ...extra] of invalidDateCommands) {
+    const result = runNode(tempSkill, [
+      'scripts/loom-chart.mjs',
+      command,
+      '--input-file',
+      file,
+      ...extra,
+    ]);
+    record(
+      `${command} rejects a nonexistent Gregorian date (exit 2, no echo)`,
+      result.code === 2 &&
+        /"code":\s*"INPUT_VALIDATION_FAILED"/.test(result.stdout) &&
+        !result.stdout.includes(invalidDate) &&
+        !result.stderr.includes(invalidDate) &&
+        !/\bat\s+\w+.*\.ts:\d+/.test(result.stderr),
+    );
+  }
+
+  const validCalculate = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'calculate',
+    '--input-file',
+    validLeapFile,
+    '--now',
+    FIXED_NOW,
+  ]);
+  const validBundle = (
+    JSON.parse(validCalculate.stdout) as {
+      bundle?: {
+        normalizedTime?: { localCivil?: string; utcInstant?: string };
+        western?: { rulesetId?: string };
+        bazi?: { rulesetId?: string };
+        ziwei?: { rulesetId?: string };
+        vedic?: { rulesetId?: string };
+      };
+    }
+  ).bundle;
+  const normalizedTime = validBundle?.normalizedTime;
+  record(
+    'calculate accepts 2000-02-29 with consistent local and UTC time',
+    validCalculate.code === 0 &&
+      normalizedTime?.localCivil === '2000-02-29T08:30:00+08:00' &&
+      normalizedTime.utcInstant === '2000-02-29T00:30:00Z',
+  );
+  record(
+    'calculate records only the implemented rulesets',
+    validCalculate.code === 0 &&
+      validBundle?.western?.rulesetId === 'western-tropical-placidus@0.2.0' &&
+      validBundle.bazi?.rulesetId === 'bazi-standard@0.1.0' &&
+      validBundle.ziwei?.rulesetId === 'iztro-default@0.1.0' &&
+      validBundle.vedic?.rulesetId === 'vedic-parashara-lahiri@0.1.0' &&
+      !validCalculate.stdout.includes('review-nonexistent'),
+  );
+
+  const validLeapNormalize = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'normalize',
+    '--input-file',
+    validLeapFile,
+  ]);
+  const leapNormalized = (
+    JSON.parse(validLeapNormalize.stdout) as {
+      normalized?: { localDate?: string; localCivilIso?: string; utcInstant?: string };
+    }
+  ).normalized;
+  record(
+    'normalize preserves 2000-02-29 local date, civil time, and UTC',
+    validLeapNormalize.code === 0 &&
+      leapNormalized?.localDate === '2000-02-29' &&
+      leapNormalized.localCivilIso === '2000-02-29T08:30:00+08:00' &&
+      leapNormalized.utcInstant === '2000-02-29T00:30:00Z',
+  );
+
+  const fakeRuleset = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'calculate',
+    '--input-file',
+    fakeRulesetFile,
+  ]);
+  record(
+    'calculate rejects a fabricated ruleset (exit 10)',
+    fakeRuleset.code === 10 &&
+      /"code":\s*"RULESET_UNSUPPORTED"/.test(fakeRuleset.stdout) &&
+      !/"ok":\s*true/.test(fakeRuleset.stdout),
+  );
+
+  const lunarNormalize = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'normalize',
+    '--input-file',
+    lunarFile,
+  ]);
+  const lunarPayload = JSON.parse(lunarNormalize.stdout) as {
+    normalized?: { localDate?: string };
+    warnings?: Array<{ code?: string }>;
+  };
+  record(
+    'normalize still converts lunar 2023-02-30 to 2023-03-21',
+    lunarNormalize.code === 0 &&
+      lunarPayload.normalized?.localDate === '2023-03-21' &&
+      lunarPayload.warnings?.some((warning) => warning.code === 'LUNAR_CONVERTED') === true,
+  );
+
+  const validInterpret = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'interpret',
+    '--input-file',
+    validLeapFile,
+    '--now',
+    FIXED_NOW,
+  ]);
+  const interpretationRulesets = (
+    JSON.parse(validInterpret.stdout) as {
+      interpretation?: { rulesets?: Array<{ id?: string; version?: string }> };
+    }
+  ).interpretation?.rulesets;
+  record(
+    'interpret records bazi-rules-ziping only when bazi interpretation ran',
+    validInterpret.code === 0 &&
+      interpretationRulesets?.some(
+        (ruleset) => ruleset.id === 'bazi-rules-ziping' && ruleset.version === '0.1.0',
+      ) === true &&
+      interpretationRulesets?.some(
+        (ruleset) => ruleset.id === 'bazi-standard' && ruleset.version === '0.1.0',
+      ) === true,
+  );
+
+  const synastryValid = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'synastry',
+    '--input-file',
+    synastryValidFile,
+    '--now',
+    FIXED_NOW,
+  ]);
+  record(
+    'synastry still accepts a valid pair',
+    synastryValid.code === 0 && /"ok":\s*true/.test(synastryValid.stdout),
+  );
+
   // render is temporarily disabled (visualization reports off): it must emit a
   // stable disabled notice (exit 3), never crash, and never write a report file.
   runNode(tempSkill, [...calcArgs, '--output-file', 'chart.json']);

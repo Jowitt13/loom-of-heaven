@@ -8,6 +8,7 @@ export * from './warnings.ts';
 export * from './errors.ts';
 export * from './provenance.ts';
 export * from './birth-input.ts';
+export * from './ruleset-support.ts';
 export * from './normalized.ts';
 export * from './bazi.ts';
 export * from './bazi-interpretation.ts';

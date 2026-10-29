@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -130,6 +130,129 @@ function main(): void {
       name: 'answer-plan omits exact dynamic target dates',
       ok: dynamicAnswerPlan.code === 0 && !dynamicAnswerPlan.stdout.includes(targetDate),
       detail: `exit ${dynamicAnswerPlan.code}`,
+    });
+
+    const integrityBase = {
+      calendar: 'gregorian',
+      localDate: '2000-02-29',
+      localTime: '08:30',
+      timeAccuracy: 'exact',
+      timezone: 'Asia/Shanghai',
+      location: { latitude: 31.23, longitude: 121.47, source: 'user' },
+      ruleGender: 'male',
+      settings: { systems: ['western', 'bazi', 'ziwei', 'vedic'] },
+    };
+    const writeInput = (name: string, value: unknown): string => {
+      writeFileSync(join(pkgRoot, name), JSON.stringify(value));
+      return name;
+    };
+    const invalidDate = '2023-02-29';
+    const badDateFile = writeInput('integrity-bad-date.json', {
+      ...integrityBase,
+      localDate: invalidDate,
+    });
+    const leapFile = writeInput('integrity-leap.json', integrityBase);
+    const fakeRulesetFile = writeInput('integrity-fake-ruleset.json', {
+      ...integrityBase,
+      localDate: '1990-06-15',
+      settings: { systems: ['bazi'], bazi: { rulesetId: 'review-nonexistent@9.9.9' } },
+    });
+    const lunarFile = writeInput('integrity-lunar.json', {
+      ...integrityBase,
+      calendar: 'lunar',
+      localDate: '2023-02-30',
+      lunarLeapMonth: false,
+    });
+
+    const badDate = run(pkgRoot, [
+      'scripts/loom-chart.mjs',
+      'normalize',
+      '--input-file',
+      badDateFile,
+    ]);
+    results.push({
+      name: 'nonexistent Gregorian date rejected (exit 2, no echo)',
+      ok:
+        badDate.code === 2 &&
+        /"code":\s*"INPUT_VALIDATION_FAILED"/.test(badDate.stdout) &&
+        !badDate.stdout.includes(invalidDate) &&
+        !badDate.stderr.includes(invalidDate),
+      detail: `exit ${badDate.code}`,
+    });
+
+    const fakeRuleset = run(pkgRoot, [
+      'scripts/loom-chart.mjs',
+      'calculate',
+      '--input-file',
+      fakeRulesetFile,
+    ]);
+    results.push({
+      name: 'fabricated ruleset rejected (exit 10)',
+      ok: fakeRuleset.code === 10 && /"code":\s*"RULESET_UNSUPPORTED"/.test(fakeRuleset.stdout),
+      detail: `exit ${fakeRuleset.code}`,
+    });
+
+    const leap = run(pkgRoot, [
+      'scripts/loom-chart.mjs',
+      'calculate',
+      '--input-file',
+      leapFile,
+      '--now',
+      FIXED_NOW,
+    ]);
+    const leapBundle = (
+      JSON.parse(leap.stdout) as {
+        bundle?: {
+          normalizedTime?: { localCivil?: string; utcInstant?: string };
+          bazi?: { rulesetId?: string };
+        };
+      }
+    ).bundle;
+    results.push({
+      name: '2000-02-29 accepted with consistent local/UTC time',
+      ok:
+        leap.code === 0 &&
+        leapBundle?.normalizedTime?.localCivil === '2000-02-29T08:30:00+08:00' &&
+        leapBundle.normalizedTime.utcInstant === '2000-02-29T00:30:00Z' &&
+        leapBundle.bazi?.rulesetId === 'bazi-standard@0.1.0',
+      detail: `exit ${leap.code}`,
+    });
+
+    const integrityInterp = run(pkgRoot, [
+      'scripts/loom-chart.mjs',
+      'interpret',
+      '--input-file',
+      leapFile,
+      '--now',
+      FIXED_NOW,
+    ]);
+    const interpRulesets = (
+      JSON.parse(integrityInterp.stdout) as {
+        interpretation?: { rulesets?: Array<{ id?: string; version?: string }> };
+      }
+    ).interpretation?.rulesets;
+    results.push({
+      name: 'bazi interpretation ruleset recorded when executed',
+      ok:
+        integrityInterp.code === 0 &&
+        interpRulesets?.some(
+          (ruleset) => ruleset.id === 'bazi-rules-ziping' && ruleset.version === '0.1.0',
+        ) === true,
+      detail: `exit ${integrityInterp.code}`,
+    });
+
+    const lunar = run(pkgRoot, ['scripts/loom-chart.mjs', 'normalize', '--input-file', lunarFile]);
+    const lunarPayload = JSON.parse(lunar.stdout) as {
+      normalized?: { localDate?: string };
+      warnings?: Array<{ code?: string }>;
+    };
+    results.push({
+      name: 'lunar 2023-02-30 still converts to 2023-03-21',
+      ok:
+        lunar.code === 0 &&
+        lunarPayload.normalized?.localDate === '2023-03-21' &&
+        lunarPayload.warnings?.some((warning) => warning.code === 'LUNAR_CONVERTED') === true,
+      detail: `exit ${lunar.code}`,
     });
   } finally {
     rmSync(tmp, { recursive: true, force: true });
