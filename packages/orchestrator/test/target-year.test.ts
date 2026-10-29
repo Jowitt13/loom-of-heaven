@@ -49,15 +49,16 @@ describe('requested target year survives an unavailable Zi Wei horoscope', () =>
     expect(warnings.map((w) => w.code)).not.toContain('ZIWEI_INPUT_REQUIRED');
   });
 
-  it('keeps at=2036 when the birth time is unknown and Zi Wei is unavailable', () => {
+  it('withholds the requested annual window when the birth time is unknown', () => {
     const { interpretation, warnings } = runInterpret(
       input({ localTime: undefined, timeAccuracy: 'unknown' }),
       { now: NOW, at: AT_2036 },
     );
     expect(warnings.map((w) => w.code)).toContain('ZIWEI_INPUT_REQUIRED');
-    const years = annualYears(interpretation);
-    expect(years[0]).toBe('2036');
-    expect(years).not.toContain('2026');
+    expect(warnings.map((w) => w.code)).toContain('TIME_UNKNOWN');
+    // The unknown-time boundary withholds the placeholder-derived annual window
+    // entirely: the requested year is neither kept nor silently moved to 2026.
+    expect(annualYears(interpretation)).toEqual([]);
     expect(claims(interpretation)).not.toContain('当前流年（');
   });
 
@@ -94,11 +95,12 @@ describe('requested target year survives an unavailable Zi Wei horoscope', () =>
       input({ localTime: undefined, timeAccuracy: 'unknown' }),
       { now: NOW, at: AT_2036, topic: 'general' },
     );
+    // Unknown time withholds the annual window instead of answering from the
+    // placeholder; the Zi Wei unavailability and time limits are still explicit.
     const years = publicResult.facts
       .map((f) => /^(\d{4})\(/.exec(f.claim)?.[1])
       .filter((year): year is string => year !== undefined);
-    expect(years[0]).toBe('2036');
-    expect(years).not.toContain('2026');
+    expect(years).toEqual([]);
     expect(publicResult.systems.find((s) => s.system === 'ziwei')?.status).toBe('unavailable');
     expect(publicResult.warnings.map((w) => w.code)).toContain('ZIWEI_INPUT_REQUIRED');
     expect(answerPlan.requiredWarningCodes).toContain('TIME_UNKNOWN');

@@ -721,6 +721,33 @@ function vedicRuleFacts(rules: VedicInterpretation | null): InterpretationFact[]
   });
 }
 
+/**
+ * A fact may enter an unknown-time reading only when every evidence item is
+ * either a non-chart limitation note or an explicit whole-day-stable marker.
+ * The Vedic layer emits `unknownTimeStable` markers exactly for that purpose;
+ * BaZi and Western facts are derived from the internal noon placeholder and
+ * carry no such marker, so they are withheld instead of presented as certain.
+ */
+function isWholeDayStableFact(fact: InterpretationFact): boolean {
+  return (
+    fact.evidence.length > 0 &&
+    fact.evidence.every((evidence) => {
+      if (evidence.kind === 'time') return evidence.ref === 'engine.disclaimer';
+      if (evidence.kind === 'vedic') {
+        return (
+          evidence.ref === 'vedic.unknownTimeStable.moonNakshatra' ||
+          evidence.ref === 'vedic.unknownTimeStable.panchanga'
+        );
+      }
+      return (
+        evidence.kind === 'vedic-rule' &&
+        (evidence.ref === 'vedic-rule/nakshatra/moon-day-stable' ||
+          evidence.ref === 'vedic-rule/panchanga/day-stable')
+      );
+    })
+  );
+}
+
 /** Build the topic-organized, evidence-grounded interpretation facts for a chart. */
 export function buildInterpretationFacts(
   bundle: ChartBundle,
@@ -779,6 +806,15 @@ export function buildInterpretationFacts(
     );
   }
 
+  // Unknown-time reliability boundary: the BaZi/Western layers computed this chart
+  // from the internal noon placeholder, so none of their facts carry whole-day
+  // stability evidence and a legal time-of-day completion could overturn them.
+  // Only facts whose evidence is itself whole-day-stable (the Vedic
+  // `unknownTimeStable` markers) or non-chart limitation notes survive; accurate
+  // and approximate times keep every existing fact.
+  const readingFacts =
+    bundle.originalInput.timeAccuracy === 'unknown' ? facts.filter(isWholeDayStableFact) : facts;
+
   return {
     schemaVersion: bundle.schemaVersion,
     engineVersion: bundle.engineVersion,
@@ -788,7 +824,7 @@ export function buildInterpretationFacts(
       timezone: bundle.originalInput.timezone,
       calendar: bundle.originalInput.calendar,
     },
-    facts,
+    facts: readingFacts,
     rulesets: [
       ...bundle.provenance.rulesets,
       ...(baziRules ? [{ id: BAZI_RULES_RULESET_NAME, version: baziRules.provider.version }] : []),
@@ -802,5 +838,23 @@ export function buildInterpretationFacts(
     ],
     disclaimers: DISCLAIMERS,
     followupOffers: FOLLOWUP_OFFERS,
+  };
+}
+
+/**
+ * Internal input to IQ-4's existing unknown-time career degradation only.
+ * Not exported by the package facade: ordinary readings always use the
+ * reliability boundary above. The journey must omit these candidates before
+ * it can construct a response view; they are not delivery-ready facts.
+ */
+export function buildBaziCareerDegradationFacts(bundle: ChartBundle): InterpretationFacts {
+  if (bundle.originalInput.timeAccuracy !== 'unknown') {
+    throw new Error('Career degradation material requires unknown birth time');
+  }
+  return {
+    ...buildInterpretationFacts(bundle),
+    facts: careerFacts(bundle).filter((entry) =>
+      entry.evidence.every((evidence) => evidence.kind === 'bazi' || evidence.kind === 'bazi-rule'),
+    ),
   };
 }

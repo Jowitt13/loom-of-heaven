@@ -62569,6 +62569,15 @@ function vedicRuleFacts(rules) {
     );
   });
 }
+function isWholeDayStableFact(fact2) {
+  return fact2.evidence.length > 0 && fact2.evidence.every((evidence) => {
+    if (evidence.kind === "time") return evidence.ref === "engine.disclaimer";
+    if (evidence.kind === "vedic") {
+      return evidence.ref === "vedic.unknownTimeStable.moonNakshatra" || evidence.ref === "vedic.unknownTimeStable.panchanga";
+    }
+    return evidence.kind === "vedic-rule" && (evidence.ref === "vedic-rule/nakshatra/moon-day-stable" || evidence.ref === "vedic-rule/panchanga/day-stable");
+  });
+}
 function buildInterpretationFacts(bundle, options = {}) {
   const focusYear = options.targetYear ?? (options.horoscope ? new Date(options.horoscope.targetSolarDate).getUTCFullYear() : new Date(bundle.calculatedAt).getUTCFullYear());
   const baziRules = bundle.bazi ? interpretBazi(bundle.bazi, { focusYear }) : null;
@@ -62610,6 +62619,7 @@ function buildInterpretationFacts(bundle, options = {}) {
       )
     );
   }
+  const readingFacts = bundle.originalInput.timeAccuracy === "unknown" ? facts.filter(isWholeDayStableFact) : facts;
   return {
     schemaVersion: bundle.schemaVersion,
     engineVersion: bundle.engineVersion,
@@ -62619,7 +62629,7 @@ function buildInterpretationFacts(bundle, options = {}) {
       timezone: bundle.originalInput.timezone,
       calendar: bundle.originalInput.calendar
     },
-    facts,
+    facts: readingFacts,
     rulesets: [
       ...bundle.provenance.rulesets,
       ...baziRules ? [{ id: BAZI_RULES_RULESET_NAME, version: baziRules.provider.version }] : [],
@@ -62629,6 +62639,17 @@ function buildInterpretationFacts(bundle, options = {}) {
     ],
     disclaimers: DISCLAIMERS,
     followupOffers: FOLLOWUP_OFFERS
+  };
+}
+function buildBaziCareerDegradationFacts(bundle) {
+  if (bundle.originalInput.timeAccuracy !== "unknown") {
+    throw new Error("Career degradation material requires unknown birth time");
+  }
+  return {
+    ...buildInterpretationFacts(bundle),
+    facts: careerFacts(bundle).filter(
+      (entry) => entry.evidence.every((evidence) => evidence.kind === "bazi" || evidence.kind === "bazi-rule")
+    )
   };
 }
 
@@ -65179,6 +65200,19 @@ var BaziCareerJourneyError = class extends Error {
   }
   code;
 };
+function unknownTimeCareerDegradationPlan(birthInput, now) {
+  const bundle = calculate(
+    {
+      ...birthInput,
+      settings: { ...birthInput.settings, systems: ["western", "bazi", "ziwei", "vedic"] }
+    },
+    { now }
+  );
+  const interpretation = buildBaziCareerDegradationFacts(bundle);
+  const result = buildPublicResult(bundle, interpretation);
+  const answerPlan = buildAnswerPlan(result, { topic: "career" });
+  return { publicResult: { ...result, facts: answerPlan.selectedFacts }, answerPlan };
+}
 var BaziCareerJourneyInput = external_exports.strictObject({
   // Parsed through the bounded facade below: a caller may pass an already
   // normalized BirthInput and the engine's own parsing stays canonical.
@@ -65203,10 +65237,11 @@ function runBaziCareerJourney(rawInput, options) {
   if (clarificationPlan.status === "requires-clarification") {
     throw new BaziCareerJourneyError("CLARIFICATION_REQUIRED");
   }
-  const { publicResult, answerPlan } = runAnswerPlan(birthInput, {
-    now: options.now,
-    topic: "career"
-  });
+  const unknownTime = birthInput.timeAccuracy === "unknown";
+  if (unknownTime && !clarificationPlan.degradationCodes.includes("omit-time-sensitive-claims")) {
+    throw new BaziCareerJourneyError("SETTING_CONFLICT");
+  }
+  const { publicResult, answerPlan } = unknownTime ? unknownTimeCareerDegradationPlan(birthInput, options.now) : runAnswerPlan(birthInput, { now: options.now, topic: "career" });
   const context = { publicResult, answerPlan };
   const approval = approveAnswerClaimCandidates(
     context,

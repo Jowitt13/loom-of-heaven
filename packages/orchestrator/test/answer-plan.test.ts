@@ -154,7 +154,10 @@ describe('public result and answer plan', () => {
     });
     expect(publicResult.inputReliability.birthTimeKnown).toBe(false);
     expect(answerPlan.requiredWarningCodes).toContain('TIME_UNKNOWN');
-    expect(answerPlan.answerability).toBe('limited');
+    // No career fact survives the unknown-time boundary, so the topic is not
+    // answerable at all (TIME_REQUIRED), not silently "limited" around it.
+    expect(answerPlan.answerability).toBe('not-supported');
+    expect(answerPlan.noEvidenceReason).toBe('TIME_REQUIRED');
   });
 
   it('keeps approximate-time warnings for explicit time-sensitive technical facts', () => {
