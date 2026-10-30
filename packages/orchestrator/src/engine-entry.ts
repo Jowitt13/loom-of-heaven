@@ -14,6 +14,24 @@ export type { CalculateOptions, NormalizeResult, HoroscopeOptions } from './calc
 export { runAnswerPlan, runInterpret } from './interpret.ts';
 export type { AnswerPlanOptions, InterpretOptions } from './interpret.ts';
 
+// Transient answer-delivery binding + bound delivery orchestration (IQ-4 §7
+// "本次计划与最终文本绑定"): request/plan digests, binding-aware validation and
+// the verbatim checked-text delivery body. No persistence, no third validator.
+export {
+  buildAnswerBinding,
+  deliverAnswer,
+  deriveAnswerPlanDigest,
+  deriveAnswerRequestDigest,
+  transcribeReadingDraft,
+} from './answer-delivery.ts';
+export type {
+  AnswerBindingContext,
+  AnswerBindingRequest,
+  AnswerDeliveryFailureReason,
+  AnswerDeliveryResult,
+  DeliverAnswerInput,
+} from './answer-delivery.ts';
+
 // IQ-4F explicit single-system (bazi) career runtime entry. Serves only the
 // frozen versioned records; the generic answer-plan verb above stays the
 // unspecified-system default.
@@ -65,6 +83,10 @@ export {
   parseBirthInput,
   parseSynastryInput,
   ValidateAnswerInput,
+  AnswerBinding,
+  CareerRealityContext,
+  ANSWER_BINDING_CONTRACT_VERSION,
+  ANSWER_DELIVERY_CONTRACT_VERSION,
   MAX_VALIDATE_ANSWER_INPUT_BYTES,
   MAX_OBJECT_KEYS,
   MAX_OBJECT_KEY_CHARS,

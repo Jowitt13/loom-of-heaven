@@ -40,6 +40,29 @@ export const READING_DRAFT_CONTRACT_VERSION = 'reading-draft/v2';
 export const READING_DRAFT_LEGACY_V1 = 'reading-draft/v1';
 export const VALIDATION_RESULT_CONTRACT_VERSION = 'validation-result/v2';
 
+/**
+ * Transient per-answer binding (answer-delivery). A digest pair that ties one
+ * validated delivery to ONE answer-plan run: `requestDigest` covers the current
+ * subject/input revision, topic/lens, resolved target time, executed settings
+ * and engine version (plus career-reality content when used); `planDigest`
+ * covers the full plan content (selected facts with their claims, constraints
+ * and response requirements). Digests are opaque consistency fingerprints —
+ * they are NOT authentication, NOT identity, and NOT birth-data anonymization;
+ * a stateless validator cannot detect a host that deliberately replays an
+ * entire stale context as "current".
+ */
+export const ANSWER_BINDING_CONTRACT_VERSION = 'answer-binding/v1';
+export const ANSWER_DELIVERY_CONTRACT_VERSION = 'answer-delivery/v1';
+
+const Sha256Digest = z.string().regex(/^sha256:[0-9a-f]{64}$/);
+
+export const AnswerBinding = z.strictObject({
+  contractVersion: z.literal(ANSWER_BINDING_CONTRACT_VERSION),
+  requestDigest: Sha256Digest,
+  planDigest: Sha256Digest,
+});
+export type AnswerBinding = z.infer<typeof AnswerBinding>;
+
 // --- Protective resource limits ---
 // Rationale: the validator runs bounded regex scans over every heading and
 // paragraph; these caps keep worst-case VALIDATION-STAGE cost linear and small,
@@ -160,7 +183,7 @@ const CareerRealitySource = z.strictObject({
 /** Optional local validation context. The host must copy only reality the user
  * explicitly stated; these declarations do not independently prove that history.
  * This is source binding, not a questionnaire, chart fact, or persistence API. */
-const CareerRealityContext = z.strictObject({
+export const CareerRealityContext = z.strictObject({
   confirmedFacts: z
     .array(
       z.strictObject({
@@ -183,6 +206,7 @@ const CareerRealityContext = z.strictObject({
   transient: z.literal(true),
   noPersistence: z.literal(true),
 });
+export type CareerRealityContextData = z.infer<typeof CareerRealityContext>;
 
 /** A single paragraph within a reading section. */
 export const ReadingParagraph = z.strictObject({
@@ -294,6 +318,11 @@ export const ViolationCode = z.enum([
   // This does not claim general semantic enforcement of every plan guardrail.
   'GUARDRAIL_VIOLATED',
 
+  // Delivery-binding violations (answer-delivery): the draft's plan instance does
+  // not match the current request context (stale subject/input revision, topic,
+  // lens, target time, settings, career-reality content, or plan content).
+  'BINDING_MISMATCH',
+
   // Resource-boundary violations
   'RESOURCE_LIMIT_EXCEEDED', // input exceeds a protective resource limit
 ]);
@@ -358,6 +387,13 @@ export type AnswerValidationResult = z.infer<typeof AnswerValidationResult>;
  */
 export const ValidateAnswerInput = z.strictObject({
   careerReality: CareerRealityContext.optional(),
+  /**
+   * Optional transient binding block copied verbatim from the answer-plan run's
+   * output. Absent ⇒ classic structural validation only (legacy behaviour is
+   * unchanged); present ⇒ the delivery path additionally compares it against
+   * the current request context. Additive, backward-compatible field.
+   */
+  answerBinding: AnswerBinding.optional(),
   answerPlan: z.object({
     allowedFactIds: z.array(z.string().max(MAX_FACT_ID_CHARS)).max(MAX_ALLOWED_FACT_IDS),
     requiredCaveats: z.array(z.string().max(MAX_CAVEAT_ENTRY_CHARS)).max(MAX_REQUIRED_CAVEATS),

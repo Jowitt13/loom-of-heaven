@@ -174,6 +174,134 @@ try {
     missingTopic.code !== 0 && /"code":\s*"INPUT_VALIDATION_FAILED"/.test(missingTopic.stdout),
   );
 
+  // Bound delivery (IQ-4 §7 本次计划与最终文本绑定): the same draft is delivered
+  // under the matching current request and rejected under a revised subject.
+  const bindingPlanArgs = [
+    'scripts/loom-chart.mjs',
+    'answer-plan',
+    '--input-file',
+    'scripts/fixtures/smoke.json',
+    '--topic',
+    'character',
+    '--now',
+    FIXED_NOW,
+  ];
+  const bindingPlanRun = runNode(tempSkill, bindingPlanArgs);
+  let bindingEmitted = false;
+  let deliveredOk = false;
+  let mismatchRejected = false;
+  let mismatchEchoedBirth = true;
+  try {
+    const bindingPlan = JSON.parse(bindingPlanRun.stdout) as {
+      answerBinding?: { contractVersion?: string; requestDigest?: string; planDigest?: string };
+      answerPlan: {
+        selectedFacts: Array<{ id: string }>;
+        requiredCaveats: string[];
+        requiredWarningCodes: string[];
+      };
+    };
+    bindingEmitted =
+      bindingPlanRun.code === 0 &&
+      bindingPlan.answerBinding?.contractVersion === 'answer-binding/v1' &&
+      /^sha256:[0-9a-f]{64}$/.test(bindingPlan.answerBinding.requestDigest ?? '') &&
+      /^sha256:[0-9a-f]{64}$/.test(bindingPlan.answerBinding.planDigest ?? '');
+    const firstFact = bindingPlan.answerPlan.selectedFacts[0];
+    const warningRefs = bindingPlan.answerPlan.requiredWarningCodes.map((_, index) => ({
+      kind: 'warning' as const,
+      index,
+    }));
+    const caveatRefs = bindingPlan.answerPlan.requiredCaveats.map((_, index) => ({
+      kind: 'caveat' as const,
+      index,
+    }));
+    const draft = {
+      contractVersion: 'reading-draft/v2',
+      topic: 'character',
+      sections: [
+        {
+          id: 'body',
+          heading: '性格概览',
+          paragraphs: [
+            {
+              text: '整体性格结构呈现主动与秩序并存的底色，传统说法只作文化参考，具体表现因环境与选择而异。',
+              sourceFactIds: firstFact ? [firstFact.id] : [],
+              constraintRefs: caveatRefs.length > 0 ? [caveatRefs[0]!] : undefined,
+            },
+            {
+              text: '出生时间的精确程度会影响与时间相关的细节判断，本解读只保留可靠的部分。',
+              sourceFactIds: [] as string[],
+              constraintRefs: [...warningRefs, ...caveatRefs.slice(1)],
+            },
+          ],
+        },
+      ],
+      caveatsExpressed: bindingPlan.answerPlan.requiredCaveats,
+      warningsDisclosed: bindingPlan.answerPlan.requiredWarningCodes,
+    };
+    writeFileSync(
+      join(tempSkill, 'delivery-input.json'),
+      JSON.stringify({
+        answerBinding: bindingPlan.answerBinding,
+        answerPlan: bindingPlan.answerPlan,
+        readingDraft: draft,
+      }),
+      'utf8',
+    );
+    const deliveryArgs = [
+      'scripts/loom-chart.mjs',
+      'validate-answer',
+      '--input-file',
+      'delivery-input.json',
+      '--context-input-file',
+      'scripts/fixtures/smoke.json',
+      '--topic',
+      'character',
+      '--now',
+      FIXED_NOW,
+    ];
+    const delivered = runNode(tempSkill, deliveryArgs);
+    const deliveryParsed =
+      delivered.code === 0
+        ? (JSON.parse(delivered.stdout) as {
+            ok?: boolean;
+            deliverableBody?: string;
+            deliverableBodySha256?: string;
+          })
+        : {};
+    deliveredOk =
+      deliveryParsed.ok === true &&
+      typeof deliveryParsed.deliverableBody === 'string' &&
+      deliveryParsed.deliverableBody.startsWith('性格概览') &&
+      /^sha256:[0-9a-f]{64}$/.test(deliveryParsed.deliverableBodySha256 ?? '');
+    // Revised subject: same plan + draft under a one-day-later birth date must fail.
+    const smokeFixture = JSON.parse(
+      readFileSync(join(tempSkill, 'scripts', 'fixtures', 'smoke.json'), 'utf8'),
+    ) as { localDate: string };
+    const revisedDate = smokeFixture.localDate.replace(/(\d{2})$/, (day) =>
+      String(Number(day) + 1).padStart(2, '0'),
+    );
+    writeFileSync(
+      join(tempSkill, 'revised-birth.json'),
+      JSON.stringify({ ...smokeFixture, localDate: revisedDate }),
+      'utf8',
+    );
+    const mismatch = runNode(tempSkill, [
+      ...deliveryArgs.slice(0, 5),
+      'revised-birth.json',
+      ...deliveryArgs.slice(6),
+    ]);
+    mismatchRejected = mismatch.code === 1 && /BINDING_MISMATCH/.test(mismatch.stdout);
+    mismatchEchoedBirth = mismatch.stdout.includes(revisedDate);
+  } catch {
+    /* the records below report the failure */
+  }
+  record('bound delivery: answer-plan emits a binding', bindingEmitted);
+  record('bound delivery succeeds and returns the checked body verbatim', deliveredOk);
+  record(
+    'bound delivery rejects a stale plan under a revised subject without echoing birth data',
+    mismatchRejected && !mismatchEchoedBirth,
+  );
+
   // IQ-4F: the explicit single-system bazi-career runtime entry.
   const baziCareerArgs = [
     'scripts/loom-chart.mjs',
@@ -275,6 +403,13 @@ try {
   record(
     'answer-plan removes the exact dynamic target date from the public output',
     dynamicAnswer.code === 0 && !dynamicAnswer.stdout.includes(targetDate),
+  );
+  record(
+    'answer-plan with --at still emits a binding (target time participates in the digest)',
+    dynamicAnswer.code === 0 &&
+      /"answerBinding":\s*\{\s*"contractVersion":\s*"answer-binding\/v1"/.test(
+        dynamicAnswer.stdout,
+      ),
   );
 
   // Input-date and ruleset-version integrity through the real CLI entry.
