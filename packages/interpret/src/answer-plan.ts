@@ -365,13 +365,19 @@ export function materialWarningCodes(
 
 /** Precise follow-up only when supplying data genuinely unblocks THIS request. */
 const TIME_COMPLETION_OFFER = '如有条件，可补充出生时间后重新计算依赖时刻的部分';
+const RULE_GENDER_COMPLETION_OFFER =
+  '如愿意，可补充规则性别（男/女）后重新计算目标年的动态记录；不愿提供则保持当前结果';
 
 /**
  * Follow-up offers must match real capability: no job/industry fit, no key-year
- * or event promises, no default menu. Empty is a valid answer.
+ * or event promises, no default menu. Empty is a valid answer. The only
+ * non-empty cases are the evidence-based missing-input reasons, each offering
+ * exactly its own bounded, optional completion step — nothing else is asked.
  */
 function followupOffersFor(noEvidenceReason: AnswerPlan['noEvidenceReason']): string[] {
-  return noEvidenceReason === 'TIME_REQUIRED' ? [TIME_COMPLETION_OFFER] : [];
+  if (noEvidenceReason === 'TIME_REQUIRED') return [TIME_COMPLETION_OFFER];
+  if (noEvidenceReason === 'INPUT_REQUIRED') return [RULE_GENDER_COMPLETION_OFFER];
+  return [];
 }
 
 /**

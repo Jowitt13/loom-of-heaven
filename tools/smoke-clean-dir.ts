@@ -431,6 +431,39 @@ try {
     timingAtInputRequired,
   );
 
+  // The dynamic path's missing input never lends its reason to a request that
+  // cannot consume it, even with the input supplied.
+  const timingCareerAt = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'answer-plan',
+    '--input-file',
+    'scripts/fixtures/smoke.json',
+    '--topic',
+    'career',
+    '--lens',
+    'timing',
+    '--at',
+    '2036-05-20',
+    '--now',
+    FIXED_NOW,
+  ]);
+  let careerAtNoFakeAsk = false;
+  try {
+    const parsed = JSON.parse(timingCareerAt.stdout) as {
+      answerPlan?: { noEvidenceReason?: string; followupOffers?: string[] };
+    };
+    careerAtNoFakeAsk =
+      timingCareerAt.code === 0 &&
+      parsed.answerPlan?.noEvidenceReason === 'NO_TOPIC_FACTS' &&
+      (parsed.answerPlan?.followupOffers?.length ?? 1) === 0;
+  } catch {
+    /* reported below */
+  }
+  record(
+    "career timing at a target does not borrow the dynamic path's missing-input reason",
+    careerAtNoFakeAsk,
+  );
+
   // With the rule input present, the same request keeps ONLY the yearly-flow
   // record — no natal pillars or other background impersonate period evidence.
   const smokeWithGender = JSON.parse(

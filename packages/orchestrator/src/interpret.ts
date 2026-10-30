@@ -87,15 +87,19 @@ function runInterpretation(input: BirthInput, options: InterpretOptions): Interp
 }
 
 /**
- * Evidence collector for an empty unknown-time plan — why the selection is
- * empty, never guessed:
+ * Evidence collector for an empty plan — why the selection is empty, never
+ * guessed:
  * 1. Facts-layer probe: rebuild ONLY the fact layer on the same computed chart
  *    with the unknown-time reliability filter disabled (no chart recompute) and
  *    ask the ordinary selection whether admitted material would exist with a
  *    known birth time. If yes, the missing time is the real blocker.
- * 2. Dynamic path's own report: an explicitly requested target period whose
- *    horoscope layer answered ZIWEI_INPUT_REQUIRED names its missing input —
- *    birth time when unknown, the rule input (e.g. gender) otherwise.
+ * 2. Dynamic path's own report — but ONLY when THIS request could actually
+ *    consume that path: a synthetic minimal yearly-flow record is put through
+ *    the ordinary selection (consumption check, no output, no fabricated chart),
+ *    so a career/character/marriage timing request that would never select the
+ *    dynamic record stays NO_TOPIC_FACTS instead of borrowing its missing-input
+ *    reason. When consumed, the path names its missing input — birth time when
+ *    unknown, the rule input (e.g. gender) otherwise.
  * No evidence ⇒ NO_TOPIC_FACTS: supplying time, place or gender would not help.
  */
 function probeEmptyReason(
@@ -119,11 +123,31 @@ function probeEmptyReason(
   if (
     atRequested &&
     run.horoscope === null &&
-    run.warnings.some((warning) => warning.code === 'ZIWEI_INPUT_REQUIRED')
+    run.warnings.some((warning) => warning.code === 'ZIWEI_INPUT_REQUIRED') &&
+    requestConsumesYearlyFlow(request)
   ) {
     return timeUnknown ? 'TIME_REQUIRED' : 'INPUT_REQUIRED';
   }
   return undefined;
+}
+
+/**
+ * Consumption check for the dynamic missing-input reason: would THIS topic+lens
+ * select the admitted yearly-flow record if the dynamic path had produced it?
+ * Reuses the ordinary selection over one synthetic minimal record — an internal
+ * evidence probe only; nothing enters any output and no chart or fact is faked.
+ */
+function requestConsumesYearlyFlow(request: {
+  topic: InterpretationTopic;
+  lens?: AnswerLens;
+}): boolean {
+  const syntheticYearlyRecord = {
+    id: 'fact-1',
+    topic: 'general' as const,
+    claim: 'probe',
+    evidence: [{ kind: 'ziwei-horoscope' as const, ref: 'horoscope.yearly' }],
+  };
+  return selectAnswerFacts([syntheticYearlyRecord], request).length > 0;
 }
 
 /**

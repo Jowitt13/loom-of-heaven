@@ -63016,8 +63016,11 @@ function materialWarningCodes(warnings, selectedFacts) {
   }).map((warning) => warning.code);
 }
 var TIME_COMPLETION_OFFER = "\u5982\u6709\u6761\u4EF6\uFF0C\u53EF\u8865\u5145\u51FA\u751F\u65F6\u95F4\u540E\u91CD\u65B0\u8BA1\u7B97\u4F9D\u8D56\u65F6\u523B\u7684\u90E8\u5206";
+var RULE_GENDER_COMPLETION_OFFER = "\u5982\u613F\u610F\uFF0C\u53EF\u8865\u5145\u89C4\u5219\u6027\u522B\uFF08\u7537/\u5973\uFF09\u540E\u91CD\u65B0\u8BA1\u7B97\u76EE\u6807\u5E74\u7684\u52A8\u6001\u8BB0\u5F55\uFF1B\u4E0D\u613F\u63D0\u4F9B\u5219\u4FDD\u6301\u5F53\u524D\u7ED3\u679C";
 function followupOffersFor(noEvidenceReason) {
-  return noEvidenceReason === "TIME_REQUIRED" ? [TIME_COMPLETION_OFFER] : [];
+  if (noEvidenceReason === "TIME_REQUIRED") return [TIME_COMPLETION_OFFER];
+  if (noEvidenceReason === "INPUT_REQUIRED") return [RULE_GENDER_COMPLETION_OFFER];
+  return [];
 }
 function buildAnswerPlan(publicResult, requestInput, capabilityProbe) {
   const request = AnswerRequest.parse(requestInput);
@@ -64654,10 +64657,19 @@ function probeEmptyReason(run, request, atRequested) {
     const probePublic = buildPublicResult(patchedBundle, probeFacts, run.warnings);
     if (selectAnswerFacts(probePublic.facts, request).length > 0) return "TIME_REQUIRED";
   }
-  if (atRequested && run.horoscope === null && run.warnings.some((warning) => warning.code === "ZIWEI_INPUT_REQUIRED")) {
+  if (atRequested && run.horoscope === null && run.warnings.some((warning) => warning.code === "ZIWEI_INPUT_REQUIRED") && requestConsumesYearlyFlow(request)) {
     return timeUnknown ? "TIME_REQUIRED" : "INPUT_REQUIRED";
   }
   return void 0;
+}
+function requestConsumesYearlyFlow(request) {
+  const syntheticYearlyRecord = {
+    id: "fact-1",
+    topic: "general",
+    claim: "probe",
+    evidence: [{ kind: "ziwei-horoscope", ref: "horoscope.yearly" }]
+  };
+  return selectAnswerFacts([syntheticYearlyRecord], request).length > 0;
 }
 function runInterpret(input2, options = {}) {
   const run = runInterpretation(input2, options);

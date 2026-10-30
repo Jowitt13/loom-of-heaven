@@ -100,6 +100,72 @@ describe('honest empty reasons (no fake input requests)', () => {
     expect(unknown.answerPlan.followupOffers).toEqual([]);
   });
 
+  it(
+    'a dynamic path missing inputs never lends its reason to a request that cannot consume it',
+    { timeout: 30_000 },
+    () => {
+      // Review follow-up reproduction: with an explicit target, career/character/
+      // marriage timing previously borrowed TIME_REQUIRED / INPUT_REQUIRED from
+      // the Zi Wei dynamic path even though supplying the data would still leave
+      // them without admitted material. The reason must belong to THIS request.
+      const noGender = parseBirthInput({ ...rawA, ruleGender: undefined });
+      for (const topic of ['career', 'character', 'marriage'] as const) {
+        for (const input of [A, unknownInput, noGender]) {
+          const { answerPlan } = runAnswerPlan(input, {
+            now: FIXED,
+            topic,
+            lens: 'timing',
+            at: AT_2036,
+          });
+          expect(answerPlan.answerability, topic).toBe('not-supported');
+          expect(answerPlan.noEvidenceReason, topic).toBe('NO_TOPIC_FACTS');
+          expect(answerPlan.followupOffers, topic).toEqual([]);
+        }
+      }
+    },
+  );
+
+  it(
+    'without an explicit target the dynamic path is not consulted at all',
+    { timeout: 30_000 },
+    () => {
+      const noGender = parseBirthInput({ ...rawA, ruleGender: undefined });
+      for (const topic of ['career', 'character', 'marriage', 'general'] as const) {
+        for (const input of [unknownInput, noGender]) {
+          const { answerPlan } = runAnswerPlan(input, { now: FIXED, topic, lens: 'timing' });
+          expect(answerPlan.noEvidenceReason, topic).toBe('NO_TOPIC_FACTS');
+          expect(answerPlan.followupOffers, topic).toEqual([]);
+        }
+      }
+    },
+  );
+
+  it('supplying the missing rule input yields exactly the admitted yearly record', () => {
+    const noGender = parseBirthInput({ ...rawA, ruleGender: undefined });
+    const completed = parseBirthInput({ ...rawA, ruleGender: 'female' });
+    const blocked = runAnswerPlan(noGender, {
+      now: FIXED,
+      topic: 'general',
+      lens: 'timing',
+      at: AT_2036,
+    });
+    expect(blocked.answerPlan.noEvidenceReason).toBe('INPUT_REQUIRED');
+    const unblocked = runAnswerPlan(completed, {
+      now: FIXED,
+      topic: 'general',
+      lens: 'timing',
+      at: AT_2036,
+    });
+    expect(unblocked.answerPlan.answerability).toBe('limited');
+    expect(unblocked.answerPlan.selectedFacts).toHaveLength(1);
+    expect(
+      unblocked.answerPlan.selectedFacts[0]!.evidence.some(
+        (e) => e.kind === 'ziwei-horoscope' && e.ref === 'horoscope.yearly',
+      ),
+    ).toBe(true);
+    expect(unblocked.answerPlan.followupOffers).toEqual([]);
+  });
+
   it('asks for birth time only when the timing path is really waiting on it', () => {
     const { answerPlan } = runAnswerPlan(unknownInput, {
       now: FIXED,
@@ -123,7 +189,10 @@ describe('honest empty reasons (no fake input requests)', () => {
       at: AT_2036,
     });
     expect(answerPlan.noEvidenceReason).toBe('INPUT_REQUIRED');
-    expect(answerPlan.followupOffers).toEqual([]);
+    // One bounded, optional, specific next step — nothing else is asked for.
+    expect(answerPlan.followupOffers).toEqual([
+      '如愿意，可补充规则性别（男/女）后重新计算目标年的动态记录；不愿提供则保持当前结果',
+    ]);
     // The unavailability stays honestly scoped in the audit warnings.
     expect(
       runAnswerPlan(noGender, {

@@ -104,10 +104,12 @@ and offer a bounded follow-up. Never fill the gap with an inferred chart positio
 
 - `TIME_REQUIRED` — the same request has admitted material that is really waiting on the birth
   time (the one case where asking for the time genuinely unblocks THIS question);
-- `INPUT_REQUIRED` — an explicitly requested dynamic path names a missing rule input
-  (e.g. the gender the Zi Wei dynamic chart needs);
+- `INPUT_REQUIRED` — an explicitly requested dynamic path THIS request can actually consume
+  (checked through the ordinary selection) names a missing rule input, e.g. the gender the Zi Wei
+  dynamic chart needs; the follow-up offer states exactly that one optional step;
 - `NO_TOPIC_FACTS` — no admitted path exists for this topic+lens; supplying a time, place or
-  gender would NOT unlock it, so do not ask for them.
+  gender would NOT unlock it, so do not ask for them. A dynamic path's missing input never lends
+  its reason to a request that could not consume the path even with the input supplied.
 
 `followupOffers` mirror real capability only. The default is an EMPTY list: no
 job/industry fit, no key-year or event promises, no automatic menu. The single
