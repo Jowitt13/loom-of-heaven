@@ -154,8 +154,12 @@ describe('default-answer material admission', () => {
 
     const caveats = answerPlan.requiredCaveats.join('\n');
     expect(caveats).toContain('缺某五行不等于凶');
-    expect(caveats).toContain('专业医师');
     expect(caveats).toContain('配偶星之有无');
+    // The health note is a limitation disclaimer, never answer basis: its fact
+    // is excluded from the default selection, so its caveat is not a required
+    // caveat of selected material (it stays in disclaimers/technical output).
+    expect(caveats).not.toContain('专业医师');
+    expect(answerPlan.selectedFacts.some((fact) => fact.claim.includes('健康提示'))).toBe(false);
     expect(answerPlan.requiredCaveats).toEqual([
       ...new Set(
         answerPlan.selectedFacts

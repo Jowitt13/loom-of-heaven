@@ -17,7 +17,11 @@ import type {
   PublicResult,
   PublicWarning,
 } from '@loom/contracts';
-import { isDefaultAnswerFact } from './material-admission.ts';
+import {
+  isDefaultAnswerFact,
+  isLimitationNoteFact,
+  isTimingPeriodFact,
+} from './material-admission.ts';
 
 /** P4 v2 hard cut: public answer plans report every first-class system. */
 const SYSTEMS: ChartSystem[] = ['western', 'bazi', 'ziwei', 'vedic'];
@@ -194,21 +198,38 @@ export function buildPublicResult(
   });
 }
 
-function selectFacts(facts: PublicFact[], request: AnswerPlan['request']): PublicFact[] {
-  // Topic selects relevance; admission decides whether a fact may be narrated
-  // at all. `general` is therefore broad admitted context, not every record.
-  const admittedFacts = facts.filter(isDefaultAnswerFact);
-  if (request.topic === 'general') return admittedFacts;
-  const topicFacts = admittedFacts.filter((fact) => fact.topic === request.topic);
-  if (request.topic !== 'career') return topicFacts;
+/**
+ * Select the facts that may support one request. Topic and lens act TOGETHER:
+ * - admission decides whether a fact may be narrated at all;
+ * - a limitation-note-only fact (engine disclaimer) is context, never answer basis;
+ * - the timing lens keeps ONLY admitted target-period records — natal placements
+ *   (pillars, day master, spouse stars, houses, signs, birth-cycle remainders)
+ *   are background and never impersonate period evidence, for every topic;
+ * - career additionally keeps just the ADR 0021 cultural reference for its
+ *   non-timing lenses (no admitted career-timing inference exists).
+ */
+export function selectAnswerFacts(
+  facts: PublicFact[],
+  request: { topic: InterpretationTopic; lens?: AnswerLens },
+): PublicFact[] {
+  const admittedFacts = facts.filter(
+    (fact) => isDefaultAnswerFact(fact) && !isLimitationNoteFact(fact),
+  );
+  const topicPool =
+    request.topic === 'general'
+      ? admittedFacts
+      : admittedFacts.filter((fact) => fact.topic === request.topic);
+  if (request.lens === 'timing') {
+    return topicPool.filter(isTimingPeriodFact);
+  }
+  if (request.topic !== 'career') return topicPool;
 
   // ADR 0021 admits one narrow cultural reference for ordinary career prose,
   // not every system's career placement. Derive both narration material and
   // validation constraints from this same set; technical detail remains opt-in.
   // No admitted career-timing inference exists: do not substitute natal themes.
-  if (request.lens === 'timing') return [];
   const pillarRef = /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/;
-  const references = topicFacts.filter(
+  const references = topicPool.filter(
     (fact) =>
       fact.evidence.some((e) => e.kind === 'bazi' && pillarRef.test(e.ref)) &&
       fact.evidence.some(
@@ -342,16 +363,40 @@ export function materialWarningCodes(
     .map((warning) => warning.code);
 }
 
+/** Precise follow-up only when supplying data genuinely unblocks THIS request. */
+const TIME_COMPLETION_OFFER = '如有条件，可补充出生时间后重新计算依赖时刻的部分';
+const RULE_GENDER_COMPLETION_OFFER =
+  '如愿意，可补充规则性别（男/女）后重新计算目标年的动态记录；不愿提供则保持当前结果';
+
+/**
+ * Follow-up offers must match real capability: no job/industry fit, no key-year
+ * or event promises, no default menu. Empty is a valid answer. The only
+ * non-empty cases are the evidence-based missing-input reasons, each offering
+ * exactly its own bounded, optional completion step — nothing else is asked.
+ */
+function followupOffersFor(noEvidenceReason: AnswerPlan['noEvidenceReason']): string[] {
+  if (noEvidenceReason === 'TIME_REQUIRED') return [TIME_COMPLETION_OFFER];
+  if (noEvidenceReason === 'INPUT_REQUIRED') return [RULE_GENDER_COMPLETION_OFFER];
+  return [];
+}
+
 /**
  * Select only the facts that may support one topic. This does not write prose;
  * a host model must cite only these ids and honor the included guardrails.
+ *
+ * `capabilityProbe` (optional) carries the orchestrator's EVIDENCE about why an
+ * empty selection is empty — a facts-layer probe for material withheld only by
+ * the unknown-time boundary, or the dynamic path's own missing-input warning.
+ * The empty-reason is never guessed: without probe evidence the honest answer
+ * is NO_TOPIC_FACTS, because supplying time, place or gender would not help.
  */
 export function buildAnswerPlan(
   publicResult: PublicResult,
   requestInput: { topic: InterpretationTopic; lens?: AnswerLens },
+  capabilityProbe?: { probeReason?: 'TIME_REQUIRED' | 'INPUT_REQUIRED' },
 ): AnswerPlan {
   const request = AnswerRequestSchema.parse(requestInput);
-  const selectedFacts = selectFacts(publicResult.facts, request);
+  const selectedFacts = selectAnswerFacts(publicResult.facts, request);
   const requiredWarningCodes = materialWarningCodes(publicResult.warnings, selectedFacts);
   const hasLimitation =
     requiredWarningCodes.some((code) => LIMITING_WARNING_CODES.has(code)) ||
@@ -359,11 +404,7 @@ export function buildAnswerPlan(
   const answerability =
     selectedFacts.length === 0 ? 'not-supported' : hasLimitation ? 'limited' : 'grounded';
   const noEvidenceReason =
-    selectedFacts.length === 0
-      ? publicResult.inputReliability.birthTimeKnown
-        ? 'NO_TOPIC_FACTS'
-        : 'TIME_REQUIRED'
-      : undefined;
+    selectedFacts.length === 0 ? (capabilityProbe?.probeReason ?? 'NO_TOPIC_FACTS') : undefined;
 
   return AnswerPlanSchema.parse({
     contractVersion: ANSWER_PLAN_CONTRACT_VERSION,
@@ -390,6 +431,6 @@ export function buildAnswerPlan(
     },
     ...(noEvidenceReason === undefined ? {} : { noEvidenceReason }),
     disclaimers: publicResult.disclaimers,
-    followupOffers: publicResult.followupOffers,
+    followupOffers: followupOffersFor(noEvidenceReason),
   });
 }

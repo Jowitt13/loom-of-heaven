@@ -359,6 +359,160 @@ try {
     legacyClaimsNothing,
   );
 
+  // IQ-4 §7 capability & failure recovery: timing lenses use real capability,
+  // empty reasons are evidence-based, and follow-up offers promise nothing more.
+  const timingChar = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'answer-plan',
+    '--input-file',
+    'scripts/fixtures/smoke.json',
+    '--topic',
+    'character',
+    '--lens',
+    'timing',
+    '--now',
+    FIXED_NOW,
+  ]);
+  let characterTimingHonest = false;
+  try {
+    const parsed = JSON.parse(timingChar.stdout) as {
+      answerPlan?: {
+        answerability?: string;
+        noEvidenceReason?: string;
+        selectedFacts?: unknown[];
+        followupOffers?: string[];
+      };
+    };
+    const plan = parsed.answerPlan;
+    characterTimingHonest =
+      timingChar.code === 0 &&
+      plan?.answerability === 'not-supported' &&
+      plan?.noEvidenceReason === 'NO_TOPIC_FACTS' &&
+      (plan?.selectedFacts?.length ?? 1) === 0 &&
+      (plan?.followupOffers?.length ?? 1) === 0;
+  } catch {
+    /* reported below */
+  }
+  record(
+    'character timing is honestly not-supported with no fake input requests',
+    characterTimingHonest,
+  );
+
+  const timingAt = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'answer-plan',
+    '--input-file',
+    'scripts/fixtures/smoke.json',
+    '--topic',
+    'general',
+    '--lens',
+    'timing',
+    '--at',
+    '2036-05-20',
+    '--now',
+    FIXED_NOW,
+  ]);
+  // This fixture declares ruleGender "unspecified": the dynamic path honestly
+  // names its missing rule input instead of fabricating timing material.
+  let timingAtInputRequired = false;
+  try {
+    const parsed = JSON.parse(timingAt.stdout) as {
+      answerPlan?: { answerability?: string; noEvidenceReason?: string };
+    };
+    timingAtInputRequired =
+      timingAt.code === 0 &&
+      parsed.answerPlan?.answerability === 'not-supported' &&
+      parsed.answerPlan?.noEvidenceReason === 'INPUT_REQUIRED';
+  } catch {
+    /* reported below */
+  }
+  record(
+    'general timing without the rule gender names INPUT_REQUIRED honestly',
+    timingAtInputRequired,
+  );
+
+  // The dynamic path's missing input never lends its reason to a request that
+  // cannot consume it, even with the input supplied.
+  const timingCareerAt = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'answer-plan',
+    '--input-file',
+    'scripts/fixtures/smoke.json',
+    '--topic',
+    'career',
+    '--lens',
+    'timing',
+    '--at',
+    '2036-05-20',
+    '--now',
+    FIXED_NOW,
+  ]);
+  let careerAtNoFakeAsk = false;
+  try {
+    const parsed = JSON.parse(timingCareerAt.stdout) as {
+      answerPlan?: { noEvidenceReason?: string; followupOffers?: string[] };
+    };
+    careerAtNoFakeAsk =
+      timingCareerAt.code === 0 &&
+      parsed.answerPlan?.noEvidenceReason === 'NO_TOPIC_FACTS' &&
+      (parsed.answerPlan?.followupOffers?.length ?? 1) === 0;
+  } catch {
+    /* reported below */
+  }
+  record(
+    "career timing at a target does not borrow the dynamic path's missing-input reason",
+    careerAtNoFakeAsk,
+  );
+
+  // With the rule input present, the same request keeps ONLY the yearly-flow
+  // record — no natal pillars or other background impersonate period evidence.
+  const smokeWithGender = JSON.parse(
+    readFileSync(join(tempSkill, 'scripts', 'fixtures', 'smoke.json'), 'utf8'),
+  ) as Record<string, unknown>;
+  writeFileSync(
+    join(tempSkill, 'gendered-birth.json'),
+    JSON.stringify({ ...smokeWithGender, ruleGender: 'male' }),
+    'utf8',
+  );
+  const timingGendered = runNode(tempSkill, [
+    'scripts/loom-chart.mjs',
+    'answer-plan',
+    '--input-file',
+    'gendered-birth.json',
+    '--topic',
+    'general',
+    '--lens',
+    'timing',
+    '--at',
+    '2036-05-20',
+    '--now',
+    FIXED_NOW,
+  ]);
+  let timingAtCapability = false;
+  try {
+    const parsed = JSON.parse(timingGendered.stdout) as {
+      answerPlan?: {
+        selectedFacts?: Array<{ claim: string; evidence: Array<{ kind: string; ref: string }> }>;
+        followupOffers?: string[];
+      };
+    };
+    const facts = parsed.answerPlan?.selectedFacts ?? [];
+    timingAtCapability =
+      timingGendered.code === 0 &&
+      facts.length > 0 &&
+      facts.every((fact) =>
+        fact.evidence.some((e) => e.kind === 'ziwei-horoscope' && e.ref === 'horoscope.yearly'),
+      ) &&
+      facts.every((fact) => !fact.claim.startsWith('四柱')) &&
+      (parsed.answerPlan?.followupOffers?.length ?? 1) === 0;
+  } catch {
+    /* reported below */
+  }
+  record(
+    'general timing at an explicit target uses only the yearly-flow record',
+    timingAtCapability,
+  );
+
   // IQ-4F: the explicit single-system bazi-career runtime entry.
   const baziCareerArgs = [
     'scripts/loom-chart.mjs',
