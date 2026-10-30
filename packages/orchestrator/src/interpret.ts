@@ -1,14 +1,17 @@
 import { buildAnswerPlan, buildInterpretationFacts, buildPublicResult } from '@loom/interpret';
 import type {
+  AnswerBinding,
   AnswerLens,
   AnswerPlan,
   BirthInput,
+  CareerRealityContextData,
   EngineWarning,
   InterpretationFacts,
   InterpretationTopic,
   PublicResult,
 } from '@loom/contracts';
 import { calculate, runHoroscope, type HoroscopeOptions } from './calculate.ts';
+import { buildAnswerBinding } from './answer-delivery.ts';
 
 export interface InterpretOptions {
   /** Injected wall-clock (epoch ms) for deterministic output. */
@@ -22,6 +25,12 @@ export interface AnswerPlanOptions extends InterpretOptions {
   topic: InterpretationTopic;
   /** Bounded answer perspective selected by the host. */
   lens?: AnswerLens;
+  /**
+   * Optional transient career-reality context; when present it participates in
+   * the delivery binding digest (content revision — same factId with a changed
+   * statement invalidates) but never changes the computed chart or plan facts.
+   */
+  careerReality?: CareerRealityContextData;
 }
 
 interface InterpretationRun {
@@ -89,7 +98,7 @@ export function runInterpret(
 export function runAnswerPlan(
   input: BirthInput,
   options: AnswerPlanOptions,
-): { publicResult: PublicResult; answerPlan: AnswerPlan } {
+): { publicResult: PublicResult; answerPlan: AnswerPlan; answerBinding: AnswerBinding } {
   const allSystemsInput: BirthInput = {
     ...input,
     settings: {
@@ -103,6 +112,23 @@ export function runAnswerPlan(
     topic: options.topic,
     lens: options.lens,
   });
+  // Transient per-answer binding: digest over the CURRENT request context (the
+  // caller's original input, topic/lens, resolved at/now — parsed once by the
+  // CLI — executed settings and optional career-reality content) plus the full
+  // plan content. Lives beside the public outputs; never inside PublicResult.
+  const answerBinding = buildAnswerBinding(
+    {
+      birthInput: input,
+      request: {
+        topic: options.topic,
+        lens: options.lens,
+        ...(options.now !== undefined ? { now: options.now } : {}),
+        ...(options.at !== undefined ? { at: options.at } : {}),
+      },
+      ...(options.careerReality === undefined ? {} : { careerReality: options.careerReality }),
+    },
+    answerPlan,
+  );
   // The intermediate result exists only in-process so the planner can select a
   // topic. Callers receive a topic-scoped result: non-selected facts never cross
   // the engine/host boundary beside the AnswerPlan instructions.
@@ -110,5 +136,5 @@ export function runAnswerPlan(
     ...fullPublicResult,
     facts: answerPlan.selectedFacts,
   };
-  return { publicResult, answerPlan };
+  return { publicResult, answerPlan, answerBinding };
 }

@@ -40,6 +40,46 @@ export const READING_DRAFT_CONTRACT_VERSION = 'reading-draft/v2';
 export const READING_DRAFT_LEGACY_V1 = 'reading-draft/v1';
 export const VALIDATION_RESULT_CONTRACT_VERSION = 'validation-result/v2';
 
+/**
+ * Transient per-answer binding (answer-delivery). A digest pair that ties one
+ * validated delivery to ONE answer-plan run: `requestDigest` covers the current
+ * subject/input revision, topic/lens, resolved target time, executed settings
+ * and engine version (plus career-reality content when used); `planDigest`
+ * covers the full plan content (selected facts with their claims, constraints
+ * and response requirements). Digests are opaque consistency fingerprints —
+ * they are NOT authentication, NOT identity, and NOT birth-data anonymization;
+ * a stateless validator cannot detect a host that deliberately replays an
+ * entire stale context as "current".
+ */
+export const ANSWER_BINDING_CONTRACT_VERSION = 'answer-binding/v1';
+export const ANSWER_DELIVERY_CONTRACT_VERSION = 'answer-delivery/v1';
+
+/** Opaque consistency fingerprint (`sha256:<64 lowercase hex>`). */
+export const Sha256Digest = z.string().regex(/^sha256:[0-9a-f]{64}$/);
+export type Sha256Digest = z.infer<typeof Sha256Digest>;
+
+export const AnswerBinding = z.strictObject({
+  contractVersion: z.literal(ANSWER_BINDING_CONTRACT_VERSION),
+  requestDigest: Sha256Digest,
+  planDigest: Sha256Digest,
+});
+export type AnswerBinding = z.infer<typeof AnswerBinding>;
+
+/**
+ * A draft's OWN provenance record, sealed when the draft is written: the binding
+ * of the plan run it was authored against plus a digest over the draft content
+ * itself. Bound delivery compares this record against the CURRENT request and the
+ * SUBMITTED plan independently, so a draft made for another subject cannot be
+ * re-used by pairing it with a fresh plan/binding. Like the binding it is a
+ * transient consistency record — not identity, not signing, and no defence
+ * against a host that deliberately re-labels a stale draft as current.
+ */
+export const AnswerDraftOrigin = z.strictObject({
+  draftSource: AnswerBinding,
+  draftDigest: Sha256Digest,
+});
+export type AnswerDraftOrigin = z.infer<typeof AnswerDraftOrigin>;
+
 // --- Protective resource limits ---
 // Rationale: the validator runs bounded regex scans over every heading and
 // paragraph; these caps keep worst-case VALIDATION-STAGE cost linear and small,
@@ -160,7 +200,7 @@ const CareerRealitySource = z.strictObject({
 /** Optional local validation context. The host must copy only reality the user
  * explicitly stated; these declarations do not independently prove that history.
  * This is source binding, not a questionnaire, chart fact, or persistence API. */
-const CareerRealityContext = z.strictObject({
+export const CareerRealityContext = z.strictObject({
   confirmedFacts: z
     .array(
       z.strictObject({
@@ -183,6 +223,7 @@ const CareerRealityContext = z.strictObject({
   transient: z.literal(true),
   noPersistence: z.literal(true),
 });
+export type CareerRealityContextData = z.infer<typeof CareerRealityContext>;
 
 /** A single paragraph within a reading section. */
 export const ReadingParagraph = z.strictObject({
@@ -293,6 +334,11 @@ export const ViolationCode = z.enum([
   // Emitted for mixed career-reality/chart sources or non-career reality input.
   // This does not claim general semantic enforcement of every plan guardrail.
   'GUARDRAIL_VIOLATED',
+
+  // Delivery-binding violations (answer-delivery): the draft's plan instance does
+  // not match the current request context (stale subject/input revision, topic,
+  // lens, target time, settings, career-reality content, or plan content).
+  'BINDING_MISMATCH',
 
   // Resource-boundary violations
   'RESOURCE_LIMIT_EXCEEDED', // input exceeds a protective resource limit

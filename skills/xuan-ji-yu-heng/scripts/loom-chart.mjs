@@ -14,13 +14,22 @@
  *   node scripts/loom-chart.mjs compare    --input-file in.json --profiles a,b [--output-file out.json]
  *   node scripts/loom-chart.mjs horoscope  --input-file in.json --at YYYY-MM-DD[THH:mm:ss] [--output-file out.json]
  *   node scripts/loom-chart.mjs interpret  --input-file in.json [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file interpretation.json]
- *   node scripts/loom-chart.mjs answer-plan --input-file in.json --topic <topic> [--lens overview|strengths|risks|timing|advice|explain] [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--output-file answer-plan.json]
+ *   node scripts/loom-chart.mjs answer-plan --input-file in.json --topic <topic> [--lens overview|strengths|risks|timing|advice|explain] [--at YYYY-MM-DD[THH:mm:ss]] [--now <iso|ms>] [--career-reality-file career.json] [--output-file answer-plan.json]
+ *       (the output also carries a transient answerBinding: request/plan digests that tie the
+ *        plan to THIS subject, input revision, topic/lens, target time, settings and content)
  *   node scripts/loom-chart.mjs synastry  --input-file people.json [--now <iso|ms>] [--output-file synastry.json]  (1-5 people; set analyzePair when >2)
  *   node scripts/loom-chart.mjs lint-reading --input-file draft-reading.md [--channel topic|full] [--simple] [--technical-details] [--output-file reading-lint.json]
  *   node scripts/loom-chart.mjs validate-answer --input-file validate-input.json [--output-file validation-result.json]
  *       (input file is size-capped; ordinary-question gate order: answer-plan → host writes a
- *        reading-draft/v2 JSON → validate-answer → render the SAME visible text as Markdown →
- *        lint-reading → show the answer only when BOTH gates pass; re-run BOTH after any rewrite)
+ *        reading-draft/v2 JSON → SEAL it to its plan run → validate-answer bound delivery →
+ *        display the returned deliverableBody verbatim; any rewrite needs a new seal + check)
+ *       SEAL: --seal-draft --binding-file answer-plan.json --input-file draft.json
+ *       → { draftSource, draftDigest } to submit with the saved plan.
+ *       BOUND DELIVERY: --context-input-file birth.json --topic <topic> [--lens ...] [--at ...] [--now ...]
+ *       with { draftSource, draftDigest, answerPlan, readingDraft }: the draft's own origin is
+ *       compared against the CURRENT request, the submitted plan and the draft content; any
+ *       mismatch fails with no body. Declaring a binding WITHOUT --context-input-file is a
+ *       controlled error — it never falls back to the structural check.
  *   node scripts/loom-chart.mjs render     [DISABLED] visualization reports are temporarily off; use calculate/interpret JSON (exit 3)
  *   node scripts/loom-chart.mjs verify     [--fixture fixtures/smoke.json]
  *   node scripts/loom-chart.mjs version    (local BUILD_MANIFEST labels plus scoped contentIdentity SHA-256)
@@ -161,6 +170,9 @@ async function main() {
     runSynastry,
     validateAnswer,
     parseValidateAnswerInputBounded,
+    deliverAnswer,
+    sealReadingDraft,
+    CareerRealityContext,
     MAX_VALIDATE_ANSWER_INPUT_BYTES,
     timeIndexFromHour,
     calculate,
@@ -254,24 +266,30 @@ async function main() {
         const input = parsePublicInputOrThrow(parseBirthInput, EngineError, raw);
         const topic = parseAnswerTopic(args.topic, EngineError);
         const lens = parseAnswerLens(args.lens, EngineError);
-        let at;
-        if (typeof args.at === 'string') {
-          const parsedAt = parseAtValue(args.at);
-          if (!parsedAt) {
+        const at = parseAnswerAtOption(args, EngineError, timeIndexFromHour);
+        let careerReality;
+        if (typeof args['career-reality-file'] === 'string') {
+          const realityRaw = readPublicJsonOrThrow(args['career-reality-file'], EngineError);
+          const parsedReality = CareerRealityContext.safeParse(realityRaw);
+          if (!parsedReality.success) {
             throw new EngineError(
               'INPUT_VALIDATION_FAILED',
-              'The answer-plan target time must use the documented format.',
+              'The career-reality file does not match the careerReality contract.',
             );
           }
-          at = { solarDate: parsedAt.solarDate, timeIndex: timeIndexFromHour(parsedAt.hour) };
+          careerReality = parsedReality.data;
         }
-        const { publicResult, answerPlan } = runAnswerPlan(input, {
+        const { publicResult, answerPlan, answerBinding } = runAnswerPlan(input, {
           topic,
           lens,
           now: parseNow(typeof args.now === 'string' ? args.now : undefined),
           at,
+          ...(careerReality === undefined ? {} : { careerReality }),
         });
-        writePublicOutput(args, canonicalJsonPretty({ ok: true, publicResult, answerPlan }));
+        writePublicOutput(
+          args,
+          canonicalJsonPretty({ ok: true, publicResult, answerPlan, answerBinding }),
+        );
         return;
       }
       case 'bazi-career': {
@@ -341,6 +359,62 @@ async function main() {
         } catch {
           throw new EngineError('INPUT_VALIDATION_FAILED', 'Cannot read or parse the input file.');
         }
+
+        // Sealing mode: bind a finished draft to the plan run it was written for.
+        // Output is the draft's own origin record ({ draftSource, draftDigest }) to
+        // be submitted alongside the saved plan. Sealing does NOT validate content.
+        if (args['seal-draft'] === true) {
+          const bindingFile = requireArg(args, 'binding-file');
+          const planOutput = readPublicJsonOrThrow(bindingFile, EngineError);
+          const sealed = sealReadingDraft(planOutput.answerBinding, rawInput);
+          writePublicOutput(args, canonicalJsonPretty(sealed));
+          return;
+        }
+
+        // A declared binding/origin must never fall back to the low-level structural
+        // check: bound delivery requires the CURRENT request context explicitly.
+        const declaresBinding =
+          Object.hasOwn(rawInput, 'draftSource') ||
+          Object.hasOwn(rawInput, 'draftDigest') ||
+          Object.hasOwn(rawInput, 'answerBinding');
+        if (declaresBinding && typeof args['context-input-file'] !== 'string') {
+          throw new EngineError(
+            'INPUT_VALIDATION_FAILED',
+            'Input declares an answer binding or draft origin; bound delivery requires --context-input-file (and --topic). It is never silently reduced to the structural check.',
+          );
+        }
+
+        // Bound delivery mode: with --context-input-file the validator additionally
+        // binds the draft to the CURRENT request (stale subject/topic/lens/target/
+        // settings/plan content is rejected) and returns the verbatim deliverable
+        // body of the checked text (structure check → transcription → lintReading).
+        if (typeof args['context-input-file'] === 'string') {
+          const topic = parseAnswerTopic(args.topic, EngineError);
+          const lens = parseAnswerLens(args.lens, EngineError);
+          const at = parseAnswerAtOption(args, EngineError, timeIndexFromHour);
+          const now = parseNow(typeof args.now === 'string' ? args.now : undefined);
+          const currentBirthInput = readPublicJsonOrThrow(args['context-input-file'], EngineError);
+          const delivery = deliverAnswer({
+            currentRequest: {
+              birthInput: currentBirthInput,
+              topic,
+              lens,
+              ...(now === undefined ? {} : { now }),
+              ...(at === undefined ? {} : { at }),
+              ...(rawInput.careerReality === undefined
+                ? {}
+                : { careerReality: rawInput.careerReality }),
+            },
+            draftSource: rawInput.draftSource,
+            draftDigest: rawInput.draftDigest,
+            answerPlan: rawInput.answerPlan,
+            readingDraft: rawInput.readingDraft,
+          });
+          writePublicOutput(args, canonicalJsonPretty(delivery));
+          if (!delivery.ok) process.exit(1);
+          return;
+        }
+
         let validatedInput;
         try {
           validatedInput = parseValidateAnswerInputBounded(rawInput);
@@ -457,7 +531,15 @@ function parseAnswerLens(value, EngineError) {
 }
 
 function rejectPublicAnswerArgs(args, EngineError) {
-  const allowed = new Set(['input-file', 'topic', 'lens', 'at', 'now', 'output-file']);
+  const allowed = new Set([
+    'input-file',
+    'topic',
+    'lens',
+    'at',
+    'now',
+    'career-reality-file',
+    'output-file',
+  ]);
   if (args._.length > 0 || Object.keys(args).some((key) => key !== '_' && !allowed.has(key))) {
     throw new EngineError(
       'INPUT_VALIDATION_FAILED',
@@ -469,6 +551,20 @@ function rejectPublicAnswerArgs(args, EngineError) {
       throw new EngineError('INPUT_VALIDATION_FAILED', 'An answer-plan option requires a value.');
     }
   }
+}
+
+/** Shared target-time parsing for the answer-plan and bound-delivery paths (parsed ONCE per run).
+ * `timeIndexFromHour` is passed in because it comes from the lazily-imported engine bundle. */
+function parseAnswerAtOption(args, EngineError, timeIndexFromHour) {
+  if (typeof args.at !== 'string') return undefined;
+  const parsedAt = parseAtValue(args.at);
+  if (!parsedAt) {
+    throw new EngineError(
+      'INPUT_VALIDATION_FAILED',
+      'The answer-plan target time must use the documented format.',
+    );
+  }
+  return { solarDate: parsedAt.solarDate, timeIndex: timeIndexFromHour(parsedAt.hour) };
 }
 
 function publicErrorEnvelope(engineError) {

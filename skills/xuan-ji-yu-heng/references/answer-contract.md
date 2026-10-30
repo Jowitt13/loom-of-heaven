@@ -39,9 +39,11 @@ career advice. Reality-based paragraphs use the separate optional source binding
 a borrowed chart fact id or constraint exemption.
 
 `career --lens timing` currently returns `not-supported`: natal cultural themes are not evidence
-for promotion, job-change or other career timing. `--lens explain` retains topic-scoped technical
-facts from all systems for an explicit request for technical explanation, not for default career
-prose or career fit. `calculate` and `interpret` remain the full technical-chart entry points.
+for promotion, job-change or other career timing. `--lens explain` keeps topic-scoped technical
+framing, but admission still follows the same evidence-family and rule-status gates as every
+other lens — unadmitted technical material (pattern / useful-god / industry and other producer
+mechanisms outside the admitted set) stays in `calculate` / `interpret` technical output and is
+NOT released into career prose by choosing `explain`.
 
 The command never accepts a free-form user question. The host maps the question to a bounded
 topic/lens, or asks a clarification question when it cannot do so reliably. Do not put a user's
@@ -55,9 +57,18 @@ The successful envelope is:
 {
   "ok": true,
   "publicResult": {},
-  "answerPlan": {}
+  "answerPlan": {},
+  "answerBinding": {}
 }
 ```
+
+`answerBinding` (`answer-binding/v1`) is a transient consistency fingerprint for THIS plan run:
+`requestDigest` covers the current subject/input revision, topic/lens, the resolved target time
+(`--at` / `--now` as parsed once by this command), the executed settings and engine version, plus
+career-reality content when `--career-reality-file` was supplied; `planDigest` covers the full
+plan content. Copy it verbatim next to the saved plan when you intend to use bound delivery
+below. Digests are hashes, not authentication and not birth-data anonymization; nothing is
+persisted by the engine.
 
 `publicResult` contains only:
 
@@ -93,9 +104,12 @@ For an ordinary answer, the host must:
 4. Honor all guardrails: traditional-culture framing; evidence-only reasoning; no deterministic
    fate, medical, legal, investment, life-and-death or unsupported-comparison claims.
 5. Run BOTH deterministic gates before displaying anything, in this order:
-   `answer-plan` → write a `reading-draft/v2` JSON → `validate-answer` → render the SAME visible
-   text as Markdown → `lint-reading`. Show the answer only when both gates pass, and re-run both
-   gates after ANY rewrite.
+   `answer-plan` → write a `reading-draft/v2` JSON → `validate-answer` → display the SAME text
+   that was checked. Show the answer only when both gates pass, and re-run the gates after ANY
+   rewrite. Preferred: bound delivery (below) — `validate-answer` with `--context-input-file`
+   returns the checked text as `deliverableBody`; display that body verbatim instead of rewriting
+   it. If you change one word, one heading or the order, the previous pass no longer applies:
+   re-run and display the newly returned body.
 
 For a user who explicitly asks for a full technical chart or raw JSON, use `calculate` and
 `interpret` instead. Treat those files as private artifacts, not as defaults for ordinary chat.
@@ -202,9 +216,11 @@ conclusively failed, fix the reported violations, and re-run — never display i
 - Scanning strips `\p{Default_Ignorable_Code_Point}` and case-folds the plain text — no
   entity/NCR decode step is needed since the input is plain text by contract.
 - Runtime surface: the engine bundle exports `validateAnswer`,
-  `parseValidateAnswerInputBounded`, `READING_DRAFT_CONTRACT_VERSION`,
-  `VALIDATION_RESULT_CONTRACT_VERSION`, `READING_DRAFT_LEGACY_V1` and the documented
-  `MAX_*` limit constants.
+  `parseValidateAnswerInputBounded`, `deliverAnswer`, `deriveAnswerRequestDigest`,
+  `deriveAnswerPlanDigest`, `transcribeReadingDraft`, `AnswerBinding`, `CareerRealityContext`,
+  `ANSWER_BINDING_CONTRACT_VERSION`, `ANSWER_DELIVERY_CONTRACT_VERSION`,
+  `READING_DRAFT_CONTRACT_VERSION`, `VALIDATION_RESULT_CONTRACT_VERSION`,
+  `READING_DRAFT_LEGACY_V1` and the documented `MAX_*` limit constants.
 - Honest scope: this is a deterministic structure-and-wording gate. It cannot prove a
   paragraph's meaning follows from its cited facts, cannot prove a referenced caveat is
   truly expressed by the surrounding prose, and its pattern scan cannot recognize every
@@ -268,3 +284,73 @@ Keep metadata internal: the visible answer must not add an audit sentence explai
 Use a temporary local input file and remove it after validation; do not put real statements in
 the repository, logs or fixtures. The validator does not store or transmit them. A host chat's
 own retention and remote-model policies remain separate from the local engine.
+
+## Bound delivery (this plan, this request, this text)
+
+The classic `validate-answer` input above stays available for the plain structural shape
+`{ answerPlan, readingDraft }`. It is a STRUCTURAL gate and never was a context authenticator — it
+cannot tell which subject or request a plan or draft belongs to, and it makes no bound-delivery
+claim. The default Skill answer flow uses bound delivery:
+
+```text
+# 1. seal the finished draft to the plan run it was written for
+node scripts/loom-chart.mjs validate-answer \
+  --seal-draft \
+  --input-file draft.json \
+  --binding-file answer-plan.json \
+  --output-file draft-origin.json
+# → { "draftSource": …, "draftDigest": "sha256:…" }
+
+# 2. submit { draftSource, draftDigest, answerPlan: <the FULL saved plan>, readingDraft }
+#    together with the CURRENT request
+node scripts/loom-chart.mjs validate-answer \
+  --input-file delivery-input.json \
+  --context-input-file birth-input.json \
+  --topic character \
+  --output-file delivery-result.json
+```
+
+`--context-input-file` (plus the same `--topic` / `--lens` / `--at` / `--now` options as
+`answer-plan`) re-states the CURRENT request; the delivery input may also carry `careerReality`,
+which participates in the request digest — same id with a revised statement invalidates. The
+engine then runs, in order:
+
+1. **draft-origin check** — the draft's OWN recorded source is compared independently against
+   (a) the CURRENT request, (b) the SUBMITTED plan's actual content, and (c) the submitted draft's
+   own content (`draftDigest`). A draft written for another subject cannot be re-used by pairing it
+   with a fresh plan and binding: its recorded source is its own. A bare draft with no origin is
+   refused (`DRAFT_ORIGIN_MISSING`) — supplying a binding only at submission time never counts as
+   verified provenance;
+2. the existing `validate-answer` structure/safety gate over the same draft;
+3. deterministic verbatim transcription of the checked draft (exact heading/paragraph text and
+   order; nothing reworded, summarized or appended);
+4. the existing `lint-reading` language gate.
+
+Success returns `answer-delivery/v1` with `deliverableBody` (exactly the checked text) and
+`deliverableBodySha256`. Display that body verbatim; do not rewrite, reorder or add to it. Any
+rewrite — a word, a heading, the order — needs a NEW seal and a new check, which yields a new body.
+Any failure returns `ok: false` with a `failureReason` (`DRAFT_ORIGIN_MISSING`,
+`BINDING_MISMATCH`, `VALIDATION_FAILED`, `LINT_FAILED`, `MALFORMED_INPUT`) and NO body — a failed
+run never carries or authorizes reuse of a previous successful body.
+
+**No silent downgrade.** An input that declares a binding or draft origin but omits
+`--context-input-file` is rejected with `INPUT_VALIDATION_FAILED`; it is never quietly reduced to
+the low-level structural check. Only input with no declared binding takes the structural path, and
+that path — like before — still needs `lint-reading` on the produced text before display.
+
+Trust and privacy boundaries:
+
+- The expected context comes from the CURRENT request the host re-submits, not from anything the
+  draft or plan asserts. Two stale artifacts that agree with each other are still rejected when
+  they disagree with the current request.
+- The draft's origin is sealed over its CONTENT: editing the draft after sealing invalidates it, so
+  a checked body cannot be swapped for different text.
+- Honest limit: a stateless validator cannot detect a host that deliberately re-labels a stale
+  draft with the current request's digests, nor one that replays an entire stale context. This
+  defends against accidental mismatch, not against a malicious host; it is not authentication.
+- The digests are consistency fingerprints only — not identity, not signing, not birth-data
+  anonymization. Birth data never enters `publicResult`; binding digests are opaque hashes.
+- Nothing is persisted: no session registry, database or signing service exists. Do not commit
+  delivery inputs or results containing real personal data.
+- The current time and target time are parsed once per command; omit `--now` at both steps (or
+  pass the same explicit value) so the digest cannot drift with the wall clock.

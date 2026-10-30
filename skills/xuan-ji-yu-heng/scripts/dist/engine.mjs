@@ -46251,6 +46251,18 @@ var AnswerPlan = external_exports.strictObject({
 var READING_DRAFT_CONTRACT_VERSION = "reading-draft/v2";
 var READING_DRAFT_LEGACY_V1 = "reading-draft/v1";
 var VALIDATION_RESULT_CONTRACT_VERSION = "validation-result/v2";
+var ANSWER_BINDING_CONTRACT_VERSION = "answer-binding/v1";
+var ANSWER_DELIVERY_CONTRACT_VERSION = "answer-delivery/v1";
+var Sha256Digest = external_exports.string().regex(/^sha256:[0-9a-f]{64}$/);
+var AnswerBinding = external_exports.strictObject({
+  contractVersion: external_exports.literal(ANSWER_BINDING_CONTRACT_VERSION),
+  requestDigest: Sha256Digest,
+  planDigest: Sha256Digest
+});
+var AnswerDraftOrigin = external_exports.strictObject({
+  draftSource: AnswerBinding,
+  draftDigest: Sha256Digest
+});
 var MAX_VALIDATE_ANSWER_INPUT_BYTES = 2097152;
 var MAX_OBJECT_KEYS = 32;
 var MAX_OBJECT_KEY_CHARS = 64;
@@ -46410,6 +46422,10 @@ var ViolationCode = external_exports.enum([
   // Emitted for mixed career-reality/chart sources or non-career reality input.
   // This does not claim general semantic enforcement of every plan guardrail.
   "GUARDRAIL_VIOLATED",
+  // Delivery-binding violations (answer-delivery): the draft's plan instance does
+  // not match the current request context (stale subject/input revision, topic,
+  // lens, target time, settings, career-reality content, or plan content).
+  "BINDING_MISMATCH",
   // Resource-boundary violations
   "RESOURCE_LIMIT_EXCEEDED"
   // input exceeds a protective resource limit
@@ -64374,6 +64390,207 @@ function bigramSimilarity(a, b) {
   return union2 === 0 ? 0 : inter / union2;
 }
 
+// packages/orchestrator/src/answer-delivery.ts
+import { createHash } from "node:crypto";
+var ALL_FOUR_SYSTEMS = ["western", "bazi", "ziwei", "vedic"];
+function sha256Hex(value) {
+  return `sha256:${createHash("sha256").update(value, "utf8").digest("hex")}`;
+}
+function deriveAnswerRequestDigest(context) {
+  const executedInput = {
+    ...context.birthInput,
+    settings: { ...context.birthInput.settings, systems: [...ALL_FOUR_SYSTEMS] }
+  };
+  const payload = {
+    bindingVersion: ANSWER_BINDING_CONTRACT_VERSION,
+    subjectAndInputRevision: executedInput,
+    request: { topic: context.request.topic, lens: context.request.lens ?? "overview" },
+    resolvedTarget: {
+      at: context.request.at ? { solarDate: context.request.at.solarDate, timeIndex: context.request.at.timeIndex } : null,
+      now: context.request.now ?? null
+    },
+    execution: { engineVersion: ENGINE_VERSION },
+    careerReality: context.careerReality ?? null
+  };
+  return sha256Hex(canonicalJson(payload));
+}
+function deriveAnswerPlanDigest(answerPlan) {
+  return sha256Hex(canonicalJson(answerPlan));
+}
+function buildAnswerBinding(context, answerPlan) {
+  return {
+    contractVersion: ANSWER_BINDING_CONTRACT_VERSION,
+    requestDigest: deriveAnswerRequestDigest(context),
+    planDigest: deriveAnswerPlanDigest(answerPlan)
+  };
+}
+function projectPlanSubset(answerPlan) {
+  return {
+    allowedFactIds: answerPlan.allowedFactIds,
+    requiredCaveats: answerPlan.requiredCaveats,
+    requiredWarningCodes: answerPlan.requiredWarningCodes,
+    guardrails: answerPlan.guardrails,
+    answerability: answerPlan.answerability,
+    request: { topic: answerPlan.request.topic },
+    disclaimers: answerPlan.disclaimers
+  };
+}
+function transcribeReadingDraft(draft) {
+  const blocks = [];
+  for (const section of draft.sections) {
+    const parts = [];
+    if (section.heading.length > 0) parts.push(section.heading);
+    for (const paragraph of section.paragraphs) parts.push(paragraph.text);
+    blocks.push(parts.join("\n\n"));
+  }
+  return blocks.join("\n\n");
+}
+function malformed() {
+  return {
+    contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+    ok: false,
+    failureReason: "MALFORMED_INPUT",
+    binding: null,
+    validation: null,
+    lint: null,
+    deliverableBody: null,
+    deliverableBodySha256: null
+  };
+}
+function sealReadingDraft(answerBinding, readingDraft) {
+  const parsedBinding = AnswerBinding.safeParse(answerBinding);
+  if (!parsedBinding.success) {
+    throw new Error("sealReadingDraft requires a valid answer-binding/v1 record.");
+  }
+  return {
+    draftSource: parsedBinding.data,
+    draftDigest: digestOfJson(readingDraft)
+  };
+}
+function digestOfJson(value) {
+  return sha256Hex(canonicalJson(value));
+}
+function deliverAnswer(input2) {
+  if (typeof input2 !== "object" || input2 === null) return malformed();
+  const raw = input2;
+  let birthInput;
+  try {
+    birthInput = parseBirthInput(raw.currentRequest?.birthInput);
+  } catch {
+    return malformed();
+  }
+  const currentRequest = raw.currentRequest;
+  if (currentRequest === void 0 || typeof currentRequest !== "object" || typeof currentRequest.topic !== "string") {
+    return malformed();
+  }
+  let careerReality;
+  if (currentRequest.careerReality !== void 0) {
+    const parsedReality = CareerRealityContext.safeParse(currentRequest.careerReality);
+    if (!parsedReality.success) return malformed();
+    careerReality = parsedReality.data;
+  }
+  if (raw.draftSource === void 0 || raw.draftDigest === void 0) {
+    return {
+      contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+      ok: false,
+      failureReason: "DRAFT_ORIGIN_MISSING",
+      binding: null,
+      validation: null,
+      lint: null,
+      deliverableBody: null,
+      deliverableBodySha256: null
+    };
+  }
+  const parsedSource = AnswerBinding.safeParse(raw.draftSource);
+  const parsedDigest = Sha256Digest.safeParse(raw.draftDigest);
+  const parsedPlan = AnswerPlan.safeParse(raw.answerPlan);
+  if (!parsedSource.success || !parsedDigest.success || !parsedPlan.success) return malformed();
+  const currentRequestDigest = deriveAnswerRequestDigest({
+    birthInput,
+    request: {
+      topic: currentRequest.topic,
+      lens: currentRequest.lens,
+      now: currentRequest.now,
+      at: currentRequest.at
+    },
+    ...careerReality === void 0 ? {} : { careerReality }
+  });
+  const requestDigestMatch = currentRequestDigest === parsedSource.data.requestDigest;
+  const planDigestMatch = deriveAnswerPlanDigest(parsedPlan.data) === parsedSource.data.planDigest;
+  let draftDigestMatch = false;
+  try {
+    draftDigestMatch = digestOfJson(raw.readingDraft) === parsedDigest.data;
+  } catch {
+    return malformed();
+  }
+  if (!requestDigestMatch || !planDigestMatch || !draftDigestMatch) {
+    return {
+      contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+      ok: false,
+      failureReason: "BINDING_MISMATCH",
+      binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
+      validation: null,
+      lint: null,
+      deliverableBody: null,
+      deliverableBodySha256: null
+    };
+  }
+  const validation = validateAnswer({
+    ...careerReality === void 0 ? {} : { careerReality },
+    answerPlan: projectPlanSubset(parsedPlan.data),
+    readingDraft: raw.readingDraft
+  });
+  if (!validation.ok) {
+    return {
+      contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+      ok: false,
+      failureReason: "VALIDATION_FAILED",
+      binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
+      validation,
+      lint: null,
+      deliverableBody: null,
+      deliverableBodySha256: null
+    };
+  }
+  const parsedDraft = validation.ok ? raw.readingDraft : null;
+  const draftShape = parsedDraft;
+  if (draftShape === null || !Array.isArray(draftShape.sections)) return malformed();
+  const sections = [];
+  for (const section of draftShape.sections) {
+    if (typeof section?.heading !== "string" || !Array.isArray(section.paragraphs) || section.paragraphs.some((paragraph) => typeof paragraph?.text !== "string")) {
+      return malformed();
+    }
+    sections.push({
+      heading: section.heading,
+      paragraphs: section.paragraphs.map((paragraph) => ({ text: paragraph.text }))
+    });
+  }
+  const body = transcribeReadingDraft({ sections });
+  const lint = lintReading(body, { channel: "topic" });
+  if (!lint.ok) {
+    return {
+      contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+      ok: false,
+      failureReason: "LINT_FAILED",
+      binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
+      validation,
+      lint,
+      deliverableBody: null,
+      deliverableBodySha256: null
+    };
+  }
+  return {
+    contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+    ok: true,
+    failureReason: null,
+    binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
+    validation,
+    lint,
+    deliverableBody: body,
+    deliverableBodySha256: sha256Hex(body)
+  };
+}
+
 // packages/orchestrator/src/interpret.ts
 function dedupeWarnings(warnings) {
   const seen = /* @__PURE__ */ new Set();
@@ -64421,11 +64638,24 @@ function runAnswerPlan(input2, options) {
     topic: options.topic,
     lens: options.lens
   });
+  const answerBinding = buildAnswerBinding(
+    {
+      birthInput: input2,
+      request: {
+        topic: options.topic,
+        lens: options.lens,
+        ...options.now !== void 0 ? { now: options.now } : {},
+        ...options.at !== void 0 ? { at: options.at } : {}
+      },
+      ...options.careerReality === void 0 ? {} : { careerReality: options.careerReality }
+    },
+    answerPlan
+  );
   const publicResult = {
     ...fullPublicResult,
     facts: answerPlan.selectedFacts
   };
-  return { publicResult, answerPlan };
+  return { publicResult, answerPlan, answerBinding };
 }
 
 // packages/contracts/src/clarification-plan.ts
@@ -66309,7 +66539,12 @@ function verify(fixtureInput) {
   return { ok: checks.every((c) => c.ok), checks };
 }
 export {
+  ANSWER_BINDING_CONTRACT_VERSION,
+  ANSWER_DELIVERY_CONTRACT_VERSION,
+  AnswerBinding,
+  AnswerDraftOrigin,
   COMPARE_PROFILES,
+  CareerRealityContext,
   ENGINE_NAME,
   ENGINE_VERSION,
   ERROR_CODES,
@@ -66347,13 +66582,18 @@ export {
   READING_DRAFT_LEGACY_V1,
   READING_TERMS,
   SCHEMA_VERSION,
+  Sha256Digest,
   VALIDATION_RESULT_CONTRACT_VERSION,
   ValidateAnswerInput,
+  buildAnswerBinding,
   calculate,
   canonicalJson,
   canonicalJsonPretty,
   compareProfiles,
   computeRequestId,
+  deliverAnswer,
+  deriveAnswerPlanDigest,
+  deriveAnswerRequestDigest,
   doctor,
   escapeHtml,
   lintReading,
@@ -66371,8 +66611,10 @@ export {
   runInterpret,
   runNormalize,
   runSynastry,
+  sealReadingDraft,
   timeIndexFromHour,
   toEngineError,
+  transcribeReadingDraft,
   validateAnswer,
   verify
 };
