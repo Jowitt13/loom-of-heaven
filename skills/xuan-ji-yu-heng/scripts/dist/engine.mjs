@@ -62764,6 +62764,16 @@ function isDefaultAnswerFact(fact2) {
   }
   return true;
 }
+function isTimingPeriodFact(fact2) {
+  return fact2.evidence.some(
+    (evidence) => evidence.kind === "ziwei-horoscope" && evidence.ref === "horoscope.yearly"
+  );
+}
+function isLimitationNoteFact(fact2) {
+  return fact2.evidence.length > 0 && fact2.evidence.every(
+    (evidence) => evidence.kind === "time" && evidence.ref === "engine.disclaimer"
+  );
+}
 
 // packages/interpret/src/answer-plan.ts
 var SYSTEMS = ["western", "bazi", "ziwei", "vedic"];
@@ -62902,14 +62912,17 @@ function buildPublicResult(bundle, interpretation, warnings = bundle.warnings) {
     followupOffers: interpretation.followupOffers.map(sanitizePublicText)
   });
 }
-function selectFacts(facts, request) {
-  const admittedFacts = facts.filter(isDefaultAnswerFact);
-  if (request.topic === "general") return admittedFacts;
-  const topicFacts = admittedFacts.filter((fact2) => fact2.topic === request.topic);
-  if (request.topic !== "career") return topicFacts;
-  if (request.lens === "timing") return [];
+function selectAnswerFacts(facts, request) {
+  const admittedFacts = facts.filter(
+    (fact2) => isDefaultAnswerFact(fact2) && !isLimitationNoteFact(fact2)
+  );
+  const topicPool = request.topic === "general" ? admittedFacts : admittedFacts.filter((fact2) => fact2.topic === request.topic);
+  if (request.lens === "timing") {
+    return topicPool.filter(isTimingPeriodFact);
+  }
+  if (request.topic !== "career") return topicPool;
   const pillarRef = /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/;
-  const references = topicFacts.filter(
+  const references = topicPool.filter(
     (fact2) => fact2.evidence.some((e) => e.kind === "bazi" && pillarRef.test(e.ref)) && fact2.evidence.some(
       (e) => e.kind === "bazi-rule" && e.ref === "bazi-rule/ten-gods/xiang-yi"
     ) && fact2.evidence.every(
@@ -63002,13 +63015,17 @@ function materialWarningCodes(warnings, selectedFacts) {
     return factSystems.has(warning.system);
   }).map((warning) => warning.code);
 }
-function buildAnswerPlan(publicResult, requestInput) {
+var TIME_COMPLETION_OFFER = "\u5982\u6709\u6761\u4EF6\uFF0C\u53EF\u8865\u5145\u51FA\u751F\u65F6\u95F4\u540E\u91CD\u65B0\u8BA1\u7B97\u4F9D\u8D56\u65F6\u523B\u7684\u90E8\u5206";
+function followupOffersFor(noEvidenceReason) {
+  return noEvidenceReason === "TIME_REQUIRED" ? [TIME_COMPLETION_OFFER] : [];
+}
+function buildAnswerPlan(publicResult, requestInput, capabilityProbe) {
   const request = AnswerRequest.parse(requestInput);
-  const selectedFacts = selectFacts(publicResult.facts, request);
+  const selectedFacts = selectAnswerFacts(publicResult.facts, request);
   const requiredWarningCodes = materialWarningCodes(publicResult.warnings, selectedFacts);
   const hasLimitation = requiredWarningCodes.some((code) => LIMITING_WARNING_CODES.has(code)) || selectedFacts.some((fact2) => fact2.caveat !== void 0);
   const answerability = selectedFacts.length === 0 ? "not-supported" : hasLimitation ? "limited" : "grounded";
-  const noEvidenceReason = selectedFacts.length === 0 ? publicResult.inputReliability.birthTimeKnown ? "NO_TOPIC_FACTS" : "TIME_REQUIRED" : void 0;
+  const noEvidenceReason = selectedFacts.length === 0 ? capabilityProbe?.probeReason ?? "NO_TOPIC_FACTS" : void 0;
   return AnswerPlan.parse({
     contractVersion: ANSWER_PLAN_CONTRACT_VERSION,
     engineVersion: publicResult.engineVersion,
@@ -63031,7 +63048,7 @@ function buildAnswerPlan(publicResult, requestInput) {
     },
     ...noEvidenceReason === void 0 ? {} : { noEvidenceReason },
     disclaimers: publicResult.disclaimers,
-    followupOffers: publicResult.followupOffers
+    followupOffers: followupOffersFor(noEvidenceReason)
   });
 }
 
@@ -64610,15 +64627,37 @@ function runInterpretation(input2, options) {
   const bundle = calculate(input2, { now: options.now });
   const horoscopeRun = options.at ? runHoroscope(input2, options.at) : null;
   const targetYear = targetYearFrom(options.at);
+  const horoscope = horoscopeRun?.horoscope ?? null;
   const interpretation = buildInterpretationFacts(bundle, {
     ...targetYear !== void 0 ? { targetYear } : {},
-    horoscope: horoscopeRun?.horoscope ?? null
+    horoscope
   });
   return {
     bundle,
     interpretation,
-    warnings: dedupeWarnings([...bundle.warnings, ...horoscopeRun?.warnings ?? []])
+    warnings: dedupeWarnings([...bundle.warnings, ...horoscopeRun?.warnings ?? []]),
+    horoscope,
+    targetYear
   };
+}
+function probeEmptyReason(run, request, atRequested) {
+  const timeUnknown = run.bundle.originalInput.timeAccuracy === "unknown";
+  if (timeUnknown) {
+    const patchedBundle = {
+      ...run.bundle,
+      originalInput: { ...run.bundle.originalInput, timeAccuracy: "approximate" }
+    };
+    const probeFacts = buildInterpretationFacts(patchedBundle, {
+      ...run.targetYear !== void 0 ? { targetYear: run.targetYear } : {},
+      horoscope: run.horoscope
+    });
+    const probePublic = buildPublicResult(patchedBundle, probeFacts, run.warnings);
+    if (selectAnswerFacts(probePublic.facts, request).length > 0) return "TIME_REQUIRED";
+  }
+  if (atRequested && run.horoscope === null && run.warnings.some((warning) => warning.code === "ZIWEI_INPUT_REQUIRED")) {
+    return timeUnknown ? "TIME_REQUIRED" : "INPUT_REQUIRED";
+  }
+  return void 0;
 }
 function runInterpret(input2, options = {}) {
   const run = runInterpretation(input2, options);
@@ -64634,10 +64673,23 @@ function runAnswerPlan(input2, options) {
   };
   const run = runInterpretation(allSystemsInput, options);
   const fullPublicResult = buildPublicResult(run.bundle, run.interpretation, run.warnings);
-  const answerPlan = buildAnswerPlan(fullPublicResult, {
+  let answerPlan = buildAnswerPlan(fullPublicResult, {
     topic: options.topic,
     lens: options.lens
   });
+  if (answerPlan.selectedFacts.length === 0) {
+    answerPlan = buildAnswerPlan(
+      fullPublicResult,
+      { topic: options.topic, lens: options.lens },
+      {
+        probeReason: probeEmptyReason(
+          run,
+          { topic: options.topic, lens: options.lens },
+          options.at !== void 0
+        )
+      }
+    );
+  }
   const answerBinding = buildAnswerBinding(
     {
       birthInput: input2,
@@ -64653,7 +64705,8 @@ function runAnswerPlan(input2, options) {
   );
   const publicResult = {
     ...fullPublicResult,
-    facts: answerPlan.selectedFacts
+    facts: answerPlan.selectedFacts,
+    followupOffers: answerPlan.followupOffers
   };
   return { publicResult, answerPlan, answerBinding };
 }

@@ -127,3 +127,32 @@ export function isDefaultAnswerFact(fact: {
   }
   return true;
 }
+
+/**
+ * Whether a fact's evidence is an admitted TARGET-PERIOD record — material that
+ * actually describes a requested dynamic period (today: the admitted Zi Wei
+ * yearly-flow record). This is a consumption predicate over the existing
+ * admission table, not a second registry: natal placements (signs, palaces,
+ * spouse stars, houses, birth-time cycle remainders) never match, and an
+ * explicit `at` never widens it. Timing-lens answers may cite ONLY this class.
+ */
+export function isTimingPeriodFact(fact: { evidence: readonly MaterialEvidence[] }): boolean {
+  return fact.evidence.some(
+    (evidence) => evidence.kind === 'ziwei-horoscope' && evidence.ref === 'horoscope.yearly',
+  );
+}
+
+/**
+ * Whether every evidence item is a non-chart limitation note (the engine's
+ * disclaimer marker). Such a fact explains a boundary; it is never "answer
+ * basis", so it cannot make a request limited/grounded on its own. Facts that
+ * ALSO cite chart evidence stay selectable.
+ */
+export function isLimitationNoteFact(fact: { evidence: readonly MaterialEvidence[] }): boolean {
+  return (
+    fact.evidence.length > 0 &&
+    fact.evidence.every(
+      (evidence) => evidence.kind === 'time' && evidence.ref === 'engine.disclaimer',
+    )
+  );
+}

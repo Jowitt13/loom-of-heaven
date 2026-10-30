@@ -91,8 +91,29 @@ for consent before sending them to any remote model or service.
 - a fixed content order and safety guardrails;
 - `answerability`: `grounded`, `limited` or `not-supported`.
 
+Topic and lens select TOGETHER. The `timing` lens keeps only admitted
+target-period records (today: the Zi Wei yearly-flow record behind an explicit
+`--at`); natal placements — pillars, day master, spouse stars, houses, signs,
+birth-cycle remainders — are background and are never selected as period
+evidence for any topic. A limitation note (e.g. the health disclaimer) is never
+answer basis: it cannot make a request `limited` on its own.
+
 When `answerability` is `not-supported`, say that the engine has no eligible fact for the request
 and offer a bounded follow-up. Never fill the gap with an inferred chart position, rule or verdict.
+`noEvidenceReason` is evidence-based, not guessed:
+
+- `TIME_REQUIRED` — the same request has admitted material that is really waiting on the birth
+  time (the one case where asking for the time genuinely unblocks THIS question);
+- `INPUT_REQUIRED` — an explicitly requested dynamic path names a missing rule input
+  (e.g. the gender the Zi Wei dynamic chart needs);
+- `NO_TOPIC_FACTS` — no admitted path exists for this topic+lens; supplying a time, place or
+  gender would NOT unlock it, so do not ask for them.
+
+`followupOffers` mirror real capability only. The default is an EMPTY list: no
+job/industry fit, no key-year or event promises, no automatic menu. The single
+non-empty case is `TIME_REQUIRED`, which offers exactly the time-completion
+step. Full-result warnings keep every audit record; `requiredWarningCodes`
+carries only the limits that qualify the selected material.
 
 ## Host writing rules
 
