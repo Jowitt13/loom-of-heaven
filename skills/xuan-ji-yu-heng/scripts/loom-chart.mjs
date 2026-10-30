@@ -21,12 +21,15 @@
  *   node scripts/loom-chart.mjs lint-reading --input-file draft-reading.md [--channel topic|full] [--simple] [--technical-details] [--output-file reading-lint.json]
  *   node scripts/loom-chart.mjs validate-answer --input-file validate-input.json [--output-file validation-result.json]
  *       (input file is size-capped; ordinary-question gate order: answer-plan → host writes a
- *        reading-draft/v2 JSON → validate-answer → display the SAME text that was checked →
- *        show the answer only when the gate passes; re-run the gate after any rewrite)
- *       BOUND DELIVERY: add --context-input-file birth.json --topic <topic> [--lens ...] [--at ...] [--now ...]
- *       and include the saved full answerPlan + answerBinding in the input file: the draft is
- *       additionally bound to the CURRENT request (stale plan/subject/topic/time is rejected)
- *       and the output carries the verbatim deliverableBody of the checked text.
+ *        reading-draft/v2 JSON → SEAL it to its plan run → validate-answer bound delivery →
+ *        display the returned deliverableBody verbatim; any rewrite needs a new seal + check)
+ *       SEAL: --seal-draft --binding-file answer-plan.json --input-file draft.json
+ *       → { draftSource, draftDigest } to submit with the saved plan.
+ *       BOUND DELIVERY: --context-input-file birth.json --topic <topic> [--lens ...] [--at ...] [--now ...]
+ *       with { draftSource, draftDigest, answerPlan, readingDraft }: the draft's own origin is
+ *       compared against the CURRENT request, the submitted plan and the draft content; any
+ *       mismatch fails with no body. Declaring a binding WITHOUT --context-input-file is a
+ *       controlled error — it never falls back to the structural check.
  *   node scripts/loom-chart.mjs render     [DISABLED] visualization reports are temporarily off; use calculate/interpret JSON (exit 3)
  *   node scripts/loom-chart.mjs verify     [--fixture fixtures/smoke.json]
  *   node scripts/loom-chart.mjs version    (local BUILD_MANIFEST labels plus scoped contentIdentity SHA-256)
@@ -168,6 +171,7 @@ async function main() {
     validateAnswer,
     parseValidateAnswerInputBounded,
     deliverAnswer,
+    sealReadingDraft,
     CareerRealityContext,
     MAX_VALIDATE_ANSWER_INPUT_BYTES,
     timeIndexFromHour,
@@ -356,6 +360,30 @@ async function main() {
           throw new EngineError('INPUT_VALIDATION_FAILED', 'Cannot read or parse the input file.');
         }
 
+        // Sealing mode: bind a finished draft to the plan run it was written for.
+        // Output is the draft's own origin record ({ draftSource, draftDigest }) to
+        // be submitted alongside the saved plan. Sealing does NOT validate content.
+        if (args['seal-draft'] === true) {
+          const bindingFile = requireArg(args, 'binding-file');
+          const planOutput = readPublicJsonOrThrow(bindingFile, EngineError);
+          const sealed = sealReadingDraft(planOutput.answerBinding, rawInput);
+          writePublicOutput(args, canonicalJsonPretty(sealed));
+          return;
+        }
+
+        // A declared binding/origin must never fall back to the low-level structural
+        // check: bound delivery requires the CURRENT request context explicitly.
+        const declaresBinding =
+          Object.hasOwn(rawInput, 'draftSource') ||
+          Object.hasOwn(rawInput, 'draftDigest') ||
+          Object.hasOwn(rawInput, 'answerBinding');
+        if (declaresBinding && typeof args['context-input-file'] !== 'string') {
+          throw new EngineError(
+            'INPUT_VALIDATION_FAILED',
+            'Input declares an answer binding or draft origin; bound delivery requires --context-input-file (and --topic). It is never silently reduced to the structural check.',
+          );
+        }
+
         // Bound delivery mode: with --context-input-file the validator additionally
         // binds the draft to the CURRENT request (stale subject/topic/lens/target/
         // settings/plan content is rejected) and returns the verbatim deliverable
@@ -377,7 +405,8 @@ async function main() {
                 ? {}
                 : { careerReality: rawInput.careerReality }),
             },
-            answerBinding: rawInput.answerBinding,
+            draftSource: rawInput.draftSource,
+            draftDigest: rawInput.draftDigest,
             answerPlan: rawInput.answerPlan,
             readingDraft: rawInput.readingDraft,
           });

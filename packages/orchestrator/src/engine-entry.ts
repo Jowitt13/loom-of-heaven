@@ -22,6 +22,7 @@ export {
   deliverAnswer,
   deriveAnswerPlanDigest,
   deriveAnswerRequestDigest,
+  sealReadingDraft,
   transcribeReadingDraft,
 } from './answer-delivery.ts';
 export type {
@@ -84,6 +85,8 @@ export {
   parseSynastryInput,
   ValidateAnswerInput,
   AnswerBinding,
+  AnswerDraftOrigin,
+  Sha256Digest,
   CareerRealityContext,
   ANSWER_BINDING_CONTRACT_VERSION,
   ANSWER_DELIVERY_CONTRACT_VERSION,

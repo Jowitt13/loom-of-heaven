@@ -287,11 +287,22 @@ own retention and remote-model policies remain separate from the local engine.
 
 ## Bound delivery (this plan, this request, this text)
 
-The classic `validate-answer` input above remains valid and unchanged: it is a STRUCTURAL gate
-and never was a context authenticator — it cannot tell which subject or request a plan belongs
-to. Bound delivery closes the accidental-mismatch hole on top of it, reusing the same validator:
+The classic `validate-answer` input above stays available for the plain structural shape
+`{ answerPlan, readingDraft }`. It is a STRUCTURAL gate and never was a context authenticator — it
+cannot tell which subject or request a plan or draft belongs to, and it makes no bound-delivery
+claim. The default Skill answer flow uses bound delivery:
 
 ```text
+# 1. seal the finished draft to the plan run it was written for
+node scripts/loom-chart.mjs validate-answer \
+  --seal-draft \
+  --input-file draft.json \
+  --binding-file answer-plan.json \
+  --output-file draft-origin.json
+# → { "draftSource": …, "draftDigest": "sha256:…" }
+
+# 2. submit { draftSource, draftDigest, answerPlan: <the FULL saved plan>, readingDraft }
+#    together with the CURRENT request
 node scripts/loom-chart.mjs validate-answer \
   --input-file delivery-input.json \
   --context-input-file birth-input.json \
@@ -300,32 +311,43 @@ node scripts/loom-chart.mjs validate-answer \
 ```
 
 `--context-input-file` (plus the same `--topic` / `--lens` / `--at` / `--now` options as
-`answer-plan`) re-states the CURRENT request; the delivery input file carries
-`{ "answerBinding": …, "answerPlan": <the FULL saved plan>, "readingDraft": … }` (and optionally
-`careerReality`, which participates in the binding digest — same id with a revised statement
-invalidates). The engine then runs, in order:
+`answer-plan`) re-states the CURRENT request; the delivery input may also carry `careerReality`,
+which participates in the request digest — same id with a revised statement invalidates. The
+engine then runs, in order:
 
-1. binding check — `requestDigest` re-derived from the CURRENT request must match, and
-   `planDigest` must cover the submitted plan's actual content (changed facts or constraints
-   invalidate); a mismatch is a controlled `BINDING_MISMATCH` failure;
+1. **draft-origin check** — the draft's OWN recorded source is compared independently against
+   (a) the CURRENT request, (b) the SUBMITTED plan's actual content, and (c) the submitted draft's
+   own content (`draftDigest`). A draft written for another subject cannot be re-used by pairing it
+   with a fresh plan and binding: its recorded source is its own. A bare draft with no origin is
+   refused (`DRAFT_ORIGIN_MISSING`) — supplying a binding only at submission time never counts as
+   verified provenance;
 2. the existing `validate-answer` structure/safety gate over the same draft;
 3. deterministic verbatim transcription of the checked draft (exact heading/paragraph text and
    order; nothing reworded, summarized or appended);
 4. the existing `lint-reading` language gate.
 
 Success returns `answer-delivery/v1` with `deliverableBody` (exactly the checked text) and
-`deliverableBodySha256`. Display that body verbatim; do not rewrite, reorder or add to it.
-Any failure returns `ok: false` with a `failureReason` and NO body — a failed run never carries
-or authorizes reuse of a previous successful body.
+`deliverableBodySha256`. Display that body verbatim; do not rewrite, reorder or add to it. Any
+rewrite — a word, a heading, the order — needs a NEW seal and a new check, which yields a new body.
+Any failure returns `ok: false` with a `failureReason` (`DRAFT_ORIGIN_MISSING`,
+`BINDING_MISMATCH`, `VALIDATION_FAILED`, `LINT_FAILED`, `MALFORMED_INPUT`) and NO body — a failed
+run never carries or authorizes reuse of a previous successful body.
+
+**No silent downgrade.** An input that declares a binding or draft origin but omits
+`--context-input-file` is rejected with `INPUT_VALIDATION_FAILED`; it is never quietly reduced to
+the low-level structural check. Only input with no declared binding takes the structural path, and
+that path — like before — still needs `lint-reading` on the produced text before display.
 
 Trust and privacy boundaries:
 
 - The expected context comes from the CURRENT request the host re-submits, not from anything the
   draft or plan asserts. Two stale artifacts that agree with each other are still rejected when
   they disagree with the current request.
-- Honest limit: a stateless validator cannot detect a host that deliberately replays an entire
-  stale context as the current request. This defends against accidental mismatch, not against a
-  malicious host; it is not authentication.
+- The draft's origin is sealed over its CONTENT: editing the draft after sealing invalidates it, so
+  a checked body cannot be swapped for different text.
+- Honest limit: a stateless validator cannot detect a host that deliberately re-labels a stale
+  draft with the current request's digests, nor one that replays an entire stale context. This
+  defends against accidental mismatch, not against a malicious host; it is not authentication.
 - The digests are consistency fingerprints only — not identity, not signing, not birth-data
   anonymization. Birth data never enters `publicResult`; binding digests are opaque hashes.
 - Nothing is persisted: no session registry, database or signing service exists. Do not commit

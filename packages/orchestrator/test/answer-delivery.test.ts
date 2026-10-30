@@ -9,6 +9,7 @@ import { validateAnswer } from '@loom/interpret';
 import {
   deliverAnswer,
   deriveAnswerRequestDigest,
+  sealReadingDraft,
   transcribeReadingDraft,
 } from '../src/answer-delivery.ts';
 import { runAnswerPlan } from '../src/interpret.ts';
@@ -18,11 +19,19 @@ const rawA = JSON.parse(readFileSync('examples/birth-input.json', 'utf8')) as Re
   string,
   unknown
 >;
+const rawB = { ...rawA, localDate: '1991-01-02' };
 const A = parseBirthInput(rawA);
-const B = parseBirthInput({ ...rawA, localDate: '1991-01-02' });
+const B = parseBirthInput(rawB);
 
-/** A jargon-free, footer-free draft body paragraph that cites a plan fact. */
-function characterDraft(plan: AnswerPlan): Record<string, unknown> {
+function runA(topic: 'character' | 'career' = 'character') {
+  return runAnswerPlan(A, { now: FIXED, topic });
+}
+function runB(topic: 'character' | 'career' = 'character') {
+  return runAnswerPlan(B, { now: FIXED, topic });
+}
+
+/** A jargon-free, footer-free draft that satisfies the character plan's constraints. */
+function characterDraft(plan: AnswerPlan, marker = '主动与秩序并存'): Record<string, unknown> {
   const fact = plan.selectedFacts[0]!;
   return {
     contractVersion: 'reading-draft/v2',
@@ -33,7 +42,7 @@ function characterDraft(plan: AnswerPlan): Record<string, unknown> {
         heading: '性格概览',
         paragraphs: [
           {
-            text: '整体性格结构呈现主动与秩序并存的底色，传统说法只作文化参考，具体表现因环境与选择而异。',
+            text: `整体性格结构呈现${marker}的底色，传统说法只作文化参考，具体表现因环境与选择而异。`,
             sourceFactIds: [fact.id],
             constraintRefs: [{ kind: 'caveat', index: 0 }],
           },
@@ -54,39 +63,47 @@ function characterDraft(plan: AnswerPlan): Record<string, unknown> {
   };
 }
 
-function runA(topic: 'character' | 'career' = 'character') {
-  return runAnswerPlan(A, { now: FIXED, topic });
+/** Seal a draft to the plan run it was written for (the host's draft-time step). */
+function sealed<T extends { answerBinding: unknown; answerPlan: AnswerPlan }>(
+  run: T,
+  draft: Record<string, unknown>,
+) {
+  return sealReadingDraft(run.answerBinding, draft);
 }
 
-describe('pre-fix mismatch reproduction (why binding is needed)', () => {
-  it('the old structural check accepts an A-draft against the B-plan despite identical ids', () => {
+describe('pre-fix mismatch reproduction (why draft origin binding is needed)', () => {
+  it('the structural check alone accepts an A-draft against the B-plan despite identical ids', () => {
     const planA = runA().answerPlan;
-    const planB = runAnswerPlan(B, { now: FIXED, topic: 'character' }).answerPlan;
-    // Same id space, different fact content (the documented collision).
+    const planB = runB().answerPlan;
     expect(planA.allowedFactIds.slice(0, 5)).toEqual(planB.allowedFactIds.slice(0, 5));
     const idA = planA.selectedFacts[0]!;
     const idB = planB.selectedFacts[0]!;
     expect(idA.id).toBe(idB.id);
     expect(idA.claim).not.toBe(idB.claim);
-    // The A-draft passes the B-plan's STRUCTURAL subset: ids exist, caveats and
-    // warnings are string-identical across the two plans. This is the confirmed
-    // accidental-mismatch hole the delivery binding closes.
-    const result = validateAnswer({ answerPlan: planB, readingDraft: characterDraft(planA) });
-    expect(result.ok).toBe(true);
+    // ids exist and caveat/warning strings are identical across the two plans, so
+    // the low-level gate cannot tell which subject the draft was written for.
+    expect(validateAnswer({ answerPlan: planB, readingDraft: characterDraft(planA) }).ok).toBe(
+      true,
+    );
   });
 });
 
 describe('answer delivery binding', () => {
   it('A + A passes and returns the verbatim deliverable body', () => {
     const run = runA();
+    const draft = characterDraft(run.answerPlan);
     const delivery = deliverAnswer({
       currentRequest: { birthInput: rawA, topic: 'character', now: FIXED },
-      answerBinding: run.answerBinding,
+      ...sealed(run, draft),
       answerPlan: run.answerPlan,
-      readingDraft: characterDraft(run.answerPlan),
+      readingDraft: draft,
     });
     expect(delivery.ok).toBe(true);
-    expect(delivery.binding).toEqual({ requestDigestMatch: true, planDigestMatch: true });
+    expect(delivery.binding).toEqual({
+      requestDigestMatch: true,
+      planDigestMatch: true,
+      draftDigestMatch: true,
+    });
     const expectedBody = transcribeReadingDraft({
       sections: [
         {
@@ -104,86 +121,115 @@ describe('answer delivery binding', () => {
     expect(delivery.deliverableBodySha256).toBe(
       `sha256:${createHash('sha256').update(expectedBody, 'utf8').digest('hex')}`,
     );
-    // No appended footer/menu/technical tail beyond the checked text.
     expect(delivery.deliverableBody).not.toContain('敏感项校对');
     expect(delivery.deliverableBody).not.toContain('引擎警告');
   });
 
-  it('B + B passes with its own binding', () => {
-    const run = runAnswerPlan(B, { now: FIXED, topic: 'character' });
+  it('B + B passes with its own origin', () => {
+    const run = runB();
+    const draft = characterDraft(run.answerPlan);
     const delivery = deliverAnswer({
-      currentRequest: {
-        birthInput: { ...rawA, localDate: '1991-01-02' },
-        topic: 'character',
-        now: FIXED,
-      },
-      answerBinding: run.answerBinding,
+      currentRequest: { birthInput: rawB, topic: 'character', now: FIXED },
+      ...sealed(run, draft),
       answerPlan: run.answerPlan,
-      readingDraft: characterDraft(run.answerPlan),
+      readingDraft: draft,
     });
     expect(delivery.ok).toBe(true);
   });
 
-  it('rejects an A-draft under the current B context even though fact ids coincide', () => {
-    const runA = runAnswerPlan(A, { now: FIXED, topic: 'character' });
+  // THE gap Codex reproduced: A draft + B plan + B binding, current request B.
+  it('rejects an A draft that carries its own A origin, paired with the current B plan', () => {
+    const runA0 = runA();
+    const runB0 = runB();
+    const draftA = characterDraft(runA0.answerPlan, '命主甲');
+    const originA = sealed(runA0, draftA); // sealed when the A draft was written
     const delivery = deliverAnswer({
-      currentRequest: {
-        birthInput: { ...rawA, localDate: '1991-01-02' },
-        topic: 'character',
-        now: FIXED,
-      },
-      answerBinding: runA.answerBinding,
-      answerPlan: runA.answerPlan,
-      readingDraft: characterDraft(runA.answerPlan),
+      // current request is B, and the submitted plan/binding are B's
+      currentRequest: { birthInput: rawB, topic: 'character', now: FIXED },
+      ...originA,
+      answerPlan: runB0.answerPlan,
+      readingDraft: draftA,
     });
     expect(delivery.ok).toBe(false);
     expect(delivery.failureReason).toBe('BINDING_MISMATCH');
+    // The draft's recorded source plan is A's, not B's.
+    expect(delivery.binding).toEqual({
+      requestDigestMatch: false,
+      planDigestMatch: false,
+      draftDigestMatch: true,
+    });
+    expect(delivery.deliverableBody).toBeNull();
+    expect(canonicalJson(delivery)).not.toContain('命主甲');
+  });
+
+  it('rejects a bare legacy draft that has no origin of its own', () => {
+    const run = runA();
+    const delivery = deliverAnswer({
+      currentRequest: { birthInput: rawA, topic: 'character', now: FIXED },
+      answerPlan: run.answerPlan,
+      readingDraft: characterDraft(run.answerPlan),
+    });
+    expect(delivery.ok).toBe(false);
+    expect(delivery.failureReason).toBe('DRAFT_ORIGIN_MISSING');
+    expect(delivery.deliverableBody).toBeNull();
+  });
+
+  it('rejects a draft whose content changed after sealing', () => {
+    const run = runA();
+    const draft = characterDraft(run.answerPlan);
+    const origin = sealed(run, draft);
+    const swapped = structuredClone(draft);
+    (swapped.sections as Array<{ paragraphs: Array<{ text: string }> }>)[0]!.paragraphs[0]!.text =
+      '整体性格结构呈现完全不同的底色，传统说法只作文化参考。';
+    const delivery = deliverAnswer({
+      currentRequest: { birthInput: rawA, topic: 'character', now: FIXED },
+      ...origin,
+      answerPlan: run.answerPlan,
+      readingDraft: swapped,
+    });
+    expect(delivery.failureReason).toBe('BINDING_MISMATCH');
+    expect(delivery.binding?.draftDigestMatch).toBe(false);
+    expect(delivery.deliverableBody).toBeNull();
+  });
+
+  it('rejects an A draft under the current B context even with matching ids', () => {
+    const runA0 = runA();
+    const draftA = characterDraft(runA0.answerPlan, '命主甲');
+    const delivery = deliverAnswer({
+      currentRequest: { birthInput: rawB, topic: 'character', now: FIXED },
+      ...sealed(runA0, draftA),
+      answerPlan: runA0.answerPlan,
+      readingDraft: draftA,
+    });
+    expect(delivery.failureReason).toBe('BINDING_MISMATCH');
     expect(delivery.binding?.requestDigestMatch).toBe(false);
     expect(delivery.deliverableBody).toBeNull();
-    // Controlled failure never echoes birth data.
-    expect(canonicalJson(delivery)).not.toContain('1990-03-10');
     expect(canonicalJson(delivery)).not.toContain('1991-01-02');
   });
 
-  it('invalidates the old binding when topic, lens or target time changes', () => {
-    const base = runAnswerPlan(A, { now: FIXED, topic: 'character' });
-    const cases: Array<Record<string, unknown>> = [
-      { topic: 'career' },
-      { topic: 'character', lens: 'strengths' },
-      { topic: 'character', at: { solarDate: '2026-05-20', timeIndex: 7 } },
-    ];
-    for (const changed of cases) {
+  it('invalidates the origin when topic, lens or target time changes', () => {
+    const base = runA();
+    const draft = characterDraft(base.answerPlan);
+    const origin = sealed(base, draft);
+    for (const changed of [
+      { topic: 'career' as const },
+      { topic: 'character' as const, lens: 'strengths' as const },
+      { topic: 'character' as const, at: { solarDate: '2026-05-20', timeIndex: 7 } },
+    ]) {
       const delivery = deliverAnswer({
         currentRequest: { birthInput: rawA, now: FIXED, ...changed },
-        answerBinding: base.answerBinding,
+        ...origin,
         answerPlan: base.answerPlan,
-        readingDraft: characterDraft(base.answerPlan),
+        readingDraft: draft,
       });
       expect(delivery.failureReason).toBe('BINDING_MISMATCH');
       expect(delivery.deliverableBody).toBeNull();
     }
-    // A plan bound WITHOUT a target time is not valid under a request WITH one.
-    const withAt = runAnswerPlan(A, {
-      now: FIXED,
-      topic: 'character',
-      at: { solarDate: '2036-05-20', timeIndex: 7 },
-    });
-    const cross = deliverAnswer({
-      currentRequest: {
-        birthInput: rawA,
-        topic: 'character',
-        now: FIXED,
-        at: { solarDate: '2026-05-20', timeIndex: 7 },
-      },
-      answerBinding: withAt.answerBinding,
-      answerPlan: withAt.answerPlan,
-      readingDraft: characterDraft(withAt.answerPlan),
-    });
-    expect(cross.failureReason).toBe('BINDING_MISMATCH');
   });
 
-  it('invalidates the old binding when executed settings change', () => {
+  it('invalidates the origin when executed settings change', () => {
     const base = runA();
+    const draft = characterDraft(base.answerPlan);
     const changedSettings = {
       ...rawA,
       settings: {
@@ -197,15 +243,17 @@ describe('answer delivery binding', () => {
     };
     const delivery = deliverAnswer({
       currentRequest: { birthInput: changedSettings, topic: 'character', now: FIXED },
-      answerBinding: base.answerBinding,
+      ...sealed(base, draft),
       answerPlan: base.answerPlan,
-      readingDraft: characterDraft(base.answerPlan),
+      readingDraft: draft,
     });
     expect(delivery.failureReason).toBe('BINDING_MISMATCH');
   });
 
-  it('invalidates the binding when plan facts or constraints change', () => {
+  it('invalidates the origin when plan facts or constraints change', () => {
     const base = runA();
+    const draft = characterDraft(base.answerPlan);
+    const origin = sealed(base, draft);
     const tamperedFacts = structuredClone(base.answerPlan);
     tamperedFacts.selectedFacts[0]!.claim = '被替换的无关结论';
     const tamperedConstraints = structuredClone(base.answerPlan);
@@ -213,9 +261,9 @@ describe('answer delivery binding', () => {
     for (const plan of [tamperedFacts, tamperedConstraints]) {
       const delivery = deliverAnswer({
         currentRequest: { birthInput: rawA, topic: 'character', now: FIXED },
-        answerBinding: base.answerBinding,
+        ...origin,
         answerPlan: plan,
-        readingDraft: characterDraft(base.answerPlan),
+        readingDraft: draft,
       });
       expect(delivery.failureReason).toBe('BINDING_MISMATCH');
       expect(delivery.binding?.planDigestMatch).toBe(false);
@@ -241,15 +289,11 @@ describe('answer delivery binding', () => {
     const r2 = reality('目前在教育行业做课程设计'); // same id, revised statement
     const withR1 = runAnswerPlan(A, { now: FIXED, topic: 'career', careerReality: r1 });
     const withR1Again = runAnswerPlan(A, { now: FIXED, topic: 'career', careerReality: r1 });
-    // Deterministic for identical content.
     expect(withR1.answerBinding.requestDigest).toBe(withR1Again.answerBinding.requestDigest);
-    // Same id, changed statement ⇒ new digest.
     const withR2 = runAnswerPlan(A, { now: FIXED, topic: 'career', careerReality: r2 });
     expect(withR1.answerBinding.requestDigest).not.toBe(withR2.answerBinding.requestDigest);
-    // Present vs absent career reality also differs.
     const without = runAnswerPlan(A, { now: FIXED, topic: 'career' });
     expect(without.answerBinding.requestDigest).not.toBe(withR1.answerBinding.requestDigest);
-    // Digest-level: direct derivation is stable and split-free.
     expect(deriveAnswerRequestDigest({ birthInput: A, request: { topic: 'career' } })).toBe(
       deriveAnswerRequestDigest({ birthInput: A, request: { topic: 'career' } }),
     );
@@ -268,84 +312,89 @@ describe('answer delivery binding', () => {
     expect(seen[0]).not.toBe(seen[1]);
   });
 
-  it('does not let a post-check text or heading change ride the old pass', () => {
+  it('re-delivers a new body after a rewrite and never reuses a failed one', () => {
     const run = runA();
     const request = {
       currentRequest: { birthInput: rawA, topic: 'character' as const, now: FIXED },
     };
+    const draft = characterDraft(run.answerPlan);
     const okDelivery = deliverAnswer({
       ...request,
-      answerBinding: run.answerBinding,
+      ...sealed(run, draft),
       answerPlan: run.answerPlan,
-      readingDraft: characterDraft(run.answerPlan),
+      readingDraft: draft,
     });
     expect(okDelivery.ok).toBe(true);
 
-    // Rewriting a paragraph into a deterministic-fate claim must fail validation,
-    // and the failed result must NOT carry the previous successful body.
-    const mutated = characterDraft(run.answerPlan);
-    (mutated.sections as Array<{ paragraphs: Array<{ text: string }> }>)[0]!.paragraphs[0]!.text =
+    // A rewritten draft must be re-sealed; the new delivery has its own body.
+    const rewritten = characterDraft(run.answerPlan, '沉稳与灵活交替');
+    (rewritten.sections as Array<{ heading: string }>)[0]!.heading = '性格要点';
+    const resealed = deliverAnswer({
+      ...request,
+      ...sealed(run, rewritten),
+      answerPlan: run.answerPlan,
+      readingDraft: rewritten,
+    });
+    expect(resealed.ok).toBe(true);
+    expect(resealed.deliverableBody).toContain('性格要点');
+    expect(resealed.deliverableBodySha256).not.toBe(okDelivery.deliverableBodySha256);
+
+    // A rewrite that keeps the OLD seal is rejected (content no longer matches).
+    const unsealed = deliverAnswer({
+      ...request,
+      ...sealed(run, draft),
+      answerPlan: run.answerPlan,
+      readingDraft: rewritten,
+    });
+    expect(unsealed.ok).toBe(false);
+    expect(unsealed.deliverableBody).toBeNull();
+
+    // A safety-failing rewrite returns no body at all.
+    const unsafe = characterDraft(run.answerPlan);
+    (unsafe.sections as Array<{ paragraphs: Array<{ text: string }> }>)[0]!.paragraphs[0]!.text =
       '这一配置注定会成功，毫无疑问会成功。';
     const failed = deliverAnswer({
       ...request,
-      answerBinding: run.answerBinding,
+      ...sealed(run, unsafe),
       answerPlan: run.answerPlan,
-      readingDraft: mutated,
+      readingDraft: unsafe,
     });
-    expect(failed.ok).toBe(false);
+    expect(failed.failureReason).toBe('VALIDATION_FAILED');
     expect(failed.deliverableBody).toBeNull();
-
-    // A heading change re-delivers a DIFFERENT body (new check, new text) — the
-    // old result can never be reused for the changed draft.
-    const reheaded = characterDraft(run.answerPlan);
-    (reheaded.sections as Array<{ heading: string }>)[0]!.heading = '性格要点';
-    const redelivered = deliverAnswer({
-      ...request,
-      answerBinding: run.answerBinding,
-      answerPlan: run.answerPlan,
-      readingDraft: reheaded,
-    });
-    expect(redelivered.ok).toBe(true);
-    expect(redelivered.deliverableBody).toContain('性格要点');
-    expect(redelivered.deliverableBodySha256).not.toBe(okDelivery.deliverableBodySha256);
   });
 
-  it('fails closed on malformed, mismatched or oversized bindings without echoing birth data', () => {
+  it('fails closed on malformed or oversized origin records without echoing birth data', () => {
     const run = runA();
+    const draft = characterDraft(run.answerPlan);
     const request = {
       currentRequest: { birthInput: rawA, topic: 'character' as const, now: FIXED },
     };
-    for (const binding of [
-      undefined,
+    const good = sealed(run, draft);
+    const cases: Array<Record<string, unknown>> = [
+      { draftSource: { contractVersion: 'answer-binding/v0' }, draftDigest: good.draftDigest },
+      { draftSource: good.draftSource, draftDigest: 'not-a-digest' },
+      { draftSource: good.draftSource, draftDigest: 'sha256:' + 'x'.repeat(5000) },
       {
-        contractVersion: 'answer-binding/v0',
-        requestDigest: 'sha256:' + '0'.repeat(64),
-        planDigest: 'sha256:' + '0'.repeat(64),
+        draftSource: { ...good.draftSource, planDigest: 'sha256:' + '0'.repeat(64) },
+        draftDigest: good.draftDigest,
       },
-      {
-        contractVersion: 'answer-binding/v1',
-        requestDigest: 'not-a-digest',
-        planDigest: 'sha256:' + '0'.repeat(64),
-      },
-      { contractVersion: 'answer-binding/v1', requestDigest: 'x'.repeat(5000) },
-    ]) {
+    ];
+    for (const origin of cases) {
       const delivery = deliverAnswer({
         ...request,
-        answerBinding: binding,
+        ...origin,
         answerPlan: run.answerPlan,
-        readingDraft: characterDraft(run.answerPlan),
+        readingDraft: draft,
       });
       expect(delivery.ok).toBe(false);
-      expect(delivery.failureReason).toBe('MALFORMED_INPUT');
       expect(delivery.deliverableBody).toBeNull();
       expect(canonicalJson(delivery)).not.toContain('1990-03-10');
     }
-    // A malformed plan or missing draft fails the same controlled way.
     const badPlan = deliverAnswer({
       ...request,
-      answerBinding: run.answerBinding,
+      ...good,
       answerPlan: { nonsense: true },
-      readingDraft: characterDraft(run.answerPlan),
+      readingDraft: draft,
     });
     expect(badPlan.failureReason).toBe('MALFORMED_INPUT');
   });
@@ -377,18 +426,29 @@ describe('answer delivery binding', () => {
     };
     const delivery = deliverAnswer({
       currentRequest: { birthInput: unknownRaw, topic: 'career', now: FIXED },
-      answerBinding: run.answerBinding,
+      ...sealed(run, limitationDraft),
       answerPlan: run.answerPlan,
       readingDraft: limitationDraft,
     });
     expect(delivery.ok).toBe(true);
-    // The bound delivery rejects the SAME unknown-time draft under the exact-time A.
+    // The same unknown-time draft under the exact-time A is rejected.
     const cross = deliverAnswer({
       currentRequest: { birthInput: rawA, topic: 'career', now: FIXED },
-      answerBinding: run.answerBinding,
+      ...sealed(run, limitationDraft),
       answerPlan: run.answerPlan,
       readingDraft: limitationDraft,
     });
     expect(cross.failureReason).toBe('BINDING_MISMATCH');
+  });
+
+  it('keeps the low-level structural entry compatible but claims nothing about origin', () => {
+    const plan = runA().answerPlan;
+    // The legacy input shape (no origin fields) still validates structurally.
+    const legacy = validateAnswer({ answerPlan: plan, readingDraft: characterDraft(plan) });
+    expect(legacy.contractVersion).toBe('validation-result/v2');
+    expect(legacy.ok).toBe(true);
+    // and carries no delivery/origin claim at all.
+    expect(legacy).not.toHaveProperty('deliverableBody');
+    expect(legacy).not.toHaveProperty('binding');
   });
 });

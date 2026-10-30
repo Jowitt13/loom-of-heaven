@@ -191,7 +191,12 @@ try {
   let deliveredOk = false;
   let mismatchRejected = false;
   let mismatchEchoedBirth = true;
+  let draftSealed = false;
+  let noContextFailsClosed = false;
+  let legacyClaimsNothing = false;
   try {
+    // Save the plan output so the sealing step can read its binding.
+    writeFileSync(join(tempSkill, 'plan-character.json'), bindingPlanRun.stdout, 'utf8');
     const bindingPlan = JSON.parse(bindingPlanRun.stdout) as {
       answerBinding?: { contractVersion?: string; requestDigest?: string; planDigest?: string };
       answerPlan: {
@@ -238,15 +243,58 @@ try {
       caveatsExpressed: bindingPlan.answerPlan.requiredCaveats,
       warningsDisclosed: bindingPlan.answerPlan.requiredWarningCodes,
     };
+    writeFileSync(join(tempSkill, 'draft.json'), JSON.stringify(draft), 'utf8');
+    // Seal the finished draft to the plan run it was written for.
+    const sealRun = runNode(tempSkill, [
+      'scripts/loom-chart.mjs',
+      'validate-answer',
+      '--seal-draft',
+      '--input-file',
+      'draft.json',
+      '--binding-file',
+      'plan-character.json',
+    ]);
+    const sealedOrigin =
+      sealRun.code === 0 ? (JSON.parse(sealRun.stdout) as Record<string, unknown>) : {};
+    draftSealed =
+      sealRun.code === 0 &&
+      typeof sealedOrigin.draftDigest === 'string' &&
+      /^sha256:[0-9a-f]{64}$/.test(sealedOrigin.draftDigest as string) &&
+      (sealedOrigin.draftSource as { contractVersion?: string } | undefined)?.contractVersion ===
+        'answer-binding/v1';
     writeFileSync(
       join(tempSkill, 'delivery-input.json'),
-      JSON.stringify({
-        answerBinding: bindingPlan.answerBinding,
-        answerPlan: bindingPlan.answerPlan,
-        readingDraft: draft,
-      }),
+      JSON.stringify({ ...sealedOrigin, answerPlan: bindingPlan.answerPlan, readingDraft: draft }),
       'utf8',
     );
+    // A binding declared without the current-request context must fail, never
+    // silently fall back to the structural check.
+    const noContext = runNode(tempSkill, [
+      'scripts/loom-chart.mjs',
+      'validate-answer',
+      '--input-file',
+      'delivery-input.json',
+    ]);
+    noContextFailsClosed =
+      noContext.code === 2 &&
+      /INPUT_VALIDATION_FAILED/.test(noContext.stdout) &&
+      !/"ok":\s*true/.test(noContext.stdout);
+    // The legacy structural shape keeps working but claims no bound delivery.
+    writeFileSync(
+      join(tempSkill, 'legacy-input.json'),
+      JSON.stringify({ answerPlan: bindingPlan.answerPlan, readingDraft: draft }),
+      'utf8',
+    );
+    const legacy = runNode(tempSkill, [
+      'scripts/loom-chart.mjs',
+      'validate-answer',
+      '--input-file',
+      'legacy-input.json',
+    ]);
+    legacyClaimsNothing =
+      legacy.code === 0 &&
+      /"contractVersion":\s*"validation-result\/v2"/.test(legacy.stdout) &&
+      !/deliverableBody|"binding"/.test(legacy.stdout);
     const deliveryArgs = [
       'scripts/loom-chart.mjs',
       'validate-answer',
@@ -296,10 +344,19 @@ try {
     /* the records below report the failure */
   }
   record('bound delivery: answer-plan emits a binding', bindingEmitted);
+  record('bound delivery: a finished draft seals to its plan run', draftSealed);
   record('bound delivery succeeds and returns the checked body verbatim', deliveredOk);
   record(
     'bound delivery rejects a stale plan under a revised subject without echoing birth data',
     mismatchRejected && !mismatchEchoedBirth,
+  );
+  record(
+    'a declared binding without --context-input-file fails closed (no structural fallback)',
+    noContextFailsClosed,
+  );
+  record(
+    'the legacy structural entry still works and claims no bound delivery',
+    legacyClaimsNothing,
   );
 
   // IQ-4F: the explicit single-system bazi-career runtime entry.

@@ -8,6 +8,7 @@ import {
   CareerRealityContext,
   ENGINE_VERSION,
   parseBirthInput,
+  Sha256Digest,
 } from '@loom/contracts';
 import type {
   AnswerLens,
@@ -138,14 +139,23 @@ export function transcribeReadingDraft(draft: {
 }
 
 export type AnswerDeliveryFailureReason =
-  'MALFORMED_INPUT' | 'BINDING_MISMATCH' | 'VALIDATION_FAILED' | 'LINT_FAILED';
+  | 'MALFORMED_INPUT'
+  | 'DRAFT_ORIGIN_MISSING'
+  | 'BINDING_MISMATCH'
+  | 'VALIDATION_FAILED'
+  | 'LINT_FAILED';
 
 export interface AnswerDeliveryResult {
   contractVersion: typeof ANSWER_DELIVERY_CONTRACT_VERSION;
   ok: boolean;
   /** Failure category; null on success. Static wording only — never input echo. */
   failureReason: AnswerDeliveryFailureReason | null;
-  binding: { requestDigestMatch: boolean; planDigestMatch: boolean } | null;
+  /** Independent comparisons: the draft's own origin vs the plan, the request, and its content. */
+  binding: {
+    requestDigestMatch: boolean;
+    planDigestMatch: boolean;
+    draftDigestMatch: boolean;
+  } | null;
   validation: AnswerValidationResult | null;
   lint: ReturnType<typeof lintReading> | null;
   /** Deliverable body — present ONLY on success; never a previous successful body. */
@@ -165,8 +175,13 @@ export interface DeliverAnswerInput {
     at?: HoroscopeOptions;
     careerReality?: unknown;
   };
-  /** Binding copied verbatim from the plan run output (raw, untrusted). */
-  answerBinding: unknown;
+  /**
+   * The draft's OWN origin record, produced by `sealReadingDraft` WHEN THE DRAFT
+   * WAS WRITTEN (`answer-plan`'s binding + a digest of the draft content). A bare
+   * draft carries no provenance and cannot be bound-delivered.
+   */
+  draftSource: unknown;
+  draftDigest: unknown;
   /** The FULL saved answer plan (raw, untrusted — schema-parsed here). */
   answerPlan: unknown;
   /** The reading draft (raw, untrusted — validated via the existing public entry). */
@@ -187,10 +202,40 @@ function malformed(): AnswerDeliveryResult {
 }
 
 /**
- * Bound delivery: binding checks → existing validateAnswer (structure/safety) →
- * verbatim transcription → existing lintReading → deliverable body. Any failure
- * returns ok:false with NO body (a failed run never carries or authorizes reuse
- * of a previous successful body).
+ * Seal a draft with its OWN origin: the plan-run binding it was authored against
+ * plus a digest over the draft content. Call this when the draft is written, then
+ * submit the result (as `draftSource` / `draftDigest`) together with the saved
+ * plan. Sealing binds the CONTENT to that origin, so a draft cannot later be
+ * paired with a different plan and pass as if it had been written for it.
+ */
+export function sealReadingDraft(
+  answerBinding: unknown,
+  readingDraft: unknown,
+): { draftSource: AnswerBinding; draftDigest: string } {
+  const parsedBinding = AnswerBinding.safeParse(answerBinding);
+  if (!parsedBinding.success) {
+    throw new Error('sealReadingDraft requires a valid answer-binding/v1 record.');
+  }
+  return {
+    draftSource: parsedBinding.data,
+    draftDigest: digestOfJson(readingDraft),
+  };
+}
+
+/** sha256 over the canonical JSON of a draft (stable key order, no whitespace). */
+function digestOfJson(value: unknown): string {
+  return sha256Hex(canonicalJson(value));
+}
+
+/**
+ * Bound delivery: draft-origin checks → existing validateAnswer (structure/safety)
+ * → verbatim transcription → existing lintReading → deliverable body. Any failure
+ * returns ok:false with NO body (a failed run never carries or authorizes reuse of
+ * a previous successful body).
+ *
+ * The draft's own origin is compared INDEPENDENTLY against the submitted plan, the
+ * current request, and the submitted draft content. Supplying a fresh plan+binding
+ * for a stale draft therefore fails: the draft's recorded source is its own.
  */
 export function deliverAnswer(input: unknown): AnswerDeliveryResult {
   if (typeof input !== 'object' || input === null) return malformed();
@@ -218,11 +263,24 @@ export function deliverAnswer(input: unknown): AnswerDeliveryResult {
     careerReality = parsedReality.data;
   }
 
-  // Binding block: strict shape, then compared against the CURRENT request and
-  // the SUBMITTED full plan.
-  const parsedBinding = AnswerBinding.safeParse(raw.answerBinding);
+  // A bare draft has no provenance: it cannot be bound-delivered at all.
+  if (raw.draftSource === undefined || raw.draftDigest === undefined) {
+    return {
+      contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+      ok: false,
+      failureReason: 'DRAFT_ORIGIN_MISSING',
+      binding: null,
+      validation: null,
+      lint: null,
+      deliverableBody: null,
+      deliverableBodySha256: null,
+    };
+  }
+
+  const parsedSource = AnswerBinding.safeParse(raw.draftSource);
+  const parsedDigest = Sha256Digest.safeParse(raw.draftDigest);
   const parsedPlan = AnswerPlan.safeParse(raw.answerPlan);
-  if (!parsedBinding.success || !parsedPlan.success) return malformed();
+  if (!parsedSource.success || !parsedDigest.success || !parsedPlan.success) return malformed();
 
   const currentRequestDigest = deriveAnswerRequestDigest({
     birthInput,
@@ -234,14 +292,21 @@ export function deliverAnswer(input: unknown): AnswerDeliveryResult {
     },
     ...(careerReality === undefined ? {} : { careerReality }),
   });
-  const requestDigestMatch = currentRequestDigest === parsedBinding.data.requestDigest;
-  const planDigestMatch = deriveAnswerPlanDigest(parsedPlan.data) === parsedBinding.data.planDigest;
-  if (!requestDigestMatch || !planDigestMatch) {
+  // Three independent comparisons, all against the DRAFT's own record.
+  const requestDigestMatch = currentRequestDigest === parsedSource.data.requestDigest;
+  const planDigestMatch = deriveAnswerPlanDigest(parsedPlan.data) === parsedSource.data.planDigest;
+  let draftDigestMatch = false;
+  try {
+    draftDigestMatch = digestOfJson(raw.readingDraft) === parsedDigest.data;
+  } catch {
+    return malformed();
+  }
+  if (!requestDigestMatch || !planDigestMatch || !draftDigestMatch) {
     return {
       contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
       ok: false,
       failureReason: 'BINDING_MISMATCH',
-      binding: { requestDigestMatch, planDigestMatch },
+      binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
       validation: null,
       lint: null,
       deliverableBody: null,
@@ -252,7 +317,6 @@ export function deliverAnswer(input: unknown): AnswerDeliveryResult {
   // Existing structural/safety gate over the plan subset + draft (+ reality).
   const validation = validateAnswer({
     ...(careerReality === undefined ? {} : { careerReality }),
-    answerBinding: parsedBinding.data,
     answerPlan: projectPlanSubset(parsedPlan.data),
     readingDraft: raw.readingDraft,
   });
@@ -261,7 +325,7 @@ export function deliverAnswer(input: unknown): AnswerDeliveryResult {
       contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
       ok: false,
       failureReason: 'VALIDATION_FAILED',
-      binding: { requestDigestMatch, planDigestMatch },
+      binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
       validation,
       lint: null,
       deliverableBody: null,
@@ -296,7 +360,7 @@ export function deliverAnswer(input: unknown): AnswerDeliveryResult {
       contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
       ok: false,
       failureReason: 'LINT_FAILED',
-      binding: { requestDigestMatch, planDigestMatch },
+      binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
       validation,
       lint,
       deliverableBody: null,
@@ -308,7 +372,7 @@ export function deliverAnswer(input: unknown): AnswerDeliveryResult {
     contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
     ok: true,
     failureReason: null,
-    binding: { requestDigestMatch, planDigestMatch },
+    binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
     validation,
     lint,
     deliverableBody: body,

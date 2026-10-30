@@ -54,7 +54,9 @@ export const VALIDATION_RESULT_CONTRACT_VERSION = 'validation-result/v2';
 export const ANSWER_BINDING_CONTRACT_VERSION = 'answer-binding/v1';
 export const ANSWER_DELIVERY_CONTRACT_VERSION = 'answer-delivery/v1';
 
-const Sha256Digest = z.string().regex(/^sha256:[0-9a-f]{64}$/);
+/** Opaque consistency fingerprint (`sha256:<64 lowercase hex>`). */
+export const Sha256Digest = z.string().regex(/^sha256:[0-9a-f]{64}$/);
+export type Sha256Digest = z.infer<typeof Sha256Digest>;
 
 export const AnswerBinding = z.strictObject({
   contractVersion: z.literal(ANSWER_BINDING_CONTRACT_VERSION),
@@ -62,6 +64,21 @@ export const AnswerBinding = z.strictObject({
   planDigest: Sha256Digest,
 });
 export type AnswerBinding = z.infer<typeof AnswerBinding>;
+
+/**
+ * A draft's OWN provenance record, sealed when the draft is written: the binding
+ * of the plan run it was authored against plus a digest over the draft content
+ * itself. Bound delivery compares this record against the CURRENT request and the
+ * SUBMITTED plan independently, so a draft made for another subject cannot be
+ * re-used by pairing it with a fresh plan/binding. Like the binding it is a
+ * transient consistency record — not identity, not signing, and no defence
+ * against a host that deliberately re-labels a stale draft as current.
+ */
+export const AnswerDraftOrigin = z.strictObject({
+  draftSource: AnswerBinding,
+  draftDigest: Sha256Digest,
+});
+export type AnswerDraftOrigin = z.infer<typeof AnswerDraftOrigin>;
 
 // --- Protective resource limits ---
 // Rationale: the validator runs bounded regex scans over every heading and
@@ -387,13 +404,6 @@ export type AnswerValidationResult = z.infer<typeof AnswerValidationResult>;
  */
 export const ValidateAnswerInput = z.strictObject({
   careerReality: CareerRealityContext.optional(),
-  /**
-   * Optional transient binding block copied verbatim from the answer-plan run's
-   * output. Absent ⇒ classic structural validation only (legacy behaviour is
-   * unchanged); present ⇒ the delivery path additionally compares it against
-   * the current request context. Additive, backward-compatible field.
-   */
-  answerBinding: AnswerBinding.optional(),
   answerPlan: z.object({
     allowedFactIds: z.array(z.string().max(MAX_FACT_ID_CHARS)).max(MAX_ALLOWED_FACT_IDS),
     requiredCaveats: z.array(z.string().max(MAX_CAVEAT_ENTRY_CHARS)).max(MAX_REQUIRED_CAVEATS),

@@ -46259,6 +46259,10 @@ var AnswerBinding = external_exports.strictObject({
   requestDigest: Sha256Digest,
   planDigest: Sha256Digest
 });
+var AnswerDraftOrigin = external_exports.strictObject({
+  draftSource: AnswerBinding,
+  draftDigest: Sha256Digest
+});
 var MAX_VALIDATE_ANSWER_INPUT_BYTES = 2097152;
 var MAX_OBJECT_KEYS = 32;
 var MAX_OBJECT_KEY_CHARS = 64;
@@ -46471,13 +46475,6 @@ var AnswerValidationResult = external_exports.strictObject({
 });
 var ValidateAnswerInput = external_exports.strictObject({
   careerReality: CareerRealityContext.optional(),
-  /**
-   * Optional transient binding block copied verbatim from the answer-plan run's
-   * output. Absent ⇒ classic structural validation only (legacy behaviour is
-   * unchanged); present ⇒ the delivery path additionally compares it against
-   * the current request context. Additive, backward-compatible field.
-   */
-  answerBinding: AnswerBinding.optional(),
   answerPlan: external_exports.object({
     allowedFactIds: external_exports.array(external_exports.string().max(MAX_FACT_ID_CHARS)).max(MAX_ALLOWED_FACT_IDS),
     requiredCaveats: external_exports.array(external_exports.string().max(MAX_CAVEAT_ENTRY_CHARS)).max(MAX_REQUIRED_CAVEATS),
@@ -63641,22 +63638,6 @@ function parseValidateAnswerInputBounded(raw) {
   requireOwnField(root, "readingDraft");
   const plan = requireBoundedObject(root.answerPlan);
   const draft = requireBoundedObject(root.readingDraft);
-  let answerBinding;
-  if (Object.hasOwn(root, "answerBinding")) {
-    requireOwnField(root, "answerBinding");
-    if (root.answerBinding !== void 0) {
-      const binding = requireBoundedObject(root.answerBinding);
-      if (Object.keys(binding).some(
-        (key) => !["contractVersion", "requestDigest", "planDigest"].includes(key)
-      ))
-        boundedReject();
-      const { contractVersion, requestDigest, planDigest } = binding;
-      if (typeof contractVersion !== "string" || contractVersion.length > 32) boundedReject();
-      if (typeof requestDigest !== "string" || requestDigest.length > 71 || typeof planDigest !== "string" || planDigest.length > 71)
-        boundedReject();
-      answerBinding = { contractVersion, requestDigest, planDigest };
-    }
-  }
   let careerReality;
   if (Object.hasOwn(root, "careerReality")) {
     requireOwnField(root, "careerReality");
@@ -63804,7 +63785,6 @@ function parseValidateAnswerInputBounded(raw) {
   }
   const projected = {
     ...careerReality === void 0 ? {} : { careerReality },
-    ...answerBinding === void 0 ? {} : { answerBinding },
     answerPlan: {
       allowedFactIds: plan.allowedFactIds,
       requiredCaveats: plan.requiredCaveats,
@@ -64477,6 +64457,19 @@ function malformed() {
     deliverableBodySha256: null
   };
 }
+function sealReadingDraft(answerBinding, readingDraft) {
+  const parsedBinding = AnswerBinding.safeParse(answerBinding);
+  if (!parsedBinding.success) {
+    throw new Error("sealReadingDraft requires a valid answer-binding/v1 record.");
+  }
+  return {
+    draftSource: parsedBinding.data,
+    draftDigest: digestOfJson(readingDraft)
+  };
+}
+function digestOfJson(value) {
+  return sha256Hex(canonicalJson(value));
+}
 function deliverAnswer(input2) {
   if (typeof input2 !== "object" || input2 === null) return malformed();
   const raw = input2;
@@ -64496,9 +64489,22 @@ function deliverAnswer(input2) {
     if (!parsedReality.success) return malformed();
     careerReality = parsedReality.data;
   }
-  const parsedBinding = AnswerBinding.safeParse(raw.answerBinding);
+  if (raw.draftSource === void 0 || raw.draftDigest === void 0) {
+    return {
+      contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+      ok: false,
+      failureReason: "DRAFT_ORIGIN_MISSING",
+      binding: null,
+      validation: null,
+      lint: null,
+      deliverableBody: null,
+      deliverableBodySha256: null
+    };
+  }
+  const parsedSource = AnswerBinding.safeParse(raw.draftSource);
+  const parsedDigest = Sha256Digest.safeParse(raw.draftDigest);
   const parsedPlan = AnswerPlan.safeParse(raw.answerPlan);
-  if (!parsedBinding.success || !parsedPlan.success) return malformed();
+  if (!parsedSource.success || !parsedDigest.success || !parsedPlan.success) return malformed();
   const currentRequestDigest = deriveAnswerRequestDigest({
     birthInput,
     request: {
@@ -64509,14 +64515,20 @@ function deliverAnswer(input2) {
     },
     ...careerReality === void 0 ? {} : { careerReality }
   });
-  const requestDigestMatch = currentRequestDigest === parsedBinding.data.requestDigest;
-  const planDigestMatch = deriveAnswerPlanDigest(parsedPlan.data) === parsedBinding.data.planDigest;
-  if (!requestDigestMatch || !planDigestMatch) {
+  const requestDigestMatch = currentRequestDigest === parsedSource.data.requestDigest;
+  const planDigestMatch = deriveAnswerPlanDigest(parsedPlan.data) === parsedSource.data.planDigest;
+  let draftDigestMatch = false;
+  try {
+    draftDigestMatch = digestOfJson(raw.readingDraft) === parsedDigest.data;
+  } catch {
+    return malformed();
+  }
+  if (!requestDigestMatch || !planDigestMatch || !draftDigestMatch) {
     return {
       contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
       ok: false,
       failureReason: "BINDING_MISMATCH",
-      binding: { requestDigestMatch, planDigestMatch },
+      binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
       validation: null,
       lint: null,
       deliverableBody: null,
@@ -64525,7 +64537,6 @@ function deliverAnswer(input2) {
   }
   const validation = validateAnswer({
     ...careerReality === void 0 ? {} : { careerReality },
-    answerBinding: parsedBinding.data,
     answerPlan: projectPlanSubset(parsedPlan.data),
     readingDraft: raw.readingDraft
   });
@@ -64534,7 +64545,7 @@ function deliverAnswer(input2) {
       contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
       ok: false,
       failureReason: "VALIDATION_FAILED",
-      binding: { requestDigestMatch, planDigestMatch },
+      binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
       validation,
       lint: null,
       deliverableBody: null,
@@ -64561,7 +64572,7 @@ function deliverAnswer(input2) {
       contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
       ok: false,
       failureReason: "LINT_FAILED",
-      binding: { requestDigestMatch, planDigestMatch },
+      binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
       validation,
       lint,
       deliverableBody: null,
@@ -64572,7 +64583,7 @@ function deliverAnswer(input2) {
     contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
     ok: true,
     failureReason: null,
-    binding: { requestDigestMatch, planDigestMatch },
+    binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
     validation,
     lint,
     deliverableBody: body,
@@ -66531,6 +66542,7 @@ export {
   ANSWER_BINDING_CONTRACT_VERSION,
   ANSWER_DELIVERY_CONTRACT_VERSION,
   AnswerBinding,
+  AnswerDraftOrigin,
   COMPARE_PROFILES,
   CareerRealityContext,
   ENGINE_NAME,
@@ -66570,6 +66582,7 @@ export {
   READING_DRAFT_LEGACY_V1,
   READING_TERMS,
   SCHEMA_VERSION,
+  Sha256Digest,
   VALIDATION_RESULT_CONTRACT_VERSION,
   ValidateAnswerInput,
   buildAnswerBinding,
@@ -66598,6 +66611,7 @@ export {
   runInterpret,
   runNormalize,
   runSynastry,
+  sealReadingDraft,
   timeIndexFromHour,
   toEngineError,
   transcribeReadingDraft,

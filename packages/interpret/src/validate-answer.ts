@@ -954,31 +954,6 @@ export function parseValidateAnswerInputBounded(raw: unknown): ValidateAnswerInp
   requireOwnField(root, 'readingDraft');
   const plan = requireBoundedObject(root.answerPlan);
   const draft = requireBoundedObject(root.readingDraft);
-  // Optional transient binding block: strict shape (version literal + two
-  // bounded sha256 strings) checked here so the projection stays bounded.
-  let answerBinding: unknown;
-  if (Object.hasOwn(root, 'answerBinding')) {
-    requireOwnField(root, 'answerBinding');
-    if (root.answerBinding !== undefined) {
-      const binding = requireBoundedObject(root.answerBinding);
-      if (
-        Object.keys(binding).some(
-          (key) => !['contractVersion', 'requestDigest', 'planDigest'].includes(key),
-        )
-      )
-        boundedReject();
-      const { contractVersion, requestDigest, planDigest } = binding as Record<string, unknown>;
-      if (typeof contractVersion !== 'string' || contractVersion.length > 32) boundedReject();
-      if (
-        typeof requestDigest !== 'string' ||
-        requestDigest.length > 71 ||
-        typeof planDigest !== 'string' ||
-        planDigest.length > 71
-      )
-        boundedReject();
-      answerBinding = { contractVersion, requestDigest, planDigest };
-    }
-  }
   let careerReality: unknown;
   if (Object.hasOwn(root, 'careerReality')) {
     requireOwnField(root, 'careerReality');
@@ -1135,7 +1110,6 @@ export function parseValidateAnswerInputBounded(raw: unknown): ValidateAnswerInp
   // getters/Proxies in the original `raw` never reach Zod's internal traversal.
   const projected = {
     ...(careerReality === undefined ? {} : { careerReality }),
-    ...(answerBinding === undefined ? {} : { answerBinding }),
     answerPlan: {
       allowedFactIds: plan.allowedFactIds,
       requiredCaveats: plan.requiredCaveats,
