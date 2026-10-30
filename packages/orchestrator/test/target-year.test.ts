@@ -90,7 +90,7 @@ describe('requested target year survives an unavailable Zi Wei horoscope', () =>
     expect(canonicalJson(first.warnings)).toBe(canonicalJson(second.warnings));
   });
 
-  it('propagates at=2036 through answer-plan when Zi Wei is unavailable', () => {
+  it('keeps technical at=2036 without admitting its withheld timeline to answer-plan', () => {
     const { publicResult, answerPlan } = runAnswerPlan(
       input({ localTime: undefined, timeAccuracy: 'unknown' }),
       { now: NOW, at: AT_2036, topic: 'general' },
@@ -101,6 +101,14 @@ describe('requested target year survives an unavailable Zi Wei horoscope', () =>
       .map((f) => /^(\d{4})\(/.exec(f.claim)?.[1])
       .filter((year): year is string => year !== undefined);
     expect(years).toEqual([]);
+    // Missing gender also makes Zi Wei unavailable, without relying on any
+    // unknown-time placeholder fact remaining narratable.
+    const technical = runInterpret(input({ ruleGender: undefined }), {
+      now: NOW,
+      at: AT_2036,
+    }).interpretation;
+    expect(annualYears(technical)[0]).toBe('2036');
+    expect(annualYears(technical)).not.toContain('2026');
     expect(publicResult.systems.find((s) => s.system === 'ziwei')?.status).toBe('unavailable');
     expect(publicResult.warnings.map((w) => w.code)).toContain('ZIWEI_INPUT_REQUIRED');
     expect(answerPlan.requiredWarningCodes).toContain('TIME_UNKNOWN');

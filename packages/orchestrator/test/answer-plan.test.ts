@@ -160,14 +160,14 @@ describe('public result and answer plan', () => {
     expect(answerPlan.noEvidenceReason).toBe('TIME_REQUIRED');
   });
 
-  it('keeps approximate-time warnings for explicit time-sensitive technical facts', () => {
+  it('keeps approximate-time warnings for admitted time-sensitive facts', () => {
     const approximateTime = parseBirthInput({
       ...syntheticInput,
       timeAccuracy: 'approximate',
     });
     const { answerPlan } = runAnswerPlan(approximateTime, {
       now: FIXED,
-      topic: 'career',
+      topic: 'marriage',
       lens: 'explain',
     });
     expect(answerPlan.requiredWarningCodes).toContain('TIME_ACCURACY_APPROXIMATE');
@@ -328,7 +328,7 @@ describe('public result and answer plan', () => {
   it('keeps TIME_UNKNOWN and NEAR_BOUNDARY always material, and time warnings when facts are time-sensitive', () => {
     const timeFact = {
       id: 'fact-1',
-      topic: 'career' as const,
+      topic: 'general' as const,
       claim: '西方中天（MC）位于Capricorn',
       evidence: [{ kind: 'western' as const, ref: 'western.angles.mc.sign' }],
       caveat: '需确切出生时间方有宫位。',
@@ -395,7 +395,7 @@ describe('public result and answer plan', () => {
         disclaimers: [],
         followupOffers: [],
       },
-      { topic: 'career', lens: 'explain' },
+      { topic: 'general', lens: 'explain' },
     );
     expect(timeScoped.requiredWarningCodes).toContain('SOLAR_TIME_APPROXIMATE');
     expect(timeScoped.requiredWarningCodes).toContain('TIME_UNKNOWN');
@@ -455,18 +455,18 @@ describe('public result and answer plan', () => {
         expect(evidence.ref).not.toContain('bazi-rule/useful-god');
       }
     }
-    // The mixed claim is split: pattern may exist as a technical fact only.
-    const patternFacts = publicResult.facts.filter((fact) =>
-      fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/pattern'),
+    // Technical interpret retains these records; the default public context does not.
+    const technicalRefs = runInterpret(syntheticInput, { now: FIXED }).interpretation.facts.flatMap(
+      (fact) => fact.evidence.map((evidence) => evidence.ref),
     );
-    for (const fact of patternFacts) {
-      expect(fact.topic).not.toBe('career');
+    for (const ref of ['bazi-rule/pattern', 'bazi-rule/industry/wu-xing', 'bazi-rule/useful-god']) {
+      expect(technicalRefs).toContain(ref);
     }
-    const industryFacts = publicResult.facts.filter((fact) =>
-      fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/industry/wu-xing'),
+    const publicRefs = publicResult.facts.flatMap((fact) =>
+      fact.evidence.map((evidence) => evidence.ref),
     );
-    for (const fact of industryFacts) {
-      expect(fact.topic).not.toBe('career');
+    for (const ref of ['bazi-rule/pattern', 'bazi-rule/industry/wu-xing', 'bazi-rule/useful-god']) {
+      expect(publicRefs).not.toContain(ref);
     }
   });
 
@@ -490,7 +490,7 @@ describe('public result and answer plan', () => {
     expect(answerPlan.responseRequirements.contentOrder).not.toContain('practical-options');
     // Keep the complete warning record for audit, without forcing it into prose.
     expect(publicResult.warnings).toEqual(technical.publicResult.warnings);
-    expect(technical.answerPlan.selectedFacts.length).toBeGreaterThan(1);
+    expect(technical.answerPlan.selectedFacts).toEqual(answerPlan.selectedFacts);
 
     const draft = {
       contractVersion: 'reading-draft/v2',
@@ -512,7 +512,10 @@ describe('public result and answer plan', () => {
       warningsDisclosed: [],
     };
     expect(validateAnswer({ answerPlan, readingDraft: draft }).ok).toBe(true);
-    const foreignFact = technical.answerPlan.selectedFacts.find((f) => f.id !== fact.id)!;
+    const foreignFact = runAnswerPlan(syntheticInput, {
+      now: FIXED,
+      topic: 'character',
+    }).answerPlan.selectedFacts.find((f) => f.id !== fact.id)!;
     const changedDraft = structuredClone(draft);
     changedDraft.sections[0]!.paragraphs[0]!.sourceFactIds = [foreignFact.id];
     expect(

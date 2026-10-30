@@ -53,7 +53,7 @@ describe('public v2 hard cut (P4)', () => {
     });
     const { publicResult, answerPlan } = runAnswerPlan(input, {
       now: FIXED,
-      topic: 'career',
+      topic: 'general',
       lens: 'explain',
     });
     expect(publicResult.systems).toHaveLength(4);

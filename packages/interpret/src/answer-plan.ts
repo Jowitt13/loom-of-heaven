@@ -17,6 +17,7 @@ import type {
   PublicResult,
   PublicWarning,
 } from '@loom/contracts';
+import { isDefaultAnswerFact } from './material-admission.ts';
 
 /** P4 v2 hard cut: public answer plans report every first-class system. */
 const SYSTEMS: ChartSystem[] = ['western', 'bazi', 'ziwei', 'vedic'];
@@ -184,7 +185,9 @@ export function buildPublicResult(
       birthTimeKnown: bundle.originalInput.timeAccuracy !== 'unknown',
     },
     warnings: toPublicWarnings(warnings),
-    facts: toPublicFacts(interpretation),
+    // Keep the original stable fact ids (gaps are intentional) before filtering,
+    // so an admitted fact that downstream traces already reference does not move.
+    facts: toPublicFacts(interpretation).filter(isDefaultAnswerFact),
     rulesets: interpretation.rulesets,
     disclaimers: interpretation.disclaimers.map(sanitizePublicText),
     followupOffers: interpretation.followupOffers.map(sanitizePublicText),
@@ -192,9 +195,12 @@ export function buildPublicResult(
 }
 
 function selectFacts(facts: PublicFact[], request: AnswerPlan['request']): PublicFact[] {
-  if (request.topic === 'general') return facts;
-  const topicFacts = facts.filter((fact) => fact.topic === request.topic);
-  if (request.topic !== 'career' || request.lens === 'explain') return topicFacts;
+  // Topic selects relevance; admission decides whether a fact may be narrated
+  // at all. `general` is therefore broad admitted context, not every record.
+  const admittedFacts = facts.filter(isDefaultAnswerFact);
+  if (request.topic === 'general') return admittedFacts;
+  const topicFacts = admittedFacts.filter((fact) => fact.topic === request.topic);
+  if (request.topic !== 'career') return topicFacts;
 
   // ADR 0021 admits one narrow cultural reference for ordinary career prose,
   // not every system's career placement. Derive both narration material and

@@ -62498,9 +62498,10 @@ function followupFacts(bundle, focusYear) {
   if (!b) return out;
   const gender = bundle.originalInput.ruleGender;
   const ind = industryFinding(b);
+  const industryClaim = ind.matched ? ind.claim : "\u884C\u4E1A\u89C4\u5219\u672A\u547D\u4E2D\uFF0C\u672A\u63D0\u4F9B\u884C\u4E1A\u7ED3\u8BBA\u3002";
   out.push(
-    fact("general", ind.claim, [ev("bazi-rule", `bazi-rule/${ind.ruleId}`, ind.claim)], {
-      reason: ind.reason,
+    fact("general", industryClaim, [ev("bazi-rule", `bazi-rule/${ind.ruleId}`, industryClaim)], {
+      reason: ind.matched ? ind.reason : "matched=false\uFF1B\u4E0D\u5C06\u672A\u547D\u4E2D\u89C4\u5219\u7684\u5019\u9009\u6587\u672C\u4F5C\u4E3A\u80AF\u5B9A\u7ED3\u8BBA\u3002",
       caveat: "\u884C\u4E1A\u4E3A\u53C2\u8003\u65B9\u5411\uFF0C\u975E\u552F\u4E00\uFF1B\u9700\u7ED3\u5408\u5174\u8DA3\u4E0E\u73B0\u5B9E\u3002"
     })
   );
@@ -62653,6 +62654,101 @@ function buildBaziCareerDegradationFacts(bundle) {
   };
 }
 
+// packages/interpret/src/material-admission.ts
+var SIGNS3 = "(?:aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)";
+var BODIES2 = "(?:sun|moon|mercury|venus|mars|jupiter|saturn|uranus|neptune|pluto)";
+var MAJOR_STARS = "(?:\u7D2B\u5FAE|\u5929\u673A|\u592A\u9633|\u6B66\u66F2|\u5929\u540C|\u5EC9\u8D1E|\u5929\u5E9C|\u592A\u9634|\u8D2A\u72FC|\u5DE8\u95E8|\u5929\u76F8|\u5929\u6881|\u4E03\u6740|\u7834\u519B)";
+var PALACES = "(?:\u547D|\u5144\u5F1F|\u592B\u59BB|\u5B50\u5973|\u8D22\u5E1B|\u75BE\u5384|\u8FC1\u79FB|\u4EC6\u5F79|\u5B98\u7984|\u7530\u5B85|\u798F\u5FB7|\u7236\u6BCD)\u5BAB?";
+var WESTERN_RULES = [
+  new RegExp(`^western-rule/planet-sign/(?:sun|moon|mercury|venus|mars)-${SIGNS3}$`),
+  /^western-rule\/planet-house\/(?:sun|moon)-h(?:1|4|7|10)$/,
+  new RegExp(`^western-rule/angle/(?:asc|mc)-${SIGNS3}$`),
+  new RegExp(`^western-rule/dignity/${BODIES2}-(?:domicile|exaltation|detriment|fall)$`)
+];
+var WESTERN_ASPECT = new RegExp(
+  `^western-rule/aspect/(${BODIES2})-(?:conjunction|opposition|square|trine|sextile)-(${BODIES2})$`
+);
+var ZIWEI_RULES = [
+  new RegExp(`^ziwei-rule/main-star/${MAJOR_STARS}$`),
+  new RegExp(`^ziwei-rule/palace-star/(?:soul|career|wealth)-${MAJOR_STARS}(?:\u3001${MAJOR_STARS})?$`),
+  new RegExp(
+    `^ziwei-rule/sihua/(?:${MAJOR_STARS}|\u6587\u660C|\u6587\u66F2|\u5DE6\u8F85|\u53F3\u5F3C)-\u5316(?:\u7984|\u6743|\u79D1|\u5FCC)-${PALACES}$`
+  ),
+  new RegExp(`^ziwei-rule/brightness/${MAJOR_STARS}-(?:\u5E99|\u65FA|\u5F97|\u5229|\u5E73|\u4E0D|\u9677)$`)
+];
+var VEDIC_RULES = /* @__PURE__ */ new Set([
+  "vedic-rule/nakshatra/moon",
+  "vedic-rule/nakshatra/moon-day-stable",
+  "vedic-rule/panchanga/instantaneous",
+  "vedic-rule/panchanga/day-stable",
+  "vedic-rule/vimshottari/birth-balance"
+]);
+var BAZI_PROVIDER = [
+  "bazi.dayMaster",
+  "bazi.pillars.*.(stem|branch|tenGodDisplay)",
+  "bazi.pillars.*.(stemElement|hiddenStems)",
+  "bazi.pillars.*.tenGod"
+];
+var WESTERN_PROVIDER = /* @__PURE__ */ new Set([
+  "western.planets[Sun].sign",
+  "western.planets[Venus]",
+  "western.planets[Mercury]",
+  "western.angles.mc.sign",
+  "western.angles.descendant.sign",
+  "western.aspects"
+]);
+var ZIWEI_PROVIDER = new RegExp(`^ziwei\\.palaces\\[${PALACES}\\](?:\\.majorStars)?$`);
+var VEDIC_PROVIDER = /* @__PURE__ */ new Set([
+  "vedic.unknownTimeStable.moonNakshatra",
+  "vedic.unknownTimeStable.panchanga",
+  "vedic.derived.grahas[Moon].nakshatra",
+  "vedic.derived.(lagna|grahas).bhava",
+  "vedic.derived.panchanga",
+  "vedic.derived.vimshottari"
+]);
+var PILLAR_TEN_GOD = /^bazi\.pillars\.(?:year|month|day|hour)\.tenGod$/;
+function isAdmittedEvidence({ kind, ref }, topic) {
+  switch (kind) {
+    case "bazi-rule":
+      return ref === "bazi-rule/strength" || ref === "bazi-rule/ten-gods/xiang-yi" && topic === "career";
+    case "western-rule": {
+      if (WESTERN_RULES.some((pattern) => pattern.test(ref))) return true;
+      const aspect = ref.match(WESTERN_ASPECT);
+      return aspect !== null && aspect[1] !== aspect[2] && [aspect[1], aspect[2]].some((body) => body === "sun" || body === "moon");
+    }
+    case "ziwei-rule":
+      return ZIWEI_RULES.some((pattern) => pattern.test(ref));
+    case "vedic-rule":
+      return VEDIC_RULES.has(ref) || /^vedic-rule\/bhava\/whole-sign-(?:[1-9]|1[0-2])$/.test(ref);
+    case "bazi":
+      return BAZI_PROVIDER.includes(ref) || PILLAR_TEN_GOD.test(ref);
+    case "western":
+      return WESTERN_PROVIDER.has(ref) || /^western\.7thRuler\[(?:Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn)\]$/.test(ref);
+    case "ziwei":
+      return ZIWEI_PROVIDER.test(ref);
+    case "ziwei-horoscope":
+      return ref === "horoscope.yearly";
+    case "vedic":
+      return VEDIC_PROVIDER.has(ref);
+    case "time":
+      return ref === "input.ruleGender" || ref === "engine.disclaimer";
+    default:
+      return false;
+  }
+}
+function isDefaultAnswerFact(fact2) {
+  if (fact2.evidence.length === 0) return false;
+  if (!fact2.evidence.every((evidence) => isAdmittedEvidence(evidence, fact2.topic))) return false;
+  if (fact2.topic === "career") {
+    return fact2.evidence.some(
+      (e) => e.kind === "bazi-rule" && e.ref === "bazi-rule/ten-gods/xiang-yi"
+    ) && fact2.evidence.some((e) => e.kind === "bazi" && PILLAR_TEN_GOD.test(e.ref)) && fact2.evidence.every(
+      (e) => e.kind === "bazi-rule" && e.ref === "bazi-rule/ten-gods/xiang-yi" || e.kind === "bazi" && PILLAR_TEN_GOD.test(e.ref)
+    );
+  }
+  return true;
+}
+
 // packages/interpret/src/answer-plan.ts
 var SYSTEMS = ["western", "bazi", "ziwei", "vedic"];
 var ANSWER_GUARDRAILS = [
@@ -62782,16 +62878,19 @@ function buildPublicResult(bundle, interpretation, warnings = bundle.warnings) {
       birthTimeKnown: bundle.originalInput.timeAccuracy !== "unknown"
     },
     warnings: toPublicWarnings(warnings),
-    facts: toPublicFacts(interpretation),
+    // Keep the original stable fact ids (gaps are intentional) before filtering,
+    // so an admitted fact that downstream traces already reference does not move.
+    facts: toPublicFacts(interpretation).filter(isDefaultAnswerFact),
     rulesets: interpretation.rulesets,
     disclaimers: interpretation.disclaimers.map(sanitizePublicText),
     followupOffers: interpretation.followupOffers.map(sanitizePublicText)
   });
 }
 function selectFacts(facts, request) {
-  if (request.topic === "general") return facts;
-  const topicFacts = facts.filter((fact2) => fact2.topic === request.topic);
-  if (request.topic !== "career" || request.lens === "explain") return topicFacts;
+  const admittedFacts = facts.filter(isDefaultAnswerFact);
+  if (request.topic === "general") return admittedFacts;
+  const topicFacts = admittedFacts.filter((fact2) => fact2.topic === request.topic);
+  if (request.topic !== "career") return topicFacts;
   if (request.lens === "timing") return [];
   const pillarRef = /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/;
   const references = topicFacts.filter(
