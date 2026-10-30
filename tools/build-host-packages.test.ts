@@ -168,4 +168,43 @@ describe('cross-platform reproducible host packaging (real build path)', () => {
       rmSync(parentWithTmp, { recursive: true, force: true });
     }
   });
+
+  it('never packages local .mimosa runtime data into any host zip', () => {
+    const work = mkdtempSync(join(tmpdir(), 'loom-mimosa-hygiene-'));
+    const fakeSkill = join(work, 'skill-src');
+    try {
+      // Minimal synthetic Skill (mirrors the .tmp-parent regression shape).
+      mkdirSync(join(fakeSkill, 'scripts', 'dist'), { recursive: true });
+      mkdirSync(join(fakeSkill, 'references'), { recursive: true });
+      writeFileSync(join(fakeSkill, 'SKILL.md'), '# Synthetic Skill\n');
+      writeFileSync(join(fakeSkill, 'LICENSE'), 'MIT\n');
+      writeFileSync(join(fakeSkill, 'scripts', 'dist', 'engine.mjs'), 'export const x = 1;\n');
+      writeFileSync(join(fakeSkill, 'scripts', 'loom-chart.mjs'), '#!/usr/bin/env node\n');
+      writeFileSync(join(fakeSkill, 'references', 'answer-contract.md'), '# contract\n');
+
+      // Synthetic Mimosa sentinels at the Skill root and nested under references/
+      // so both the full-capability and reading-lite staging paths are exercised.
+      mkdirSync(join(fakeSkill, '.mimosa', 'history'), { recursive: true });
+      writeFileSync(join(fakeSkill, '.mimosa', 'history', 'run-sentinel.json'), '{}\n');
+      mkdirSync(join(fakeSkill, 'references', '.mimosa'), { recursive: true });
+      writeFileSync(join(fakeSkill, 'references', '.mimosa', 'sentinel.json'), '{}\n');
+
+      const zips = buildHostZips(fakeSkill, join(work, 'out'));
+      expect(zips.length).toBeGreaterThan(0);
+      for (const b of zips) {
+        const entries = listZipEntries(b.zip);
+        expect(entries).toContain(`${b.host.packageName}/SKILL.md`);
+        if (b.host.capability === 'reading-lite') {
+          expect(entries).toContain(`${b.host.packageName}/references/answer-contract.md`);
+        } else {
+          expect(entries).toContain(`${b.host.packageName}/scripts/dist/engine.mjs`);
+        }
+        for (const name of entries) {
+          expect(name.includes('.mimosa')).toBe(false);
+        }
+      }
+    } finally {
+      rmSync(work, { recursive: true, force: true });
+    }
+  });
 });

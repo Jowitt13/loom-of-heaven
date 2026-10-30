@@ -609,9 +609,12 @@ function followupFacts(bundle: ChartBundle, focusYear: number): InterpretationFa
   // 适合行业 (喜用五行→行业大类). ADR 0021: technical follow-up only — never
   // a default career-body claim (IQ-4H source gate).
   const ind = industryFinding(b);
+  // The frozen finding can carry a proposal even when matched=false. Consume
+  // its state, not that proposal; do not silently revise the versioned rule.
+  const industryClaim = ind.matched ? ind.claim : '行业规则未命中，未提供行业结论。';
   out.push(
-    fact('general', ind.claim, [ev('bazi-rule', `bazi-rule/${ind.ruleId}`, ind.claim)], {
-      reason: ind.reason,
+    fact('general', industryClaim, [ev('bazi-rule', `bazi-rule/${ind.ruleId}`, industryClaim)], {
+      reason: ind.matched ? ind.reason : 'matched=false；不将未命中规则的候选文本作为肯定结论。',
       caveat: '行业为参考方向，非唯一；需结合兴趣与现实。',
     }),
   );
@@ -721,6 +724,33 @@ function vedicRuleFacts(rules: VedicInterpretation | null): InterpretationFact[]
   });
 }
 
+/**
+ * A fact may enter an unknown-time reading only when every evidence item is
+ * either a non-chart limitation note or an explicit whole-day-stable marker.
+ * The Vedic layer emits `unknownTimeStable` markers exactly for that purpose;
+ * BaZi and Western facts are derived from the internal noon placeholder and
+ * carry no such marker, so they are withheld instead of presented as certain.
+ */
+function isWholeDayStableFact(fact: InterpretationFact): boolean {
+  return (
+    fact.evidence.length > 0 &&
+    fact.evidence.every((evidence) => {
+      if (evidence.kind === 'time') return evidence.ref === 'engine.disclaimer';
+      if (evidence.kind === 'vedic') {
+        return (
+          evidence.ref === 'vedic.unknownTimeStable.moonNakshatra' ||
+          evidence.ref === 'vedic.unknownTimeStable.panchanga'
+        );
+      }
+      return (
+        evidence.kind === 'vedic-rule' &&
+        (evidence.ref === 'vedic-rule/nakshatra/moon-day-stable' ||
+          evidence.ref === 'vedic-rule/panchanga/day-stable')
+      );
+    })
+  );
+}
+
 /** Build the topic-organized, evidence-grounded interpretation facts for a chart. */
 export function buildInterpretationFacts(
   bundle: ChartBundle,
@@ -779,6 +809,15 @@ export function buildInterpretationFacts(
     );
   }
 
+  // Unknown-time reliability boundary: the BaZi/Western layers computed this chart
+  // from the internal noon placeholder, so none of their facts carry whole-day
+  // stability evidence and a legal time-of-day completion could overturn them.
+  // Only facts whose evidence is itself whole-day-stable (the Vedic
+  // `unknownTimeStable` markers) or non-chart limitation notes survive; accurate
+  // and approximate times keep every existing fact.
+  const readingFacts =
+    bundle.originalInput.timeAccuracy === 'unknown' ? facts.filter(isWholeDayStableFact) : facts;
+
   return {
     schemaVersion: bundle.schemaVersion,
     engineVersion: bundle.engineVersion,
@@ -788,7 +827,7 @@ export function buildInterpretationFacts(
       timezone: bundle.originalInput.timezone,
       calendar: bundle.originalInput.calendar,
     },
-    facts,
+    facts: readingFacts,
     rulesets: [
       ...bundle.provenance.rulesets,
       ...(baziRules ? [{ id: BAZI_RULES_RULESET_NAME, version: baziRules.provider.version }] : []),
@@ -802,5 +841,23 @@ export function buildInterpretationFacts(
     ],
     disclaimers: DISCLAIMERS,
     followupOffers: FOLLOWUP_OFFERS,
+  };
+}
+
+/**
+ * Internal input to IQ-4's existing unknown-time career degradation only.
+ * Not exported by the package facade: ordinary readings always use the
+ * reliability boundary above. The journey must omit these candidates before
+ * it can construct a response view; they are not delivery-ready facts.
+ */
+export function buildBaziCareerDegradationFacts(bundle: ChartBundle): InterpretationFacts {
+  if (bundle.originalInput.timeAccuracy !== 'unknown') {
+    throw new Error('Career degradation material requires unknown birth time');
+  }
+  return {
+    ...buildInterpretationFacts(bundle),
+    facts: careerFacts(bundle).filter((entry) =>
+      entry.evidence.every((evidence) => evidence.kind === 'bazi' || evidence.kind === 'bazi-rule'),
+    ),
   };
 }

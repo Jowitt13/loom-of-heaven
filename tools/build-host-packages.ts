@@ -54,6 +54,8 @@ const releasesDir = join(root, 'releases');
 function isExcluded(relPath: string): boolean {
   if (/(?:^|\/)\.\.?(?:\/|$)/.test(relPath)) return true; // safety: . or ..
   if (/(?:^|\/)\.tmp(\/|$)/.test(relPath)) return true;
+  // Local Mimosa runtime data never enters a host zip, at any depth.
+  if (/(?:^|\/)\.mimosa(\/|$)/.test(relPath)) return true;
   // Both committed SBOMs (CycloneDX + SPDX) stay out of the host zips, matching the
   // long-standing sbom.cdx.json exclusion that keeps the zip contents deterministic.
   if (/(?:^|\/)sbom\.(cdx|spdx)\.json$/.test(relPath)) return true;

@@ -7,6 +7,7 @@ skills/psychology-self-assessment/sbom.spdx.json
 coverage/
 .tmp/
 .qoder/
+**/.mimosa/
 pnpm-lock.yaml
 QODER_HANDOFF.md
 

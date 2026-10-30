@@ -184,10 +184,22 @@ describe('cross-system interpretation facts (handoff §8 layer 2)', () => {
     expect(interp.facts.some((f) => f.topic === 'general' && f.claim.includes('丙午'))).toBe(true);
   });
 
-  it('unknown time still yields bazi facts but no western ascendant claim', () => {
+  it('withholds placeholder-derived claims when the birth time is unknown', () => {
     const interp = interpret({ timeAccuracy: 'unknown', localTime: undefined });
-    // BaZi facts still present (day pillar), but no MC/ascendant fact is fabricated.
+    // No MC/ascendant fact is fabricated (unchanged), and the noon-placeholder
+    // pillars no longer reach the reading as confirmed conclusions.
     expect(interp.facts.some((f) => f.claim.includes('中天'))).toBe(false);
-    expect(interp.facts.some((f) => f.claim.includes('日主'))).toBe(true);
+    expect(interp.facts.some((f) => /日主|四柱|五行缺失|五行分布/.test(f.claim))).toBe(false);
+    // Only whole-day-stable or non-chart limitation evidence survives.
+    for (const fact of interp.facts) {
+      for (const evidence of fact.evidence) {
+        const stable =
+          evidence.kind === 'time' ||
+          evidence.ref.includes('unknownTimeStable') ||
+          evidence.ref.endsWith('day-stable');
+        expect(stable, `${evidence.kind}:${evidence.ref}`).toBe(true);
+      }
+    }
+    expect(interp.disclaimers.length).toBeGreaterThanOrEqual(3);
   });
 });
