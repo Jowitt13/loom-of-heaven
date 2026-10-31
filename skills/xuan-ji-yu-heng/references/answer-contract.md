@@ -127,12 +127,12 @@ For an ordinary answer, the host must:
 4. Honor all guardrails: traditional-culture framing; evidence-only reasoning; no deterministic
    fate, medical, legal, investment, life-and-death or unsupported-comparison claims.
 5. Run BOTH deterministic gates before displaying anything, in this order:
-   `answer-plan` → write a `reading-draft/v2` JSON → `validate-answer` → display the SAME text
-   that was checked. Show the answer only when both gates pass, and re-run the gates after ANY
-   rewrite. Preferred: bound delivery (below) — `validate-answer` with `--context-input-file`
-   returns the checked text as `deliverableBody`; display that body verbatim instead of rewriting
-   it. If you change one word, one heading or the order, the previous pass no longer applies:
-   re-run and display the newly returned body.
+   `answer-plan` → write a `reading-draft/v3` JSON (v2 still accepted, plain text only) →
+   `validate-answer` → display the SAME text that was checked. Show the answer only when both
+   gates pass, and re-run the gates after ANY rewrite. Preferred: bound delivery (below) —
+   `validate-answer` with `--context-input-file` returns the checked text as `deliverableBody`;
+   display that body verbatim instead of rewriting it. If you change one word, one heading or
+   the order, the previous pass no longer applies: re-run and display the newly returned body.
 
 For a user who explicitly asks for a full technical chart or raw JSON, use `calculate` and
 `interpret` instead. Treat those files as private artifacts, not as defaults for ordinary chat.
@@ -147,24 +147,24 @@ The input file is one JSON object: `{ "answerPlan": { … }, "readingDraft": { �
 `answerPlan` fields come from the `answer-plan` output (`allowedFactIds`, `requiredCaveats`,
 `requiredWarningCodes`, `guardrails`, `answerability`, `request.topic`, `disclaimers`).
 
-### reading-draft/v2 input
+### reading-draft/v3 input (new drafts; v2 remains accepted, plain text only)
 
 ```json
 {
-  "contractVersion": "reading-draft/v2",
+  "contractVersion": "reading-draft/v3",
   "topic": "career",
   "sections": [
     {
       "id": "summary",
-      "heading": "30秒看懂",
-      "paragraphs": [{ "text": "…", "sourceFactIds": ["fact-1"] }]
+      "heading": "## 最值得先看的一点",
+      "paragraphs": [{ "text": "…**重点**…", "sourceFactIds": ["fact-1"] }]
     },
     {
       "id": "conditions",
-      "heading": "这项判断受出生时间影响",
+      "heading": "",
       "paragraphs": [
         {
-          "text": "…",
+          "text": "…\n- 一个要点一件事",
           "sourceFactIds": [],
           "constraintRefs": [
             { "kind": "caveat", "index": 0 },
@@ -188,12 +188,24 @@ The input file is one JSON object: `{ "answerPlan": { … }, "readingDraft": { �
   paragraphs cite no facts, and all headings + paragraph texts share one
   `MAX_NOT_SUPPORTED_TEXT_CHARS` budget. Any `sourceFactIds` value that IS provided is
   always checked against `allowedFactIds`, in every mode.
-- **Plain-text contract:** `heading` and `text` fields are PLAIN TEXT. The validator
-  bans a fixed set of ASCII structural characters that can form Markdown/HTML across
-  hosts: `& < > [ ] ` + "`* _ ~ \\ | #". Any single occurrence triggers`CONTAINS_MARKUP` (error). Full-width equivalents (，。【】（）＞＆～ etc.) are
-  allowed. Hosts must escape these fields before rendering as Markdown or HTML; the
-  validator scans the plain text as-is without any decode step, so there is no
-  divergence between scanned text and host-rendered text.
+- **Presentation subset (v3):** `heading` is one line of plain text, optionally prefixed
+  `## ` or `### ` (nothing else); `text` is plain text plus paired, non-empty,
+  non-nested, non-cross-line `**强调**` and simple `- ` bullet lines. HTML, entities,
+  links, images, code, tables, `#`/`####`, stray or unclosed `*` are rejected with
+  `CONTAINS_MARKUP` (error) — never auto-repaired. Safety rules scan the VISIBLE text
+  (markers stripped), so `必**然**结婚` cannot bypass a banned-phrase rule; the raw
+  marked-up text still counts toward every resource limit and is what `draftDigest` and
+  the delivered body carry. `reading-draft/v2` keeps its ORIGINAL plain-text rule: the
+  same markers are simply rejected there (do not "migrate" by mixing versions).
+- **Caveat scope in bound delivery:** with the full saved plan bound to the current
+  request, a `requiredCaveat` is MANDATORY only when a fact the draft actually cites owns
+  it, or when no selected fact owns it at all (kept conservatively). A caveat owned only
+  by facts you did not cite is no longer forced into the text — so a focused follow-up
+  need not append an unrelated 五行/vedic boundary paragraph. The original
+  `requiredCaveats` array, its indices and every `constraintRef` are unchanged; a
+  non-required caveat you DO declare or reference still has to pass the consistency
+  check; `requiredWarningCodes` and all other obligations are untouched. The low-level
+  structural path (no bound full plan) keeps requiring every caveat.
 - `caveatsExpressed` / `warningsDisclosed` must stay consistent with the `constraintRefs`:
   a required caveat/warning that is declared but never referenced (or vice versa) is a
   `CONSTRAINT_ATTESTATION_MISMATCH` error.
@@ -201,12 +213,10 @@ The input file is one JSON object: `{ "answerPlan": { … }, "readingDraft": { �
   default visible section. A host may reference a disclaimer with
   `{ "kind": "disclaimer", "index": i }` when the user explicitly asks for technical detail
   or the current subject makes that boundary material.
-- Legacy `reading-draft/v1` is REJECTED at runtime (`UNSUPPORTED_CONTRACT_VERSION`) — a
-  breaking change targeted at the next release (v0.2.0). Runtime acceptance of
-  caller-selected v1 would re-enable the removed section-id fact exemption, so migration
-  is a documented path, not a runtime downgrade: add `constraintRefs` to every
-  constraint-expressing paragraph, satisfy the consistency rules above, then set
-  `contractVersion` to `reading-draft/v2`.
+- Legacy `reading-draft/v1` is REJECTED at runtime (`UNSUPPORTED_CONTRACT_VERSION`).
+  Migration from v1 is a documented path, not a runtime downgrade: add `constraintRefs` to
+  every constraint-expressing paragraph, satisfy the consistency rules above, then set
+  `contractVersion` to `reading-draft/v3` (or stay on plain-text v2).
 
 ### validation-result/v2 output
 
@@ -344,10 +354,15 @@ engine then runs, in order:
    with a fresh plan and binding: its recorded source is its own. A bare draft with no origin is
    refused (`DRAFT_ORIGIN_MISSING`) — supplying a binding only at submission time never counts as
    verified provenance;
-2. the existing `validate-answer` structure/safety gate over the same draft;
+2. the existing `validate-answer` structure/safety gate over the same draft, with the caveat
+   scope derived INSIDE the engine from the bound full plan plus the draft's own citations
+   (caveats owned by uncited facts stop being mandatory; original indices and every other
+   obligation are unchanged — no host JSON field can influence this);
 3. deterministic verbatim transcription of the checked draft (exact heading/paragraph text and
-   order; nothing reworded, summarized or appended);
-4. the existing `lint-reading` language gate.
+   order; nothing reworded, summarized or appended — v3 markup characters are part of the
+   checked text and are transcribed as-is);
+4. the existing `lint-reading` language gate (content headings are allowed; control labels,
+   fixed footers, menus, empty talk, repetition and overreach stay checked).
 
 Success returns `answer-delivery/v1` with `deliverableBody` (exactly the checked text) and
 `deliverableBodySha256`. Display that body verbatim; do not rewrite, reorder or add to it. Any

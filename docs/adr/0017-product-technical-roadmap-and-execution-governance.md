@@ -4,6 +4,7 @@
 - Date: 2026-08-28
 - Amended: 2026-08-29 — roadmap v2 sequencing and evaluation boundaries
 - Amended: 2026-10-29 — roadmap v3.2 correctness and natal-answer optimization direction
+- Amended: 2026-10-31 — roadmap v3.3 adaptive presentation and reading-draft/v3 (this amendment)
 - Scope: product positioning, technical sequence, command admission, and roadmap change control
 - Related: [Product technical roadmap](../PRODUCT_TECHNICAL_ROADMAP.md),
   [Commander protocol](../COMMANDER_PROTOCOL.md), [ADR 0016](./0016-interpretable-state-and-accuracy-lab.md),
@@ -130,6 +131,44 @@ version, manifest, installed host, or persisted user data.
 The review branch is not mainline activation: normal verification and merge are still required
 before this route directs implementation. A failing baseline security check is recorded separately,
 not bypassed or silently repaired by widening this documentation task.
+
+## Owner-confirmed presentation change — 2026-10-31
+
+Roadmap `loom-product-roadmap/v3.3` supersedes v3.2 solely for the default presentation surface and
+its compatibility notes. After three real WorkBuddy rounds on the v3.2 candidate showed material
+tours, behavioral assertion creep, and unrelated-caveat tail paragraphs, the owner selected an
+adaptive-layout default: scannable answers with optional short `## `/`### ` headings, sparing
+paired `**emphasis**`, short `- ` bullet lists and whitespace — instead of mandatory continuous
+prose only. This is a presentation decision, not a new UI, report format, or fixed template;
+content selection, fact boundaries, and every safety rule are unchanged.
+
+Two bounded delivery changes carry it in the SAME reviewable change (no separate preparation
+projects):
+
+1. `reading-draft/v3` carries the limited marker subset explicitly (v2 remains accepted with its
+   original plain-text rule; v1 stays rejected). Markers enter `draftDigest`, are transcribed
+   verbatim, and safety rules scan the VISIBLE text so markers cannot split or hide banned
+   phrases; illegal or unclosed markers are rejected, never auto-repaired. No new error codes,
+   CLI flags, rich-text AST, or renderer were added.
+2. Bound delivery derives, from trusted internal code only, which `requiredCaveats` are mandatory
+   for THIS run: those owned by cited facts, plus caveats with no fact attribution (kept
+   conservatively). Caveats owned only by uncited facts stop forcing unrelated tail paragraphs.
+   The original array, its indices, every `constraintRef`, all warnings, guardrails,
+   answerability and failure reasons are unchanged; the low-level structural path still requires
+   every caveat, and no host JSON field can influence the derivation.
+
+The rejected alternatives were: keeping prose-only defaults and asking hosts to be "less verbose"
+(a real host already showed the constraint forces unrelated content); silently relaxing v2's
+plain-text rule (format would bypass the checked-text guarantee); and appending formatting after
+a successful check (unchecked text would reach users). Presentation borrowing from real-chat
+samples does not import their career fit, mind-reading, relationship verdicts, or label usage.
+
+Everything outside presentation and these two delivery mechanics is unchanged: calculation,
+ruleset admission, source and school gates, privacy defaults, career ADR 0021 bounds,
+`BLOCKED_SOURCE_ADMISSION`, C-track, D1/D2 shadow status, IQ-5 deferral, and release authority.
+This amendment is not host-installation, merge, or release approval, and does not bump engine,
+ruleset, package, or release versions. `reading-draft/v3` is a draft contract version;
+`loom-product-roadmap/v3.3` is a roadmap version; neither is a product release version.
 
 ## Precedence
 

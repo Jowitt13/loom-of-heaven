@@ -76,6 +76,7 @@ import {
   MAX_WARNING_ENTRY_CHARS,
   MAX_WARNINGS_DISCLOSED,
   READING_DRAFT_CONTRACT_VERSION,
+  READING_DRAFT_V3_CONTRACT_VERSION,
   VALIDATION_RESULT_CONTRACT_VERSION,
   ValidateAnswerInput as ValidateAnswerInputSchema,
 } from '@loom/contracts';
@@ -367,8 +368,62 @@ const HIGH_RISK_GROUPS: RuleGroup[] = [
 // cross-host Markdown/HTML structures. Any single occurrence triggers
 // CONTAINS_MARKUP. Full-width equivalents (，。【】（）＞ etc.) are allowed —
 // visual structure comes from the sections/paragraphs schema, not inline
-// formatting.
+// formatting. This rule is EXACTLY the reading-draft/v2 rule and is unchanged.
 const MARKUP_STRUCTURAL_CHARS_RE = /[&<>\[\]`*_~\\|#]/;
+
+// --- reading-draft/v3 limited presentation subset ---
+// v3 keeps the same JSON shape but allows a FIXED bounded set of markers:
+// a `## ` / `### ` single-line short heading, paired non-nested non-cross-line
+// `**emphasis**` with non-empty content, and simple `- ` bullet lines. Anything
+// else — HTML, entities, links, images, code, tables, `#`/`####`, stray or
+// unclosed `*` — is rejected with the SAME existing CONTAINS_MARKUP violation
+// (no new error codes, no auto-repair). Safety rules scan the VISIBLE text
+// (markers stripped), so `必**然**结婚` is seen as the contiguous phrase; the
+// raw text (markers included) still counts toward every resource budget and is
+// what transcription and draftDigest carry.
+const V3_REJECTED_CHARS_RE = /[&<>\[\]`_~\\|]/;
+const V3_HEADING_PREFIX_TEST_RE = /^(##|###) /;
+const V3_HEADING_PREFIX_STRIP_RE = /^(##|###) /;
+const V3_BOLD_PAIR_GLOBAL_RE = /\*\*([^*\n]+)\*\*/g;
+
+/**
+ * Validate a v3 section heading and return its VISIBLE text (prefix stripped),
+ * or null when it uses anything outside the allowed subset. A heading is either
+ * plain text (no markers at all) or a single line starting with `## `/`### `
+ * followed by a non-empty plain remainder (no bold, no further `#`).
+ */
+function v3VisibleHeading(heading: string): string | null {
+  if (heading.includes('\n')) return null;
+  const prefixed = V3_HEADING_PREFIX_TEST_RE.test(heading);
+  const rest = prefixed ? heading.replace(V3_HEADING_PREFIX_STRIP_RE, '') : heading;
+  if (prefixed && rest.trim() === '') return null;
+  if (V3_REJECTED_CHARS_RE.test(rest) || /[*#]/.test(rest)) return null;
+  return rest;
+}
+
+/**
+ * Validate a v3 paragraph text and return its VISIBLE text (well-formed
+ * `**emphasis**` pairs unwrapped, bullet markers kept as plain characters), or
+ * null when it uses anything outside the allowed subset. `*` is legal ONLY as
+ * complete, non-empty, non-nested, non-cross-line pairs; a leftover single `*`
+ * (unclosed, empty, nested or stray) rejects the whole field.
+ */
+function v3VisibleText(text: string): string | null {
+  if (V3_REJECTED_CHARS_RE.test(text) || text.includes('#')) return null;
+  if (!text.includes('*')) return text;
+  let emptyEmphasis = false;
+  // One left-to-right pass: each well-formed pair unwraps into the visible text;
+  // any star that is NOT part of such a pair survives to the check below.
+  const visible = text.replace(V3_BOLD_PAIR_GLOBAL_RE, (_full: string, inner: string) => {
+    if (inner.trim() === '') {
+      emptyEmphasis = true;
+      return inner;
+    }
+    return inner;
+  });
+  if (emptyEmphasis || visible.includes('*')) return null;
+  return visible;
+}
 
 /**
  * Scan normalized+masked text and return the id of the first matching rule in a
@@ -408,14 +463,33 @@ function resourceViolation(limitKey: string): AnswerViolation {
 }
 
 /**
+ * TRUSTED-INTERNAL caveat scope for bound delivery only. Bound delivery derives
+ * `requiredCaveatIndices` from the schema-parsed FULL plan (each cited fact's
+ * own caveat, mapped to original requiredCaveats indices) — it is NEVER
+ * accepted from host JSON: no skip/override/scope field can reach it through
+ * any input file or CLI flag. When absent, every requiredCaveat stays required
+ * (the original low-level structural behavior).
+ */
+export interface InternalCaveatScope {
+  requiredCaveatIndices: ReadonlySet<number>;
+}
+
+/**
  * Validate a ReadingDraft against an AnswerPlan. THE public safety entry:
  * accepts unknown/raw input, never trusts a prior parse, and never throws —
  * malformed or wrong-version input yields a stable not-ok result. Violations
  * carry only structured locators (sectionIndex, field, paragraphIndex,
  * patternKey from closed sets, itemIndex) and static wording — never fragments
  * of the draft, the plan, or any caller-provided string.
+ *
+ * `internal` is an in-process, trusted-internal option (see InternalCaveatScope);
+ * it cannot be supplied through JSON input, so the public JSON contract is
+ * unchanged.
  */
-export function validateAnswer(input: unknown): AnswerValidationResult {
+export function validateAnswer(
+  input: unknown,
+  internal?: InternalCaveatScope,
+): AnswerValidationResult {
   const reject = (
     code: 'UNSUPPORTED_CONTRACT_VERSION' | 'MALFORMED_INPUT',
     detail: string,
@@ -441,11 +515,14 @@ export function validateAnswer(input: unknown): AnswerValidationResult {
       typeof rawDraft === 'object' && rawDraft !== null
         ? (rawDraft as { contractVersion?: unknown }).contractVersion
         : undefined;
-    if (draftVersion !== READING_DRAFT_CONTRACT_VERSION) {
+    if (
+      draftVersion !== READING_DRAFT_CONTRACT_VERSION &&
+      draftVersion !== READING_DRAFT_V3_CONTRACT_VERSION
+    ) {
       return reject(
         'UNSUPPORTED_CONTRACT_VERSION',
-        'ReadingDraft 的 contractVersion 不是受支持的 reading-draft/v2。',
-        '使用 reading-draft/v2。legacy reading-draft/v1 已在运行时被拒绝（v0.2.0 破坏性变化）；迁移方法见 references/answer-contract.md（为约束表达段落添加 constraintRefs 并更换版本串）。',
+        'ReadingDraft 的 contractVersion 不是受支持的 reading-draft 版本。',
+        '新草稿使用 reading-draft/v3（有限标题/加粗/要点排版）；reading-draft/v2 继续支持并保持纯文本规则；legacy reading-draft/v1 已在运行时被拒绝。迁移与格式范围见 references/answer-contract.md。',
       );
     }
 
@@ -471,7 +548,7 @@ export function validateAnswer(input: unknown): AnswerValidationResult {
       );
     }
 
-    return runValidateAnswer(parsed);
+    return runValidateAnswer(parsed, internal);
   } catch {
     // Proxy traps, getter throws, or any other unexpected exception from
     // accessing unknown input properties — return stable static result.
@@ -520,8 +597,18 @@ function constraintKindKey(kind: PlanConstraintKind): 'disclaimer' | 'caveat' | 
 }
 
 /** Internal: validate an ALREADY schema-parsed input. Not a public entry. */
-function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
+function runValidateAnswer(
+  input: ValidateAnswerInput,
+  internal?: InternalCaveatScope,
+): AnswerValidationResult {
   const { answerPlan, readingDraft } = input;
+  const isV3 = readingDraft.contractVersion === READING_DRAFT_V3_CONTRACT_VERSION;
+  const markupDetail = isV3
+    ? 'heading/text 使用了 reading-draft/v3 允许范围之外的标记（仅允许 ## / ### 单行短标题、成对不嵌套不跨行的非空 **强调** 与 - 要点行）。'
+    : 'heading/text 含有 HTML 标签、HTML 实体、HTML 注释或 Markdown 链接/图片语法，违反纯文本契约。';
+  const markupRemediation = isV3
+    ? '仅使用 v3 允许的有限排版（## / ### 短标题、成对 **强调**、- 要点行）；其余标记不受支持，不会自动修复后放行。'
+    : 'heading/text 字段必须为纯文本；宿主负责在渲染时 escape 并自行添加 Markdown 格式。';
 
   const violations: AnswerViolation[] = [];
   let violationsTruncated = false;
@@ -602,24 +689,30 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
   for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
     const section = readingDraft.sections[sIdx]!;
 
-    // 3.0 Plain-text contract: reject markup in heading.
-    if (MARKUP_STRUCTURAL_CHARS_RE.test(section.heading)) {
+    // 3.0 Text-contract gate: v2 keeps the original plain-text character ban;
+    // v3 validates its limited marker subset and derives the VISIBLE heading
+    // text the safety scan must see. Illegal/unclosed markers are rejected,
+    // never auto-repaired.
+    const headingVisible = isV3
+      ? v3VisibleHeading(section.heading)
+      : MARKUP_STRUCTURAL_CHARS_RE.test(section.heading)
+        ? null
+        : section.heading;
+    if (headingVisible === null) {
       push({
         code: 'CONTAINS_MARKUP',
         severity: 'error',
         sectionIndex: sIdx,
         field: 'heading',
         patternKey: 'markup.detected',
-        detail:
-          'heading 含有 HTML 标签、HTML 实体、HTML 注释或 Markdown 链接/图片语法，违反纯文本契约。',
-        remediation:
-          'heading/text 字段必须为纯文本；宿主负责在渲染时 escape 并自行添加 Markdown 格式。',
+        detail: markupDetail,
+        remediation: markupRemediation,
       });
     }
 
     // 4a. Heading scan (headings are visible text too).
-    if (section.heading.length > 0) {
-      const headingScanText = toScanText(section.heading);
+    if (section.heading.length > 0 && headingVisible !== null) {
+      const headingScanText = toScanText(headingVisible);
       for (const group of HIGH_RISK_GROUPS) {
         const ruleId = findGroupHit(headingScanText, group.rules);
         if (ruleId !== null) {
@@ -639,12 +732,21 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
     for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
       const para = section.paragraphs[pIdx]!;
 
+      // v3: derive the VISIBLE paragraph text (markers stripped) once; v2 is
+      // plain text, so visible === raw. Safety scans below run on the visible
+      // text so markers can never split or hide a banned phrase.
+      const paraVisible = isV3
+        ? v3VisibleText(para.text)
+        : MARKUP_STRUCTURAL_CHARS_RE.test(para.text)
+          ? null
+          : para.text;
+
       if (para.realitySource !== undefined) {
         // A narrow wording backstop for known source-smuggling tokens, not a
         // semantic proof: cultural discussion belongs in its separate T unit.
         if (
           /八字|命盘|星盘|十神|官杀|七杀|正官|格局|喜用|用神|五行|紫微|吠陀|\b(?:bazi|astrology|horoscope|vedic|ziwei)\b/i.test(
-            normalizeSafetyText(`${section.heading} ${para.text}`),
+            normalizeSafetyText(`${headingVisible ?? section.heading} ${paraVisible ?? para.text}`),
           )
         ) {
           push({
@@ -692,8 +794,9 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
         }
       }
 
-      // 3.0 Plain-text contract: reject markup in paragraph text.
-      if (MARKUP_STRUCTURAL_CHARS_RE.test(para.text)) {
+      // 3.0 Text-contract gate for paragraph text (v2 plain-text ban / v3
+      // limited-marker subset). Unclosed or illegal markers reject the field.
+      if (paraVisible === null) {
         push({
           code: 'CONTAINS_MARKUP',
           severity: 'error',
@@ -701,10 +804,8 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
           field: 'paragraph',
           paragraphIndex: pIdx,
           patternKey: 'markup.detected',
-          detail:
-            'paragraph text 含有 HTML 标签、HTML 实体、HTML 注释或 Markdown 链接/图片语法，违反纯文本契约。',
-          remediation:
-            'heading/text 字段必须为纯文本；宿主负责在渲染时 escape 并自行添加 Markdown 格式。',
+          detail: markupDetail,
+          remediation: markupRemediation,
         });
       }
 
@@ -774,8 +875,9 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
         }
       }
 
-      // 4b. High-risk scan — every paragraph of every section, on masked text.
-      const paraScanText = toScanText(para.text);
+      // 4b. High-risk scan — every paragraph of every section, on the masked
+      // VISIBLE text (v3 markers stripped, so emphasis cannot split a phrase).
+      const paraScanText = toScanText(paraVisible ?? para.text);
       for (const group of HIGH_RISK_GROUPS) {
         const ruleId = findGroupHit(paraScanText, group.rules);
         if (ruleId !== null) {
@@ -797,12 +899,18 @@ function runValidateAnswer(input: ValidateAnswerInput): AnswerValidationResult {
 
   // 5. Required caveats: constraintRefs are the primary evidence and the
   // caveatsExpressed self-attestation must agree with them — one truth source,
-  // no contradictions.
+  // no contradictions. In BOUND DELIVERY the trusted-internal scope narrows
+  // which caveats are REQUIRED to those owned by a fact the draft actually
+  // cites (plus any caveat with no fact attribution, kept conservatively).
+  // Non-required caveats stay fully subject to the reference/attestation
+  // consistency check below — an optional constraint is never half-checked.
+  const caveatRequired = (index: number): boolean =>
+    internal?.requiredCaveatIndices?.has(index) ?? true;
   const expressedCaveats = new Set(readingDraft.caveatsExpressed);
   for (let cIdx = 0; cIdx < answerPlan.requiredCaveats.length; cIdx++) {
     const declared = expressedCaveats.has(answerPlan.requiredCaveats[cIdx]!);
     const referenced = referencedCaveats.has(cIdx);
-    if (!declared && !referenced) {
+    if (!declared && !referenced && caveatRequired(cIdx)) {
       push({
         code: 'MISSING_REQUIRED_CAVEAT',
         severity: 'error',

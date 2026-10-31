@@ -13,13 +13,18 @@ This document is the implementation source of truth for the Skill instructions,
 
 | Surface          | Default visibility | Contents                                                                           |
 | ---------------- | ------------------ | ---------------------------------------------------------------------------------- |
-| `body`           | visible            | Natural paragraphs answering the user's question.                                  |
+| `body`           | visible            | Scannable reading of the user's question: short headings, bullets and sparing      |
+|                  |                    | emphasis when content groups; plain paragraphs for short follow-ups.               |
 | technical detail | on request         | Chart facts, terms, mechanisms, source references and calculation settings.        |
 | internal audit   | never visible      | Warning records, guardrails, fact ids, rulesets, provenance and validation output. |
 
-The default `body` must not contain a fixed heading, a numbered template, raw warning data,
-provenance, rule ids, a disclaimer footer or an automatic follow-up menu. It must not label any
-section `讲人话`; it gives the concrete conclusion directly.
+Since roadmap v3.3 the default `body` may use the `reading-draft/v3` limited marker subset —
+`## `/`### ` single-line short headings, paired non-nested `**emphasis**`, simple `- ` bullet
+lines — with the formatting written inside the checked draft, covered by `draftDigest`,
+transcribed verbatim and safety-scanned as visible text (v2 plain-text drafts stay accepted).
+It must not contain a fixed report template or compulsory per-topic headings, a numbered
+template, raw warning data, provenance, rule ids, a disclaimer footer or an automatic follow-up
+menu. It must not label any section `讲人话`; it gives the concrete conclusion directly.
 
 ## Required internal reasoning chain
 

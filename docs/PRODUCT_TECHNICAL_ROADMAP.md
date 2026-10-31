@@ -1,9 +1,9 @@
 # Loom product technical roadmap
 
-- Roadmap id: `loom-product-roadmap/v3.2`
+- Roadmap id: `loom-product-roadmap/v3.3`
 - Status: **Accepted and owner-confirmed**
-- Confirmed: 2026-10-29
-- Supersedes: `loom-product-roadmap/v3.1`
+- Confirmed: 2026-10-31
+- Supersedes: `loom-product-roadmap/v3.2`
 - Authority: product direction, technical sequencing, and slice admission
 - Related: [ADR 0018](./adr/0018-structural-answer-quality-route.md),
   [ADR 0017](./adr/0017-product-technical-roadmap-and-execution-governance.md),
@@ -75,8 +75,9 @@ Every phase and slice preserves all of these invariants:
 3. Distinct systems or schools do not vote, average, or silently lend each other terminology.
 4. Cross-system synthesis records `convergent`, `conflicting`, or `incomparable` signals with their
    original mechanisms intact.
-5. Default narration remains continuous prose. Audit detail is available on explicit request, not
-   appended automatically.
+5. Default narration is a scannable natural reading (adaptive layout since v3.3; formatting only
+   from the checked draft). Audit detail is available on explicit request, not appended
+   automatically.
 6. Raw queries, chat transcripts, questionnaire answers, exact birth records, and model reasoning
    are not persisted by default. Any memory is separately designed, explicit opt-in, inspectable,
    deletable, and retention-bounded.
@@ -93,11 +94,24 @@ Every phase and slice preserves all of these invariants:
 ### 3.1 Answer presentation invariant
 
 The default answer starts from the professional mechanism that matters and immediately gives its
-concrete implication. It never prints a `讲人话` label, a fixed report template, or automatic
-footer sections such as `敏感项校对`, `引擎警告`, `专业依据`, `声明`, or translated equivalents.
-Structure and wording may vary naturally; the evidence, approved claim, material caveat, and
-conclusion boundary may not. A caveat appears inline only when it materially changes the answer.
-Technical evidence, provenance, and audit records appear only on explicit request.
+concrete implication. Since v3.3 the default surface is **adaptive scannable layout**, not
+prose-only: a first answer explains a few well-grounded main lines (never one compulsory section
+per system), optional short `## `/`### ` headings group real content, short `- ` bullet lists
+carry parallel points (one point per item), and sparing paired `**emphasis**` highlights key
+phrases; short follow-ups may remain plain paragraphs. Layout serves content — no fixed report
+template, no compulsory heading/quota per topic, and headings never carry conclusions the cited
+material does not support.
+
+It never prints a `讲人话` label or automatic footer sections such as `敏感项校对`, `引擎警告`,
+`专业依据`, `声明`, or translated equivalents. Formatting travels inside the checked draft
+(`reading-draft/v3`'s limited marker subset; v2 plain text stays accepted), is part of
+`draftDigest`, and is transcribed verbatim — text is never formatted after passing its checks,
+and safety rules scan the visible text so markers cannot hide banned phrases. Wording and
+structure may vary naturally; the evidence, approved claim, material caveat, and conclusion
+boundary may not. A caveat appears inline beside the judgment it qualifies, only when it
+materially changes the answer (bound delivery derives which fact-owned caveats are mandatory for
+the current citations). Technical evidence, provenance, and audit records appear only on explicit
+request.
 
 ### 3.2 Claim and synthesis invariant
 
@@ -501,6 +515,18 @@ next unblocked slice in this roadmap and prove its admission conditions.
 
 ## 9. Roadmap changelog
 
+- `loom-product-roadmap/v3.3` — 2026-10-31: **version change** for the owner-confirmed adaptive
+  presentation decision (ADR 0017 amendment of the same date). §3.1 now defines an adaptive
+  scannable layout (short headings, sparing paired emphasis, short bullet lists, whitespace)
+  instead of prose-only defaults, carried by the additive `reading-draft/v3` limited-marker
+  contract (v2 accepted with its original plain-text rule; v1 still rejected; markers digest,
+  transcribe and safety-scan as visible text). Bound delivery derives fact-owned caveat
+  necessity from the current citations inside trusted code, so focused answers stop carrying
+  unrelated uncited-fact caveats; original indices, warnings, guardrails, answerability, the
+  low-level all-caveats path and every other boundary are unchanged. Calculation, source/school
+  admission, defaults, privacy, career ADR 0021 and its blocker, C-track, D1/D2, IQ-5 deferral
+  and release authority are unchanged. This is a roadmap version, not an engine/ruleset/package
+  or release version.
 - `loom-product-roadmap/v3.2` — 2026-10-29: **version change** for the owner-confirmed
   optimization direction (amended ADR 0017). Preserve the four-system traditional-reading
   destination; broaden the current IQ-4 focus to proven correctness repair and one readable,

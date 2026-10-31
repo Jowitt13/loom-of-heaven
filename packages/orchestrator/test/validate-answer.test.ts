@@ -2336,3 +2336,155 @@ describe('validate-answer — fact boundary and safety layer', () => {
     });
   });
 });
+
+describe('reading-draft/v3 limited presentation subset (scope+presentation plan §3)', () => {
+  function v3Draft(opts: {
+    heading?: string;
+    text: string;
+    facts?: string[];
+    refs?: Array<{ kind: 'caveat' | 'warning' | 'disclaimer'; index: number }>;
+  }) {
+    return makeDraft({
+      contractVersion: 'reading-draft/v3',
+      sections: [
+        {
+          id: 'body',
+          heading: opts.heading ?? '## 核心结论',
+          paragraphs: [
+            {
+              text: opts.text,
+              sourceFactIds: opts.facts ?? ['fact-1'],
+              ...(opts.refs ? { constraintRefs: opts.refs } : {}),
+            },
+          ],
+        },
+      ],
+      caveatsExpressed: [],
+      warningsDisclosed: [],
+    });
+  }
+
+  it('accepts a ## short heading, paired emphasis, a bullet line and newlines', () => {
+    const result = runValidated(
+      makePlan({ requiredCaveats: [], requiredWarningCodes: [] }),
+      v3Draft({
+        heading: '## 命宫里的两种侧重',
+        text: '这张盘的底色是**果决与执行**并存。\n- 武曲：刚毅果决、善于理财与执行\n- 破军：变动性强、敢于破旧立新',
+      }),
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it('accepts a ### heading and plain text without any marker', () => {
+    const result = runValidated(
+      makePlan({ requiredCaveats: [], requiredWarningCodes: [] }),
+      v3Draft({ heading: '### 小结', text: '两种侧重并存，星性本身没有回答偏好哪一侧。' }),
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it('rejects # and #### level headings and multi-line headings', () => {
+    for (const heading of ['# 核心结论', '#### 核心结论', '## 核心结论\n第二行']) {
+      const result = runValidated(makePlan(), v3Draft({ heading, text: '合成正文。' }));
+      expect(
+        result.violations.some((v) => v.code === 'CONTAINS_MARKUP' && v.field === 'heading'),
+        `should reject heading: ${JSON.stringify(heading)}`,
+      ).toBe(true);
+    }
+  });
+
+  it('rejects unclosed, empty, nested, cross-line and stray emphasis', () => {
+    for (const text of [
+      '这是**未闭合的强调。',
+      '空的**  **强调。',
+      '嵌套的**a*b**强调。',
+      '跨行的**强调\n继续**。',
+      '单个*星号。',
+    ]) {
+      const result = runValidated(makePlan(), v3Draft({ text }));
+      expect(
+        result.violations.some((v) => v.code === 'CONTAINS_MARKUP' && v.field === 'paragraph'),
+        `should reject text: ${JSON.stringify(text)}`,
+      ).toBe(true);
+    }
+  });
+
+  it('rejects HTML, entities, links, images, code and other unsupported structures in v3', () => {
+    for (const text of [
+      '合成<b>标签</b>。',
+      '合成&amp;实体。',
+      '[合成链接](http://example.com)',
+      '`代码`片段。',
+      '表格|分隔|符。',
+      '下划线_强调_。',
+      '删除~~线~~。',
+      '井号#标题行。',
+    ]) {
+      const result = runValidated(makePlan(), v3Draft({ text }));
+      expect(
+        result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
+        `should reject v3 text: ${text}`,
+      ).toBe(true);
+    }
+  });
+
+  it('scans the VISIBLE text so markers cannot split a banned phrase', () => {
+    const split = runValidated(makePlan(), v3Draft({ text: '这份盘读作注**定**短命。' }));
+    expect(split.violations.some((v) => v.code === 'HIGH_RISK_LIFE_DEATH')).toBe(true);
+    const plain = runValidated(makePlan(), v3Draft({ text: '这份盘读作注定短命。' }));
+    expect(plain.violations.some((v) => v.code === 'HIGH_RISK_LIFE_DEATH')).toBe(true);
+  });
+
+  it('scans bullet lines and headings for banned phrases', () => {
+    const bullet = runValidated(
+      makePlan(),
+      v3Draft({ text: '两个要点：\n- 建议买入股票\n- 保持关注' }),
+    );
+    expect(bullet.violations.some((v) => v.code === 'HIGH_RISK_INVESTMENT')).toBe(true);
+    const heading = runValidated(
+      makePlan(),
+      v3Draft({ heading: '## 注定孤独终老', text: '合成正文。' }),
+    );
+    expect(heading.violations.some((v) => v.code === 'HIGH_RISK_LIFE_DEATH')).toBe(true);
+  });
+
+  it('does not widen the disclaimer mask for marked-up text', () => {
+    const masked = runValidated(
+      makePlan(),
+      v3Draft({ text: '本报告不构成医疗诊断，**其余照常**。' }),
+    );
+    expect(masked.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(false);
+    const unmasked = runValidated(makePlan(), v3Draft({ text: '**我确认**这是医疗诊断。' }));
+    expect(unmasked.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
+  });
+
+  it('v2 keeps its original plain-text rule: markdown allowed in v3 is rejected in v2', () => {
+    for (const [heading, text] of [
+      ['## 核心结论', '合成正文。'],
+      ['核心结论', '这是**加粗**正文。'],
+    ] as const) {
+      const result = runValidated(
+        makePlan(),
+        makeDraft({
+          sections: [{ id: 'summary', heading, paragraphs: [{ text, sourceFactIds: ['fact-1'] }] }],
+        }),
+      );
+      expect(
+        result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
+        `v2 should reject: ${heading} / ${text}`,
+      ).toBe(true);
+    }
+  });
+
+  it('v1 remains rejected beside v2/v3 (no runtime downgrade)', () => {
+    const v1Draft = { ...makeDraft(), contractVersion: 'reading-draft/v1' };
+    expect(() =>
+      ValidateAnswerInputSchema.parse({ answerPlan: makePlan(), readingDraft: v1Draft }),
+    ).toThrow();
+    const publicResult = validateAnswer({
+      answerPlan: makePlan(),
+      readingDraft: v1Draft,
+    });
+    expect(publicResult.violations[0]!.code).toBe('UNSUPPORTED_CONTRACT_VERSION');
+  });
+});

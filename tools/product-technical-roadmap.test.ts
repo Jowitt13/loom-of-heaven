@@ -15,23 +15,39 @@ const NARRATIVE = read('docs/NARRATIVE_OUTPUT_V1.md');
 const TEN_GOD_ADR = read('docs/adr/0021-ten-god-cultural-reference.md');
 
 describe('product technical roadmap and commander governance', () => {
-  it('records an owner-confirmed v3.2 roadmap and accepted route-change ADR', () => {
-    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v3.2`');
+  it('records an owner-confirmed v3.3 roadmap and accepted route-change ADR', () => {
+    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v3.3`');
     expect(ROADMAP).toContain('Status: **Accepted and owner-confirmed**');
-    expect(ROADMAP).toContain('Confirmed: 2026-10-29');
-    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v3.1`');
+    expect(ROADMAP).toContain('Confirmed: 2026-10-31');
+    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v3.2`');
+    expect(ROADMAP).toContain('`loom-product-roadmap/v3.3` — 2026-10-31: **version change**');
+    // History is retained, not rewritten.
     expect(ROADMAP).toContain('`loom-product-roadmap/v3.2` — 2026-10-29: **version change**');
     expect(GOVERNANCE_ADR).toContain('Status: Accepted');
     expect(GOVERNANCE_ADR).toContain('Amended: 2026-08-29');
     expect(GOVERNANCE_ADR).toContain('Amended: 2026-10-29');
+    expect(GOVERNANCE_ADR).toContain('Amended: 2026-10-31');
     expect(GOVERNANCE_ADR).toContain('## Owner-confirmed focus change — 2026-10-29');
+    expect(GOVERNANCE_ADR).toContain('## Owner-confirmed presentation change — 2026-10-31');
     expect(GOVERNANCE_ADR).toContain('The current freeze changes no runtime');
     expect(ROUTE_ADR).toContain('Status: Accepted');
     expect(ROUTE_ADR).toContain('Date: 2026-09-03');
     expect(ROUTE_ADR).toContain('This ADR changes no runtime');
-    expect(AGENTS).toContain('loom-product-roadmap/v3.2');
+    expect(AGENTS).toContain('loom-product-roadmap/v3.3');
     expect(AGENTS).toContain('loom-commander-protocol/v3');
-    expect(PROTOCOL).toContain('roadmap: loom-product-roadmap/v3.2');
+    expect(PROTOCOL).toContain('roadmap: loom-product-roadmap/v3.3');
+  });
+
+  it('bounds the v3.3 presentation change to layout and delivery mechanics', () => {
+    expect(ROADMAP).toContain('adaptive scannable layout');
+    expect(ROADMAP).toContain('reading-draft/v3');
+    expect(ROADMAP).toContain('v2 plain text stays accepted');
+    expect(ROADMAP).toContain('fact-owned caveat');
+    expect(NARRATIVE).toContain('reading-draft/v3');
+    expect(NARRATIVE).toContain('v2 plain-text drafts stay accepted');
+    expect(GOVERNANCE_ADR).toContain('no host JSON field can influence the derivation');
+    expect(GOVERNANCE_ADR).toContain('IQ-5 deferral, and release authority');
+    expect(ROADMAP).toContain('This is a roadmap version, not an engine/ruleset/package');
   });
 
   it('locks the ADR 0021 ten-god cultural-reference bounds as a v3.1 static gate', () => {
@@ -181,8 +197,8 @@ describe('product technical roadmap and commander governance', () => {
   });
 
   it('preserves natural delivery and makes audit detail explicitly requested', () => {
-    expect(ROADMAP).toContain('Default narration remains continuous prose');
-    expect(ROADMAP).toMatch(/on explicit request, not\s+appended automatically/);
+    expect(ROADMAP).toContain('Default narration is a scannable natural reading');
+    expect(ROADMAP).toMatch(/on explicit request, not\s+appended\s+automatically/);
     expect(ROADMAP).toContain('on-request audit cards rather than mandatory footers');
     expect(ROADMAP).toMatch(/raw\s+ids/);
     for (const clutter of ['warning panels', 'a technique card', 'a fixed disclaimer footer']) {
@@ -193,7 +209,7 @@ describe('product technical roadmap and commander governance', () => {
       expect(NARRATIVE, clutter).toContain(clutter);
     }
     expect(NARRATIVE).toContain('Vary paragraph structure, transitions, and emphasis naturally');
-    expect(AGENTS).toMatch(/Never label a\s+section `讲人话`/);
+    expect(AGENTS).toMatch(/Never label a\s+section\s+`讲人话`/);
   });
 
   it('keeps persistence opt-in and psychology structurally isolated', () => {

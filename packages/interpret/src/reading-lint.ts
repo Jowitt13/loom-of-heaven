@@ -238,17 +238,14 @@ const JARGON_SPECS = buildTermSpecs();
 const FOLLOWUP_RE = /还想看|想看更多|想继续看|继续(?:看|了解)|想深入看|接下来想看/;
 
 /**
- * Default answers are prose only. These strings identify internal-control leakage,
- * rather than ordinary astrological vocabulary. Keep this list deliberately narrow:
- * a natural caveat about an uncertain birth time is allowed; a rendered warning panel
- * or raw evidence identifier is not.
+ * These strings identify internal-control leakage, rather than ordinary
+ * astrological vocabulary. Keep this list deliberately narrow: a natural caveat
+ * about an uncertain birth time is allowed; a rendered warning panel or raw
+ * evidence identifier is not. Content headings themselves are NO longer banned
+ * (roadmap v3.3 adaptive layout): a `## ` heading line passes unless it carries
+ * one of the leaked control labels below.
  */
 const DELIVERY_LEAKS: Array<{ term: string; re: RegExp; hint: string }> = [
-  {
-    term: '模板标题',
-    re: /^\s{0,3}#{1,6}\s+/,
-    hint: '默认交付使用连续自然段；只有用户明确要求结构化报告时才使用标题',
-  },
   {
     term: '敏感项校对',
     re: /敏感项校对/,

@@ -100,11 +100,19 @@ warnings. Computing all four systems does not require displaying all four — se
      换几个说法再讲一遍。详见 `references/examples-career.md` 中分开的正文与内部说明。
    - Per-topic loading: use the **自然叙述规范 v1** in `references/reading-style.md`; 事业 → `+ references/examples-career.md`; 感情 → `+ references/examples-love.md`; 财运 → `+ references/examples-wealth.md`; 学业/流年不加载无关案例文件。
    - **Channel B 的内部链路与默认交付：**先保留每条选中事实的 `id` / `reason` /
-     `evidence.ref` / `caveat`，再按“事实 → 规则机制 → 现实含义 → 条件”写成连续自然段。
-     专业术语可以出现，但术语、机制与具体处境必须紧邻；不得将原始 id、ref、ruleId、
-     ruleset、provenance 或 warning 数据写入默认正文。
-   - **结构与措辞门禁（validate-answer，先于成文）:** 把通俗中间层整理成 `reading-draft/v2` JSON：命盘段落用 `sourceFactIds`，相关 caveat/warning 用 `constraintRefs`；事业现实建议段落用独立 `realitySource` 引用同时提交的 `careerReality.confirmedFacts`，只记录用户明确自述，不借命盘 ID、不混合来源段落。没有现实自述就不生成现实建议；来源元数据不进正文。disclaimer 仅在确有必要时引用，legacy v1 仍拒绝。**普通问题一律走绑定交付**，顺序固定：
-     ① `answer-plan` 取计划与绑定 → ② 写 `reading-draft/v2` 草稿 → ③ **密封**该草稿到它的计划运行：`node scripts/loom-chart.mjs validate-answer --seal-draft --input-file draft.json --binding-file answer-plan.json --output-file draft-origin.json` → ④ 绑定送检：把 `{ draftSource, draftDigest, answerPlan（完整保存的计划）, readingDraft }` 放入送检文件，并加 `--context-input-file birth-input.json --topic <topic>`（及与 answer-plan 相同的 `--lens/--at/--now`）→ ⑤ 仅当 `ok:true` 才展示返回的 `deliverableBody`（它就是被检查过的文本，`deliverableBodySha256` 可核对）。
+     `evidence.ref` / `caveat`，再按“事实 → 规则机制 → 现实含义 → 条件”组织成便于扫读的
+     正文：内容多时用短标题分组，并列信息用简短列表，重点词适量加粗；短回答可以只是
+     自然段。专业术语可以出现，但术语、机制与具体处境必须紧邻；不得将原始 id、ref、
+     ruleId、ruleset、provenance 或 warning 数据写入默认正文。
+   - **结构与措辞门禁（validate-answer，先于成文）:** 把通俗中间层整理成 `reading-draft/v3`
+     JSON（新增草稿默认 v3：短标题用 `## `/`### `、重点用成对 `**加粗**`、并列用 `- ` 要点行；
+     其余标记一律被拒。旧 `reading-draft/v2` 纯文本草稿继续受支持，v1 仍拒绝）：命盘段落用 `sourceFactIds`，
+     相关 caveat/warning 用 `constraintRefs`；事业现实建议段落用独立 `realitySource` 引用同时提交的
+     `careerReality.confirmedFacts`，只记录用户明确自述，不借命盘 ID、不混合来源段落。没有现实
+     自述就不生成现实建议；来源元数据不进正文。disclaimer 仅在确有必要时引用，legacy v1 仍拒绝。
+     绑定交付会按本轮实际引用的事实派生 caveat 必需性：只有未引用事实独有的 caveat 不再强制表达，
+     原数组与引用下标不变，warning 披露义务不变。**普通问题一律走绑定交付**，顺序固定：
+     ① `answer-plan` 取计划与绑定 → ② 写 `reading-draft/v3` 草稿 → ③ **密封**该草稿到它的计划运行：`node scripts/loom-chart.mjs validate-answer --seal-draft --input-file draft.json --binding-file answer-plan.json --output-file draft-origin.json` → ④ 绑定送检：把 `{ draftSource, draftDigest, answerPlan（完整保存的计划）, readingDraft }` 放入送检文件，并加 `--context-input-file birth-input.json --topic <topic>`（及与 answer-plan 相同的 `--lens/--at/--now`）→ ⑤ 仅当 `ok:true` 才展示返回的 `deliverableBody`（它就是被检查过的文本，含已检查的标题/加粗/要点原样，`deliverableBodySha256` 可核对）。
      旧对象、旧出生资料、旧主题/目标时间、被改动的计划，或**草稿不是为本次计划所写**，都会被 `BINDING_MISMATCH` 受控拒绝；裸草稿（无来源）被 `DRAFT_ORIGIN_MISSING` 拒绝。改一个字、标题或顺序都必须重新密封并重新送检，展示新返回的正文，**不得沿用上一次成功正文**（失败结果不携带正文）。已声明绑定却漏传 `--context-input-file` 会被 `INPUT_VALIDATION_FAILED` 拒绝，绝不静默退回低层结构检查。
      仅当确实只需要结构检查（例如人工排查历史草稿）时，才用 `{ answerPlan, readingDraft }` 送检；该路径输出 `validation-result/v2`、**不构成绑定交付**，且仍须按上面的 lint-reading 流程检查措辞后再展示。摘要只证明一致性，不是认证；无状态检查器防意外错配、不防故意重新标注来源或回放整套旧上下文的宿主。详见 `references/answer-contract.md`。
    - **交付面与真实检查（lint-reading）:** 默认正文不得含章节模板、`专业依据`、`敏感项校对`、
@@ -217,7 +225,9 @@ When the user wants an ordinary reading, run `answer-plan` and narrate ONLY from
 raw birth data and never your own invention. It contains no free-form question text; map the
 question to a bounded topic/lens first, or ask a clarification question. For every substantive
 paragraph, retain the internal chain `fact/evidence → reason/ruleset → concrete implication →
-relevant condition`. Write continuous, specific prose rather than a fixed report sequence.
+relevant condition`. Write scannable, specific answers rather than a fixed report sequence:
+a few well-explained main lines for a first answer (not one section per system), short
+headings or bullets when content genuinely groups, plain paragraphs for short follow-ups.
 
 Terms such as 干支、十神、宫位、星曜、相位或吠陀分类可以出现，但必须紧接着解释其规则机制和
 现实含义；不要把它们变成脱离结论的术语附录。趋势与年份是传统命理解读，不是统计概率，绝不输出

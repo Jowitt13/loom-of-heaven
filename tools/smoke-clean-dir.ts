@@ -359,6 +359,139 @@ try {
     legacyClaimsNothing,
   );
 
+  // reading-draft/v3 clean-dir CLI end-to-end: a formatted draft (## heading,
+  // paired emphasis, bullet line) seals and bound-delivers verbatim through the
+  // real shipped CLI, and an out-of-subset marker is rejected.
+  let v3DeliveredOk = false;
+  let v3RejectedOk = false;
+  try {
+    const savedPlan = JSON.parse(readFileSync(join(tempSkill, 'plan-character.json'), 'utf8')) as {
+      answerPlan: {
+        selectedFacts: Array<{ id: string }>;
+        requiredCaveats: string[];
+        requiredWarningCodes: string[];
+      };
+    };
+    const v3FirstFact = savedPlan.answerPlan.selectedFacts[0]!;
+    const v3WarningRefs = savedPlan.answerPlan.requiredWarningCodes.map((_, index) => ({
+      kind: 'warning' as const,
+      index,
+    }));
+    const v3CaveatRefs = savedPlan.answerPlan.requiredCaveats.map((_, index) => ({
+      kind: 'caveat' as const,
+      index,
+    }));
+    const v3Draft = {
+      contractVersion: 'reading-draft/v3',
+      topic: 'character',
+      sections: [
+        {
+          id: 'body',
+          heading: '## 性格概览',
+          paragraphs: [
+            {
+              text: '整体性格结构呈现**主动与秩序并存**的底色，两点说明如下：\n- 传统说法只作文化参考\n- 具体表现因环境与选择而异',
+              sourceFactIds: [v3FirstFact.id],
+              ...(v3CaveatRefs.length > 0 ? { constraintRefs: [v3CaveatRefs[0]!] } : {}),
+            },
+            {
+              text: '出生时间的精确程度会影响与时间相关的细节判断，本解读只保留可靠的部分。',
+              sourceFactIds: [] as string[],
+              constraintRefs: [...v3WarningRefs, ...v3CaveatRefs.slice(1)],
+            },
+          ],
+        },
+      ],
+      caveatsExpressed: savedPlan.answerPlan.requiredCaveats,
+      warningsDisclosed: savedPlan.answerPlan.requiredWarningCodes,
+    };
+    writeFileSync(join(tempSkill, 'draft-v3.json'), JSON.stringify(v3Draft), 'utf8');
+    const sealV3 = runNode(tempSkill, [
+      'scripts/loom-chart.mjs',
+      'validate-answer',
+      '--seal-draft',
+      '--input-file',
+      'draft-v3.json',
+      '--binding-file',
+      'plan-character.json',
+    ]);
+    const originV3 =
+      sealV3.code === 0 ? (JSON.parse(sealV3.stdout) as Record<string, unknown>) : {};
+    writeFileSync(
+      join(tempSkill, 'delivery-v3.json'),
+      JSON.stringify({ ...originV3, answerPlan: savedPlan.answerPlan, readingDraft: v3Draft }),
+      'utf8',
+    );
+    const deliveredV3 = runNode(tempSkill, [
+      'scripts/loom-chart.mjs',
+      'validate-answer',
+      '--input-file',
+      'delivery-v3.json',
+      '--context-input-file',
+      'scripts/fixtures/smoke.json',
+      '--topic',
+      'character',
+      '--now',
+      FIXED_NOW,
+    ]);
+    const v3Parsed =
+      deliveredV3.code === 0
+        ? (JSON.parse(deliveredV3.stdout) as { ok?: boolean; deliverableBody?: string })
+        : {};
+    v3DeliveredOk =
+      v3Parsed.ok === true &&
+      typeof v3Parsed.deliverableBody === 'string' &&
+      v3Parsed.deliverableBody.includes('## 性格概览') &&
+      v3Parsed.deliverableBody.includes('**主动与秩序并存**') &&
+      v3Parsed.deliverableBody.includes('- 传统说法只作文化参考');
+    const badV3Draft = JSON.parse(JSON.stringify(v3Draft)) as {
+      sections: Array<{ paragraphs: Array<{ text: string }> }>;
+    };
+    badV3Draft.sections[0]!.paragraphs[0]!.text = '底色见[详情](http://example.com)说明。';
+    writeFileSync(join(tempSkill, 'draft-v3-bad.json'), JSON.stringify(badV3Draft), 'utf8');
+    const sealBadV3 = runNode(tempSkill, [
+      'scripts/loom-chart.mjs',
+      'validate-answer',
+      '--seal-draft',
+      '--input-file',
+      'draft-v3-bad.json',
+      '--binding-file',
+      'plan-character.json',
+    ]);
+    const originBadV3 =
+      sealBadV3.code === 0 ? (JSON.parse(sealBadV3.stdout) as Record<string, unknown>) : {};
+    writeFileSync(
+      join(tempSkill, 'delivery-v3-bad.json'),
+      JSON.stringify({
+        ...originBadV3,
+        answerPlan: savedPlan.answerPlan,
+        readingDraft: badV3Draft,
+      }),
+      'utf8',
+    );
+    const deliveredBadV3 = runNode(tempSkill, [
+      'scripts/loom-chart.mjs',
+      'validate-answer',
+      '--input-file',
+      'delivery-v3-bad.json',
+      '--context-input-file',
+      'scripts/fixtures/smoke.json',
+      '--topic',
+      'character',
+      '--now',
+      FIXED_NOW,
+    ]);
+    v3RejectedOk =
+      deliveredBadV3.code !== 0 &&
+      /CONTAINS_MARKUP/.test(deliveredBadV3.stdout) &&
+      /"failureReason":\s*"VALIDATION_FAILED"/.test(deliveredBadV3.stdout) &&
+      !/"deliverableBody":\s*"/.test(deliveredBadV3.stdout);
+  } catch {
+    /* the records below report the failure */
+  }
+  record('v3 formatted draft bound-delivers verbatim through the clean-dir CLI', v3DeliveredOk);
+  record('v3 markup outside the allowed subset is rejected with no body', v3RejectedOk);
+
   // IQ-4 §7 capability & failure recovery: timing lenses use real capability,
   // empty reasons are evidence-based, and follow-up offers promise nothing more.
   const timingChar = runNode(tempSkill, [

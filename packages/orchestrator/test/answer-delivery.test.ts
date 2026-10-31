@@ -7,6 +7,7 @@ import { canonicalJson, parseBirthInput } from '@loom/contracts';
 import type { AnswerPlan, CareerRealityContextData } from '@loom/contracts';
 import { validateAnswer } from '@loom/interpret';
 import {
+  buildAnswerBinding,
   deliverAnswer,
   deriveAnswerRequestDigest,
   sealReadingDraft,
@@ -450,5 +451,364 @@ describe('answer delivery binding', () => {
     // and carries no delivery/origin claim at all.
     expect(legacy).not.toHaveProperty('deliverableBody');
     expect(legacy).not.toHaveProperty('binding');
+  });
+});
+
+describe('bound-delivery caveat scope (cited facts own the mandatory caveats)', () => {
+  const request = { currentRequest: { birthInput: rawA, topic: 'character' as const, now: FIXED } };
+
+  /** The real host follow-up shape: only 命宫 facts cited, no 五行 paragraph. */
+  function followUpDraft(plan: AnswerPlan): Record<string, unknown> {
+    const mingGong = plan.selectedFacts.filter((f) => f.claim.includes('命宫主星'));
+    expect(mingGong.length).toBeGreaterThan(0);
+    return {
+      contractVersion: 'reading-draft/v2',
+      topic: 'character',
+      sections: [
+        {
+          id: 'body',
+          heading: '',
+          paragraphs: [
+            {
+              text: '命宫主星组合的读法是两种侧重并存，星性只到这个粒度为止。',
+              sourceFactIds: mingGong.slice(0, 3).map((f) => f.id),
+            },
+            {
+              text: '出生时间的精确程度会影响与时间相关的细节判断，本解读只保留可靠的部分。',
+              sourceFactIds: [],
+              constraintRefs: [
+                { kind: 'warning', index: 0 },
+                { kind: 'warning', index: 1 },
+              ],
+            },
+          ],
+        },
+      ],
+      caveatsExpressed: [],
+      warningsDisclosed: ['SOLAR_TIME_APPROXIMATE'],
+    };
+  }
+
+  it('a follow-up citing only 命宫 facts delivers without the uncited 五行 caveat', () => {
+    const run = runA();
+    const draft = followUpDraft(run.answerPlan);
+    const delivery = deliverAnswer({
+      ...request,
+      ...sealed(run, draft),
+      answerPlan: run.answerPlan,
+      readingDraft: draft,
+    });
+    expect(delivery.ok).toBe(true);
+    expect(delivery.deliverableBody).not.toContain('五行');
+  });
+
+  it('citing the 五行-owning fact without expressing its caveat still fails', () => {
+    const run = runA();
+    const plan = run.answerPlan;
+    const wuXing = plan.selectedFacts.find((f) => f.claim.includes('五行'));
+    expect(wuXing).toBeDefined();
+    expect(plan.requiredCaveats).toContain(wuXing!.caveat);
+    const draft = followUpDraft(plan);
+    (
+      draft.sections as Array<{ paragraphs: Array<{ text: string; sourceFactIds: string[] }> }>
+    )[0]!.paragraphs[0]!.sourceFactIds.push(wuXing!.id);
+    const delivery = deliverAnswer({
+      ...request,
+      ...sealed(run, draft),
+      answerPlan: plan,
+      readingDraft: draft,
+    });
+    expect(delivery.failureReason).toBe('VALIDATION_FAILED');
+    expect(
+      delivery.validation?.violations.some(
+        (v) => v.code === 'MISSING_REQUIRED_CAVEAT' && v.itemIndex === 0,
+      ),
+    ).toBe(true);
+  });
+
+  it('the low-level structural path still requires every caveat (no trusted scope)', () => {
+    const run = runA();
+    const result = validateAnswer({
+      answerPlan: run.answerPlan,
+      readingDraft: followUpDraft(run.answerPlan),
+    });
+    expect(result.ok).toBe(false);
+    expect(result.violations.some((v) => v.code === 'MISSING_REQUIRED_CAVEAT')).toBe(true);
+  });
+
+  it('a zero-citation draft cannot empty the caveat obligations in bound delivery', () => {
+    const run = runA();
+    const plan = run.answerPlan;
+    expect(plan.requiredCaveats.length).toBeGreaterThan(0);
+    const draft = followUpDraft(plan);
+    (
+      draft.sections as Array<{ paragraphs: Array<{ sourceFactIds: string[] }> }>
+    )[0]!.paragraphs[0]!.sourceFactIds = [];
+    // A no-fact paragraph needs constraintRefs to be fact-exempt; give it the
+    // warnings only, so the draft itself stays structurally valid.
+    (
+      draft.sections as Array<{
+        paragraphs: Array<{ sourceFactIds: string[]; constraintRefs?: unknown[] }>;
+      }>
+    )[0]!.paragraphs[0]!.constraintRefs = [{ kind: 'warning', index: 0 }];
+    const delivery = deliverAnswer({
+      ...request,
+      ...sealed(run, draft),
+      answerPlan: plan,
+      readingDraft: draft,
+    });
+    expect(delivery.failureReason).toBe('VALIDATION_FAILED');
+    expect(delivery.validation?.violations.some((v) => v.code === 'MISSING_REQUIRED_CAVEAT')).toBe(
+      true,
+    );
+  });
+
+  it('a caveat shared by two facts stays required when either fact is cited', () => {
+    const shared = '共享的限制说明：分类仅供参考。';
+    const lone = '未引用事实独有的限制说明。';
+    const syntheticPlan: AnswerPlan = {
+      contractVersion: 'answer-plan/v2',
+      engineVersion: 'test-engine',
+      sourceSchemaVersion: 'test-schema',
+      request: { topic: 'character', lens: 'overview' },
+      answerability: 'grounded',
+      selectedFacts: [
+        {
+          id: 'fact-1',
+          topic: 'character',
+          claim: '引用的事实一。',
+          evidence: [{ kind: 'bazi', ref: 'synthetic.a' }],
+          caveat: shared,
+        },
+        {
+          id: 'fact-2',
+          topic: 'character',
+          claim: '未引用的事实二。',
+          evidence: [{ kind: 'bazi', ref: 'synthetic.b' }],
+          caveat: shared,
+        },
+        {
+          id: 'fact-3',
+          topic: 'character',
+          claim: '未引用的事实三。',
+          evidence: [{ kind: 'bazi', ref: 'synthetic.c' }],
+          caveat: lone,
+        },
+      ],
+      allowedFactIds: ['fact-1', 'fact-2', 'fact-3'],
+      requiredCaveats: [shared, lone],
+      requiredWarningCodes: [],
+      guardrails: ['traditional-culture-only', 'evidence-only'],
+      responseRequirements: {
+        contentOrder: ['summary'],
+        citeSelectedFactIds: ['fact-1', 'fact-2', 'fact-3'],
+        onlyUseSelectedFacts: true,
+        explainInPlainLanguage: true,
+        discloseRequiredWarnings: true,
+      },
+      disclaimers: [],
+      followupOffers: [],
+    };
+    const draft = {
+      contractVersion: 'reading-draft/v2',
+      topic: 'character',
+      sections: [
+        {
+          id: 'body',
+          heading: '',
+          paragraphs: [
+            {
+              text: '只讲引用的事实一，并带上它所属的限制。',
+              sourceFactIds: ['fact-1'],
+              constraintRefs: [{ kind: 'caveat', index: 0 }],
+            },
+          ],
+        },
+      ],
+      caveatsExpressed: [shared],
+      warningsDisclosed: [],
+    };
+    const binding = buildAnswerBinding(
+      { birthInput: A, request: { topic: 'character', now: FIXED } },
+      syntheticPlan,
+    );
+    const delivery = deliverAnswer({
+      ...request,
+      draftSource: binding,
+      draftDigest: sealReadingDraft(binding, draft).draftDigest,
+      answerPlan: syntheticPlan,
+      readingDraft: draft,
+    });
+    // The shared caveat is still required and expressed; the lone caveat of an
+    // uncited fact is not forced. Both conditions must hold in ONE delivery.
+    expect(delivery.ok).toBe(true);
+    expect(delivery.deliverableBody).toContain('限制');
+    // Dropping the shared caveat's expression must fail again (still required).
+    const dropped = {
+      ...draft,
+      sections: [
+        {
+          id: 'body',
+          heading: '',
+          paragraphs: [{ text: '只讲引用的事实一。', sourceFactIds: ['fact-1'] }],
+        },
+      ],
+      caveatsExpressed: [],
+    };
+    const droppedDelivery = deliverAnswer({
+      ...request,
+      draftSource: binding,
+      draftDigest: sealReadingDraft(binding, dropped).draftDigest,
+      answerPlan: syntheticPlan,
+      readingDraft: dropped,
+    });
+    expect(droppedDelivery.failureReason).toBe('VALIDATION_FAILED');
+    expect(
+      droppedDelivery.validation?.violations.some(
+        (v) => v.code === 'MISSING_REQUIRED_CAVEAT' && v.itemIndex === 0,
+      ),
+    ).toBe(true);
+  });
+
+  it('no host JSON field can narrow the caveat scope (skip/override are inert)', () => {
+    const run = runA();
+    const draft = followUpDraft(run.answerPlan);
+    const smuggled = {
+      ...draft,
+      requiredCaveatScope: [1],
+      skipCaveats: [0],
+      override: true,
+    } as Record<string, unknown>;
+    // Both drafts seal to the same binding; the smuggled fields must change
+    // nothing (unknown keys never reach the trusted internal derivation).
+    const clean = deliverAnswer({
+      ...request,
+      ...sealed(run, draft),
+      answerPlan: run.answerPlan,
+      readingDraft: draft,
+    });
+    const dirty = deliverAnswer({
+      ...request,
+      ...sealed(run, smuggled),
+      answerPlan: run.answerPlan,
+      readingDraft: smuggled,
+    });
+    expect(clean.ok).toBe(true);
+    expect(dirty.ok).toBe(true);
+    expect(dirty.deliverableBody).toBe(clean.deliverableBody);
+  });
+
+  it('an optional caveat that IS referenced keeps its attestation consistency check', () => {
+    const run = runA();
+    const plan = run.answerPlan;
+    const draft = followUpDraft(plan);
+    // The 五行 caveat is not required for this citation set, but half-declaring
+    // it (caveatsExpressed without a constraintRef) must still be rejected.
+    const inconsistent = {
+      ...draft,
+      caveatsExpressed: [plan.requiredCaveats[0]!],
+    } as Record<string, unknown>;
+    const delivery = deliverAnswer({
+      ...request,
+      ...sealed(run, inconsistent),
+      answerPlan: plan,
+      readingDraft: inconsistent,
+    });
+    expect(delivery.failureReason).toBe('VALIDATION_FAILED');
+    expect(
+      delivery.validation?.violations.some((v) => v.code === 'CONSTRAINT_ATTESTATION_MISMATCH'),
+    ).toBe(true);
+  });
+});
+
+describe('reading-draft/v3 bound delivery (limited presentation)', () => {
+  const request = { currentRequest: { birthInput: rawA, topic: 'character' as const, now: FIXED } };
+
+  function v3Draft(plan: AnswerPlan): Record<string, unknown> {
+    const mingGong = plan.selectedFacts.filter((f) => f.claim.includes('命宫主星'));
+    return {
+      contractVersion: 'reading-draft/v3',
+      topic: 'character',
+      sections: [
+        {
+          id: 'body',
+          heading: '## 命宫里的两种侧重',
+          paragraphs: [
+            {
+              text: '这张盘的底色是**果决与执行**并存，两种侧重的说明如下：\n- 武曲一侧：刚毅果决、善于理财与执行\n- 破军一侧：变动性强、敢于破旧立新',
+              sourceFactIds: mingGong.slice(0, 3).map((f) => f.id),
+            },
+            {
+              text: '出生时间的精确程度会影响与时间相关的细节判断，本解读只保留可靠的部分。',
+              sourceFactIds: [],
+              constraintRefs: [
+                { kind: 'warning', index: 0 },
+                { kind: 'warning', index: 1 },
+              ],
+            },
+          ],
+        },
+      ],
+      caveatsExpressed: [],
+      warningsDisclosed: ['SOLAR_TIME_APPROXIMATE'],
+    };
+  }
+
+  it('delivers a formatted v3 draft verbatim (heading, emphasis and bullets included)', () => {
+    const run = runA();
+    const draft = v3Draft(run.answerPlan);
+    const delivery = deliverAnswer({
+      ...request,
+      ...sealed(run, draft),
+      answerPlan: run.answerPlan,
+      readingDraft: draft,
+    });
+    expect(delivery.ok).toBe(true);
+    expect(delivery.deliverableBody).toContain('## 命宫里的两种侧重');
+    expect(delivery.deliverableBody).toContain('**果决与执行**');
+    expect(delivery.deliverableBody).toContain('- 武曲一侧');
+    expect(delivery.deliverableBodySha256).toBe(
+      `sha256:${createHash('sha256').update(delivery.deliverableBody!, 'utf8').digest('hex')}`,
+    );
+  });
+
+  it('rejects v3 markup outside the allowed subset inside bound delivery', () => {
+    const run = runA();
+    const draft = v3Draft(run.answerPlan);
+    (draft.sections as Array<{ paragraphs: Array<{ text: string }> }>)[0]!.paragraphs[0]!.text =
+      '底色见[详情](http://example.com)说明。';
+    const delivery = deliverAnswer({
+      ...request,
+      ...sealed(run, draft),
+      answerPlan: run.answerPlan,
+      readingDraft: draft,
+    });
+    expect(delivery.failureReason).toBe('VALIDATION_FAILED');
+    expect(delivery.validation?.violations.some((v) => v.code === 'CONTAINS_MARKUP')).toBe(true);
+  });
+
+  it('editing a sealed v3 draft’s heading or emphasis is a BINDING_MISMATCH', () => {
+    const run = runA();
+    const draft = v3Draft(run.answerPlan);
+    const origin = sealed(run, draft);
+    const tamperedHeading = JSON.parse(JSON.stringify(draft)) as {
+      sections: Array<{ heading: string }>;
+    };
+    tamperedHeading.sections[0]!.heading = '## 改过的标题';
+    const tamperedBold = JSON.parse(JSON.stringify(draft)) as {
+      sections: Array<{ paragraphs: Array<{ text: string }> }>;
+    };
+    tamperedBold.sections[0]!.paragraphs[0]!.text =
+      tamperedBold.sections[0]!.paragraphs[0]!.text.replace('**果决与执行**', '**果决和执行**');
+    for (const tampered of [tamperedHeading, tamperedBold]) {
+      const delivery = deliverAnswer({
+        ...request,
+        ...origin,
+        answerPlan: run.answerPlan,
+        readingDraft: tampered,
+      });
+      expect(delivery.failureReason).toBe('BINDING_MISMATCH');
+      expect(delivery.deliverableBody).toBeNull();
+    }
   });
 });

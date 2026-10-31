@@ -18,7 +18,7 @@ import type {
   InterpretationTopic,
 } from '@loom/contracts';
 import type { HoroscopeOptions } from './calculate.ts';
-import { lintReading, validateAnswer } from '@loom/interpret';
+import { lintReading, validateAnswer, type InternalCaveatScope } from '@loom/interpret';
 
 /**
  * answer-delivery — transient "this plan, this request, this text" binding for
@@ -119,6 +119,64 @@ function projectPlanSubset(answerPlan: AnswerPlan): Record<string, unknown> {
     request: { topic: answerPlan.request.topic },
     disclaimers: answerPlan.disclaimers,
   };
+}
+
+/**
+ * Shape-safe collection of the fact ids THIS draft actually cites. Returns null
+ * when the draft shape is not the expected sections/paragraphs structure — the
+ * caller then keeps the conservative all-caveats-required behavior (the draft
+ * itself will still fail the structural parse in validateAnswer).
+ */
+function collectCitedFactIds(rawDraft: unknown): Set<string> | null {
+  if (typeof rawDraft !== 'object' || rawDraft === null) return null;
+  const sections = (rawDraft as { sections?: unknown }).sections;
+  if (!Array.isArray(sections)) return null;
+  const ids = new Set<string>();
+  for (const section of sections) {
+    if (typeof section !== 'object' || section === null) return null;
+    const paragraphs = (section as { paragraphs?: unknown }).paragraphs;
+    if (!Array.isArray(paragraphs)) return null;
+    for (const para of paragraphs) {
+      if (typeof para !== 'object' || para === null) return null;
+      const factIds = (para as { sourceFactIds?: unknown }).sourceFactIds;
+      if (factIds === undefined) continue;
+      if (!Array.isArray(factIds)) return null;
+      for (const id of factIds) {
+        if (typeof id !== 'string') return null;
+        ids.add(id);
+      }
+    }
+  }
+  return ids;
+}
+
+/**
+ * Derive the THIS-run required caveat scope (trusted internal, never host JSON):
+ * a requiredCaveat stays REQUIRED when the cited facts own it, or when no
+ * selected fact owns it at all (no attribution information — conservative).
+ * A caveat owned only by facts the draft does NOT cite stops being mandatory.
+ * The original array is untouched: indices, order and every constraintRef stay
+ * exactly as the full plan recorded them. Zero citations or an unrecognizable
+ * draft shape returns undefined (all caveats required, the original behavior).
+ */
+export function deriveCaveatScopeForDelivery(
+  plan: AnswerPlan,
+  rawDraft: unknown,
+): InternalCaveatScope | undefined {
+  const cited = collectCitedFactIds(rawDraft);
+  if (cited === null || cited.size === 0) return undefined;
+  const ownedCaveats = new Set<string>();
+  const citedCaveats = new Set<string>();
+  for (const fact of plan.selectedFacts) {
+    if (fact.caveat === undefined) continue;
+    ownedCaveats.add(fact.caveat);
+    if (cited.has(fact.id)) citedCaveats.add(fact.caveat);
+  }
+  const requiredCaveatIndices = new Set<number>();
+  plan.requiredCaveats.forEach((text, index) => {
+    if (!ownedCaveats.has(text) || citedCaveats.has(text)) requiredCaveatIndices.add(index);
+  });
+  return { requiredCaveatIndices };
 }
 
 /**
@@ -314,12 +372,19 @@ export function deliverAnswer(input: unknown): AnswerDeliveryResult {
     };
   }
 
-  // Existing structural/safety gate over the plan subset + draft (+ reality).
-  const validation = validateAnswer({
-    ...(careerReality === undefined ? {} : { careerReality }),
-    answerPlan: projectPlanSubset(parsedPlan.data),
-    readingDraft: raw.readingDraft,
-  });
+  // Existing structural/safety gate over the plan subset + draft (+ reality),
+  // with the trusted-internal caveat scope derived from THIS run's citations:
+  // the full saved plan and its original indices are unchanged, only which
+  // caveats are MANDATORY narrows to the cited facts' own constraints.
+  const caveatScope = deriveCaveatScopeForDelivery(parsedPlan.data, raw.readingDraft);
+  const validation = validateAnswer(
+    {
+      ...(careerReality === undefined ? {} : { careerReality }),
+      answerPlan: projectPlanSubset(parsedPlan.data),
+      readingDraft: raw.readingDraft,
+    },
+    caveatScope,
+  );
   if (!validation.ok) {
     return {
       contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,

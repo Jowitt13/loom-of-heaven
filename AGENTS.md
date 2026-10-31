@@ -16,7 +16,7 @@ The roadmap governs product direction and technical sequence; domain ADRs and so
 govern their narrower subjects. A lower-level prompt may narrow these rules but cannot override
 them. “Continue” means the next unblocked roadmap slice—not whichever feature is easiest to add.
 Changing the route requires the owner decision, ADR, roadmap-version, protocol, and static-gate
-process recorded in the roadmap. The current authorities are `loom-product-roadmap/v3.2` and
+process recorded in the roadmap. The current authorities are `loom-product-roadmap/v3.3` and
 `loom-commander-protocol/v3`.
 
 The owner-confirmed optimization direction is roadmap section 7 (2026-10-29): repair proven
@@ -121,14 +121,18 @@ kernel, and qualified human review are all satisfied.
 For traditional-culture, entertainment and self-reflection use. Not scientifically validated
 prediction. Never give deterministic medical, legal, financial, or life-and-death advice.
 
-## Natural narrative delivery (V1)
+## Natural narrative delivery (V1, adaptive layout since roadmap v3.3)
 
-The default topic answer is continuous, specific prose, not a seven-step report. A professional
-term may appear when its rule mechanism and concrete implication are adjacent. Never label a
-section `讲人话`; say the conclusion directly. Vary structure and rhythm naturally instead of
-emitting a fixed template. Before writing a paragraph, retain its fact evidence, reason, ruleset
-and relevant caveat internally; the default body never prints source ids, rule paths, provenance,
+The default topic answer is a scannable, specific reading, not a seven-step report: a few
+well-explained main lines, optional short `## `/`### ` headings, short `- ` bullet lists and
+sparing paired `**emphasis**` when content genuinely groups; short follow-ups stay plain
+paragraphs. Formatting lives inside the checked `reading-draft/v3` draft (v2 plain text still
+accepted) and is delivered verbatim — never added after a passing check. A professional term may
+appear when its rule mechanism and concrete implication are adjacent. Never label a section
+`讲人话`; say the conclusion directly. Vary structure and rhythm naturally instead of emitting a
+fixed template. Before writing a paragraph, retain its fact evidence, reason, ruleset and
+relevant caveat internally; the default body never prints source ids, rule paths, provenance,
 `敏感项校对`, `引擎警告`, `专业依据`, `声明`, a fixed disclaimer footer, or an automatic follow-up
-menu. A material caveat is stated inline only when it changes the current answer. Technical detail
-is shown only when the user asks for it. The authoritative delivery contract is
-[`docs/NARRATIVE_OUTPUT_V1.md`](docs/NARRATIVE_OUTPUT_V1.md).
+menu. A material caveat is stated inline beside the judgment it qualifies, only when it changes
+the current answer. Technical detail is shown only when the user asks for it. The authoritative
+delivery contract is [`docs/NARRATIVE_OUTPUT_V1.md`](docs/NARRATIVE_OUTPUT_V1.md).

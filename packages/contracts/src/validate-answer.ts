@@ -23,9 +23,17 @@ import { AnswerGuardrail } from './answer-plan.ts';
  * CANNOT recognize every semantic paraphrase. This gate is necessary, not sufficient.
  *
  * Contract versioning:
- * - `reading-draft/v2` is the ONLY runtime-accepted draft version. Legacy
- *   `reading-draft/v1` is REJECTED at runtime (an intentional breaking change for
- *   the next release, v0.2.0): accepting caller-selected v1 would let input data
+ * - `reading-draft/v3` is the version NEW drafts should use: same JSON fields and
+ *   reference structure as v2, plus a bounded presentation subset (a `## `/`### `
+ *   single-line short heading, paired non-nested `**emphasis**`, simple `- `
+ *   bullet lines). Illegal or unclosed markers are rejected, never auto-repaired;
+ *   safety rules scan the VISIBLE text (markers stripped) so formatting cannot
+ *   split or hide a banned phrase. New error codes, CLI flags and rich-text
+ *   structures are deliberately NOT added.
+ * - `reading-draft/v2` remains runtime-accepted with its ORIGINAL plain-text
+ *   character rules (no markdown, not tightened, not relaxed by v3's existence).
+ *   Legacy `reading-draft/v1` is REJECTED at runtime (an intentional breaking
+ *   change since v0.2.0): accepting caller-selected v1 would let input data
  *   re-enable the removed section-id fact exemption. Migration is a documented
  *   path, not a runtime downgrade: add `constraintRefs` to constraint-expressing
  *   paragraphs and switch the version string (see references/answer-contract.md).
@@ -36,6 +44,7 @@ import { AnswerGuardrail } from './answer-plan.ts';
  */
 
 export const READING_DRAFT_CONTRACT_VERSION = 'reading-draft/v2';
+export const READING_DRAFT_V3_CONTRACT_VERSION = 'reading-draft/v3';
 /** Legacy version string — rejected at runtime; kept only for docs/diagnostics. */
 export const READING_DRAFT_LEGACY_V1 = 'reading-draft/v1';
 export const VALIDATION_RESULT_CONTRACT_VERSION = 'validation-result/v2';
@@ -257,7 +266,7 @@ export type ReadingSection = z.infer<typeof ReadingSection>;
  */
 export const ReadingDraft = z
   .strictObject({
-    contractVersion: z.literal(READING_DRAFT_CONTRACT_VERSION),
+    contractVersion: z.enum([READING_DRAFT_CONTRACT_VERSION, READING_DRAFT_V3_CONTRACT_VERSION]),
     topic: InterpretationTopic,
     sections: z.array(ReadingSection).min(1).max(MAX_SECTIONS),
     /** Which requiredCaveats (from AnswerPlan) the host claims to have expressed. */

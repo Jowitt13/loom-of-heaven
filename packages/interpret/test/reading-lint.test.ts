@@ -57,6 +57,32 @@ describe('reading-lint: V1 delivery surface', () => {
     expect(r.ok).toBe(false);
     expect(r.violations.some((v) => v.category === '黑话强')).toBe(true);
   });
+
+  it('allows content headings with adaptive layout (roadmap v3.3)', () => {
+    const r = lintReading(
+      '## 命宫里的两种侧重\n\n这张盘的底色是果决与执行并存。\n\n### 为什么这样读\n\n命宫主星被看作核心性格底色。',
+    );
+    expect(r.ok).toBe(true);
+  });
+
+  it('still rejects control-label headings even though headings are allowed', () => {
+    for (const md of [
+      '## 专业依据\n官杀见于月柱。',
+      '## 声明：传统命理仅供参考',
+      '## 敏感项校对',
+      '## 引擎警告',
+    ]) {
+      const r = lintReading(md);
+      expect(r.ok, `should reject: ${md}`).toBe(false);
+      expect(r.violations.some((v) => v.category === '交付面')).toBe(true);
+    }
+  });
+
+  it('checks emphasized and bulleted lines like ordinary content', () => {
+    const r = lintReading('## 重点\n\n- **提升竞争力**，稳步提升\n- 还想看：事业');
+    expect(r.violations.some((v) => v.category === '空话')).toBe(true);
+    expect(r.violations.some((v) => v.term === '自动追问')).toBe(true);
+  });
 });
 
 describe('reading-lint: V1 retained safety checks', () => {
