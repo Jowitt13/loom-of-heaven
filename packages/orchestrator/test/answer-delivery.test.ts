@@ -3,13 +3,18 @@
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { canonicalJson, parseBirthInput } from '@loom/contracts';
+import {
+  canonicalJson,
+  parseBirthInput,
+  ValidateAnswerInput as ValidateAnswerInputSchema,
+} from '@loom/contracts';
 import type { AnswerPlan, CareerRealityContextData } from '@loom/contracts';
 import { validateAnswer } from '@loom/interpret';
 import {
   buildAnswerBinding,
   deliverAnswer,
   deriveAnswerRequestDigest,
+  deriveCaveatScopeForDelivery,
   sealReadingDraft,
   transcribeReadingDraft,
 } from '../src/answer-delivery.ts';
@@ -451,6 +456,81 @@ describe('answer delivery binding', () => {
     // and carries no delivery/origin claim at all.
     expect(legacy).not.toHaveProperty('deliverableBody');
     expect(legacy).not.toHaveProperty('binding');
+  });
+
+  it('derives the caveat scope only AFTER bounded parsing (narrow fix)', () => {
+    const run = runA();
+    const plan = run.answerPlan;
+    // An over-sectioned draft (MAX_SECTIONS=40) whose fact ids sit behind
+    // getters: the existing bounded entry rejects it on the array LENGTH before
+    // any paragraph traversal, and the delivery fails with the same controlled
+    // violation as before — the derivation itself never sees raw objects (its
+    // parameter is the bounded-parsed draft; see the unit assertion below).
+    const overSectioned = {
+      contractVersion: 'reading-draft/v3',
+      topic: 'character',
+      sections: Array.from({ length: 41 }, () => ({
+        id: 'body',
+        heading: '',
+        paragraphs: [{ text: '合成正文。', sourceFactIds: [plan.selectedFacts[0]!.id] }],
+      })),
+      caveatsExpressed: [],
+      warningsDisclosed: [],
+    };
+    const overResult = deliverAnswer({
+      currentRequest: { birthInput: rawA, topic: 'character', now: FIXED },
+      ...sealed(run, overSectioned),
+      answerPlan: plan,
+      readingDraft: overSectioned,
+    });
+    expect(overResult.failureReason).toBe('VALIDATION_FAILED');
+    expect(
+      overResult.validation?.violations.some(
+        (v) => v.code === 'RESOURCE_LIMIT_EXCEEDED' && v.patternKey === 'MAX_SECTIONS',
+      ),
+    ).toBe(true);
+    expect(overResult.deliverableBody).toBeNull();
+    // Unit side of the ordering contract: the exported derivation consumes a
+    // schema-parsed draft (already resource-capped, own-data checked), not an
+    // unknown raw object. Feeding it the parsed draft yields the scope; unknown
+    // raw shapes are not its input anymore.
+    const parsedDraft = ValidateAnswerInputSchema.parse({
+      answerPlan: {
+        allowedFactIds: plan.allowedFactIds,
+        requiredCaveats: plan.requiredCaveats,
+        requiredWarningCodes: plan.requiredWarningCodes,
+        guardrails: plan.guardrails,
+        answerability: plan.answerability,
+        request: { topic: plan.request.topic },
+        disclaimers: plan.disclaimers,
+      },
+      readingDraft: {
+        contractVersion: 'reading-draft/v3',
+        topic: 'character',
+        sections: [
+          {
+            id: 'body',
+            heading: '',
+            paragraphs: [
+              {
+                text: '命宫主星组合的读法是两种侧重并存。',
+                sourceFactIds: plan.selectedFacts
+                  .filter((f) => f.claim.includes('命宫主星'))
+                  .slice(0, 1)
+                  .map((f) => f.id),
+              },
+            ],
+          },
+        ],
+        caveatsExpressed: [],
+        warningsDisclosed: [],
+      },
+    });
+    const scope = deriveCaveatScopeForDelivery(plan, parsedDraft.readingDraft);
+    expect(scope).toBeDefined();
+    // The cited 命宫 fact owns no caveat; both plan caveats belong to uncited
+    // facts (五行 / vedic), so neither is required for THIS citation set.
+    expect([...scope!.requiredCaveatIndices]).toEqual([]);
   });
 });
 

@@ -63252,9 +63252,13 @@ var MARKUP_STRUCTURAL_CHARS_RE = /[&<>\[\]`*_~\\|#]/;
 var V3_REJECTED_CHARS_RE = /[&<>\[\]`_~\\|]/;
 var V3_HEADING_PREFIX_TEST_RE = /^(##|###) /;
 var V3_HEADING_PREFIX_STRIP_RE = /^(##|###) /;
-var V3_BOLD_PAIR_GLOBAL_RE = /\*\*([^*\n]+)\*\*/g;
+var V3_BOLD_PAIR_GLOBAL_RE = /\*\*([^*\r\n]+)\*\*/g;
+var V3_LINE_SPLIT_RE = /\r\n|\n|\r/;
+var V3_INDENTED_CODE_RE = /^(?: {4,}|\t)/;
+var V3_NESTED_BULLET_RE = /^ {1,3}- /;
+var V3_THEMATIC_BREAK_RE = /^(?:-{3,}|(?:- ){2,}-)\s*$/;
 function v3VisibleHeading(heading) {
-  if (heading.includes("\n")) return null;
+  if (/[\r\n]/.test(heading)) return null;
   const prefixed = V3_HEADING_PREFIX_TEST_RE.test(heading);
   const rest = prefixed ? heading.replace(V3_HEADING_PREFIX_STRIP_RE, "") : heading;
   if (prefixed && rest.trim() === "") return null;
@@ -63263,6 +63267,11 @@ function v3VisibleHeading(heading) {
 }
 function v3VisibleText(text) {
   if (V3_REJECTED_CHARS_RE.test(text) || text.includes("#")) return null;
+  for (const line of text.split(V3_LINE_SPLIT_RE)) {
+    if (V3_INDENTED_CODE_RE.test(line)) return null;
+    if (V3_NESTED_BULLET_RE.test(line)) return null;
+    if (V3_THEMATIC_BREAK_RE.test(line)) return null;
+  }
   if (!text.includes("*")) return text;
   let emptyEmphasis = false;
   const visible = text.replace(V3_BOLD_PAIR_GLOBAL_RE, (_full, inner) => {
@@ -64054,6 +64063,10 @@ function buildTermSpecs() {
 }
 var JARGON_SPECS = buildTermSpecs();
 var FOLLOWUP_RE = /还想看|想看更多|想继续看|继续(?:看|了解)|想深入看|接下来想看/;
+var VISIBLE_EMPHASIS_RE = /\*\*([^*\r\n]+)\*\*/g;
+function toVisibleText(md) {
+  return md.replace(VISIBLE_EMPHASIS_RE, "$1");
+}
 var DELIVERY_LEAKS = [
   {
     term: "\u654F\u611F\u9879\u6821\u5BF9",
@@ -64205,11 +64218,12 @@ function splitSentences(md) {
 function lintReading(md, options = {}) {
   if ((options.channel ?? "topic") === "full") return { ok: true, violations: [] };
   const simple = options.simple ?? false;
-  const sentences = splitSentences(md);
+  const visible = toVisibleText(md);
+  const sentences = splitSentences(visible);
   const violations = [];
   const seen = /* @__PURE__ */ new Set();
   if (!options.technicalDetails) {
-    for (const [index, raw] of md.split(/\r?\n/).entries()) {
+    for (const [index, raw] of visible.split(/\r?\n/).entries()) {
       for (const leak of DELIVERY_LEAKS) {
         if (!leak.re.test(raw)) continue;
         const key = `delivery|${index + 1}|${leak.term}`;
@@ -64301,8 +64315,8 @@ function lintReading(md, options = {}) {
         }
       }
     }
-    if (!sent.isHeading && !sent.followup) {
-      if (RAISE_RE.test(sent.text) && !INCOME_FACT_RE.test(md)) {
+    if (!sent.followup) {
+      if (RAISE_RE.test(sent.text) && !INCOME_FACT_RE.test(visible)) {
         const key = `${sent.line}|\u52A0\u85AA\u8D8A\u754C|\u8D8A\u754C`;
         if (!seen.has(key)) {
           seen.add(key);
@@ -64483,31 +64497,18 @@ function projectPlanSubset(answerPlan) {
     disclaimers: answerPlan.disclaimers
   };
 }
-function collectCitedFactIds(rawDraft) {
-  if (typeof rawDraft !== "object" || rawDraft === null) return null;
-  const sections = rawDraft.sections;
-  if (!Array.isArray(sections)) return null;
+function collectCitedFactIds(parsedDraft) {
   const ids = /* @__PURE__ */ new Set();
-  for (const section of sections) {
-    if (typeof section !== "object" || section === null) return null;
-    const paragraphs = section.paragraphs;
-    if (!Array.isArray(paragraphs)) return null;
-    for (const para of paragraphs) {
-      if (typeof para !== "object" || para === null) return null;
-      const factIds = para.sourceFactIds;
-      if (factIds === void 0) continue;
-      if (!Array.isArray(factIds)) return null;
-      for (const id of factIds) {
-        if (typeof id !== "string") return null;
-        ids.add(id);
-      }
+  for (const section of parsedDraft.sections) {
+    for (const para of section.paragraphs) {
+      for (const id of para.sourceFactIds) ids.add(id);
     }
   }
   return ids;
 }
-function deriveCaveatScopeForDelivery(plan, rawDraft) {
-  const cited = collectCitedFactIds(rawDraft);
-  if (cited === null || cited.size === 0) return void 0;
+function deriveCaveatScopeForDelivery(plan, parsedDraft) {
+  const cited = collectCitedFactIds(parsedDraft);
+  if (cited.size === 0) return void 0;
   const ownedCaveats = /* @__PURE__ */ new Set();
   const citedCaveats = /* @__PURE__ */ new Set();
   for (const fact2 of plan.selectedFacts) {
@@ -64621,15 +64622,21 @@ function deliverAnswer(input2) {
       deliverableBodySha256: null
     };
   }
-  const caveatScope = deriveCaveatScopeForDelivery(parsedPlan.data, raw.readingDraft);
-  const validation = validateAnswer(
-    {
-      ...careerReality === void 0 ? {} : { careerReality },
-      answerPlan: projectPlanSubset(parsedPlan.data),
-      readingDraft: raw.readingDraft
-    },
-    caveatScope
-  );
+  const deliveryEnvelope = {
+    ...careerReality === void 0 ? {} : { careerReality },
+    answerPlan: projectPlanSubset(parsedPlan.data),
+    readingDraft: raw.readingDraft
+  };
+  let caveatScope;
+  try {
+    caveatScope = deriveCaveatScopeForDelivery(
+      parsedPlan.data,
+      parseValidateAnswerInputBounded(deliveryEnvelope).readingDraft
+    );
+  } catch {
+    caveatScope = void 0;
+  }
+  const validation = validateAnswer(deliveryEnvelope, caveatScope);
   if (!validation.ok) {
     return {
       contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,

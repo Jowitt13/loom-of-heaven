@@ -2487,4 +2487,44 @@ describe('reading-draft/v3 limited presentation subset (scope+presentation plan 
     });
     expect(publicResult.violations[0]!.code).toBe('UNSUPPORTED_CONTRACT_VERSION');
   });
+
+  it('rejects indented code blocks, nested bullets and thematic breaks in v3 (narrow fix)', () => {
+    for (const text of [
+      '    这张盘的分类只作概念说明。',
+      '正文一行。\n    四空格缩进的码块。',
+      '正文一行。\n\t制表符缩进的码块。',
+      '- 第一层\n  - 第二层',
+      '- 第一层\n    - 深层嵌套',
+      '正文一行。\n---',
+      '正文一行。\n- - -',
+    ]) {
+      const result = runValidated(makePlan(), v3Draft({ text }));
+      expect(
+        result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
+        `should reject v3 text: ${JSON.stringify(text)}`,
+      ).toBe(true);
+    }
+  });
+
+  it('rejects CR-based multi-line headings and CR-crossing emphasis in v3 (narrow fix)', () => {
+    const headingResult = runValidated(
+      makePlan(),
+      v3Draft({ heading: '## 第一行\r第二行', text: '合成正文。' }),
+    );
+    expect(
+      headingResult.violations.some((v) => v.code === 'CONTAINS_MARKUP' && v.field === 'heading'),
+    ).toBe(true);
+    const emphasisResult = runValidated(makePlan(), v3Draft({ text: '**第一行\r第二行**' }));
+    expect(emphasisResult.violations.some((v) => v.code === 'CONTAINS_MARKUP')).toBe(true);
+  });
+
+  it('still accepts plain soft-wrap continuations and simple bullets in v3', () => {
+    const result = runValidated(
+      makePlan({ requiredCaveats: [], requiredWarningCodes: [] }),
+      v3Draft({
+        text: '这是一段较长的说明文字，\n  换行后延续同一句，仍然是普通正文。\n- 顶层要点一\n- 顶层要点二',
+      }),
+    );
+    expect(result.ok).toBe(true);
+  });
 });
