@@ -331,6 +331,114 @@ function main(): void {
         detail: `exit ${retiredResult.code}`,
       });
     }
+
+    // reading-draft/v3 end-to-end on the extracted package: a formatted draft
+    // (## heading + paired emphasis + bullet line) plans, seals and
+    // bound-delivers verbatim through the shipped CLI on the runtime Node.
+    let v3Ok = false;
+    let v3Detail = '';
+    try {
+      const characterPlan = run(pkgRoot, [
+        'scripts/loom-chart.mjs',
+        'answer-plan',
+        '--input-file',
+        fixture,
+        '--topic',
+        'character',
+        '--now',
+        FIXED_NOW,
+      ]);
+      if (characterPlan.code !== 0) throw new Error('answer-plan failed');
+      writeInput('plan-character.json', JSON.parse(characterPlan.stdout));
+      const planJson = characterPlan.stdout;
+      const parsedPlan = JSON.parse(planJson) as {
+        answerPlan: {
+          selectedFacts: Array<{ id: string }>;
+          requiredCaveats: string[];
+          requiredWarningCodes: string[];
+        };
+      };
+      const first = parsedPlan.answerPlan.selectedFacts[0]!;
+      const warningRefs = parsedPlan.answerPlan.requiredWarningCodes.map((_, index) => ({
+        kind: 'warning' as const,
+        index,
+      }));
+      const caveatRefs = parsedPlan.answerPlan.requiredCaveats.map((_, index) => ({
+        kind: 'caveat' as const,
+        index,
+      }));
+      const v3Draft = {
+        contractVersion: 'reading-draft/v3',
+        topic: 'character',
+        sections: [
+          {
+            id: 'body',
+            heading: '## 性格概览',
+            paragraphs: [
+              {
+                text: '整体性格结构呈现**主动与秩序并存**的底色，两点说明如下：\n- 传统说法只作文化参考\n- 具体表现因环境与选择而异',
+                sourceFactIds: [first.id],
+                ...(caveatRefs.length > 0 ? { constraintRefs: [caveatRefs[0]!] } : {}),
+              },
+              {
+                text: '出生时间的精确程度会影响与时间相关的细节判断，本解读只保留可靠的部分。',
+                sourceFactIds: [] as string[],
+                constraintRefs: [...warningRefs, ...caveatRefs.slice(1)],
+              },
+            ],
+          },
+        ],
+        caveatsExpressed: parsedPlan.answerPlan.requiredCaveats,
+        warningsDisclosed: parsedPlan.answerPlan.requiredWarningCodes,
+      };
+      writeInput('draft-v3.json', v3Draft);
+      const seal = run(pkgRoot, [
+        'scripts/loom-chart.mjs',
+        'validate-answer',
+        '--seal-draft',
+        '--input-file',
+        'draft-v3.json',
+        '--binding-file',
+        'plan-character.json',
+      ]);
+      if (seal.code !== 0) throw new Error('seal failed');
+      const origin = JSON.parse(seal.stdout) as Record<string, unknown>;
+      writeInput('delivery-v3.json', {
+        ...origin,
+        answerPlan: parsedPlan.answerPlan,
+        readingDraft: v3Draft,
+      });
+      const delivery = run(pkgRoot, [
+        'scripts/loom-chart.mjs',
+        'validate-answer',
+        '--input-file',
+        'delivery-v3.json',
+        '--context-input-file',
+        fixture,
+        '--topic',
+        'character',
+        '--now',
+        FIXED_NOW,
+      ]);
+      const parsed =
+        delivery.code === 0
+          ? (JSON.parse(delivery.stdout) as { ok?: boolean; deliverableBody?: string })
+          : {};
+      v3Ok =
+        parsed.ok === true &&
+        typeof parsed.deliverableBody === 'string' &&
+        parsed.deliverableBody.includes('## 性格概览') &&
+        parsed.deliverableBody.includes('**主动与秩序并存**') &&
+        parsed.deliverableBody.includes('- 传统说法只作文化参考');
+      if (!v3Ok) v3Detail = `exit ${delivery.code}`;
+    } catch (err) {
+      v3Detail = err instanceof Error ? err.message : 'error';
+    }
+    results.push({
+      name: 'reading-draft/v3 formatted delivery ok (plan → seal → bound validate)',
+      ok: v3Ok,
+      detail: v3Detail || undefined,
+    });
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

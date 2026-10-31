@@ -1,9 +1,12 @@
 # Commander protocol
 
 - Protocol id: `loom-commander-protocol/v3`
-- Governing roadmap: `roadmap: loom-product-roadmap/v3.2`
+- Governing roadmap: `roadmap: loom-product-roadmap/v3.3`
 - Maintenance update: 2026-10-22, owner-authorized workflow simplification.
 - Route alignment: 2026-10-29, owner-confirmed correctness and natal-answer focus.
+- Route alignment: 2026-10-31, owner-confirmed adaptive presentation (roadmap v3.3 / ADR 0017
+  amendment): scannable layout via reading-draft/v3, fact-owned caveat scoping in bound delivery;
+  every other boundary unchanged.
 
 ## Ordinary work
 

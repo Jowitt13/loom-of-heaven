@@ -18,7 +18,13 @@ import type {
   InterpretationTopic,
 } from '@loom/contracts';
 import type { HoroscopeOptions } from './calculate.ts';
-import { lintReading, validateAnswer } from '@loom/interpret';
+import {
+  lintReading,
+  validateAnswer,
+  parseValidateAnswerInputBounded,
+  type InternalCaveatScope,
+} from '@loom/interpret';
+import type { ValidateAnswerInput } from '@loom/contracts';
 
 /**
  * answer-delivery — transient "this plan, this request, this text" binding for
@@ -119,6 +125,53 @@ function projectPlanSubset(answerPlan: AnswerPlan): Record<string, unknown> {
     request: { topic: answerPlan.request.topic },
     disclaimers: answerPlan.disclaimers,
   };
+}
+
+/**
+ * Collect the fact ids THIS draft actually cites. The input is the
+ * BOUNDED-PARSED draft (validate-answer's own facade has already capped arrays,
+ * verified own-data fields and rejected getters/exotic objects), so plain typed
+ * access is safe here. Raw caller objects are never traversed by this function.
+ */
+function collectCitedFactIds(parsedDraft: ValidateAnswerInput['readingDraft']): Set<string> {
+  const ids = new Set<string>();
+  for (const section of parsedDraft.sections) {
+    for (const para of section.paragraphs) {
+      for (const id of para.sourceFactIds) ids.add(id);
+    }
+  }
+  return ids;
+}
+
+/**
+ * Derive the THIS-run required caveat scope (trusted internal, never host JSON):
+ * a requiredCaveat stays REQUIRED when the cited facts own it, or when no
+ * selected fact owns it at all (no attribution information — conservative).
+ * A caveat owned only by facts the draft does NOT cite stops being mandatory.
+ * The original array is untouched: indices, order and every constraintRef stay
+ * exactly as the full plan recorded them. Zero citations returns undefined
+ * (all caveats required, the original behavior). The caller MUST pass the
+ * bounded-parsed draft — deriving from raw caller objects would traverse
+ * untrusted structure before the existing parse has vetted it.
+ */
+export function deriveCaveatScopeForDelivery(
+  plan: AnswerPlan,
+  parsedDraft: ValidateAnswerInput['readingDraft'],
+): InternalCaveatScope | undefined {
+  const cited = collectCitedFactIds(parsedDraft);
+  if (cited.size === 0) return undefined;
+  const ownedCaveats = new Set<string>();
+  const citedCaveats = new Set<string>();
+  for (const fact of plan.selectedFacts) {
+    if (fact.caveat === undefined) continue;
+    ownedCaveats.add(fact.caveat);
+    if (cited.has(fact.id)) citedCaveats.add(fact.caveat);
+  }
+  const requiredCaveatIndices = new Set<number>();
+  plan.requiredCaveats.forEach((text, index) => {
+    if (!ownedCaveats.has(text) || citedCaveats.has(text)) requiredCaveatIndices.add(index);
+  });
+  return { requiredCaveatIndices };
 }
 
 /**
@@ -314,12 +367,30 @@ export function deliverAnswer(input: unknown): AnswerDeliveryResult {
     };
   }
 
-  // Existing structural/safety gate over the plan subset + draft (+ reality).
-  const validation = validateAnswer({
+  // Existing structural/safety gate over the plan subset + draft (+ reality),
+  // with the trusted-internal caveat scope derived from THIS run's citations:
+  // the full saved plan and its original indices are unchanged, only which
+  // caveats are MANDATORY narrows to the cited facts' own constraints.
+  // ORDER: the scope is derived from the BOUNDED-PARSED draft (validate-answer's
+  // own exported facade — resource caps, own-data field checks, getter/exotic
+  // rejection all run there first), never from the raw caller object. A parse
+  // failure just skips the scope: validateAnswer below re-parses and returns
+  // the same controlled violation it always did.
+  const deliveryEnvelope = {
     ...(careerReality === undefined ? {} : { careerReality }),
     answerPlan: projectPlanSubset(parsedPlan.data),
     readingDraft: raw.readingDraft,
-  });
+  };
+  let caveatScope: InternalCaveatScope | undefined;
+  try {
+    caveatScope = deriveCaveatScopeForDelivery(
+      parsedPlan.data,
+      parseValidateAnswerInputBounded(deliveryEnvelope).readingDraft,
+    );
+  } catch {
+    caveatScope = undefined;
+  }
+  const validation = validateAnswer(deliveryEnvelope, caveatScope);
   if (!validation.ok) {
     return {
       contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,

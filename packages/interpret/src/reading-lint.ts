@@ -238,17 +238,29 @@ const JARGON_SPECS = buildTermSpecs();
 const FOLLOWUP_RE = /还想看|想看更多|想继续看|继续(?:看|了解)|想深入看|接下来想看/;
 
 /**
- * Default answers are prose only. These strings identify internal-control leakage,
- * rather than ordinary astrological vocabulary. Keep this list deliberately narrow:
- * a natural caveat about an uncertain birth time is allowed; a rendered warning panel
- * or raw evidence identifier is not.
+ * Well-formed emphasis pairs (the reading-draft/v3 subset: non-empty content,
+ * no nesting, no line crossing). Bound delivery guarantees the body only ever
+ * contains well-formed pairs; standalone lint input is unwrapped best-effort.
+ * Applied PER LINE so line counts — and therefore violation line numbers — are
+ * preserved exactly. This is scan normalization only: the delivered body,
+ * its digest and its formatting are untouched.
+ */
+const VISIBLE_EMPHASIS_RE = /\*\*([^*\r\n]+)\*\*/g;
+
+/** Visible text of a checked body: emphasis pairs unwrapped, line structure kept. */
+function toVisibleText(md: string): string {
+  return md.replace(VISIBLE_EMPHASIS_RE, '$1');
+}
+
+/**
+ * These strings identify internal-control leakage, rather than ordinary
+ * astrological vocabulary. Keep this list deliberately narrow: a natural caveat
+ * about an uncertain birth time is allowed; a rendered warning panel or raw
+ * evidence identifier is not. Content headings themselves are NO longer banned
+ * (roadmap v3.3 adaptive layout): a `## ` heading line passes unless it carries
+ * one of the leaked control labels below.
  */
 const DELIVERY_LEAKS: Array<{ term: string; re: RegExp; hint: string }> = [
-  {
-    term: '模板标题',
-    re: /^\s{0,3}#{1,6}\s+/,
-    hint: '默认交付使用连续自然段；只有用户明确要求结构化报告时才使用标题',
-  },
   {
     term: '敏感项校对',
     re: /敏感项校对/,
@@ -439,16 +451,24 @@ function splitSentences(md: string): Sentence[] {
  * For the default topic delivery, professional vocabulary is permitted, but internal
  * presentation labels and raw source identifiers are rejected. Strong jargon is an
  * error; soft jargon is a warning except in the first-200-char zone or `simple` mode.
+ *
+ * All wording/leak/overreach checks run on the VISIBLE text: reading-draft/v3
+ * emphasis pairs are unwrapped first (per line, so line numbers stay valid), so a
+ * marker can never split a known phrase (`必**然**结婚` is scanned as `必然结婚`).
+ * Fact-boundary (越界) checks are NOT skipped for content headings or bold-only
+ * lines — allowing those formats must not switch off existing rules. Grouping
+ * headings stay exempt from the vagueness rule (a short title is not empty talk).
  */
 export function lintReading(md: string, options: ReadingLintOptions = {}): ReadingLintResult {
   if ((options.channel ?? 'topic') === 'full') return { ok: true, violations: [] };
   const simple = options.simple ?? false;
-  const sentences = splitSentences(md);
+  const visible = toVisibleText(md);
+  const sentences = splitSentences(visible);
   const violations: ReadingViolation[] = [];
   const seen = new Set<string>();
 
   if (!options.technicalDetails) {
-    for (const [index, raw] of md.split(/\r?\n/).entries()) {
+    for (const [index, raw] of visible.split(/\r?\n/).entries()) {
       for (const leak of DELIVERY_LEAKS) {
         if (!leak.re.test(raw)) continue;
         const key = `delivery|${index + 1}|${leak.term}`;
@@ -545,8 +565,11 @@ export function lintReading(md: string, options: ReadingLintOptions = {}): Readi
       }
     }
     // --- fact-boundary (越界): unsupported prediction / comparison / assumed fact (9.1.1) ---
-    if (!sent.isHeading && !sent.followup) {
-      if (RAISE_RE.test(sent.text) && !INCOME_FACT_RE.test(md)) {
+    // NOT skipped for headings or bold-only lines: an allowed format must never
+    // switch an existing rule off (a followup line is a delivery-surface error
+    // reported separately above, so it stays exempt here).
+    if (!sent.followup) {
+      if (RAISE_RE.test(sent.text) && !INCOME_FACT_RE.test(visible)) {
         const key = `${sent.line}|加薪越界|越界`;
         if (!seen.has(key)) {
           seen.add(key);

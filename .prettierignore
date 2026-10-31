@@ -14,3 +14,6 @@ QODER_HANDOFF.md
 # Generated artifacts (kept byte-identical to their generators)
 dist/
 examples/
+
+# Owner-provided read-only Chat samples; never formatted, staged or committed
+/answer4/

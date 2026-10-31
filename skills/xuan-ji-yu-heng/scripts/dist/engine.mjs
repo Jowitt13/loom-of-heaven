@@ -46249,6 +46249,7 @@ var AnswerPlan = external_exports.strictObject({
 
 // packages/contracts/src/validate-answer.ts
 var READING_DRAFT_CONTRACT_VERSION = "reading-draft/v2";
+var READING_DRAFT_V3_CONTRACT_VERSION = "reading-draft/v3";
 var READING_DRAFT_LEGACY_V1 = "reading-draft/v1";
 var VALIDATION_RESULT_CONTRACT_VERSION = "validation-result/v2";
 var ANSWER_BINDING_CONTRACT_VERSION = "answer-binding/v1";
@@ -46340,7 +46341,7 @@ var ReadingSection = external_exports.strictObject({
   paragraphs: external_exports.array(ReadingParagraph).min(1).max(MAX_PARAGRAPHS_PER_SECTION)
 });
 var ReadingDraft = external_exports.strictObject({
-  contractVersion: external_exports.literal(READING_DRAFT_CONTRACT_VERSION),
+  contractVersion: external_exports.enum([READING_DRAFT_CONTRACT_VERSION, READING_DRAFT_V3_CONTRACT_VERSION]),
   topic: InterpretationTopic,
   sections: external_exports.array(ReadingSection).min(1).max(MAX_SECTIONS),
   /** Which requiredCaveats (from AnswerPlan) the host claims to have expressed. */
@@ -63248,6 +63249,45 @@ var HIGH_RISK_GROUPS = [
   }
 ];
 var MARKUP_STRUCTURAL_CHARS_RE = /[&<>\[\]`*_~\\|#]/;
+var V3_REJECTED_CHARS_RE = /[&<>\[\]`_~\\|]/;
+var V3_HEADING_PREFIX_TEST_RE = /^(##|###) /;
+var V3_HEADING_PREFIX_STRIP_RE = /^(##|###) /;
+var V3_BOLD_PAIR_GLOBAL_RE = /\*\*([^*\r\n]+)\*\*/g;
+var V3_LINE_SPLIT_RE = /\r\n|\n|\r/;
+var V3_INDENTED_CODE_RE = /^(?: {4,}|\t)/;
+var V3_SETEXT_OR_BREAK_RE = /^(?:[-=]+|(?:- ){2,}-)\s*$/;
+var V3_UNSUPPORTED_LIST_RE = /^(?:\+|\d{1,9}[.)]) /;
+var V3_NESTED_LIST_RE = /^ {1,3}(?:[-+]|\d{1,9}[.)]) /;
+function v3LineIsOutsideSubset(line) {
+  return V3_INDENTED_CODE_RE.test(line) || V3_SETEXT_OR_BREAK_RE.test(line) || V3_UNSUPPORTED_LIST_RE.test(line) || V3_NESTED_LIST_RE.test(line);
+}
+function v3VisibleHeading(heading) {
+  if (/[\r\n]/.test(heading)) return null;
+  if (/^\s/.test(heading)) return null;
+  const prefixed = V3_HEADING_PREFIX_TEST_RE.test(heading);
+  const rest = prefixed ? heading.replace(V3_HEADING_PREFIX_STRIP_RE, "") : heading;
+  if (prefixed && rest.trim() === "") return null;
+  if (V3_REJECTED_CHARS_RE.test(rest) || /[*#]/.test(rest)) return null;
+  if (!prefixed && v3LineIsOutsideSubset(rest)) return null;
+  return rest;
+}
+function v3VisibleText(text) {
+  if (V3_REJECTED_CHARS_RE.test(text) || text.includes("#")) return null;
+  for (const line of text.split(V3_LINE_SPLIT_RE)) {
+    if (v3LineIsOutsideSubset(line)) return null;
+  }
+  if (!text.includes("*")) return text;
+  let emptyEmphasis = false;
+  const visible = text.replace(V3_BOLD_PAIR_GLOBAL_RE, (_full, inner) => {
+    if (inner.trim() === "") {
+      emptyEmphasis = true;
+      return inner;
+    }
+    return inner;
+  });
+  if (emptyEmphasis || visible.includes("*")) return null;
+  return visible;
+}
 function findGroupHit(scanText, rules) {
   for (const rule of rules) {
     if (rule.re.test(scanText)) return rule.id;
@@ -63269,7 +63309,7 @@ function resourceViolation(limitKey) {
     remediation: RESOURCE_LIMIT_REMEDIATION
   };
 }
-function validateAnswer(input2) {
+function validateAnswer(input2, internal) {
   const reject = (code, detail, remediation) => ({
     contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
     ok: false,
@@ -63279,11 +63319,11 @@ function validateAnswer(input2) {
   try {
     const rawDraft = typeof input2 === "object" && input2 !== null ? input2.readingDraft : void 0;
     const draftVersion = typeof rawDraft === "object" && rawDraft !== null ? rawDraft.contractVersion : void 0;
-    if (draftVersion !== READING_DRAFT_CONTRACT_VERSION) {
+    if (draftVersion !== READING_DRAFT_CONTRACT_VERSION && draftVersion !== READING_DRAFT_V3_CONTRACT_VERSION) {
       return reject(
         "UNSUPPORTED_CONTRACT_VERSION",
-        "ReadingDraft \u7684 contractVersion \u4E0D\u662F\u53D7\u652F\u6301\u7684 reading-draft/v2\u3002",
-        "\u4F7F\u7528 reading-draft/v2\u3002legacy reading-draft/v1 \u5DF2\u5728\u8FD0\u884C\u65F6\u88AB\u62D2\u7EDD\uFF08v0.2.0 \u7834\u574F\u6027\u53D8\u5316\uFF09\uFF1B\u8FC1\u79FB\u65B9\u6CD5\u89C1 references/answer-contract.md\uFF08\u4E3A\u7EA6\u675F\u8868\u8FBE\u6BB5\u843D\u6DFB\u52A0 constraintRefs \u5E76\u66F4\u6362\u7248\u672C\u4E32\uFF09\u3002"
+        "ReadingDraft \u7684 contractVersion \u4E0D\u662F\u53D7\u652F\u6301\u7684 reading-draft \u7248\u672C\u3002",
+        "\u65B0\u8349\u7A3F\u4F7F\u7528 reading-draft/v3\uFF08\u6709\u9650\u6807\u9898/\u52A0\u7C97/\u8981\u70B9\u6392\u7248\uFF09\uFF1Breading-draft/v2 \u7EE7\u7EED\u652F\u6301\u5E76\u4FDD\u6301\u7EAF\u6587\u672C\u89C4\u5219\uFF1Blegacy reading-draft/v1 \u5DF2\u5728\u8FD0\u884C\u65F6\u88AB\u62D2\u7EDD\u3002\u8FC1\u79FB\u4E0E\u683C\u5F0F\u8303\u56F4\u89C1 references/answer-contract.md\u3002"
       );
     }
     let parsed;
@@ -63304,7 +63344,7 @@ function validateAnswer(input2) {
         "\u6309 references/answer-contract.md \u7684 ValidateAnswerInput \u7ED3\u6784\u63D0\u4F9B { answerPlan, readingDraft }\uFF0C\u5E76\u9075\u5B88\u5BFC\u51FA\u7684 MAX_* \u4E0A\u9650\u3002"
       );
     }
-    return runValidateAnswer(parsed);
+    return runValidateAnswer(parsed, internal);
   } catch {
     return {
       contractVersion: VALIDATION_RESULT_CONTRACT_VERSION,
@@ -63341,8 +63381,11 @@ function constraintKindKey(kind) {
       return "warning";
   }
 }
-function runValidateAnswer(input2) {
+function runValidateAnswer(input2, internal) {
   const { answerPlan, readingDraft } = input2;
+  const isV3 = readingDraft.contractVersion === READING_DRAFT_V3_CONTRACT_VERSION;
+  const markupDetail = isV3 ? "heading/text \u4F7F\u7528\u4E86 reading-draft/v3 \u5141\u8BB8\u8303\u56F4\u4E4B\u5916\u7684\u6807\u8BB0\uFF08\u4EC5\u5141\u8BB8 ## / ### \u5355\u884C\u77ED\u6807\u9898\u3001\u6210\u5BF9\u4E0D\u5D4C\u5957\u4E0D\u8DE8\u884C\u7684\u975E\u7A7A **\u5F3A\u8C03** \u4E0E - \u8981\u70B9\u884C\uFF09\u3002" : "heading/text \u542B\u6709 HTML \u6807\u7B7E\u3001HTML \u5B9E\u4F53\u3001HTML \u6CE8\u91CA\u6216 Markdown \u94FE\u63A5/\u56FE\u7247\u8BED\u6CD5\uFF0C\u8FDD\u53CD\u7EAF\u6587\u672C\u5951\u7EA6\u3002";
+  const markupRemediation = isV3 ? "\u4EC5\u4F7F\u7528 v3 \u5141\u8BB8\u7684\u6709\u9650\u6392\u7248\uFF08## / ### \u77ED\u6807\u9898\u3001\u6210\u5BF9 **\u5F3A\u8C03**\u3001- \u8981\u70B9\u884C\uFF09\uFF1B\u5176\u4F59\u6807\u8BB0\u4E0D\u53D7\u652F\u6301\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u4FEE\u590D\u540E\u653E\u884C\u3002" : "heading/text \u5B57\u6BB5\u5FC5\u987B\u4E3A\u7EAF\u6587\u672C\uFF1B\u5BBF\u4E3B\u8D1F\u8D23\u5728\u6E32\u67D3\u65F6 escape \u5E76\u81EA\u884C\u6DFB\u52A0 Markdown \u683C\u5F0F\u3002";
   const violations = [];
   let violationsTruncated = false;
   const push = (v) => {
@@ -63395,19 +63438,20 @@ function runValidateAnswer(input2) {
   const referencedWarnings = /* @__PURE__ */ new Set();
   for (let sIdx = 0; sIdx < readingDraft.sections.length; sIdx++) {
     const section = readingDraft.sections[sIdx];
-    if (MARKUP_STRUCTURAL_CHARS_RE.test(section.heading)) {
+    const headingVisible = isV3 ? v3VisibleHeading(section.heading) : MARKUP_STRUCTURAL_CHARS_RE.test(section.heading) ? null : section.heading;
+    if (headingVisible === null) {
       push({
         code: "CONTAINS_MARKUP",
         severity: "error",
         sectionIndex: sIdx,
         field: "heading",
         patternKey: "markup.detected",
-        detail: "heading \u542B\u6709 HTML \u6807\u7B7E\u3001HTML \u5B9E\u4F53\u3001HTML \u6CE8\u91CA\u6216 Markdown \u94FE\u63A5/\u56FE\u7247\u8BED\u6CD5\uFF0C\u8FDD\u53CD\u7EAF\u6587\u672C\u5951\u7EA6\u3002",
-        remediation: "heading/text \u5B57\u6BB5\u5FC5\u987B\u4E3A\u7EAF\u6587\u672C\uFF1B\u5BBF\u4E3B\u8D1F\u8D23\u5728\u6E32\u67D3\u65F6 escape \u5E76\u81EA\u884C\u6DFB\u52A0 Markdown \u683C\u5F0F\u3002"
+        detail: markupDetail,
+        remediation: markupRemediation
       });
     }
-    if (section.heading.length > 0) {
-      const headingScanText = toScanText(section.heading);
+    if (section.heading.length > 0 && headingVisible !== null) {
+      const headingScanText = toScanText(headingVisible);
       for (const group of HIGH_RISK_GROUPS) {
         const ruleId = findGroupHit(headingScanText, group.rules);
         if (ruleId !== null) {
@@ -63425,9 +63469,10 @@ function runValidateAnswer(input2) {
     }
     for (let pIdx = 0; pIdx < section.paragraphs.length; pIdx++) {
       const para = section.paragraphs[pIdx];
+      const paraVisible = isV3 ? v3VisibleText(para.text) : MARKUP_STRUCTURAL_CHARS_RE.test(para.text) ? null : para.text;
       if (para.realitySource !== void 0) {
         if (/八字|命盘|星盘|十神|官杀|七杀|正官|格局|喜用|用神|五行|紫微|吠陀|\b(?:bazi|astrology|horoscope|vedic|ziwei)\b/i.test(
-          normalizeSafetyText(`${section.heading} ${para.text}`)
+          normalizeSafetyText(`${headingVisible ?? section.heading} ${paraVisible ?? para.text}`)
         )) {
           push({
             code: "GUARDRAIL_VIOLATED",
@@ -63467,7 +63512,7 @@ function runValidateAnswer(input2) {
             });
         }
       }
-      if (MARKUP_STRUCTURAL_CHARS_RE.test(para.text)) {
+      if (paraVisible === null) {
         push({
           code: "CONTAINS_MARKUP",
           severity: "error",
@@ -63475,8 +63520,8 @@ function runValidateAnswer(input2) {
           field: "paragraph",
           paragraphIndex: pIdx,
           patternKey: "markup.detected",
-          detail: "paragraph text \u542B\u6709 HTML \u6807\u7B7E\u3001HTML \u5B9E\u4F53\u3001HTML \u6CE8\u91CA\u6216 Markdown \u94FE\u63A5/\u56FE\u7247\u8BED\u6CD5\uFF0C\u8FDD\u53CD\u7EAF\u6587\u672C\u5951\u7EA6\u3002",
-          remediation: "heading/text \u5B57\u6BB5\u5FC5\u987B\u4E3A\u7EAF\u6587\u672C\uFF1B\u5BBF\u4E3B\u8D1F\u8D23\u5728\u6E32\u67D3\u65F6 escape \u5E76\u81EA\u884C\u6DFB\u52A0 Markdown \u683C\u5F0F\u3002"
+          detail: markupDetail,
+          remediation: markupRemediation
         });
       }
       const refs = para.constraintRefs ?? [];
@@ -63534,7 +63579,7 @@ function runValidateAnswer(input2) {
           });
         }
       }
-      const paraScanText = toScanText(para.text);
+      const paraScanText = toScanText(paraVisible ?? para.text);
       for (const group of HIGH_RISK_GROUPS) {
         const ruleId = findGroupHit(paraScanText, group.rules);
         if (ruleId !== null) {
@@ -63552,11 +63597,12 @@ function runValidateAnswer(input2) {
       }
     }
   }
+  const caveatRequired = (index) => internal?.requiredCaveatIndices?.has(index) ?? true;
   const expressedCaveats = new Set(readingDraft.caveatsExpressed);
   for (let cIdx = 0; cIdx < answerPlan.requiredCaveats.length; cIdx++) {
     const declared = expressedCaveats.has(answerPlan.requiredCaveats[cIdx]);
     const referenced = referencedCaveats.has(cIdx);
-    if (!declared && !referenced) {
+    if (!declared && !referenced && caveatRequired(cIdx)) {
       push({
         code: "MISSING_REQUIRED_CAVEAT",
         severity: "error",
@@ -64021,12 +64067,11 @@ function buildTermSpecs() {
 }
 var JARGON_SPECS = buildTermSpecs();
 var FOLLOWUP_RE = /还想看|想看更多|想继续看|继续(?:看|了解)|想深入看|接下来想看/;
+var VISIBLE_EMPHASIS_RE = /\*\*([^*\r\n]+)\*\*/g;
+function toVisibleText(md) {
+  return md.replace(VISIBLE_EMPHASIS_RE, "$1");
+}
 var DELIVERY_LEAKS = [
-  {
-    term: "\u6A21\u677F\u6807\u9898",
-    re: /^\s{0,3}#{1,6}\s+/,
-    hint: "\u9ED8\u8BA4\u4EA4\u4ED8\u4F7F\u7528\u8FDE\u7EED\u81EA\u7136\u6BB5\uFF1B\u53EA\u6709\u7528\u6237\u660E\u786E\u8981\u6C42\u7ED3\u6784\u5316\u62A5\u544A\u65F6\u624D\u4F7F\u7528\u6807\u9898"
-  },
   {
     term: "\u654F\u611F\u9879\u6821\u5BF9",
     re: /敏感项校对/,
@@ -64177,11 +64222,12 @@ function splitSentences(md) {
 function lintReading(md, options = {}) {
   if ((options.channel ?? "topic") === "full") return { ok: true, violations: [] };
   const simple = options.simple ?? false;
-  const sentences = splitSentences(md);
+  const visible = toVisibleText(md);
+  const sentences = splitSentences(visible);
   const violations = [];
   const seen = /* @__PURE__ */ new Set();
   if (!options.technicalDetails) {
-    for (const [index, raw] of md.split(/\r?\n/).entries()) {
+    for (const [index, raw] of visible.split(/\r?\n/).entries()) {
       for (const leak of DELIVERY_LEAKS) {
         if (!leak.re.test(raw)) continue;
         const key = `delivery|${index + 1}|${leak.term}`;
@@ -64273,8 +64319,8 @@ function lintReading(md, options = {}) {
         }
       }
     }
-    if (!sent.isHeading && !sent.followup) {
-      if (RAISE_RE.test(sent.text) && !INCOME_FACT_RE.test(md)) {
+    if (!sent.followup) {
+      if (RAISE_RE.test(sent.text) && !INCOME_FACT_RE.test(visible)) {
         const key = `${sent.line}|\u52A0\u85AA\u8D8A\u754C|\u8D8A\u754C`;
         if (!seen.has(key)) {
           seen.add(key);
@@ -64455,6 +64501,31 @@ function projectPlanSubset(answerPlan) {
     disclaimers: answerPlan.disclaimers
   };
 }
+function collectCitedFactIds(parsedDraft) {
+  const ids = /* @__PURE__ */ new Set();
+  for (const section of parsedDraft.sections) {
+    for (const para of section.paragraphs) {
+      for (const id of para.sourceFactIds) ids.add(id);
+    }
+  }
+  return ids;
+}
+function deriveCaveatScopeForDelivery(plan, parsedDraft) {
+  const cited = collectCitedFactIds(parsedDraft);
+  if (cited.size === 0) return void 0;
+  const ownedCaveats = /* @__PURE__ */ new Set();
+  const citedCaveats = /* @__PURE__ */ new Set();
+  for (const fact2 of plan.selectedFacts) {
+    if (fact2.caveat === void 0) continue;
+    ownedCaveats.add(fact2.caveat);
+    if (cited.has(fact2.id)) citedCaveats.add(fact2.caveat);
+  }
+  const requiredCaveatIndices = /* @__PURE__ */ new Set();
+  plan.requiredCaveats.forEach((text, index) => {
+    if (!ownedCaveats.has(text) || citedCaveats.has(text)) requiredCaveatIndices.add(index);
+  });
+  return { requiredCaveatIndices };
+}
 function transcribeReadingDraft(draft) {
   const blocks = [];
   for (const section of draft.sections) {
@@ -64555,11 +64626,21 @@ function deliverAnswer(input2) {
       deliverableBodySha256: null
     };
   }
-  const validation = validateAnswer({
+  const deliveryEnvelope = {
     ...careerReality === void 0 ? {} : { careerReality },
     answerPlan: projectPlanSubset(parsedPlan.data),
     readingDraft: raw.readingDraft
-  });
+  };
+  let caveatScope;
+  try {
+    caveatScope = deriveCaveatScopeForDelivery(
+      parsedPlan.data,
+      parseValidateAnswerInputBounded(deliveryEnvelope).readingDraft
+    );
+  } catch {
+    caveatScope = void 0;
+  }
+  const validation = validateAnswer(deliveryEnvelope, caveatScope);
   if (!validation.ok) {
     return {
       contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,

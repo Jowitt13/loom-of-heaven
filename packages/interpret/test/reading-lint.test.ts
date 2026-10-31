@@ -57,6 +57,74 @@ describe('reading-lint: V1 delivery surface', () => {
     expect(r.ok).toBe(false);
     expect(r.violations.some((v) => v.category === '黑话强')).toBe(true);
   });
+
+  it('allows content headings with adaptive layout (roadmap v3.3)', () => {
+    const r = lintReading(
+      '## 命宫里的两种侧重\n\n这张盘的底色是果决与执行并存。\n\n### 为什么这样读\n\n命宫主星被看作核心性格底色。',
+    );
+    expect(r.ok).toBe(true);
+  });
+
+  it('still rejects control-label headings even though headings are allowed', () => {
+    for (const md of [
+      '## 专业依据\n官杀见于月柱。',
+      '## 声明：传统命理仅供参考',
+      '## 敏感项校对',
+      '## 引擎警告',
+    ]) {
+      const r = lintReading(md);
+      expect(r.ok, `should reject: ${md}`).toBe(false);
+      expect(r.violations.some((v) => v.category === '交付面')).toBe(true);
+    }
+  });
+
+  it('checks emphasized and bulleted lines like ordinary content', () => {
+    const r = lintReading('## 重点\n\n- **提升竞争力**，稳步提升\n- 还想看：事业');
+    expect(r.violations.some((v) => v.category === '空话')).toBe(true);
+    expect(r.violations.some((v) => v.term === '自动追问')).toBe(true);
+  });
+
+  it('formatting never switches an overreach rule off (PR #116 narrow fix)', () => {
+    const cases: Array<{ md: string; term: string }> = [
+      { md: '这份盘说明你肯定能做好。', term: '成功保证' },
+      { md: '## 你肯定能做好', term: '成功保证' },
+      { md: '**你肯定能做好**', term: '成功保证' },
+      { md: '你们必然结婚。', term: '关系命定断言' },
+      { md: '必**然**结婚', term: '关系命定断言' },
+      { md: '你比同龄人更容易抓住机会。', term: '群体比较' },
+      { md: '## 比同龄人更强的执行力', term: '群体比较' },
+      { md: '你现在有一份稳定的工作。', term: '既成事实' },
+      { md: '**你现在有一份**稳定的工作。', term: '既成事实' },
+    ];
+    for (const { md, term } of cases) {
+      const r = lintReading(md);
+      expect(r.ok, `should reject: ${md}`).toBe(false);
+      expect(
+        r.violations.some((v) => v.term === term),
+        `term ${term} for: ${md}`,
+      ).toBe(true);
+    }
+  });
+
+  it('emphasis cannot split a leaked control label or a follow-up menu', () => {
+    for (const md of ['**专业**依据：这张盘的分类只作概念说明。', '还想**看**：事业']) {
+      const r = lintReading(md);
+      expect(r.ok, `should reject: ${md}`).toBe(false);
+      expect(r.violations.some((v) => v.category === '交付面')).toBe(true);
+    }
+  });
+
+  it('grouping headings stay exempt from the vagueness rule', () => {
+    const r = lintReading('## 提升竞争力的两条路\n\n先把一件事按步骤做完，再记录结果。');
+    expect(r.violations.some((v) => v.category === '空话')).toBe(false);
+  });
+
+  it('keeps line numbers valid on lines that carried emphasis', () => {
+    const r = lintReading('第一行说明。\n\n必**然**结婚。');
+    const hit = r.violations.find((v) => v.term === '关系命定断言');
+    expect(hit).toBeDefined();
+    expect(hit!.line).toBe(3);
+  });
 });
 
 describe('reading-lint: V1 retained safety checks', () => {

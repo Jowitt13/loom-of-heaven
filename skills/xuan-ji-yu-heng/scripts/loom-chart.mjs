@@ -21,8 +21,10 @@
  *   node scripts/loom-chart.mjs lint-reading --input-file draft-reading.md [--channel topic|full] [--simple] [--technical-details] [--output-file reading-lint.json]
  *   node scripts/loom-chart.mjs validate-answer --input-file validate-input.json [--output-file validation-result.json]
  *       (input file is size-capped; ordinary-question gate order: answer-plan → host writes a
- *        reading-draft/v2 JSON → SEAL it to its plan run → validate-answer bound delivery →
- *        display the returned deliverableBody verbatim; any rewrite needs a new seal + check)
+ *        reading-draft/v3 JSON — limited ## / ### heading, paired **emphasis**, "- " bullets;
+ *        plain-text v2 still accepted, v1 rejected → SEAL it to its plan run → validate-answer
+ *        bound delivery → display the returned deliverableBody verbatim; any rewrite needs a
+ *        new seal + check)
  *       SEAL: --seal-draft --binding-file answer-plan.json --input-file draft.json
  *       → { draftSource, draftDigest } to submit with the saved plan.
  *       BOUND DELIVERY: --context-input-file birth.json --topic <topic> [--lens ...] [--at ...] [--now ...]
