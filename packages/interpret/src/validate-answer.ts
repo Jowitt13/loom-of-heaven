@@ -389,24 +389,59 @@ const V3_BOLD_PAIR_GLOBAL_RE = /\*\*([^*\r\n]+)\*\*/g;
 const V3_LINE_SPLIT_RE = /\r\n|\n|\r/;
 /** Four-plus leading spaces or a tab start a Markdown code block — not in the subset. */
 const V3_INDENTED_CODE_RE = /^(?: {4,}|\t)/;
-/** A bullet nested under indentation ("  - item") — top-level bullets start at column 0. */
-const V3_NESTED_BULLET_RE = /^ {1,3}- /;
-/** Thematic-break structures ("---", "- - -") — separators are not in the subset. */
-const V3_THEMATIC_BREAK_RE = /^(?:-{3,}|(?:- ){2,}-)\s*$/;
+/**
+ * A line made only of `-`/`=` runs (with optional trailing spaces): setext
+ * heading underlines ("--", "===", also single "=" / "-") and thematic breaks
+ * ("---", "- - -"). Such a line is never plain prose, so it is rejected
+ * wherever it appears — inside text AND as a plain (un-prefixed) heading.
+ */
+const V3_SETEXT_OR_BREAK_RE = /^(?:[-=]+|(?:- ){2,}-)\s*$/;
+/**
+ * Top-level list markers OUTSIDE the approved subset: `+ ` bullets and
+ * CommonMark ordered markers (`1. `, `9) `). The approved bullet is `- ` only.
+ * Deliberately anchored: digits followed by a period/paren and a space AT LINE
+ * START — "1.5 倍" / "+86 号码" in prose never match.
+ */
+const V3_UNSUPPORTED_LIST_RE = /^(?:\+|\d{1,9}[.)]) /;
+/**
+ * ANY list marker (`- `, `+ `, `1. `) indented by 1–3 spaces: nesting.
+ * Top-level bullets sit at column 0; 1–3-space soft-wrap continuations of
+ * plain text (no marker) stay legal.
+ */
+const V3_NESTED_LIST_RE = /^ {1,3}(?:[-+]|\d{1,9}[.)]) /;
+
+/**
+ * Structural line rules shared by paragraph text and PLAIN (un-prefixed)
+ * headings: a plain heading renders as a body line, so body block structures
+ * are rejected there too. `## `/`### `-prefixed headings carry their remainder
+ * inside the heading and only need the character rules.
+ */
+function v3LineIsOutsideSubset(line: string): boolean {
+  return (
+    V3_INDENTED_CODE_RE.test(line) ||
+    V3_SETEXT_OR_BREAK_RE.test(line) ||
+    V3_UNSUPPORTED_LIST_RE.test(line) ||
+    V3_NESTED_LIST_RE.test(line)
+  );
+}
 
 /**
  * Validate a v3 section heading and return its VISIBLE text (prefix stripped),
  * or null when it uses anything outside the allowed subset. A heading is either
- * plain text (no markers at all) or a SINGLE line (no LF/CRLF/CR break of any
- * form) starting with `## `/`### ` followed by a non-empty plain remainder
- * (no bold, no further `#`).
+ * a SINGLE line (no LF/CRLF/CR break of any form) starting with `## `/`### `
+ * followed by a non-empty plain remainder (no bold, no further `#`), or a
+ * single line of plain text with no leading whitespace (an indented heading
+ * would render as a code block) and no body block structure (setext/list
+ * markers are not headings).
  */
 function v3VisibleHeading(heading: string): string | null {
   if (/[\r\n]/.test(heading)) return null;
+  if (/^\s/.test(heading)) return null;
   const prefixed = V3_HEADING_PREFIX_TEST_RE.test(heading);
   const rest = prefixed ? heading.replace(V3_HEADING_PREFIX_STRIP_RE, '') : heading;
   if (prefixed && rest.trim() === '') return null;
   if (V3_REJECTED_CHARS_RE.test(rest) || /[*#]/.test(rest)) return null;
+  if (!prefixed && v3LineIsOutsideSubset(rest)) return null;
   return rest;
 }
 
@@ -415,18 +450,17 @@ function v3VisibleHeading(heading: string): string | null {
  * `**emphasis**` pairs unwrapped, bullet markers kept as plain characters), or
  * null when it uses anything outside the allowed subset. Structural line rules
  * (checked per line, on every line-break form): no indented code blocks
- * (4+ spaces or a tab), no indented nested bullets (bullets sit at column 0;
- * 1–3-space soft-wrap continuations of plain text stay legal), and no
- * thematic-break separator lines. `*` is legal ONLY as complete, non-empty,
+ * (4+ spaces or a tab), no setext underlines or thematic breaks, no `+ ` or
+ * ordered-list markers, and no indented nested list of any marker kind
+ * (top-level `- ` bullets sit at column 0; 1–3-space soft-wrap continuations
+ * of plain text stay legal). `*` is legal ONLY as complete, non-empty,
  * non-nested, non-cross-line pairs (a CR inside a pair is a line crossing too);
  * a leftover single `*` (unclosed, empty, nested or stray) rejects the field.
  */
 function v3VisibleText(text: string): string | null {
   if (V3_REJECTED_CHARS_RE.test(text) || text.includes('#')) return null;
   for (const line of text.split(V3_LINE_SPLIT_RE)) {
-    if (V3_INDENTED_CODE_RE.test(line)) return null;
-    if (V3_NESTED_BULLET_RE.test(line)) return null;
-    if (V3_THEMATIC_BREAK_RE.test(line)) return null;
+    if (v3LineIsOutsideSubset(line)) return null;
   }
   if (!text.includes('*')) return text;
   let emptyEmphasis = false;

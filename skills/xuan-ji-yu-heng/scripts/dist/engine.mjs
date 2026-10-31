@@ -63255,22 +63255,26 @@ var V3_HEADING_PREFIX_STRIP_RE = /^(##|###) /;
 var V3_BOLD_PAIR_GLOBAL_RE = /\*\*([^*\r\n]+)\*\*/g;
 var V3_LINE_SPLIT_RE = /\r\n|\n|\r/;
 var V3_INDENTED_CODE_RE = /^(?: {4,}|\t)/;
-var V3_NESTED_BULLET_RE = /^ {1,3}- /;
-var V3_THEMATIC_BREAK_RE = /^(?:-{3,}|(?:- ){2,}-)\s*$/;
+var V3_SETEXT_OR_BREAK_RE = /^(?:[-=]+|(?:- ){2,}-)\s*$/;
+var V3_UNSUPPORTED_LIST_RE = /^(?:\+|\d{1,9}[.)]) /;
+var V3_NESTED_LIST_RE = /^ {1,3}(?:[-+]|\d{1,9}[.)]) /;
+function v3LineIsOutsideSubset(line) {
+  return V3_INDENTED_CODE_RE.test(line) || V3_SETEXT_OR_BREAK_RE.test(line) || V3_UNSUPPORTED_LIST_RE.test(line) || V3_NESTED_LIST_RE.test(line);
+}
 function v3VisibleHeading(heading) {
   if (/[\r\n]/.test(heading)) return null;
+  if (/^\s/.test(heading)) return null;
   const prefixed = V3_HEADING_PREFIX_TEST_RE.test(heading);
   const rest = prefixed ? heading.replace(V3_HEADING_PREFIX_STRIP_RE, "") : heading;
   if (prefixed && rest.trim() === "") return null;
   if (V3_REJECTED_CHARS_RE.test(rest) || /[*#]/.test(rest)) return null;
+  if (!prefixed && v3LineIsOutsideSubset(rest)) return null;
   return rest;
 }
 function v3VisibleText(text) {
   if (V3_REJECTED_CHARS_RE.test(text) || text.includes("#")) return null;
   for (const line of text.split(V3_LINE_SPLIT_RE)) {
-    if (V3_INDENTED_CODE_RE.test(line)) return null;
-    if (V3_NESTED_BULLET_RE.test(line)) return null;
-    if (V3_THEMATIC_BREAK_RE.test(line)) return null;
+    if (v3LineIsOutsideSubset(line)) return null;
   }
   if (!text.includes("*")) return text;
   let emptyEmphasis = false;

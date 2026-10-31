@@ -2527,4 +2527,48 @@ describe('reading-draft/v3 limited presentation subset (scope+presentation plan 
     );
     expect(result.ok).toBe(true);
   });
+
+  it('rejects setext underlines, ordered/plus lists and nested ordered lists (grammar fix)', () => {
+    for (const text of [
+      '普通说明\n===',
+      '普通说明\n--',
+      '普通说明\n=',
+      '1. 第一项\n2. 第二项',
+      '9) 另一种有序写法',
+      '+ 第一项\n+ 第二项',
+      '- 第一层\n  1. 第二层',
+      '正文一行。\n  + 缩进的加号要点',
+    ]) {
+      const result = runValidated(makePlan(), v3Draft({ text }));
+      expect(
+        result.violations.some((v) => v.code === 'CONTAINS_MARKUP'),
+        `should reject v3 text: ${JSON.stringify(text)}`,
+      ).toBe(true);
+    }
+  });
+
+  it('rejects indented plain headings (they render as code blocks)', () => {
+    const result = runValidated(
+      makePlan(),
+      v3Draft({ heading: '    普通标题', text: '合成正文。' }),
+    );
+    expect(
+      result.violations.some((v) => v.code === 'CONTAINS_MARKUP' && v.field === 'heading'),
+    ).toBe(true);
+  });
+
+  it('does not mistake prose numbers, plus signs or dashes for list structures', () => {
+    const result = runValidated(
+      makePlan({ requiredCaveats: [], requiredWarningCodes: [] }),
+      v3Draft({
+        text: '增长 1.5 倍的说明。\n+86 开头的号码写法。\n-3 度的温差。\n  2027 年的计划从 1 月开始。',
+      }),
+    );
+    expect(result.ok).toBe(true);
+    const plainHeading = runValidated(
+      makePlan({ requiredCaveats: [], requiredWarningCodes: [] }),
+      v3Draft({ heading: '2027 年的规划', text: '合成正文。' }),
+    );
+    expect(plainHeading.ok).toBe(true);
+  });
 });
