@@ -37,8 +37,27 @@ ChartBundle fact / InterpretationFact.evidence
   → relevant condition or limitation / caveat / warning
 ```
 
-The host may vary word order and rhythm, but may not add a chart fact, rule, event prediction or
-limitation absent from this trace.
+The host may vary word order and rhythm, and — since roadmap v3.4 — may extend the trace with its
+own traditional interpretation of the cited facts (mechanism readings, comparisons across the
+cited systems, concrete scenario framing). It may not add a chart fact, rule, event prediction or
+limitation absent from this trace, and its interpretive extension is host analysis, never an
+engine-rule conclusion.
+
+### Interpretation source tiers (roadmap v3.4)
+
+Every substantive paragraph distinguishes three tiers internally:
+
+1. **Computed fact** — a value the engine actually calculated (evidence kind `western`/`bazi`/
+   `ziwei`/`vedic`/`time`).
+2. **Implemented-rule meaning** — a meaning the versioned rules layer actually produced
+   (evidence kind `*-rule`).
+3. **Host traditional interpretation** — the narrator's own traditional analysis of tiers 1–2.
+
+Tiers 1–2 are engine-backed and may be stated as engine results. Tier 3 must stay tied to the
+cited facts of tiers 1–2, but must not be presented as engine output, rule-verified, or vouched
+for by a ruleset version. A missing prewritten meaning (tier 2) no longer makes a fact
+unnarratable; it means the paragraph's meaning line is tier 3. The default body never prints
+these tier labels; they organize internal traces and on-request technical detail.
 
 ## Source trace format
 
@@ -148,14 +167,29 @@ claims. It does not establish semantic correctness. A test or review must additi
 5. The same input may vary in phrasing, but its traced fact set, rules, limitations and allowed
    claims remain unchanged.
 
-## Career body bounds (ADR 0021)
+## Career body bounds (ADR 0021, amended 2026-11-01)
 
-The default career body may include at most one frozen ten-god cultural reference (for example
-`七杀`) with an immediately adjacent brief 《渊海子平》 gloss, stated as traditional-culture
-background and never as career or industry fit. Pattern names, useful-god, five-element industry
-tables, and chart-derived career advice stay out of the default body. When the user states work
-reality, practices cite only those statements; when only birth data is present, ask one key reality
-question and invent no work history or career direction.
+The default career body answers the career question with genuinely relevant material from the
+real four-system chart: work style, drive, professional expression, collaboration, resources, and
+responsibility (roadmap v3.4 §7 item 4). The absence of a transparent 正官/七杀 never empties the
+career question, and their co-occurrence no longer omits the reference — each officer ten-god may
+be stated with its frozen gloss (七杀 → 权威、压力、竞争；正官 → 责任、自律、地位) as
+traditional-culture background. Occupational fields may be explored as traditional-symbolism
+directions from cited chart material, never packaged as a real-world career-fit assessment.
+Pattern names, useful-god, five-element industry tables, and chart-derived career advice stay out
+of the default body. When the user states work reality, practices cite only those statements;
+when only birth data is present, give the chart analysis with its conditions, invent no work
+history, and ask at most one key reality question when reality would materially change the
+answer.
+
+## Four-system topic participation (roadmap v3.4)
+
+A topic answer draws on every system whose admitted material is genuinely relevant to the
+question. Narration may state where systems support each other, sit in tension, cover different
+facets, or cannot be compared — with each mechanism kept inside its own system and each
+comparison grounded in cited per-system facts. It must not force four equal sections, vote,
+average, or manufacture consensus; a missing or locally unavailable system limits only the
+analysis that depends on it, and no system backfills another system's facts.
 
 ## Dual-source career composition (planned — no runtime implements this)
 
@@ -169,4 +203,6 @@ and clinical content never enters. The delivery rules above apply unchanged: the
 mechanism stays beside its concrete implication, caveats sit inline next to the sentences they
 qualify, structure varies naturally, and no fixed templates, footer blocks, or 讲人话 labels
 appear. Until traditional career text claims pass source admission, the traditional side
-contributes structural records and background only.
+contributes structural records, background, and — since roadmap v3.4 — the ordinary
+topic-narration analysis described in the amended ADR 0021 bounds above; the composed C-track
+product itself remains unplanned runtime work.

@@ -485,9 +485,13 @@ try {
     iResult !== undefined && privateFields.every((field) => !iAnswer.stdout.includes(field)),
   );
   record(
-    'I: answer-plan scopes facts to career and makes every one citable',
+    'I: answer-plan scopes facts to career-relevant material and makes every one citable',
+    // Roadmap v3.4: the career topic carries its authored facts plus bounded
+    // related admitted material (pillars/day-master/sun meanings), never
+    // health or unrelated topics.
     iSelected.length > 0 &&
-      iSelected.every((fact) => fact.topic === 'career') &&
+      iSelected.some((fact) => fact.topic === 'career') &&
+      iSelected.every((fact) => fact.topic === 'career' || fact.topic === 'character') &&
       JSON.stringify(iAllowed) === JSON.stringify(iSelected.map((fact) => fact.id)),
   );
 } finally {

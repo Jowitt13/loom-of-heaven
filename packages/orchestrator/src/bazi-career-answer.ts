@@ -73,6 +73,16 @@ export function scopedRequiredWarningCodes(
     ) {
       return hasTimeSensitiveFact;
     }
+    // Roadmap v3.4 precision-note split: western ayanamsha/node/asteroid
+    // approximations qualify only facts citing those points. The BaZi career
+    // body never cites them, so they are never material here.
+    if (
+      code === 'SIDEREAL_AYANAMSHA_APPROXIMATE' ||
+      code === 'LUNAR_NODE_APPROXIMATE' ||
+      code === 'ASTEROID_APPROXIMATE'
+    ) {
+      return false;
+    }
     return true;
   });
 }

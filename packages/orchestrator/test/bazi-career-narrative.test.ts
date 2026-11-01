@@ -107,7 +107,10 @@ function traceFor(
     contractVersion: 'narrative-trace/v1',
     traceId: `narrative-trace:paragraph-${paragraphNumber}`,
     paragraphId: `paragraph-${paragraphNumber}`,
-    topic: 'career',
+    // Roadmap v3.4: the trace records the CLAIM's own topic — related-topic
+    // material (e.g. pillars/day-master facts) keeps its authored topic while
+    // serving the career journey.
+    topic: claim.topic,
     approvedClaimIds: [claim.claimId],
     factRefs: claim.factRefs,
     mechanismRefs: claim.mechanismRefs,
@@ -119,13 +122,28 @@ function traceFor(
   });
 }
 
+/** One passing visible paragraph per journey claim (synthetic wording). */
+function paragraphForClaim(claim: ApprovedAnswerClaim): string {
+  if (claim.claimId.endsWith('fact-8')) return OFFICER_PARAGRAPH;
+  if (claim.claimId.endsWith('fact-1')) {
+    return '四柱与各柱十神的排布是事业侧的结构材料：哪一柱带什么十神，先按位置如实读，再谈含义。';
+  }
+  return '日主与强弱读数给出工作方式的一层底色：帮扶偏少时更依赖自身稳定积累，这层读法按排盘返回值转述。';
+}
+
 describe('IQ-4C bazi career narrative trace linkage', () => {
   it(
     'verifies ready-journey examples whose traces cover every claim and caveat',
     { timeout: 30_000 },
     () => {
-      const [officer] = journeyClaims();
-      const traces = [traceFor(officer!, 1, OFFICER_PARAGRAPH)];
+      // Roadmap v3.4: the ready career journey delivers the four-pillar
+      // layout, the day-master strength claim and the officer reference —
+      // every delivered claim needs its own trace.
+      const claims = journeyClaims();
+      expect(claims.length).toBeGreaterThanOrEqual(3);
+      const traces = claims.map((claim, index) =>
+        traceFor(claim, index + 1, paragraphForClaim(claim)),
+      );
       expect(
         verifyBaziCareerNarrative(traces, journeyInput(syntheticInput), { now: FIXED }),
       ).toEqual({ ok: true, issues: [] });
@@ -204,28 +222,45 @@ describe('IQ-4C bazi career narrative trace linkage', () => {
   });
 
   it(
-    'cannot narrate when the rule profile is unavailable (cultural gloss is rule-backed)',
+    'keeps rule-backed claims unnarratable when the rule profile is unavailable',
     { timeout: 30_000 },
     () => {
-      const run = () =>
-        verifyBaziCareerNarrative(
-          [],
-          journeyInput(syntheticInput, {
-            rulesetVariantSensitiveClaims: true,
-            rulesetVariant: 'unavailable',
-          }),
-          { now: FIXED },
-        );
-      expect(run).toThrow(ResponseViewPlanningError);
+      // Roadmap v3.4: an unavailable rule profile degrades the rule-backed
+      // claims (strength, officer gloss) but keeps the provider-only pillars
+      // fact deliverable — so the journey no longer fails closed, while a
+      // trace citing the degraded officer claim fails linkage.
+      const input = journeyInput(syntheticInput, {
+        rulesetVariantSensitiveClaims: true,
+        rulesetVariant: 'unavailable',
+      });
+      const claims = journeyClaims();
+      const officer = claims.find((claim) => claim.claimId.endsWith('fact-8'))!;
+      const result = verifyBaziCareerNarrative([traceFor(officer, 1, OFFICER_PARAGRAPH)], input, {
+        now: FIXED,
+      });
+      expect(result.ok).toBe(false);
+      // The degraded view omits the officer claim, so a trace citing it is
+      // uncovered delivered/traced claim-set drift.
+      expect(result.issues).toContainEqual({
+        code: 'CLAIM_COVERAGE',
+        path: '$.traces.approvedClaimIds',
+      });
       expect(() =>
         projectBaziCareerJourney(journeyInput(syntheticInput), { now: FIXED }),
       ).not.toThrow();
+      expect(() =>
+        projectBaziCareerJourney(
+          journeyInput(unknownTimeInput, { birthTimeReliability: 'unavailable' }),
+          { now: FIXED },
+        ),
+      ).toThrow(ResponseViewPlanningError);
     },
   );
 
   it('is deterministic for a fixed clock', () => {
-    const [officer] = journeyClaims();
-    const traces = [traceFor(officer!, 1, OFFICER_PARAGRAPH)];
+    const traces = journeyClaims().map((claim, index) =>
+      traceFor(claim, index + 1, paragraphForClaim(claim)),
+    );
     expect(verifyBaziCareerNarrative(traces, journeyInput(syntheticInput), { now: FIXED })).toEqual(
       verifyBaziCareerNarrative(traces, journeyInput(syntheticInput), { now: FIXED }),
     );

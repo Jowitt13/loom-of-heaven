@@ -31,19 +31,27 @@ or missing topic.
 overview | strengths | risks | timing | advice | explain
 ```
 
-For ordinary `career` answers, `selectedFacts` contains at most the one ADR 0021 ten-god
-cultural reference. Its caveat and material warnings are derived from that same set; unrelated
-systems' conditions do not become mandatory prose. All warnings remain in `publicResult.warnings`
-for audit. The plan contains no user-stated work reality and therefore does not request practical
-career advice. Reality-based paragraphs use the separate optional source binding below, never
-a borrowed chart fact id or constraint exemption.
+For ordinary `career` answers (roadmap v3.4 / ADR 0021 amended 2026-11-01), `selectedFacts`
+carries the genuinely career-relevant admitted material from the real four-system chart: the
+authored career facts (officer ten-god references with their frozen glosses when present, MC,
+官禄宫) plus bounded related material (four-pillar ten-god layout, day master with its strength
+reading, sun/soul-star meanings). A chart with no transparent 正官/七杀 still yields career
+material — the topic never empties for that reason, and co-occurring officer labels each get
+their own reference. Caveats and material warnings are derived from that same set; unrelated
+systems' conditions do not become mandatory prose. All warnings remain in
+`publicResult.warnings` for audit. The plan contains no user-stated work reality and therefore
+does not request practical career advice. Reality-based paragraphs use the separate optional
+source binding below, never a borrowed chart fact id or constraint exemption.
 
-`career --lens timing` currently returns `not-supported`: natal cultural themes are not evidence
-for promotion, job-change or other career timing. `--lens explain` keeps topic-scoped technical
-framing, but admission still follows the same evidence-family and rule-status gates as every
-other lens — unadmitted technical material (pattern / useful-god / industry and other producer
-mechanisms outside the admitted set) stays in `calculate` / `interpret` technical output and is
-NOT released into career prose by choosing `explain`.
+Every topic (not just career) selects its authored facts plus bounded related admitted material
+(`isTopicRelevantFact` semantics): Venus/Moon/Mars meanings also serve love questions, Mercury
+serves studies, day-master structure serves career. `general` is never a passport and relevance
+never widens admission — pattern / useful-god / industry and other producer mechanisms outside
+the admitted set stay in `calculate` / `interpret` technical output and are NOT released into
+topic prose by choosing `explain`.
+
+`career --lens timing` currently returns `not-supported`: natal themes are not evidence
+for promotion, job-change or other career timing.
 
 The command never accepts a free-form user question. The host maps the question to a bounded
 topic/lens, or asks a clarification question when it cannot do so reliably. Do not put a user's
@@ -125,7 +133,9 @@ For an ordinary answer, the host must:
 2. Explain conclusions in plain language before technical terminology.
 3. State every material caveat and required warning naturally in the paragraph it affects; do not create a fixed disclaimer footer.
 4. Honor all guardrails: traditional-culture framing; evidence-only reasoning; no deterministic
-   fate, medical, legal, investment, life-and-death or unsupported-comparison claims.
+   fate, medical, legal, investment, life-and-death or unsupported-comparison claims; and
+   `distinguish-fact-rule-interpretation` — your own traditional interpretation (tier 3) must
+   stay tied to cited facts and never claim engine-rule verification or ruleset backing.
 5. Run BOTH deterministic gates before displaying anything, in this order:
    `answer-plan` → write a `reading-draft/v3` JSON (v2 still accepted, plain text only) →
    `validate-answer` → display the SAME text that was checked. Show the answer only when both
@@ -375,6 +385,40 @@ run never carries or authorizes reuse of a previous successful body.
 `--context-input-file` is rejected with `INPUT_VALIDATION_FAILED`; it is never quietly reduced to
 the low-level structural check. Only input with no declared binding takes the structural path, and
 that path — like before — still needs `lint-reading` on the produced text before display.
+
+**Synastry pair delivery (roadmap v3.4).** The `synastry` command emits a `synastryBinding`
+beside its result (same `answer-binding/v1` record): `requestDigest` covers BOTH people's birth
+inputs and settings, the labels, the analyzed pair WITH its direction, the relationship type and
+the run clock; `planDigest` covers the full result document AND the saved run's full warnings. Sealing is identical
+(`--seal-draft --binding-file synastry.json`). Submission adds `--synastry` and passes the people
+file as the context; the input file carries `{ draftSource, draftDigest, synastryResult, synastryWarnings, readingDraft }`
+(no `answerPlan` — a single-person plan can never vouch for a pair body):
+
+`synastryWarnings` must be the same run's `warnings` array (including an empty array when there
+are none); omitting or changing it cannot preserve the binding. The emitted `requiredWarningCodes`
+is the disclosure array for the draft's `warningsDisclosed` and warning `constraintRefs` indices.
+`TIME_UNKNOWN` and `NEAR_BOUNDARY` remain mandatory; unrelated node/asteroid warnings remain audit
+records, not compulsory prose. Explicit `--synastry` without context fails, never downgrades to
+structural-only success. The separate `--seal-draft` step and unflagged structural mode are unchanged.
+When either analyzed person's time is unknown, none of the shipped pair methods establishes
+whole-day stability: pair findings are withheld (no noon-based tally or spouse-palace verdict),
+and bound delivery supports only a short limitation with its required warning. Exact/approximate
+pair calculations, single-person technical charts and unselected third people are unaffected.
+
+```text
+node scripts/loom-chart.mjs validate-answer \
+  --input-file pair-delivery-input.json \
+  --synastry \
+  --context-input-file people.json \
+  --now <same clock as the synastry run> \
+  --output-file pair-delivery-result.json
+```
+
+Pair drafts use `topic:"marriage"`; paragraphs carry NO `sourceFactIds` (the synastry path has no
+fact-id contract) and instead reference the result's own `disclaimers` via
+`constraintRefs: [{kind:"disclaimer", index}]`. The structure/safety gate, verbatim transcription
+and lint run exactly as in single-person delivery; changing either person's input, the pair, its
+direction, the relation, the clock — or the draft after sealing — fails with `BINDING_MISMATCH`.
 
 Trust and privacy boundaries:
 

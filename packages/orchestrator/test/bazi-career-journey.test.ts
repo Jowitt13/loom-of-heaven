@@ -100,13 +100,21 @@ describe('IQ-4A internal bazi career journey', () => {
       );
       expect(clarificationPlan.status).toBe('ready');
       expect(clarificationPlan.degradationCodes).toEqual([]);
+      // Roadmap v3.4: the career topic keeps its admitted bazi-namespace
+      // material — the four-pillar ten-god layout (fact-1), the day master with
+      // its strength reading (fact-2) and the ADR 0021 officer reference
+      // (fact-8) — not just the single cultural reference.
       expect(responseView).toEqual({
         contractVersion: 'response-view/v1',
         clarificationStatus: 'ready',
         topic: 'career',
         requestedDepth: 'standard',
         system: 'bazi',
-        approvedClaimIds: ['approved-claim:fact-8'],
+        approvedClaimIds: [
+          'approved-claim:fact-1',
+          'approved-claim:fact-2',
+          'approved-claim:fact-8',
+        ],
         materialCaveatIds: ['claim-constraint:approved-claim:fact-8:caveat:0'],
         allowedContentCategories: [
           'conclusion',
@@ -214,26 +222,31 @@ describe('IQ-4A internal bazi career journey', () => {
   );
 
   it(
-    'omits the cultural reference when the rule profile is unavailable',
+    'omits rule-backed career claims when the rule profile is unavailable, keeping provider-only structure honest',
     { timeout: 30_000 },
     () => {
-      // ADR 0021: the short gloss cites bazi-rule/ten-gods/xiang-yi. An
-      // unresolved rule profile therefore degrades that claim class instead of
-      // silently delivering a provider-only cultural reading.
-      let caught: unknown;
-      try {
-        projectBaziCareerJourney(
-          journeyInput(syntheticInput, {
-            rulesetVariantSensitiveClaims: true,
-            rulesetVariant: 'unavailable',
-          }),
-          { now: FIXED },
-        );
-      } catch (error) {
-        caught = error;
-      }
-      expect(caught).toBeInstanceOf(ResponseViewPlanningError);
-      expect((caught as ResponseViewPlanningError).code).toBe('NO_ELIGIBLE_APPROVED_CLAIMS');
+      // ADR 0021 (amended 2026-11-01): the officer gloss cites
+      // bazi-rule/ten-gods/xiang-yi and the strength reading cites
+      // bazi-rule/strength, so an unresolved rule profile degrades exactly
+      // those claims. The provider-only four-pillar display (fact-1, tier-1
+      // engine fact) carries no rule dependency and stays — as structure, not
+      // as a silently rule-backed cultural reading.
+      const { clarificationPlan, responseView } = projectBaziCareerJourney(
+        journeyInput(syntheticInput, {
+          rulesetVariantSensitiveClaims: true,
+          rulesetVariant: 'unavailable',
+        }),
+        { now: FIXED },
+      );
+      expect(clarificationPlan.status).toBe('degraded');
+      expect(clarificationPlan.clarificationNoteCodes).toEqual(['ruleset-variant-unavailable']);
+      expect(clarificationPlan.degradationCodes).toEqual(['omit-ruleset-variant-sensitive-claims']);
+      expect(responseView.approvedClaimIds).toEqual(['approved-claim:fact-1']);
+      expect(responseView.approvedClaimIds).not.toContain('approved-claim:fact-8');
+      expect(responseView.materialCaveatIds).toEqual([
+        'clarification-note:ruleset-variant-unavailable',
+        'degradation:omit-ruleset-variant-sensitive-claims',
+      ]);
       const degradedPlan = planClarificationMateriality(
         planningInput({ rulesetVariantSensitiveClaims: true, rulesetVariant: 'unavailable' }),
       );
@@ -244,7 +257,7 @@ describe('IQ-4A internal bazi career journey', () => {
   );
 
   it(
-    'delivers the cultural reference once the rule profile is explicitly confirmed',
+    'delivers rule-backed career claims once the rule profile is explicitly confirmed',
     { timeout: 30_000 },
     () => {
       const { clarificationPlan, responseView } = projectBaziCareerJourney(
@@ -256,7 +269,11 @@ describe('IQ-4A internal bazi career journey', () => {
       );
       expect(clarificationPlan.status).toBe('ready');
       expect(responseView.clarificationStatus).toBe('ready');
-      expect(responseView.approvedClaimIds).toEqual(['approved-claim:fact-8']);
+      expect(responseView.approvedClaimIds).toEqual([
+        'approved-claim:fact-1',
+        'approved-claim:fact-2',
+        'approved-claim:fact-8',
+      ]);
     },
   );
 

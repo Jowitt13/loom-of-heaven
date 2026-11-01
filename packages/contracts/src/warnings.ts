@@ -12,8 +12,16 @@ export const WARNING_CODES = {
   TIME_UNKNOWN: 'TIME_UNKNOWN',
   /** Local time was ambiguous (DST fall-back) and resolved via user's earlier/later choice. */
   DST_AMBIGUOUS_RESOLVED: 'DST_AMBIGUOUS_RESOLVED',
-  /** Apparent solar time uses an approximation (documented method + precision). */
+  /** Apparent/mean solar time is APPLIED to a calculation and uses an approximation
+   *  (documented method + precision). Emitted only when a non-civil solar mode is requested;
+   *  civil/UTC runs never carry this code. */
   SOLAR_TIME_APPROXIMATE: 'SOLAR_TIME_APPROXIMATE',
+  /** Western sidereal zodiac display uses the linear ayanamsha model (approximate). */
+  SIDEREAL_AYANAMSHA_APPROXIMATE: 'SIDEREAL_AYANAMSHA_APPROXIMATE',
+  /** Western lunar nodes are self-computed (true: osculating ~arc-minutes; mean: Meeus). */
+  LUNAR_NODE_APPROXIMATE: 'LUNAR_NODE_APPROXIMATE',
+  /** Western asteroids use Keplerian osculating elements (sub-degree; Chiron coarser). */
+  ASTEROID_APPROXIMATE: 'ASTEROID_APPROXIMATE',
   /** A requested chart system is not implemented yet in this engine version. */
   SYSTEM_NOT_YET_IMPLEMENTED: 'SYSTEM_NOT_YET_IMPLEMENTED',
   /** Local civil datetime is within a few minutes of a solar-term / date / hour boundary. */

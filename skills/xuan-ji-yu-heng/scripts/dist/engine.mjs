@@ -45224,8 +45224,16 @@ var WARNING_CODES = {
   TIME_UNKNOWN: "TIME_UNKNOWN",
   /** Local time was ambiguous (DST fall-back) and resolved via user's earlier/later choice. */
   DST_AMBIGUOUS_RESOLVED: "DST_AMBIGUOUS_RESOLVED",
-  /** Apparent solar time uses an approximation (documented method + precision). */
+  /** Apparent/mean solar time is APPLIED to a calculation and uses an approximation
+   *  (documented method + precision). Emitted only when a non-civil solar mode is requested;
+   *  civil/UTC runs never carry this code. */
   SOLAR_TIME_APPROXIMATE: "SOLAR_TIME_APPROXIMATE",
+  /** Western sidereal zodiac display uses the linear ayanamsha model (approximate). */
+  SIDEREAL_AYANAMSHA_APPROXIMATE: "SIDEREAL_AYANAMSHA_APPROXIMATE",
+  /** Western lunar nodes are self-computed (true: osculating ~arc-minutes; mean: Meeus). */
+  LUNAR_NODE_APPROXIMATE: "LUNAR_NODE_APPROXIMATE",
+  /** Western asteroids use Keplerian osculating elements (sub-degree; Chiron coarser). */
+  ASTEROID_APPROXIMATE: "ASTEROID_APPROXIMATE",
   /** A requested chart system is not implemented yet in this engine version. */
   SYSTEM_NOT_YET_IMPLEMENTED: "SYSTEM_NOT_YET_IMPLEMENTED",
   /** Local civil datetime is within a few minutes of a solar-term / date / hour boundary. */
@@ -46218,7 +46226,11 @@ var AnswerGuardrail = external_exports.enum([
   "no-legal-advice",
   "no-investment-advice",
   "no-life-and-death-advice",
-  "no-unsupported-comparison"
+  "no-unsupported-comparison",
+  // Roadmap v3.4: host traditional interpretation is allowed but is its own
+  // tier — it must stay tied to cited facts and never claim engine-rule
+  // verification or ruleset backing.
+  "distinguish-fact-rule-interpretation"
 ]);
 var AnswerRequest = external_exports.strictObject({
   topic: InterpretationTopic,
@@ -46827,16 +46839,6 @@ function collectTimeWarnings(input2, normalized) {
         "time",
         `Local time was ambiguous under historical DST and resolved to the "${normalized.ambiguity.resolution}" occurrence.`,
         { detail: { resolution: normalized.ambiguity.resolution } }
-      )
-    );
-  }
-  if (normalized.solar !== null) {
-    warnings.push(
-      makeWarning(
-        WARNING_CODES.SOLAR_TIME_APPROXIMATE,
-        "time",
-        `Apparent solar time uses the ${normalized.solar.method} equation-of-time approximation (~tenths of a minute).`,
-        { severity: "info", detail: { method: normalized.solar.method } }
       )
     );
   }
@@ -54699,6 +54701,19 @@ function computeBazi(normalized, settings, ruleGender) {
   if (settings.solarTimeMode !== "civil" && normalized.solar !== null) {
     const iso = settings.solarTimeMode === "mean" ? normalized.solar.meanSolarTimeIso : normalized.solar.apparentSolarTimeIso;
     parts = partsFromSolarIso(iso);
+    if (settings.solarTimeMode === "apparent") {
+      warnings.push(
+        makeWarning(
+          WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+          "bazi",
+          `Apparent solar time applied to the BaZi pillar clock via the ${normalized.solar.method} equation-of-time approximation (~tenths of a minute); pillars near a day/zi-hour boundary are the sensitive ones.`,
+          {
+            severity: "info",
+            detail: { method: normalized.solar.method, appliedTo: "bazi pillars" }
+          }
+        )
+      );
+    }
   } else {
     if (settings.solarTimeMode !== "civil") {
       solarTimeApplied = "civil";
@@ -54837,9 +54852,23 @@ function buildAstrolabe(normalized, settings, ruleGender) {
   }
   const timeIndex = timeIndexFromHour(hour);
   const gender = ruleGender === "male" ? "\u7537" : "\u5973";
+  const warnings = [];
+  if (useApparent && normalized.solar !== null) {
+    warnings.push(
+      makeWarning(
+        WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+        "ziwei",
+        `Apparent solar time applied to the Zi Wei palace clock via the ${normalized.solar.method} equation-of-time approximation (~tenths of a minute); palace placement near an hour boundary is the sensitive part.`,
+        {
+          severity: "info",
+          detail: { method: normalized.solar.method, appliedTo: "ziwei palaces" }
+        }
+      )
+    );
+  }
   return {
     astrolabe: import_iztro.astro.bySolar(dateStr, timeIndex, gender, true, "zh-CN"),
-    warnings: [],
+    warnings,
     useApparent
   };
 }
@@ -57848,7 +57877,7 @@ function computeWestern(normalized, settings) {
   if (sidereal) {
     warnings.push(
       makeWarning(
-        WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+        WARNING_CODES.SIDEREAL_AYANAMSHA_APPROXIMATE,
         "western",
         `Sidereal zodiac applied via the ${settings.ayanamsha} ayanamsha (${aya.toFixed(3)}\xB0 at this date, linear model).`,
         { severity: "info", detail: { ayanamsha: settings.ayanamsha, degrees: round6(aya) } }
@@ -57937,7 +57966,7 @@ function computeWestern(normalized, settings) {
   );
   warnings.push(
     makeWarning(
-      WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+      WARNING_CODES.LUNAR_NODE_APPROXIMATE,
       "western",
       settings.nodes === "true" ? "Lunar nodes use the true (osculating) node \u2014 self-computed, approximate (~arc-minutes)." : "Lunar nodes use the mean orbit (Meeus series).",
       { severity: "info" }
@@ -57955,7 +57984,7 @@ function computeWestern(normalized, settings) {
     }
     warnings.push(
       makeWarning(
-        WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+        WARNING_CODES.ASTEROID_APPROXIMATE,
         "western",
         "Asteroids (Chiron/Ceres/Pallas/Juno/Vesta) use Keplerian osculating elements: approximate (sub-degree; Chiron coarser), not part of the \u22641\u2032 gate.",
         { severity: "info" }
@@ -62052,7 +62081,7 @@ function interpretVedic(chart, options) {
 // packages/interpret/src/build.ts
 var DISCLAIMERS = [
   "\u4F20\u7EDF\u547D\u7406\u5206\u6790\uFF08\u516B\u5B57/\u7D2B\u5FAE/\u5360\u661F\uFF09\uFF0C\u4EC5\u4F9B\u4F20\u7EDF\u6587\u5316\u3001\u5A31\u4E50\u4E0E\u81EA\u6211\u53CD\u601D\uFF1B\u6587\u4E2D\u7684\u5409\u51F6\u503E\u5411\u3001\u8D8B\u52BF\u4E0E\u5E74\u4EFD\u7A97\u53E3\u5C5E\u4E8E\u547D\u7406\u6761\u4EF6\u8BC4\u4F30\uFF0C\u975E\u7EDF\u8BA1\u5B66\u3001\u975E\u79D1\u5B66\u9884\u6D4B\u3002",
-  "\u53EA\u636E\u672C\u6587 facts \u4F5C\u7B54\uFF08\u5F15\u7528\u5176 reason \u4E0E evidence \u7684 ref/ruleId/\u51FA\u5904\uFF09\uFF0C\u4E0D\u7F16\u9020\u661F\u4F4D/\u5BAB\u4F4D/\u5E72\u652F/\u661F\u66DC\u6216\u89C4\u5219\u7ED3\u8BBA\uFF1B\u53CD\u7EDD\u5BF9\u5316\u2014\u2014\u547D\u7531\u7ECF\u8425\u3001\u975E\u6CE8\u5B9A\u3002",
+  "\u4E8B\u5B9E\u4E0E\u89C4\u5219\u542B\u4E49\u53EA\u636E\u672C\u6587 facts\uFF08\u5F15\u7528\u5176 reason \u4E0E evidence \u7684 ref/ruleId/\u51FA\u5904\uFF09\uFF1B\u5728\u6B64\u4E4B\u4E0A\u5C55\u5F00\u7684\u4F20\u7EDF\u89E3\u91CA\u662F\u5BBF\u4E3B\u5206\u6790\uFF0C\u987B\u7D27\u6263\u6240\u5F15\u4E8B\u5B9E\uFF0C\u4E0D\u5F97\u5192\u5145\u5F15\u64CE\u89C4\u5219\u7ED3\u8BBA\uFF0C\u89C4\u5219\u7248\u672C\u4E0D\u4E3A\u6574\u7BC7\u89E3\u91CA\u80CC\u4E66\uFF1B\u4E0D\u7F16\u9020\u661F\u4F4D/\u5BAB\u4F4D/\u5E72\u652F/\u661F\u66DC\u6216\u89C4\u5219\u7ED3\u8BBA\uFF1B\u53CD\u7EDD\u5BF9\u5316\u2014\u2014\u547D\u7531\u7ECF\u8425\u3001\u975E\u6CE8\u5B9A\u3002",
   "\u4E0D\u5F97\u5BF9\u533B\u7597\u3001\u6CD5\u5F8B\u3001\u6295\u8D44\u3001\u751F\u6B7B\u7B49\u91CD\u5927\u4E8B\u9879\u7ED9\u51FA\u786E\u5B9A\u6027\u65AD\u8A00\uFF1B\u5065\u5EB7\u63D0\u793A\u4EC5\u4E3A\u4E94\u884C/\u5BAB\u4F4D\u7ED3\u6784\u63CF\u8FF0\u3001\u975E\u533B\u7597\u5EFA\u8BAE\u3002",
   "\u57FA\u4E8E\u8131\u654F\u547D\u76D8\u79BB\u7EBF\u8BA1\u7B97\uFF08\u4E0D\u542B\u59D3\u540D\u4E0E\u4EBA\u751F\u4E8B\u4EF6\uFF09\uFF1B\u4E0D\u4E3A\u201C\u63D0\u5347\u51C6\u786E\u5EA6\u201D\u7D22\u53D6\u6216\u81C6\u65AD\u4E2A\u4EBA\u9690\u79C1\u3002"
 ];
@@ -62160,30 +62189,27 @@ var CAREER_TEN_GOD_GLOSS = {
   \u6B63\u5B98: "\u8D23\u4EFB\u3001\u81EA\u5F8B\u3001\u5730\u4F4D",
   \u4E03\u6740: "\u6743\u5A01\u3001\u538B\u529B\u3001\u7ADE\u4E89"
 };
-function selectCareerOfficerLabel(tenGods) {
-  const names = [...new Set(tenGods)].filter((g) => g === "\u6B63\u5B98" || g === "\u4E03\u6740");
-  return names.length === 1 ? names[0] : null;
-}
-function careerOfficerEvidence(placements) {
-  const officers = placements.filter(
-    (p) => p.tenGod === "\u6B63\u5B98" || p.tenGod === "\u4E03\u6740"
-  );
-  const label = selectCareerOfficerLabel(officers.map((p) => p.tenGod));
-  if (label === null) return { label: null, refs: [] };
-  const refs = officers.filter((p) => p.tenGod === label).map((p) => `bazi.pillars.${p.pillar}.tenGod`);
-  return { label, refs };
+function careerOfficerLabelEvidences(placements) {
+  const byLabel = /* @__PURE__ */ new Map();
+  for (const placement of placements) {
+    if (placement.tenGod === null) continue;
+    if (placement.tenGod !== "\u6B63\u5B98" && placement.tenGod !== "\u4E03\u6740") continue;
+    const refs = byLabel.get(placement.tenGod) ?? [];
+    refs.push(`bazi.pillars.${placement.pillar}.tenGod`);
+    byLabel.set(placement.tenGod, refs);
+  }
+  return [...byLabel.entries()].map(([label, refs]) => ({ label, refs }));
 }
 function careerFacts(bundle) {
   const out = [];
   const b = bundle.bazi;
   if (b) {
-    const { label, refs } = careerOfficerEvidence([
+    for (const { label, refs } of careerOfficerLabelEvidences([
       { pillar: "year", tenGod: b.pillars.year?.tenGod ?? null },
       { pillar: "month", tenGod: b.pillars.month?.tenGod ?? null },
       { pillar: "day", tenGod: b.pillars.day?.tenGod ?? null },
       { pillar: "hour", tenGod: b.pillars.hour?.tenGod ?? null }
-    ]);
-    if (label !== null && refs.length > 0) {
+    ])) {
       const gloss = CAREER_TEN_GOD_GLOSS[label] ?? label;
       out.push(
         fact(
@@ -62755,15 +62781,49 @@ function isAdmittedEvidence({ kind, ref }, topic) {
 }
 function isDefaultAnswerFact(fact2) {
   if (fact2.evidence.length === 0) return false;
-  if (!fact2.evidence.every((evidence) => isAdmittedEvidence(evidence, fact2.topic))) return false;
-  if (fact2.topic === "career") {
-    return fact2.evidence.some(
-      (e) => e.kind === "bazi-rule" && e.ref === "bazi-rule/ten-gods/xiang-yi"
-    ) && fact2.evidence.some((e) => e.kind === "bazi" && PILLAR_TEN_GOD.test(e.ref)) && fact2.evidence.every(
-      (e) => e.kind === "bazi-rule" && e.ref === "bazi-rule/ten-gods/xiang-yi" || e.kind === "bazi" && PILLAR_TEN_GOD.test(e.ref)
-    );
-  }
-  return true;
+  return fact2.evidence.every((evidence) => isAdmittedEvidence(evidence, fact2.topic));
+}
+var RELATED_TOPIC_RULES = [
+  // Western rule meanings whose classic question is love, study or work.
+  { re: /^western-rule\/planet-sign\/(?:venus|moon|mars)-/, topics: ["marriage"] },
+  { re: /^western-rule\/planet-sign\/mercury-/, topics: ["studies"] },
+  { re: /^western-rule\/planet-sign\/sun-/, topics: ["career"] },
+  { re: /^western-rule\/planet-house\/(?:sun|moon)-h10$/, topics: ["career"] },
+  { re: /^western-rule\/planet-house\/(?:sun|moon)-h7$/, topics: ["marriage"] },
+  { re: /^western-rule\/dignity\/(?:venus|moon|mars)-/, topics: ["marriage"] },
+  { re: /^western-rule\/dignity\/(?:sun|saturn)-/, topics: ["career"] },
+  { re: /^western-rule\/dignity\/mercury-/, topics: ["studies"] },
+  {
+    re: /^western-rule\/aspect\/(?:venus|moon|mars)-/,
+    topics: ["marriage"]
+  },
+  {
+    re: /^western-rule\/aspect\/[a-z]+-(?:conjunction|opposition|square|trine|sextile)-(?:venus|moon|mars)$/,
+    topics: ["marriage"]
+  },
+  // Provider placements with the same cross-question relevance.
+  { re: /^western\.planets\[Venus\]$/, topics: ["marriage"] },
+  // BaZi structure: day master, its strength and the four-pillar ten-god
+  // layout are the classic work-style / drive / responsibility material.
+  { re: /^bazi-rule\/strength$/, topics: ["career"] },
+  { re: /^bazi\.dayMaster$/, topics: ["career"] },
+  { re: /^bazi\.pillars\.\*\.\(stem\|branch\|tenGodDisplay\)$/, topics: ["career"] },
+  // Zi Wei soul-palace stars color work style beside personality.
+  { re: /^ziwei-rule\/palace-star\/soul-/, topics: ["career"] }
+];
+function isTopicRelevantMaterial(topic, refs, requestTopic) {
+  if (topic === requestTopic) return true;
+  if (requestTopic === "general") return false;
+  return RELATED_TOPIC_RULES.some(
+    (rule) => rule.topics.some((related) => related === requestTopic) && refs.some((ref) => rule.re.test(ref))
+  );
+}
+function isTopicRelevantFact(fact2, topic) {
+  return isTopicRelevantMaterial(
+    fact2.topic,
+    fact2.evidence.map((evidence) => evidence.ref),
+    topic
+  );
 }
 function isTimingPeriodFact(fact2) {
   return fact2.evidence.some(
@@ -62786,7 +62846,8 @@ var ANSWER_GUARDRAILS = [
   "no-legal-advice",
   "no-investment-advice",
   "no-life-and-death-advice",
-  "no-unsupported-comparison"
+  "no-unsupported-comparison",
+  "distinguish-fact-rule-interpretation"
 ];
 var PUBLIC_WARNING_COPY = {
   TIME_ACCURACY_APPROXIMATE: {
@@ -62802,8 +62863,20 @@ var PUBLIC_WARNING_COPY = {
     nextStep: "\u5982\u80FD\u786E\u8BA4\u5F53\u65F6\u91C7\u7528\u7684\u65F6\u95F4\uFF0C\u53EF\u6838\u5BF9\u8BE5\u9009\u62E9\u3002"
   },
   SOLAR_TIME_APPROXIMATE: {
-    impact: "\u771F\u592A\u9633\u65F6\u4F7F\u7528\u4E86\u8FD1\u4F3C\u65B9\u6CD5\uFF0C\u8FB9\u754C\u9644\u8FD1\u7684\u7ED3\u679C\u53EF\u80FD\u8F83\u654F\u611F\u3002",
-    nextStep: "\u8BF7\u628A\u5B83\u89C6\u4E3A\u4F20\u7EDF\u6587\u5316\u5206\u6790\u4E2D\u7684\u4E0D\u786E\u5B9A\u6027\u8BF4\u660E\u3002"
+    impact: "\u672C\u6B21\u8BA1\u7B97\u5BF9\u90E8\u5206\u67F1/\u5BAB\u91C7\u7528\u4E86\u8FD1\u4F3C\u65B9\u6CD5\u7684\u592A\u9633\u65F6\u949F\u9762\uFF0C\u8BE5\u90E8\u5206\u8D34\u7740\u8FB9\u754C\u7684\u7ED3\u679C\u53EF\u80FD\u8F83\u654F\u611F\u3002",
+    nextStep: "\u8BF7\u628A\u5B83\u89C6\u4E3A\u4F20\u7EDF\u6587\u5316\u5206\u6790\u4E2D\u7684\u4E0D\u786E\u5B9A\u6027\u8BF4\u660E\uFF1B\u5176\u4F59\u6309\u6C11\u7528\u65F6/UTC \u8BA1\u7B97\u7684\u90E8\u5206\u4E0D\u53D7\u5F71\u54CD\u3002"
+  },
+  SIDEREAL_AYANAMSHA_APPROXIMATE: {
+    impact: "\u6052\u661F\u9EC4\u9053\u5750\u6807\u91C7\u7528\u7EBF\u6027 ayanamsha \u6A21\u578B\uFF0C\u5C5E\u8FD1\u4F3C\u503C\u3002",
+    nextStep: "\u6D89\u53CA\u6052\u661F\u9EC4\u9053\u4F4D\u7F6E\u65F6\u6309\u53C2\u8003\u7CBE\u5EA6\u7406\u89E3\u3002"
+  },
+  LUNAR_NODE_APPROXIMATE: {
+    impact: "\u6708\u4EAE\u4EA4\u70B9\u6309\u8FD1\u4F3C\u65B9\u6CD5\u8BA1\u7B97\uFF08\u89D2\u5206\u7EA7\u7CBE\u5EA6\uFF09\u3002",
+    nextStep: "\u6D89\u53CA\u4EA4\u70B9\u4F4D\u7F6E\u7684\u5185\u5BB9\u6309\u53C2\u8003\u7CBE\u5EA6\u7406\u89E3\u3002"
+  },
+  ASTEROID_APPROXIMATE: {
+    impact: "\u5C0F\u884C\u661F\u4F4D\u7F6E\u6309\u8F68\u9053\u6839\u6570\u8FD1\u4F3C\u8BA1\u7B97\uFF08\u4E9A\u5EA6\u7EA7\u7CBE\u5EA6\uFF09\u3002",
+    nextStep: "\u6D89\u53CA\u5C0F\u884C\u661F\u4F4D\u7F6E\u7684\u5185\u5BB9\u6309\u53C2\u8003\u7CBE\u5EA6\u7406\u89E3\u3002"
   },
   SYSTEM_NOT_YET_IMPLEMENTED: {
     impact: "\u6709\u4E00\u4E2A\u6240\u9700\u4F53\u7CFB\u5F53\u524D\u65E0\u6CD5\u8BA1\u7B97\uFF0C\u7ED3\u8BBA\u8303\u56F4\u5DF2\u53D7\u9650\u3002",
@@ -62917,26 +62990,20 @@ function selectAnswerFacts(facts, request) {
   const admittedFacts = facts.filter(
     (fact2) => isDefaultAnswerFact(fact2) && !isLimitationNoteFact(fact2)
   );
-  const topicPool = request.topic === "general" ? admittedFacts : admittedFacts.filter((fact2) => fact2.topic === request.topic);
+  const topicPool = request.topic === "general" ? admittedFacts : admittedFacts.filter((fact2) => isTopicRelevantFact(fact2, request.topic));
   if (request.lens === "timing") {
     return topicPool.filter(isTimingPeriodFact);
   }
-  if (request.topic !== "career") return topicPool;
-  const pillarRef = /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/;
-  const references = topicPool.filter(
-    (fact2) => fact2.evidence.some((e) => e.kind === "bazi" && pillarRef.test(e.ref)) && fact2.evidence.some(
-      (e) => e.kind === "bazi-rule" && e.ref === "bazi-rule/ten-gods/xiang-yi"
-    ) && fact2.evidence.every(
-      (e) => e.kind === "bazi" && pillarRef.test(e.ref) || e.kind === "bazi-rule" && e.ref === "bazi-rule/ten-gods/xiang-yi"
-    )
-  );
-  return references.length === 1 ? references : [];
+  return topicPool;
 }
 var LIMITING_WARNING_CODES = /* @__PURE__ */ new Set([
   "TIME_ACCURACY_APPROXIMATE",
   "TIME_UNKNOWN",
   "DST_AMBIGUOUS_RESOLVED",
   "SOLAR_TIME_APPROXIMATE",
+  "SIDEREAL_AYANAMSHA_APPROXIMATE",
+  "LUNAR_NODE_APPROXIMATE",
+  "ASTEROID_APPROXIMATE",
   "SYSTEM_NOT_YET_IMPLEMENTED",
   "NEAR_BOUNDARY",
   "HIGH_LATITUDE_HOUSE_RISK",
@@ -62992,7 +63059,7 @@ var ALWAYS_MATERIAL_WARNING_CODES = /* @__PURE__ */ new Set([
   "NEAR_BOUNDARY"
 ]);
 var TIME_SENSITIVE_CAVEAT_RE = /出生时间|时辰|宫位|时刻|真太阳时|时间误差|时间未知|需确切|time of day|birth time/i;
-var TIME_SENSITIVE_EVIDENCE_RE = /bazi\.pillars\.hour\.|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
+var TIME_SENSITIVE_EVIDENCE_RE = /bazi\.pillars\.hour\.|bazi\.pillars\.\*\.|ziwei\.palaces|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
 function isTimeSensitiveFact(fact2) {
   if (fact2.caveat !== void 0 && TIME_SENSITIVE_CAVEAT_RE.test(fact2.caveat)) return true;
   return fact2.evidence.some(
@@ -63007,11 +63074,35 @@ function materialWarningCodes(warnings, selectedFacts) {
   }
   return warnings.filter((warning) => {
     if (ALWAYS_MATERIAL_WARNING_CODES.has(warning.code)) return true;
+    if (warning.code === "SOLAR_TIME_APPROXIMATE") {
+      return selectedFacts.some((fact2) => {
+        const affectedEvidence = fact2.evidence.filter(
+          (evidence) => evidenceSystem(evidence.kind) === warning.system
+        );
+        return affectedEvidence.length > 0 && isTimeSensitiveFact({
+          evidence: affectedEvidence,
+          // A mixed-system fact's generic caveat cannot lend another system's
+          // time sensitivity to this consumer either.
+          ...affectedEvidence.length === fact2.evidence.length ? { caveat: fact2.caveat } : {}
+        });
+      });
+    }
     if (warning.system === "time") {
       return factSystems.has("time") || hasTimeSensitiveFact;
     }
-    if (warning.code === "SOLAR_TIME_APPROXIMATE" || warning.code === "TIME_ACCURACY_APPROXIMATE" || warning.code === "DST_AMBIGUOUS_RESOLVED") {
+    if (warning.code === "TIME_ACCURACY_APPROXIMATE" || warning.code === "DST_AMBIGUOUS_RESOLVED") {
       return factSystems.has(warning.system) && hasTimeSensitiveFact;
+    }
+    if (warning.code === "SIDEREAL_AYANAMSHA_APPROXIMATE") return factSystems.has("western");
+    if (warning.code === "LUNAR_NODE_APPROXIMATE") {
+      return selectedFacts.some(
+        (fact2) => fact2.evidence.some((e) => /NorthNode|SouthNode|nodes/i.test(e.ref))
+      );
+    }
+    if (warning.code === "ASTEROID_APPROXIMATE") {
+      return selectedFacts.some(
+        (fact2) => fact2.evidence.some((e) => /chiron|ceres|pallas|juno|vesta|asteroids/i.test(e.ref))
+      );
     }
     return factSystems.has(warning.system);
   }).map((warning) => warning.code);
@@ -63132,8 +63223,14 @@ function maskSafetyDisclaimers(normText) {
 }
 var MEDICAL_RULES = [
   {
+    // 处方 is a genuine medical term, but the two characters also sit inside
+    // ordinary relationship wording (相处方式/相处方法/相处方面 — “相处”+“方…”).
+    // Chinese has no word boundary, so the term is matched with a CLOSED set
+    // of ordinary follow-characters excluded instead; every other context
+    // (开处方、处方药、按处方…) still matches. Genuinely medical sentences
+    // usually also hit 服药/用药/停药 etc.
     id: "medical.treatment-terms",
-    re: /(?:确诊|诊断|患有|得了|治疗|服药|用药|手术|处方|化疗|放疗|抗生素|止痛药)/
+    re: /(?:确诊|诊断|患有|得了|治疗|服药|用药|手术|处方(?!式|法|面|案|向|位|针|便)|化疗|放疗|抗生素|止痛药)/
   },
   { id: "medical.referral-advice", re: /(?:建议(?:去|到|看|找|就)(?:医|诊|院|科))/ },
   {
@@ -64169,6 +64266,7 @@ var VAGUE_MARKERS = [
   "\u6CE8\u610F\u5E73\u8861",
   "\u5B66\u4F1A\u5E73\u8861"
 ];
+var ADVICE_FRAME_RE = /建议|应当|应该|不妨|试试|务必|最好|记得|需要|值得|可以考虑|要考虑|要注意|要学会|要多|要少|争取|未来|以后|接下来|长期来看|关键在于做|最重要的是做|要(?=[\u4e00-\u9fff])/;
 var CONCRETE_ACTION_RE = /分开|分开放|分开记|分成|拆分|记录|记账|记下来|存下|存入|存够|存一笔|固定存|强制储蓄|储蓄|列出|列个|列出来|写进|写下|写下来|写清楚|签|整理|复盘|对账|核对|核实|预算|留[出下备]|备[好足]|控制|控住|收紧|抓住|抓订单|准备|对齐|摊开|说清楚|说出来|讲清楚|讲给|商量|沟通|约[定好]|见面|同居|搬|跳槽|换[到个成工城]|挑选|挑[一]|选[择定]|谈[清拢定]|定[下来]|负责|接[活手]|参与|学[会到]|练[熟出]|考[下证]|做出|做扎实|做熟|做成|拿出|拿给|交付|报价|争取|商量|安排|偿还|还清|分开记录|主动把|先.{0,10}(?:再|然后|之后)/;
 var VAGUE_HINT = "\u62BD\u8C61\u5224\u65AD\u5FC5\u987B\u5728\u540C\u4E00\u53E5\u7528\u5177\u4F53\u52A8\u4F5C/\u53EF\u89C2\u5BDF\u8868\u73B0\u8BB2\u6E05\u695A\uFF08\u6570\u5B57\u3001\u751F\u6D3B\u540D\u8BCD\u53EA\u662F\u8F85\u52A9\uFF0C\u4E0D\u80FD\u5355\u72EC\u7B97\u5177\u4F53\uFF1B\u4E0B\u4E00\u53E5\u4E0D\u76F8\u5173\u5185\u5BB9\u4E0D\u7B97\uFF09";
 var INCOME_FACT_RE = /收入|薪资|薪水|薪酬|进账|赚|回报|财运|财星|财格|得财|进财/;
@@ -64304,7 +64402,7 @@ function lintReading(md, options = {}) {
     }
     if (!sent.isHeading && !sent.followup) {
       const marker = VAGUE_MARKERS.find((mk) => sent.text.includes(mk));
-      if (marker !== void 0 && !CONCRETE_ACTION_RE.test(sent.text)) {
+      if (marker !== void 0 && ADVICE_FRAME_RE.test(sent.text) && !CONCRETE_ACTION_RE.test(sent.text)) {
         const key = `${sent.line}|${marker}|\u7A7A\u8BDD`;
         if (!seen.has(key)) {
           seen.add(key);
@@ -64802,6 +64900,164 @@ function runAnswerPlan(input2, options) {
     followupOffers: answerPlan.followupOffers
   };
   return { publicResult, answerPlan, answerBinding };
+}
+
+// packages/orchestrator/src/synastry-delivery.ts
+import { createHash as createHash2 } from "node:crypto";
+var SYNASTRY_TOPIC = "marriage";
+function sha256Hex2(value) {
+  return `sha256:${createHash2("sha256").update(value, "utf8").digest("hex")}`;
+}
+function digestOfJson2(value) {
+  return sha256Hex2(canonicalJson(value));
+}
+function deriveSynastryRequestDigest(context) {
+  const parsed = parseSynastryInput(context.synastryInput);
+  const payload = {
+    bindingVersion: ANSWER_BINDING_CONTRACT_VERSION,
+    // The parsed people carry each person's FULL birth input and settings;
+    // analyzePair keeps its order, so pair direction is part of the digest.
+    synastryInput: parsed,
+    resolvedTarget: { now: context.now ?? null }
+  };
+  return sha256Hex2(canonicalJson(payload));
+}
+function deriveSynastryPlanDigest(synastryResult, warnings) {
+  return digestOfJson2({ synastryResult, warnings });
+}
+function buildSynastryBinding(context, synastryResult, warnings) {
+  return {
+    contractVersion: ANSWER_BINDING_CONTRACT_VERSION,
+    requestDigest: deriveSynastryRequestDigest(context),
+    planDigest: deriveSynastryPlanDigest(synastryResult, warnings)
+  };
+}
+function sealSynastryReadingDraft(answerBinding, readingDraft) {
+  return sealReadingDraft(answerBinding, readingDraft);
+}
+function synastryFailure(failureReason, binding, validation = null, lint = null) {
+  return {
+    contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+    ok: false,
+    failureReason,
+    binding,
+    validation,
+    lint,
+    deliverableBody: null,
+    deliverableBodySha256: null
+  };
+}
+function requiredSynastryWarningCodes(result, warnings) {
+  const facts = result.findings.flatMap((finding2, index) => {
+    if (finding2.system === "overall") return [];
+    const ref = finding2.system === "bazi" ? finding2.code === "bazi/zodiac" ? "bazi.pillars.year.branch" : "bazi.pillars.*.synastry" : finding2.system === "ziwei" ? "ziwei.palaces" : "western.angles.synastry";
+    return [
+      {
+        id: `fact-${index + 1}`,
+        topic: "marriage",
+        claim: finding2.claim,
+        evidence: [{ kind: finding2.system, ref }]
+      }
+    ];
+  });
+  return [...new Set(materialWarningCodes(warnings, facts))];
+}
+function synastryPlanEnvelope(result, warnings) {
+  return {
+    allowedFactIds: [],
+    requiredCaveats: [],
+    requiredWarningCodes: requiredSynastryWarningCodes(result, warnings),
+    guardrails: [...ANSWER_GUARDRAILS],
+    answerability: result.findings.some((finding2) => finding2.system !== "overall") ? "limited" : "not-supported",
+    request: { topic: SYNASTRY_TOPIC },
+    disclaimers: result.disclaimers
+  };
+}
+function deliverSynastryAnswer(input2) {
+  if (typeof input2 !== "object" || input2 === null) {
+    return synastryFailure("MALFORMED_INPUT", null);
+  }
+  const raw = input2;
+  if (raw.draftSource === void 0 || raw.draftDigest === void 0) {
+    return synastryFailure("DRAFT_ORIGIN_MISSING", null);
+  }
+  let synastryInput;
+  try {
+    synastryInput = parseSynastryInput(raw.currentRequest?.synastryInput);
+  } catch {
+    return synastryFailure("MALFORMED_INPUT", null);
+  }
+  const parsedSource = AnswerBinding.safeParse(raw.draftSource);
+  const parsedDigest = Sha256Digest.safeParse(raw.draftDigest);
+  if (!parsedSource.success || !parsedDigest.success) {
+    return synastryFailure("MALFORMED_INPUT", null);
+  }
+  const parsedWarnings = EngineWarning.array().max(256).safeParse(raw.synastryWarnings);
+  if (!parsedWarnings.success) return synastryFailure("MALFORMED_INPUT", null);
+  const currentRequestDigest = deriveSynastryRequestDigest({
+    synastryInput,
+    ...raw.currentRequest?.now !== void 0 ? { now: raw.currentRequest.now } : {}
+  });
+  const requestDigestMatch = currentRequestDigest === parsedSource.data.requestDigest;
+  const planDigestMatch = digestOfJson2({ synastryResult: raw.synastryResult, warnings: parsedWarnings.data }) === parsedSource.data.planDigest;
+  let draftDigestMatch = false;
+  try {
+    draftDigestMatch = digestOfJson2(raw.readingDraft) === parsedDigest.data;
+  } catch {
+    return synastryFailure("MALFORMED_INPUT", null);
+  }
+  if (!requestDigestMatch || !planDigestMatch || !draftDigestMatch) {
+    return synastryFailure("BINDING_MISMATCH", {
+      requestDigestMatch,
+      planDigestMatch,
+      draftDigestMatch
+    });
+  }
+  const result = SynastryResult.safeParse(raw.synastryResult);
+  if (!result.success) return synastryFailure("MALFORMED_INPUT", null);
+  const validation = validateAnswer({
+    answerPlan: synastryPlanEnvelope(result.data, parsedWarnings.data),
+    readingDraft: raw.readingDraft
+  });
+  if (!validation.ok) {
+    return synastryFailure(
+      "VALIDATION_FAILED",
+      { requestDigestMatch, planDigestMatch, draftDigestMatch },
+      validation
+    );
+  }
+  const draftShape = raw.readingDraft;
+  if (!Array.isArray(draftShape.sections)) return synastryFailure("MALFORMED_INPUT", null);
+  const sections = [];
+  for (const section of draftShape.sections) {
+    if (typeof section?.heading !== "string" || !Array.isArray(section.paragraphs) || section.paragraphs.some((paragraph) => typeof paragraph?.text !== "string")) {
+      return synastryFailure("MALFORMED_INPUT", null);
+    }
+    sections.push({
+      heading: section.heading,
+      paragraphs: section.paragraphs.map((paragraph) => ({ text: paragraph.text }))
+    });
+  }
+  const body = transcribeReadingDraft({ sections });
+  const lint = lintReading(body, { channel: "topic" });
+  if (!lint.ok) {
+    return synastryFailure(
+      "LINT_FAILED",
+      { requestDigestMatch, planDigestMatch, draftDigestMatch },
+      validation,
+      lint
+    );
+  }
+  return {
+    contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+    ok: true,
+    failureReason: null,
+    binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
+    validation,
+    lint,
+    deliverableBody: body,
+    deliverableBodySha256: sha256Hex2(body)
+  };
 }
 
 // packages/contracts/src/clarification-plan.ts
@@ -65309,7 +65565,7 @@ function contextLinkageIssues(context) {
     add(issues, "CONTEXT_LINKAGE", "$.answerPlan.selectedFacts");
   }
   for (const [index, fact2] of answerPlan.selectedFacts.entries()) {
-    if (fact2.topic !== answerPlan.request.topic || !sameJson(publicFactsById.get(fact2.id), fact2)) {
+    if (!isTopicRelevantFact(fact2, answerPlan.request.topic) || !sameJson(publicFactsById.get(fact2.id), fact2)) {
       add(issues, "CONTEXT_LINKAGE", `$.answerPlan.selectedFacts[${index}]`);
     }
   }
@@ -65616,7 +65872,9 @@ function projectResponseView(rawInput) {
   const requestedDepth = resolvedValue(plan, "response-depth", "depth:");
   const system = resolvedValue(plan, "system-scope", "system:");
   const retainedClaims = input2.approvedClaims.filter((claim2, index) => {
-    if (claim2.topic !== topic) throw new ResponseViewPlanningError("TOPIC_SCOPE_MISMATCH");
+    if (!isTopicRelevantMaterial(claim2.topic, claim2.mechanismRefs, topic)) {
+      throw new ResponseViewPlanningError("TOPIC_SCOPE_MISMATCH");
+    }
     if (claim2.system !== system) throw new ResponseViewPlanningError("SYSTEM_SCOPE_MISMATCH");
     return !shouldOmitClaim(input2.claimEligibility[index].sensitivities, plan);
   });
@@ -66148,7 +66406,7 @@ function runSynastry(input2, options = {}) {
   const bundleA = calculate(a.input, { now: options.now });
   const bundleB = calculate(b.input, { now: options.now });
   const focusYear = new Date(options.now ?? Date.now()).getUTCFullYear();
-  const findings = synastryFindings(bundleA, bundleB, focusYear);
+  const findings = a.input.timeAccuracy === "unknown" || b.input.timeAccuracy === "unknown" ? [] : synastryFindings(bundleA, bundleB, focusYear);
   const relation = a.relation !== "unspecified" ? a.relation : b.relation;
   const requestId = `req_syn_${fnv1a64Hex(
     canonicalJson({ people: people.map((p) => p.input), pair: [a.label, b.label], relation })
@@ -66169,7 +66427,18 @@ function runSynastry(input2, options = {}) {
     followupOffers: FOLLOWUP_OFFERS2,
     disclaimers: DISCLAIMERS2
   };
-  return { synastry, warnings: [...bundleA.warnings, ...bundleB.warnings] };
+  const warnings = [...bundleA.warnings, ...bundleB.warnings];
+  const synastryBinding = buildSynastryBinding(
+    { synastryInput: input2, ...options.now !== void 0 ? { now: options.now } : {} },
+    synastry,
+    warnings
+  );
+  return {
+    synastry,
+    warnings,
+    requiredWarningCodes: requiredSynastryWarningCodes(synastry, warnings),
+    synastryBinding
+  };
 }
 
 // packages/orchestrator/src/compare.ts
@@ -66732,14 +67001,18 @@ export {
   VALIDATION_RESULT_CONTRACT_VERSION,
   ValidateAnswerInput,
   buildAnswerBinding,
+  buildSynastryBinding,
   calculate,
   canonicalJson,
   canonicalJsonPretty,
   compareProfiles,
   computeRequestId,
   deliverAnswer,
+  deliverSynastryAnswer,
   deriveAnswerPlanDigest,
   deriveAnswerRequestDigest,
+  deriveSynastryPlanDigest,
+  deriveSynastryRequestDigest,
   doctor,
   escapeHtml,
   lintReading,
@@ -66758,6 +67031,7 @@ export {
   runNormalize,
   runSynastry,
   sealReadingDraft,
+  sealSynastryReadingDraft,
   timeIndexFromHour,
   toEngineError,
   transcribeReadingDraft,

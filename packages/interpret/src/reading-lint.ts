@@ -298,12 +298,19 @@ const DELIVERY_LEAKS: Array<{ term: string; re: RegExp; hint: string }> = [
   },
 ];
 
-// --- Vagueness ("empty talk") detection (ADR 0012, tightened in 9.1) -----------
-// Abstract goals / abilities / advice that say nothing concrete. A sentence carrying
-// an abstract marker must ALSO contain a concrete ACTION / observable behaviour IN THE
-// SAME sentence (numbers and life-nouns are only auxiliary and cannot pass a sentence
-// on their own; an unrelated concrete NEXT sentence cannot rescue it). Heuristic: it
-// cannot judge meaning, only same-sentence concreteness (see docs/VALIDATION.md).
+// --- Vagueness ("empty talk") detection (ADR 0012, tightened in 9.1; scope
+// recalibrated by roadmap v3.4) ----------------------------------------------
+// Abstract goals / abilities / advice that say nothing concrete. The check targets
+// empty ADVICE: a sentence is in scope only when it carries an advice/recommendation
+// or future-goal frame (建议/应该/需要/未来/以后…). Roadmap v3.4 keeps ordinary
+// analytical judgments legal — a descriptive sentence such as “安全感在这段关系里
+// 更重要” or “重点是表达，不是承诺” is normal traditional analysis, not empty talk;
+// its grounding is validated by fact citations, not by this wording gate. An
+// in-scope sentence must ALSO contain a concrete ACTION / observable behaviour IN
+// THE SAME sentence (numbers and life-nouns are only auxiliary and cannot pass a
+// sentence on their own; an unrelated concrete NEXT sentence cannot rescue it).
+// Heuristic: it cannot judge meaning, only same-sentence concreteness
+// (see docs/VALIDATION.md).
 const VAGUE_MARKERS = [
   // 抽象目标（只有目标、没有动作）
   '提升竞争力',
@@ -365,6 +372,10 @@ const VAGUE_MARKERS = [
   '注意平衡',
   '学会平衡',
 ];
+// Advice / recommendation / future-goal frame that brings a marker-bearing sentence
+// into vagueness scope. Descriptive tendency statements stay out of scope.
+const ADVICE_FRAME_RE =
+  /建议|应当|应该|不妨|试试|务必|最好|记得|需要|值得|可以考虑|要考虑|要注意|要学会|要多|要少|争取|未来|以后|接下来|长期来看|关键在于做|最重要的是做|要(?=[\u4e00-\u9fff])/;
 // Concrete ACTION / observable-behaviour verbs. REQUIRED (in the same sentence) for a
 // sentence that also carries an abstract marker. Life-nouns and numbers alone do NOT
 // satisfy this — “在工作中提高竞争力”“未来3年稳中求进” have nouns/numbers but no action.
@@ -546,10 +557,17 @@ export function lintReading(md: string, options: ReadingLintOptions = {}): Readi
         });
       }
     }
-    // --- vagueness (空话): abstract marker without a concrete ACTION in the SAME sentence ---
+    // --- vagueness (空话): abstract marker in an advice/future frame without a
+    // concrete ACTION in the SAME sentence. Roadmap v3.4: descriptive analytical
+    // judgments (no advice frame) are out of scope here — the fact-boundary and
+    // citation checks carry their grounding.
     if (!sent.isHeading && !sent.followup) {
       const marker = VAGUE_MARKERS.find((mk) => sent.text.includes(mk));
-      if (marker !== undefined && !CONCRETE_ACTION_RE.test(sent.text)) {
+      if (
+        marker !== undefined &&
+        ADVICE_FRAME_RE.test(sent.text) &&
+        !CONCRETE_ACTION_RE.test(sent.text)
+      ) {
         const key = `${sent.line}|${marker}|空话`;
         if (!seen.has(key)) {
           seen.add(key);

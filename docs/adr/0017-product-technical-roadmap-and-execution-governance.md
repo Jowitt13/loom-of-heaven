@@ -4,7 +4,8 @@
 - Date: 2026-08-28
 - Amended: 2026-08-29 — roadmap v2 sequencing and evaluation boundaries
 - Amended: 2026-10-29 — roadmap v3.2 correctness and natal-answer optimization direction
-- Amended: 2026-10-31 — roadmap v3.3 adaptive presentation and reading-draft/v3 (this amendment)
+- Amended: 2026-10-31 — roadmap v3.3 adaptive presentation and reading-draft/v3
+- Amended: 2026-11-01 — roadmap v3.4 four-system topic interpretation (this amendment)
 - Scope: product positioning, technical sequence, command admission, and roadmap change control
 - Related: [Product technical roadmap](../PRODUCT_TECHNICAL_ROADMAP.md),
   [Commander protocol](../COMMANDER_PROTOCOL.md), [ADR 0016](./0016-interpretable-state-and-accuracy-lab.md),
@@ -169,6 +170,42 @@ ruleset admission, source and school gates, privacy defaults, career ADR 0021 bo
 This amendment is not host-installation, merge, or release approval, and does not bump engine,
 ruleset, package, or release versions. `reading-draft/v3` is a draft contract version;
 `loom-product-roadmap/v3.3` is a roadmap version; neither is a product release version.
+
+## Owner-confirmed answer-direction change — 2026-11-01
+
+The owner confirmed the four-system topic-interpretation direction, frozen in
+[`../FOUR_SYSTEM_INTERPRETATION_DIRECTION.md`](../FOUR_SYSTEM_INTERPRETATION_DIRECTION.md) and
+carried by roadmap v3.4 §7 item 4. Trade-off: ordinary topic answers move from restating a small
+prewritten entry set to question-oriented traditional readings over the real four-system chart.
+The engine still computes; the host interprets. Specifically:
+
+- The ADR 0021 single ten-god career ceiling is retired for ordinary topic narration; ADR 0021
+  and ADR 0020 are amended in the same change. Pattern, useful-god, and industry rules remain
+  unadmitted for default bodies; career action advice still originates only from user-stated
+  reality.
+- Topic material selection must reach genuinely relevant admitted material (fixing the blanket
+  Western→character mapping and exact-topic filtering); `general` stays a non-passport and no
+  technical layer gains blanket output permission.
+- The host may build traditional interpretation on cited engine facts and implemented-rule
+  meanings. Three tiers stay distinguishable — computed fact, implemented-rule meaning, host
+  traditional interpretation — and the latter two never claim engine-rule verification; ruleset
+  versions never vouch for a whole model analysis.
+- Narration may compare support, tension, different facets, and incomparability across systems
+  with each cited mechanism intact. This is a narration permission over cited per-system facts;
+  it does not activate IQ-5's `SynthesisRecord`, its exit criteria, voting, or averaging.
+- Expression checks are calibrated (normal analytical judgments vs guarantees, fate verdicts,
+  intimidation, diagnosis) rather than widened by keyword blacklists or disabled by category
+  removal.
+- Precision warnings must state their actual source and actual application (solar-time,
+  ayanamsha, lunar-node, asteroid approximations are no longer conflated); no numeric algorithm
+  changes and no generic warning framework ride along.
+
+The current freeze changes no runtime by itself: implementation follows the roadmap v3.4 change
+with green repository verification. Career acceptance, `BLOCKED_SOURCE_ADMISSION`, C-track
+staging, D1/D2 shadow status, psychology separation, privacy defaults, and release authority are
+unchanged. This amendment is not host-installation, merge, or release approval, and does not bump
+engine, ruleset, package, or release versions. `loom-product-roadmap/v3.4` is a roadmap version,
+not a product release version.
 
 ## Precedence
 

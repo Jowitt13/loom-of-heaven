@@ -224,8 +224,14 @@ interface HighRiskRule {
 
 const MEDICAL_RULES: HighRiskRule[] = [
   {
+    // 处方 is a genuine medical term, but the two characters also sit inside
+    // ordinary relationship wording (相处方式/相处方法/相处方面 — “相处”+“方…”).
+    // Chinese has no word boundary, so the term is matched with a CLOSED set
+    // of ordinary follow-characters excluded instead; every other context
+    // (开处方、处方药、按处方…) still matches. Genuinely medical sentences
+    // usually also hit 服药/用药/停药 etc.
     id: 'medical.treatment-terms',
-    re: /(?:确诊|诊断|患有|得了|治疗|服药|用药|手术|处方|化疗|放疗|抗生素|止痛药)/,
+    re: /(?:确诊|诊断|患有|得了|治疗|服药|用药|手术|处方(?!式|法|面|案|向|位|针|便)|化疗|放疗|抗生素|止痛药)/,
   },
   { id: 'medical.referral-advice', re: /(?:建议(?:去|到|看|找|就)(?:医|诊|院|科))/ },
   {

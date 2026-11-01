@@ -228,7 +228,11 @@ describe('normal lenses and audit content stay intact', () => {
       true,
     );
     const career = runAnswerPlan(A, { now: FIXED, topic: 'career', lens: 'advice' });
-    expect(career.answerPlan.selectedFacts).toHaveLength(1);
+    // Roadmap v3.4: the career topic keeps its four-system material, and a
+    // chart-only plan still never requests practical career advice.
+    expect(career.answerPlan.selectedFacts.length).toBeGreaterThan(1);
+    expect(career.answerPlan.selectedFacts.some((fact) => fact.topic === 'career')).toBe(true);
+    expect(career.answerPlan.responseRequirements.contentOrder).not.toContain('practical-options');
   });
 
   it('explain keeps its technical content order', () => {

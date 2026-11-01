@@ -6,8 +6,10 @@ import {
   fnv1a64Hex,
 } from '@loom/contracts';
 import type { EngineWarning, SynastryInput, SynastryPerson, SynastryResult } from '@loom/contracts';
+import type { AnswerBinding } from '@loom/contracts';
 import { synastryFindings } from '@loom/synastry';
 import { calculate } from './calculate.ts';
+import { buildSynastryBinding, requiredSynastryWarningCodes } from './synastry-delivery.ts';
 
 export interface SynastryRunOptions {
   now?: number;
@@ -50,7 +52,12 @@ function pick(people: SynastryPerson[], label: string): SynastryPerson {
 export function runSynastry(
   input: SynastryInput,
   options: SynastryRunOptions = {},
-): { synastry: SynastryResult; warnings: EngineWarning[] } {
+): {
+  synastry: SynastryResult;
+  warnings: EngineWarning[];
+  requiredWarningCodes: EngineWarning['code'][];
+  synastryBinding: AnswerBinding;
+} {
   const people = input.people;
   let a: SynastryPerson;
   let b: SynastryPerson;
@@ -77,7 +84,14 @@ export function runSynastry(
   const bundleA = calculate(a.input, { now: options.now });
   const bundleB = calculate(b.input, { now: options.now });
   const focusYear = new Date(options.now ?? Date.now()).getUTCFullYear();
-  const findings = synastryFindings(bundleA, bundleB, focusYear);
+  // The shipped pair methods have no whole-day stability proof. Even a BaZi
+  // day branch can change at late Zi; Western aspects can move during the day.
+  // Do not turn either person's internal noon anchor into a pair conclusion.
+  // Exact/approximate runs and the underlying technical charts are unchanged.
+  const findings =
+    a.input.timeAccuracy === 'unknown' || b.input.timeAccuracy === 'unknown'
+      ? []
+      : synastryFindings(bundleA, bundleB, focusYear);
   const relation = a.relation !== 'unspecified' ? a.relation : b.relation;
 
   const requestId = `req_syn_${fnv1a64Hex(
@@ -101,5 +115,21 @@ export function runSynastry(
     disclaimers: DISCLAIMERS,
   };
 
-  return { synastry, warnings: [...bundleA.warnings, ...bundleB.warnings] };
+  // Transient pair binding for bound delivery (roadmap v3.4 review fix #4):
+  // requestDigest covers both birth inputs, labels, pair direction, relation
+  // and the run clock; planDigest covers this result document. Emitted beside
+  // the result exactly like the single-person answer-plan path.
+  const warnings = [...bundleA.warnings, ...bundleB.warnings];
+  const synastryBinding: AnswerBinding = buildSynastryBinding(
+    { synastryInput: input, ...(options.now !== undefined ? { now: options.now } : {}) },
+    synastry,
+    warnings,
+  );
+
+  return {
+    synastry,
+    warnings,
+    requiredWarningCodes: requiredSynastryWarningCodes(synastry, warnings),
+    synastryBinding,
+  };
 }

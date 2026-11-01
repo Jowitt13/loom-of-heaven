@@ -21,12 +21,14 @@ import {
   isDefaultAnswerFact,
   isLimitationNoteFact,
   isTimingPeriodFact,
+  isTopicRelevantFact,
 } from './material-admission.ts';
 
 /** P4 v2 hard cut: public answer plans report every first-class system. */
 const SYSTEMS: ChartSystem[] = ['western', 'bazi', 'ziwei', 'vedic'];
 
-const ANSWER_GUARDRAILS = [
+/** The standard guardrail set; shared with the synastry pair-delivery adapter. */
+export const ANSWER_GUARDRAILS = [
   'traditional-culture-only',
   'evidence-only',
   'no-deterministic-fate',
@@ -35,6 +37,7 @@ const ANSWER_GUARDRAILS = [
   'no-investment-advice',
   'no-life-and-death-advice',
   'no-unsupported-comparison',
+  'distinguish-fact-rule-interpretation',
 ] as const;
 
 /** Fixed public wording. Never pass provider warning.message/detail through this boundary. */
@@ -55,8 +58,20 @@ const PUBLIC_WARNING_COPY: Record<
     nextStep: '如能确认当时采用的时间，可核对该选择。',
   },
   SOLAR_TIME_APPROXIMATE: {
-    impact: '真太阳时使用了近似方法，边界附近的结果可能较敏感。',
-    nextStep: '请把它视为传统文化分析中的不确定性说明。',
+    impact: '本次计算对部分柱/宫采用了近似方法的太阳时钟面，该部分贴着边界的结果可能较敏感。',
+    nextStep: '请把它视为传统文化分析中的不确定性说明；其余按民用时/UTC 计算的部分不受影响。',
+  },
+  SIDEREAL_AYANAMSHA_APPROXIMATE: {
+    impact: '恒星黄道坐标采用线性 ayanamsha 模型，属近似值。',
+    nextStep: '涉及恒星黄道位置时按参考精度理解。',
+  },
+  LUNAR_NODE_APPROXIMATE: {
+    impact: '月亮交点按近似方法计算（角分级精度）。',
+    nextStep: '涉及交点位置的内容按参考精度理解。',
+  },
+  ASTEROID_APPROXIMATE: {
+    impact: '小行星位置按轨道根数近似计算（亚度级精度）。',
+    nextStep: '涉及小行星位置的内容按参考精度理解。',
   },
   SYSTEM_NOT_YET_IMPLEMENTED: {
     impact: '有一个所需体系当前无法计算，结论范围已受限。',
@@ -202,11 +217,13 @@ export function buildPublicResult(
  * Select the facts that may support one request. Topic and lens act TOGETHER:
  * - admission decides whether a fact may be narrated at all;
  * - a limitation-note-only fact (engine disclaimer) is context, never answer basis;
+ * - a topic question sees its own topic PLUS facts whose admitted evidence is
+ *   related to that topic (roadmap v3.4 §7 item 4) — one mechanism may serve
+ *   several questions, `general` is never a passport, and relevance never
+ *   widens admission;
  * - the timing lens keeps ONLY admitted target-period records — natal placements
  *   (pillars, day master, spouse stars, houses, signs, birth-cycle remainders)
- *   are background and never impersonate period evidence, for every topic;
- * - career additionally keeps just the ADR 0021 cultural reference for its
- *   non-timing lenses (no admitted career-timing inference exists).
+ *   are background and never impersonate period evidence, for every topic.
  */
 export function selectAnswerFacts(
   facts: PublicFact[],
@@ -218,31 +235,11 @@ export function selectAnswerFacts(
   const topicPool =
     request.topic === 'general'
       ? admittedFacts
-      : admittedFacts.filter((fact) => fact.topic === request.topic);
+      : admittedFacts.filter((fact) => isTopicRelevantFact(fact, request.topic));
   if (request.lens === 'timing') {
     return topicPool.filter(isTimingPeriodFact);
   }
-  if (request.topic !== 'career') return topicPool;
-
-  // ADR 0021 admits one narrow cultural reference for ordinary career prose,
-  // not every system's career placement. Derive both narration material and
-  // validation constraints from this same set; technical detail remains opt-in.
-  // No admitted career-timing inference exists: do not substitute natal themes.
-  const pillarRef = /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/;
-  const references = topicPool.filter(
-    (fact) =>
-      fact.evidence.some((e) => e.kind === 'bazi' && pillarRef.test(e.ref)) &&
-      fact.evidence.some(
-        (e) => e.kind === 'bazi-rule' && e.ref === 'bazi-rule/ten-gods/xiang-yi',
-      ) &&
-      fact.evidence.every(
-        (e) =>
-          (e.kind === 'bazi' && pillarRef.test(e.ref)) ||
-          (e.kind === 'bazi-rule' && e.ref === 'bazi-rule/ten-gods/xiang-yi'),
-      ),
-  );
-  // Ambiguous or duplicated cultural candidates are not resolved by picking one.
-  return references.length === 1 ? references : [];
+  return topicPool;
 }
 
 const LIMITING_WARNING_CODES = new Set<PublicWarning['code']>([
@@ -250,6 +247,9 @@ const LIMITING_WARNING_CODES = new Set<PublicWarning['code']>([
   'TIME_UNKNOWN',
   'DST_AMBIGUOUS_RESOLVED',
   'SOLAR_TIME_APPROXIMATE',
+  'SIDEREAL_AYANAMSHA_APPROXIMATE',
+  'LUNAR_NODE_APPROXIMATE',
+  'ASTEROID_APPROXIMATE',
   'SYSTEM_NOT_YET_IMPLEMENTED',
   'NEAR_BOUNDARY',
   'HIGH_LATITUDE_HOUSE_RISK',
@@ -322,7 +322,7 @@ const TIME_SENSITIVE_CAVEAT_RE =
   /出生时间|时辰|宫位|时刻|真太阳时|时间误差|时间未知|需确切|time of day|birth time/i;
 
 const TIME_SENSITIVE_EVIDENCE_RE =
-  /bazi\.pillars\.hour\.|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
+  /bazi\.pillars\.hour\.|bazi\.pillars\.\*\.|ziwei\.palaces|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
 
 /** Whether a selected fact's conclusion can move when time/solar input shifts. */
 export function isTimeSensitiveFact(fact: {
@@ -336,7 +336,7 @@ export function isTimeSensitiveFact(fact: {
 }
 
 export function materialWarningCodes(
-  warnings: PublicWarning[],
+  warnings: readonly Pick<PublicWarning, 'code' | 'system'>[],
   selectedFacts: PublicFact[],
 ): PublicWarning['code'][] {
   const factSystems = new Set<EngineWarning['system']>();
@@ -348,15 +348,50 @@ export function materialWarningCodes(
   return warnings
     .filter((warning) => {
       if (ALWAYS_MATERIAL_WARNING_CODES.has(warning.code)) return true;
+      // SOLAR_TIME_APPROXIMATE is emitted by the CONSUMER that applied the
+      // solar clock (system 'bazi'/'ziwei'), so it qualifies only facts of
+      // that same system whose placement is time-sensitive — e.g. it never
+      // attaches to an answer citing only a Western MC. A legacy time-layer
+      // solar warning matches no consumer system and is never material.
+      if (warning.code === 'SOLAR_TIME_APPROXIMATE') {
+        return selectedFacts.some((fact) => {
+          const affectedEvidence = fact.evidence.filter(
+            (evidence) => evidenceSystem(evidence.kind) === warning.system,
+          );
+          return (
+            affectedEvidence.length > 0 &&
+            isTimeSensitiveFact({
+              evidence: affectedEvidence,
+              // A mixed-system fact's generic caveat cannot lend another system's
+              // time sensitivity to this consumer either.
+              ...(affectedEvidence.length === fact.evidence.length ? { caveat: fact.caveat } : {}),
+            })
+          );
+        });
+      }
       if (warning.system === 'time') {
         return factSystems.has('time') || hasTimeSensitiveFact;
       }
       if (
-        warning.code === 'SOLAR_TIME_APPROXIMATE' ||
         warning.code === 'TIME_ACCURACY_APPROXIMATE' ||
         warning.code === 'DST_AMBIGUOUS_RESOLVED'
       ) {
         return factSystems.has(warning.system) && hasTimeSensitiveFact;
+      }
+      // Western precision notes are material only when the answer actually
+      // uses the affected points. Ayanamsha shifts every displayed sidereal
+      // longitude, so its presence makes any selected western fact material;
+      // nodes and asteroids qualify only facts that cite those points.
+      if (warning.code === 'SIDEREAL_AYANAMSHA_APPROXIMATE') return factSystems.has('western');
+      if (warning.code === 'LUNAR_NODE_APPROXIMATE') {
+        return selectedFacts.some((fact) =>
+          fact.evidence.some((e) => /NorthNode|SouthNode|nodes/i.test(e.ref)),
+        );
+      }
+      if (warning.code === 'ASTEROID_APPROXIMATE') {
+        return selectedFacts.some((fact) =>
+          fact.evidence.some((e) => /chiron|ceres|pallas|juno|vesta|asteroids/i.test(e.ref)),
+        );
       }
       return factSystems.has(warning.system);
     })

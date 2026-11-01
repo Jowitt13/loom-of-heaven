@@ -79,9 +79,14 @@ describe('reading-lint: V1 delivery surface', () => {
   });
 
   it('checks emphasized and bulleted lines like ordinary content', () => {
-    const r = lintReading('## 重点\n\n- **提升竞争力**，稳步提升\n- 还想看：事业');
+    // Roadmap v3.4: descriptive tendency wording alone is legal analytical
+    // prose; an advice-frame marker sentence stays empty talk even in bullets.
+    const r = lintReading('## 重点\n\n- **建议妥善处理**，积极面对\n- 还想看：事业');
     expect(r.violations.some((v) => v.category === '空话')).toBe(true);
     expect(r.violations.some((v) => v.term === '自动追问')).toBe(true);
+    // Normal analytical judgments (no advice frame) pass the vagueness rule.
+    expect(lintReading('这段关系的重点在安全感，更突出的是稳定可靠的相处方式。').ok).toBe(true);
+    expect(lintReading('事业上更突出的是专业表达的条理性，不是资源型路线。').ok).toBe(true);
   });
 
   it('formatting never switches an overreach rule off (PR #116 narrow fix)', () => {

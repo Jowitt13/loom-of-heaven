@@ -134,6 +134,24 @@ export function computeBazi(
         ? normalized.solar.meanSolarTimeIso
         : normalized.solar.apparentSolarTimeIso;
     parts = partsFromSolarIso(iso);
+    // This provider is the party that actually APPLIED the solar clock, so the
+    // approximation warning originates here (not in the time layer): only the
+    // apparent clock consumes the equation-of-time approximation — a mean
+    // clock is a longitude offset only and never claims an EOT approximation.
+    // Pillar values near a day/zi-hour boundary are the sensitive facts.
+    if (settings.solarTimeMode === 'apparent') {
+      warnings.push(
+        makeWarning(
+          WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+          'bazi',
+          `Apparent solar time applied to the BaZi pillar clock via the ${normalized.solar.method} equation-of-time approximation (~tenths of a minute); pillars near a day/zi-hour boundary are the sensitive ones.`,
+          {
+            severity: 'info',
+            detail: { method: normalized.solar.method, appliedTo: 'bazi pillars' },
+          },
+        ),
+      );
+    }
   } else {
     if (settings.solarTimeMode !== 'civil') {
       solarTimeApplied = 'civil';

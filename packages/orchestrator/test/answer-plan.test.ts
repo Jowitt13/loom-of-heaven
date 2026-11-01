@@ -40,7 +40,12 @@ describe('public result and answer plan', () => {
       const result = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
       expect(normalize).toHaveBeenCalledTimes(1);
       expect(standalone).not.toHaveBeenCalled();
-      expect(result.answerPlan.allowedFactIds).toEqual(['fact-8']);
+      // Roadmap v3.4: the career topic keeps its four-system material — the
+      // officer reference (fact-8), MC (fact-9) and the 官禄宫 (fact-10) —
+      // not just the single cultural reference.
+      expect(result.answerPlan.allowedFactIds).toContain('fact-8');
+      expect(result.answerPlan.allowedFactIds).toContain('fact-9');
+      expect(result.answerPlan.allowedFactIds).toContain('fact-10');
       expect(result.publicResult.systems.every((system) => system.status === 'computed')).toBe(
         true,
       );
@@ -105,7 +110,7 @@ describe('public result and answer plan', () => {
     );
   });
 
-  it('selects only the requested topic facts and makes every usable fact citable', () => {
+  it('selects topic-relevant facts and makes every usable fact citable', () => {
     const { publicResult, answerPlan } = runAnswerPlan(syntheticInput, {
       now: FIXED,
       topic: 'career',
@@ -113,13 +118,35 @@ describe('public result and answer plan', () => {
     });
     expect(answerPlan.request).toEqual({ topic: 'career', lens: 'advice' });
     expect(answerPlan.selectedFacts.length).toBeGreaterThan(0);
-    expect(answerPlan.selectedFacts.every((fact) => fact.topic === 'career')).toBe(true);
+    // Roadmap v3.4: a topic sees its authored facts PLUS related admitted
+    // material (pillars/day-master strength for career); health-only and
+    // other unrelated material stays out.
+    const authored = answerPlan.selectedFacts.filter((fact) => fact.topic === 'career');
+    const related = answerPlan.selectedFacts.filter((fact) => fact.topic !== 'career');
+    expect(authored.length).toBeGreaterThan(0);
+    expect(related.length).toBeGreaterThan(0);
+    expect(
+      related.every((fact) =>
+        fact.evidence.some((evidence) =>
+          [
+            /^bazi-rule\/strength$/,
+            /^bazi\.dayMaster$/,
+            /^bazi\.pillars\.\*\./,
+            /^western-rule\/planet-sign\/sun-/,
+            /^western-rule\/dignity\/(?:sun|saturn)-/,
+            /^ziwei-rule\/palace-star\/soul-/,
+          ].some((pattern) => pattern.test(evidence.ref)),
+        ),
+      ),
+    ).toBe(true);
+    expect(answerPlan.selectedFacts.every((fact) => fact.topic !== 'health')).toBe(true);
     expect(answerPlan.allowedFactIds).toEqual(answerPlan.selectedFacts.map((fact) => fact.id));
     expect(publicResult.facts.map((fact) => fact.id)).toEqual(answerPlan.allowedFactIds);
     expect(answerPlan.responseRequirements.citeSelectedFactIds).toEqual(answerPlan.allowedFactIds);
     expect(answerPlan.responseRequirements.onlyUseSelectedFacts).toBe(true);
     expect(answerPlan.guardrails).toContain('no-investment-advice');
     expect(answerPlan.guardrails).toContain('no-medical-advice');
+    expect(answerPlan.guardrails).toContain('distinguish-fact-rule-interpretation');
   });
 
   it('is deterministic with a fixed clock and does not fabricate a topic with no evidence', () => {
@@ -287,9 +314,12 @@ describe('public result and answer plan', () => {
         nextStep: 'y',
       },
       {
+        // Review fix #2: the solar approximation warning is emitted by the
+        // CONSUMER that applied the clock (BaZi pillars here), never by the
+        // time layer.
         code: 'SOLAR_TIME_APPROXIMATE' as const,
         severity: 'info' as const,
-        system: 'time' as const,
+        system: 'bazi' as const,
         impact: 'x',
         nextStep: 'y',
       },
@@ -323,16 +353,53 @@ describe('public result and answer plan', () => {
     const mixedCodes = materialWarningCodes(approximateWarnings, [toFact(mixedSameLabel.refs)]);
     expect(mixedCodes).toContain('TIME_ACCURACY_APPROXIMATE');
     expect(mixedCodes).toContain('SOLAR_TIME_APPROXIMATE');
+
+    // A Western-MC-only answer never inherits the BaZi solar warning; a legacy
+    // time-layer solar warning matches no consumer and is never material.
+    const mcOnlyFact = {
+      id: 'fact-9',
+      topic: 'career' as const,
+      claim: '西方中天（MC）位于Leo',
+      evidence: [{ kind: 'western' as const, ref: 'western.angles.mc.sign' }],
+    };
+    expect(materialWarningCodes(approximateWarnings, [mcOnlyFact])).not.toContain(
+      'SOLAR_TIME_APPROXIMATE',
+    );
+    expect(
+      materialWarningCodes(approximateWarnings, [toFact(nonHourOnly.refs), mcOnlyFact]),
+    ).not.toContain('SOLAR_TIME_APPROXIMATE');
+    expect(
+      materialWarningCodes(approximateWarnings, [
+        { ...mcOnlyFact, evidence: [...toFact(nonHourOnly.refs).evidence, ...mcOnlyFact.evidence] },
+      ]),
+    ).not.toContain('SOLAR_TIME_APPROXIMATE');
+    expect(
+      materialWarningCodes(approximateWarnings, [toFact(hourOnly.refs), mcOnlyFact]),
+    ).toContain('SOLAR_TIME_APPROXIMATE');
+    const ziweiSolar = [{ code: 'SOLAR_TIME_APPROXIMATE' as const, system: 'ziwei' as const }];
+    const palace = {
+      ...mcOnlyFact,
+      evidence: [{ kind: 'ziwei' as const, ref: 'ziwei.palaces.命宫' }],
+    };
+    expect(materialWarningCodes(ziweiSolar, [palace])).toContain('SOLAR_TIME_APPROXIMATE');
+    expect(
+      materialWarningCodes(approximateWarnings, [toFact(nonHourOnly.refs), palace]),
+    ).not.toContain('SOLAR_TIME_APPROXIMATE');
+    const legacyTimeSolar = [
+      {
+        code: 'SOLAR_TIME_APPROXIMATE' as const,
+        severity: 'info' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+    ];
+    expect(materialWarningCodes(legacyTimeSolar, [toFact(hourOnly.refs)])).not.toContain(
+      'SOLAR_TIME_APPROXIMATE',
+    );
   });
 
-  it('keeps TIME_UNKNOWN and NEAR_BOUNDARY always material, and time warnings when facts are time-sensitive', () => {
-    const timeFact = {
-      id: 'fact-1',
-      topic: 'general' as const,
-      claim: '西方中天（MC）位于Capricorn',
-      evidence: [{ kind: 'western' as const, ref: 'western.angles.mc.sign' }],
-      caveat: '需确切出生时间方有宫位。',
-    };
+  it('keeps TIME_UNKNOWN and NEAR_BOUNDARY always material, and solar warnings matched to the consuming system', () => {
     const plainFact = {
       id: 'fact-2',
       topic: 'career' as const,
@@ -342,6 +409,12 @@ describe('public result and answer plan', () => {
         { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
       ],
       caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+    };
+    const hourPillarFact = {
+      id: 'fact-3',
+      topic: 'character' as const,
+      claim: '四柱：年:庚午(七杀)  月:己丑(正财)  日:甲辰(日主(日元))  时:丙寅(食神)',
+      evidence: [{ kind: 'bazi' as const, ref: 'bazi.pillars.*.(stem|branch|tenGodDisplay)' }],
     };
     const alwaysWarnings = [
       {
@@ -359,9 +432,10 @@ describe('public result and answer plan', () => {
         nextStep: 'y',
       },
       {
+        // Review fix #2: consumer-emitted (BaZi applied the apparent clock).
         code: 'SOLAR_TIME_APPROXIMATE' as const,
         severity: 'info' as const,
-        system: 'time' as const,
+        system: 'bazi' as const,
         impact: 'x',
         nextStep: 'y',
       },
@@ -381,24 +455,26 @@ describe('public result and answer plan', () => {
       },
       { topic: 'career' },
     );
+    // The year-pillar-only ten-god fact is not time-sensitive, so the BaZi
+    // solar warning stays out of the default body; always-material codes stay.
     expect(plainOnly.requiredWarningCodes).toEqual(['TIME_UNKNOWN', 'NEAR_BOUNDARY']);
-    const timeScoped = buildAnswerPlan(
+    const hourScoped = buildAnswerPlan(
       {
         contractVersion: 'public-result/v2',
         engineVersion: '0.4.0',
         sourceSchemaVersion: '0.1.0',
-        systems: [{ system: 'western', status: 'computed' }],
+        systems: [{ system: 'bazi', status: 'computed' }],
         inputReliability: { timeAccuracy: 'exact', birthTimeKnown: true },
         warnings: alwaysWarnings,
-        facts: [timeFact],
+        facts: [hourPillarFact],
         rulesets: [],
         disclaimers: [],
         followupOffers: [],
       },
-      { topic: 'general', lens: 'explain' },
+      { topic: 'character', lens: 'explain' },
     );
-    expect(timeScoped.requiredWarningCodes).toContain('SOLAR_TIME_APPROXIMATE');
-    expect(timeScoped.requiredWarningCodes).toContain('TIME_UNKNOWN');
+    expect(hourScoped.requiredWarningCodes).toContain('SOLAR_TIME_APPROXIMATE');
+    expect(hourScoped.requiredWarningCodes).toContain('TIME_UNKNOWN');
   });
 
   it('uses fixed public warning copy and removes exact dynamic target dates', () => {
@@ -481,17 +557,24 @@ describe('public result and answer plan', () => {
       topic: 'career',
       lens: 'advice',
     });
-    expect(answerPlan.selectedFacts).toHaveLength(1);
+    expect(answerPlan.selectedFacts.length).toBeGreaterThan(1);
     expect(publicResult.facts).toEqual(answerPlan.selectedFacts);
-    const fact = answerPlan.selectedFacts[0]!;
-    expect(fact.evidence.some((e) => e.kind === 'bazi')).toBe(true);
-    expect(answerPlan.requiredCaveats).toEqual([fact.caveat]);
     expect(answerPlan.requiredWarningCodes).not.toContain('SOLAR_TIME_APPROXIMATE');
     expect(answerPlan.responseRequirements.contentOrder).not.toContain('practical-options');
     // Keep the complete warning record for audit, without forcing it into prose.
     expect(publicResult.warnings).toEqual(technical.publicResult.warnings);
     expect(technical.answerPlan.selectedFacts).toEqual(answerPlan.selectedFacts);
 
+    // A chart-only plan must not request practical career advice; the draft
+    // below narrates one selected fact (the officer reference) with its caveat.
+    const fact = answerPlan.selectedFacts.find((f) => f.id === 'fact-8')!;
+    const scoped = {
+      ...publicResult,
+      facts: [fact],
+    };
+    const scopedPlan = buildAnswerPlan(scoped, { topic: 'career', lens: 'advice' });
+    expect(scopedPlan.selectedFacts).toEqual([fact]);
+    expect(scopedPlan.requiredCaveats).toEqual([fact.caveat]);
     const draft = {
       contractVersion: 'reading-draft/v2',
       topic: 'career',
@@ -508,18 +591,18 @@ describe('public result and answer plan', () => {
           ],
         },
       ],
-      caveatsExpressed: answerPlan.requiredCaveats,
+      caveatsExpressed: scopedPlan.requiredCaveats,
       warningsDisclosed: [],
     };
-    expect(validateAnswer({ answerPlan, readingDraft: draft }).ok).toBe(true);
+    expect(validateAnswer({ answerPlan: scopedPlan, readingDraft: draft }).ok).toBe(true);
     const foreignFact = runAnswerPlan(syntheticInput, {
       now: FIXED,
       topic: 'character',
-    }).answerPlan.selectedFacts.find((f) => f.id !== fact.id)!;
+    }).answerPlan.selectedFacts.find((f) => !answerPlan.allowedFactIds.includes(f.id))!;
     const changedDraft = structuredClone(draft);
     changedDraft.sections[0]!.paragraphs[0]!.sourceFactIds = [foreignFact.id];
     expect(
-      validateAnswer({ answerPlan, readingDraft: changedDraft }).violations.some(
+      validateAnswer({ answerPlan: scopedPlan, readingDraft: changedDraft }).violations.some(
         (v) => v.code === 'UNKNOWN_FACT_ID',
       ),
     ).toBe(true);
@@ -540,11 +623,12 @@ describe('public result and answer plan', () => {
     expect(answerPlan.responseRequirements.contentOrder).not.toContain('practical-options');
   });
 
-  it('rejects mixed, unbacked and ambiguous career references instead of trimming them', () => {
+  it('rejects career facts whose evidence is not admitted instead of trimming them', () => {
     const { publicResult } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
-    const reference = publicResult.facts[0]!;
+    const reference = publicResult.facts.find((fact) => fact.id === 'fact-8')!;
     for (const facts of [
-      [{ ...reference, evidence: reference.evidence.filter((e) => e.kind !== 'bazi-rule') }],
+      // Pattern text appended to a ten-god claim must drop the whole fact
+      // (ADR 0021 split, unchanged by the v3.4 amendment).
       [
         {
           ...reference,
@@ -557,46 +641,103 @@ describe('public result and answer plan', () => {
           ],
         },
       ],
+      // An unadmitted rule ref (useful-god) never rides along.
       [
         {
           ...reference,
           evidence: [
             ...reference.evidence,
             {
-              kind: 'western' as const,
-              ref: 'western.angles.mc.sign',
+              kind: 'bazi-rule' as const,
+              ref: 'bazi-rule/useful-god',
             },
           ],
         },
       ],
-      [reference, { ...reference, id: 'fact-999' }],
+      // A fabricated provider path is not support.
+      [
+        {
+          ...reference,
+          evidence: [
+            {
+              kind: 'bazi' as const,
+              ref: 'bazi.pillars.hour.secret-door',
+            },
+          ],
+        },
+      ],
     ]) {
       const plan = buildAnswerPlan({ ...publicResult, facts }, { topic: 'career' });
-      expect(plan.answerability).toBe('not-supported');
-      expect(plan.selectedFacts).toEqual([]);
+      expect(plan.selectedFacts.find((fact) => fact.id === reference.id)).toBeUndefined();
     }
+    // With ONLY non-admitted career material left, the topic is not answerable.
+    const unadmittedOnly = {
+      ...publicResult,
+      facts: [
+        {
+          ...reference,
+          evidence: [
+            {
+              kind: 'bazi-rule' as const,
+              ref: 'bazi-rule/pattern',
+            },
+          ],
+        },
+      ],
+    };
+    const plan = buildAnswerPlan(unadmittedOnly, { topic: 'career' });
+    expect(plan.answerability).toBe('not-supported');
+    expect(plan.selectedFacts).toEqual([]);
   });
 
-  it('does not narrow other topics or the explicitly requested technical overview', () => {
+  it('keeps every topic on its authored facts plus bounded related material', () => {
     const { publicResult } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'general' });
     expect(buildAnswerPlan(publicResult, { topic: 'general' }).selectedFacts).toEqual(
       publicResult.facts,
     );
     for (const topic of ['character', 'wealth', 'marriage', 'studies', 'health'] as const) {
-      expect(buildAnswerPlan(publicResult, { topic }).selectedFacts).toEqual(
-        publicResult.facts.filter((fact) => fact.topic === topic),
-      );
+      const selected = buildAnswerPlan(publicResult, { topic }).selectedFacts;
+      // Every authored fact of the topic is selected...
+      for (const fact of publicResult.facts.filter((fact) => fact.topic === topic)) {
+        expect(selected).toContainEqual(fact);
+      }
+      // ...selected facts are the authored set plus related admitted material,
+      // and nothing outside both (health has no related-material rules here).
+      const selectedIds = selected.map((fact) => fact.id);
+      const authoredIds = publicResult.facts
+        .filter((fact) => fact.topic === topic)
+        .map((fact) => fact.id);
+      for (const id of selectedIds) {
+        if (!authoredIds.includes(id)) {
+          const fact = publicResult.facts.find((entry) => entry.id === id)!;
+          // Related material for love/studies questions is the classic
+          // Venus/Moon/Mars and Mercury evidence; for health none exists.
+          if (topic === 'marriage') {
+            expect(
+              fact.evidence.some((evidence) => /(?:venus|moon|mars)/i.test(evidence.ref)),
+            ).toBe(true);
+          } else if (topic === 'studies') {
+            expect(fact.evidence.some((evidence) => /mercury/i.test(evidence.ref))).toBe(true);
+          } else {
+            expect(fact.topic).toBe(topic);
+          }
+        }
+      }
     }
   });
 
-  it('offers at most one ten-god cultural reference with its non-prophecy caveat', () => {
+  it('offers at most one ten-god cultural reference per officer label with its non-prophecy caveat', () => {
     const { answerPlan } = runAnswerPlan(syntheticInput, { now: FIXED, topic: 'career' });
     const tenGodFacts = answerPlan.selectedFacts.filter((fact) =>
       fact.evidence.some((evidence) =>
         /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/.test(evidence.ref),
       ),
     );
-    expect(tenGodFacts.length).toBeLessThanOrEqual(1);
+    // ADR 0021 amended 2026-11-01: one fact per DISTINCT officer label; this
+    // chart carries only 七杀, so exactly one reference appears.
+    const labels = tenGodFacts.map((fact) => fact.claim.match(/「(.+?)」/)?.[1]);
+    expect(new Set(labels).size).toBe(labels.length);
+    expect(tenGodFacts.length).toBeLessThanOrEqual(2);
     for (const fact of tenGodFacts) {
       expect(fact.claim).toMatch(/命盘里有「.+」这一传统十神/);
       expect(fact.claim).not.toMatch(/格/);
@@ -616,14 +757,23 @@ describe('public result and answer plan', () => {
     }
   });
 
-  it('omits the cultural reference when 正官 and 七杀 co-occur (no arbitrary winner)', async () => {
-    const { selectCareerOfficerLabel } = await import('@loom/interpret');
-    expect(selectCareerOfficerLabel(['七杀'])).toBe('七杀');
-    expect(selectCareerOfficerLabel(['正官'])).toBe('正官');
-    expect(selectCareerOfficerLabel(['七杀', '七杀'])).toBe('七杀');
+  it('emits one cultural reference per distinct officer label instead of omitting co-occurrence', async () => {
+    const { selectCareerOfficerLabel, careerOfficerLabelEvidences } =
+      await import('@loom/interpret');
+    // Retired single-label resolution (kept as a helper): co-occurrence has no
+    // single winner...
     expect(selectCareerOfficerLabel(['正官', '七杀'])).toBeNull();
-    expect(selectCareerOfficerLabel(['七杀', '正官', '正官'])).toBeNull();
-    expect(selectCareerOfficerLabel([])).toBeNull();
-    expect(selectCareerOfficerLabel(['正财'])).toBeNull();
+    expect(selectCareerOfficerLabel(['七杀'])).toBe('七杀');
+    // ...but the fact layer now cites BOTH labels, each with its own pillars.
+    expect(
+      careerOfficerLabelEvidences([
+        { pillar: 'year', tenGod: '七杀' },
+        { pillar: 'hour', tenGod: '正官' },
+      ]),
+    ).toEqual([
+      { label: '七杀', refs: ['bazi.pillars.year.tenGod'] },
+      { label: '正官', refs: ['bazi.pillars.hour.tenGod'] },
+    ]);
+    expect(careerOfficerLabelEvidences([{ pillar: 'day', tenGod: '正财' }])).toEqual([]);
   });
 });

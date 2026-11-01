@@ -1,12 +1,17 @@
 # Commander protocol
 
 - Protocol id: `loom-commander-protocol/v3`
-- Governing roadmap: `roadmap: loom-product-roadmap/v3.3`
+- Governing roadmap: `roadmap: loom-product-roadmap/v3.4`
 - Maintenance update: 2026-10-22, owner-authorized workflow simplification.
 - Route alignment: 2026-10-29, owner-confirmed correctness and natal-answer focus.
 - Route alignment: 2026-10-31, owner-confirmed adaptive presentation (roadmap v3.3 / ADR 0017
   amendment): scannable layout via reading-draft/v3, fact-owned caveat scoping in bound delivery;
   every other boundary unchanged.
+- Route alignment: 2026-11-01, owner-confirmed four-system topic interpretation (roadmap v3.4 /
+  ADR 0017 amendment): question-oriented readings over the real four-system chart; the ADR 0021
+  single-reference career ceiling is retired for topic narration (ADR 0021/0020 amended in the
+  same change); the host may interpret from cited facts without claiming engine-rule
+  verification; precision warnings state their actual source; every other boundary unchanged.
 
 ## Ordinary work
 
@@ -37,9 +42,12 @@ Human review and sealed holdouts remain optional. Their absence does not block I
 
 Calculation remains deterministic and offline. Preserve source references, material caveats and
 privacy; do not invent chart values or user history. Candidate claims need verification before
-narration. Separate systems and clinical/nonclinical capabilities. ADR 0021 bounds career output:
-one admitted ten-god cultural reference at most; career practices use user-stated reality.
-Default answers are natural prose with material limits inline, not technical footer panels.
+narration. Separate systems and clinical/nonclinical capabilities. Career topic output follows
+roadmap v3.4 and the amended ADR 0021: four-system career-relevant material from the real chart,
+occupational fields only as traditional-symbolism directions, no chart-derived career-fit
+verdict, pattern/useful-god/industry rules stay out of default bodies, and career action advice
+uses user-stated reality only. Default answers are natural prose with material limits inline,
+not technical footer panels.
 
 ## Delivery and decisions
 
@@ -57,9 +65,12 @@ may not silently jump to technique expansion, UI, memory or publication.
 For the owner's current optimization work, use the single fixed list in
 [roadmap section 7](PRODUCT_TECHNICAL_ROADMAP.md#current-optimization-direction--owner-confirmed-2026-10-29):
 proven correctness and evidence-identity repairs, bounded answer-path repairs, then one readable
-natal-answer loop from already-admitted material. The first implementation scope is real
-Gregorian-date validation plus ruleset-version authenticity. Career's source blocker does not
-block these tasks and is not lifted by them; cross-system synthesis remains deferred.
+natal-answer loop from already-admitted material, plus the 2026-11-01 four-system
+topic-interpretation item (§7 item 4: lift the career single-reference ceiling, repair topic
+material selection, host interpretation grounded in cited facts, calibrated expression checks,
+honest precision-warning provenance). The first implementation scope is real Gregorian-date
+validation plus ruleset-version authenticity. Career's source blocker does not block these tasks
+and is not lifted by them; cross-system synthesis remains deferred.
 
 Name the item, affected user behavior, and its done condition in the ordinary four-field task.
 Add the failing synthetic regression beside its fix instead of creating a separate baseline

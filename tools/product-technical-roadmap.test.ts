@@ -15,27 +15,62 @@ const NARRATIVE = read('docs/NARRATIVE_OUTPUT_V1.md');
 const TEN_GOD_ADR = read('docs/adr/0021-ten-god-cultural-reference.md');
 
 describe('product technical roadmap and commander governance', () => {
-  it('records an owner-confirmed v3.3 roadmap and accepted route-change ADR', () => {
-    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v3.3`');
+  it('records an owner-confirmed v3.4 roadmap and accepted route-change ADR', () => {
+    expect(ROADMAP).toContain('Roadmap id: `loom-product-roadmap/v3.4`');
     expect(ROADMAP).toContain('Status: **Accepted and owner-confirmed**');
-    expect(ROADMAP).toContain('Confirmed: 2026-10-31');
-    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v3.2`');
-    expect(ROADMAP).toContain('`loom-product-roadmap/v3.3` — 2026-10-31: **version change**');
+    expect(ROADMAP).toContain('Confirmed: 2026-11-01');
+    expect(ROADMAP).toContain('Supersedes: `loom-product-roadmap/v3.3`');
+    expect(ROADMAP).toContain('`loom-product-roadmap/v3.4` — 2026-11-01: **version change**');
     // History is retained, not rewritten.
+    expect(ROADMAP).toContain('`loom-product-roadmap/v3.3` — 2026-10-31: **version change**');
     expect(ROADMAP).toContain('`loom-product-roadmap/v3.2` — 2026-10-29: **version change**');
     expect(GOVERNANCE_ADR).toContain('Status: Accepted');
     expect(GOVERNANCE_ADR).toContain('Amended: 2026-08-29');
     expect(GOVERNANCE_ADR).toContain('Amended: 2026-10-29');
     expect(GOVERNANCE_ADR).toContain('Amended: 2026-10-31');
+    expect(GOVERNANCE_ADR).toContain('Amended: 2026-11-01');
     expect(GOVERNANCE_ADR).toContain('## Owner-confirmed focus change — 2026-10-29');
     expect(GOVERNANCE_ADR).toContain('## Owner-confirmed presentation change — 2026-10-31');
+    expect(GOVERNANCE_ADR).toContain('## Owner-confirmed answer-direction change — 2026-11-01');
     expect(GOVERNANCE_ADR).toContain('The current freeze changes no runtime');
     expect(ROUTE_ADR).toContain('Status: Accepted');
     expect(ROUTE_ADR).toContain('Date: 2026-09-03');
     expect(ROUTE_ADR).toContain('This ADR changes no runtime');
-    expect(AGENTS).toContain('loom-product-roadmap/v3.3');
+    expect(AGENTS).toContain('loom-product-roadmap/v3.4');
     expect(AGENTS).toContain('loom-commander-protocol/v3');
-    expect(PROTOCOL).toContain('roadmap: loom-product-roadmap/v3.3');
+    expect(PROTOCOL).toContain('roadmap: loom-product-roadmap/v3.4');
+  });
+
+  it('carries the 2026-11-01 four-system topic-interpretation direction with bounded amendments', () => {
+    const DIRECTION = read('docs/FOUR_SYSTEM_INTERPRETATION_DIRECTION.md');
+    const DUAL_SOURCE_ADR = read('docs/adr/0020-dual-provenance-career-layer.md');
+    expect(DIRECTION).toContain('确认日期：2026-11-01');
+    expect(DIRECTION).toContain('loom-product-roadmap/v3.4');
+    expect(ROADMAP).toContain(
+      '#### 4. Four-system topic interpretation — owner-confirmed 2026-11-01',
+    );
+    expect(ROADMAP).toContain('事业单条官杀上限解除');
+    expect(ROADMAP).toContain('主题选材修复');
+    expect(ROADMAP).toContain('近似误差来源修正');
+    expect(ROADMAP).toContain('does not activate');
+    // ADR 0021: ceiling retired for topic narration, glosses and exclusions retained.
+    expect(TEN_GOD_ADR).toContain('Amended: 2026-11-01');
+    expect(TEN_GOD_ADR).toContain('## Amendment — 2026-11-01');
+    expect(TEN_GOD_ADR).toContain('**Retired:**');
+    expect(TEN_GOD_ADR).toContain('remain unadmitted for default bodies');
+    expect(TEN_GOD_ADR).toContain(
+      'BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples is unchanged',
+    );
+    // ADR 0020: composition layers and C-track staging unchanged.
+    expect(DUAL_SOURCE_ADR).toContain('Amended: 2026-11-01');
+    expect(DUAL_SOURCE_ADR).toContain(
+      'R layer remains the **only** source of career action advice',
+    );
+    expect(DUAL_SOURCE_ADR).toContain('C-3 (wiring the T layer into the');
+    // Narrative carries the three tiers and four-system participation.
+    expect(NARRATIVE).toContain('### Interpretation source tiers (roadmap v3.4)');
+    expect(NARRATIVE).toContain('## Four-system topic participation (roadmap v3.4)');
+    expect(NARRATIVE).toContain('## Career body bounds (ADR 0021, amended 2026-11-01)');
   });
 
   it('bounds the v3.3 presentation change to layout and delivery mechanics', () => {

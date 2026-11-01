@@ -137,7 +137,7 @@ describe('IQ-4F explicit bazi-career runtime entry', () => {
     expect(entryExport).toBe(runBaziCareerRuntime);
   });
 
-  it('retains multi-system technical facts without granting explain extra career permission', () => {
+  it('retains multi-system technical facts and lets the career topic use them (roadmap v3.4)', () => {
     const { interpretation } = runInterpret(
       parseBirthInput({
         ...syntheticInput,
@@ -154,15 +154,19 @@ describe('IQ-4F explicit bazi-career runtime entry', () => {
     expect(systems.has('western')).toBe(true);
     expect(systems.has('ziwei')).toBe(true);
     expect(systems.has('vedic')).toBe(true);
+    // The old single-reference narrowing is retired: the career topic (any
+    // lens) now selects the genuinely relevant four-system material, and the
+    // single-system bazi-career entry keeps its own bazi-only boundary.
     const { answerPlan } = runAnswerPlan(syntheticInput, {
       now: FIXED,
       topic: 'career',
       lens: 'explain',
     });
-    expect(
-      answerPlan.selectedFacts.every((fact) =>
-        fact.evidence.every((e) => e.kind === 'bazi' || e.kind === 'bazi-rule'),
-      ),
-    ).toBe(true);
+    const selectedSystems = new Set(
+      answerPlan.selectedFacts.flatMap((fact) => fact.evidence.map((evidence) => evidence.kind)),
+    );
+    expect(selectedSystems.has('bazi')).toBe(true);
+    expect(selectedSystems.has('western')).toBe(true);
+    expect(selectedSystems.has('ziwei')).toBe(true);
   });
 });

@@ -5,6 +5,7 @@ import {
   type PublicFact,
   type PublicResult,
 } from '@loom/contracts';
+import { isTopicRelevantFact } from './material-admission.ts';
 import {
   APPROVED_ANSWER_CLAIM_CONTRACT_VERSION,
   ANSWER_CLAIM_CANDIDATE_CONTRACT_VERSION,
@@ -162,7 +163,12 @@ function contextLinkageIssues(context: ClaimChainContext): AnswerClaimChainIssue
   }
 
   for (const [index, fact] of answerPlan.selectedFacts.entries()) {
-    if (fact.topic !== answerPlan.request.topic || !sameJson(publicFactsById.get(fact.id), fact)) {
+    // Roadmap v3.4: a selected fact may carry its authored topic or a related
+    // one — the same relevance predicate selectAnswerFacts applies.
+    if (
+      !isTopicRelevantFact(fact, answerPlan.request.topic) ||
+      !sameJson(publicFactsById.get(fact.id), fact)
+    ) {
       add(issues, 'CONTEXT_LINKAGE', `$.answerPlan.selectedFacts[${index}]`);
     }
   }

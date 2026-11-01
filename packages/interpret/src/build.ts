@@ -34,7 +34,7 @@ import type {
 
 const DISCLAIMERS: string[] = [
   '传统命理分析（八字/紫微/占星），仅供传统文化、娱乐与自我反思；文中的吉凶倾向、趋势与年份窗口属于命理条件评估，非统计学、非科学预测。',
-  '只据本文 facts 作答（引用其 reason 与 evidence 的 ref/ruleId/出处），不编造星位/宫位/干支/星曜或规则结论；反绝对化——命由经营、非注定。',
+  '事实与规则含义只据本文 facts（引用其 reason 与 evidence 的 ref/ruleId/出处）；在此之上展开的传统解释是宿主分析，须紧扣所引事实，不得冒充引擎规则结论，规则版本不为整篇解释背书；不编造星位/宫位/干支/星曜或规则结论；反绝对化——命由经营、非注定。',
   '不得对医疗、法律、投资、生死等重大事项给出确定性断言；健康提示仅为五行/宫位结构描述、非医疗建议。',
   '基于脱敏命盘离线计算（不含姓名与人生事件）；不为“提升准确度”索取或臆断个人隐私。',
 ];
@@ -205,6 +205,7 @@ export type CareerOfficerPillar = 'year' | 'month' | 'day' | 'hour';
  * Pillar-resolved officer evidence for the ADR 0021 career reference.
  * Emits one `bazi.pillars.<pillar>.tenGod` ref per supporting pillar so
  * time-sensitivity can see an hour-pillar basis (never a `*` wildcard).
+ * Single-label resolution (used by the retired v3.1 narrowing tests).
  */
 export function careerOfficerEvidence(
   placements: ReadonlyArray<{ pillar: CareerOfficerPillar; tenGod: string | null }>,
@@ -221,19 +222,36 @@ export function careerOfficerEvidence(
   return { label, refs };
 }
 
+/**
+ * ADR 0021 (amended 2026-11-01): every DISTINCT officer label present in the
+ * stems becomes its own cultural-reference fact with its own frozen gloss —
+ * co-occurrence no longer omits the reference, and no winner is picked. Each
+ * fact stays single-label so pattern text can never ride along (IQ-4H gate).
+ */
+export function careerOfficerLabelEvidences(
+  placements: ReadonlyArray<{ pillar: CareerOfficerPillar; tenGod: string | null }>,
+): Array<{ label: string; refs: string[] }> {
+  const byLabel = new Map<string, string[]>();
+  for (const placement of placements) {
+    if (placement.tenGod === null) continue;
+    if (placement.tenGod !== '正官' && placement.tenGod !== '七杀') continue;
+    const refs = byLabel.get(placement.tenGod) ?? [];
+    refs.push(`bazi.pillars.${placement.pillar}.tenGod`);
+    byLabel.set(placement.tenGod, refs);
+  }
+  return [...byLabel.entries()].map(([label, refs]) => ({ label, refs }));
+}
+
 function careerFacts(bundle: ChartBundle): InterpretationFact[] {
   const out: InterpretationFact[] = [];
   const b = bundle.bazi;
   if (b) {
-    // ADR 0021: career body gets one ten-god cultural reference only. Pattern
-    // text must never ride along in this claim (IQ-4H source gate).
-    const { label, refs } = careerOfficerEvidence([
+    for (const { label, refs } of careerOfficerLabelEvidences([
       { pillar: 'year', tenGod: b.pillars.year?.tenGod ?? null },
       { pillar: 'month', tenGod: b.pillars.month?.tenGod ?? null },
       { pillar: 'day', tenGod: b.pillars.day?.tenGod ?? null },
       { pillar: 'hour', tenGod: b.pillars.hour?.tenGod ?? null },
-    ]);
-    if (label !== null && refs.length > 0) {
+    ])) {
       const gloss = CAREER_TEN_GOD_GLOSS[label] ?? label;
       out.push(
         fact(

@@ -1,9 +1,13 @@
 # ADR 0021: Ten-god cultural reference in career answers
 
-- Status: Accepted — narrow product policy; limited runtime and Skill alignment only
+- Status: Accepted — narrow product policy; limited runtime and Skill alignment only.
+  **Amended 2026-11-01: the single-reference career ceiling this ADR froze is retired for
+  ordinary topic narration by roadmap v3.4** (see the amendment section); everything the
+  amendment does not restate keeps its original force.
 - Date: 2026-09-08
+- Amended: 2026-11-01 — roadmap v3.4 four-system topic interpretation
 - Scope: whether frozen ten-god symbolism may appear as a brief cultural reference in the default career body
-- Related: [ADR 0020](0020-dual-provenance-career-layer.md) (composition layers; unchanged),
+- Related: [ADR 0020](0020-dual-provenance-career-layer.md) (composition layers; amended 2026-11-01),
   [BAZI_SOURCE_MATRIX](../BAZI_SOURCE_MATRIX.md) (ten-god rows), [Narrative Output V1](../NARRATIVE_OUTPUT_V1.md),
   IQ-4H acceptance packet (`evals/fixtures/synthetic/iq4-acceptance-packet.json`)
 
@@ -89,6 +93,36 @@ If a target sentence needs more than the frozen gloss (e.g. expanding 七杀 int
 - `bazi-career` remains claim-prose-free structured records (IQ-4F); this ADR does not put claim
   text into that entry.
 - C-1/C-2/C-4 stay as previously scoped; no new cards, scores, or evaluation systems.
+
+## Amendment — 2026-11-01 (roadmap v3.4 four-system topic interpretation)
+
+The owner-confirmed four-system topic-interpretation direction
+([`../FOUR_SYSTEM_INTERPRETATION_DIRECTION.md`](../FOUR_SYSTEM_INTERPRETATION_DIRECTION.md);
+roadmap v3.4 §7 item 4) replaces the narrow ceiling this ADR froze for the **default career
+body**:
+
+1. **Retired:** the "at most one ten-god cultural reference" ceiling and the rule that a career
+   question with no transparent 正官/七杀 (or with both co-occurring) yields no chart material at
+   all. Career topic answers now draw on genuinely relevant admitted material from the actual
+   four-system results — work style, drive, professional expression, collaboration, resources,
+   and responsibility — including the frozen ten-god references of this ADR when present.
+2. **Retained from this ADR:** the frozen short glosses (七杀 → 权威、压力、竞争;
+   正官 → 责任、自律、地位) as admitted `bazi-rule/ten-gods/xiang-yi` material; the
+   non-prophecy caveat; the split that keeps pattern text out of ten-god claims; co-occurrence
+   no longer omits the reference — the fact layer may cite both, and the host states each
+   officer ten-god with its own gloss without picking a winner or implying a verdict.
+3. **Still excluded (unchanged):** pattern naming/formation (`bazi-rule/pattern`), useful-god
+   (`bazi-rule/useful-god`), and five-element industry matching (`bazi-rule/industry/wu-xing`)
+   remain unadmitted for default bodies, as do chart-derived career-fit verdicts. Occupational
+   fields may be explored as traditional-symbolism directions from real chart material, never
+   packaged as a real-world career-fit assessment.
+4. **Still true:** career practices/action advice cite only user-stated reality (ADR 0020 R
+   layer); birth-only career answers carry chart analysis with its conditions, no invented work
+   history, and at most one key reality question when reality would materially change the
+   answer. IQ-4H `BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples is unchanged.
+
+The 2026-09-08 text above remains as the historical record of the original decision; where the
+two differ, this amendment governs runtime and Skill text.
 
 ## Non-goals
 

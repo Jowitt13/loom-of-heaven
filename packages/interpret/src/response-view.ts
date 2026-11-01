@@ -9,6 +9,7 @@ import {
 } from '../../contracts/src/response-view.ts';
 import type { ClarificationPlan, DegradationCode } from '../../contracts/src/clarification-plan.ts';
 import type { ApprovedAnswerClaim } from '../../contracts/src/answer-claim.ts';
+import { isTopicRelevantMaterial } from './material-admission.ts';
 
 export type ResponseViewPlanningErrorCode =
   | 'CLARIFICATION_REQUIRED'
@@ -97,7 +98,12 @@ export function projectResponseView(rawInput: unknown): ResponseViewValue {
   const requestedDepth = resolvedValue(plan, 'response-depth', 'depth:');
   const system = resolvedValue(plan, 'system-scope', 'system:');
   const retainedClaims = input.approvedClaims.filter((claim, index) => {
-    if (claim.topic !== topic) throw new ResponseViewPlanningError('TOPIC_SCOPE_MISMATCH');
+    // Roadmap v3.4 relevance semantics (same predicate as fact selection): a
+    // claim authored under a related topic — e.g. pillars/day-master material
+    // for career — belongs to this view; unrelated topics still mismatch.
+    if (!isTopicRelevantMaterial(claim.topic, claim.mechanismRefs, topic)) {
+      throw new ResponseViewPlanningError('TOPIC_SCOPE_MISMATCH');
+    }
     if (claim.system !== system) throw new ResponseViewPlanningError('SYSTEM_SCOPE_MISMATCH');
     return !shouldOmitClaim(input.claimEligibility[index]!.sensitivities, plan);
   });
