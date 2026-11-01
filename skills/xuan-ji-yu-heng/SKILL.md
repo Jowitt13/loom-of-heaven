@@ -159,12 +159,25 @@ When the user uploads **1-5 people** and asks about a relationship (合婚/配�
    which pair, **ask first** — do not guess. Relationship tags: `couple|spouse|dating|ambiguous|ex|family|friend|partner`.
 3. Build `people.json` (`{ people:[{label, relation, input}...], analyzePair:[labelA,labelB] }`) —
    `analyzePair` is REQUIRED when more than two people are given (else the engine errors, asking for it).
-4. Optionally run `calculate --systems all` per person and show each chart; then run `synastry`.
+4. Optionally run `calculate --systems all` per person and show each chart; then run `synastry`
+   with each person's `input.settings.systems` actually enabled for the systems you intend to
+   narrate (default all four; a BaZi-only `people.json` yields only BaZi/overall findings).
 5. Narrate the pair from `synastry.findings` per `references/reading-style.md` (合婚模板): lead with
    契合度+关键张力, cite 八字/紫微/占星 findings, take the angle for the relationship type (夫妻/情侣/暧昧/前任),
    give 相处建议. Keep `disclaimers` internal unless the user asks for technical detail or a
    boundary is material to the current relationship question. **Never** conclude “注定在一起/必分手”.
-6. Use a synastry `followupOffer` only if the user asks to continue; never append it as an automatic menu.
+   未实现的配对方法（如吠陀合盘）如实不提，不补造第四份关系判断；计数（吉/张力项数）不是匹配分。
+6. **合盘正文也走绑定交付**（与单人相同的密封→绑定送检→逐字展示链）：草稿为 `reading-draft/v3`、
+   `topic:"marriage"`，段落不带 `sourceFactIds`，改用 `constraintRefs` 引用 synastry 结果的
+   `disclaimers`（`{kind:"disclaimer", index}`）。`synastry` 命令的输出自带
+   `synastryBinding`（与单人 `answerBinding` 同一 `answer-binding/v1` 记录，覆盖双方出生输入、
+   标签、配对方向、关系类型与运行时钟）：①密封用同一 `validate-answer --seal-draft
+--binding-file synastry.json --input-file draft.json`；②送检加
+   `--synastry --context-input-file people.json --now <与 synastry 相同>`，送检文件为
+   `{ draftSource, draftDigest, synastryResult（完整保存的结果）, readingDraft }`。换任一人输入、
+   换对象/方向/关系、改运行时钟或改草稿，都会被 `BINDING_MISMATCH` 拒绝。单人 answer-plan
+   永远不能给合盘正文背书。
+7. Use a synastry `followupOffer` only if the user asks to continue; never append it as an automatic menu.
 
 ## Commands
 

@@ -174,6 +174,7 @@ async function main() {
     parseValidateAnswerInputBounded,
     deliverAnswer,
     sealReadingDraft,
+    deliverSynastryAnswer,
     CareerRealityContext,
     MAX_VALIDATE_ANSWER_INPUT_BYTES,
     timeIndexFromHour,
@@ -315,10 +316,10 @@ async function main() {
             issues: err && err.issues ? err.issues : String(err),
           });
         }
-        const { synastry, warnings } = runSynastry(parsed, {
+        const { synastry, warnings, synastryBinding } = runSynastry(parsed, {
           now: parseNow(typeof args.now === 'string' ? args.now : undefined),
         });
-        writeOutput(args, canonicalJsonPretty({ ok: true, synastry, warnings }));
+        writeOutput(args, canonicalJsonPretty({ ok: true, synastry, warnings, synastryBinding }));
         return;
       }
       case 'lint-reading': {
@@ -368,7 +369,12 @@ async function main() {
         if (args['seal-draft'] === true) {
           const bindingFile = requireArg(args, 'binding-file');
           const planOutput = readPublicJsonOrThrow(bindingFile, EngineError);
-          const sealed = sealReadingDraft(planOutput.answerBinding, rawInput);
+          // Single-person plans carry answerBinding; the synastry output
+          // carries synastryBinding (same answer-binding/v1 record).
+          const sealed = sealReadingDraft(
+            planOutput.answerBinding ?? planOutput.synastryBinding,
+            rawInput,
+          );
           writePublicOutput(args, canonicalJsonPretty(sealed));
           return;
         }
@@ -390,7 +396,30 @@ async function main() {
         // binds the draft to the CURRENT request (stale subject/topic/lens/target/
         // settings/plan content is rejected) and returns the verbatim deliverable
         // body of the checked text (structure check → transcription → lintReading).
+        // With --synastry the context file is a people.json (pair context:
+        // both birth inputs, labels, pair direction, relation, run clock) and
+        // the input file carries the saved synastry result instead of a plan.
         if (typeof args['context-input-file'] === 'string') {
+          if (args.synastry === true) {
+            const now = parseNow(typeof args.now === 'string' ? args.now : undefined);
+            const currentSynastryInput = readPublicJsonOrThrow(
+              args['context-input-file'],
+              EngineError,
+            );
+            const pairDelivery = deliverSynastryAnswer({
+              currentRequest: {
+                synastryInput: currentSynastryInput,
+                ...(now === undefined ? {} : { now }),
+              },
+              draftSource: rawInput.draftSource,
+              draftDigest: rawInput.draftDigest,
+              synastryResult: rawInput.synastryResult,
+              readingDraft: rawInput.readingDraft,
+            });
+            writePublicOutput(args, canonicalJsonPretty(pairDelivery));
+            if (!pairDelivery.ok) process.exit(1);
+            return;
+          }
           const topic = parseAnswerTopic(args.topic, EngineError);
           const lens = parseAnswerLens(args.lens, EngineError);
           const at = parseAnswerAtOption(args, EngineError, timeIndexFromHour);

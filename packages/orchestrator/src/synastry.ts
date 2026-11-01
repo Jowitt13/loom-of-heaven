@@ -6,8 +6,10 @@ import {
   fnv1a64Hex,
 } from '@loom/contracts';
 import type { EngineWarning, SynastryInput, SynastryPerson, SynastryResult } from '@loom/contracts';
+import type { AnswerBinding } from '@loom/contracts';
 import { synastryFindings } from '@loom/synastry';
 import { calculate } from './calculate.ts';
+import { buildSynastryBinding } from './synastry-delivery.ts';
 
 export interface SynastryRunOptions {
   now?: number;
@@ -50,7 +52,7 @@ function pick(people: SynastryPerson[], label: string): SynastryPerson {
 export function runSynastry(
   input: SynastryInput,
   options: SynastryRunOptions = {},
-): { synastry: SynastryResult; warnings: EngineWarning[] } {
+): { synastry: SynastryResult; warnings: EngineWarning[]; synastryBinding: AnswerBinding } {
   const people = input.people;
   let a: SynastryPerson;
   let b: SynastryPerson;
@@ -101,5 +103,18 @@ export function runSynastry(
     disclaimers: DISCLAIMERS,
   };
 
-  return { synastry, warnings: [...bundleA.warnings, ...bundleB.warnings] };
+  // Transient pair binding for bound delivery (roadmap v3.4 review fix #4):
+  // requestDigest covers both birth inputs, labels, pair direction, relation
+  // and the run clock; planDigest covers this result document. Emitted beside
+  // the result exactly like the single-person answer-plan path.
+  const synastryBinding: AnswerBinding = buildSynastryBinding(
+    { synastryInput: input, ...(options.now !== undefined ? { now: options.now } : {}) },
+    synastry,
+  );
+
+  return {
+    synastry,
+    warnings: [...bundleA.warnings, ...bundleB.warnings],
+    synastryBinding,
+  };
 }

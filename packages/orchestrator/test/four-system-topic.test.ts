@@ -2,7 +2,8 @@
 // Roadmap v3.4 §7 item 4 regressions: four-system topic interpretation.
 import { describe, expect, it } from 'vitest';
 import { parseBirthInput } from '@loom/contracts';
-import { runAnswerPlan } from '@loom/orchestrator';
+import { calculate, runAnswerPlan } from '@loom/orchestrator';
+import { materialWarningCodes } from '@loom/interpret';
 
 const FIXED = Date.parse('2026-01-01T00:00:00Z');
 
@@ -165,4 +166,102 @@ describe('roadmap v3.4 four-system topic interpretation', () => {
     const { answerPlan } = runAnswerPlan(baseInput, { now: FIXED, topic: 'general' });
     expect(answerPlan.guardrails).toContain('distinguish-fact-rule-interpretation');
   });
+
+  it(
+    'emits the solar-time warning only from the consumer that actually applied the clock (review fix #2)',
+    { timeout: 30_000 },
+    () => {
+      // B: only Western is requested; an UNUSED bazi apparent setting never
+      // produces a "solar time applied to BaZi pillars" claim.
+      const westernOnly = parseBirthInput({
+        ...baseInput,
+        settings: {
+          ...baseInput.settings,
+          systems: ['western'],
+          bazi: { ...baseInput.settings.bazi, solarTimeMode: 'apparent' as const },
+        },
+      });
+      const westernChart = calculate(westernOnly, { now: FIXED });
+      expect(westernChart.bazi).toBeUndefined();
+      expect(
+        westernChart.warnings.find((warning) => warning.code === 'SOLAR_TIME_APPROXIMATE'),
+      ).toBeUndefined();
+
+      // Mean mode consumes no equation-of-time approximation (longitude offset
+      // only) and must not claim one.
+      const meanRun = parseBirthInput({
+        ...baseInput,
+        settings: {
+          ...baseInput.settings,
+          bazi: { ...baseInput.settings.bazi, solarTimeMode: 'mean' as const },
+        },
+      });
+      const meanChart = calculate(meanRun, { now: FIXED });
+      expect(
+        meanChart.warnings.find((warning) => warning.code === 'SOLAR_TIME_APPROXIMATE'),
+      ).toBeUndefined();
+
+      // Apparent BaZi: the consumer itself emits the warning, tagged 'bazi',
+      // and it qualifies a pillar-clock answer of that system.
+      const apparentChart = calculate(apparentBirth(), { now: FIXED });
+      const apparentSolar = apparentChart.warnings.find(
+        (warning) => warning.code === 'SOLAR_TIME_APPROXIMATE',
+      );
+      expect(apparentSolar).toBeDefined();
+      expect(apparentSolar!.system).toBe('bazi');
+      expect(apparentSolar!.message).toContain('BaZi pillar clock');
+      const apparentPlan = runAnswerPlan(apparentBirth(), { now: FIXED, topic: 'character' });
+      expect(apparentPlan.answerPlan.requiredWarningCodes).toContain('SOLAR_TIME_APPROXIMATE');
+
+      // Apparent Zi Wei: same rule, tagged 'ziwei', qualifying palace facts.
+      const ziweiApparent = parseBirthInput({
+        ...baseInput,
+        settings: {
+          ...baseInput.settings,
+          systems: ['western', 'bazi', 'ziwei', 'vedic'],
+          ziwei: { ...baseInput.settings.ziwei, useApparentSolarTime: true },
+        },
+      });
+      const ziweiChart = calculate(ziweiApparent, { now: FIXED });
+      const ziweiSolar = ziweiChart.warnings.find(
+        (warning) => warning.code === 'SOLAR_TIME_APPROXIMATE',
+      );
+      expect(ziweiSolar).toBeDefined();
+      expect(ziweiSolar!.system).toBe('ziwei');
+      expect(ziweiSolar!.message).toContain('Zi Wei palace clock');
+      const ziweiPlan = runAnswerPlan(ziweiApparent, { now: FIXED, topic: 'marriage' });
+      expect(ziweiPlan.answerPlan.requiredWarningCodes).toContain('SOLAR_TIME_APPROXIMATE');
+    },
+  );
+
+  it('does not attach the BaZi solar warning to a Western-MC-only answer (review fix #2)', () => {
+    const warnings = [
+      {
+        code: 'SOLAR_TIME_APPROXIMATE' as const,
+        severity: 'info' as const,
+        system: 'bazi' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+    ];
+    const mcOnly = [
+      {
+        id: 'fact-9',
+        topic: 'career' as const,
+        claim: '西方中天（MC）位于Leo',
+        evidence: [{ kind: 'western' as const, ref: 'western.angles.mc.sign' }],
+      },
+    ];
+    expect(materialWarningCodes(warnings, mcOnly)).toEqual([]);
+  });
 });
+
+function apparentBirth() {
+  return parseBirthInput({
+    ...baseInput,
+    settings: {
+      ...baseInput.settings,
+      bazi: { ...baseInput.settings.bazi, solarTimeMode: 'apparent' as const },
+    },
+  });
+}

@@ -27,7 +27,8 @@ import {
 /** P4 v2 hard cut: public answer plans report every first-class system. */
 const SYSTEMS: ChartSystem[] = ['western', 'bazi', 'ziwei', 'vedic'];
 
-const ANSWER_GUARDRAILS = [
+/** The standard guardrail set; shared with the synastry pair-delivery adapter. */
+export const ANSWER_GUARDRAILS = [
   'traditional-culture-only',
   'evidence-only',
   'no-deterministic-fate',
@@ -321,7 +322,7 @@ const TIME_SENSITIVE_CAVEAT_RE =
   /出生时间|时辰|宫位|时刻|真太阳时|时间误差|时间未知|需确切|time of day|birth time/i;
 
 const TIME_SENSITIVE_EVIDENCE_RE =
-  /bazi\.pillars\.hour\.|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
+  /bazi\.pillars\.hour\.|bazi\.pillars\.\*\.|ziwei\.palaces|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
 
 /** Whether a selected fact's conclusion can move when time/solar input shifts. */
 export function isTimeSensitiveFact(fact: {
@@ -347,11 +348,18 @@ export function materialWarningCodes(
   return warnings
     .filter((warning) => {
       if (ALWAYS_MATERIAL_WARNING_CODES.has(warning.code)) return true;
+      // SOLAR_TIME_APPROXIMATE is emitted by the CONSUMER that applied the
+      // solar clock (system 'bazi'/'ziwei'), so it qualifies only facts of
+      // that same system whose placement is time-sensitive — e.g. it never
+      // attaches to an answer citing only a Western MC. A legacy time-layer
+      // solar warning matches no consumer system and is never material.
+      if (warning.code === 'SOLAR_TIME_APPROXIMATE') {
+        return factSystems.has(warning.system) && hasTimeSensitiveFact;
+      }
       if (warning.system === 'time') {
         return factSystems.has('time') || hasTimeSensitiveFact;
       }
       if (
-        warning.code === 'SOLAR_TIME_APPROXIMATE' ||
         warning.code === 'TIME_ACCURACY_APPROXIMATE' ||
         warning.code === 'DST_AMBIGUOUS_RESOLVED'
       ) {

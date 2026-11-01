@@ -386,6 +386,29 @@ run never carries or authorizes reuse of a previous successful body.
 the low-level structural check. Only input with no declared binding takes the structural path, and
 that path — like before — still needs `lint-reading` on the produced text before display.
 
+**Synastry pair delivery (roadmap v3.4).** The `synastry` command emits a `synastryBinding`
+beside its result (same `answer-binding/v1` record): `requestDigest` covers BOTH people's birth
+inputs and settings, the labels, the analyzed pair WITH its direction, the relationship type and
+the run clock; `planDigest` covers the full result document. Sealing is identical
+(`--seal-draft --binding-file synastry.json`). Submission adds `--synastry` and passes the people
+file as the context; the input file carries `{ draftSource, draftDigest, synastryResult, readingDraft }`
+(no `answerPlan` — a single-person plan can never vouch for a pair body):
+
+```text
+node scripts/loom-chart.mjs validate-answer \
+  --input-file pair-delivery-input.json \
+  --synastry \
+  --context-input-file people.json \
+  --now <same clock as the synastry run> \
+  --output-file pair-delivery-result.json
+```
+
+Pair drafts use `topic:"marriage"`; paragraphs carry NO `sourceFactIds` (the synastry path has no
+fact-id contract) and instead reference the result's own `disclaimers` via
+`constraintRefs: [{kind:"disclaimer", index}]`. The structure/safety gate, verbatim transcription
+and lint run exactly as in single-person delivery; changing either person's input, the pair, its
+direction, the relation, the clock — or the draft after sealing — fails with `BINDING_MISMATCH`.
+
 Trust and privacy boundaries:
 
 - The expected context comes from the CURRENT request the host re-submits, not from anything the

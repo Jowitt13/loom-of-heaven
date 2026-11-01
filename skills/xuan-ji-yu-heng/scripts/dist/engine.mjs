@@ -46842,23 +46842,6 @@ function collectTimeWarnings(input2, normalized) {
       )
     );
   }
-  const solarAppliedTo = [
-    ...input2.settings.bazi.solarTimeMode !== "civil" ? ["bazi pillars"] : [],
-    ...input2.settings.ziwei.useApparentSolarTime ? ["ziwei palaces"] : []
-  ];
-  if (normalized.solar !== null && solarAppliedTo.length > 0) {
-    warnings.push(
-      makeWarning(
-        WARNING_CODES.SOLAR_TIME_APPROXIMATE,
-        "time",
-        `Solar time applied to ${solarAppliedTo.join(" and ")} via the ${normalized.solar.method} equation-of-time approximation (~tenths of a minute); Western stays on the UTC instant.`,
-        {
-          severity: "info",
-          detail: { method: normalized.solar.method, appliedTo: solarAppliedTo }
-        }
-      )
-    );
-  }
   if (normalized.timeKnown) {
     const [h, m, s] = normalized.localTime.split(":").map((v) => Number.parseInt(v, 10));
     const secondsFromMidnight = h * 3600 + m * 60 + s;
@@ -54718,6 +54701,19 @@ function computeBazi(normalized, settings, ruleGender) {
   if (settings.solarTimeMode !== "civil" && normalized.solar !== null) {
     const iso = settings.solarTimeMode === "mean" ? normalized.solar.meanSolarTimeIso : normalized.solar.apparentSolarTimeIso;
     parts = partsFromSolarIso(iso);
+    if (settings.solarTimeMode === "apparent") {
+      warnings.push(
+        makeWarning(
+          WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+          "bazi",
+          `Apparent solar time applied to the BaZi pillar clock via the ${normalized.solar.method} equation-of-time approximation (~tenths of a minute); pillars near a day/zi-hour boundary are the sensitive ones.`,
+          {
+            severity: "info",
+            detail: { method: normalized.solar.method, appliedTo: "bazi pillars" }
+          }
+        )
+      );
+    }
   } else {
     if (settings.solarTimeMode !== "civil") {
       solarTimeApplied = "civil";
@@ -54856,9 +54852,23 @@ function buildAstrolabe(normalized, settings, ruleGender) {
   }
   const timeIndex = timeIndexFromHour(hour);
   const gender = ruleGender === "male" ? "\u7537" : "\u5973";
+  const warnings = [];
+  if (useApparent && normalized.solar !== null) {
+    warnings.push(
+      makeWarning(
+        WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+        "ziwei",
+        `Apparent solar time applied to the Zi Wei palace clock via the ${normalized.solar.method} equation-of-time approximation (~tenths of a minute); palace placement near an hour boundary is the sensitive part.`,
+        {
+          severity: "info",
+          detail: { method: normalized.solar.method, appliedTo: "ziwei palaces" }
+        }
+      )
+    );
+  }
   return {
     astrolabe: import_iztro.astro.bySolar(dateStr, timeIndex, gender, true, "zh-CN"),
-    warnings: [],
+    warnings,
     useApparent
   };
 }
@@ -63049,7 +63059,7 @@ var ALWAYS_MATERIAL_WARNING_CODES = /* @__PURE__ */ new Set([
   "NEAR_BOUNDARY"
 ]);
 var TIME_SENSITIVE_CAVEAT_RE = /出生时间|时辰|宫位|时刻|真太阳时|时间误差|时间未知|需确切|time of day|birth time/i;
-var TIME_SENSITIVE_EVIDENCE_RE = /bazi\.pillars\.hour\.|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
+var TIME_SENSITIVE_EVIDENCE_RE = /bazi\.pillars\.hour\.|bazi\.pillars\.\*\.|ziwei\.palaces|hour|house|mc\b|angle|ascendant|lagna|bhava|时柱|宫位|vedic\.derived/i;
 function isTimeSensitiveFact(fact2) {
   if (fact2.caveat !== void 0 && TIME_SENSITIVE_CAVEAT_RE.test(fact2.caveat)) return true;
   return fact2.evidence.some(
@@ -63064,10 +63074,13 @@ function materialWarningCodes(warnings, selectedFacts) {
   }
   return warnings.filter((warning) => {
     if (ALWAYS_MATERIAL_WARNING_CODES.has(warning.code)) return true;
+    if (warning.code === "SOLAR_TIME_APPROXIMATE") {
+      return factSystems.has(warning.system) && hasTimeSensitiveFact;
+    }
     if (warning.system === "time") {
       return factSystems.has("time") || hasTimeSensitiveFact;
     }
-    if (warning.code === "SOLAR_TIME_APPROXIMATE" || warning.code === "TIME_ACCURACY_APPROXIMATE" || warning.code === "DST_AMBIGUOUS_RESOLVED") {
+    if (warning.code === "TIME_ACCURACY_APPROXIMATE" || warning.code === "DST_AMBIGUOUS_RESOLVED") {
       return factSystems.has(warning.system) && hasTimeSensitiveFact;
     }
     if (warning.code === "SIDEREAL_AYANAMSHA_APPROXIMATE") return factSystems.has("western");
@@ -63200,8 +63213,14 @@ function maskSafetyDisclaimers(normText) {
 }
 var MEDICAL_RULES = [
   {
+    // 处方 is a genuine medical term, but the two characters also sit inside
+    // ordinary relationship wording (相处方式/相处方法/相处方面 — “相处”+“方…”).
+    // Chinese has no word boundary, so the term is matched with a CLOSED set
+    // of ordinary follow-characters excluded instead; every other context
+    // (开处方、处方药、按处方…) still matches. Genuinely medical sentences
+    // usually also hit 服药/用药/停药 etc.
     id: "medical.treatment-terms",
-    re: /(?:确诊|诊断|患有|得了|治疗|服药|用药|手术|处方|化疗|放疗|抗生素|止痛药)/
+    re: /(?:确诊|诊断|患有|得了|治疗|服药|用药|手术|处方(?!式|法|面|案|向|位|针|便)|化疗|放疗|抗生素|止痛药)/
   },
   { id: "medical.referral-advice", re: /(?:建议(?:去|到|看|找|就)(?:医|诊|院|科))/ },
   {
@@ -64873,6 +64892,147 @@ function runAnswerPlan(input2, options) {
   return { publicResult, answerPlan, answerBinding };
 }
 
+// packages/orchestrator/src/synastry-delivery.ts
+import { createHash as createHash2 } from "node:crypto";
+var SYNASTRY_TOPIC = "marriage";
+function sha256Hex2(value) {
+  return `sha256:${createHash2("sha256").update(value, "utf8").digest("hex")}`;
+}
+function digestOfJson2(value) {
+  return sha256Hex2(canonicalJson(value));
+}
+function deriveSynastryRequestDigest(context) {
+  const parsed = parseSynastryInput(context.synastryInput);
+  const payload = {
+    bindingVersion: ANSWER_BINDING_CONTRACT_VERSION,
+    // The parsed people carry each person's FULL birth input and settings;
+    // analyzePair keeps its order, so pair direction is part of the digest.
+    synastryInput: parsed,
+    resolvedTarget: { now: context.now ?? null }
+  };
+  return sha256Hex2(canonicalJson(payload));
+}
+function deriveSynastryPlanDigest(synastryResult) {
+  return digestOfJson2(synastryResult);
+}
+function buildSynastryBinding(context, synastryResult) {
+  return {
+    contractVersion: ANSWER_BINDING_CONTRACT_VERSION,
+    requestDigest: deriveSynastryRequestDigest(context),
+    planDigest: deriveSynastryPlanDigest(synastryResult)
+  };
+}
+function sealSynastryReadingDraft(answerBinding, readingDraft) {
+  return sealReadingDraft(answerBinding, readingDraft);
+}
+function synastryFailure(failureReason, binding, validation = null, lint = null) {
+  return {
+    contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+    ok: false,
+    failureReason,
+    binding,
+    validation,
+    lint,
+    deliverableBody: null,
+    deliverableBodySha256: null
+  };
+}
+function synastryPlanEnvelope(result) {
+  return {
+    allowedFactIds: [],
+    requiredCaveats: [],
+    requiredWarningCodes: [],
+    guardrails: [...ANSWER_GUARDRAILS],
+    answerability: "limited",
+    request: { topic: SYNASTRY_TOPIC },
+    disclaimers: result.disclaimers
+  };
+}
+function deliverSynastryAnswer(input2) {
+  if (typeof input2 !== "object" || input2 === null) {
+    return synastryFailure("MALFORMED_INPUT", null);
+  }
+  const raw = input2;
+  if (raw.draftSource === void 0 || raw.draftDigest === void 0) {
+    return synastryFailure("DRAFT_ORIGIN_MISSING", null);
+  }
+  let synastryInput;
+  try {
+    synastryInput = parseSynastryInput(raw.currentRequest?.synastryInput);
+  } catch {
+    return synastryFailure("MALFORMED_INPUT", null);
+  }
+  const parsedSource = AnswerBinding.safeParse(raw.draftSource);
+  const parsedDigest = Sha256Digest.safeParse(raw.draftDigest);
+  if (!parsedSource.success || !parsedDigest.success) {
+    return synastryFailure("MALFORMED_INPUT", null);
+  }
+  const currentRequestDigest = deriveSynastryRequestDigest({
+    synastryInput,
+    ...raw.currentRequest?.now !== void 0 ? { now: raw.currentRequest.now } : {}
+  });
+  const requestDigestMatch = currentRequestDigest === parsedSource.data.requestDigest;
+  const planDigestMatch = digestOfJson2(raw.synastryResult) === parsedSource.data.planDigest;
+  let draftDigestMatch = false;
+  try {
+    draftDigestMatch = digestOfJson2(raw.readingDraft) === parsedDigest.data;
+  } catch {
+    return synastryFailure("MALFORMED_INPUT", null);
+  }
+  if (!requestDigestMatch || !planDigestMatch || !draftDigestMatch) {
+    return synastryFailure("BINDING_MISMATCH", {
+      requestDigestMatch,
+      planDigestMatch,
+      draftDigestMatch
+    });
+  }
+  const result = SynastryResult.safeParse(raw.synastryResult);
+  if (!result.success) return synastryFailure("MALFORMED_INPUT", null);
+  const validation = validateAnswer({
+    answerPlan: synastryPlanEnvelope(result.data),
+    readingDraft: raw.readingDraft
+  });
+  if (!validation.ok) {
+    return synastryFailure(
+      "VALIDATION_FAILED",
+      { requestDigestMatch, planDigestMatch, draftDigestMatch },
+      validation
+    );
+  }
+  const draftShape = raw.readingDraft;
+  if (!Array.isArray(draftShape.sections)) return synastryFailure("MALFORMED_INPUT", null);
+  const sections = [];
+  for (const section of draftShape.sections) {
+    if (typeof section?.heading !== "string" || !Array.isArray(section.paragraphs) || section.paragraphs.some((paragraph) => typeof paragraph?.text !== "string")) {
+      return synastryFailure("MALFORMED_INPUT", null);
+    }
+    sections.push({
+      heading: section.heading,
+      paragraphs: section.paragraphs.map((paragraph) => ({ text: paragraph.text }))
+    });
+  }
+  const body = transcribeReadingDraft({ sections });
+  const lint = lintReading(body, { channel: "topic" });
+  if (!lint.ok) {
+    return synastryFailure(
+      "LINT_FAILED",
+      { requestDigestMatch, planDigestMatch, draftDigestMatch },
+      validation,
+      lint
+    );
+  }
+  return {
+    contractVersion: ANSWER_DELIVERY_CONTRACT_VERSION,
+    ok: true,
+    failureReason: null,
+    binding: { requestDigestMatch, planDigestMatch, draftDigestMatch },
+    validation,
+    lint,
+    deliverableBody: body,
+    deliverableBodySha256: sha256Hex2(body)
+  };
+}
+
 // packages/contracts/src/clarification-plan.ts
 var CLARIFICATION_PLAN_CONTRACT_VERSION = "clarification-plan/v1";
 var ClarificationQuestionId = external_exports.enum([
@@ -66240,7 +66400,15 @@ function runSynastry(input2, options = {}) {
     followupOffers: FOLLOWUP_OFFERS2,
     disclaimers: DISCLAIMERS2
   };
-  return { synastry, warnings: [...bundleA.warnings, ...bundleB.warnings] };
+  const synastryBinding = buildSynastryBinding(
+    { synastryInput: input2, ...options.now !== void 0 ? { now: options.now } : {} },
+    synastry
+  );
+  return {
+    synastry,
+    warnings: [...bundleA.warnings, ...bundleB.warnings],
+    synastryBinding
+  };
 }
 
 // packages/orchestrator/src/compare.ts
@@ -66803,14 +66971,18 @@ export {
   VALIDATION_RESULT_CONTRACT_VERSION,
   ValidateAnswerInput,
   buildAnswerBinding,
+  buildSynastryBinding,
   calculate,
   canonicalJson,
   canonicalJsonPretty,
   compareProfiles,
   computeRequestId,
   deliverAnswer,
+  deliverSynastryAnswer,
   deriveAnswerPlanDigest,
   deriveAnswerRequestDigest,
+  deriveSynastryPlanDigest,
+  deriveSynastryRequestDigest,
   doctor,
   escapeHtml,
   lintReading,
@@ -66829,6 +67001,7 @@ export {
   runNormalize,
   runSynastry,
   sealReadingDraft,
+  sealSynastryReadingDraft,
   timeIndexFromHour,
   toEngineError,
   transcribeReadingDraft,

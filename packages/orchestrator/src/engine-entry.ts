@@ -33,6 +33,16 @@ export type {
   DeliverAnswerInput,
 } from './answer-delivery.ts';
 
+// Thin pair-context adapter for synastry bound delivery (roadmap v3.4 review
+// fix #4): reuses the same sealing/binding/validation/transcription/lint path.
+export {
+  buildSynastryBinding,
+  deliverSynastryAnswer,
+  deriveSynastryPlanDigest,
+  deriveSynastryRequestDigest,
+  sealSynastryReadingDraft,
+} from './synastry-delivery.ts';
+
 // IQ-4F explicit single-system (bazi) career runtime entry. Serves only the
 // frozen versioned records; the generic answer-plan verb above stays the
 // unspecified-system default.

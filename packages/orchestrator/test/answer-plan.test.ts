@@ -314,9 +314,12 @@ describe('public result and answer plan', () => {
         nextStep: 'y',
       },
       {
+        // Review fix #2: the solar approximation warning is emitted by the
+        // CONSUMER that applied the clock (BaZi pillars here), never by the
+        // time layer.
         code: 'SOLAR_TIME_APPROXIMATE' as const,
         severity: 'info' as const,
-        system: 'time' as const,
+        system: 'bazi' as const,
         impact: 'x',
         nextStep: 'y',
       },
@@ -350,16 +353,33 @@ describe('public result and answer plan', () => {
     const mixedCodes = materialWarningCodes(approximateWarnings, [toFact(mixedSameLabel.refs)]);
     expect(mixedCodes).toContain('TIME_ACCURACY_APPROXIMATE');
     expect(mixedCodes).toContain('SOLAR_TIME_APPROXIMATE');
+
+    // A Western-MC-only answer never inherits the BaZi solar warning; a legacy
+    // time-layer solar warning matches no consumer and is never material.
+    const mcOnlyFact = {
+      id: 'fact-9',
+      topic: 'career' as const,
+      claim: '西方中天（MC）位于Leo',
+      evidence: [{ kind: 'western' as const, ref: 'western.angles.mc.sign' }],
+    };
+    expect(materialWarningCodes(approximateWarnings, [mcOnlyFact])).not.toContain(
+      'SOLAR_TIME_APPROXIMATE',
+    );
+    const legacyTimeSolar = [
+      {
+        code: 'SOLAR_TIME_APPROXIMATE' as const,
+        severity: 'info' as const,
+        system: 'time' as const,
+        impact: 'x',
+        nextStep: 'y',
+      },
+    ];
+    expect(materialWarningCodes(legacyTimeSolar, [toFact(hourOnly.refs)])).not.toContain(
+      'SOLAR_TIME_APPROXIMATE',
+    );
   });
 
-  it('keeps TIME_UNKNOWN and NEAR_BOUNDARY always material, and time warnings when facts are time-sensitive', () => {
-    const timeFact = {
-      id: 'fact-1',
-      topic: 'general' as const,
-      claim: '西方中天（MC）位于Capricorn',
-      evidence: [{ kind: 'western' as const, ref: 'western.angles.mc.sign' }],
-      caveat: '需确切出生时间方有宫位。',
-    };
+  it('keeps TIME_UNKNOWN and NEAR_BOUNDARY always material, and solar warnings matched to the consuming system', () => {
     const plainFact = {
       id: 'fact-2',
       topic: 'career' as const,
@@ -369,6 +389,12 @@ describe('public result and answer plan', () => {
         { kind: 'bazi-rule' as const, ref: 'bazi-rule/ten-gods/xiang-yi' },
       ],
       caveat: '官杀仅示事业/责任倾向的结构，非职业预言。',
+    };
+    const hourPillarFact = {
+      id: 'fact-3',
+      topic: 'character' as const,
+      claim: '四柱：年:庚午(七杀)  月:己丑(正财)  日:甲辰(日主(日元))  时:丙寅(食神)',
+      evidence: [{ kind: 'bazi' as const, ref: 'bazi.pillars.*.(stem|branch|tenGodDisplay)' }],
     };
     const alwaysWarnings = [
       {
@@ -386,9 +412,10 @@ describe('public result and answer plan', () => {
         nextStep: 'y',
       },
       {
+        // Review fix #2: consumer-emitted (BaZi applied the apparent clock).
         code: 'SOLAR_TIME_APPROXIMATE' as const,
         severity: 'info' as const,
-        system: 'time' as const,
+        system: 'bazi' as const,
         impact: 'x',
         nextStep: 'y',
       },
@@ -408,24 +435,26 @@ describe('public result and answer plan', () => {
       },
       { topic: 'career' },
     );
+    // The year-pillar-only ten-god fact is not time-sensitive, so the BaZi
+    // solar warning stays out of the default body; always-material codes stay.
     expect(plainOnly.requiredWarningCodes).toEqual(['TIME_UNKNOWN', 'NEAR_BOUNDARY']);
-    const timeScoped = buildAnswerPlan(
+    const hourScoped = buildAnswerPlan(
       {
         contractVersion: 'public-result/v2',
         engineVersion: '0.4.0',
         sourceSchemaVersion: '0.1.0',
-        systems: [{ system: 'western', status: 'computed' }],
+        systems: [{ system: 'bazi', status: 'computed' }],
         inputReliability: { timeAccuracy: 'exact', birthTimeKnown: true },
         warnings: alwaysWarnings,
-        facts: [timeFact],
+        facts: [hourPillarFact],
         rulesets: [],
         disclaimers: [],
         followupOffers: [],
       },
-      { topic: 'general', lens: 'explain' },
+      { topic: 'character', lens: 'explain' },
     );
-    expect(timeScoped.requiredWarningCodes).toContain('SOLAR_TIME_APPROXIMATE');
-    expect(timeScoped.requiredWarningCodes).toContain('TIME_UNKNOWN');
+    expect(hourScoped.requiredWarningCodes).toContain('SOLAR_TIME_APPROXIMATE');
+    expect(hourScoped.requiredWarningCodes).toContain('TIME_UNKNOWN');
   });
 
   it('uses fixed public warning copy and removes exact dynamic target dates', () => {

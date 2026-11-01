@@ -94,9 +94,27 @@ function buildAstrolabe(
 
   const timeIndex = timeIndexFromHour(hour);
   const gender = ruleGender === 'male' ? '男' : '女';
+  // This provider is the party that actually APPLIED the apparent solar clock
+  // (natal chart and 运限盘 alike), so the equation-of-time approximation
+  // warning originates here — qualified by the hour-sensitive palace placement,
+  // and never emitted when the civil clock was used.
+  const warnings: EngineWarning[] = [];
+  if (useApparent && normalized.solar !== null) {
+    warnings.push(
+      makeWarning(
+        WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+        'ziwei',
+        `Apparent solar time applied to the Zi Wei palace clock via the ${normalized.solar.method} equation-of-time approximation (~tenths of a minute); palace placement near an hour boundary is the sensitive part.`,
+        {
+          severity: 'info',
+          detail: { method: normalized.solar.method, appliedTo: 'ziwei palaces' },
+        },
+      ),
+    );
+  }
   return {
     astrolabe: astro.bySolar(dateStr, timeIndex, gender, true, 'zh-CN'),
-    warnings: [],
+    warnings,
     useApparent,
   };
 }

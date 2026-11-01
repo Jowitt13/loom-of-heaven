@@ -472,6 +472,48 @@ describe('validate-answer — fact boundary and safety layer', () => {
       expect(result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
     });
 
+    it('处方 narrowing: ordinary relationship wording passes, real prescriptions stay blocked (review fix #3)', () => {
+      // Wording-only controls carry no plan constraints to express.
+      const barePlan = makePlan({ requiredCaveats: [], requiredWarningCodes: [] });
+      const singleSection = (text: string) =>
+        makeDraft({
+          sections: [
+            {
+              id: 'summary',
+              heading: '核心结论',
+              paragraphs: [{ text, sourceFactIds: ['fact-1'] }],
+            },
+          ],
+        });
+      // 相处方式/相处方法/相处方面 contain the 处方 substring but are
+      // ordinary relationship language, not medication content.
+      for (const text of [
+        '七宫主星示关系相处方式的倾向，非精确断人。',
+        '两个人的相处方法需要在磨合里慢慢形成。',
+        '相处方面，双方更依赖沟通而不是默契。',
+      ]) {
+        const result = runValidated(barePlan, singleSection(text));
+        expect(result.ok, text).toBe(true);
+      }
+      // Genuine prescription content still fails — with and without ordinary
+      // relationship wording in the same paragraph.
+      for (const text of [
+        '医生给你开了处方，按处方用药即可。',
+        '相处方式可以慢慢磨合，但你应该按处方停药。',
+        '处方药不能随便停。',
+      ]) {
+        const result = runValidated(barePlan, singleSection(text));
+        expect(
+          result.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL'),
+          text,
+        ).toBe(true);
+      }
+      // A CJK-separator split of a real term cannot slip past the scan
+      // (normalization collapses it before the rule runs).
+      const split = runValidated(barePlan, singleSection('开了处 方，按时服药。'));
+      expect(split.violations.some((v) => v.code === 'HIGH_RISK_MEDICAL')).toBe(true);
+    });
+
     it('HIGH_RISK_LEGAL: blocks legal conclusions', () => {
       const draft = makeDraft({
         sections: [
