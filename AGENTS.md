@@ -16,16 +16,24 @@ The roadmap governs product direction and technical sequence; domain ADRs and so
 govern their narrower subjects. A lower-level prompt may narrow these rules but cannot override
 them. “Continue” means the next unblocked roadmap slice—not whichever feature is easiest to add.
 Changing the route requires the owner decision, ADR, roadmap-version, protocol, and static-gate
-process recorded in the roadmap. The current authorities are `loom-product-roadmap/v3.3` and
+process recorded in the roadmap. The current authorities are `loom-product-roadmap/v3.4` and
 `loom-commander-protocol/v3`.
 
 The owner-confirmed optimization direction is roadmap section 7 (2026-10-29): repair proven
 calculation and evidence-identity defects, repair the existing answer path, then deliver one
 readable natal-answer loop using already-admitted material. The first implementation scope is
-real Gregorian-date validation plus ruleset-version authenticity. Career keeps ADR 0021's bounds
-and its blocked acceptance state; it is not the sole prerequisite for maintenance or natal-answer
+real Gregorian-date validation plus ruleset-version authenticity. Career keeps its blocked
+acceptance state; it is not the sole prerequisite for maintenance or natal-answer
 work. Do not restart the completed 2026-10-23 queue or adopt the external review's 15 work packages
 as an implementation mandate. A direction freeze is not runtime, installation, or release approval.
+
+The owner's answer-direction decision (2026-11-01) is frozen in
+[`docs/FOUR_SYSTEM_INTERPRETATION_DIRECTION.md`](docs/FOUR_SYSTEM_INTERPRETATION_DIRECTION.md)
+and carried into runtime by roadmap v3.4 (§7 item 4; ADR 0017/0020/0021 amendments of the same
+date): ordinary topic answers are question-oriented readings over the real four-system chart.
+Read it before planning further answer changes. Route alignment is complete; do not restart the
+superseded narrow goals (single-reference career ceiling, prewrite-only narration), and do not
+treat the roadmap change as installation, merge, or release authorization.
 
 ## What this project is
 
@@ -50,9 +58,13 @@ CLI. **The model never computes a chart itself.**
 - **No fabricated verdicts.** Interpretation is source-cited. Preserve every warning for audit;
   in a topic reading, state only the practical effect that materially changes the answer, in
   natural language — never a raw warning code or a warning panel.
-- **Career body (ADR 0021).** At most one frozen ten-god cultural reference with its short gloss
-  and non-prophecy caveat. Never pattern/useful-god/industry or chart-derived career fit. Career
-  practices cite only user-stated reality; birth-only answers contain no action advice.
+- **Career body (ADR 0021, amended 2026-11-01).** Career topic answers use genuinely relevant
+  material from the real four-system chart — work style, drive, professional expression,
+  collaboration, resources, responsibility; occupational fields appear only as
+  traditional-symbolism exploration directions, never as career-fit verdicts. Pattern, useful-god
+  and industry rules stay out of default bodies; the frozen ten-god glosses and non-prophecy
+  caveat remain admitted material. Career practices cite only user-stated reality; birth-only
+  answers contain no action advice.
 - **De-identified.** Never write a real name, birth time, or location into logs, fixtures, or git.
 
 ## How to run the Skill (the only supported entry point)

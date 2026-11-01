@@ -21,6 +21,7 @@ import {
   isDefaultAnswerFact,
   isLimitationNoteFact,
   isTimingPeriodFact,
+  isTopicRelevantFact,
 } from './material-admission.ts';
 
 /** P4 v2 hard cut: public answer plans report every first-class system. */
@@ -35,6 +36,7 @@ const ANSWER_GUARDRAILS = [
   'no-investment-advice',
   'no-life-and-death-advice',
   'no-unsupported-comparison',
+  'distinguish-fact-rule-interpretation',
 ] as const;
 
 /** Fixed public wording. Never pass provider warning.message/detail through this boundary. */
@@ -55,8 +57,20 @@ const PUBLIC_WARNING_COPY: Record<
     nextStep: '如能确认当时采用的时间，可核对该选择。',
   },
   SOLAR_TIME_APPROXIMATE: {
-    impact: '真太阳时使用了近似方法，边界附近的结果可能较敏感。',
-    nextStep: '请把它视为传统文化分析中的不确定性说明。',
+    impact: '本次计算对部分柱/宫采用了近似方法的太阳时钟面，该部分贴着边界的结果可能较敏感。',
+    nextStep: '请把它视为传统文化分析中的不确定性说明；其余按民用时/UTC 计算的部分不受影响。',
+  },
+  SIDEREAL_AYANAMSHA_APPROXIMATE: {
+    impact: '恒星黄道坐标采用线性 ayanamsha 模型，属近似值。',
+    nextStep: '涉及恒星黄道位置时按参考精度理解。',
+  },
+  LUNAR_NODE_APPROXIMATE: {
+    impact: '月亮交点按近似方法计算（角分级精度）。',
+    nextStep: '涉及交点位置的内容按参考精度理解。',
+  },
+  ASTEROID_APPROXIMATE: {
+    impact: '小行星位置按轨道根数近似计算（亚度级精度）。',
+    nextStep: '涉及小行星位置的内容按参考精度理解。',
   },
   SYSTEM_NOT_YET_IMPLEMENTED: {
     impact: '有一个所需体系当前无法计算，结论范围已受限。',
@@ -202,11 +216,13 @@ export function buildPublicResult(
  * Select the facts that may support one request. Topic and lens act TOGETHER:
  * - admission decides whether a fact may be narrated at all;
  * - a limitation-note-only fact (engine disclaimer) is context, never answer basis;
+ * - a topic question sees its own topic PLUS facts whose admitted evidence is
+ *   related to that topic (roadmap v3.4 §7 item 4) — one mechanism may serve
+ *   several questions, `general` is never a passport, and relevance never
+ *   widens admission;
  * - the timing lens keeps ONLY admitted target-period records — natal placements
  *   (pillars, day master, spouse stars, houses, signs, birth-cycle remainders)
- *   are background and never impersonate period evidence, for every topic;
- * - career additionally keeps just the ADR 0021 cultural reference for its
- *   non-timing lenses (no admitted career-timing inference exists).
+ *   are background and never impersonate period evidence, for every topic.
  */
 export function selectAnswerFacts(
   facts: PublicFact[],
@@ -218,31 +234,11 @@ export function selectAnswerFacts(
   const topicPool =
     request.topic === 'general'
       ? admittedFacts
-      : admittedFacts.filter((fact) => fact.topic === request.topic);
+      : admittedFacts.filter((fact) => isTopicRelevantFact(fact, request.topic));
   if (request.lens === 'timing') {
     return topicPool.filter(isTimingPeriodFact);
   }
-  if (request.topic !== 'career') return topicPool;
-
-  // ADR 0021 admits one narrow cultural reference for ordinary career prose,
-  // not every system's career placement. Derive both narration material and
-  // validation constraints from this same set; technical detail remains opt-in.
-  // No admitted career-timing inference exists: do not substitute natal themes.
-  const pillarRef = /^bazi\.pillars\.(year|month|day|hour)\.tenGod$/;
-  const references = topicPool.filter(
-    (fact) =>
-      fact.evidence.some((e) => e.kind === 'bazi' && pillarRef.test(e.ref)) &&
-      fact.evidence.some(
-        (e) => e.kind === 'bazi-rule' && e.ref === 'bazi-rule/ten-gods/xiang-yi',
-      ) &&
-      fact.evidence.every(
-        (e) =>
-          (e.kind === 'bazi' && pillarRef.test(e.ref)) ||
-          (e.kind === 'bazi-rule' && e.ref === 'bazi-rule/ten-gods/xiang-yi'),
-      ),
-  );
-  // Ambiguous or duplicated cultural candidates are not resolved by picking one.
-  return references.length === 1 ? references : [];
+  return topicPool;
 }
 
 const LIMITING_WARNING_CODES = new Set<PublicWarning['code']>([
@@ -250,6 +246,9 @@ const LIMITING_WARNING_CODES = new Set<PublicWarning['code']>([
   'TIME_UNKNOWN',
   'DST_AMBIGUOUS_RESOLVED',
   'SOLAR_TIME_APPROXIMATE',
+  'SIDEREAL_AYANAMSHA_APPROXIMATE',
+  'LUNAR_NODE_APPROXIMATE',
+  'ASTEROID_APPROXIMATE',
   'SYSTEM_NOT_YET_IMPLEMENTED',
   'NEAR_BOUNDARY',
   'HIGH_LATITUDE_HOUSE_RISK',
@@ -357,6 +356,21 @@ export function materialWarningCodes(
         warning.code === 'DST_AMBIGUOUS_RESOLVED'
       ) {
         return factSystems.has(warning.system) && hasTimeSensitiveFact;
+      }
+      // Western precision notes are material only when the answer actually
+      // uses the affected points. Ayanamsha shifts every displayed sidereal
+      // longitude, so its presence makes any selected western fact material;
+      // nodes and asteroids qualify only facts that cite those points.
+      if (warning.code === 'SIDEREAL_AYANAMSHA_APPROXIMATE') return factSystems.has('western');
+      if (warning.code === 'LUNAR_NODE_APPROXIMATE') {
+        return selectedFacts.some((fact) =>
+          fact.evidence.some((e) => /NorthNode|SouthNode|nodes/i.test(e.ref)),
+        );
+      }
+      if (warning.code === 'ASTEROID_APPROXIMATE') {
+        return selectedFacts.some((fact) =>
+          fact.evidence.some((e) => /chiron|ceres|pallas|juno|vesta|asteroids/i.test(e.ref)),
+        );
       }
       return factSystems.has(warning.system);
     })

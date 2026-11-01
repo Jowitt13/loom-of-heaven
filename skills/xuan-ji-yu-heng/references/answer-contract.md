@@ -31,19 +31,27 @@ or missing topic.
 overview | strengths | risks | timing | advice | explain
 ```
 
-For ordinary `career` answers, `selectedFacts` contains at most the one ADR 0021 ten-god
-cultural reference. Its caveat and material warnings are derived from that same set; unrelated
-systems' conditions do not become mandatory prose. All warnings remain in `publicResult.warnings`
-for audit. The plan contains no user-stated work reality and therefore does not request practical
-career advice. Reality-based paragraphs use the separate optional source binding below, never
-a borrowed chart fact id or constraint exemption.
+For ordinary `career` answers (roadmap v3.4 / ADR 0021 amended 2026-11-01), `selectedFacts`
+carries the genuinely career-relevant admitted material from the real four-system chart: the
+authored career facts (officer ten-god references with their frozen glosses when present, MC,
+官禄宫) plus bounded related material (four-pillar ten-god layout, day master with its strength
+reading, sun/soul-star meanings). A chart with no transparent 正官/七杀 still yields career
+material — the topic never empties for that reason, and co-occurring officer labels each get
+their own reference. Caveats and material warnings are derived from that same set; unrelated
+systems' conditions do not become mandatory prose. All warnings remain in
+`publicResult.warnings` for audit. The plan contains no user-stated work reality and therefore
+does not request practical career advice. Reality-based paragraphs use the separate optional
+source binding below, never a borrowed chart fact id or constraint exemption.
 
-`career --lens timing` currently returns `not-supported`: natal cultural themes are not evidence
-for promotion, job-change or other career timing. `--lens explain` keeps topic-scoped technical
-framing, but admission still follows the same evidence-family and rule-status gates as every
-other lens — unadmitted technical material (pattern / useful-god / industry and other producer
-mechanisms outside the admitted set) stays in `calculate` / `interpret` technical output and is
-NOT released into career prose by choosing `explain`.
+Every topic (not just career) selects its authored facts plus bounded related admitted material
+(`isTopicRelevantFact` semantics): Venus/Moon/Mars meanings also serve love questions, Mercury
+serves studies, day-master structure serves career. `general` is never a passport and relevance
+never widens admission — pattern / useful-god / industry and other producer mechanisms outside
+the admitted set stay in `calculate` / `interpret` technical output and are NOT released into
+topic prose by choosing `explain`.
+
+`career --lens timing` currently returns `not-supported`: natal themes are not evidence
+for promotion, job-change or other career timing.
 
 The command never accepts a free-form user question. The host maps the question to a bounded
 topic/lens, or asks a clarification question when it cannot do so reliably. Do not put a user's
@@ -125,7 +133,9 @@ For an ordinary answer, the host must:
 2. Explain conclusions in plain language before technical terminology.
 3. State every material caveat and required warning naturally in the paragraph it affects; do not create a fixed disclaimer footer.
 4. Honor all guardrails: traditional-culture framing; evidence-only reasoning; no deterministic
-   fate, medical, legal, investment, life-and-death or unsupported-comparison claims.
+   fate, medical, legal, investment, life-and-death or unsupported-comparison claims; and
+   `distinguish-fact-rule-interpretation` — your own traditional interpretation (tier 3) must
+   stay tied to cited facts and never claim engine-rule verification or ruleset backing.
 5. Run BOTH deterministic gates before displaying anything, in this order:
    `answer-plan` → write a `reading-draft/v3` JSON (v2 still accepted, plain text only) →
    `validate-answer` → display the SAME text that was checked. Show the answer only when both

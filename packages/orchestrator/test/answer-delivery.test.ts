@@ -39,6 +39,9 @@ function runB(topic: 'character' | 'career' = 'character') {
 /** A jargon-free, footer-free draft that satisfies the character plan's constraints. */
 function characterDraft(plan: AnswerPlan, marker = '主动与秩序并存'): Record<string, unknown> {
   const fact = plan.selectedFacts[0]!;
+  // Roadmap v3.4: the civil/UTC default no longer produces a phantom
+  // solar-time warning, so this plan carries no required warnings at all —
+  // the draft discloses none and cites the two plan caveats.
   return {
     contractVersion: 'reading-draft/v2',
     topic: 'character',
@@ -55,17 +58,13 @@ function characterDraft(plan: AnswerPlan, marker = '主动与秩序并存'): Rec
           {
             text: '出生时间的精确程度会影响与时间相关的细节判断，本解读只保留可靠的部分。',
             sourceFactIds: [],
-            constraintRefs: [
-              { kind: 'warning', index: 0 },
-              { kind: 'warning', index: 1 },
-              { kind: 'caveat', index: 1 },
-            ],
+            constraintRefs: [{ kind: 'caveat', index: 1 }],
           },
         ],
       },
     ],
     caveatsExpressed: [plan.requiredCaveats[0]!, plan.requiredCaveats[1]!],
-    warningsDisclosed: ['SOLAR_TIME_APPROXIMATE'],
+    warningsDisclosed: [],
   };
 }
 
@@ -553,19 +552,11 @@ describe('bound-delivery caveat scope (cited facts own the mandatory caveats)', 
               text: '命宫主星组合的读法是两种侧重并存，星性只到这个粒度为止。',
               sourceFactIds: mingGong.slice(0, 3).map((f) => f.id),
             },
-            {
-              text: '出生时间的精确程度会影响与时间相关的细节判断，本解读只保留可靠的部分。',
-              sourceFactIds: [],
-              constraintRefs: [
-                { kind: 'warning', index: 0 },
-                { kind: 'warning', index: 1 },
-              ],
-            },
           ],
         },
       ],
       caveatsExpressed: [],
-      warningsDisclosed: ['SOLAR_TIME_APPROXIMATE'],
+      warningsDisclosed: [],
     };
   }
 
@@ -818,19 +809,11 @@ describe('reading-draft/v3 bound delivery (limited presentation)', () => {
               text: '这张盘的底色是**果决与执行**并存，两种侧重的说明如下：\n- 武曲一侧：刚毅果决、善于理财与执行\n- 破军一侧：变动性强、敢于破旧立新',
               sourceFactIds: mingGong.slice(0, 3).map((f) => f.id),
             },
-            {
-              text: '出生时间的精确程度会影响与时间相关的细节判断，本解读只保留可靠的部分。',
-              sourceFactIds: [],
-              constraintRefs: [
-                { kind: 'warning', index: 0 },
-                { kind: 'warning', index: 1 },
-              ],
-            },
           ],
         },
       ],
       caveatsExpressed: [],
-      warningsDisclosed: ['SOLAR_TIME_APPROXIMATE'],
+      warningsDisclosed: [],
     };
   }
 

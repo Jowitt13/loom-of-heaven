@@ -1,9 +1,9 @@
 # Loom product technical roadmap
 
-- Roadmap id: `loom-product-roadmap/v3.3`
+- Roadmap id: `loom-product-roadmap/v3.4`
 - Status: **Accepted and owner-confirmed**
-- Confirmed: 2026-10-31
-- Supersedes: `loom-product-roadmap/v3.2`
+- Confirmed: 2026-11-01
+- Supersedes: `loom-product-roadmap/v3.3`
 - Authority: product direction, technical sequencing, and slice admission
 - Related: [ADR 0018](./adr/0018-structural-answer-quality-route.md),
   [ADR 0017](./adr/0017-product-technical-roadmap-and-execution-governance.md),
@@ -150,9 +150,11 @@ not displace the active phase. A later phase may not be pulled forward because i
 visible.
 
 **Current active phase.** IQ-4 correctness repair and natal-answer usability, alongside the retained
-BaZi career vertical. The owner-confirmed v3.2 focus is the single work list in section 7. Proven
-correctness defects and the existing-content natal-answer loop do not wait for career's source
-blocker. This does not pass or waive career acceptance and does not activate IQ-5 synthesis.
+BaZi career vertical. The owner-confirmed v3.2 focus is the single work list in section 7; the
+owner-confirmed 2026-11-01 four-system topic-interpretation direction (§7 item 4, roadmap v3.4)
+extends that list. Proven correctness defects and the existing-content natal-answer loop
+do not wait for career's source blocker. This does not pass or waive career acceptance and does
+not activate IQ-5 synthesis.
 
 ### G0 — governance and security baseline
 
@@ -254,9 +256,12 @@ without requiring medical or clinical inference.
 Exit criteria: the selected system has representative exact/approximate/unknown-time cases,
 source-blocked cases, contradiction cases, four-host acceptance, and reviewed answer examples. The
 result must be specific without claiming fate or scientific prediction. Within this career
-vertical, other systems cannot be used to repair missing evidence. ADR 0021 and
-`BLOCKED_SOURCE_ADMISSION` for reviewed-answer-examples remain in force. Completing the natal
-milestone does not complete this career criterion or admit IQ-5.
+vertical, other systems cannot be used to repair missing evidence. `BLOCKED_SOURCE_ADMISSION`
+for reviewed-answer-examples remains in force. Since roadmap v3.4 the ordinary topic-narration
+career bounds are governed by the four-system topic-interpretation direction (§7 item 4) and the
+amended ADR 0021, not by the retired single-reference ceiling; pattern/useful-god/industry rules
+remain unadmitted for default bodies. Completing the natal milestone does not complete this career
+criterion or admit IQ-5.
 
 ### IQ-5 — cross-system synthesis
 
@@ -345,8 +350,9 @@ new capability or a product-direction change.
 
 Per the owner's 2026-09-07 decision and [ADR 0020](adr/0020-dual-provenance-career-layer.md),
 career guidance is composed from separately provenanced sources: a TraditionalStructureLayer
-(admitted structural facts and traditional-culture background only; today exactly one narrow
-ADR 0021 ten-god cultural reference — pattern/useful-god/industry remain unadmitted), a
+(admitted structural facts and traditional-culture background; ordinary topic narration since
+roadmap v3.4 may build four-system traditional analysis on real chart facts per §7 item 4 and the
+amended ADR 0021 — pattern/useful-god/industry rules remain unadmitted), a
 CareerRealityLayer (only reality the user actively states — roles, skills,
 goals, constraints, preferences — and the only source of career advice), and an optional future
 CareerReflectionLayer (non-diagnostic, admitted per instrument by separate owner
@@ -460,6 +466,29 @@ WP-00 through WP-14 是问题证据与建议，不是第二份执行路线，也
 - 实际回答是否易懂、切题与忠实单独说明；测试全绿、用户“觉得准”、技术宿主验收不等于
   现实预测有效。人工/模型评审可提供有界证据，不新增强制评分、封闭集或模型评委项目。
 
+#### 4. Four-system topic interpretation — owner-confirmed 2026-11-01
+
+**单一工作依据。** Owner 已确认把普通命理专题从“少量预写条目的复述”升级为“基于真实四体系
+排盘、围绕问题的传统解读”（方向冻结见
+[`FOUR_SYSTEM_INTERPRETATION_DIRECTION.md`](FOUR_SYSTEM_INTERPRETATION_DIRECTION.md)；本轮为该
+方向的实施条目，不新增阶段编号）。
+
+| 内容                 | 边界与完成标准                                                                                                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 事业单条官杀上限解除 | 不再因四干无正官/七杀把事业题判成无材料；按实际四体系结果取工作方式、动力、专业表达、协作、资源、责任等材料。职业领域只作传统象义探索方向，不包装为职业适配鉴定；格局/喜用/行业规则仍不进默认正文 |
+| 真实盘面的宿主解释   | 区分引擎计算事实、已实现规则含义、宿主传统解释三层；后两者不得冒充引擎规则结论，规则版本不给整篇模型解释背书。缺预写释义不再等于无回答能力                                                        |
+| 主题选材修复         | 修正大量 Western 含义统一归入 character 的映射与 exact-topic 过滤，使感情、学业、事业等专题取得真正相关材料；同一材料可与多个问题相关；不无差别放行全部技术事实，`general` 仍不是通行证           |
+| 四体系按问题参与     | 默认检查四体系但只讲与本题有关、实际可用的内容；叙述可比较支持、张力、不同侧面与不可比较处，不强制四段、不投票、不平均。局部缺失只影响依赖该部分的分析                                            |
+| 表达限制校准         | 允许明确的传统分析（如“重点是”“主要张力在于”）；正常判断与收益保证、命定断言、恐吓、诊断区分开，不以关键词黑名单扩大拦截，也不删除整个防护类别                                                    |
+| 近似误差来源修正     | 时间规范化与 Western 岁差/交点/小行星近似不再共用同一 warning code 被统称“真太阳时近似”；按实际来源、实际应用设置与受影响事实说明，不全量静默、不改数值算法、不建通用 warning 框架                |
+
+完成标准：上述方向冻结文件 Validation 表中的有限场景（事业无官杀反例、同对象感情/财运/
+学业/性格、同一对合成对象合盘、同点追问与质疑、保持项、近似来源）有真实回归与代表性正文；
+错误对象、捏造事实、未计算数值与重大风险保证不能因新模式放行。ADR 0021/0020 按同轮修订，
+历史 changelog、旧验收包与 BLOCKED 证据不改写。宿主解释权限的扩大不改变计算核心、来源准入、
+隐私默认与发布授权；IQ-5 的 `SynthesisRecord` 契约与验收保持 deferred，本条只授权叙述层
+围绕已引用事实的组织与比较。
+
 #### Deferred work and preserved boundaries
 
 - 后续维护而非当前统一前置：历史秒级时区至少诚实类型化拒绝（不得静默取整）；相位入相、
@@ -515,6 +544,23 @@ next unblocked slice in this roadmap and prove its admission conditions.
 
 ## 9. Roadmap changelog
 
+- `loom-product-roadmap/v3.4` — 2026-11-01: **version change** for the owner-confirmed four-system
+  topic-interpretation direction (ADR 0017 amendment of the same date; direction frozen in
+  `FOUR_SYSTEM_INTERPRETATION_DIRECTION.md`). §7 gains item 4: ordinary topic answers become
+  question-oriented readings over the real four-system chart — the ADR 0021 single ten-god
+  career ceiling is retired for topic narration (ADR 0021 amended: the frozen gloss and
+  non-prophecy caveat remain available material; pattern/useful-god/industry rules stay out of
+  default bodies), topic material selection is repaired so love/studies/career reach genuinely
+  relevant admitted material, the host may make traditional interpretations grounded in cited
+  engine facts and implemented-rule meanings without claiming engine-rule verification for its
+  own analysis, and precision warnings state their actual source and actual application instead
+  of being relabeled as solar-time error. ADR 0020's composition layers and C-track staging are
+  unchanged (reality remains the only source of career action advice). Narration-level
+  cross-system comparison supported by cited per-system facts is permitted; it does not activate
+  IQ-5's `SynthesisRecord`, its exit criteria, or any voting/averaging. Calculation, source and
+  school admission, privacy defaults, clinical separation, D1/D2 shadow status, installation and
+  release authority are unchanged. This is a roadmap version, not an engine/ruleset/package or
+  release version.
 - `loom-product-roadmap/v3.3` — 2026-10-31: **version change** for the owner-confirmed adaptive
   presentation decision (ADR 0017 amendment of the same date). §3.1 now defines an adaptive
   scannable layout (short headings, sparing paired emphasis, short bullet lists, whitespace)

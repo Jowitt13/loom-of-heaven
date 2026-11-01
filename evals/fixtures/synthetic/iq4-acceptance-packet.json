@@ -32,7 +32,11 @@
     }
   },
   "fixedNow": 1767225600000,
-  "expectedViewClaimIds": ["approved-claim:fact-8"],
+  "expectedViewClaimIds": [
+    "approved-claim:fact-1",
+    "approved-claim:fact-2",
+    "approved-claim:fact-8"
+  ],
   "runtimeEntry": {
     "sourceCommit": "84f51027826ba138dcf219136a606653aa02d15e",
     "sourceCommitSemantics": "IQ-4F bazi-career runtime-entry introduction commit. This is a fixed entry anchor copied into result.sourceCommit, not the installed candidate identity. Codex candidate identity is the verified repository commit in hostAcceptance.codexCandidateSourceCommit; the other three hosts use their pinned candidate ZIP SHA-256 values.",
@@ -50,8 +54,9 @@
     "reason": "ADR 0021 仅窄准入一条冻结十神文化参考（短释 + 非职业预言 caveat），这不是完整职业答案，也不等于 reviewed-answer-examples 已通过。格局（bazi-rule/pattern）与喜用神行业匹配（bazi-rule/industry/wu-xing）等仍未准入；bazi-career 运行时入口仍只输出结构化记录。reviewed-answer-examples 保持 BLOCKED_SOURCE_ADMISSION；四宿主技术验收与本状态无关，不能解除它。解除需要针对完整职业答案的来源准入裁决及其后的独立准入切片。"
   },
   "hostAcceptance": {
-    "status": "EXECUTED",
+    "status": "NOT_EXECUTED",
     "statusVocabulary": ["NOT_EXECUTED", "EXECUTED"],
+    "evidenceInvalidation": "Roadmap v3.4 (2026-11-01) changed the bazi-career stdout (the career topic now carries the four-pillar layout, the day-master strength claim and the officer reference instead of the single cultural reference), so the recomputed stdout digest no longer matches the 2026-09-28 EXECUTED records. Per evidenceRule (rebuilding candidates invalidates earlier host evidence, release checklist A4), all four records return to NOT_EXECUTED; their superseded results are retained verbatim below as history and are NOT current evidence. Re-acceptance requires new host runs against the rebuilt candidate.",
     "packageCommand": "pnpm run package:hosts",
     "verifyCommand": "pnpm run verify:hosts",
     "codexCandidateSourceCommit": "0473a93beda05739d257a6870e19d1ece43f4c97",
@@ -70,9 +75,9 @@
     "records": [
       {
         "hostId": "codex",
-        "status": "EXECUTED",
+        "status": "NOT_EXECUTED",
         "engineSelfCheck": "node scripts/loom-chart.mjs verify",
-        "result": {
+        "supersededResult": {
           "exitCode": 0,
           "outputDigest": "sha256:fed1bcebb409f25799f85a1fa7c67e777629e0f2e5db4bb04b446cb55daae263",
           "executedAtISO": "2026-09-28",
@@ -85,9 +90,9 @@
       },
       {
         "hostId": "qoder",
-        "status": "EXECUTED",
+        "status": "NOT_EXECUTED",
         "engineSelfCheck": "node scripts/loom-chart.mjs verify",
-        "result": {
+        "supersededResult": {
           "exitCode": 0,
           "outputDigest": "sha256:fed1bcebb409f25799f85a1fa7c67e777629e0f2e5db4bb04b446cb55daae263",
           "executedAtISO": "2026-09-28",
@@ -100,9 +105,9 @@
       },
       {
         "hostId": "workbuddy",
-        "status": "EXECUTED",
+        "status": "NOT_EXECUTED",
         "engineSelfCheck": "node scripts/loom-chart.mjs verify",
-        "result": {
+        "supersededResult": {
           "exitCode": 0,
           "outputDigest": "sha256:fed1bcebb409f25799f85a1fa7c67e777629e0f2e5db4bb04b446cb55daae263",
           "executedAtISO": "2026-09-28",
@@ -115,9 +120,9 @@
       },
       {
         "hostId": "doubao",
-        "status": "EXECUTED",
+        "status": "NOT_EXECUTED",
         "engineSelfCheck": "node scripts/loom-chart.mjs verify",
-        "result": {
+        "supersededResult": {
           "exitCode": 0,
           "outputDigest": "sha256:fed1bcebb409f25799f85a1fa7c67e777629e0f2e5db4bb04b446cb55daae263",
           "executedAtISO": "2026-09-28",

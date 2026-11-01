@@ -2,7 +2,12 @@
 import { describe, expect, it } from 'vitest';
 import { parseBirthInput } from '@loom/contracts';
 import type { AnswerLens, InterpretationTopic, PublicFact, PublicResult } from '@loom/contracts';
-import { buildAnswerPlan, buildInterpretationFacts } from '@loom/interpret';
+import {
+  buildAnswerPlan,
+  buildInterpretationFacts,
+  isTopicRelevantFact,
+  relatedTopicsForFact,
+} from '@loom/interpret';
 import { calculate, runAnswerPlan, runInterpret } from '@loom/orchestrator';
 import { industryFinding, interpretBazi } from '../../bazi-rules/src/index.ts';
 
@@ -221,10 +226,13 @@ describe('default-answer material admission', () => {
     expect(selectedIds).toContain(admittedProbe.id);
   });
 
-  it('keeps career and its explain lens inside the admitted boundary', () => {
+  it('keeps career and its explain lens inside the admitted boundary (roadmap v3.4)', () => {
     const career = runAnswerPlan(input, { now: FIXED, topic: 'career' }).answerPlan;
     expect(career.selectedFacts.length).toBeGreaterThan(0);
-    expect(career.selectedFacts.every((fact) => fact.topic === 'career')).toBe(true);
+    // Authored career facts plus bounded related material (pillars, day
+    // master, sun/soul star meanings); every fact stays admitted.
+    expect(career.selectedFacts.some((fact) => fact.topic === 'career')).toBe(true);
+    expect(career.selectedFacts.some((fact) => fact.topic !== 'career')).toBe(true);
     expect(
       career.selectedFacts.some((fact) =>
         fact.evidence.some((evidence) => evidence.ref === 'bazi-rule/ten-gods/xiang-yi'),
@@ -239,12 +247,11 @@ describe('default-answer material admission', () => {
     }).answerPlan;
     expect(explain.selectedFacts).toEqual(career.selectedFacts);
     for (const fact of explain.selectedFacts) {
-      expect(fact.topic).toBe('career');
       expect(hasWithheldMechanism(fact)).toBe(false);
     }
     const general = runAnswerPlan(input, { now: FIXED, topic: 'general' }).answerPlan;
     expect(general.selectedFacts.filter((fact) => fact.topic === 'career')).toEqual(
-      career.selectedFacts,
+      career.selectedFacts.filter((fact) => fact.topic === 'career'),
     );
   });
 
@@ -274,5 +281,38 @@ describe('default-answer material admission', () => {
     expect(industry.claim).toBe('行业规则未命中，未提供行业结论。');
     expect(industry.reason).toContain('matched=false');
     expect(JSON.stringify(industry)).not.toMatch(/金融|地产|能源|文教|贸易/);
+  });
+
+  it('maps related topics by admitted-evidence shape only (roadmap v3.4)', () => {
+    // Western relational/study/work meanings serve their classic questions.
+    const venusSign = syntheticFact('fact-1', [
+      { kind: 'western-rule', ref: 'western-rule/planet-sign/venus-pisces' },
+    ]);
+    expect(isTopicRelevantFact(venusSign, 'marriage')).toBe(true);
+    expect(isTopicRelevantFact(venusSign, 'career')).toBe(false);
+    const mercurySign = syntheticFact('fact-2', [
+      { kind: 'western-rule', ref: 'western-rule/planet-sign/mercury-capricorn' },
+    ]);
+    expect(isTopicRelevantFact(mercurySign, 'studies')).toBe(true);
+    expect(isTopicRelevantFact(mercurySign, 'marriage')).toBe(false);
+    // BaZi structure material is classic career material.
+    const pillars = syntheticFact('fact-3', [
+      { kind: 'bazi', ref: 'bazi.pillars.*.(stem|branch|tenGodDisplay)' },
+    ]);
+    expect(isTopicRelevantFact(pillars, 'career')).toBe(true);
+    expect(isTopicRelevantFact(pillars, 'marriage')).toBe(false);
+    // Authored topic always matches; general is never a passport.
+    expect(isTopicRelevantFact(venusSign, 'character')).toBe(true);
+    expect(isTopicRelevantFact(pillars, 'general')).toBe(false);
+    // Unknown/withheld refs produce NO related topics — relevance never
+    // broadens admission.
+    const fabricated = syntheticFact('fact-4', [
+      { kind: 'bazi-rule', ref: 'bazi-rule/useful-god' },
+    ]);
+    expect(relatedTopicsForFact(fabricated)).toEqual([]);
+    const aspectPair = syntheticFact('fact-5', [
+      { kind: 'western-rule', ref: 'western-rule/aspect/venus-trine-mars' },
+    ]);
+    expect(isTopicRelevantFact(aspectPair, 'marriage')).toBe(true);
   });
 });

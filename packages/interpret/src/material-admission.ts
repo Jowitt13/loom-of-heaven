@@ -109,23 +109,93 @@ export function isDefaultAnswerFact(fact: {
   evidence: readonly MaterialEvidence[];
 }): boolean {
   if (fact.evidence.length === 0) return false;
-  if (!fact.evidence.every((evidence) => isAdmittedEvidence(evidence, fact.topic))) return false;
-  // ADR 0021 is the same boundary for general, career and explain requests.
-  // Relabeling a career record as part of a general result does not admit it.
-  if (fact.topic === 'career') {
-    return (
-      fact.evidence.some(
-        (e) => e.kind === 'bazi-rule' && e.ref === 'bazi-rule/ten-gods/xiang-yi',
-      ) &&
-      fact.evidence.some((e) => e.kind === 'bazi' && PILLAR_TEN_GOD.test(e.ref)) &&
-      fact.evidence.every(
-        (e) =>
-          (e.kind === 'bazi-rule' && e.ref === 'bazi-rule/ten-gods/xiang-yi') ||
-          (e.kind === 'bazi' && PILLAR_TEN_GOD.test(e.ref)),
-      )
-    );
+  return fact.evidence.every((evidence) => isAdmittedEvidence(evidence, fact.topic));
+}
+
+/**
+ * Topic relevance beyond a fact's authored topic (roadmap v3.4 §7 item 4). One
+ * mechanism can serve several questions: Venus/Moon/Mars meanings also speak to
+ * intimacy and expression, Mercury to studies, the Sun and day-master strength
+ * to work style and drive. The mapping is keyed by the SAME admitted-evidence
+ * ref shapes the admission table above recognizes — it broadens which questions
+ * may see a fact, never which facts exist. `general` never appears here: it is
+ * not a topic passport.
+ */
+const RELATED_TOPIC_RULES: ReadonlyArray<{
+  re: RegExp;
+  topics: ReadonlyArray<'career' | 'wealth' | 'marriage' | 'studies' | 'health'>;
+}> = [
+  // Western rule meanings whose classic question is love, study or work.
+  { re: /^western-rule\/planet-sign\/(?:venus|moon|mars)-/, topics: ['marriage'] },
+  { re: /^western-rule\/planet-sign\/mercury-/, topics: ['studies'] },
+  { re: /^western-rule\/planet-sign\/sun-/, topics: ['career'] },
+  { re: /^western-rule\/planet-house\/(?:sun|moon)-h10$/, topics: ['career'] },
+  { re: /^western-rule\/planet-house\/(?:sun|moon)-h7$/, topics: ['marriage'] },
+  { re: /^western-rule\/dignity\/(?:venus|moon|mars)-/, topics: ['marriage'] },
+  { re: /^western-rule\/dignity\/(?:sun|saturn)-/, topics: ['career'] },
+  { re: /^western-rule\/dignity\/mercury-/, topics: ['studies'] },
+  {
+    re: /^western-rule\/aspect\/(?:venus|moon|mars)-/,
+    topics: ['marriage'],
+  },
+  {
+    re: /^western-rule\/aspect\/[a-z]+-(?:conjunction|opposition|square|trine|sextile)-(?:venus|moon|mars)$/,
+    topics: ['marriage'],
+  },
+  // Provider placements with the same cross-question relevance.
+  { re: /^western\.planets\[Venus\]$/, topics: ['marriage'] },
+  // BaZi structure: day master, its strength and the four-pillar ten-god
+  // layout are the classic work-style / drive / responsibility material.
+  { re: /^bazi-rule\/strength$/, topics: ['career'] },
+  { re: /^bazi\.dayMaster$/, topics: ['career'] },
+  { re: /^bazi\.pillars\.\*\.\(stem\|branch\|tenGodDisplay\)$/, topics: ['career'] },
+  // Zi Wei soul-palace stars color work style beside personality.
+  { re: /^ziwei-rule\/palace-star\/soul-/, topics: ['career'] },
+];
+
+/** Topics, beyond its authored one, for whose questions this fact is material. */
+export function relatedTopicsForFact(fact: {
+  evidence: readonly MaterialEvidence[];
+}): ReadonlyArray<'career' | 'wealth' | 'marriage' | 'studies' | 'health'> {
+  const topics = new Set<'career' | 'wealth' | 'marriage' | 'studies' | 'health'>();
+  for (const evidence of fact.evidence) {
+    for (const rule of RELATED_TOPIC_RULES) {
+      if (rule.re.test(evidence.ref)) for (const topic of rule.topics) topics.add(topic);
+    }
   }
-  return true;
+  return [...topics];
+}
+
+/**
+ * Whether material with an authored `topic` and these evidence refs may support
+ * a request for `requestTopic` (authored topic or a related one). Shared by
+ * fact selection, the claim chain and the response view so all three layers
+ * apply the SAME v3.4 relevance semantics. `general` is never a passport.
+ */
+export function isTopicRelevantMaterial(
+  topic: string | undefined,
+  refs: readonly string[],
+  requestTopic: string,
+): boolean {
+  if (topic === requestTopic) return true;
+  if (requestTopic === 'general') return false;
+  return RELATED_TOPIC_RULES.some(
+    (rule) =>
+      rule.topics.some((related) => related === requestTopic) &&
+      refs.some((ref) => rule.re.test(ref)),
+  );
+}
+
+/** Whether a fact may support a request for `topic` (authored topic or a related one). */
+export function isTopicRelevantFact(
+  fact: { topic?: string; evidence: readonly MaterialEvidence[] },
+  topic: string,
+): boolean {
+  return isTopicRelevantMaterial(
+    fact.topic,
+    fact.evidence.map((evidence) => evidence.ref),
+    topic,
+  );
 }
 
 /**

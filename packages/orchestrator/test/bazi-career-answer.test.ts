@@ -74,12 +74,17 @@ function journeyInput(birthInput: BirthInput, overrides: Parameters<typeof plann
   return { birthInput, planningInput: planningInput(overrides) };
 }
 
-// Birth-only positive example: one cultural reference + non-prophecy caveat.
+// Birth-only positive example (roadmap v3.4): structure material (pillars,
+// day master) plus the cultural reference with its non-prophecy caveat.
 // No action advice — practices require user-stated reality (ADR 0021).
-// No unrelated solar-time tip: the scoped ten-god claim is not time-sensitive.
+// No unrelated solar-time tip: the scoped claims are not time-sensitive.
 const OFFICER_PARAGRAPH =
   '命盘里有「七杀」这一传统十神，传统上常联到权威、压力、竞争一类主题，只作文化背景。' +
   '官杀说的是事业倾向的结构，不是职业预言。';
+const PILLARS_PARAGRAPH =
+  '四柱与各柱十神的排布是事业侧的结构材料：哪一柱带什么十神，先按位置如实读，再谈含义。';
+const DAY_MASTER_PARAGRAPH =
+  '日主与强弱读数给出工作方式的一层底色：帮扶偏少时更依赖自身稳定积累，这层读法按排盘返回值转述。';
 
 const CAVEAT_FACT_8 = '官杀仅示事业/责任倾向的结构，非职业预言。';
 
@@ -115,7 +120,9 @@ function traceFor(
     contractVersion: 'narrative-trace/v1',
     traceId: `narrative-trace:paragraph-${paragraphNumber}`,
     paragraphId: `paragraph-${paragraphNumber}`,
-    topic: 'career',
+    // Roadmap v3.4: the trace records the CLAIM's own topic — related-topic
+    // material keeps its authored topic while serving the career journey.
+    topic: claim.topic,
     approvedClaimIds: [claim.claimId],
     factRefs: claim.factRefs,
     mechanismRefs: claim.mechanismRefs,
@@ -127,6 +134,13 @@ function traceFor(
   });
 }
 
+/** One passing visible paragraph per journey claim (synthetic wording). */
+function paragraphForClaim(claim: ApprovedAnswerClaim): string {
+  if (claim.claimId.endsWith('fact-8')) return OFFICER_PARAGRAPH;
+  if (claim.claimId.endsWith('fact-1')) return PILLARS_PARAGRAPH;
+  return DAY_MASTER_PARAGRAPH;
+}
+
 function answerDraft(): ReturnType<typeof ReadingDraft.parse> {
   return ReadingDraft.parse({
     contractVersion: 'reading-draft/v2',
@@ -136,6 +150,8 @@ function answerDraft(): ReturnType<typeof ReadingDraft.parse> {
         id: 'career',
         heading: '',
         paragraphs: [
+          { text: PILLARS_PARAGRAPH, sourceFactIds: ['fact-1'] },
+          { text: DAY_MASTER_PARAGRAPH, sourceFactIds: ['fact-2'] },
           {
             text: OFFICER_PARAGRAPH,
             sourceFactIds: ['fact-8'],
@@ -153,11 +169,10 @@ function readyExamples(): {
   answer: ReturnType<typeof ReadingDraft.parse>;
   traces: NarrativeTraceValue[];
 } {
-  const [officer] = journeyClaims();
-  return {
-    answer: answerDraft(),
-    traces: [traceFor(officer!, 1, OFFICER_PARAGRAPH)],
-  };
+  const traces = journeyClaims().map((claim, index) =>
+    traceFor(claim, index + 1, paragraphForClaim(claim)),
+  );
+  return { answer: answerDraft(), traces };
 }
 
 describe('IQ-4D bazi career answer verification', () => {
@@ -231,7 +246,7 @@ describe('IQ-4D bazi career answer verification', () => {
   it('rejects an answer that drops a material caveat of a delivered claim', () => {
     const { traces } = readyExamples();
     const incomplete = answerDraft();
-    incomplete.sections[0]!.paragraphs[0] = {
+    incomplete.sections[0]!.paragraphs[2] = {
       text: OFFICER_PARAGRAPH,
       sourceFactIds: ['fact-8'],
     };
@@ -248,7 +263,7 @@ describe('IQ-4D bazi career answer verification', () => {
   it('rejects a declared caveat that no paragraph actually expresses', () => {
     const { traces } = readyExamples();
     const unbacked = answerDraft();
-    unbacked.sections[0]!.paragraphs[0] = {
+    unbacked.sections[0]!.paragraphs[2] = {
       text: OFFICER_PARAGRAPH,
       sourceFactIds: ['fact-8'],
     };
@@ -280,11 +295,11 @@ describe('IQ-4D bazi career answer verification', () => {
   });
 
   it('rejects an answer whose visible text diverges from its trace', () => {
-    const [officer] = journeyClaims();
+    const [pillars] = journeyClaims();
     const { answer } = readyExamples();
     const diverged = {
-      ...traceFor(officer!, 1, OFFICER_PARAGRAPH),
-      visibleText: `${OFFICER_PARAGRAPH}另加一句没核过的话。`,
+      ...traceFor(pillars!, 1, PILLARS_PARAGRAPH),
+      visibleText: `${PILLARS_PARAGRAPH}另加一句没核过的话。`,
     };
     const result = verifyBaziCareerAnswer(answer, [diverged], journeyInput(syntheticInput), {
       now: FIXED,
@@ -297,12 +312,12 @@ describe('IQ-4D bazi career answer verification', () => {
   });
 
   it('rejects visible text that leaks delivery-surface blocks', () => {
-    const [officer] = journeyClaims();
+    const officer = journeyClaims().find((claim) => claim.claimId.endsWith('fact-8'))!;
     const leak = {
-      ...traceFor(officer!, 1, '专业依据\n官杀见于月柱。'),
+      ...traceFor(officer, 1, '专业依据\n官杀见于月柱。'),
     };
     const draft = answerDraft();
-    draft.sections[0]!.paragraphs[0] = {
+    draft.sections[0]!.paragraphs[2] = {
       text: '专业依据\n官杀见于月柱。',
       sourceFactIds: ['fact-8'],
       constraintRefs: [{ kind: 'caveat', index: 0 }],
@@ -318,7 +333,7 @@ describe('IQ-4D bazi career answer verification', () => {
   });
 
   it(
-    'fails closed on degraded unknown-time journeys and on an unavailable rule profile',
+    'fails closed on degraded unknown-time journeys and degrades rule-profile loss to a controlled failure',
     { timeout: 30_000 },
     () => {
       const { answer, traces } = readyExamples();
@@ -330,20 +345,27 @@ describe('IQ-4D bazi career answer verification', () => {
           { now: FIXED },
         ),
       ).toThrow(ResponseViewPlanningError);
-      // The ADR 0021 short gloss cites bazi-rule/ten-gods/xiang-yi, so an
-      // unavailable rule profile degrades the cultural reference instead of
-      // pretending it is provider-only.
-      expect(() =>
-        verifyBaziCareerAnswer(
-          answer,
-          traces,
-          journeyInput(syntheticInput, {
-            rulesetVariantSensitiveClaims: true,
-            rulesetVariant: 'unavailable',
-          }),
-          { now: FIXED },
-        ),
-      ).toThrow(ResponseViewPlanningError);
+      // Roadmap v3.4: an unavailable rule profile degrades the rule-backed
+      // claims instead of emptying the journey, so the full answer (which
+      // cites the degraded officer claim) fails the controlled boundary
+      // checks rather than throwing.
+      const degraded = verifyBaziCareerAnswer(
+        answer,
+        traces,
+        journeyInput(syntheticInput, {
+          rulesetVariantSensitiveClaims: true,
+          rulesetVariant: 'unavailable',
+        }),
+        { now: FIXED },
+      );
+      expect(degraded.ok).toBe(false);
+      expect(degraded.issues).toContainEqual({
+        code: 'CLAIM_COVERAGE',
+        path: '$.traces.approvedClaimIds',
+      });
+      expect(degraded.violations.some((violation) => violation.code === 'UNKNOWN_FACT_ID')).toBe(
+        true,
+      );
       expect(() =>
         verifyBaziCareerAnswer(
           answer,

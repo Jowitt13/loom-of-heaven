@@ -120,6 +120,10 @@ export const AnswerGuardrail = z.enum([
   'no-investment-advice',
   'no-life-and-death-advice',
   'no-unsupported-comparison',
+  // Roadmap v3.4: host traditional interpretation is allowed but is its own
+  // tier — it must stay tied to cited facts and never claim engine-rule
+  // verification or ruleset backing.
+  'distinguish-fact-rule-interpretation',
 ]);
 export type AnswerGuardrail = z.infer<typeof AnswerGuardrail>;
 

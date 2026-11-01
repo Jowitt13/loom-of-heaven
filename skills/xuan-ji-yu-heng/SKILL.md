@@ -86,16 +86,20 @@ warnings. Computing all four systems does not require displaying all four — se
      `allowedFactIds`; do not read or attach `chart.json` / `interpretation.json`. The body shows
      **only the facts relevant to that topic**. There is no requirement to display all four raw
      charts or the full fact set in a topic report.
-   - **事业 Channel B（ADR 0021）默认正文：**连续短文，一眼能读。用户若说了工作现实（岗位、困扰、
+   - **事业 Channel B（ADR 0021，2026-11-01 修订 / roadmap v3.4）默认正文：**围绕问题组织四体系
+     事业材料：工作方式、动力、专业表达、协作、资源、责任。用户若说了工作现实（岗位、困扰、
      目标），**先回答现实困扰**；可执行做法只基于用户自述的具体处境，**不要**写“这些做法只来自你
-     刚才说的…和命盘无关”之类的内部审计句。命盘至多一条简短传统参考：形如「命盘里有『七杀』这一
-     传统十神」，紧邻冻结短释（七杀→权威、压力、竞争；正官→责任、自律、地位），并立刻说明只是
-     文化背景、非职业预言。**禁止**展开 TEN_GOD_MEANINGS 整段（如“需制化为权”“女命之夫星”）。
-     正官与七杀同现时**省略**该参考，不得任选其一。**禁止**把格局/格局成败、喜用神、五行行业表写
-     进正文，**禁止**由命盘推出职业适配或行业方向，**禁止**把七杀写成七杀格。只有出生信息时：说明
-     现有信息能支持的十神参考，并只问一个最关键的现实问题，**不给行动建议**，不编造工作经历或
-     职业方向。多体系综合不进事业默认正文。**不要**另起与当前结论无关的真太阳时/技术提示尾段；只
-     有 `requiredWarningCodes` 中真正影响所选事实的 warning 才就地自然说明。
+     刚才说的…和命盘无关”之类的内部审计句。命盘十神参考按实际存在陈述：形如「命盘里有『七杀』
+     这一传统十神」，紧邻冻结短释（七杀→权威、压力、竞争；正官→责任、自律、地位），并立刻说明
+     只是文化背景、非职业预言；正官与七杀同现时可分别陈述各自短释，不选胜者、不合成判词。
+     **禁止**展开 TEN_GOD_MEANINGS 整段（如“需制化为权”“女命之夫星”）。**禁止**把格局/格局成败、
+     喜用神、五行行业表写进正文，**禁止**由命盘推出职业适配鉴定；职业领域只能作为传统象义的探索
+     方向（例如官禄宫星性指向的工组类型），并说明需结合现实细化。四干没有官杀时**不得**把事业题
+     判成没有材料——照常解释官禄宫、MC、日主强弱与十神布局等真实内容。只有出生信息时：先给出
+     上述命盘分析及其条件，现实确会改变答案时才问一个最关键的现实问题，**不给行动建议**，不编造
+     工作经历或职业方向。叙述中可比较不同体系的支持、张力与不同侧面，各自机制保持在本体系内；
+     不强制四段、不投票。**不要**另起与当前结论无关的技术提示尾段；只有 `requiredWarningCodes`
+     中真正影响所选事实的 warning 才就地自然说明。
      示例只示范信息边界和清楚的表达，不是逐字套用的开场白；不重复用户整段提问，也不把同一限制
      换几个说法再讲一遍。详见 `references/examples-career.md` 中分开的正文与内部说明。
    - Per-topic loading: use the **自然叙述规范 v1** in `references/reading-style.md`; 事业 → `+ references/examples-career.md`; 感情 → `+ references/examples-love.md`; 财运 → `+ references/examples-wealth.md`; 学业/流年不加载无关案例文件。
@@ -228,6 +232,18 @@ paragraph, retain the internal chain `fact/evidence → reason/ruleset → concr
 relevant condition`. Write scannable, specific answers rather than a fixed report sequence:
 a few well-explained main lines for a first answer (not one section per system), short
 headings or bullets when content genuinely groups, plain paragraphs for short follow-ups.
+
+**解释的三个来源层（roadmap v3.4）。** 材料分三层：①引擎计算的事实（provider 值）；
+②已实现规则给出的含义（`*-rule` 证据）；③你基于①②展开的传统解释。①②可以按引擎结果陈述；
+③必须紧扣所引用的事实，但**不得**说成引擎规则结论、不得让规则版本为整段解释背书。缺少预写
+释义（②）不再等于不能回答——你可以用传统知识解释真实盘面（③），仍不得编造未计算的位置、
+数值或时期。正文不打印这些层标签；用户追问依据时再分层展开。
+
+**四体系按问题参与。** 默认检查四个体系的实际结果，但只讲与本题有关、实际可用的内容。可以在
+叙述中比较不同体系的支持、张力、不同侧面与不可比较之处，各体系机制保持在本体系内、互不借词；
+不强制四段、不投票、不平均。某体系缺输入或局部不可用，只影响依赖该部分的分析，其余有可靠依据
+的内容照常回答。明确的分析性判断（“重点是…”“主要张力在于…”）是正常表达；收益保证、命定断言、
+恐吓与诊断仍然禁止。
 
 Terms such as 干支、十神、宫位、星曜、相位或吠陀分类可以出现，但必须紧接着解释其规则机制和
 现实含义；不要把它们变成脱离结论的术语附录。趋势与年份是传统命理解读，不是统计概率，绝不输出

@@ -183,13 +183,24 @@ export function collectTimeWarnings(
     );
   }
 
-  if (normalized.solar !== null) {
+  // The solar clock face is DATA unless a consumer actually applies it: BaZi pillars
+  // under a non-civil solarTimeMode, or Zi Wei palaces under useApparentSolarTime.
+  // A civil/UTC run never carries this warning, so its public copy can no longer be
+  // read as "solar time affected this chart" when no calculation used that clock.
+  const solarAppliedTo = [
+    ...(input.settings.bazi.solarTimeMode !== 'civil' ? ['bazi pillars'] : []),
+    ...(input.settings.ziwei.useApparentSolarTime ? ['ziwei palaces'] : []),
+  ];
+  if (normalized.solar !== null && solarAppliedTo.length > 0) {
     warnings.push(
       makeWarning(
         WARNING_CODES.SOLAR_TIME_APPROXIMATE,
         'time',
-        `Apparent solar time uses the ${normalized.solar.method} equation-of-time approximation (~tenths of a minute).`,
-        { severity: 'info', detail: { method: normalized.solar.method } },
+        `Solar time applied to ${solarAppliedTo.join(' and ')} via the ${normalized.solar.method} equation-of-time approximation (~tenths of a minute); Western stays on the UTC instant.`,
+        {
+          severity: 'info',
+          detail: { method: normalized.solar.method, appliedTo: solarAppliedTo },
+        },
       ),
     );
   }

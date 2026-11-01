@@ -1,7 +1,11 @@
 # ADR 0020: Dual-source career layer
 
-- Status: Accepted — architecture and governance only; no runtime behavior implemented
+- Status: Accepted — architecture and governance only; no runtime behavior implemented.
+  **Amended 2026-11-01: ordinary topic-narration bounds for the T layer follow roadmap v3.4**
+  (see the amendment section); the composition grammar, C-track staging, and clinical isolation
+  below are unchanged.
 - Date: 2026-09-07
+- Amended: 2026-11-01 — roadmap v3.4 four-system topic interpretation
 - Scope: career-layer capability separation, provenance and composition rules, privacy and
   consent boundaries, and the staged C-track plan
 - Related: [Product technical roadmap](../PRODUCT_TECHNICAL_ROADMAP.md) (§5 C-track, §9 v3
@@ -125,6 +129,27 @@ advice units); adversarial fixtures for smuggling ("按八字我适合什么行�
 answer); trace checks that caveats sit with their units. Owner review and any future host
 acceptance use the acceptance-packet pattern with digest binding; pending is never pass. No
 accuracy percentages, model judges, or opaque scores.
+
+## Amendment — 2026-11-01 (roadmap v3.4 four-system topic interpretation)
+
+Roadmap v3.4 (owner decision 2026-11-01) redefines what the T layer may contribute to ordinary
+topic narration, without touching this ADR's composition grammar or staged C-track plan:
+
+- In ordinary topic answers (career included), the traditional side is no longer limited to
+  "structured records plus one narrow ADR 0021 ten-god cultural reference". It may carry
+  four-system traditional analysis built on cited engine facts and implemented-rule meanings,
+  bounded by the amended ADR 0021 and the roadmap v3.4 item: no chart-derived career-fit
+  verdict, no pattern/useful-god/industry rule text, occupational fields only as
+  traditional-symbolism exploration directions.
+- The R layer remains the **only** source of career action advice. Traditional analysis may sit
+  adjacent to reality-based advice but is never presented as its source (T⊣R adjacency
+  unchanged). Birth-only answers carry chart analysis with its conditions instead of a
+  reality-interview substitute.
+- C-1/C-2/C-4 keep their current internal-only state; C-3 (wiring the T layer into the
+  composed dual-source career product) remains paused pending separate owner authorization.
+  This amendment is about the ordinary answer-plan narration path, not the C-track product.
+- Layer tags, resolvable provenance, the forbidden T→advice edge, every clinical boundary, and
+  the privacy rules below are unchanged.
 
 ## Non-goals and evidence boundary
 

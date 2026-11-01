@@ -66,7 +66,7 @@ export function computeWestern(
   if (sidereal) {
     warnings.push(
       makeWarning(
-        WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+        WARNING_CODES.SIDEREAL_AYANAMSHA_APPROXIMATE,
         'western',
         `Sidereal zodiac applied via the ${settings.ayanamsha} ayanamsha (${aya.toFixed(3)}° at this date, linear model).`,
         { severity: 'info', detail: { ayanamsha: settings.ayanamsha, degrees: round6(aya) } },
@@ -182,7 +182,7 @@ export function computeWestern(
   );
   warnings.push(
     makeWarning(
-      WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+      WARNING_CODES.LUNAR_NODE_APPROXIMATE,
       'western',
       settings.nodes === 'true'
         ? 'Lunar nodes use the true (osculating) node — self-computed, approximate (~arc-minutes).'
@@ -204,7 +204,7 @@ export function computeWestern(
     }
     warnings.push(
       makeWarning(
-        WARNING_CODES.SOLAR_TIME_APPROXIMATE,
+        WARNING_CODES.ASTEROID_APPROXIMATE,
         'western',
         'Asteroids (Chiron/Ceres/Pallas/Juno/Vesta) use Keplerian osculating elements: approximate (sub-degree; Chiron coarser), not part of the ≤1′ gate.',
         { severity: 'info' },
