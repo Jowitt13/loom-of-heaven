@@ -174,7 +174,11 @@ When the user uploads **1-5 people** and asks about a relationship (合婚/配�
    标签、配对方向、关系类型与运行时钟）：①密封用同一 `validate-answer --seal-draft
 --binding-file synastry.json --input-file draft.json`；②送检加
    `--synastry --context-input-file people.json --now <与 synastry 相同>`，送检文件为
-   `{ draftSource, draftDigest, synastryResult（完整保存的结果）, readingDraft }`。换任一人输入、
+   `{ draftSource, draftDigest, synastryResult（完整保存的结果）, synastryWarnings（同次输出的完整 warnings）, readingDraft }`。
+   同次输出的 `requiredWarningCodes` 是草稿的必要披露项，按该数组下标用 warning constraintRefs
+   就地表达；不把未涉及的交点/小行星误差硬塞入正文。任一被分析方时间未知时，当前合盘方法
+   没有整日稳定性依据，`findings` 为空，只说明受限范围，不把午锚关系当成结论。
+   显式 `--synastry` 缺当前双方上下文不会降级成旧结构检查。换任一人输入、
    换对象/方向/关系、改运行时钟或改草稿，都会被 `BINDING_MISMATCH` 拒绝。单人 answer-plan
    永远不能给合盘正文背书。
 7. Use a synastry `followupOffer` only if the user asks to continue; never append it as an automatic menu.

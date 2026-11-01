@@ -439,6 +439,202 @@ function main(): void {
       ok: v3Ok,
       detail: v3Detail || undefined,
     });
+
+    // The explicit pair mode must not fall through to a successful structural
+    // check. Exercise the REAL extracted CLI, including its Node 22 runtime.
+    const structuralFile = writeInput('pair-structural.json', {
+      answerPlan: {
+        allowedFactIds: ['fact-1'],
+        requiredCaveats: [],
+        requiredWarningCodes: [],
+        guardrails: [],
+        answerability: 'grounded',
+        request: { topic: 'marriage' },
+        disclaimers: [],
+      },
+      readingDraft: {
+        contractVersion: 'reading-draft/v3',
+        topic: 'marriage',
+        sections: [
+          {
+            id: 'body',
+            heading: '',
+            paragraphs: [{ text: '这组材料讨论双方的表达节奏。', sourceFactIds: ['fact-1'] }],
+          },
+        ],
+        caveatsExpressed: [],
+        warningsDisclosed: [],
+      },
+    });
+    const structural = run(pkgRoot, [
+      'scripts/loom-chart.mjs',
+      'validate-answer',
+      '--input-file',
+      structuralFile,
+    ]);
+    const noContext = run(pkgRoot, [
+      'scripts/loom-chart.mjs',
+      'validate-answer',
+      '--synastry',
+      '--input-file',
+      structuralFile,
+    ]);
+    results.push({
+      name: 'explicit synastry without context fails; legacy structural mode stays valid',
+      ok:
+        structural.code === 0 &&
+        noContext.code === 2 &&
+        /INPUT_VALIDATION_FAILED/.test(noContext.stdout),
+      detail: `structural ${structural.code}, pair ${noContext.code}`,
+    });
+
+    for (const unknown of [true, false]) {
+      let pairOk = false;
+      let detail = '';
+      try {
+        const people = {
+          people: [
+            {
+              label: '甲',
+              relation: 'couple',
+              input: {
+                ...integrityBase,
+                localTime: unknown ? undefined : '00:00:00',
+                timeAccuracy: unknown ? 'unknown' : 'exact',
+              },
+            },
+            {
+              label: '乙',
+              relation: 'couple',
+              input: { ...integrityBase, localDate: '2001-08-18', localTime: '14:30:00' },
+            },
+          ],
+          analyzePair: ['甲', '乙'],
+        };
+        const peopleFile = writeInput('pair-people.json', people);
+        const pairRun = run(pkgRoot, [
+          'scripts/loom-chart.mjs',
+          'synastry',
+          '--input-file',
+          peopleFile,
+          '--now',
+          FIXED_NOW,
+        ]);
+        if (pairRun.code !== 0) throw new Error('pair calculation failed');
+        const saved = JSON.parse(pairRun.stdout) as {
+          synastry: { findings: unknown[] };
+          warnings: unknown[];
+          requiredWarningCodes: string[];
+        };
+        const expectedCode = unknown ? 'TIME_UNKNOWN' : 'NEAR_BOUNDARY';
+        if (!saved.requiredWarningCodes.includes(expectedCode))
+          throw new Error('missing material warning');
+        if (unknown && saved.synastry.findings.length !== 0)
+          throw new Error('noon findings leaked');
+        if (!unknown && saved.synastry.findings.length === 0)
+          throw new Error('known-time findings lost');
+        writeInput('pair-run.json', saved);
+        const draft = {
+          contractVersion: 'reading-draft/v3',
+          topic: 'marriage',
+          sections: [
+            {
+              id: 'limit',
+              heading: '',
+              paragraphs: [
+                {
+                  text: unknown
+                    ? '一方出生时间未知，当前方法暂不能给出可靠的双方关系判断。'
+                    : '出生时刻接近规则分界，相关关系判断应结合边界差异理解。',
+                  sourceFactIds: [],
+                  constraintRefs: [
+                    { kind: 'warning', index: saved.requiredWarningCodes.indexOf(expectedCode) },
+                  ],
+                },
+              ],
+            },
+          ],
+          caveatsExpressed: [],
+          warningsDisclosed: saved.requiredWarningCodes,
+        };
+        const deliver = (
+          body: typeof draft,
+          warnings: unknown,
+        ): { code: number; value: Record<string, unknown> } => {
+          writeInput('pair-draft.json', body);
+          const sealed = run(pkgRoot, [
+            'scripts/loom-chart.mjs',
+            'validate-answer',
+            '--seal-draft',
+            '--input-file',
+            'pair-draft.json',
+            '--binding-file',
+            'pair-run.json',
+          ]);
+          if (sealed.code !== 0) throw new Error('pair sealing failed');
+          writeInput('pair-delivery.json', {
+            ...JSON.parse(sealed.stdout),
+            synastryResult: saved.synastry,
+            synastryWarnings: warnings,
+            readingDraft: body,
+          });
+          const delivered = run(pkgRoot, [
+            'scripts/loom-chart.mjs',
+            'validate-answer',
+            '--synastry',
+            '--input-file',
+            'pair-delivery.json',
+            '--context-input-file',
+            peopleFile,
+            '--now',
+            FIXED_NOW,
+          ]);
+          return {
+            code: delivered.code,
+            value: JSON.parse(delivered.stdout) as Record<string, unknown>,
+          };
+        };
+        const valid = deliver(draft, saved.warnings);
+        const tampered = deliver(draft, []);
+        const omitted = deliver(
+          {
+            ...draft,
+            warningsDisclosed: [],
+            sections: [
+              {
+                id: 'limit',
+                heading: '',
+                paragraphs: [
+                  {
+                    ...draft.sections[0]!.paragraphs[0]!,
+                    constraintRefs: [],
+                  },
+                ],
+              },
+            ],
+          },
+          saved.warnings,
+        );
+        pairOk =
+          valid.code === 0 &&
+          valid.value.ok === true &&
+          valid.value.deliverableBody === draft.sections[0]!.paragraphs[0]!.text &&
+          tampered.code === 1 &&
+          tampered.value.failureReason === 'BINDING_MISMATCH' &&
+          omitted.code === 1 &&
+          omitted.value.failureReason === 'VALIDATION_FAILED' &&
+          omitted.value.deliverableBody === null;
+      } catch (err) {
+        detail = err instanceof Error ? err.message : 'pair smoke failed';
+      }
+      results.push({
+        name: unknown
+          ? 'unknown-time pair withholds noon findings and requires bound warning'
+          : 'near-boundary pair preserves findings and requires bound warning',
+        ok: pairOk,
+        detail: detail || undefined,
+      });
+    }
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

@@ -389,10 +389,21 @@ that path — like before — still needs `lint-reading` on the produced text be
 **Synastry pair delivery (roadmap v3.4).** The `synastry` command emits a `synastryBinding`
 beside its result (same `answer-binding/v1` record): `requestDigest` covers BOTH people's birth
 inputs and settings, the labels, the analyzed pair WITH its direction, the relationship type and
-the run clock; `planDigest` covers the full result document. Sealing is identical
+the run clock; `planDigest` covers the full result document AND the saved run's full warnings. Sealing is identical
 (`--seal-draft --binding-file synastry.json`). Submission adds `--synastry` and passes the people
-file as the context; the input file carries `{ draftSource, draftDigest, synastryResult, readingDraft }`
+file as the context; the input file carries `{ draftSource, draftDigest, synastryResult, synastryWarnings, readingDraft }`
 (no `answerPlan` — a single-person plan can never vouch for a pair body):
+
+`synastryWarnings` must be the same run's `warnings` array (including an empty array when there
+are none); omitting or changing it cannot preserve the binding. The emitted `requiredWarningCodes`
+is the disclosure array for the draft's `warningsDisclosed` and warning `constraintRefs` indices.
+`TIME_UNKNOWN` and `NEAR_BOUNDARY` remain mandatory; unrelated node/asteroid warnings remain audit
+records, not compulsory prose. Explicit `--synastry` without context fails, never downgrades to
+structural-only success. The separate `--seal-draft` step and unflagged structural mode are unchanged.
+When either analyzed person's time is unknown, none of the shipped pair methods establishes
+whole-day stability: pair findings are withheld (no noon-based tally or spouse-palace verdict),
+and bound delivery supports only a short limitation with its required warning. Exact/approximate
+pair calculations, single-person technical charts and unselected third people are unaffected.
 
 ```text
 node scripts/loom-chart.mjs validate-answer \

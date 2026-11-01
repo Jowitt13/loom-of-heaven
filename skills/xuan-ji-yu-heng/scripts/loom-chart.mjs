@@ -316,10 +316,19 @@ async function main() {
             issues: err && err.issues ? err.issues : String(err),
           });
         }
-        const { synastry, warnings, synastryBinding } = runSynastry(parsed, {
+        const { synastry, warnings, requiredWarningCodes, synastryBinding } = runSynastry(parsed, {
           now: parseNow(typeof args.now === 'string' ? args.now : undefined),
         });
-        writeOutput(args, canonicalJsonPretty({ ok: true, synastry, warnings, synastryBinding }));
+        writeOutput(
+          args,
+          canonicalJsonPretty({
+            ok: true,
+            synastry,
+            warnings,
+            requiredWarningCodes,
+            synastryBinding,
+          }),
+        );
         return;
       }
       case 'lint-reading': {
@@ -385,7 +394,10 @@ async function main() {
           Object.hasOwn(rawInput, 'draftSource') ||
           Object.hasOwn(rawInput, 'draftDigest') ||
           Object.hasOwn(rawInput, 'answerBinding');
-        if (declaresBinding && typeof args['context-input-file'] !== 'string') {
+        if (
+          (declaresBinding || args.synastry === true) &&
+          typeof args['context-input-file'] !== 'string'
+        ) {
           throw new EngineError(
             'INPUT_VALIDATION_FAILED',
             'Input declares an answer binding or draft origin; bound delivery requires --context-input-file (and --topic). It is never silently reduced to the structural check.',
@@ -414,6 +426,7 @@ async function main() {
               draftSource: rawInput.draftSource,
               draftDigest: rawInput.draftDigest,
               synastryResult: rawInput.synastryResult,
+              synastryWarnings: rawInput.synastryWarnings,
               readingDraft: rawInput.readingDraft,
             });
             writePublicOutput(args, canonicalJsonPretty(pairDelivery));

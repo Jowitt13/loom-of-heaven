@@ -2,14 +2,20 @@ import {
   ANSWER_BINDING_CONTRACT_VERSION,
   ANSWER_DELIVERY_CONTRACT_VERSION,
   AnswerBinding,
+  EngineWarning as EngineWarningSchema,
   canonicalJson,
   Sha256Digest,
   SynastryResult as SynastryResultSchema,
   parseSynastryInput,
 } from '@loom/contracts';
-import type { SynastryInput, SynastryResult } from '@loom/contracts';
+import type { EngineWarning, PublicFact, SynastryInput, SynastryResult } from '@loom/contracts';
 import { createHash } from 'node:crypto';
-import { ANSWER_GUARDRAILS, lintReading, validateAnswer } from '@loom/interpret';
+import {
+  ANSWER_GUARDRAILS,
+  lintReading,
+  materialWarningCodes,
+  validateAnswer,
+} from '@loom/interpret';
 import { sealReadingDraft, transcribeReadingDraft } from './answer-delivery.ts';
 import type { AnswerDeliveryResult } from './answer-delivery.ts';
 
@@ -67,19 +73,23 @@ export function deriveSynastryRequestDigest(context: SynastryBindingContext): st
 }
 
 /** Digest over the full synastry result document this body was written from. */
-export function deriveSynastryPlanDigest(synastryResult: SynastryResult): string {
-  return digestOfJson(synastryResult);
+export function deriveSynastryPlanDigest(
+  synastryResult: SynastryResult,
+  warnings: readonly EngineWarning[],
+): string {
+  return digestOfJson({ synastryResult, warnings });
 }
 
 /** Build the transient pair binding emitted beside the synastry result. */
 export function buildSynastryBinding(
   context: SynastryBindingContext,
   synastryResult: SynastryResult,
+  warnings: readonly EngineWarning[],
 ): AnswerBinding {
   return {
     contractVersion: ANSWER_BINDING_CONTRACT_VERSION,
     requestDigest: deriveSynastryRequestDigest(context),
-    planDigest: deriveSynastryPlanDigest(synastryResult),
+    planDigest: deriveSynastryPlanDigest(synastryResult, warnings),
   };
 }
 
@@ -98,6 +108,8 @@ export interface DeliverSynastryAnswerInput {
   draftDigest: unknown;
   /** The FULL saved synastry result (raw, untrusted — digest-compared). */
   synastryResult: unknown;
+  /** The saved run's FULL warnings; bound together with its result, never optional. */
+  synastryWarnings: unknown;
   /** The reading draft (raw, untrusted — validated via the public entry). */
   readingDraft: unknown;
 }
@@ -120,14 +132,43 @@ function synastryFailure(
   };
 }
 
-/** Minimal honest plan envelope derived from the submitted synastry result. */
-function synastryPlanEnvelope(result: SynastryResult) {
+/** Reuse warning materiality; these pointers describe dependency, not new chart facts. */
+export function requiredSynastryWarningCodes(
+  result: SynastryResult,
+  warnings: readonly EngineWarning[],
+): EngineWarning['code'][] {
+  const facts: PublicFact[] = result.findings.flatMap((finding, index) => {
+    if (finding.system === 'overall') return [];
+    const ref =
+      finding.system === 'bazi'
+        ? finding.code === 'bazi/zodiac'
+          ? 'bazi.pillars.year.branch'
+          : 'bazi.pillars.*.synastry'
+        : finding.system === 'ziwei'
+          ? 'ziwei.palaces'
+          : 'western.angles.synastry';
+    return [
+      {
+        id: `fact-${index + 1}`,
+        topic: 'marriage',
+        claim: finding.claim,
+        evidence: [{ kind: finding.system, ref }],
+      },
+    ];
+  });
+  return [...new Set(materialWarningCodes(warnings, facts))];
+}
+
+/** Minimal honest plan envelope derived from the bound result AND warnings. */
+function synastryPlanEnvelope(result: SynastryResult, warnings: readonly EngineWarning[]) {
   return {
     allowedFactIds: [],
     requiredCaveats: [],
-    requiredWarningCodes: [],
+    requiredWarningCodes: requiredSynastryWarningCodes(result, warnings),
     guardrails: [...ANSWER_GUARDRAILS],
-    answerability: 'limited' as const,
+    answerability: result.findings.some((finding) => finding.system !== 'overall')
+      ? ('limited' as const)
+      : ('not-supported' as const),
     request: { topic: SYNASTRY_TOPIC },
     disclaimers: result.disclaimers,
   };
@@ -161,12 +202,17 @@ export function deliverSynastryAnswer(input: unknown): AnswerDeliveryResult {
     return synastryFailure('MALFORMED_INPUT', null);
   }
 
+  const parsedWarnings = EngineWarningSchema.array().max(256).safeParse(raw.synastryWarnings);
+  if (!parsedWarnings.success) return synastryFailure('MALFORMED_INPUT', null);
+
   const currentRequestDigest = deriveSynastryRequestDigest({
     synastryInput,
     ...(raw.currentRequest?.now !== undefined ? { now: raw.currentRequest.now as number } : {}),
   });
   const requestDigestMatch = currentRequestDigest === parsedSource.data.requestDigest;
-  const planDigestMatch = digestOfJson(raw.synastryResult) === parsedSource.data.planDigest;
+  const planDigestMatch =
+    digestOfJson({ synastryResult: raw.synastryResult, warnings: parsedWarnings.data }) ===
+    parsedSource.data.planDigest;
   let draftDigestMatch = false;
   try {
     draftDigestMatch = digestOfJson(raw.readingDraft) === parsedDigest.data;
@@ -188,7 +234,7 @@ export function deliverSynastryAnswer(input: unknown): AnswerDeliveryResult {
   // envelope's disclaimers are the run's own; paragraphs reference them via
   // constraintRefs (the pair path has no fact-id contract to cite).
   const validation = validateAnswer({
-    answerPlan: synastryPlanEnvelope(result.data),
+    answerPlan: synastryPlanEnvelope(result.data, parsedWarnings.data),
     readingDraft: raw.readingDraft,
   });
   if (!validation.ok) {

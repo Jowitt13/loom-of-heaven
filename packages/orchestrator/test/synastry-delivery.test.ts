@@ -92,7 +92,7 @@ function pairDraft() {
 
 function sealedPair(input: SynastryInput, draft: unknown, now: number) {
   const run = runSynastry(input, { now });
-  const binding = buildSynastryBinding({ synastryInput: input, now }, run.synastry);
+  const binding = buildSynastryBinding({ synastryInput: input, now }, run.synastry, run.warnings);
   return { run, ...sealSynastryReadingDraft(binding, draft) };
 }
 
@@ -108,6 +108,19 @@ describe('synastry pair bound delivery (roadmap v3.4 review fix #4)', () => {
       false,
     );
     expect(run.synastry.pair).toEqual({ a: '甲', b: '乙', relation: 'couple' });
+    const withUnselected = peopleInput();
+    withUnselected.people.push({
+      ...structuredClone(withUnselected.people[0]!),
+      label: '丙',
+      input: parseBirthInput({
+        ...withUnselected.people[0]!.input,
+        timeAccuracy: 'unknown',
+        localTime: undefined,
+      }),
+    });
+    expect(runSynastry(withUnselected, { now: FIXED }).synastry.findings).toEqual(
+      run.synastry.findings,
+    );
   });
 
   it('delivers a valid pair body verbatim through the binding chain', () => {
@@ -119,6 +132,7 @@ describe('synastry pair bound delivery (roadmap v3.4 review fix #4)', () => {
       draftSource: sealed.draftSource,
       draftDigest: sealed.draftDigest,
       synastryResult: sealed.run.synastry,
+      synastryWarnings: sealed.run.warnings,
       readingDraft: draft,
     });
     expect(delivery.ok).toBe(true);
@@ -146,6 +160,7 @@ describe('synastry pair bound delivery (roadmap v3.4 review fix #4)', () => {
       draftSource: sealed.draftSource,
       draftDigest: sealed.draftDigest,
       synastryResult: sealed.run.synastry,
+      synastryWarnings: sealed.run.warnings,
       readingDraft: draft,
     });
     expect(delivery.ok).toBe(false);
@@ -165,6 +180,7 @@ describe('synastry pair bound delivery (roadmap v3.4 review fix #4)', () => {
       draftSource: sealed.draftSource,
       draftDigest: sealed.draftDigest,
       synastryResult: sealed.run.synastry,
+      synastryWarnings: sealed.run.warnings,
       readingDraft: draft,
     });
     expect(swappedDelivery.failureReason).toBe('BINDING_MISMATCH');
@@ -176,6 +192,7 @@ describe('synastry pair bound delivery (roadmap v3.4 review fix #4)', () => {
       draftSource: sealed.draftSource,
       draftDigest: sealed.draftDigest,
       synastryResult: sealed.run.synastry,
+      synastryWarnings: sealed.run.warnings,
       readingDraft: draft,
     });
     expect(relationDelivery.failureReason).toBe('BINDING_MISMATCH');
@@ -193,6 +210,7 @@ describe('synastry pair bound delivery (roadmap v3.4 review fix #4)', () => {
       draftSource: sealed.draftSource,
       draftDigest: sealed.draftDigest,
       synastryResult: sealed.run.synastry,
+      synastryWarnings: sealed.run.warnings,
       readingDraft: modified,
     });
     expect(modifiedDelivery.failureReason).toBe('BINDING_MISMATCH');
@@ -208,6 +226,7 @@ describe('synastry pair bound delivery (roadmap v3.4 review fix #4)', () => {
       draftSource: sealed.draftSource,
       draftDigest: sealed.draftDigest,
       synastryResult: foreignRun.synastry,
+      synastryWarnings: foreignRun.warnings,
       readingDraft: draft,
     });
     expect(foreignDelivery.failureReason).toBe('BINDING_MISMATCH');
@@ -224,6 +243,7 @@ describe('synastry pair bound delivery (roadmap v3.4 review fix #4)', () => {
       draftSource: riskySealed.draftSource,
       draftDigest: riskySealed.draftDigest,
       synastryResult: riskySealed.run.synastry,
+      synastryWarnings: riskySealed.run.warnings,
       readingDraft: risky,
     });
     expect(riskyDelivery.ok).toBe(false);
@@ -244,6 +264,7 @@ describe('synastry pair bound delivery (roadmap v3.4 review fix #4)', () => {
       draftSource: ordinarySealed.draftSource,
       draftDigest: ordinarySealed.draftDigest,
       synastryResult: ordinarySealed.run.synastry,
+      synastryWarnings: ordinarySealed.run.warnings,
       readingDraft: ordinary,
     });
     expect(ordinaryDelivery.ok).toBe(true);
@@ -264,5 +285,135 @@ describe('synastry pair bound delivery (roadmap v3.4 review fix #4)', () => {
     });
     expect(misrouted.ok).toBe(false);
     expect(['MALFORMED_INPUT', 'BINDING_MISMATCH']).toContain(misrouted.failureReason);
+  });
+
+  it(
+    'withholds noon-based pair findings when either analyzed person has unknown time',
+    { timeout: 30_000 },
+    () => {
+      const exact = peopleInput();
+      const oldResult = runSynastry(exact, { now: FIXED });
+      expect(oldResult.synastry.findings.some((f) => f.code === 'bazi/spouse-palace')).toBe(true);
+      const late = structuredClone(exact);
+      late.people[0]!.input = parseBirthInput({ ...late.people[0]!.input, localTime: '23:30:00' });
+      expect(
+        runSynastry(late, { now: FIXED }).synastry.findings.some(
+          (f) => f.code === 'bazi/spouse-palace',
+        ),
+      ).toBe(false);
+
+      for (const personIndex of [0, 1]) {
+        const input = structuredClone(exact);
+        input.people[personIndex]!.input = parseBirthInput({
+          ...input.people[personIndex]!.input,
+          timeAccuracy: 'unknown',
+          localTime: undefined,
+        });
+        const run = runSynastry(input, { now: FIXED });
+        expect(run.synastry.findings).toEqual([]);
+        expect(run.requiredWarningCodes).toContain('TIME_UNKNOWN');
+        const draft = {
+          ...pairDraft(),
+          sections: [
+            {
+              id: 'limit',
+              heading: '',
+              paragraphs: [
+                {
+                  text: '一方出生时间未知，当前合盘方法依赖时刻，暂不把午时占位当作双方的关系判断。',
+                  sourceFactIds: [],
+                  constraintRefs: [
+                    { kind: 'warning', index: run.requiredWarningCodes.indexOf('TIME_UNKNOWN') },
+                  ],
+                },
+              ],
+            },
+          ],
+          warningsDisclosed: run.requiredWarningCodes,
+        };
+        const sealed = sealSynastryReadingDraft(run.synastryBinding, draft);
+        const delivery = {
+          currentRequest: { synastryInput: input, now: FIXED },
+          ...sealed,
+          synastryResult: run.synastry,
+          synastryWarnings: run.warnings,
+          readingDraft: draft,
+        };
+        expect(deliverSynastryAnswer(delivery).ok).toBe(true);
+        expect(
+          deliverSynastryAnswer({ ...delivery, synastryResult: oldResult.synastry }).failureReason,
+        ).toBe('BINDING_MISMATCH');
+        const omitted = {
+          ...draft,
+          warningsDisclosed: [],
+          sections: [
+            {
+              id: 'limit',
+              heading: '',
+              paragraphs: [
+                {
+                  text: draft.sections[0]!.paragraphs[0]!.text,
+                  sourceFactIds: [],
+                  constraintRefs: [{ kind: 'disclaimer', index: 0 }],
+                },
+              ],
+            },
+          ],
+        };
+        const rejected = deliverSynastryAnswer({
+          ...delivery,
+          ...sealSynastryReadingDraft(run.synastryBinding, omitted),
+          readingDraft: omitted,
+        });
+        expect(rejected.ok).toBe(false);
+        expect(
+          rejected.validation?.violations.some((v) => v.code === 'MISSING_REQUIRED_WARNING'),
+        ).toBe(true);
+      }
+    },
+  );
+
+  it('requires a near-boundary disclosure and binds the full warning record', () => {
+    const input = peopleInput();
+    input.people[0]!.input = parseBirthInput({ ...input.people[0]!.input, localTime: '00:00:00' });
+    const run = runSynastry(input, { now: FIXED });
+    expect(run.requiredWarningCodes).toContain('NEAR_BOUNDARY');
+    expect(run.requiredWarningCodes).not.toContain('ASTEROID_APPROXIMATE');
+    expect(run.requiredWarningCodes).not.toContain('LUNAR_NODE_APPROXIMATE');
+    const draft = pairDraft();
+    const delivery = {
+      currentRequest: { synastryInput: input, now: FIXED },
+      ...sealSynastryReadingDraft(run.synastryBinding, draft),
+      synastryResult: run.synastry,
+      synastryWarnings: run.warnings,
+      readingDraft: draft,
+    };
+    const omitted = deliverSynastryAnswer(delivery);
+    expect(omitted.validation?.violations.some((v) => v.code === 'MISSING_REQUIRED_WARNING')).toBe(
+      true,
+    );
+    draft.sections[1]!.paragraphs[0]!.text += '出生时刻接近规则分界，相关位置应结合边界差异理解。';
+    draft.sections[1]!.paragraphs[0]!.constraintRefs.push({
+      kind: 'warning',
+      index: run.requiredWarningCodes.indexOf('NEAR_BOUNDARY'),
+    } as never);
+    const disclosed = { ...draft, warningsDisclosed: run.requiredWarningCodes };
+    const valid = {
+      ...delivery,
+      ...sealSynastryReadingDraft(run.synastryBinding, disclosed),
+      readingDraft: disclosed,
+    };
+    expect(deliverSynastryAnswer(valid).ok).toBe(true);
+    expect(deliverSynastryAnswer({ ...valid, synastryWarnings: [] }).failureReason).toBe(
+      'BINDING_MISMATCH',
+    );
+    expect(deliverSynastryAnswer({ ...valid, synastryWarnings: undefined }).failureReason).toBe(
+      'MALFORMED_INPUT',
+    );
+    const changed = structuredClone(run.warnings);
+    changed[0]!.message += 'changed';
+    expect(deliverSynastryAnswer({ ...valid, synastryWarnings: changed }).failureReason).toBe(
+      'BINDING_MISMATCH',
+    );
   });
 });

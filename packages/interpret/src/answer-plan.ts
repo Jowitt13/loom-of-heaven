@@ -336,7 +336,7 @@ export function isTimeSensitiveFact(fact: {
 }
 
 export function materialWarningCodes(
-  warnings: PublicWarning[],
+  warnings: readonly Pick<PublicWarning, 'code' | 'system'>[],
   selectedFacts: PublicFact[],
 ): PublicWarning['code'][] {
   const factSystems = new Set<EngineWarning['system']>();
@@ -354,7 +354,20 @@ export function materialWarningCodes(
       // attaches to an answer citing only a Western MC. A legacy time-layer
       // solar warning matches no consumer system and is never material.
       if (warning.code === 'SOLAR_TIME_APPROXIMATE') {
-        return factSystems.has(warning.system) && hasTimeSensitiveFact;
+        return selectedFacts.some((fact) => {
+          const affectedEvidence = fact.evidence.filter(
+            (evidence) => evidenceSystem(evidence.kind) === warning.system,
+          );
+          return (
+            affectedEvidence.length > 0 &&
+            isTimeSensitiveFact({
+              evidence: affectedEvidence,
+              // A mixed-system fact's generic caveat cannot lend another system's
+              // time sensitivity to this consumer either.
+              ...(affectedEvidence.length === fact.evidence.length ? { caveat: fact.caveat } : {}),
+            })
+          );
+        });
       }
       if (warning.system === 'time') {
         return factSystems.has('time') || hasTimeSensitiveFact;

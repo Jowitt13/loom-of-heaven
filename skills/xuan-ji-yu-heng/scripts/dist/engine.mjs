@@ -63075,7 +63075,17 @@ function materialWarningCodes(warnings, selectedFacts) {
   return warnings.filter((warning) => {
     if (ALWAYS_MATERIAL_WARNING_CODES.has(warning.code)) return true;
     if (warning.code === "SOLAR_TIME_APPROXIMATE") {
-      return factSystems.has(warning.system) && hasTimeSensitiveFact;
+      return selectedFacts.some((fact2) => {
+        const affectedEvidence = fact2.evidence.filter(
+          (evidence) => evidenceSystem(evidence.kind) === warning.system
+        );
+        return affectedEvidence.length > 0 && isTimeSensitiveFact({
+          evidence: affectedEvidence,
+          // A mixed-system fact's generic caveat cannot lend another system's
+          // time sensitivity to this consumer either.
+          ...affectedEvidence.length === fact2.evidence.length ? { caveat: fact2.caveat } : {}
+        });
+      });
     }
     if (warning.system === "time") {
       return factSystems.has("time") || hasTimeSensitiveFact;
@@ -64912,14 +64922,14 @@ function deriveSynastryRequestDigest(context) {
   };
   return sha256Hex2(canonicalJson(payload));
 }
-function deriveSynastryPlanDigest(synastryResult) {
-  return digestOfJson2(synastryResult);
+function deriveSynastryPlanDigest(synastryResult, warnings) {
+  return digestOfJson2({ synastryResult, warnings });
 }
-function buildSynastryBinding(context, synastryResult) {
+function buildSynastryBinding(context, synastryResult, warnings) {
   return {
     contractVersion: ANSWER_BINDING_CONTRACT_VERSION,
     requestDigest: deriveSynastryRequestDigest(context),
-    planDigest: deriveSynastryPlanDigest(synastryResult)
+    planDigest: deriveSynastryPlanDigest(synastryResult, warnings)
   };
 }
 function sealSynastryReadingDraft(answerBinding, readingDraft) {
@@ -64937,13 +64947,28 @@ function synastryFailure(failureReason, binding, validation = null, lint = null)
     deliverableBodySha256: null
   };
 }
-function synastryPlanEnvelope(result) {
+function requiredSynastryWarningCodes(result, warnings) {
+  const facts = result.findings.flatMap((finding2, index) => {
+    if (finding2.system === "overall") return [];
+    const ref = finding2.system === "bazi" ? finding2.code === "bazi/zodiac" ? "bazi.pillars.year.branch" : "bazi.pillars.*.synastry" : finding2.system === "ziwei" ? "ziwei.palaces" : "western.angles.synastry";
+    return [
+      {
+        id: `fact-${index + 1}`,
+        topic: "marriage",
+        claim: finding2.claim,
+        evidence: [{ kind: finding2.system, ref }]
+      }
+    ];
+  });
+  return [...new Set(materialWarningCodes(warnings, facts))];
+}
+function synastryPlanEnvelope(result, warnings) {
   return {
     allowedFactIds: [],
     requiredCaveats: [],
-    requiredWarningCodes: [],
+    requiredWarningCodes: requiredSynastryWarningCodes(result, warnings),
     guardrails: [...ANSWER_GUARDRAILS],
-    answerability: "limited",
+    answerability: result.findings.some((finding2) => finding2.system !== "overall") ? "limited" : "not-supported",
     request: { topic: SYNASTRY_TOPIC },
     disclaimers: result.disclaimers
   };
@@ -64967,12 +64992,14 @@ function deliverSynastryAnswer(input2) {
   if (!parsedSource.success || !parsedDigest.success) {
     return synastryFailure("MALFORMED_INPUT", null);
   }
+  const parsedWarnings = EngineWarning.array().max(256).safeParse(raw.synastryWarnings);
+  if (!parsedWarnings.success) return synastryFailure("MALFORMED_INPUT", null);
   const currentRequestDigest = deriveSynastryRequestDigest({
     synastryInput,
     ...raw.currentRequest?.now !== void 0 ? { now: raw.currentRequest.now } : {}
   });
   const requestDigestMatch = currentRequestDigest === parsedSource.data.requestDigest;
-  const planDigestMatch = digestOfJson2(raw.synastryResult) === parsedSource.data.planDigest;
+  const planDigestMatch = digestOfJson2({ synastryResult: raw.synastryResult, warnings: parsedWarnings.data }) === parsedSource.data.planDigest;
   let draftDigestMatch = false;
   try {
     draftDigestMatch = digestOfJson2(raw.readingDraft) === parsedDigest.data;
@@ -64989,7 +65016,7 @@ function deliverSynastryAnswer(input2) {
   const result = SynastryResult.safeParse(raw.synastryResult);
   if (!result.success) return synastryFailure("MALFORMED_INPUT", null);
   const validation = validateAnswer({
-    answerPlan: synastryPlanEnvelope(result.data),
+    answerPlan: synastryPlanEnvelope(result.data, parsedWarnings.data),
     readingDraft: raw.readingDraft
   });
   if (!validation.ok) {
@@ -66379,7 +66406,7 @@ function runSynastry(input2, options = {}) {
   const bundleA = calculate(a.input, { now: options.now });
   const bundleB = calculate(b.input, { now: options.now });
   const focusYear = new Date(options.now ?? Date.now()).getUTCFullYear();
-  const findings = synastryFindings(bundleA, bundleB, focusYear);
+  const findings = a.input.timeAccuracy === "unknown" || b.input.timeAccuracy === "unknown" ? [] : synastryFindings(bundleA, bundleB, focusYear);
   const relation = a.relation !== "unspecified" ? a.relation : b.relation;
   const requestId = `req_syn_${fnv1a64Hex(
     canonicalJson({ people: people.map((p) => p.input), pair: [a.label, b.label], relation })
@@ -66400,13 +66427,16 @@ function runSynastry(input2, options = {}) {
     followupOffers: FOLLOWUP_OFFERS2,
     disclaimers: DISCLAIMERS2
   };
+  const warnings = [...bundleA.warnings, ...bundleB.warnings];
   const synastryBinding = buildSynastryBinding(
     { synastryInput: input2, ...options.now !== void 0 ? { now: options.now } : {} },
-    synastry
+    synastry,
+    warnings
   );
   return {
     synastry,
-    warnings: [...bundleA.warnings, ...bundleB.warnings],
+    warnings,
+    requiredWarningCodes: requiredSynastryWarningCodes(synastry, warnings),
     synastryBinding
   };
 }

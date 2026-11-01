@@ -365,6 +365,26 @@ describe('public result and answer plan', () => {
     expect(materialWarningCodes(approximateWarnings, [mcOnlyFact])).not.toContain(
       'SOLAR_TIME_APPROXIMATE',
     );
+    expect(
+      materialWarningCodes(approximateWarnings, [toFact(nonHourOnly.refs), mcOnlyFact]),
+    ).not.toContain('SOLAR_TIME_APPROXIMATE');
+    expect(
+      materialWarningCodes(approximateWarnings, [
+        { ...mcOnlyFact, evidence: [...toFact(nonHourOnly.refs).evidence, ...mcOnlyFact.evidence] },
+      ]),
+    ).not.toContain('SOLAR_TIME_APPROXIMATE');
+    expect(
+      materialWarningCodes(approximateWarnings, [toFact(hourOnly.refs), mcOnlyFact]),
+    ).toContain('SOLAR_TIME_APPROXIMATE');
+    const ziweiSolar = [{ code: 'SOLAR_TIME_APPROXIMATE' as const, system: 'ziwei' as const }];
+    const palace = {
+      ...mcOnlyFact,
+      evidence: [{ kind: 'ziwei' as const, ref: 'ziwei.palaces.命宫' }],
+    };
+    expect(materialWarningCodes(ziweiSolar, [palace])).toContain('SOLAR_TIME_APPROXIMATE');
+    expect(
+      materialWarningCodes(approximateWarnings, [toFact(nonHourOnly.refs), palace]),
+    ).not.toContain('SOLAR_TIME_APPROXIMATE');
     const legacyTimeSolar = [
       {
         code: 'SOLAR_TIME_APPROXIMATE' as const,
